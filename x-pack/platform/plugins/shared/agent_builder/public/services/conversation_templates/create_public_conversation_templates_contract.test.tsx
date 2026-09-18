@@ -7,15 +7,25 @@
 
 import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationTemplateUIContext,
+  ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
 } from '@kbn/agent-builder-browser';
+import { agentBuilderMocks } from '../../mocks';
 import { ConversationTemplatesService } from './conversation_templates_service';
 import { createPublicConversationTemplatesContract } from './create_public_conversation_templates_contract';
 
 const conversation = {
+  id: 'conversation-a',
+  agent_id: 'agent-a',
+} as Conversation;
+
+const conversationRow = {
   id: 'conversation-a',
   agent_id: 'agent-a',
 } as ConversationWithoutRoundsWithPermissions;
@@ -23,6 +33,7 @@ const conversation = {
 describe('createPublicConversationTemplatesContract', () => {
   const setup = () => {
     const context: ConversationTemplateUIContext = {
+      attachmentsService: agentBuilderMocks.createStart().attachments,
       openSidebarConversation: jest.fn(),
       openFullscreenConversation: jest.fn().mockResolvedValue(undefined),
     };
@@ -44,6 +55,73 @@ describe('createPublicConversationTemplatesContract', () => {
     expect(() =>
       contract.registerTemplateUIDefinition('investigation', () => definition)
     ).toThrow();
+  });
+
+  it('registers tabs without using context and preserves duplicate and missing-tab behavior', () => {
+    const { contract } = setup();
+    const definition = { label: 'Overview', content: () => null };
+    contract.registerTab('overview', () => definition);
+    expect(contract.getTab('overview')).toBe(definition);
+    expect(contract.getTab('missing')).toBeUndefined();
+    expect(() => contract.registerTab('overview', () => definition)).toThrow();
+  });
+
+  it('supplies the same context to tabs and templates without wrapping their components', () => {
+    const { contract, context } = setup();
+    const createTab = jest.fn(
+      (capabilities: ConversationTemplateUIContext): ConversationTemplateTabDefinition => ({
+        label: 'Overview',
+        content: function TabContent({ conversation: tabConversation }) {
+          const [clicked, setClicked] = useState(false);
+          return (
+            <>
+              <button
+                onClick={() => {
+                  setClicked(true);
+                  capabilities.openSidebarConversation(tabConversation.id);
+                }}
+              >
+                {clicked ? 'Opened sidebar' : 'Open sidebar'}
+              </button>
+              <button
+                onClick={() =>
+                  capabilities.openFullscreenConversation({
+                    conversationId: tabConversation.id,
+                    agentId: tabConversation.agent_id,
+                  })
+                }
+              >
+                Open fullscreen
+              </button>
+            </>
+          );
+        },
+      })
+    );
+    const createTemplate = jest.fn(() => ({ name: 'Investigation', tabs: ['overview'] }));
+    contract.registerTab('overview', createTab);
+    contract.registerTemplateUIDefinition('investigation', createTemplate);
+    const TabContent = contract.getTab('overview')?.content;
+    if (!TabContent) throw new Error('Expected a registered tab');
+    const props = {
+      isOpenedFromChat: false,
+      conversation,
+    };
+    const { rerender } = render(<TabContent {...props} />);
+    fireEvent.click(screen.getByText('Open sidebar'));
+    fireEvent.click(screen.getByText('Open fullscreen'));
+    rerender(<TabContent {...props} conversation={{ ...props.conversation, title: 'Updated' }} />);
+    expect(screen.getByText('Opened sidebar')).toBeTruthy();
+    expect(context.openSidebarConversation).toHaveBeenCalledWith(conversation.id);
+    expect(context.openFullscreenConversation).toHaveBeenCalledWith({
+      conversationId: conversation.id,
+      agentId: conversation.agent_id,
+    });
+    expect(createTab).toHaveBeenCalledTimes(1);
+    expect(createTab).toHaveBeenCalledWith(context);
+    expect(createTemplate).toHaveBeenCalledWith(context);
+    expect(TabContent).toBe(createTab.mock.results[0].value.content);
+    expect(contract.getTab('overview')?.content).toBe(TabContent);
   });
 
   it('supplies navigation at registration and preserves the returned card and its hook state', () => {
@@ -85,15 +163,15 @@ describe('createPublicConversationTemplatesContract', () => {
     contract.registerTemplateUIDefinition('investigation', createDefinition);
     const BriefCard = contract.getTemplateUIDefinition('investigation')?.briefCard;
     if (!BriefCard) throw new Error('Expected a registered brief card');
-    const { rerender } = render(<BriefCard conversation={conversation} />);
+    const { rerender } = render(<BriefCard conversation={conversationRow} />);
     fireEvent.click(screen.getByText('Open sidebar'));
     fireEvent.click(screen.getByText('Open fullscreen'));
-    rerender(<BriefCard conversation={conversation} />);
+    rerender(<BriefCard conversation={conversationRow} />);
     expect(screen.getByText('Opened sidebar')).toBeTruthy();
-    expect(context.openSidebarConversation).toHaveBeenCalledWith(conversation.id);
+    expect(context.openSidebarConversation).toHaveBeenCalledWith(conversationRow.id);
     expect(context.openFullscreenConversation).toHaveBeenCalledWith({
-      conversationId: conversation.id,
-      agentId: conversation.agent_id,
+      conversationId: conversationRow.id,
+      agentId: conversationRow.agent_id,
     });
     expect(createDefinition).toHaveBeenCalledTimes(1);
     expect(createDefinition).toHaveBeenCalledWith(context);

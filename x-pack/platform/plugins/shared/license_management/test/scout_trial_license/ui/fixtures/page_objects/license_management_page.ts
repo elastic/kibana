@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 const LICENSE_MANAGEMENT_APP_PATH = 'management/stack/license_management';
@@ -17,8 +18,8 @@ export class LicenseManagementPage {
   public readonly confirmModalConfirmButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.licenseText = this.page.testSubj.locator('licenseText');
-    this.licenseSubText = this.page.testSubj.locator('licenseSubText');
+    this.licenseText = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
+    this.licenseSubText = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.description);
     this.revertToBasicButton = this.page.testSubj.locator('revertToBasicButton');
     this.confirmModalTitleText = this.page.testSubj.locator('confirmModalTitleText');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');

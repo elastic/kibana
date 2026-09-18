@@ -77,9 +77,18 @@ steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
     with:
       node-version-file: '.nvmrc'
-      cache: yarn
+  - name: Enable corepack-managed pnpm
+    # Kibana pins pnpm via package.json "engines.pnpm" (no "packageManager" field) and
+    # `kbn bootstrap` refuses to run without it. corepack drops the `pnpm` shim next to
+    # `node`, so the `KBN_NODE_BIN` export below exposes it to the agent too.
+    run: |
+      export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+      PNPM_VERSION="$(node -p "require('./package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+      corepack enable
+      corepack prepare "pnpm@${PNPM_VERSION}" --activate
+      pnpm --version
   - name: Bootstrap Kibana
-    run: yarn kbn bootstrap
+    run: pnpm kbn bootstrap
   - name: Expose Kibana's Node.js path to the agent
     # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
     # `node` is whichever version the runner cached first, not the one setup-node just
@@ -238,7 +247,7 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 
 ## Environment
 
-Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `yarn`, since each call starts a fresh shell:
+Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `pnpm`, since each call starts a fresh shell:
 
 ```bash
 export PATH="$KBN_NODE_BIN:$PATH"

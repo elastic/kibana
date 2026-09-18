@@ -94,6 +94,12 @@ function createMockEngineDescriptor(
     paginationId: string;
     lastExecutionTimestamp: string;
     sliceEndTimestamp: string;
+    nonPriorityLogExtractionState: {
+      checkpointTimestamp: string | null;
+      paginationId: string | null;
+      lastExecutionTimestamp: string | null;
+      sliceEndTimestamp: string | null;
+    } | null;
   }>
 ) {
   const logExtractionState = {
@@ -106,6 +112,7 @@ function createMockEngineDescriptor(
     type,
     status: ENGINE_STATUS.STARTED,
     logExtractionState,
+    nonPriorityLogExtractionState: overrides?.nonPriorityLogExtractionState ?? null,
     versionState: { version: 2, state: 'running' as const, isMigratedFromV1: false },
   };
 }
@@ -122,7 +129,12 @@ type GlobalStateLogExtractionOverrides = Partial<{
 
 function createMockGlobalStateClient(
   logExtractionOverrides?: GlobalStateLogExtractionOverrides
-): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
+): jest.Mocked<
+  Pick<
+    EntityStoreGlobalStateClient,
+    'find' | 'findOrThrow' | 'findLogExtractionOverrides' | 'update'
+  >
+> {
   const logsExtraction = LogExtractionConfig.parse({
     docsLimit: logExtractionOverrides?.docsLimit ?? 10000,
     additionalIndexPatterns: logExtractionOverrides?.additionalIndexPatterns ?? [],
@@ -140,6 +152,7 @@ function createMockGlobalStateClient(
   return {
     find: jest.fn().mockResolvedValue(state),
     findOrThrow: jest.fn().mockResolvedValue(state),
+    findLogExtractionOverrides: jest.fn().mockResolvedValue(logsExtraction),
     update: jest.fn().mockImplementation(async (partial: EntityStoreGlobalStateOverrides) => ({
       ...state,
       logsExtraction: LogExtractionConfig.parse({
@@ -148,6 +161,16 @@ function createMockGlobalStateClient(
       }),
     })),
   };
+}
+
+/** Points every global-state read at the same fixture. The extraction path consumes `findLogExtractionOverrides`, not `findOrThrow`. */
+function setGlobalState(
+  mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>,
+  state: EntityStoreGlobalState
+): void {
+  mockGlobalStateClient.find.mockResolvedValue(state);
+  mockGlobalStateClient.findOrThrow.mockResolvedValue(state);
+  mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue(state.logsExtraction);
 }
 
 interface TestContext {
@@ -331,6 +354,116 @@ describe('LogsExtractionClient', () => {
       expect(queries.some((q) => q.includes('-logs-proxy-*'))).toBe(true);
     });
 
+    it('excludes internal ES|QL views on origin and every remote cluster without naming linked projects', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,$.alert-actions'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+
+      await client.extractLogs('user');
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      expect(queries.some((q) => q.includes('-$.*'))).toBe(true);
+      expect(queries.some((q) => q.includes('*:-$.*'))).toBe(true);
+      expect(queries.every((q) => !q.includes('kayak-f86d55'))).toBe(true);
+    });
+
+    it('retries the probe after a remote-view error and reuses those exclusions for extraction', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1']],
+      };
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const remoteViewError = {
+        message:
+          'ES|QL queries with remote views are not supported. Matched [kayak-f86d55:logs-security-summary]. Remove them from the query pattern or exclude them with [kayak-f86d55:-logs-security-summary] if matched by a wildcard.',
+        meta: {
+          body: {
+            error: {
+              type: 'remote_resource_not_supported_exception',
+              reason:
+                'ES|QL queries with remote views are not supported. Matched [kayak-f86d55:logs-security-summary].',
+              'es.esql.view.names': ['kayak-f86d55:logs-security-summary'],
+            },
+          },
+        },
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery
+        .mockRejectedValueOnce(remoteViewError)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z'))
+        .mockResolvedValueOnce(mockEsqlResponse)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      // probe fail, probe retry, extraction, terminal empty probe, sweep extraction
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(5);
+
+      const probeRetryQuery = mockExecuteEsqlQuery.mock.calls[1][0].query;
+      const extractionQuery = mockExecuteEsqlQuery.mock.calls[2][0].query;
+      expect(probeRetryQuery).toContain('*:-logs-security-summary');
+      expect(extractionQuery).toContain('*:-logs-security-summary');
+      expect(extractionQuery).toContain('kayak-f86d55:-logs-security-summary');
+    });
+
+    it('propagates extraction error when the probe succeeded but extraction hits a remote view not seen by the probe', async () => {
+      // The probe accumulates remote-resource exclusions into indexPatterns; by the time
+      // extraction runs those exclusions are already present. A remote view error on extraction
+      // therefore represents a view the probe did not encounter (race condition), and it
+      // propagates as a failure rather than being silently retried.
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const remoteViewError = {
+        message: 'remote_resource_not_supported_exception',
+        meta: {
+          body: {
+            error: {
+              type: 'remote_resource_not_supported_exception',
+              reason: 'ES|QL queries with remote views are not supported.',
+              'es.esql.view.names': ['booking-aa11:custom-view'],
+            },
+          },
+        },
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z'))
+        .mockRejectedValueOnce(remoteViewError);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+    });
+
     it('should handle empty results from ESQL query', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
@@ -463,8 +596,7 @@ describe('LogsExtractionClient', () => {
           maxTimeWindowSize: '999d',
         }),
       } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      setGlobalState(mockGlobalStateClient, globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -510,8 +642,7 @@ describe('LogsExtractionClient', () => {
           maxTimeWindowSize: '999d',
         }),
       } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      setGlobalState(mockGlobalStateClient, globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -548,8 +679,7 @@ describe('LogsExtractionClient', () => {
           maxTimeWindowSize: '999d',
         }),
       } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      setGlobalState(mockGlobalStateClient, globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', { lastExecutionTimestamp }) as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -965,8 +1095,7 @@ describe('LogsExtractionClient', () => {
             maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'drop',
           }),
         } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        setGlobalState(mockGlobalStateClient, globalState);
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user') as Awaited<
             ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -1311,8 +1440,7 @@ describe('LogsExtractionClient', () => {
             maxTimeWindowSize: overrides.maxTimeWindowSize,
           }),
         } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        setGlobalState(mockGlobalStateClient, globalState);
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user', {
             lastExecutionTimestamp: overrides.lastExecutionTimestamp,
@@ -1395,8 +1523,7 @@ describe('LogsExtractionClient', () => {
             maxTimeWindowSize: '5m',
           }),
         } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        setGlobalState(mockGlobalStateClient, globalState);
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user') as Awaited<
             ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -1474,6 +1601,25 @@ describe('LogsExtractionClient', () => {
       expect(remoteIndexPatterns).not.toContain('metrics-*');
     });
 
+    it('drops internal ES|QL view includes from local and remote pattern lists', async () => {
+      const mockDataView = {
+        getIndexPattern: jest
+          .fn()
+          .mockReturnValue(
+            'logs-*,$.alert-actions,kayak-f86d55:$.rule-events,remote_cluster:logs-*'
+          ),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns, remoteIndexPatterns } =
+        await client.getLocalAndRemoteIndexPatterns();
+
+      expect(localIndexPatterns).toContain('logs-*');
+      expect(localIndexPatterns).not.toContain('$.alert-actions');
+      expect(remoteIndexPatterns).toContain('remote_cluster:logs-*');
+      expect(remoteIndexPatterns).not.toContain('kayak-f86d55:$.rule-events');
+    });
+
     it('should exclude alerts index from both local and remote', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,.alerts-security.alerts-default'),
@@ -1549,6 +1695,8 @@ describe('LogsExtractionClient', () => {
       expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
       // remote includes are also not returned
       expect(indexPatterns).not.toContain('remote_cluster:logs-*');
+      // View exclusions are query-only (`*:-\$.*` is not a privilege target)
+      expect(indexPatterns).not.toContain('*:-$.*');
     });
   });
 
@@ -1884,4 +2032,146 @@ describe('LogsExtractionClient mid-slice resume', () => {
       expect(ingestedIds).toEqual(['entity1', 'entity2', 'entity3']);
     }
   );
+});
+
+describe('LogsExtractionClient extraction mode cursor routing', () => {
+  const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+
+  const extractionColumns: ESQLSearchResponse['columns'] = [
+    { name: '@timestamp', type: 'date' },
+    { name: HASHED_ID_FIELD, type: 'keyword' },
+    { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
+  ];
+
+  function createContextWithMode(mode: 'single' | 'priority' | 'nonPriority') {
+    jest.clearAllMocks();
+    mockExecuteEsqlQuery.mockReset();
+    mockIngestEntities.mockReset();
+
+    const mockLogger = loggerMock.create();
+    const mockEsClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+    const mockDataViewsService = {
+      get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
+    } as unknown as jest.Mocked<DataViewsService>;
+    const mockEngineDescriptorClient: jest.Mocked<
+      Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+    > = {
+      findOrThrow: jest.fn(),
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const mockGlobalStateClient = createMockGlobalStateClient();
+
+    const client = new LogsExtractionClient({
+      logger: mockLogger,
+      namespace: 'default',
+      esClient: mockEsClient,
+      dataViewsService: mockDataViewsService,
+      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+      globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+      extractionMode: mode,
+    });
+
+    return { client, mockEngineDescriptorClient, mockDataViewsService };
+  }
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: fixedNow.getTime() });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('nonPriority mode writes nonPriorityLogExtractionState on mid-run and end-of-run persists', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user') as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    mockIngestEntities.mockResolvedValue(undefined);
+    // probe → extraction (1 row, non-final) → empty probe (end of window) → sweep
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:00:00.000Z'))
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [['2025-01-15T10:30:00.000Z', 'hash1', 'entity1']],
+      })
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    const updateCalls = mockEngineDescriptorClient.update.mock.calls.map(([, update]) => update);
+    // Every update must use nonPriorityLogExtractionState, never logExtractionState.
+    expect(updateCalls.every((u) => !('logExtractionState' in u))).toBe(true);
+    expect(updateCalls.some((u) => 'nonPriorityLogExtractionState' in u)).toBe(true);
+  });
+
+  it('single mode writes logExtractionState — regression guard for the default path', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode('single');
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user') as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    mockIngestEntities.mockResolvedValue(undefined);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    const updateCalls = mockEngineDescriptorClient.update.mock.calls.map(([, update]) => update);
+    expect(updateCalls.every((u) => !('nonPriorityLogExtractionState' in u))).toBe(true);
+  });
+
+  it('priority mode writes logExtractionState and resumes from the existing checkpoint', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode('priority');
+    const existingCheckpoint = '2025-01-15T11:30:00.000Z';
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp: existingCheckpoint,
+        lastExecutionTimestamp: existingCheckpoint,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockIngestEntities.mockResolvedValue(undefined);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    const updateCalls = mockEngineDescriptorClient.update.mock.calls.map(([, update]) => update);
+    // priority shares logExtractionState with single — never touches nonPriorityLogExtractionState.
+    expect(updateCalls.every((u) => !('nonPriorityLogExtractionState' in u))).toBe(true);
+    expect(updateCalls.some((u) => 'logExtractionState' in u)).toBe(true);
+    // The first ES|QL query starts from the existing checkpoint, not from lookbackPeriod.
+    const firstQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+    expect(firstQuery).toContain(existingCheckpoint);
+  });
+
+  it('nonPriority with a live logExtractionState checkpoint starts from lookbackPeriod, not from the priority cursor', async () => {
+    // The priority process has a live checkpoint; the non-priority cursor is absent (null).
+    // The non-priority client must not read the priority cursor — it starts fresh.
+    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    const priorityCheckpoint = '2025-01-14T00:00:00.000Z'; // 36 hours ago — outside lookback
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp: priorityCheckpoint,
+        lastExecutionTimestamp: priorityCheckpoint,
+        // nonPriorityLogExtractionState absent → null default → fresh start
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockIngestEntities.mockResolvedValue(undefined);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    // The first query should probe from lookbackPeriod (3h back from fixedNow = 09:00),
+    // not from the priority cursor 36 hours ago.
+    const firstQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+    expect(firstQuery).not.toContain(priorityCheckpoint);
+    expect(firstQuery).toContain('2025-01-15T09:00:00.000Z');
+  });
 });

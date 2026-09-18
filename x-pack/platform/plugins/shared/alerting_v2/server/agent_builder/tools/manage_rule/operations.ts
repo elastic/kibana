@@ -32,14 +32,15 @@ import {
   isStateTransitionAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
 
@@ -567,6 +568,12 @@ export const executeRuleOperations = async (
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
       'Signal rules cannot set recovery_strategy or no_data_strategy.'
+    );
+  }
+
+  if (!isRecoveryTransitionConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
     );
   }
 
