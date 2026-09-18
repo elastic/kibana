@@ -16,11 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import {
-  WatchAutonomyLevel,
-  WorkerScheduleInterval,
-  Worker,
-} from '../components/watch_settings.gen';
+import { WorkerSettingsWrite, Worker } from '../components/watch_settings.gen';
 
 export const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
@@ -34,36 +30,37 @@ export type UpdateWorkerRequestParams = z.infer<typeof UpdateWorkerRequestParams
 export type UpdateWorkerRequestParamsInput = z.input<typeof UpdateWorkerRequestParams>;
 
 export const UpdateWorkerRequestBody = lazySchema(() =>
-  z.object({
-    /**
-     * Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.
-     */
-    enabled: z
-      .boolean()
-      .optional()
-      .describe(
-        'Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.'
+  z
+    .object({
+      /**
+       * Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.
+       */
+      enabled: z
+        .boolean()
+        .optional()
+        .describe(
+          'Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.'
+        ),
+      /**
+       * Revision returned by list/GET. Required when settings is present; null asserts that the per-space managed Worker has not been installed yet.
+       */
+      settingsRevision: z
+        .number()
+        .int()
+        .min(0)
+        .nullable()
+        .optional()
+        .describe(
+          'Revision returned by list/GET. Required when settings is present; null asserts that the per-space managed Worker has not been installed yet.'
+        ),
+      /**
+       * Settings patch with the same names and nesting as the WorkerSettings read shape. Shared fields and `extras` share this object and the same revision/persistence path. The resulting complete settings are validated against the Worker's own declaration; an unknown key, another Worker's field, or an autonomy level the Worker does not allow is rejected with a 400 naming the field.
+       */
+      settings: WorkerSettingsWrite.optional().describe(
+        "Settings patch with the same names and nesting as the WorkerSettings read shape. Shared fields and `extras` share this object and the same revision/persistence path. The resulting complete settings are validated against the Worker's own declaration; an unknown key, another Worker's field, or an autonomy level the Worker does not allow is rejected with a 400 naming the field."
       ),
-    /**
-     * Revision returned by list/GET. Required when any settings field is present; null asserts that the per-space managed Worker has not been installed yet.
-     */
-    settingsRevision: z
-      .number()
-      .int()
-      .min(0)
-      .nullable()
-      .optional()
-      .describe(
-        'Revision returned by list/GET. Required when any settings field is present; null asserts that the per-space managed Worker has not been installed yet.'
-      ),
-    autonomyLevel: WatchAutonomyLevel.optional(),
-    /**
-     * New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule.
-     */
-    scheduleInterval: WorkerScheduleInterval.optional().describe(
-      "New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule."
-    ),
-  })
+    })
+    .strict()
 );
 export type UpdateWorkerRequestBody = z.infer<typeof UpdateWorkerRequestBody>;
 export type UpdateWorkerRequestBodyInput = z.input<typeof UpdateWorkerRequestBody>;

@@ -229,7 +229,6 @@ export const createMemoryPatchTool = ({
   schema: memoryPatchSchema,
   confirmation: { askUser: 'never' },
   handler: async ({ id, name, operations, change_summary: changeSummary }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,
@@ -244,6 +243,7 @@ export const createMemoryPatchTool = ({
     }
 
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       const entry = id
         ? await memoryService.get({ id })
         : await memoryService.getByName({ name: name! });
