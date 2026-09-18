@@ -38,6 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { normalizeUrl } from '../../connector_utils';
+import { isReadOnlySql, READ_ONLY_STATEMENT_PREFIXES } from '../../lib/generic_db_connector';
 import type {
   ExecuteStatementInput,
   RunQueryInput,
@@ -83,49 +84,6 @@ const buildListParams = (input: {
   if (input.showLimit !== undefined) params.showLimit = input.showLimit;
   if (input.fromName !== undefined) params.fromName = input.fromName;
   return params;
-};
-
-// ---------------------------------------------------------------------------
-// Read-only SQL guardrail for `runQuery`
-//
-// Strips leading whitespace + SQL comments (line `-- ...` and block `/* ... */`)
-// and matches the first remaining token against an allowlist of read-only
-// statement keywords. Multi-statement submissions are rejected.
-// ---------------------------------------------------------------------------
-
-const READ_ONLY_STATEMENT_PREFIXES = /^(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i;
-
-const stripLeadingCommentsAndWhitespace = (sql: string): string => {
-  let remaining = sql;
-  // Repeatedly strip whitespace, line comments, and block comments from the start
-  // until nothing matches.
-  while (true) {
-    const before = remaining;
-    remaining = remaining.replace(/^\s+/, '');
-    remaining = remaining.replace(/^--[^\n]*(?:\n|$)/, '');
-    remaining = remaining.replace(/^\/\*[\s\S]*?\*\//, '');
-    if (remaining === before) return remaining;
-  }
-};
-
-const hasTrailingStatement = (sql: string): boolean => {
-  // Detect semicolon-delimited multi-statement submissions. Anything after the
-  // first `;` that isn't whitespace or a comment counts as a second statement.
-  //
-  // Note: this is a conservative textual check — it does not parse string
-  // literals, so a query containing `;` inside a quoted string will be
-  // rejected. That is acceptable for a read-only guardrail; agents can
-  // rewrite such queries to avoid embedded semicolons.
-  const semicolonIndex = sql.indexOf(';');
-  if (semicolonIndex === -1) return false;
-  const trailing = stripLeadingCommentsAndWhitespace(sql.slice(semicolonIndex + 1));
-  return trailing.length > 0;
-};
-
-const isReadOnlyStatement = (sql: string): boolean => {
-  if (hasTrailingStatement(sql)) return false;
-  const head = stripLeadingCommentsAndWhitespace(sql);
-  return READ_ONLY_STATEMENT_PREFIXES.test(head);
 };
 
 // ---------------------------------------------------------------------------
@@ -368,7 +326,7 @@ export const Snowflake: ConnectorSpec = {
         'Run a read-only SQL query asynchronously in Snowflake. Accepts SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN only. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected before the request is sent. Returns a statement handle — use getStatementStatus to retrieve results, or cancelStatement to abort. Supports bind variables and session-scoped context (warehouse, database, schema, role). Single-statement only; multi-statement submissions are rejected. For write or DDL operations, ask the user to invoke executeStatement from a workflow.',
       input: RunQueryInputSchema,
       handler: async (ctx, input: RunQueryInput) => {
-        if (!isReadOnlyStatement(input.statement)) {
+        if (!isReadOnlySql(input.statement, READ_ONLY_STATEMENT_PREFIXES)) {
           throw new Error(
             'runQuery only accepts read-only SQL statements (SELECT, WITH, SHOW, DESCRIBE, DESC, EXPLAIN) and rejects semicolon-delimited multi-statement submissions. ' +
               'For write (INSERT / UPDATE / DELETE / MERGE), DDL (CREATE / ALTER / DROP / TRUNCATE), privilege, procedure, or session-state statements, use the executeStatement action from a workflow.'
