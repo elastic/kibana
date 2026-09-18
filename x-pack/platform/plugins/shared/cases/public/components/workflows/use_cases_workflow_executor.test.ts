@@ -22,6 +22,13 @@ jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
   useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
 }));
 
+// Mock the EBT hook — analytics behaviour is tested in its own suite
+jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  useWorkflowRunTriggeredEBT: () => jest.fn(),
+  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
+    .getWorkflowRunOriginType,
+}));
+
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
 describe('useCasesWorkflowExecutor', () => {
