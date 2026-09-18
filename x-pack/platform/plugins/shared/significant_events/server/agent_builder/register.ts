@@ -13,7 +13,6 @@ import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 
-
 /**
  * Registers the significant events agent-builder tools and attachments at setup.
  *
