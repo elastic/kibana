@@ -24,13 +24,34 @@ import {
 import * as useFetcherModule from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 
+import type { UrlParams } from '../../../../context/url_params_context/types';
 import { TransactionDistribution } from '.';
+
+interface CapturedWaterfallProps {
+  selectedSample?: { traceId: string; transactionId: string } | null;
+  traceSamples?: Array<{ traceId: string; transactionId: string }>;
+}
+
+const waterfallWithSummarySpy = jest.fn<void, [CapturedWaterfallProps]>();
+
+jest.mock('../waterfall_with_summary', () => ({
+  WaterfallWithSummary: (props: CapturedWaterfallProps) => {
+    waterfallWithSummarySpy(props);
+    return null;
+  },
+}));
 
 const coreMock = {
   settings: { client: { get: () => {} } },
 } as unknown as CoreStart;
 
-function Wrapper({ children }: { children?: ReactNode }) {
+function Wrapper({
+  children,
+  urlParams,
+}: {
+  children?: ReactNode;
+  urlParams?: Partial<UrlParams>;
+}) {
   const KibanaReactContext = createKibanaReactContext({
     ...coreMock,
     usageCollection: { reportUiCounter: () => {} },
@@ -66,6 +87,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
                 rangeTo: 'now',
                 start: 'mystart',
                 end: 'myend',
+                ...urlParams,
               }}
             >
               {children}
@@ -78,6 +100,10 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('transaction_details/distribution', () => {
+  beforeEach(() => {
+    waterfallWithSummarySpy.mockClear();
+  });
+
   describe('TransactionDistribution', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
       jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
@@ -145,6 +171,85 @@ describe('transaction_details/distribution', () => {
       await waitFor(() => {
         expect(screen.getByTestId('apmCorrelationsChart')).toBeInTheDocument();
         expect(screen.queryByTestId('loading')).toBeNull(); // it doesn't exist
+      });
+    });
+
+    describe('trace sample selection', () => {
+      const traceSamples = [
+        { traceId: 'trace-a', transactionId: 'tx-a' },
+        { traceId: 'trace-b', transactionId: 'tx-b' },
+        { traceId: 'trace-c', transactionId: 'tx-c' },
+      ];
+
+      beforeEach(() => {
+        jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
+          data: undefined,
+          refetch: () => {},
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        }));
+      });
+
+      // Regression test: the pagination index must reflect the trace sample
+      // selected via the URL (traceId/transactionId), so it stays in sync when
+      // navigating back/forward through browser history.
+      it('passes the URL-selected sample to WaterfallWithSummary so the index tracks the URL', async () => {
+        render(
+          <TransactionDistribution
+            onChartSelection={jest.fn()}
+            onClearSelection={jest.fn()}
+            traceSamplesFetchResult={{
+              data: { traceSamples },
+              status: useFetcherModule.FETCH_STATUS.SUCCESS,
+              error: undefined,
+            }}
+          />,
+          {
+            wrapper: ({ children }: { children?: ReactNode }) => (
+              <Wrapper urlParams={{ traceId: 'trace-b', transactionId: 'tx-b' }}>
+                {children}
+              </Wrapper>
+            ),
+          }
+        );
+
+        await waitFor(() => {
+          expect(waterfallWithSummarySpy).toHaveBeenCalled();
+        });
+
+        const lastProps = waterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+        expect(lastProps?.selectedSample).toEqual(traceSamples[1]);
+        // The same reference from traceSamples must be passed so indexOf resolves.
+        expect(lastProps?.selectedSample).toBe(lastProps?.traceSamples?.[1]);
+      });
+
+      it('passes selectedSample as null when the URL sample is not among the samples', async () => {
+        render(
+          <TransactionDistribution
+            onChartSelection={jest.fn()}
+            onClearSelection={jest.fn()}
+            traceSamplesFetchResult={{
+              data: { traceSamples },
+              status: useFetcherModule.FETCH_STATUS.SUCCESS,
+              error: undefined,
+            }}
+          />,
+          {
+            wrapper: ({ children }: { children?: ReactNode }) => (
+              <Wrapper urlParams={{ traceId: 'unknown', transactionId: 'unknown' }}>
+                {children}
+              </Wrapper>
+            ),
+          }
+        );
+
+        await waitFor(() => {
+          expect(waterfallWithSummarySpy).toHaveBeenCalled();
+        });
+
+        const lastProps = waterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+        // Passing `null` (not `undefined`) keeps WaterfallWithSummary in the
+        // controlled code path that derives the index from the URL.
+        expect(lastProps?.selectedSample).toBeNull();
       });
     });
   });
