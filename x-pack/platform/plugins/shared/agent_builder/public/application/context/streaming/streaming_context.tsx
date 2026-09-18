@@ -93,16 +93,25 @@ export const StreamingProvider = ({
     );
   }, []);
 
+  const markStreamStarted = useCallback((conversationId: string) => {
+    setActiveStreams((prev) => {
+      const current = prev.get(conversationId);
+      return current ? new Map(prev).set(conversationId, { ...current, started: true }) : prev;
+    });
+  }, []);
+
   const sendMutation = useSendMessageMutation({
     conversationStreamService,
     setPendingMessage,
     clearPendingMessage,
     clearActiveStream,
+    markStreamStarted,
   });
 
   const resumeMutation = useResumeRoundMutation({
     conversationStreamService,
     clearActiveStream,
+    markStreamStarted,
   });
 
   // Pull stable references out of the mutation result objects. The result object itself is

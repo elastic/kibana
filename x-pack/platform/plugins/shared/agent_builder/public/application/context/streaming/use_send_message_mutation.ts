@@ -58,6 +58,7 @@ export interface SendMessageMutationBindings {
   ) => void;
   clearPendingMessage: (conversationId: string) => void;
   clearActiveStream: (conversationId: string) => void;
+  markStreamStarted: (conversationId: string) => void;
 }
 
 type UseSendMessageMutationProps = SendMessageMutationBindings;
@@ -132,6 +133,7 @@ export const useSendMessageMutation = ({
   setPendingMessage,
   clearPendingMessage,
   clearActiveStream,
+  markStreamStarted,
 }: UseSendMessageMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
@@ -203,6 +205,9 @@ export const useSendMessageMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
+            if (isExecutionStartedEvent(event)) {
+              markStreamStarted(vars.conversationId);
+            }
             if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               timelineExecutionId ??= event.execution_id;
               triggerEventId ??= event.trigger_event_id;

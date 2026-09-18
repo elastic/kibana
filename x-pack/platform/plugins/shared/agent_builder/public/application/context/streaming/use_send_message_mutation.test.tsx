@@ -69,6 +69,7 @@ const setup = () => {
     setPendingMessage: jest.fn(),
     clearPendingMessage: jest.fn(),
     clearActiveStream: jest.fn(),
+    markStreamStarted: jest.fn(),
   };
   const source = new Subject<ChatEvent>();
   mockChat.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
@@ -173,6 +174,7 @@ describe('useSendMessageMutation', () => {
 
     await waitFor(() => expect(mockAbort).toHaveBeenCalledWith(executionId));
     expect(signal.aborted).toBe(false);
+    expect(bindings.markStreamStarted).toHaveBeenCalledWith(conversationId);
 
     act(() => {
       source.next(aborted as ChatEvent);

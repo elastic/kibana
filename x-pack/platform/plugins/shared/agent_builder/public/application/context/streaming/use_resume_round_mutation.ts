@@ -34,6 +34,7 @@ export interface ResumeRoundVars {
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
   clearActiveStream: (conversationId: string) => void;
+  markStreamStarted: (conversationId: string) => void;
 }
 
 type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
@@ -45,6 +46,7 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
 export const useResumeRoundMutation = ({
   conversationStreamService,
   clearActiveStream,
+  markStreamStarted,
 }: UseResumeRoundMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
@@ -101,6 +103,9 @@ export const useResumeRoundMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
+            if (isExecutionStartedEvent(event)) {
+              markStreamStarted(vars.conversationId);
+            }
             if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               timelineExecutionId ??= event.execution_id;
             }

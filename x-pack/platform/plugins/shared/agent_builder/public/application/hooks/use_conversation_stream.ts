@@ -114,7 +114,8 @@ export const useConversationStream = () => {
       isResponseLoading,
       isResuming,
       pendingMessage: record.pendingMessage,
-      canCancel: isMyStreamActive,
+      // Stop needs the server to know the run: only once `execution_started` has arrived.
+      canCancel: isMyStreamActive && Boolean(myStream?.started),
       isCancelling: Boolean(myStream?.cancelling),
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
@@ -129,6 +130,7 @@ export const useConversationStream = () => {
       isResuming,
       record.pendingMessage,
       isMyStreamActive,
+      myStream?.started,
       myStream?.cancelling,
     ]
   );

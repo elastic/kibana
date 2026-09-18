@@ -39,7 +39,11 @@ const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::exec
 const setup = () => {
   const eventsService = new EventsService();
   const conversationStreamService = new ConversationStreamService(eventsService);
-  const bindings = { conversationStreamService, clearActiveStream: jest.fn() };
+  const bindings = {
+    conversationStreamService,
+    clearActiveStream: jest.fn(),
+    markStreamStarted: jest.fn(),
+  };
   const source = new Subject<ChatEvent>();
   mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
 
