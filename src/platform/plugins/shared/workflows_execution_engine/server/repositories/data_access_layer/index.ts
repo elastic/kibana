@@ -20,7 +20,6 @@ export {
 export { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './mappings/workflow_executions_mappings';
 export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './mappings/step_executions_mappings';
 
-export { createUnsupportedStorageSourceError } from './lib/unsupported_storage_source';
 export { getStepExecutionsByWorkflowExecution } from './lib/get_step_executions_by_workflow_execution';
 export type { GetStepExecutionsByWorkflowExecutionParams } from './lib/get_step_executions_by_workflow_execution';
 
@@ -29,9 +28,18 @@ export type { PlainIndexDataClientDeps } from './implementations/plain_index/pla
 export { PlainIndexDataClient } from './implementations/plain_index/plain_index_data_client';
 export { createDataClientBundle } from './implementations/create_data_client_bundle';
 
+export {
+  getBulkUpdaterWriteResult,
+  type BulkUpdaterWriteResult,
+} from './lib/bulk_updater_write_result';
+
+export { bulkUpdaterItem, isBulkUpdaterItem } from './types';
 export type {
   BulkItem,
   BulkItemResponse,
+  BulkItemResult,
+  BulkPlainItem,
+  BulkUpdaterItem,
   BulkRequestOptions,
   BulkResponse,
   CreateDataClientDeps,
@@ -52,9 +60,6 @@ export type {
   StepExecutionsCountRequest,
   StepExecutionsDeleteByQueryRequest,
   StepExecutionsSearchRequest,
-  ScriptUpdateRequest,
-  ScriptUpdateResponse,
-  ScriptUpdateResult,
   UpsertDocument,
   WorkflowExecutionSourceProjectionField,
   WorkflowExecutionUpsertDocument,
