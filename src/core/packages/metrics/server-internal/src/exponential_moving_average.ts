@@ -13,20 +13,41 @@ const wallClock: TimestampProvider = {
   now: () => Date.now(),
 };
 
+/** @internal */
+export type EluHistorySmoothingAlgorithm = 'ema' | 'time-weighted-ema';
+
 /**
- * An RxJS operator implementing the exponential moving average function.
+ * Fixed-interval exponential moving average (sample-count warm-up).
  *
  * @see https://en.wikipedia.org/wiki/Exponential_smoothing
- * @param period The period of time.
- * @param expectedInterval The nominal interval between values; used for the first sample and when samples arrive back-to-back.
- * @param timestampProvider Optional clock for elapsed-time weighting (defaults to wall clock).
- * @returns An operator emitting smoothed values.
- * @remarks
- * Uses **accumulating mean value** until the observation window is full (i.e., until enough elapsed time has been covered),
- * then switches to exponential smoothing for subsequent values. The switch happens when accumulated elapsed time reaches `period`.
- * Smoothing uses `alpha = 1 - exp(-dt / period)` where `dt` is the actual time since the previous sample.
  */
-export function exponentialMovingAverage(
+export function intervalBasedExponentialMovingAverage(
+  period: number,
+  interval: number
+): OperatorFunction<number, number> {
+  const alpha = 1 - Math.exp(-interval / period);
+
+  return (inner) => {
+    let previous: number | undefined;
+    let mean = 0;
+
+    return inner.pipe(
+      map((current, index) => {
+        if (index < period / interval) {
+          return (mean += (current * interval) / period);
+        }
+        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
+      })
+    );
+  };
+}
+
+/**
+ * Time-weighted exponential moving average (elapsed-time warm-up and smoothing).
+ *
+ * @see https://en.wikipedia.org/wiki/Exponential_smoothing
+ */
+export function timeWeightedExponentialMovingAverage(
   period: number,
   expectedInterval: number,
   timestampProvider: TimestampProvider = wallClock
@@ -60,4 +81,16 @@ export function exponentialMovingAverage(
       })
     );
   };
+}
+
+/** @internal */
+export function createExponentialMovingAverage(
+  algorithm: EluHistorySmoothingAlgorithm,
+  period: number,
+  expectedInterval: number,
+  timestampProvider: TimestampProvider = wallClock
+): OperatorFunction<number, number> {
+  return algorithm === 'time-weighted-ema'
+    ? timeWeightedExponentialMovingAverage(period, expectedInterval, timestampProvider)
+    : intervalBasedExponentialMovingAverage(period, expectedInterval);
 }

@@ -8,7 +8,12 @@
  */
 
 import { Subject, type TimestampProvider } from 'rxjs';
-import { exponentialMovingAverage } from './exponential_moving_average';
+import { TestScheduler } from 'rxjs/testing';
+import {
+  createExponentialMovingAverage,
+  intervalBasedExponentialMovingAverage,
+  timeWeightedExponentialMovingAverage,
+} from './exponential_moving_average';
 
 const period = 15;
 const interval = 5;
@@ -26,15 +31,55 @@ const createClock = (start = 0): { clock: TimestampProvider; advance: (ms: numbe
   };
 };
 
-describe('exponentialMovingAverage', () => {
+describe('intervalBasedExponentialMovingAverage', () => {
+  let testScheduler: TestScheduler;
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => {
+      return expect(actual).toStrictEqual(expected);
+    });
+  });
+
+  it('should emit the initial value as mean', () => {
+    testScheduler.run(({ cold, expectObservable }) => {
+      const observable = cold('a|', { a: 1 }).pipe(
+        intervalBasedExponentialMovingAverage(period, interval)
+      );
+
+      expectObservable(observable).toBe('a|', { a: expect.closeTo(0.3, 1) });
+    });
+  });
+
+  it('should emit smoothed values', () => {
+    testScheduler.run(({ cold, expectObservable }) => {
+      const observable = cold('abcdefg|', { a: 1, b: 1, c: 1, d: 1, e: 2, f: 2, g: 1 }).pipe(
+        intervalBasedExponentialMovingAverage(period, interval)
+      );
+
+      expectObservable(observable).toBe('abcdefg|', {
+        a: expect.closeTo(0.3, 1),
+        b: expect.closeTo(0.7, 1),
+        c: 1,
+        d: 1,
+        e: expect.closeTo(1.3, 1),
+        f: expect.closeTo(1.5, 1),
+        g: expect.closeTo(1.3, 1),
+      });
+    });
+  });
+});
+
+describe('timeWeightedExponentialMovingAverage', () => {
   it('should emit the initial value as mean', () => {
     const { clock } = createClock();
     const results: number[] = [];
     const subject = new Subject<number>();
 
-    subject.pipe(exponentialMovingAverage(period, interval, clock)).subscribe((value) => {
-      results.push(value);
-    });
+    subject
+      .pipe(timeWeightedExponentialMovingAverage(period, interval, clock))
+      .subscribe((value) => {
+        results.push(value);
+      });
 
     subject.next(1);
     subject.complete();
@@ -47,9 +92,11 @@ describe('exponentialMovingAverage', () => {
     const results: number[] = [];
     const subject = new Subject<number>();
 
-    subject.pipe(exponentialMovingAverage(period, interval, clock)).subscribe((value) => {
-      results.push(value);
-    });
+    subject
+      .pipe(timeWeightedExponentialMovingAverage(period, interval, clock))
+      .subscribe((value) => {
+        results.push(value);
+      });
 
     for (const value of [1, 1, 1, 1, 2, 2, 1]) {
       subject.next(value);
@@ -68,43 +115,16 @@ describe('exponentialMovingAverage', () => {
     ]);
   });
 
-  it('should fade away outdated values at a fixed cadence', () => {
-    const { clock, advance } = createClock();
-    const results: number[] = [];
-    const subject = new Subject<number>();
-
-    subject.pipe(exponentialMovingAverage(period, interval, clock)).subscribe((value) => {
-      results.push(value);
-    });
-
-    for (const value of [1, 1, 1, 1, 2, 2, 1, 1, 2, 2]) {
-      subject.next(value);
-      advance(interval);
-    }
-    subject.complete();
-
-    expect(results).toEqual([
-      expect.closeTo(0.3, 1),
-      expect.closeTo(0.7, 1),
-      1,
-      1,
-      expect.closeTo(1.3, 1),
-      expect.closeTo(1.5, 1),
-      expect.closeTo(1.3, 1),
-      expect.closeTo(1.2, 1),
-      expect.closeTo(1.5, 1),
-      expect.closeTo(1.6, 1),
-    ]);
-  });
-
   it('should weight a long gap proportionally to elapsed time', () => {
     const { clock, advance } = createClock();
     const results: number[] = [];
     const subject = new Subject<number>();
 
-    subject.pipe(exponentialMovingAverage(period, interval, clock)).subscribe((value) => {
-      results.push(value);
-    });
+    subject
+      .pipe(timeWeightedExponentialMovingAverage(period, interval, clock))
+      .subscribe((value) => {
+        results.push(value);
+      });
 
     for (const value of [1, 1]) {
       subject.next(value);
@@ -131,9 +151,11 @@ describe('exponentialMovingAverage', () => {
     const results: number[] = [];
     const subject = new Subject<number>();
 
-    subject.pipe(exponentialMovingAverage(period, interval, clock)).subscribe((value) => {
-      results.push(value);
-    });
+    subject
+      .pipe(timeWeightedExponentialMovingAverage(period, interval, clock))
+      .subscribe((value) => {
+        results.push(value);
+      });
 
     for (const value of [1, 1, 1]) {
       subject.next(value);
@@ -146,5 +168,32 @@ describe('exponentialMovingAverage', () => {
     subject.complete();
 
     expect(results).toEqual([expect.closeTo(0.3, 1), expect.closeTo(0.7, 1), 1, 1, 1, 1]);
+  });
+});
+
+describe('createExponentialMovingAverage', () => {
+  it('defaults to interval-based smoothing for ema', () => {
+    const { clock, advance } = createClock();
+    const intervalResults: number[] = [];
+    const factoryResults: number[] = [];
+    const values = [1, 1, 1, 1];
+
+    const intervalSubject = new Subject<number>();
+    intervalSubject
+      .pipe(intervalBasedExponentialMovingAverage(period, interval))
+      .subscribe((value) => intervalResults.push(value));
+
+    const factorySubject = new Subject<number>();
+    factorySubject
+      .pipe(createExponentialMovingAverage('ema', period, interval, clock))
+      .subscribe((value) => factoryResults.push(value));
+
+    for (const value of values) {
+      intervalSubject.next(value);
+      factorySubject.next(value);
+      advance(interval);
+    }
+
+    expect(factoryResults).toEqual(intervalResults);
   });
 });

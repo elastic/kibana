@@ -87,6 +87,7 @@ Object {
   "protocol": "http1",
   "prototypeHardening": true,
   "rateLimiter": Object {
+    "algorithm": "ema",
     "enabled": false,
   },
   "requestId": Object {

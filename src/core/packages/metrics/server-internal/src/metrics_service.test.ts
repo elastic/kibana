@@ -191,8 +191,41 @@ describe('MetricsService', () => {
     });
 
     it('emits average ELU values on getEluMetrics$ call', async () => {
+      mockOpsCollector.collect
+        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0));
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
+      const { getEluMetrics$ } = await metricsService.start();
+      const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
+
+      jest.advanceTimersByTime(testInterval * 2);
+      await new Promise((resolve) => process.nextTick(resolve));
+      await metricsService.stop();
+
+      await expect(eluMetricsPromise).resolves.toEqual([
+        expect.objectContaining({
+          short: expect.closeTo(0.007, 3), // accumulating mean: (0 + 0 + 1) / (15 / 5) = 0.0067
+          medium: expect.closeTo(0.003, 3), // accumulating mean: (0 + 0 + 1) / (30 / 5) = 0.0033
+          long: expect.closeTo(0.002, 3), // accumulating mean: (0 + 0 + 1) / (60 / 5) = 0.0017
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.013, 3), // accumulating mean: (1 + 1) / (15 / 5) = 0.0133
+          medium: expect.closeTo(0.007, 3), // accumulating mean: (1 + 1) / (30 / 5) = 0.0067
+          long: expect.closeTo(0.003, 3), // accumulating mean: (1 + 1) / (60 / 5) = 0.0033
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.02, 2), // accumulating mean: (1 + 1 + 1) / (15 / 5) = 0.02
+          medium: expect.closeTo(0.01, 2), // accumulating mean: (1 + 1 + 1) / (30 / 5) = 0.01
+          long: expect.closeTo(0.005, 3), // accumulating mean: (1 + 1 + 1) / (60 / 5) = 0.005
+        }),
+      ]);
+    });
+
+    it('emits time-weighted ELU values when configured', async () => {
       let now = 1_000;
       jest.spyOn(Date, 'now').mockImplementation(() => now);
+      httpMock.rateLimiter = { ...httpMock.rateLimiter, algorithm: 'time-weighted-ema' };
 
       mockOpsCollector.collect
         .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
@@ -215,19 +248,19 @@ describe('MetricsService', () => {
 
       await expect(eluMetricsPromise).resolves.toEqual([
         expect.objectContaining({
-          short: expect.closeTo(0.007, 3), // accumulating mean: 1 * 100 / 15000
-          medium: expect.closeTo(0.003, 3), // accumulating mean: 1 * 100 / 30000
-          long: expect.closeTo(0.002, 3), // accumulating mean: 1 * 100 / 60000
+          short: expect.closeTo(0.007, 3),
+          medium: expect.closeTo(0.003, 3),
+          long: expect.closeTo(0.002, 3),
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.013, 3), // accumulating mean: 2 * 100 / 15000
-          medium: expect.closeTo(0.007, 3), // accumulating mean: 2 * 100 / 30000
-          long: expect.closeTo(0.003, 3), // accumulating mean: 2 * 100 / 60000
+          short: expect.closeTo(0.013, 3),
+          medium: expect.closeTo(0.007, 3),
+          long: expect.closeTo(0.003, 3),
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.02, 2), // accumulating mean: 3 * 100 / 15000
-          medium: expect.closeTo(0.01, 2), // accumulating mean: 3 * 100 / 30000
-          long: expect.closeTo(0.005, 3), // accumulating mean: 3 * 100 / 60000
+          short: expect.closeTo(0.02, 2),
+          medium: expect.closeTo(0.01, 2),
+          long: expect.closeTo(0.005, 3),
         }),
       ]);
     });
