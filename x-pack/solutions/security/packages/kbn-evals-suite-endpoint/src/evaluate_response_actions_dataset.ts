@@ -79,11 +79,27 @@ export const createResponseActionsTrajectoryEvaluator = (): Evaluator<
     name: 'Trajectory',
     evaluate: async (args) => {
       const exp = args.expected as ResponseActionsDatasetExample['output'] | undefined;
-      if (!exp?.tool_sequence || exp.tool_sequence.length === 0) {
+      if (!exp?.tool_sequence) {
         return {
           score: null,
           label: 'N/A',
           explanation: 'No tool_sequence annotation — skipping trajectory evaluation.',
+        };
+      }
+      if (exp.tool_sequence.length === 0) {
+        // Explicit empty sequence (e.g. the write-action boundary row): the
+        // model must call NO tools at all. Score directly instead of falling
+        // through to `inner.evaluate`, whose order/coverage weighting is
+        // undefined against an empty expected sequence and would otherwise
+        // report the same N/A as an unannotated row, hiding a real failure.
+        const actual = getToolCallSteps(args.output).map((step) => step.tool_id);
+        const passed = actual.length === 0;
+        return {
+          score: passed ? 1 : 0,
+          label: passed ? 'Pass' : 'Fail',
+          explanation: passed
+            ? 'No tools called, matching the expected empty tool_sequence.'
+            : `Expected no tool calls but got: ${actual.join(', ')}`,
         };
       }
       return inner.evaluate(args);

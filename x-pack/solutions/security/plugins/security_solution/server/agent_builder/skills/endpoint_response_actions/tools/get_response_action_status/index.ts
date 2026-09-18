@@ -90,6 +90,10 @@ export const getResponseActionStatusTool = (
                 // one entry per process. Summarized so a single lookup cannot
                 // exhaust the conversation context.
                 outputs: summarizeActionOutputs(actionDetails.outputs),
+                // Documented on ActionDetails: the error reason(s) when
+                // `wasSuccessful` is false. Without this the agent can tell
+                // an analyst an action failed but never why.
+                errors: actionDetails.errors,
                 startedAt: actionDetails.startedAt,
                 completedAt: actionDetails.completedAt,
                 createdBy: actionDetails.createdBy,

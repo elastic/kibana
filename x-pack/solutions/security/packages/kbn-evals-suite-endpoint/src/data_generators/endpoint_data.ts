@@ -6,13 +6,21 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { ResponseActionsApiCommandNames } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
+import { EndpointActionGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_action_generator';
+import { FleetActionGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/fleet_action_generator';
+import type { EndpointAction } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 const POLL_INTERVAL_MS = 5_000;
@@ -439,6 +447,109 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       refresh: true,
       document: { '@timestamp': now, ...extra.document },
     });
+  }
+}
+
+export interface SeedResponseActionOptions {
+  actionId: string;
+  agentId: string;
+  command: ResponseActionsApiCommandNames;
+  status: 'pending' | 'successful' | 'failed';
+  comment?: string;
+}
+
+/**
+ * Seeds one response-action request (+ Fleet + Endpoint ack response when
+ * `status !== 'pending'`) so `get_response_action_status` evals exercise the
+ * real ES read path instead of only the not-found branch.
+ *
+ * Uses the same generators/indices as
+ * `indexEndpointAndFleetActionsForHost` (kept separate because that helper
+ * only supports randomized action ids/commands, not the fixed values a
+ * golden-question eval needs to assert against).
+ */
+export async function seedResponseAction(
+  esClient: Client,
+  { actionId, agentId, command, status, comment }: SeedResponseActionOptions
+): Promise<void> {
+  const generator = new EndpointActionGenerator();
+  const startedAt = new Date().toISOString();
+
+  const logsEndpointAction = generator.generate({
+    EndpointActions: {
+      action_id: actionId,
+      data: { command, comment: comment ?? `eval seed: ${command}` },
+    },
+    '@timestamp': startedAt,
+    agent: {
+      id: agentId,
+      policy: [
+        {
+          agentId,
+          elasticAgentId: agentId,
+          integrationPolicyId: 'eval-response-policy',
+          agentPolicyId: '',
+        },
+      ],
+    },
+  });
+
+  const fleetAction: EndpointAction = {
+    ...logsEndpointAction.EndpointActions,
+    '@timestamp': logsEndpointAction['@timestamp'],
+    agents: [agentId],
+    user_id: logsEndpointAction.user.id,
+  };
+
+  const operations: BulkRequest['operations'] = [
+    { create: { _index: AGENT_ACTIONS_INDEX } },
+    fleetAction,
+    { create: { _index: ENDPOINT_ACTIONS_INDEX } },
+    logsEndpointAction,
+  ];
+
+  if (status !== 'pending') {
+    const fleetGenerator = new FleetActionGenerator();
+    const fleetActionResponse = fleetGenerator.generateResponse({
+      action_id: actionId,
+      agent_id: agentId,
+      action_response: { endpoint: { ack: true } },
+      error: status === 'failed' ? 'eval seed: command failed' : undefined,
+    });
+
+    // `EndpointActionGenerator.generateResponse` returns the
+    // `logs-endpoint.action.responses-*` shape directly — no manual
+    // reshaping of the Fleet response needed.
+    const endpointActionResponse = generator.generateResponse({
+      EndpointActions: {
+        action_id: actionId,
+        data: { command, comment: comment ?? `eval seed: ${command}` },
+      },
+      agent: { id: agentId },
+      error: status === 'failed' ? { message: 'eval seed: command failed' } : undefined,
+    });
+
+    operations.push(
+      { create: { _index: AGENT_ACTIONS_RESULTS_INDEX } },
+      fleetActionResponse,
+      { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+      endpointActionResponse
+    );
+  }
+
+  const bulkResponse = await esClient.bulk(
+    { operations, refresh: 'wait_for' },
+    { headers: { 'X-elastic-product-origin': 'fleet' } }
+  );
+
+  if (bulkResponse.errors) {
+    throw new Error(
+      `seedResponseAction(): ES bulk failed for action ${actionId}\n\n${JSON.stringify(
+        bulkResponse,
+        null,
+        2
+      )}`
+    );
   }
 }
 

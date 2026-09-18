@@ -61,11 +61,18 @@ export interface EndpointLookupService {
  *   rather than trusting Fleet's default sort to always put the live agent
  *   first — otherwise isolate/unisolate/status tools can silently act on a
  *   dead agent while reporting success.
- * - Fleet itself is an origin-only service. Under cross-project search a host
+ * - Fleet itself is an origin-only service: under cross-project search a host
  *   enrolled in a linked project is absent from it, yet the Endpoint UI (which
- *   reads the united metadata index with request-scoped services) shows it. So
- *   when Fleet yields nothing we retry against the scoped metadata index, which
- *   is the same fan-out the metadata route uses.
+ *   reads the united metadata index with request-scoped services) shows it.
+ *   When CPS reads are active we ALWAYS also query the scoped metadata index
+ *   and reconcile the two candidate sets — not just as a fallback when Fleet
+ *   returns zero matches. Two reasons that narrower fallback is wrong:
+ *     1. An origin agent can be filtered out by Space visibility, leaving
+ *        zero *visible* Fleet matches even though Fleet technically has a
+ *        record — the fallback needs to run in that case too.
+ *     2. An origin-project agent and a same-named linked-project endpoint can
+ *        coexist; querying metadata only when Fleet is empty would silently
+ *        prefer the origin host and never detect the collision.
  */
 export function createEndpointLookupService(
   endpointAppContextService: EndpointAppContextService,
@@ -74,22 +81,67 @@ export function createEndpointLookupService(
 ): EndpointLookupService {
   const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
 
+  interface NormalizedCandidate {
+    agentId: string;
+    isLive: boolean;
+    status: string;
+    packages?: string[];
+    enrolledAt?: string;
+  }
+
+  const listVisibleFleetCandidates = async (hostName: string): Promise<NormalizedCandidate[]> => {
+    const agents = await fleetServices.agent.listAgents({
+      showInactive: true,
+      kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
+      page: 1,
+      perPage: 10,
+    });
+
+    if (!agents?.agents?.length) {
+      return [];
+    }
+
+    const visible: NormalizedCandidate[] = [];
+    for (const candidate of agents.agents as Array<{
+      id: string;
+      status: string;
+      packages?: string[];
+      enrolled_at?: string;
+    }>) {
+      try {
+        await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
+        visible.push({
+          agentId: candidate.id,
+          isLive: candidate.status === 'online',
+          status: candidate.status,
+          packages: candidate.packages,
+          enrolledAt: candidate.enrolled_at,
+        });
+      } catch (e) {
+        // A not-found means the agent is not visible in the caller's space:
+        // skip it, but do not fail the whole lookup. Anything else (e.g. a
+        // transient Fleet/ES failure) is a real error and must propagate
+        // rather than be misreported as "host not found".
+        if (!(e instanceof NotFoundError)) {
+          throw e;
+        }
+      }
+    }
+    return visible;
+  };
+
   /**
-   * Fallback resolution through the request-scoped metadata index.
-   *
-   * Used only when Fleet (origin-only) has no record for the hostname, which
-   * under CPS means the host may belong to a linked project. Matching is
-   * done on `host.hostname` against the united index the Endpoint UI reads.
-   * Linked-project agents are absent from origin Fleet, so the integration
-   * package list is unavailable and `agentType` resolves to the `endpoint`
-   * default rather than being guessed from packages.
+   * Candidates visible only through the request-scoped metadata index — i.e.
+   * endpoints enrolled in a linked project, invisible to origin Fleet. Callers
+   * merge this with `listVisibleFleetCandidates` rather than treating it as an
+   * exclusive fallback.
    */
-  const resolveFromScopedMetadata = async (
+  const listScopedMetadataCandidates = async (
     hostName: string,
     scopedServices: ScopedEndpointServices
-  ) => {
+  ): Promise<NormalizedCandidate[]> => {
     if (!scopedServices.isCpsRead()) {
-      return { kind: 'not_found' as const };
+      return [];
     }
 
     const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
@@ -102,113 +154,66 @@ export function createEndpointLookupService(
       scopedServices
     );
 
-    const candidates = (data ?? [])
+    return (data ?? [])
       .map((entry) => ({
         agentId: entry.metadata?.agent?.id,
-        status: entry.host_status,
+        // Metadata `host_status` is the HostStatus enum (`healthy`), not
+        // Fleet's agent-level `online`.
+        isLive: entry.host_status === HostStatus.HEALTHY,
+        status: entry.host_status as string,
       }))
-      .filter((candidate): candidate is { agentId: string; status: HostStatus } =>
-        Boolean(candidate.agentId)
-      );
-
-    if (!candidates.length) {
-      return { kind: 'not_found' as const };
-    }
-
-    // Metadata `host_status` is the HostStatus enum (`healthy`), not Fleet's
-    // agent-level `online`.
-    const live = candidates.filter((candidate) => candidate.status === HostStatus.HEALTHY);
-    if (live.length > 1) {
-      return {
-        kind: 'ambiguous' as const,
-        candidates: live.map((candidate) => ({
-          agentId: candidate.agentId,
-          status: candidate.status,
-        })),
-      };
-    }
-
-    const chosen = live[0] ?? candidates[0];
-
-    return {
-      kind: 'found' as const,
-      endpoint: {
-        agentId: chosen.agentId,
-        agentType: resolveAgentTypeFromPackages([]),
-        packages: [],
-      },
-    };
+      .filter((candidate): candidate is NormalizedCandidate => Boolean(candidate.agentId));
   };
 
   return {
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
-      const agents = await fleetServices.agent.listAgents({
-        showInactive: true,
-        kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
-        page: 1,
-        perPage: 10,
-      });
+      const [fleetCandidates, metadataCandidates] = await Promise.all([
+        listVisibleFleetCandidates(hostName),
+        scoped ? listScopedMetadataCandidates(hostName, scoped) : Promise.resolve([]),
+      ]);
 
-      if (!agents?.agents?.length) {
-        // Fleet is origin-only. Under CPS the host may live in a linked
-        // project, where only the request-scoped metadata index can see it.
-        return scoped ? resolveFromScopedMetadata(hostName, scoped) : { kind: 'not_found' };
-      }
+      // Fleet is the authority when it has the record — prefer it (it carries
+      // `packages`, needed for `agentType`) and only add metadata candidates
+      // Fleet doesn't already know about, so a host isn't double-counted.
+      const fleetIds = new Set(fleetCandidates.map((c) => c.agentId));
+      const merged = [
+        ...fleetCandidates,
+        ...metadataCandidates.filter((c) => !fleetIds.has(c.agentId)),
+      ];
 
-      // Drop agents this space cannot see BEFORE deciding ambiguity, otherwise
-      // a host that is only reachable from another space would look ambiguous.
-      const visible: Array<{ id: string; status: string; packages?: string[] }> = [];
-      for (const candidate of agents.agents) {
-        try {
-          await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
-          visible.push(candidate as { id: string; status: string; packages?: string[] });
-        } catch (e) {
-          // A not-found means the agent is not visible in the caller's space:
-          // skip it, but do not fail the whole lookup. Anything else (e.g. a
-          // transient Fleet/ES failure) is a real error and must propagate
-          // rather than be misreported as "host not found".
-          if (!(e instanceof NotFoundError)) {
-            throw e;
-          }
-        }
-      }
-
-      if (!visible.length) {
+      if (!merged.length) {
         return { kind: 'not_found' };
       }
 
-      const sorted = [...visible].sort((a, b) => {
-        const aOnline = a.status === 'online' ? 1 : 0;
-        const bOnline = b.status === 'online' ? 1 : 0;
-        if (aOnline !== bOnline) return bOnline - aOnline;
-        return ((b as { enrolled_at?: string }).enrolled_at ?? '').localeCompare(
-          (a as { enrolled_at?: string }).enrolled_at ?? ''
-        );
+      const sorted = [...merged].sort((a, b) => {
+        const aLive = a.isLive ? 1 : 0;
+        const bLive = b.isLive ? 1 : 0;
+        if (aLive !== bLive) return bLive - aLive;
+        return (b.enrolledAt ?? '').localeCompare(a.enrolledAt ?? '');
       });
 
       // More than one agent matching the hostname is normal Fleet bookkeeping
       // (re-enrollment, reinstall, agent upgrade) as long as only ONE of them
-      // is live. Two live machines genuinely sharing a hostname is different:
-      // picking either one silently would report — or isolate — the wrong
-      // host, so surface the ambiguity instead of guessing.
-      const live = sorted.filter((a) => a.status === 'online');
+      // is live. Two live machines genuinely sharing a hostname — including a
+      // same-named endpoint in a linked project — is different: picking either
+      // one silently would report, or isolate, the wrong host, so surface the
+      // ambiguity instead of guessing.
+      const live = sorted.filter((c) => c.isLive);
       if (live.length > 1) {
         return {
           kind: 'ambiguous',
-          candidates: live.map((a) => ({ agentId: a.id, status: a.status })),
+          candidates: live.map((c) => ({ agentId: c.agentId, status: c.status })),
         };
       }
 
-      const agent = sorted[0];
-      const agentId = agent.id;
-      const packages = (agent.packages as string[] | undefined) ?? [];
+      const chosen = sorted[0];
 
       return {
         kind: 'found',
         endpoint: {
-          agentId,
-          agentType: resolveAgentTypeFromPackages(packages),
-          packages,
+          agentId: chosen.agentId,
+          agentType: resolveAgentTypeFromPackages(chosen.packages ?? []),
+          packages: chosen.packages ?? [],
         },
       };
     },

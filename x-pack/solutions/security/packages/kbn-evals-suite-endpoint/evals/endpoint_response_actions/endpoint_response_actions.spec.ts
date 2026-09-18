@@ -12,6 +12,7 @@ import {
   waitForEndpointPackage,
   waitForTransformPropagation,
   seedScenario,
+  seedResponseAction,
 } from '../../src/data_generators/endpoint_data';
 import {
   cleanupResponseActionsData,
@@ -19,6 +20,12 @@ import {
 } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
+
+// Fixed action ids the golden questions reference directly. Seeded in
+// `beforeAll` via `seedResponseAction` so `get_response_action_status` reads
+// hit real ES documents instead of only exercising the not-found branch.
+const ACTION_ID_FOUND = '8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e';
+const ACTION_ID_PENDING_SCAN = 'c1db8485-5110-4fef-a683-d5c037a65de5';
 
 evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
@@ -48,6 +55,23 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       os: { name: 'Linux', version: 'Ubuntu 22.04' },
       policyName: 'eval-policy-response',
       policyStatus: 'success',
+    });
+
+    // Seed the response-action documents the "action status follow-up"
+    // golden questions reference by fixed ID, so those reads exercise the
+    // real ES `found` path instead of only ever hitting not-found.
+    await seedResponseAction(esClient, {
+      actionId: ACTION_ID_FOUND,
+      agentId: 'eval-agent-era-isolate-001',
+      command: 'isolate',
+      status: 'successful',
+    });
+    await seedResponseAction(esClient, {
+      actionId: ACTION_ID_PENDING_SCAN,
+      agentId: 'eval-agent-era-isolate-001',
+      command: 'running-processes',
+      status: 'pending',
+      comment: 'eval seed: malware scan',
     });
 
     // The propagation wait must count the ids THIS suite seeds
@@ -145,13 +169,12 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
           examples: [
             {
               input: {
-                question:
-                  'Can you check the status of response action 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e?',
+                question: `Can you check the status of response action ${ACTION_ID_FOUND}?`,
               },
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Called endpoint-response-actions.get_response_action_status with action ID 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e',
+                  `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_FOUND}`,
                   'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
                   'Reported the lookup result to the analyst (action status if found, or a clear not-found message)',
                 ],
@@ -161,13 +184,12 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
             },
             {
               input: {
-                question:
-                  'The malware scan on eval-host-isolate returned pending earlier — what is the status of action c1db8485-5110-4fef-a683-d5c037a65de5 now?',
+                question: `The malware scan on eval-host-isolate returned pending earlier — what is the status of action ${ACTION_ID_PENDING_SCAN} now?`,
               },
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Called endpoint-response-actions.get_response_action_status with action ID c1db8485-5110-4fef-a683-d5c037a65de5',
+                  `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_PENDING_SCAN}`,
                   'Did not dispatch a new scan or other write action just to check status',
                   'Reported the current action status or a clear not-found message to the analyst',
                 ],
