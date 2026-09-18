@@ -307,7 +307,7 @@ export function SearchEmbeddableGridComponent({
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
-      isPrintMode={isPrintMode}
+      displayMode={isPrintMode ? 'print' : 'default'}
     />
   );
 }

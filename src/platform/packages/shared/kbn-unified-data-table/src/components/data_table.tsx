@@ -80,6 +80,7 @@ import type {
   DocMap,
   DocumentsDisplayMode,
   JsonModeSettings,
+  DisplayMode,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -264,10 +265,11 @@ interface InternalUnifiedDataTableProps {
    */
   isSortEnabled?: boolean;
   /**
-   * Determines whether interactive grid controls should be enabled.
-   * When false, pagination, toolbar controls, column actions, resizing, and row controls are hidden.
+   * Display mode of the grid.
+   * When 'print', pagination, toolbar controls, column actions, resizing, and row controls are hidden.
+   * @default 'default'
    */
-  isInteractive?: boolean;
+  displayMode?: DisplayMode;
   /**
    * Only for ES|QL mode for now.
    * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
@@ -598,7 +600,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
-      isInteractive = true,
+      displayMode = 'default',
       isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
@@ -666,6 +668,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       services;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
+
+    const isInteractive = displayMode === 'default';
 
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);

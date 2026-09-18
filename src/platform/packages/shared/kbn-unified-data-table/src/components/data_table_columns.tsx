@@ -114,7 +114,7 @@ function buildEuiGridColumn({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
-  isInteractive,
+  isInteractive = true,
   isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,
@@ -143,7 +143,7 @@ function buildEuiGridColumn({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
-  isInteractive: boolean;
+  isInteractive?: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
@@ -399,7 +399,7 @@ export function getEuiGridColumns({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
-  isInteractive: boolean;
+  isInteractive?: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
   services: {

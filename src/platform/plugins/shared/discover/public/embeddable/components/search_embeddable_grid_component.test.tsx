@@ -197,6 +197,6 @@ describe('SearchEmbeddableGridComponent', () => {
     });
 
     const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
-    expect(lastCallProps?.isPrintMode).toBe(true);
+    expect(lastCallProps?.displayMode).toBe('print');
   });
 });

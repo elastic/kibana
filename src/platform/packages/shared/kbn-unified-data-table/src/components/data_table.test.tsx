@@ -776,7 +776,7 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         columns: ['message'],
         sort: [['message', 'desc']],
-        isInteractive: false,
+        displayMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().sorting).toBeUndefined();
@@ -993,7 +993,7 @@ describe('UnifiedDataTable', () => {
     it('should hide toolbar controls when interactive controls are disabled', async () => {
       await renderComponent({
         ...getProps(),
-        isInteractive: false,
+        displayMode: 'print',
         onUpdateRowHeight: jest.fn(),
         onUpdateSampleSize: jest.fn(),
       });
@@ -1813,7 +1813,7 @@ describe('UnifiedDataTable', () => {
       await renderComponent({
         ...getProps(),
         columns: ['message'],
-        isInteractive: false,
+        displayMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().onColumnResize).toBeUndefined();
@@ -1910,7 +1910,7 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         rowsPerPageOptions: [1, 5],
         rowsPerPageState: 1,
-        isInteractive: false,
+        displayMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().pagination).toBeUndefined();
