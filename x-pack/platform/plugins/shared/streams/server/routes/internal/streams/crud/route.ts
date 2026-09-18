@@ -230,7 +230,7 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      names: z.array(z.string()).max(BULK_GET_SUMMARIES_MAX_NAMES),
+      names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(BULK_GET_SUMMARIES_MAX_NAMES),
     }),
   }),
   handler: async ({
