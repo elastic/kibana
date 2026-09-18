@@ -9,19 +9,18 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxConnectionManager } from '../tools/sandbox_bash/grpc_client';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
-import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox allocate cannot stall the investigation. */
 const HYDRATE_TIMEOUT_MS = 20_000;
 
 export const cortexHydrateStepDefinition = ({
-  getConnectionManager,
+  getSandboxStart,
   logger,
 }: {
-  getConnectionManager: () => SandboxConnectionManager | undefined;
+  getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
 }) =>
   createServerStepDefinition({
@@ -43,25 +42,24 @@ export const cortexHydrateStepDefinition = ({
     }),
     handler: async (context) => {
       const { conversation_id: conversationId } = context.input;
-      const manager = getConnectionManager();
+      const sandboxStart = getSandboxStart();
 
-      if (!manager) {
+      if (!sandboxStart) {
         throw new Error(
-          'The Nightshift sandbox is not configured — ' +
-            'set xpack.nightshift_investigations.sandbox in kibana.yml.'
+          'The sandbox is not configured — ' +
+            'ensure the sandbox plugin is installed and configured.'
         );
       }
 
       // The hook runs this workflow in the caller's space, which is the same space the sandbox
       // tools resolve from the request, so both address the same workspace.
       const { spaceId } = context.contextManager.getContext().workflow;
-      const scopedConversationId = scopeConversationId(spaceId, conversationId);
+      const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
 
       await withTimeout(
         (signal) =>
           hydrateCortexWorkspace({
-            apiClient: manager.apiClient,
-            conversationId: scopedConversationId,
+            session,
             esClient: context.contextManager.getScopedEsClient(),
             spaceId,
             signal,
@@ -71,6 +69,6 @@ export const cortexHydrateStepDefinition = ({
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { conversation_id: scopedConversationId } };
+      return { output: { conversation_id: conversationId } };
     },
   });

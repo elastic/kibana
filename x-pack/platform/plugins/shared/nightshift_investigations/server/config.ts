@@ -9,20 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-const sandboxSslConfigSchema = schema.object({
-  certificate_authorities: schema.maybe(schema.string()),
-  certificate: schema.string(),
-  key: schema.string(),
-});
-
 const sandboxConfigSchema = schema.object({
-  // sandbox-api address — gRPC proxy that allocates sandboxes and proxies RPCs.
-  host: schema.string({ defaultValue: 'localhost' }),
-  port: schema.number({ defaultValue: 9090 }),
-  // API key required by sandbox-api for authentication (ApiKey scheme).
-  api_key: schema.string(),
-  // mTLS inline PEM strings — required when sandbox is configured.
-  ssl: sandboxSslConfigSchema,
   // Id of the preconfigured connector holding the Elasticsearch URL and API key the
   // sandbox queries telemetry with. It is added to the investigator's connector
   // allow-list; credentials are injected per command, only when the agent asks for it.

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SandboxApiClient } from './grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
 export const renderElasticManifest = (connectorId: string): string =>
@@ -39,19 +39,17 @@ export const renderElasticManifest = (connectorId: string): string =>
   ].join('\n');
 
 export const writeElasticManifest = async ({
-  conversationId,
-  apiClient,
+  session,
   connectorId,
   logger,
 }: {
-  conversationId: string;
-  apiClient: SandboxApiClient;
+  session: SandboxSession;
   connectorId: string;
   logger: Logger;
 }): Promise<void> => {
-  logger.debug(`Writing Elasticsearch manifest for conversation ${conversationId}`);
+  logger.debug(`Writing Elasticsearch manifest`);
 
-  await apiClient.writeFiles(conversationId, [
+  await session.writeFiles([
     {
       path: '/workspace/elastic.md',
       content: Buffer.from(renderElasticManifest(connectorId), 'utf8'),

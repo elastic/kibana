@@ -1471,6 +1471,7 @@ packages:
   - 'x-pack/platform/plugins/shared/query_activity'
   - 'x-pack/platform/plugins/shared/rule_registry'
   - 'x-pack/platform/plugins/shared/sample_data_ingest'
+  - 'x-pack/platform/plugins/shared/sandbox'
   - 'x-pack/platform/plugins/shared/saved_objects_tagging'
   - 'x-pack/platform/plugins/shared/screenshotting'
   - 'x-pack/platform/plugins/shared/search_inference_endpoints'

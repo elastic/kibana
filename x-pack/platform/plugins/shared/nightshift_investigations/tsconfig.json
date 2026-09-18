@@ -34,6 +34,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
     "@kbn/investigation-output",
+    "@kbn/sandbox-plugin",
     "@kbn/context-engine-plugin",
     "@kbn/inference-common",
     "@kbn/inference-plugin",

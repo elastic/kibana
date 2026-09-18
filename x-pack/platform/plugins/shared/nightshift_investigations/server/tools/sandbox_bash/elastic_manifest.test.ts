@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { SandboxApiClient } from './grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 describe('renderElasticManifest', () => {
@@ -30,19 +30,18 @@ describe('renderElasticManifest', () => {
 describe('writeElasticManifest', () => {
   it('writes the manifest to /workspace/elastic.md', async () => {
     const writeFiles = jest.fn().mockResolvedValue(undefined);
-    const apiClient = { writeFiles } as unknown as SandboxApiClient;
+    const session = { writeFiles } as unknown as SandboxSession;
 
     await writeElasticManifest({
-      conversationId: 'conversation-1',
-      apiClient,
+      session,
       connectorId: 'elasticsearch-telemetry',
       logger: loggingSystemMock.createLogger(),
     });
 
-    expect(writeFiles).toHaveBeenCalledWith('conversation-1', [
+    expect(writeFiles).toHaveBeenCalledWith([
       { path: '/workspace/elastic.md', content: expect.any(Buffer) },
     ]);
-    const [, files] = writeFiles.mock.calls[0];
+    const [files] = writeFiles.mock.calls[0];
     expect(files[0].content.toString('utf8')).toContain('# Elasticsearch telemetry');
   });
 });

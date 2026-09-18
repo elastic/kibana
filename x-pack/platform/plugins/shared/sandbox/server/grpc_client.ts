@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable no-bitwise, max-classes-per-file */
+/* eslint-disable no-bitwise */
 // Protobuf encoding/decoding uses intentional bitwise operations throughout.
-// Two classes (SandboxApiClient + SandboxConnectionManager) are co-located by design.
 
 import { promisify } from 'util';
 import * as grpc from '@grpc/grpc-js';
-import type { Logger } from '@kbn/core/server';
-import type { NightshiftInvestigationsConfig } from '../../config';
-import type { SandboxCallContext } from './tool_utils';
 
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
@@ -380,7 +376,7 @@ function deserializeMkdirsResponse(buf: Buffer): boolean[] {
 }
 
 // ---------------------------------------------------------------------------
-// SandboxApiClient — one shared gRPC connection to sandbox-api
+// SandboxApiClient — one shared gRPC connection to sandbox-api.
 // Each method takes a conversationId injected as x-conversation-id metadata.
 // ---------------------------------------------------------------------------
 
@@ -543,186 +539,5 @@ export class SandboxApiClient {
 
   close(): void {
     this.client.close();
-  }
-}
-
-// ---------------------------------------------------------------------------
-// SandboxConnectionManager — wraps SandboxApiClient with per-conversation
-// initialization (workspace restore + connector manifest write).
-//
-// Commands run over the unary RunCommand RPC only. Kibana never serves connector
-// callbacks from inside the sandbox: connector credentials are resolved in Kibana
-// and injected into a single command's environment by the bash tool instead.
-// ---------------------------------------------------------------------------
-
-type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
-
-export class SandboxConnectionManager {
-  private readonly logger: Logger;
-  readonly apiClient: SandboxApiClient;
-  private readonly writeManifest?: (
-    conversationId: string,
-    callContext: SandboxCallContext
-  ) => Promise<void>;
-  /** Tracks conversations that have been initialized (manifest write). */
-  private readonly initialized = new Map<string, Promise<void>>();
-  /** conversationId → JSON.stringify(allowedConnectorIds) for manifest refresh detection. */
-  private readonly lastAllowedIds = new Map<string, string>();
-
-  constructor({
-    config,
-    logger,
-    writeManifest,
-  }: {
-    config: SandboxConfig;
-    logger: Logger;
-    writeManifest?: (conversationId: string, callContext: SandboxCallContext) => Promise<void>;
-  }) {
-    this.logger = logger;
-    this.writeManifest = writeManifest;
-    this.apiClient = new SandboxApiClient({
-      host: config.host,
-      port: config.port,
-      apiKey: config.api_key,
-      rootCertPem: config.ssl.certificate_authorities
-        ? Buffer.from(config.ssl.certificate_authorities)
-        : undefined,
-      clientCertPem: Buffer.from(config.ssl.certificate),
-      clientKeyPem: Buffer.from(config.ssl.key),
-    });
-  }
-
-  async runCommand(
-    conversationId: string,
-    params: RunCommandParams,
-    callContext: SandboxCallContext
-  ): Promise<RunCommandResult> {
-    await this.ensureInitialized(conversationId, callContext);
-    await this.maybeRefreshManifest(conversationId, callContext);
-    return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.runCommand(conversationId, params)
-    );
-  }
-
-  async statFiles(
-    conversationId: string,
-    paths: string[],
-    callContext: SandboxCallContext
-  ): Promise<FileMetadata[]> {
-    await this.ensureInitialized(conversationId, callContext);
-    return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.statFiles(conversationId, paths)
-    );
-  }
-
-  async readFiles(
-    conversationId: string,
-    requests: Array<{ path: string; maxReadBytes?: number }>,
-    callContext: SandboxCallContext
-  ): Promise<ReadFileResult[]> {
-    await this.ensureInitialized(conversationId, callContext);
-    return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.readFiles(conversationId, requests)
-    );
-  }
-
-  async writeFiles(
-    conversationId: string,
-    requests: Array<{ path: string; content: Buffer }>,
-    callContext: SandboxCallContext
-  ): Promise<WriteFileResult[]> {
-    await this.ensureInitialized(conversationId, callContext);
-    return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.writeFiles(conversationId, requests)
-    );
-  }
-
-  async mkdirs(
-    conversationId: string,
-    paths: string[],
-    callContext: SandboxCallContext
-  ): Promise<boolean[]> {
-    await this.ensureInitialized(conversationId, callContext);
-    return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.mkdirs(conversationId, paths)
-    );
-  }
-
-  /** On UNAVAILABLE (pod self-exited), clear init state so the next call re-runs restore + manifest write.
-   *  Only clears if the init generation this call ran under is still current, so a late failure
-   *  from a dead pod cannot evict the fresh init a later call already installed. */
-  private async withUnavailableReset<T>(conversationId: string, fn: () => Promise<T>): Promise<T> {
-    const generation = this.initialized.get(conversationId);
-    try {
-      return await fn();
-    } catch (err) {
-      const code: number | undefined = err?.code;
-      if (code === 14 /* UNAVAILABLE */ && this.initialized.get(conversationId) === generation) {
-        this.initialized.delete(conversationId);
-        this.lastAllowedIds.delete(conversationId);
-        this.logger.warn(
-          `Sandbox UNAVAILABLE for conversation ${conversationId} — cleared init state for re-initialization on next call`
-        );
-      }
-      throw err;
-    }
-  }
-
-  private async maybeRefreshManifest(
-    conversationId: string,
-    callContext: SandboxCallContext
-  ): Promise<void> {
-    if (!this.writeManifest) return;
-    const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
-    const lastKey = this.lastAllowedIds.get(conversationId);
-    if (lastKey === currentKey) return;
-    this.lastAllowedIds.set(conversationId, currentKey);
-    await this.writeManifest(conversationId, callContext).catch((err) => {
-      this.logger.warn(
-        `Connector manifest refresh failed for conversation ${conversationId}: ${err.message}`
-      );
-    });
-  }
-
-  private ensureInitialized(
-    conversationId: string,
-    callContext: SandboxCallContext
-  ): Promise<void> {
-    const existing = this.initialized.get(conversationId);
-    if (existing) return existing;
-
-    const promise: Promise<void> = this.initializeConversation(conversationId, callContext).catch(
-      (err) => {
-        if (this.initialized.get(conversationId) === promise) {
-          this.initialized.delete(conversationId);
-        }
-        throw err;
-      }
-    );
-    this.initialized.set(conversationId, promise);
-    return promise;
-  }
-
-  private async initializeConversation(
-    conversationId: string,
-    callContext: SandboxCallContext
-  ): Promise<void> {
-    this.logger.debug(`Initializing sandbox for conversation ${conversationId}`);
-
-    if (this.writeManifest) {
-      const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
-      this.lastAllowedIds.set(conversationId, currentKey);
-      await this.writeManifest(conversationId, callContext).catch((err) => {
-        this.logger.warn(
-          `Connector manifest write failed for conversation ${conversationId}: ${err.message}`
-        );
-      });
-    }
-  }
-
-  close(): void {
-    this.apiClient.close();
-    this.initialized.clear();
-    this.lastAllowedIds.clear();
   }
 }

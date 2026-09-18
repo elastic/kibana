@@ -11,9 +11,9 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
-import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
@@ -51,22 +51,20 @@ export const registerCortexAiIndex = (
 };
 
 export const hydrateCortexWorkspace = async ({
-  apiClient,
-  conversationId,
+  session,
   esClient,
   spaceId,
   signal,
   logger,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
   logger: Logger;
 }): Promise<void> => {
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  await materializeCortex({ apiClient, conversationId, store, logger });
+  await materializeCortex({ session, store, logger });
 };
 
 export const runCortexOptimize = async ({
