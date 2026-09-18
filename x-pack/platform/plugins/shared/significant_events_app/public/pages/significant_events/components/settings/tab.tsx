@@ -92,7 +92,7 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canConfigureEngines = canManage && canConfigure;
   const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
-  const { isDeveloperMode, setDeveloperMode, canEditDeveloperMode } = useDeveloperMode();
+  const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
   // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
 
@@ -842,7 +842,7 @@ export function SettingsTab() {
                     onChange={(e) => {
                       void setDeveloperMode(e.target.checked);
                     }}
-                    disabled={!canEditDeveloperMode}
+                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
                   />
                 </EuiFormRow>
               </EuiForm>

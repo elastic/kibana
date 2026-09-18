@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
@@ -14,13 +14,14 @@ import { getFormattedError } from '../util/errors';
 
 export interface UseDeveloperModeResult {
   isDeveloperMode: boolean;
+  isSaving: boolean;
   setDeveloperMode: (enabled: boolean) => Promise<void>;
-  canEditDeveloperMode: boolean;
 }
 
-export function useDeveloperMode(): UseDeveloperModeResult {
+export const useDeveloperMode = (): UseDeveloperModeResult => {
   const { core } = useKibana();
   const settingsClient = core.settings.client;
+  const [isSaving, setIsSaving] = useState(false);
   const developerMode$ = useMemo(
     () => settingsClient.get$<boolean>(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, false),
     [settingsClient]
@@ -29,25 +30,17 @@ export function useDeveloperMode(): UseDeveloperModeResult {
     developerMode$,
     settingsClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, false)
   );
-  const canEditDeveloperMode = core.application.capabilities.advancedSettings?.save === true;
 
   const setDeveloperMode = useCallback(
     async (enabled: boolean): Promise<void> => {
-      let updateError: Error | undefined;
-      const updateErrorSubscription = settingsClient.getUpdateErrors$().subscribe((error) => {
-        updateError = error;
-      });
-
+      setIsSaving(true);
       try {
         const wasSaved = await settingsClient.set(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, enabled);
         if (!wasSaved) {
-          throw (
-            updateError ??
-            new Error(
-              i18n.translate(
-                'xpack.significantEventsApp.settings.developerModeSaveFailedErrorMessage',
-                { defaultMessage: 'The developer mode setting could not be saved.' }
-              )
+          throw new Error(
+            i18n.translate(
+              'xpack.significantEventsApp.settings.developerModeSaveFailedErrorMessage',
+              { defaultMessage: 'The developer mode setting could not be saved.' }
             )
           );
         }
@@ -62,7 +55,7 @@ export function useDeveloperMode(): UseDeveloperModeResult {
           text: getFormattedError(error).message,
         });
       } finally {
-        updateErrorSubscription.unsubscribe();
+        setIsSaving(false);
       }
     },
     [core.notifications.toasts, settingsClient]
@@ -70,7 +63,7 @@ export function useDeveloperMode(): UseDeveloperModeResult {
 
   return {
     isDeveloperMode: isDeveloperMode ?? false,
+    isSaving,
     setDeveloperMode,
-    canEditDeveloperMode,
   };
-}
+};

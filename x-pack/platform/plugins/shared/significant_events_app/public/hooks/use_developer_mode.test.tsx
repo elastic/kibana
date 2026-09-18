@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 import { useDeveloperMode } from './use_developer_mode';
@@ -18,15 +18,8 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const setUiSetting = jest.fn();
 const addDanger = jest.fn();
 
-const setup = ({
-  enabled = false,
-  canSaveAdvancedSettings = true,
-}: {
-  enabled?: boolean;
-  canSaveAdvancedSettings?: boolean;
-} = {}) => {
+const setup = ({ enabled = false }: { enabled?: boolean } = {}) => {
   const developerMode$ = new BehaviorSubject(enabled);
-  const updateErrors$ = new Subject<Error>();
   setUiSetting.mockImplementation(async (_key: string, value: boolean) => {
     developerMode$.next(value);
     return true;
@@ -35,17 +28,12 @@ const setup = ({
   mockUseKibana.mockReturnValue({
     core: {
       application: {
-        capabilities: {
-          advancedSettings: {
-            save: canSaveAdvancedSettings,
-          },
-        },
+        capabilities: {},
       },
       settings: {
         client: {
           get: jest.fn().mockReturnValue(enabled),
           get$: jest.fn().mockReturnValue(developerMode$),
-          getUpdateErrors$: jest.fn().mockReturnValue(updateErrors$),
           set: setUiSetting,
         },
       },
@@ -57,7 +45,7 @@ const setup = ({
     },
   } as never);
 
-  return { developerMode$, updateErrors$ };
+  return { developerMode$ };
 };
 
 describe('useDeveloperMode', () => {
@@ -69,7 +57,7 @@ describe('useDeveloperMode', () => {
     setup({ enabled: false });
     const { result } = renderHook(() => useDeveloperMode());
     expect(result.current.isDeveloperMode).toBe(false);
-    expect(result.current.canEditDeveloperMode).toBe(true);
+    expect(result.current.isSaving).toBe(false);
   });
 
   it('updates when the uiSetting observable emits', async () => {
@@ -98,12 +86,28 @@ describe('useDeveloperMode', () => {
     expect(setUiSetting).toHaveBeenCalledWith(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, true);
   });
 
-  it('toasts when the setting cannot be saved', async () => {
-    const { updateErrors$ } = setup({ enabled: false });
-    setUiSetting.mockImplementation(async () => {
-      updateErrors$.next(new Error('save failed'));
-      return false;
+  it('sets isSaving while the request is in flight', async () => {
+    let resolveSave!: (value: boolean) => void;
+    setUiSetting.mockReturnValue(new Promise<boolean>((resolve) => (resolveSave = resolve)));
+    setup({ enabled: false });
+    const { result } = renderHook(() => useDeveloperMode());
+
+    act(() => {
+      void result.current.setDeveloperMode(true);
     });
+
+    await waitFor(() => expect(result.current.isSaving).toBe(true));
+
+    await act(async () => {
+      resolveSave(true);
+    });
+
+    expect(result.current.isSaving).toBe(false);
+  });
+
+  it('toasts when the setting cannot be saved', async () => {
+    setup({ enabled: false });
+    setUiSetting.mockResolvedValue(false);
     const { result } = renderHook(() => useDeveloperMode());
 
     await act(async () => {
@@ -112,13 +116,7 @@ describe('useDeveloperMode', () => {
 
     expect(addDanger).toHaveBeenCalledWith({
       title: 'Unable to update developer mode',
-      text: 'save failed',
+      text: 'The developer mode setting could not be saved.',
     });
-  });
-
-  it('disables editing without advancedSettings.save', () => {
-    setup({ canSaveAdvancedSettings: false });
-    const { result } = renderHook(() => useDeveloperMode());
-    expect(result.current.canEditDeveloperMode).toBe(false);
   });
 });
