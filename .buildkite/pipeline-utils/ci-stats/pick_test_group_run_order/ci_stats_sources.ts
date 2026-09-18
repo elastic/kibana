@@ -41,8 +41,14 @@ export function buildCiStatsSources(args: {
   selectiveMergeBase: string | undefined;
   mergeQueueMergeBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, selectiveMergeBase, mergeQueueMergeBase } =
-    args;
+  const {
+    trackedBranch,
+    ownBranch,
+    pipelineSlug,
+    prNumber,
+    selectiveMergeBase,
+    mergeQueueMergeBase,
+  } = args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 

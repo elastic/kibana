@@ -45,7 +45,9 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
-  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.selectiveMergeBase : undefined;
+  const selectiveTestingMergeBase = config.useSelectiveTesting
+    ? config.selectiveMergeBase
+    : undefined;
 
   // Fast path: a PR whose diff is exclusively Scout test files cannot affect
   // any Jest unit/integration or FTR config — skip emitting them entirely.
