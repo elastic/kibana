@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 import { ConversationProposalsService } from './conversation_proposals_service';
@@ -43,20 +44,23 @@ const makeProposalsService = (
 /**
  * Builds an Agent Builder mock whose scoped client exposes `bulkGet`.
  *
- * @param titlesById - A map from conversation id to title. Ids absent from the map are omitted
- *   from the returned `Map`, mirroring the real bulk-get behaviour for inaccessible conversations.
- *   Defaults to returning `Title for ${id}` for every requested id.
+ * @param conversationsById - A map from conversation id to partial conversation data. Ids absent
+ *   from the map are omitted from the returned `Map`, mirroring the real bulk-get behaviour for
+ *   inaccessible conversations. Defaults to returning `{ title: 'Title for ${id}' }` for every
+ *   requested id.
  */
-const makeAgentBuilder = (titlesById?: Record<string, string>): AgentBuilderPluginStart =>
+const makeAgentBuilder = (
+  conversationsById?: Record<string, Partial<ConversationWithoutRoundsWithPermissions>>
+): AgentBuilderPluginStart =>
   ({
     conversations: {
       getScopedClient: jest.fn().mockResolvedValue({
         bulkGet: jest.fn().mockImplementation(async (ids: string[]) => {
-          const result = new Map<string, { title: string }>();
+          const result = new Map<string, Partial<ConversationWithoutRoundsWithPermissions>>();
           for (const id of ids) {
-            const title = titlesById ? titlesById[id] : `Title for ${id}`;
-            if (title !== undefined) {
-              result.set(id, { title });
+            const conv = conversationsById ? conversationsById[id] : { title: `Title for ${id}` };
+            if (conv !== undefined) {
+              result.set(id, conv);
             }
           }
           return result;
@@ -91,7 +95,7 @@ describe('ConversationProposalsService', () => {
     );
   });
 
-  it('deduplicates conversation ids before fetching titles', async () => {
+  it('deduplicates conversation ids before fetching conversations', async () => {
     const proposals = [
       makeProposal({ id: 'p1', conversationId: 'shared' }),
       makeProposal({ id: 'p2', conversationId: 'shared' }),
@@ -120,7 +124,7 @@ describe('ConversationProposalsService', () => {
       makeProposal({ id: 'p2', conversationId: 'bad' }),
     ];
     // 'bad' is not in the returned map (inaccessible / not found)
-    const agentBuilder = makeAgentBuilder({ good: 'Title for good' });
+    const agentBuilder = makeAgentBuilder({ good: { title: 'Title for good' } });
 
     const service = new ConversationProposalsService(
       makeProposalsService(proposals),
@@ -175,7 +179,7 @@ describe('ConversationProposalsService', () => {
 
   it('attaches conversation titles to each proposal item', async () => {
     const proposals = [makeProposal({ conversationId: 'conv-xyz' })];
-    const agentBuilder = makeAgentBuilder({ 'conv-xyz': 'My investigation' });
+    const agentBuilder = makeAgentBuilder({ 'conv-xyz': { title: 'My investigation' } });
 
     const service = new ConversationProposalsService(
       makeProposalsService(proposals),
@@ -324,5 +328,74 @@ describe('ConversationProposalsService', () => {
 
     expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(0);
     expect(Object.keys(result.groups)).toEqual([CLOSED_GROUP_KEY]);
+  });
+
+  it('attaches assignees from conversation metadata to each proposal item', async () => {
+    const proposals = [makeProposal({ conversationId: 'conv-assigned' })];
+    const agentBuilder = makeAgentBuilder({
+      'conv-assigned': {
+        title: 'Assigned investigation',
+        metadata: { assignees: ['user-1', 'user-2'] },
+      },
+    });
+
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      agentBuilder,
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate[0].assignees).toEqual(['user-1', 'user-2']);
+  });
+
+  it('defaults assignees to an empty array when metadata key is absent', async () => {
+    const proposals = [makeProposal({ conversationId: 'conv-no-assignees' })];
+    const agentBuilder = makeAgentBuilder({
+      'conv-no-assignees': { title: 'Unassigned investigation' },
+    });
+
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      agentBuilder,
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate[0].assignees).toEqual([]);
+  });
+
+  it('defaults assignees to an empty array when the conversation is unresolvable', async () => {
+    const proposals = [makeProposal({ conversationId: 'conv-missing' })];
+    // 'conv-missing' not in the map — simulates an inaccessible conversation
+    const agentBuilder = makeAgentBuilder({});
+
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      agentBuilder,
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate[0].assignees).toEqual([]);
+  });
+
+  it('defaults assignees to an empty array when the bulk fetch fails', async () => {
+    const proposals = [makeProposal({ conversationId: 'conv-any' })];
+    const getScopedClient = jest.fn().mockResolvedValue({
+      bulkGet: jest.fn().mockRejectedValue(new Error('access denied')),
+    });
+    const agentBuilder = {
+      conversations: { getScopedClient },
+    } as unknown as AgentBuilderPluginStart;
+
+    const service = new ConversationProposalsService(
+      makeProposalsService(proposals),
+      agentBuilder,
+      logger
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate[0].assignees).toEqual([]);
   });
 });

@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type {
   ProposalWithMetadata,
@@ -45,41 +46,52 @@ export class ConversationProposalsService {
       spaceId
     );
 
-    const titles = await this.getTitles(
+    const conversations = await this.fetchConversations(
       proposals.map((p) => p.conversationId),
       request
     );
 
-    const groups = this.groupProposals(proposals, titles);
+    const groups = this.groupProposals(proposals, conversations);
     const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
     return { groups, total, truncated };
   }
 
+  private enrichProposals(
+    proposals: ProposalWithMetadata[],
+    conversations: Map<string, ConversationWithoutRoundsWithPermissions>
+  ): ProposalItem[] {
+    return proposals.map((proposal) => {
+      const conversation = conversations.get(proposal.conversationId);
+      const assignees = Array.isArray(conversation?.metadata?.assignees)
+        ? (conversation.metadata.assignees as string[])
+        : [];
+      return {
+        ...proposal,
+        assignees,
+        ...(conversation?.title ? { conversationTitle: conversation.title } : {}),
+      };
+    });
+  }
+
   private groupProposals(
     proposals: ProposalWithMetadata[],
-    titles: Map<string, string>
+    conversations: Map<string, ConversationWithoutRoundsWithPermissions>
   ): ProposalGroups {
     const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
+    const items = this.enrichProposals(proposals, conversations);
 
-    for (const proposal of proposals) {
-      const item: ProposalItem = {
-        ...proposal,
-        ...(titles.has(proposal.conversationId)
-          ? { conversationTitle: titles.get(proposal.conversationId) }
-          : {}),
-      };
-
+    for (const item of items) {
       // Anything not awaiting is closed, including a proposal that expired
       // unanswered — it carries no decision but nobody can act on it either.
       // `executing` counts as closed too: the human already approved and the
       // action is running, so re-offering it would invite a second decision.
-      if (!isAwaitingDecision(proposal)) {
+      if (!isAwaitingDecision(item)) {
         groups[CLOSED_GROUP_KEY].push(item);
-      } else if (proposal.category) {
-        if (!groups[proposal.category]) {
-          groups[proposal.category] = [];
+      } else if (item.category) {
+        if (!groups[item.category]) {
+          groups[item.category] = [];
         }
-        groups[proposal.category].push(item);
+        groups[item.category].push(item);
       }
     }
 
@@ -91,21 +103,18 @@ export class ConversationProposalsService {
     return groups;
   }
 
-  private async getTitles(
+  private async fetchConversations(
     conversationIds: string[],
     request: KibanaRequest
-  ): Promise<Map<string, string>> {
+  ): Promise<Map<string, ConversationWithoutRoundsWithPermissions>> {
     const uniqueIds = [...new Set(conversationIds)];
     const client = await this.agentBuilder.conversations.getScopedClient({ request });
 
-    // Titles are decoration: if the bulk read fails, still return the proposals list without them.
+    // Conversation data is decoration: if the bulk read fails, still return the proposals list without it.
     try {
-      const conversations = await client.bulkGet(uniqueIds);
-      return new Map(
-        [...conversations].flatMap(([id, { title }]) => (title ? [[id, title] as const] : []))
-      );
+      return await client.bulkGet(uniqueIds);
     } catch (err) {
-      this.logger.debug(`Could not resolve conversation titles: ${err}`);
+      this.logger.debug(`Could not resolve conversation data: ${err}`);
       return new Map();
     }
   }
