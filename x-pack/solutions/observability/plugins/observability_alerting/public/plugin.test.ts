@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { App, AppUpdater, AppUpdatableFields } from '@kbn/core/public';
+import type { App, AppUpdater, AppUpdatableFields, Capabilities } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
@@ -18,6 +18,7 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
 } from './constants';
+import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 
 const APP_STUB: App = {
   id: OBSERVABILITY_ALERTING_APP_ID,
@@ -44,10 +45,18 @@ const readLatestUpdate = async (
 };
 
 describe('ObservabilityAlertingPlugin', () => {
-  const setupWithSetting = (enabled: boolean) => {
+  const setupWithSetting = (
+    enabled: boolean,
+    capabilities: Record<string, Record<string, boolean>> = {}
+  ) => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const enabled$ = new BehaviorSubject(enabled);
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      ...capabilities,
+    } as Capabilities;
 
     coreSetup.getStartServices.mockResolvedValue([
       coreStart,
@@ -132,12 +141,37 @@ describe('ObservabilityAlertingPlugin', () => {
   });
 
   it('makes the app accessible when alerting v2 is enabled', async () => {
-    const { registered, enabled$ } = setupWithSetting(true);
+    const { registered, enabled$, coreStart } = setupWithSetting(true);
     const update = await readLatestUpdate(registered.updater$, enabled$);
 
     expect(update).toEqual({
       status: AppStatus.accessible,
+      deepLinks: getObservabilityAlertingDeepLinks(coreStart.application.capabilities),
     });
+  });
+
+  it('hides unauthorized deep links from global search when v2 is enabled', async () => {
+    const { registered, enabled$ } = setupWithSetting(true, {
+      alerting_v2_alerts: { read: true },
+    });
+    const update = await readLatestUpdate(registered.updater$, enabled$);
+
+    expect(update?.deepLinks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        }),
+        expect.objectContaining({
+          id: 'rules-v2',
+          visibleIn: [],
+        }),
+        expect.objectContaining({
+          id: 'rule-library',
+          visibleIn: [],
+        }),
+      ])
+    );
   });
 
   it('keeps the app inaccessible when alerting v2 is disabled', async () => {

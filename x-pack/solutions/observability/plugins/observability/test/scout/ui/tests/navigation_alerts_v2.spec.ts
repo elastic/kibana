@@ -31,6 +31,7 @@ import {
 import { expect } from '@kbn/scout-oblt/ui';
 import {
   setAlertingV2EnabledSetting,
+  setAlertingV2NavSettings,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
@@ -48,27 +49,6 @@ const PANEL_LINKS = {
   maintenanceWindows: 'management:maintenanceWindows',
   executionHistory: 'observabilityAlerting:execution-history',
 } as const;
-
-/**
- * Visible panel children when v2 is on. Titles match
- * `OBSERVABILITY_ALERTING_SURFACES` plus Maintenance Windows.
- * `rules-v1` stays hidden in the side nav and is covered by the URL suite.
- */
-const V2_PANEL_PAGES = [
-  { name: 'Alerts', deepLinkId: PANEL_LINKS.alerts, title: 'Alert episodes' },
-  { name: 'Rules', deepLinkId: PANEL_LINKS.rulesV2, title: 'Rules' },
-  { name: 'Action Policies', deepLinkId: PANEL_LINKS.actionPolicies, title: 'Action Policies' },
-  {
-    name: 'Maintenance Windows',
-    deepLinkId: PANEL_LINKS.maintenanceWindows,
-    title: 'Maintenance Windows',
-  },
-  {
-    name: 'Execution history',
-    deepLinkId: PANEL_LINKS.executionHistory,
-    title: 'Execution history',
-  },
-] as const;
 
 const expectPageTitle = async (pageTitle: Locator, title: string) => {
   await expect(pageTitle).toHaveText(title, {
@@ -148,10 +128,42 @@ const loadNavAsRole = async (
   return nav;
 };
 
+const enableV2AndOpenNav = async ({
+  browserAuth,
+  pageObjects,
+  kbnClient,
+  scoutSpace,
+}: {
+  browserAuth: { loginAsAdmin: () => Promise<void> };
+  pageObjects: {
+    observabilityNavigation: ObservabilityNavigation;
+    chrome: { pageTitle: Locator };
+  };
+  kbnClient: Parameters<typeof setAlertingV2NavSettings>[0];
+  scoutSpace: Parameters<typeof setAlertingV2NavSettings>[1];
+}) => {
+  await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+    v2Enabled: true,
+    showClassicAlertsPage: false,
+  });
+  await browserAuth.loginAsAdmin();
+  await pageObjects.observabilityNavigation.goto();
+  await pageObjects.observabilityNavigation.waitForLoad();
+};
+
+const expectAlertsHiddenFromOverflow = async (nav: ObservabilityNavigation) => {
+  await expect(nav.navItemInPrimaryById(ALERTS_PANEL_ID)).not.toBeVisible();
+  await expect(nav.navItemInPrimaryByDeepLinkId(ALERTS_DEEP_LINK)).not.toBeVisible();
+  if (await nav.moreMenuTrigger.isVisible()) {
+    await nav.openMoreMenu();
+    await expect(nav.navItemInMoreById(ALERTS_PANEL_ID)).not.toBeVisible();
+    await expect(nav.navItemInMoreByDeepLinkId(ALERTS_DEEP_LINK)).not.toBeVisible();
+  }
+};
+
 const expectPanelLinks = async (nav: ObservabilityNavigation, visible: readonly string[]) => {
   if (visible.length === 0) {
-    await expect(nav.navItemInBodyById(ALERTS_PANEL_ID)).not.toBeVisible();
-    await expect(nav.navItemInBodyByDeepLinkId(ALERTS_DEEP_LINK)).not.toBeVisible();
+    await expectAlertsHiddenFromOverflow(nav);
     return;
   }
 
@@ -177,9 +189,9 @@ test.describe(
       if (!config.serverless) {
         await scoutSpace.setSolutionView('oblt');
       }
-      await unsetAlertingV2EnabledSetting(kbnClient);
-      await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
+      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+        v2Enabled: false,
+        showClassicAlertsPage: false,
       });
     });
 
@@ -233,9 +245,9 @@ test.describe(
       kbnClient,
       scoutSpace,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
-      await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
+      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+        v2Enabled: true,
+        showClassicAlertsPage: false,
       });
 
       await browserAuth.loginAsAdmin();
@@ -281,29 +293,80 @@ test.describe(
       });
     });
 
-    for (const surface of V2_PANEL_PAGES) {
-      test(`clicking ${surface.name} loads ${surface.title} when alerting v2 is enabled`, async ({
-        browserAuth,
-        pageObjects,
-        kbnClient,
-        scoutSpace,
-      }) => {
-        await setAlertingV2EnabledSetting(kbnClient, true);
-        await scoutSpace.uiSettings.set({
-          [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
-        });
+    test('clicking Alerts loads Alert episodes when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
 
-        await browserAuth.loginAsAdmin();
-        await pageObjects.observabilityNavigation.goto();
-        await pageObjects.observabilityNavigation.waitForLoad();
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.alerts
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Alert episodes');
+    });
 
-        await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
-          ALERTS_PANEL_ID,
-          surface.deepLinkId
-        );
-        await expectPageTitle(pageObjects.chrome.pageTitle, surface.title);
-      });
-    }
+    test('clicking Rules loads Rules when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.rulesV2
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Rules');
+    });
+
+    test('clicking Action Policies loads Action Policies when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.actionPolicies
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Action Policies');
+    });
+
+    test('clicking Maintenance Windows loads Maintenance Windows when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.maintenanceWindows
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Maintenance Windows');
+    });
+
+    test('clicking Execution history loads Execution history when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.executionHistory
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Execution history');
+    });
 
     test('clicking Alerts V1 loads the classic alerts page when the classic table setting is on', async ({
       browserAuth,
@@ -311,9 +374,9 @@ test.describe(
       kbnClient,
       scoutSpace,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
-      await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: true,
+      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+        v2Enabled: true,
+        showClassicAlertsPage: true,
       });
 
       await browserAuth.loginAsAdmin();
@@ -342,9 +405,9 @@ test.describe(
       kbnClient,
       scoutSpace,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, false);
-      await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
+      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+        v2Enabled: false,
+        showClassicAlertsPage: false,
       });
 
       await browserAuth.loginAsAdmin();
@@ -363,9 +426,9 @@ test.describe(
       kbnClient,
       scoutSpace,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
-      await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
+      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+        v2Enabled: true,
+        showClassicAlertsPage: false,
       });
 
       const nav = pageObjects.observabilityNavigation;
@@ -381,6 +444,7 @@ test.describe(
         await scoutSpace.uiSettings.set({
           [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: true,
         });
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
         try {
           await loadNavAsRole(
             browserAuth,
@@ -392,6 +456,7 @@ test.describe(
           await scoutSpace.uiSettings.set({
             [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
           });
+          await kbnClient.uiSettings.waitForEventualCacheRefresh();
         }
       });
     });
