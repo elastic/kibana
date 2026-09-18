@@ -128,13 +128,25 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
               (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
           );
 
-        const success = skillInvoked && searchToolCalled && hasQueryReferences;
+        const corroborationDepth = corroboratedCount >= example.output.minCorroboratedCount;
+        const gapIdentification = gapCount <= example.output.maxGapCount + 1;
+
+        // `success` is the AND of every dimension the scorecard reports. It previously
+        // omitted corroborationDepth/gapIdentification, so a run could report
+        // `corroborationDepth: 0` and still be green — the dataset's own
+        // minCorroboratedCount/maxGapCount expectations gated nothing.
+        const success =
+          skillInvoked &&
+          searchToolCalled &&
+          corroborationDepth &&
+          gapIdentification &&
+          hasQueryReferences;
 
         const scorecard = {
           skillInvoked: skillInvoked ? 1 : 0,
           correctToolCalled: searchToolCalled ? 1 : 0,
-          corroborationDepth: corroboratedCount >= example.output.minCorroboratedCount ? 1 : 0,
-          gapIdentification: gapCount <= example.output.maxGapCount + 1 ? 1 : 0,
+          corroborationDepth: corroborationDepth ? 1 : 0,
+          gapIdentification: gapIdentification ? 1 : 0,
           groundedness: hasQueryReferences ? 1 : 0,
         };
 
