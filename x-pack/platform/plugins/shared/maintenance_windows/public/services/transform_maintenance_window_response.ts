@@ -18,12 +18,22 @@ export const transformMaintenanceWindowResponse = (
     events: response.events,
     rRule: response.r_rule,
     ...(response.category_ids !== undefined ? { categoryIds: response.category_ids } : {}),
-    ...(response.scoped_query !== undefined ? { scopedQuery: response.scoped_query } : {}),
+    ...(response.scoped_query != null
+      ? {
+          // `enabled` is optional in the route schema for back-compat; coerce before handing to UI.
+          scopedQuery: { ...response.scoped_query, enabled: response.scoped_query.enabled ?? true },
+        }
+      : {}),
     ...(response.scope !== undefined
       ? {
           scope: {
             ...(response.scope.alerting !== undefined
-              ? { alerting: response.scope.alerting }
+              ? {
+                  alerting: {
+                    ...response.scope.alerting,
+                    enabled: response.scope.alerting.enabled ?? true,
+                  },
+                }
               : {}),
             ...(response.scope.alerting_v2 !== undefined
               ? { alertingV2: response.scope.alerting_v2 }

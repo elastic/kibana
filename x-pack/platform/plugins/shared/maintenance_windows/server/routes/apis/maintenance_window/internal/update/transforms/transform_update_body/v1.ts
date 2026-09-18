@@ -18,9 +18,14 @@ export const transformUpdateBody = (
     duration,
     r_rule: rRule,
     category_ids: categoryIds,
-    scoped_query: scopedQuery,
+    scoped_query: rawScopedQuery,
     scope,
   } = updateBody;
+
+  // `enabled` is optional in the route schema (defaultValue: true) for back-compat; coerce here.
+  const scopedQuery = rawScopedQuery
+    ? { ...rawScopedQuery, enabled: rawScopedQuery.enabled ?? true }
+    : rawScopedQuery;
 
   const schedule =
     rRule && duration
@@ -35,7 +40,9 @@ export const transformUpdateBody = (
   const resolvedScope =
     scope !== undefined
       ? {
-          ...(scope.alerting !== undefined ? { alerting: scope.alerting } : {}),
+          ...(scope.alerting !== undefined
+            ? { alerting: { ...scope.alerting, enabled: scope.alerting.enabled ?? true } }
+            : {}),
           ...(scope.alerting_v2 !== undefined ? { alertingV2: scope.alerting_v2 } : {}),
         }
       : scopedQuery != null

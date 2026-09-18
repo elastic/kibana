@@ -29,9 +29,12 @@ export const alertingV2ScopeSchema = schema.object(
 
 export const alertsFilterQuerySchema = schema.object(
   {
-    enabled: schema.boolean({
-      meta: { description: 'Whether the maintenance window applies to alerting v1 alerts.' },
-    }),
+    enabled: schema.maybe(
+      schema.boolean({
+        defaultValue: true,
+        meta: { description: 'Whether the maintenance window applies to alerting v1 alerts.' },
+      })
+    ),
     kql: schema.maybe(
       schema.string({
         maxLength: 10000,
