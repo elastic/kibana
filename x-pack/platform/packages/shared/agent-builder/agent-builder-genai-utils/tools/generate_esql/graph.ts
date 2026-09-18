@@ -42,6 +42,7 @@ import {
   isRequestDocumentationAction,
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
+import { hasRejectedJoinTarget } from './join_errors';
 
 export const requestDocumentationSchema = z
   .object({
@@ -184,6 +185,17 @@ export const createNlToEsqlGraph = ({
     };
   };
 
+  /**
+   * Regenerating after a rejected join target cannot produce the answer: this tool returns a
+   * single query, and the question needed more than one index. Further attempts would each cost a
+   * full generation over the accumulated history, and the best they could yield is a query over
+   * the primary index alone — valid, but silently missing the other half. So the call ends and the
+   * caller gets a fast, truthful failure to act on.
+   *
+   * Decided from the errors already in state; no cluster lookup is involved.
+   */
+  const joinTargetRejected = (state: StateType): boolean => hasRejectedJoinTarget(state.actions);
+
   const branchAfterGenerate = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
     if (!isGenerateQueryAction(lastAction)) {
@@ -256,11 +268,10 @@ export const createNlToEsqlGraph = ({
     if (!isValidateQueryAction(lastAction)) {
       throw new Error(`Last action is not a validate_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // execute query step - validate first (ANTLR), then execute only if valid
@@ -321,11 +332,10 @@ export const createNlToEsqlGraph = ({
     if (!isExecuteQueryAction(lastAction)) {
       throw new Error(`Last action is not an execute_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // finalize step - process / generate the outputs
