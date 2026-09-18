@@ -33,11 +33,11 @@ import {
 } from './create_dataset_form_state';
 
 // ---------------------------------------------------------------------------
-// Module-level option factories — shared across components so each select
+// Module-level option arrays — shared across components so each select
 // renders consistently wherever it appears.
 // ---------------------------------------------------------------------------
 
-const FORMAT_OPTIONS = () => [
+const FORMAT_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsFormatPlaceholder },
   { value: 'csv', text: createDatasetWizardStrings.settingsFormatCsv },
   { value: 'tsv', text: createDatasetWizardStrings.settingsFormatTsv },
@@ -46,7 +46,7 @@ const FORMAT_OPTIONS = () => [
   // { value: 'orc', text: createDatasetWizardStrings.settingsFormatOrc },
 ];
 
-const SCHEMA_RESOLUTION_OPTIONS = () => [
+const SCHEMA_RESOLUTION_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsSchemaResolutionPlaceholder },
   {
     value: 'first_file_wins',
@@ -59,43 +59,43 @@ const SCHEMA_RESOLUTION_OPTIONS = () => [
   },
 ];
 
-const PARTITION_DETECTION_OPTIONS = () => [
+const PARTITION_DETECTION_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsPartitionDetectionPlaceholder },
   { value: 'auto', text: createDatasetWizardStrings.settingsPartitionDetectionAuto },
   { value: 'hive', text: createDatasetWizardStrings.settingsPartitionDetectionHive },
   { value: 'none', text: createDatasetWizardStrings.settingsPartitionDetectionNone },
 ];
 
-const ERROR_MODE_OPTIONS = () => [
+const ERROR_MODE_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsErrorModePlaceholder },
   { value: 'fail_fast', text: createDatasetWizardStrings.settingsErrorModeFailFast },
   { value: 'skip_row', text: createDatasetWizardStrings.settingsErrorModeSkipRow },
   { value: 'null_field', text: createDatasetWizardStrings.settingsErrorModeNullField },
 ];
 
-const MODE_OPTIONS = () => [
+const MODE_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
   { value: 'quoted', text: createDatasetWizardStrings.settingsModeQuoted },
   { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
   { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
 ];
 
-const HEADER_ROW_OPTIONS = () => [
+const HEADER_ROW_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
   { value: 'true', text: createDatasetWizardStrings.settingsHeaderRowTrue },
   { value: 'false', text: createDatasetWizardStrings.settingsHeaderRowFalse },
 ];
 
-const MULTI_VALUE_SYNTAX_OPTIONS = () => [
+const MULTI_VALUE_SYNTAX_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsMultiValueSyntaxPlaceholder },
   { value: 'none', text: createDatasetWizardStrings.settingsMultiValueSyntaxNone },
   { value: 'brackets', text: createDatasetWizardStrings.settingsMultiValueSyntaxBrackets },
 ];
 
-const BOOLEAN_OPTIONS = (placeholder: string, enabled: string, disabled: string) => [
-  { value: '', text: placeholder },
-  { value: 'true', text: enabled },
-  { value: 'false', text: disabled },
+const HIVE_PARTITIONING_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsHivePartitioningPlaceholder },
+  { value: 'true', text: createDatasetWizardStrings.settingsHivePartitioningEnabled },
+  { value: 'false', text: createDatasetWizardStrings.settingsHivePartitioningDisabled },
 ];
 
 // ---------------------------------------------------------------------------
@@ -124,7 +124,7 @@ export function CreateDatasetFormatField({
       error={formatFieldState.error?.message}
     >
       <EuiSelect
-        options={FORMAT_OPTIONS()}
+        options={FORMAT_OPTIONS}
         data-test-subj="createDatasetSettingsFormat"
         fullWidth
         aria-label={createDatasetWizardStrings.settingsFormatLabel}
@@ -151,7 +151,7 @@ export function CreateDatasetPartitionDetectionField({
   return (
     <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
       <EuiSelect
-        options={PARTITION_DETECTION_OPTIONS()}
+        options={PARTITION_DETECTION_OPTIONS}
         data-test-subj="createDatasetSettingsPartitionDetection"
         fullWidth
         aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
@@ -264,7 +264,7 @@ function RemainingUniversalSettings({
         fullWidth
       >
         <EuiSelect
-          options={SCHEMA_RESOLUTION_OPTIONS()}
+          options={SCHEMA_RESOLUTION_OPTIONS}
           data-test-subj="createDatasetSettingsSchemaResolution"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
@@ -293,11 +293,7 @@ function RemainingUniversalSettings({
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsHivePartitioningLabel} fullWidth>
         <EuiSelect
-          options={BOOLEAN_OPTIONS(
-            createDatasetWizardStrings.settingsHivePartitioningPlaceholder,
-            createDatasetWizardStrings.settingsHivePartitioningEnabled,
-            createDatasetWizardStrings.settingsHivePartitioningDisabled
-          )}
+          options={HIVE_PARTITIONING_OPTIONS}
           data-test-subj="createDatasetSettingsHivePartitioning"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsHivePartitioningLabel}
@@ -371,7 +367,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
         <EuiSelect
-          options={MODE_OPTIONS()}
+          options={MODE_OPTIONS}
           data-test-subj="createDatasetSettingsMode"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsModeLabel}
@@ -383,7 +379,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>
         <EuiSelect
-          options={HEADER_ROW_OPTIONS()}
+          options={HEADER_ROW_OPTIONS}
           data-test-subj="createDatasetSettingsHeaderRow"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
@@ -559,7 +555,7 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel} fullWidth>
         <EuiSelect
-          options={MULTI_VALUE_SYNTAX_OPTIONS()}
+          options={MULTI_VALUE_SYNTAX_OPTIONS}
           data-test-subj="createDatasetSettingsMultiValueSyntax"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel}
@@ -590,7 +586,7 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsErrorModeLabel} fullWidth>
         <EuiSelect
-          options={ERROR_MODE_OPTIONS()}
+          options={ERROR_MODE_OPTIONS}
           data-test-subj="createDatasetSettingsErrorMode"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
