@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/kbn-client'
   - '@kbn/tooling-log'
   - '@kbn/expect'
+  - '@kbn/workflows'
   - '@kbn/zod'
 tags:
   - functional-tests
