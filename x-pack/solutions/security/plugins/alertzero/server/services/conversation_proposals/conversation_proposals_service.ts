@@ -12,6 +12,7 @@ import type {
   ProposalWithMetadata,
   ProposalsQuery,
 } from '@kbn/agentic-investigations-plugin/common';
+import { isAwaitingDecision } from '@kbn/agentic-investigations-plugin/common';
 import {
   CLOSED_GROUP_KEY,
   type ProposalGroups,
@@ -34,7 +35,13 @@ export class ConversationProposalsService {
     spaceId: string
   ): Promise<GetProposalsListResponse> {
     const { proposals, truncated } = await this.proposalsService.listByWindow(
-      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
+      {
+        decidedWithinHours: query.windowHours,
+        // One live proposal per subject: a retried action leaves the failed
+        // attempt behind pointing at its replacement.
+        excludeSuperseded: true,
+        excludeExpired: false,
+      },
       spaceId
     );
 
@@ -62,7 +69,11 @@ export class ConversationProposalsService {
           : {}),
       };
 
-      if (proposal.decidedAt) {
+      // Anything not awaiting is closed, including a proposal that expired
+      // unanswered — it carries no decision but nobody can act on it either.
+      // `executing` counts as closed too: the human already approved and the
+      // action is running, so re-offering it would invite a second decision.
+      if (!isAwaitingDecision(proposal)) {
         groups[CLOSED_GROUP_KEY].push(item);
       } else if (proposal.category) {
         if (!groups[proposal.category]) {
