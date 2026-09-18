@@ -40,4 +40,29 @@ describe('parseConfidence', () => {
     expect(parseConfidence('Confidence: 5')).toBeUndefined();
     expect(parseConfidence('Confidence: 850%')).toBeUndefined();
   });
+
+  it('rejects a multi-digit out-of-range value instead of reading its first digit', () => {
+    // Regression: the decimal capture was `(\d(?:\.\d+)?)`, so it matched the
+    // leading digit of `Confidence: 12` and returned a PASSING 1. Every value
+    // from 10 to 19 could therefore satisfy the confidence floor on a report
+    // that states no usable confidence.
+    for (const malformed of [
+      'Confidence: 12',
+      'Confidence: 10',
+      'Confidence: 19',
+      'confidence 99',
+    ]) {
+      expect(parseConfidence(malformed)).toBeUndefined();
+    }
+  });
+
+  it('still reads the in-range decimals it read before', () => {
+    // The boundary the fix must not cross: whole-token capture keeps every
+    // legitimate single-digit and fractional value working.
+    expect(parseConfidence('Confidence: 1')).toBe(1);
+    expect(parseConfidence('Confidence: 0')).toBe(0);
+    expect(parseConfidence('Confidence: 0.8')).toBe(0.8);
+    expect(parseConfidence('Confidence: 0.05')).toBe(0.05);
+    expect(parseConfidence('Confidence: 1.0')).toBe(1);
+  });
 });

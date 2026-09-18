@@ -45,7 +45,12 @@ export const parseConfidence = (text: string): number | undefined => {
     if (value >= 0 && value <= 1) return value;
   }
 
-  const decimal = /confidence[^0-9\n]{0,20}(\d(?:\.\d+)?)/i.exec(text);
+  // The capture must be the WHOLE numeric token: a single-digit pattern
+  // (`(\d(?:\.\d+)?)`) matched the first digit of `Confidence: 12` and returned a
+  // passing 1, so every value from 10 to 19 could make the confidence gate green
+  // on a malformed report. The range check below is only meaningful once the
+  // complete token reaches it.
+  const decimal = /confidence[^0-9\n]{0,20}(\d+(?:\.\d+)?)/i.exec(text);
   if (decimal) {
     const value = Number(decimal[1]);
     if (value >= 0 && value <= 1) return value;
