@@ -144,11 +144,16 @@ const buildLauncherScript = (workdir: string, scriptFile: string): string => {
   const stderrFile = `${workdir}/stderr.txt`;
   const codeFile = `${workdir}/code.txt`;
   const pidFile = `${workdir}/pid.txt`;
+  const jobCmd = `WORKDIR="${workdir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"`;
 
   return `#!/bin/bash
 ${BASH_STATUS_HELPERS}
 mkdir -p "${workdir}"
-setsid bash -c 'WORKDIR="${workdir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"' < /dev/null > /dev/null 2>&1 &
+if command -v setsid >/dev/null 2>&1; then
+  setsid bash -c '${jobCmd}' < /dev/null > /dev/null 2>&1 &
+else
+  bash -c '${jobCmd}' < /dev/null > /dev/null 2>&1 &
+fi
 PID=$!
 echo $PID > "${pidFile}"
 TIMEOUT=20
@@ -186,11 +191,18 @@ fi
 rm -rf "${workdir}"
 `;
 
-const createVariableAssignment = (variable: string, value: string): string =>
-  `${variable}=$(cat << EOF
+const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+const createVariableAssignment = (variable: string, value: string): string => {
+  if (!ENV_KEY_PATTERN.test(variable)) {
+    throw new Error(`Invalid environment variable name: ${variable}`);
+  }
+
+  return `${variable}=$(cat << 'EOF'
 ${value}
 EOF
 )`;
+};
 
 const envRecordToScript = (env: Record<string, string>): string =>
   Object.entries(env)

@@ -165,8 +165,32 @@ describe('startJob', () => {
     expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('TIMEOUT=20'));
     expect(mockedExecScript).toHaveBeenCalledWith(
       ctx,
+      expect.stringContaining('command -v setsid')
+    );
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
       expect.stringContaining(`setsid bash -c 'WORKDIR="${getWorkdir(result.jobId)}"`)
     );
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.stringContaining(`else\n  bash -c 'WORKDIR="${getWorkdir(result.jobId)}"`)
+    );
+  });
+
+  it('uploads env.sh with quoted heredoc assignments', async () => {
+    const result = await startJob(ctx, 'echo hi', { APP_DIR: '/opt/app' });
+
+    expect(mockedUploadFile).toHaveBeenCalledWith(ctx, {
+      remotePath: `${getWorkdir(result.jobId)}/env.sh`,
+      content: "APP_DIR=$(cat << 'EOF'\n/opt/app\nEOF\n)",
+    });
+  });
+
+  it('throws on invalid env keys', async () => {
+    await expect(startJob(ctx, 'echo hi', { 'FOO; rm': 'x' })).rejects.toThrow(
+      'Invalid environment variable name: FOO; rm'
+    );
+    expect(mockedUploadFile).not.toHaveBeenCalled();
   });
 
   it('returns terminated status when the command finishes within 2s', async () => {
