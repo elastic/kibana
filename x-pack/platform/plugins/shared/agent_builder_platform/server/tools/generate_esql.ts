@@ -40,11 +40,11 @@ const nlToEsqlToolSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
-  execute: z
-    .enum(['none', 'schema', 'data'])
-    .default('data')
+  execute_query: z
+    .boolean()
+    .default(true)
     .describe(
-      "(optional) How to run the generated query. 'data' (default) executes to validate with the result set. 'schema' executes only to collect columns (LIMIT 1, keep all-null columns). 'none' only AST-validates."
+      '(optional) If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.'
     ),
   disable_named_params: z
     .boolean()
@@ -98,7 +98,7 @@ export const generateEsqlTool = ({
         query: nlQuery,
         index,
         context,
-        execute = 'data',
+        execute_query: executeQuery = true,
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
@@ -110,7 +110,7 @@ export const generateEsqlTool = ({
         nlQuery,
         index,
         additionalContext: context,
-        execute,
+        execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
