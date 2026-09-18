@@ -61,40 +61,34 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodyToCompare).toEqual(expectedRule);
       });
 
-      it('should return an error if the id does not exist when trying to delete an id', async () => {
+      it('should return skipped if the id does not exist when trying to delete an id', async () => {
         const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: { ids: ['c4e80a0d-e20f-4efc-84c1-08112da5a612'], action: 'delete' },
           })
-          .expect(500);
+          .expect(200);
 
         expect(body).toEqual({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Bulk edit failed',
+          success: true,
+          rules_count: 0,
           attributes: {
-            errors: [
-              {
-                message: 'Rule not found',
-                status_code: 500,
-                rules: [
-                  {
-                    id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
-                  },
-                ],
-              },
-            ],
+            errors: [],
             results: {
               updated: [],
               created: [],
               deleted: [],
-              skipped: [],
+              skipped: [
+                {
+                  id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
+                  skip_reason: 'RULE_NOT_FOUND',
+                },
+              ],
             },
             summary: {
-              failed: 1,
+              failed: 0,
               succeeded: 0,
-              skipped: 0,
+              skipped: 1,
               total: 1,
             },
           },
