@@ -78,6 +78,17 @@ export const runLiveQueryTool = (
       return unauthorizedToolResult('writeLiveQueries');
     }
 
+    // Dispatching is the POST route's privilege; the rows returned inline below
+    // are the GET results route's data, which that route guards behind
+    // readLiveQueries. The `live_queries_all` sub-feature happens to co-grant
+    // both, but that is a property of the feature registration rather than of
+    // this tool, so the read privilege is asserted here as well.
+    const canReadResults = await hasOsqueryToolPrivilege(
+      osqueryContext,
+      request,
+      'readLiveQueries'
+    );
+
     const packageService = osqueryContext.service.getPackageService();
     const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
       osqueryContext,
@@ -231,15 +242,25 @@ export const runLiveQueryTool = (
               query,
               timeout_seconds: timeout ?? 60,
               responded_agents: responded,
-              row_count: rows.length,
-              rows: rows.slice(0, MAX_RESULT_ROWS),
-              ...(pollResult.truncated && { truncated: true }),
+              // Rows are the GET results route's payload; the tool description
+              // promises them only to callers who also hold readLiveQueries.
+              ...(canReadResults
+                ? {
+                    row_count: rows.length,
+                    rows: rows.slice(0, MAX_RESULT_ROWS),
+                    ...(pollResult.truncated && { truncated: true }),
+                  }
+                : {
+                    guidance:
+                      'Result rows require the osquery readLiveQueries privilege, which this caller does not hold, so only the dispatch metadata is returned. Ask an operator with live-query read access to open this action in the Osquery app.',
+                  }),
               ...(pollResult.errorAgents !== undefined &&
                 pollResult.errorAgents > 0 && { errored_agents: pollResult.errorAgents }),
-              ...(status !== 'completed' && {
-                guidance:
-                  'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
-              }),
+              ...(canReadResults &&
+                status !== 'completed' && {
+                  guidance:
+                    'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
+                }),
             },
           },
         ],

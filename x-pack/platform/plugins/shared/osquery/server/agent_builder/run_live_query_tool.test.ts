@@ -143,6 +143,32 @@ describe('runLiveQueryTool', () => {
     expect(pollActionResponses).toHaveBeenCalled();
   });
 
+  // The tool description promises inline rows only to callers who also hold
+  // `readLiveQueries` (the privilege the GET results route requires). Assert
+  // the branch so the promise cannot silently drift back to "rows for anyone
+  // who can dispatch".
+  it('withholds inline rows when the caller holds writeLiveQueries without readLiveQueries', async () => {
+    const { context } = buildContext(['osquery-writeLiveQueries']);
+    const tool = runLiveQueryTool(context, loggerMock.create(), schemaService());
+
+    const result = await tool.handler(
+      { query: 'SELECT pid FROM processes', agent_ids: ['agent-1'] },
+      { request: {}, spaceId: 'default' } as any
+    );
+
+    const data = getResultData(result);
+
+    // Dispatching is allowed — this tool mirrors POST /api/osquery/live_queries
+    // — and its metadata comes back.
+    expect(data.action_id).toBe('query-action-1');
+    expect(data.status).toBe('completed');
+    expect(pollActionResponses).toHaveBeenCalled();
+    // The rows the GET results route guards behind readLiveQueries do not.
+    expect(data.rows).toBeUndefined();
+    expect(data.row_count).toBeUndefined();
+    expect(data.guidance).toMatch(/readLiveQueries/);
+  });
+
   // `writeLiveQueries` is grantable ONLY via the `live_queries_all` sub-feature
   // privilege, which co-grants `readLiveQueries` (see `register_features.ts`:
   // api: [osquery-writeLiveQueries, osquery-readLiveQueries]). The group is
