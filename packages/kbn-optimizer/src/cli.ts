@@ -71,6 +71,11 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
+      const devOnly = flags['dev-only'] ?? false;
+      if (typeof devOnly !== 'boolean') {
+        throw createFlagError('expected --dev-only to have no value');
+      }
+
       const profileWebpack = flags.profile ?? false;
       if (typeof profileWebpack !== 'boolean') {
         throw createFlagError('expected --profile to have no value');
@@ -115,6 +120,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         cache,
         examples: examples && !(validateLimits || updateLimits),
         testPlugins: testPlugins && !(validateLimits || updateLimits),
+        devOnly: devOnly && !(validateLimits || updateLimits),
         profileWebpack,
         inspectWorkers,
         includeCoreBundle,
@@ -154,6 +160,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           'watch',
           'examples',
           'test-plugins',
+          'dev-only',
           'dist',
           'cache',
           'profile',
@@ -182,6 +189,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
           --no-examples      don't build the example plugins
           --test-plugins     build test plugins too
+          --dev-only         build devOnly plugins too
           --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
           --no-inspect-workers  when inspecting the parent process, don't inspect the workers
           --limits           path to a limits.yml file to read, defaults to $KBN_OPTIMIZER_LIMITS_PATH or source file

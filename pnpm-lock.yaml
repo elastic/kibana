@@ -1712,21 +1712,12 @@ importers:
       '@kbn/dependency-injection-example-plugin':
         specifier: workspace:*
         version: link:examples/dependency_injection
-      '@kbn/design-tools':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-design-tools
       '@kbn/dev-tools-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dev_tools
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
-      '@kbn/developer-toolbar':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-developer-toolbar
-      '@kbn/developer-toolbar-plugin':
-        specifier: workspace:*
-        version: link:src/platform/plugins/shared/developer_toolbar
       '@kbn/discover-contextual-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-discover-contextual-components
@@ -2240,9 +2231,6 @@ importers:
       '@kbn/input-control-vis-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/input_control_vis
-      '@kbn/inspect-component-plugin':
-        specifier: workspace:*
-        version: link:src/platform/plugins/private/inspect_component
       '@kbn/inspector-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/inspector
@@ -5145,6 +5133,9 @@ importers:
       '@kbn/dependency-usage':
         specifier: workspace:*
         version: link:packages/kbn-dependency-usage
+      '@kbn/design-tools':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-design-tools
       '@kbn/detections-response-ftr-services':
         specifier: workspace:*
         version: link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
@@ -5166,6 +5157,12 @@ importers:
       '@kbn/dev-validation-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-validation-runner
+      '@kbn/developer-toolbar':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-developer-toolbar
+      '@kbn/developer-toolbar-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/developer_toolbar
       '@kbn/docs-utils':
         specifier: workspace:*
         version: link:packages/kbn-docs-utils
@@ -5361,6 +5358,9 @@ importers:
       '@kbn/ink':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ink
+      '@kbn/inspect-component-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/inspect_component
       '@kbn/jest-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-jest-benchmarks
