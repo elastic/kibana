@@ -75,18 +75,20 @@ describe('Detection Rule Creation worker', () => {
       expect(proposal).not.toHaveProperty('on-failure');
     });
 
-    // The draft is an ES|QL rule, so the action has to accept the whole request body,
-    // not only the bare query-rule fields its first callers sent.
-    it('hands the action a body it passes through to the API', () => {
+    // The action takes the drafted ES|QL request body whole and hands it to the API.
+    it('hands the action an ES|QL body it passes through to the API', () => {
       const props = action.triggers?.[0]?.inputs?.properties as Record<
         string,
         { properties?: Record<string, { enum?: string[] }>; required?: string[] }
       >;
-      expect(props.actionInput.properties?.type?.enum).toContain('esql');
-      expect(props.actionInput.required).not.toContain('index');
-      const drafted = action.steps.find((step) => step.name === 'create_drafted_rule');
-      expect(drafted?.if).toContain('inputs.actionInput.type != null');
-      expect(drafted?.with?.rule).toBe('${{ inputs.actionInput }}');
+      expect(props.actionInput.properties?.type?.enum).toEqual(['esql']);
+      expect(props.actionInput.properties?.language?.enum).toEqual(['esql']);
+      expect(props.actionInput.required).toEqual(
+        expect.arrayContaining(['type', 'language', 'name', 'description', 'query'])
+      );
+      const create = action.steps.find((step) => step.name === 'create_rule');
+      expect(create?.type).toBe('security.createRule');
+      expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
     });
 
     // A draft with an empty query or no attachment is not reviewable; proposing it
@@ -130,7 +132,7 @@ describe('Detection Rule Creation worker', () => {
       expect(report?.if).toContain('steps.draft_previewed.output.ok != true');
       const inputs = inputsOf(report);
       expect(inputs).not.toHaveProperty('actionWorkflowId');
-      expect(inputs.category).toBe('investigate');
+      expect(inputs.category).toBe('configure');
       expect(report).not.toHaveProperty('on-failure');
     });
 

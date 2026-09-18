@@ -330,7 +330,7 @@ steps:
                   The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.
 
                   {{ steps.compose_report.output.body }}
-                category: investigate
+                category: configure
                 impact: low
                 confidence: low
 
@@ -389,7 +389,7 @@ steps:
                   The check matched a prebuilt rule, but did not report a rule id and version to install.
 
                   {{ steps.compose_report.output.body }}
-                category: investigate
+                category: configure
                 impact: low
                 confidence: low
 
@@ -444,7 +444,7 @@ steps:
               The coverage check returned an unexpected verdict and no automated action was taken.
 
               {{ steps.compose_report.output.body }}
-            category: investigate
+            category: configure
             impact: low
             confidence: low
 

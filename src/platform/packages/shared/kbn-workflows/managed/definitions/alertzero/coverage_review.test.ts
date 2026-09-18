@@ -359,17 +359,17 @@ describe('Detection Coverage review', () => {
 
     // The gate types actionInput as an object, so action-less proposals omit the keys
     // rather than pass an empty value. With no action to inherit a category from, they
-    // must name their own queue bucket or fall into the uncategorized fallback.
-    const actionless: Array<[string, string]> = [
-      ['propose_confirm', 'configure'],
-      ...REPORT_STEPS.map((name): [string, string] => [name, 'investigate']),
-    ];
-    it.each(actionless)('%s carries no action but names its category', (name, category) => {
-      const inputs = inputsOf(stepByName(name));
-      expect(inputs).not.toHaveProperty('actionWorkflowId');
-      expect(inputs).not.toHaveProperty('actionInput');
-      expect(inputs.category).toBe(category);
-    });
+    // must name the same `configure` bucket the action proposals land in, or fall into
+    // the uncategorized fallback.
+    it.each(['propose_confirm', ...REPORT_STEPS])(
+      '%s carries no action but names its category',
+      (name) => {
+        const inputs = inputsOf(stepByName(name));
+        expect(inputs).not.toHaveProperty('actionWorkflowId');
+        expect(inputs).not.toHaveProperty('actionInput');
+        expect(inputs.category).toBe('configure');
+      }
+    );
 
     it.each(REPORT_STEPS)('%s renders the shared report body', (name) => {
       expect(String(inputsOf(stepByName(name)).comment)).toContain(

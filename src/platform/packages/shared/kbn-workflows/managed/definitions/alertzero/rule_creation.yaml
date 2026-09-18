@@ -276,7 +276,7 @@ steps:
 
           **On approval**
           Nothing is applied automatically; approving acknowledges that this gap needs a hand-written rule or its data source first. Dismiss if it should not get a rule.
-        category: investigate
+        category: configure
         impact: low
         confidence: low
 
