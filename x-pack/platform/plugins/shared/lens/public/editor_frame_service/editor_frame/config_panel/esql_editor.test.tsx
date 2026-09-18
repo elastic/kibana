@@ -250,6 +250,19 @@ describe('ESQLEditor', () => {
       );
     });
 
+    it('does not repeatedly refresh when ES|QL variables are unavailable', async () => {
+      useFetchContextMock.mockReturnValue(createMockFetchContext({ esqlVariables: undefined }));
+      const onLayerQuerySubmit = jest.fn().mockResolvedValue(undefined);
+
+      renderEditor({ onLayerQuerySubmit });
+      await waitFor(() => expect(getGridAttrsMock).toHaveBeenCalledTimes(1));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      expect(getGridAttrsMock).toHaveBeenCalledTimes(1);
+    });
+
     it('refreshes the layer-scoped results grid when ES|QL variables change', async () => {
       const onLayerQuerySubmit = jest.fn().mockResolvedValue(undefined);
       const editor = renderEditor({ onLayerQuerySubmit });

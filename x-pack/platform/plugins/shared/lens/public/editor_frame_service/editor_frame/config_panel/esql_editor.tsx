@@ -41,6 +41,8 @@ import { useInitializeChart } from './use_initialize_chart';
 import { useHasMultipleVisibleLayers } from './use_has_multiple_visible_layers';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
+const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
+
 export type ESQLEditorProps = Simplify<
   {
     isTextBasedLanguage: boolean;
@@ -169,7 +171,10 @@ export function ESQLEditor({
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
-  const { esqlVariables = [], isApproximate } = useFetchContext({ uuid: panelId, parentApi });
+  const { esqlVariables = EMPTY_ESQL_VARIABLES, isApproximate } = useFetchContext({
+    uuid: panelId,
+    parentApi,
+  });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   // Update column limit indicator when chart data finishes loading
