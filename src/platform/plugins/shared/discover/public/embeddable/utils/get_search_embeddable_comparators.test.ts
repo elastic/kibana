@@ -10,11 +10,13 @@
 import { runComparator } from '@kbn/presentation-publishing';
 import { getDiscoverSessionEmbeddableComparators } from './get_search_embeddable_comparators';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 describe('getDiscoverSessionEmbeddableComparators', () => {
   const language = 'kql' as const;
   const baseTab = {
+    type: DiscoverTabType.Default as const,
     query: { language, expression: '*' },
     filters: [],
     sort: [],

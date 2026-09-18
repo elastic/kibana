@@ -1,5 +1,5 @@
 {
-  "sha1": "baec989cb1f4a3189135826a2d66e2c7f1e10ee0",
+  "sha1": "404c8c4f99a4331615f99b4cb9539f772a5431f0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -112,8 +112,8 @@
       }
     },
     {
-      "id": "7998edec061cd06-3b7d4b7c8c80cdb",
-      "title": "Significant Events run quota authorization denies a manager whose Streams privilege is limited to one space",
+      "id": "7998edec061cd06-474b7573b22c201",
+      "title": "Significant Events run quota authorization denies a manager whose Nightshift privilege is limited to one space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -128,8 +128,8 @@
       }
     },
     {
-      "id": "7998edec061cd06-5fed36fa861660c",
-      "title": "Significant Events run quota authorization allows an all-spaces Streams manager to update and restore settings",
+      "id": "7998edec061cd06-ef381f2f9a77c63",
+      "title": "Significant Events run quota authorization allows an all-spaces Nightshift manager to update and restore settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
