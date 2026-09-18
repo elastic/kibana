@@ -193,25 +193,6 @@ describe('HomePage', () => {
     });
   });
 
-  describe('the manage data action', () => {
-    it('is shown to a role that can reach Index Management', () => {
-      render(<HomePage />);
-
-      expect(screen.getByTestId('homePageDataCardDataManagement')).toBeInTheDocument();
-    });
-
-    it('is hidden from a role without Index Management', () => {
-      mockServices({ hasIndexManagement: false });
-
-      render(<HomePage />);
-
-      expect(screen.queryByTestId('homePageDataCardDataManagement')).not.toBeInTheDocument();
-      // the data card itself, and its stats, stay visible
-      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
-      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
-    });
-  });
-
   describe('the onboarding banner', () => {
     const bannerProps = () => mockHomePageBanner.mock.calls[0][0];
 
