@@ -11,12 +11,13 @@ export const formatColumnsBlock = (
   columns: EsqlEsqlColumnInfo[] | undefined,
   query: string
 ): string => {
-  if (columns === undefined) {
+  if (!columns?.length) {
     return `No column information is available; infer fields from the ES|QL query: ${query}`;
   }
 
   const listed = columns.map(({ name, type }) => `- ${JSON.stringify(name)} (${type})`).join('\n');
   return `Bind only these executed result columns, using their exact names:
-<columns>${listed ? `\n${listed}` : ''}
+<columns>
+${listed}
 </columns>`;
 };
