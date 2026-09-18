@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ActionScope, ConnectorAlertingHint, ConnectorMetadata } from '@kbn/connector-specs';
 import type { ConnectorSpecDetail } from '../../../../../../common/connector_spec';
 
 export type GetConnectorSpecResult = Pick<
@@ -20,4 +20,6 @@ export type GetConnectorSpecResult = Pick<
 > & {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
+  actionSchemas: Record<string, { input: Record<string, unknown>; description?: string; scope: ActionScope }>;
+  alerting?: ConnectorAlertingHint;
 };

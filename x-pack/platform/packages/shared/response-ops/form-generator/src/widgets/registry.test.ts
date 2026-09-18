@@ -13,6 +13,7 @@ import { TextWidget } from './components/text_widget';
 import { NumberWidget } from './components/number_widget';
 import { PasswordWidget } from './components/password_widget';
 import { HiddenWidget } from './components/hidden_widget';
+import { BooleanWidget } from './components/boolean_widget';
 
 describe('Widget Registry', () => {
   describe('getDefaultWidgetForSchema - string schemas', () => {
@@ -97,15 +98,15 @@ describe('Widget Registry', () => {
     });
   });
 
-  describe('getDefaultWidgetForSchema - unsupported schema types', () => {
-    it('should throw error for z.boolean() without explicit widget', () => {
+  describe('getDefaultWidgetForSchema - boolean schemas', () => {
+    it('should return BooleanWidget for z.boolean()', () => {
       const schema = z.boolean();
-
-      expect(() => getWidgetComponent(schema)).toThrow(
-        /No widget found for schema type: ZodBoolean/
-      );
+      const component = getWidgetComponent(schema);
+      expect(component).toBe(BooleanWidget);
     });
+  });
 
+  describe('getDefaultWidgetForSchema - unsupported schema types', () => {
     it('should throw error for z.array() without explicit widget', () => {
       const schema = z.array(z.string());
 
