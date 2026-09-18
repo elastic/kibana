@@ -24,6 +24,13 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "event_loop_watchdog": Object {
+          "dedup_window_ms": 300000,
+          "enabled": false,
+          "heartbeat_interval_ms": 100,
+          "live_report_interval_ms": 3000,
+          "threshold_ms": 500,
+        },
         "execution_control": Object {
           "poll_interval": 5000,
         },
@@ -91,6 +98,13 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "event_loop_watchdog": Object {
+          "dedup_window_ms": 300000,
+          "enabled": false,
+          "heartbeat_interval_ms": 100,
+          "live_report_interval_ms": 3000,
+          "threshold_ms": 500,
+        },
         "execution_control": Object {
           "poll_interval": 5000,
         },
@@ -155,6 +169,13 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "event_loop_watchdog": Object {
+          "dedup_window_ms": 300000,
+          "enabled": false,
+          "heartbeat_interval_ms": 100,
+          "live_report_interval_ms": 3000,
+          "threshold_ms": 500,
         },
         "execution_control": Object {
           "poll_interval": 5000,

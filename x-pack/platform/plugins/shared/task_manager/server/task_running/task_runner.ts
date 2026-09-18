@@ -25,6 +25,7 @@ import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, eitherAsync, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
+import { notifyTaskRunEnd, notifyTaskRunStart } from '../event_loop_watchdog';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskRunEvent,
@@ -490,6 +491,7 @@ export class TaskManagerRunner implements TaskRunner {
             description: 'run task',
           });
 
+          notifyTaskRunStart(this.id, this.taskType);
           const result = await runner.run(() =>
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
@@ -530,6 +532,7 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('failure');
           return processedResult;
         } finally {
+          notifyTaskRunEnd(this.id);
           this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
         }
       }

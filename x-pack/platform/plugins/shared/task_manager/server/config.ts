@@ -81,6 +81,23 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
+/*
+ * Diagnostic prototype: detects blocks of the main event loop from a dedicated worker
+ * thread and logs a report naming the task(s) that were in flight when the block started.
+ * Disabled by default.
+ */
+const eventLoopWatchdogSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  /* Minimum uninterrupted event-loop block duration (ms) that triggers a report. */
+  threshold_ms: schema.number({ defaultValue: 500, min: 50 }),
+  /* How often (ms) the main thread stamps its heartbeat for the watchdog to observe. */
+  heartbeat_interval_ms: schema.number({ defaultValue: 100, min: 10 }),
+  /* How often (ms) a still-blocked notice is written while a block is ongoing. */
+  live_report_interval_ms: schema.number({ defaultValue: 3000, min: 100 }),
+  /* Suppresses repeat reports for the same suspect task type(s) within this window (ms). */
+  dedup_window_ms: schema.number({ defaultValue: 5 * 60 * 1000, min: 0 }),
+});
+
 const requestTimeoutsConfig = schema.object({
   /* The request timeout config for task manager's updateByQuery default:30s, min:10s, max:10m */
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
@@ -135,6 +152,7 @@ export const configSchema = schema.object(
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
     ephemeral_tasks: schema.maybe(schema.any()),
     event_loop_delay: eventLoopDelaySchema,
+    event_loop_watchdog: eventLoopWatchdogSchema,
     invalidate_api_key_task: schema.object({
       interval: schema.string({ validate: validateDuration, defaultValue: '5m' }),
       removalDelay: schema.string({ validate: validateDuration, defaultValue: '1h' }),
@@ -244,3 +262,4 @@ export const configSchema = schema.object(
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
+export type EventLoopWatchdogConfig = TypeOf<typeof eventLoopWatchdogSchema>;
