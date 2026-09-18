@@ -46,7 +46,7 @@ export const getWorkdir = (jobId: string): string => `${REMOTE_HOST_JOB_ROOT}/${
 export const wrapUserScript = (code: string, hasEnv: boolean, cwd?: string): string =>
   `
 #!/bin/bash
-STEP_OUTPUT="$WORKDIR/output.txt"
+export STEP_OUTPUT="$WORKDIR/output.txt"
 touch "$STEP_OUTPUT"
 ${hasEnv ? '. "$WORKDIR/env.sh"' : ''}
 ${cwd ? `cd ${JSON.stringify(cwd)} || exit 1` : ''}
@@ -198,7 +198,7 @@ const createVariableAssignment = (variable: string, value: string): string => {
     throw new Error(`Invalid environment variable name: ${variable}`);
   }
 
-  return `${variable}=$(cat << 'EOF'
+  return `export ${variable}=$(cat << 'EOF'
 ${value}
 EOF
 )`;

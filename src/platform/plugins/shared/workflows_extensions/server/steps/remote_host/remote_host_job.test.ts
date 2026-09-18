@@ -60,7 +60,7 @@ describe('wrapUserScript', () => {
   it('sets STEP_OUTPUT to the workdir output file and includes the user command', () => {
     const wrapped = wrapUserScript('hostname -f', false);
 
-    expect(wrapped).toContain('STEP_OUTPUT="$WORKDIR/output.txt"');
+    expect(wrapped).toContain('export STEP_OUTPUT="$WORKDIR/output.txt"');
     expect(wrapped).toContain('touch "$STEP_OUTPUT"');
     expect(wrapped).toContain('hostname -f');
     expect(wrapped).not.toContain('env.sh');
@@ -182,7 +182,7 @@ describe('startJob', () => {
 
     expect(mockedUploadFile).toHaveBeenCalledWith(ctx, {
       remotePath: `${getWorkdir(result.jobId)}/env.sh`,
-      content: "APP_DIR=$(cat << 'EOF'\n/opt/app\nEOF\n)",
+      content: "export APP_DIR=$(cat << 'EOF'\n/opt/app\nEOF\n)",
     });
   });
 
