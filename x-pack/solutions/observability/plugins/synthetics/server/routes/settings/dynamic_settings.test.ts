@@ -231,6 +231,14 @@ describe('dynamic settings routes', () => {
       ).toThrow();
     });
 
+    it('rejects unknown top-level keys so a typo cannot no-op via merge', () => {
+      expect(
+        DynamicSettingsSchema.safeParse({
+          certAgeThresholdTypo: 90,
+        }).success
+      ).toBe(false);
+    });
+
     it('rejects unknown defaultEmail keys so a typo cannot drop cc or bcc', () => {
       expect(
         DynamicSettingsSchema.safeParse({

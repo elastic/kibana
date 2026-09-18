@@ -180,7 +180,7 @@ export const fromSettingsAttribute = (
 
 const emailList = z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000);
 
-export const DynamicSettingsSchema = z.object({
+export const DynamicSettingsSchema = z.strictObject({
   certAgeThreshold: z.number().int().min(1).optional(),
   certExpirationThreshold: z.number().int().min(1).optional(),
   defaultConnectors: z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000).optional(),
