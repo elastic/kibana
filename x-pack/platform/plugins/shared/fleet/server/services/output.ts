@@ -1628,9 +1628,7 @@ class OutputService {
 
     const directPolicyIds = directPolicies.items.map((p) => p.id);
     const pkgDerivedIds = packagePolicySOs.items.flatMap((pp) =>
-      pp.policy_ids.filter((id) => !directPolicyIds.includes(id))
-    );
-    const uniqueIds = [...new Set([...directPolicyIds, ...pkgDerivedIds])];
+    const pkgDerivedIds = packagePolicySOs.items.flatMap((pp) => pp.policy_ids);
     const agentPolicyCount = uniqueIds.length;
 
     let agentCount = 0;
