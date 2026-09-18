@@ -25,7 +25,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
-import { isMissingValue, MISSING_TOKEN } from '@kbn/field-formats-common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getHttp, getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
@@ -176,7 +176,10 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
-  if (isMissingValue(value)) {
+  // Only null/undefined mean "no value" here. ES|QL rows never contain the MISSING_TOKEN
+  // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
+  // real document value and must produce a phrase filter, not a negated exists filter.
+  if (value == null) {
     const existsFilter = buildSimpleExistFilter(fieldName, indexPattern);
     existsFilter.meta.negate = true;
     return [existsFilter];
@@ -214,7 +217,7 @@ export const createFilterESQL = async (
     return [];
   }
   const value = table.rows[rowIndex][column.id];
-  if (isMissingValue(value)) {
+  if (value == null) {
     return !operationType ? await createFilterFromRawColumnsESQL(column, value) : [];
   }
 
