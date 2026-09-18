@@ -128,6 +128,7 @@ Managed Worker definitions:
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
 - `system-security-detection-rule-creation`
+- `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 

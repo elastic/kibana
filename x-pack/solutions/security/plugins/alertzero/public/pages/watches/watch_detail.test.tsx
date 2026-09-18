@@ -12,12 +12,14 @@ import {
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   createCatalogWatchPlaceholder,
   type CatalogWatchId,
   type Worker,
@@ -75,6 +77,12 @@ const floorWorkers: Worker[] = [
     },
   }),
 ];
+
+const forensicsWorker = createWorker({
+  id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  name: 'Endpoint Analysis',
+  watchIds: [SYSTEM_SECURITY_WATCH_FORENSICS_ID],
+});
 
 const huntWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
@@ -135,7 +143,7 @@ describe('WatchDetailPage', () => {
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, huntWorker]);
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, huntWorker, forensicsWorker]);
 
     expect(screen.queryByTestId('alertZeroWatchEnabledSwitch')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
@@ -149,6 +157,11 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
       )
     ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+      )
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId(
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
@@ -240,6 +253,7 @@ describe('WatchDetailPage', () => {
       ...floorWorkers,
       huntWorker,
       ...detectionWorkers,
+      forensicsWorker,
     ]);
 
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
@@ -252,6 +266,7 @@ describe('WatchDetailPage', () => {
       ...floorWorkers,
       huntWorker,
       ...detectionWorkers,
+      forensicsWorker,
     ]);
 
     for (const worker of detectionWorkers) {
@@ -267,6 +282,35 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('shows Forensics Watch with one Worker that has enablement and fixed autonomy', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
+      ...floorWorkers,
+      huntWorker,
+      ...detectionWorkers,
+      forensicsWorker,
+    ]);
+
+    const section = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+    );
+    expect(section).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+      )
+    ).toBeInTheDocument();
+    // Endpoint analysis allows manual only, so the level renders as fixed text rather
+    // than a slider, and its sweep cadence is fixed in the definition, not a setting.
+    expect(within(section).getByTestId('alertZeroAutonomyFixed')).toHaveTextContent('Manual');
+    expect(within(section).queryByTestId('alertZeroAutonomySlider')).not.toBeInTheDocument();
+    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {

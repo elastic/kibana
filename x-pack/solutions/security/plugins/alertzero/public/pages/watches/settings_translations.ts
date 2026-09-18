@@ -19,6 +19,7 @@ import {
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   type WorkerScheduleUnit,
 } from '@kbn/alertzero-common';
@@ -710,6 +711,13 @@ const WATCH_INTROS: Record<string, string> = {
     {
       defaultMessage:
         'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
+    }
+  ),
+  [SYSTEM_SECURITY_WATCH_FORENSICS_ID]: i18n.translate(
+    'xpack.alertzero.watches.settings.intro.forensics',
+    {
+      defaultMessage:
+        'Groups the Forensic Analysis Workers. Settings below belong to that Worker, not to this Watch.',
     }
   ),
 };
