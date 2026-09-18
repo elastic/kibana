@@ -498,6 +498,23 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
           { type: 'index', value: DEST.traces, query: `FROM ${DEST.traces}` },
         ]);
       });
+
+      await apiTest.step('returns the derived FROM query on LIST', async () => {
+        const response = await apiClient.get(COLLECTION, {
+          headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.ai_indices).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id,
+              traces: [{ type: 'index', value: DEST.traces, query: `FROM ${DEST.traces}` }],
+            }),
+          ])
+        );
+      });
     }
   );
 
