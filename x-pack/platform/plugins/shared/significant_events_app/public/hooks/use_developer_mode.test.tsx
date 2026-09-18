@@ -88,8 +88,8 @@ describe('useDeveloperMode', () => {
 
   it('sets isSaving while the request is in flight', async () => {
     let resolveSave!: (value: boolean) => void;
-    setUiSetting.mockReturnValue(new Promise<boolean>((resolve) => (resolveSave = resolve)));
     setup({ enabled: false });
+    setUiSetting.mockReturnValue(new Promise<boolean>((resolve) => (resolveSave = resolve)));
     const { result } = renderHook(() => useDeveloperMode());
 
     act(() => {
