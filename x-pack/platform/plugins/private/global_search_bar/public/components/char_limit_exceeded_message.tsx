@@ -14,14 +14,13 @@ export const CharLimitExceededMessage = () => {
   const charLimitMessage = (
     <>
       <EuiTitle size="s">
-        <h3 data-test-subj="searchCharLimitExceededMessageHeading">
+        <h2 data-test-subj="searchCharLimitExceededMessageHeading">
           <FormattedMessage
             id="xpack.globalSearchBar.searchBar.searchCharLimitExceededHeading"
             defaultMessage="Search character limit exceeded"
           />
-        </h3>
+        </h2>
       </EuiTitle>
-      <EuiText>
         <p>
           <FormattedMessage
             id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
