@@ -309,6 +309,55 @@ describe('installKibanaSavedObjects', () => {
     );
   });
 
+  it('normalizes id/destinationId on ambiguous_conflict resolve results for additional-space objects', async () => {
+    // For additional-space installs, createSavedObjectKibanaAsset rewrites the id to a v5
+    // UUID and stores the archive id in originId. The initial import normalizes results
+    // (lines 729-737), but the ambiguous-conflict resolve pass did not apply the same swap
+    // before the Libra fix. Without normalization the stored ref uses the space-scoped UUID
+    // instead of the archive id, breaking subsequent installs.
+    const archiveId = 'my-dashboard-archive-id';
+    const spaceScopedId = 'aaaabbbb-0000-0000-0000-000000000001';
+
+    // Simulate an asset that has already been rewritten for additional-space install:
+    // id = space-scoped UUID, originId = archive id
+    const rewrittenAsset = {
+      id: spaceScopedId,
+      type: KibanaSavedObjectType.dashboard,
+      originId: archiveId,
+      attributes: {},
+      references: [],
+    } as any;
+
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: rewrittenAsset.type,
+      id: rewrittenAsset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+
+    mockImporter.import.mockResolvedValueOnce(createImportResponse([ambiguousError]));
+    // resolveImportErrors returns the space-scoped UUID as the id (as the SO framework would)
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse([], [{ id: spaceScopedId, type: rewrittenAsset.type, meta: {} }])
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [rewrittenAsset],
+    });
+
+    // After normalization the result id must be the archive id, not the space-scoped UUID
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: spaceScopedId }),
+      ])
+    );
+  });
+
   it('does not throw on empty destinations array in ambiguous_conflict error', async () => {
     const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
     const ambiguousError: SavedObjectsImportFailure = {
@@ -385,6 +434,24 @@ describe('createSavedObjectKibanaAsset', () => {
 
     expect(result.id).toEqual('system-logs-template');
     expect(result.originId).toBeUndefined();
+  });
+
+  it('preserves a pre-existing originId on a SavedObjectToBe asset when rewriteId is false', () => {
+    // replaceInMarkdown queues already-processed SavedObjectToBe values through
+    // flushAssetsToInstall → createSavedObjectKibanaAsset without options.
+    // Before the fix, the originId was silently dropped, severing the origin chain.
+    const preProcessed = {
+      id: 'space-scoped-uuid-v5',
+      type: KibanaSavedObjectType.dashboard,
+      originId: 'original-archive-id',
+      attributes: { title: 'My Dashboard' },
+      references: [],
+    } as any;
+
+    const result = createSavedObjectKibanaAsset(preProcessed);
+
+    expect(result.id).toEqual('space-scoped-uuid-v5');
+    expect(result.originId).toEqual('original-archive-id');
   });
 });
 

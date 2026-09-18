@@ -128,13 +128,21 @@ export function createSavedObjectKibanaAsset(
     options?.installAsAdditionalSpace &&
     (asset.type === KibanaSavedObjectType.dashboard ||
       asset.type === KibanaSavedObjectType.alertingRuleTemplate);
-  // convert that to an object
+  // An asset may already carry an originId when it has been pre-processed by an earlier
+  // call to this function (e.g. replaceInMarkdown queues SavedObjectToBe values as
+  // ArchiveAsset). Preserve it so the origin chain is not lost on re-import.
+  const preExistingOriginId = (asset as SavedObjectToBe).originId;
+
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: rewriteId
       ? getSpaceScopedAssetId(asset.id, options?.spaceId ?? DEFAULT_SPACE_ID)
       : asset.id,
-    ...(rewriteId ? { originId: asset.id } : {}),
+    ...(rewriteId
+      ? { originId: asset.id }
+      : preExistingOriginId
+      ? { originId: preExistingOriginId }
+      : {}),
     attributes: asset.attributes,
     references: asset.references || [],
   };
@@ -783,7 +791,9 @@ async function installKibanaSavedObjectsChunk({
     });
     for (const [key, destId] of picked) pickedDestinations.set(key, destId);
     referenceErrors.push(...ambiguousRefErrors);
-    allSuccessResults = allSuccessResults.concat(ambiguousSuccessResults);
+    allSuccessResults = allSuccessResults.concat(
+      normalizeResolveResults(ambiguousSuccessResults, toBeSavedObjects)
+    );
   }
 
   /*
@@ -841,13 +851,35 @@ async function installKibanaSavedObjectsChunk({
       );
     }
 
-    allSuccessResults = allSuccessResults.concat(resolveSuccessResults);
+    allSuccessResults = allSuccessResults.concat(
+      normalizeResolveResults(resolveSuccessResults, toBeSavedObjects)
+    );
   }
 
   // Dedup results: when both ambiguous_conflict and missing_references errors occur in the
   // same chunk, both resolution passes call resolveImportErrors over the full object set,
   // so the same object can appear in multiple successResults lists.
   return uniqBy(allSuccessResults, (r) => `${r.type}:${r.id}:${r.destinationId ?? ''}`);
+}
+
+/**
+ * Mirrors the normalization the initial import pass applies at lines 721-728: for
+ * additional-space objects the importer returns `{ id: <space-v5>, destinationId: <chosen> }`,
+ * but callers expect `{ id: <archive-id>, destinationId: <chosen> }`. Apply this to results
+ * from both resolveImportErrors calls so asset refs are stored with the correct origin id.
+ */
+function normalizeResolveResults(
+  results: SavedObjectsImportSuccess[],
+  toBeSavedObjects: SavedObjectToBe[]
+): SavedObjectsImportSuccess[] {
+  for (const r of results) {
+    const originId = toBeSavedObjects.find((so) => so.id === r.id && so.type === r.type)?.originId;
+    if (originId) {
+      r.destinationId = r.id;
+      r.id = originId;
+    }
+  }
+  return results;
 }
 
 /**
