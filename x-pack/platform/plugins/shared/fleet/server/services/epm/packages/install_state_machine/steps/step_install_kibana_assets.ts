@@ -36,8 +36,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
   // Spaces would leave them at the old version while the package record advances,
   // breaking upgrade consistency. The caller should retry the upload.
   if (authorizedSpaces && installedPkg) {
-    const primarySpaceId =
-      installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+    const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
     const isAdditionalSpaceInstall = primarySpaceId !== spaceId;
     if (!isAdditionalSpaceInstall) {
       const newSpaces = Object.keys(

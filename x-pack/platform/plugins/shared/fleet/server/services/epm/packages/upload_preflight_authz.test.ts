@@ -515,10 +515,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
-    expect(atSpaces).toHaveBeenCalledWith(
-      ['space-x'],
-      expect.anything()
-    );
+    expect(atSpaces).toHaveBeenCalledWith(['space-x'], expect.anything());
     expect(atSpaces).not.toHaveBeenCalledWith(
       expect.arrayContaining(['primary-space']),
       expect.anything()
@@ -720,9 +717,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // which writes only to the request Space regardless of primary/additional.
     // Preflight must mirror that — do not require privileges in the other Spaces.
     (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'security_detection_engine-1.0.0/kibana/security_rule/my-rule.json' },
-      ])
+      makeIterator([{ path: 'security_detection_engine-1.0.0/kibana/security_rule/my-rule.json' }])
     );
 
     const security = makeSecurity(true);

@@ -172,7 +172,10 @@ export async function checkUploadPackageAssetPrivileges(
     );
   }
 
-  const actions = buildRequiredActions({ ...signals, gatedTypesFound: effectiveGatedTypes }, security);
+  const actions = buildRequiredActions(
+    { ...signals, gatedTypesFound: effectiveGatedTypes },
+    security
+  );
 
   const effectivePrimarySpace =
     installation?.attributes?.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
