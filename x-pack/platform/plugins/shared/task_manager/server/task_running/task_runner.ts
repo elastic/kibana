@@ -811,14 +811,7 @@ export class TaskManagerRunner implements TaskRunner {
             })
           );
         } catch (error) {
-          const isVersionConflict = isVersionConflictError(error);
-
-          if ((this.isExpired || this.isCancelled) && isVersionConflict) {
-            this.logger.warn(
-              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
-              { tags: [this.id, this.taskType] }
-            );
-          } else if (isVersionConflict) {
+          if (isVersionConflictError(error)) {
             await resolveTaskDocumentConflicts({
               taskId: this.id,
               partialTask,

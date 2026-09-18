@@ -3428,7 +3428,7 @@ describe('TaskManagerRunner', () => {
     test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
-      const { runner, store, logger } = await readyToRunStageSetup({
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
@@ -3460,6 +3460,7 @@ describe('TaskManagerRunner', () => {
           reason: `[task:${id}]: version conflict, required seqNo [1], primary term [1]. current document has seqNo [64000] and primary term [1]`,
         },
       });
+      store.get.mockResolvedValue({ ...instance, ownerId: 'another-kibana-node' });
 
       const promise = runner.run();
       await Promise.resolve();
@@ -3467,15 +3468,75 @@ describe('TaskManagerRunner', () => {
       await promise;
 
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.get).toHaveBeenCalledWith(id);
 
       const frameworkErrorLogs = logger.error.mock.calls.filter(([, meta]) =>
         ((meta as { tags?: string[] })?.tags ?? []).includes('task-run-failed')
       );
       expect(frameworkErrorLogs).toEqual([]);
 
+      expect(logger.error).toHaveBeenCalledWith(
+        `Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:${id}": task has been claimed by another worker`,
+        { tags: [id, 'bar', 'task-doc-resolve-conflict'] }
+      );
+    });
+
+    test('resolves a version conflict on an expired recurring task when the schedule was updated while running and the task was not reclaimed', async () => {
+      const id = 'expired-schedule-updated';
+      const runAt = moment().subtract(5, 'm').toDate();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          runAt,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '1h' },
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      // bulkUpdateSchedules with includeRunningTasks bumped the version but did not reclaim the task
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      };
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
       expect(logger.warn).toHaveBeenCalledWith(
-        `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
-        { tags: [id, 'bar'] }
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
+        { tags: [id, 'bar', 'task-doc-resolve-conflict'] }
+      );
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          status: TaskStatus.Idle,
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
+        { validate: false, doc: currentTask }
       );
     });
 
