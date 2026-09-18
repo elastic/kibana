@@ -2997,9 +2997,3 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     license: 'enterprise',
   },
 ];
-
-export const CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS: ReadonlySet<string> = new Set([
-  'linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
-  'mac.advanced.memory_protection.user_yara_rescan_interval_seconds',
-  'windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
-]);

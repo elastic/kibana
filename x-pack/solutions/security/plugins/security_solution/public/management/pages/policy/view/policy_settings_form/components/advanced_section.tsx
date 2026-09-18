@@ -26,10 +26,8 @@ import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
-import {
-  AdvancedPolicySchema,
-  CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS,
-} from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
+import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../../common/endpoint/service/policy/custom_yara_signatures';
 import { useIsCustomYaraSignaturesAvailable } from '../hooks/use_is_custom_yara_signatures_available';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {

@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/advanced_policy_schema';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
 import { DefaultPolicyNotificationMessage } from './policy_config';
 import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
