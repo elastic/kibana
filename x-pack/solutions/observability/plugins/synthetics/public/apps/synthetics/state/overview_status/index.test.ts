@@ -171,6 +171,34 @@ describe('overviewStatusReducer', () => {
       expect(next.status?.staleConfigs.mon1).toBeUndefined();
     });
 
+    it('moves the promoted monitor from pendingIds to staleIds (the statusFilter-scoped id arrays)', () => {
+      // `useMonitorFilters` scopes a `statusFilter` via `pendingIds`/`staleIds`
+      // directly, not via `pendingConfigs`/`staleConfigs` — those must move in
+      // lockstep with the promotion below, or "Pending"/"Stale" filtering goes
+      // stale itself.
+      const initial = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([], {
+            pendingConfigs: {
+              mon1: makeMeta({ configId: 'mon1' }),
+              mon2: makeMeta({ configId: 'mon2' }),
+            },
+            pendingIds: ['mon1', 'mon2'],
+            staleIds: [],
+          })
+        )
+      );
+
+      const next = overviewStatusReducer(
+        initial,
+        fetchStaleStatusAction.success({ priorRuns: [stalePriorRun({ monitorQueryId: 'mon1' })] })
+      );
+
+      expect(next.status?.pendingIds).toEqual(['mon2']);
+      expect(next.status?.staleIds).toEqual(['mon1']);
+    });
+
     it('rebuilds allConfigs so consumers see the promoted (stale) metadata', () => {
       const initial = loadedState();
 

@@ -34,7 +34,7 @@ describe('useOverviewAlertsCount', () => {
     jest.clearAllMocks();
     filtersSpy.mockReturnValue([]);
     paramSpy.mockReturnValue({} as any);
-    spaceSpy.mockReturnValue({ loading: false } as any);
+    spaceSpy.mockReturnValue({ loading: false, space: { id: 'default' } } as any);
     mockHttpPost.mockResolvedValue(bucketsResponse([]));
   });
 
@@ -90,7 +90,9 @@ describe('useOverviewAlertsCount', () => {
 
     expect(body.query.bool.filter).toEqual(
       expect.arrayContaining([
-        { range: { '@timestamp': { gte: 'now-12h', lte: 'now' } } },
+        // Anchored on the alert's onset, matching the annotation markers —
+        // not `@timestamp`, which moves on the recovery check.
+        { range: { 'kibana.alert.start': { gte: 'now-12h', lte: 'now' } } },
         { terms: { 'kibana.space_ids': ['default'] } },
         { terms: { 'observer.geo.name': ['us-east'] } },
       ])
@@ -101,7 +103,7 @@ describe('useOverviewAlertsCount', () => {
     // Spaces are a security boundary for alert data — `alertsFilters` omits
     // `kibana.space_ids` until the space resolves, so firing before that
     // would transiently expose alert counts from every space.
-    spaceSpy.mockReturnValue({ loading: true } as any);
+    spaceSpy.mockReturnValue({ loading: true, space: undefined } as any);
 
     const { result } = renderHook(() => useOverviewAlertsCount(props));
 
@@ -109,8 +111,21 @@ describe('useOverviewAlertsCount', () => {
     expect(mockHttpPost).not.toHaveBeenCalled();
   });
 
-  it('quotes and escapes the free-text search query rather than passing it through as raw Lucene syntax', async () => {
-    paramSpy.mockReturnValue({ query: 'a" OR monitor.name: *' } as any);
+  it('does not query when the space lookup has finished but failed to resolve a space', async () => {
+    // `useKibanaSpace` reports `loading: false` with `space: undefined` both
+    // before the first resolve and if the lookup fails — only the latter
+    // looks the same as "done and safe to query" if `loading` is the only
+    // thing checked.
+    spaceSpy.mockReturnValue({ loading: false, space: undefined } as any);
+
+    const { result } = renderHook(() => useOverviewAlertsCount(props));
+
+    expect(result.current.loading).toBe(true);
+    expect(mockHttpPost).not.toHaveBeenCalled();
+  });
+
+  it('matches monitor.name as a case-sensitive substring, the same as the annotation clause', async () => {
+    paramSpy.mockReturnValue({ query: 'checkout' } as any);
 
     renderHook(() => useOverviewAlertsCount(props));
 
@@ -120,14 +135,22 @@ describe('useOverviewAlertsCount', () => {
     const body = JSON.parse(requestArgs.body);
 
     expect(body.query.bool.filter).toEqual(
-      expect.arrayContaining([
-        {
-          query_string: {
-            query: '"a\\" OR monitor.name: *"',
-            fields: ['monitor.name'],
-          },
-        },
-      ])
+      expect.arrayContaining([{ wildcard: { 'monitor.name': { value: '*checkout*' } } }])
+    );
+  });
+
+  it('escapes literal wildcard characters in the free-text search so they cannot widen the match', async () => {
+    paramSpy.mockReturnValue({ query: 'a*b?c\\d' } as any);
+
+    renderHook(() => useOverviewAlertsCount(props));
+
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalled());
+
+    const [, requestArgs] = mockHttpPost.mock.calls[0];
+    const body = JSON.parse(requestArgs.body);
+
+    expect(body.query.bool.filter).toEqual(
+      expect.arrayContaining([{ wildcard: { 'monitor.name': { value: '*a\\*b\\?c\\\\d*' } } }])
     );
   });
 });

@@ -45,7 +45,7 @@ describe('useOverviewAlertsAnnotations', () => {
     mockUseFetcher.mockReturnValue({ data: mockAlertsDataView });
     filtersSpy.mockReturnValue([]);
     paramSpy.mockReturnValue({} as any);
-    spaceSpy.mockReturnValue({ loading: false } as any);
+    spaceSpy.mockReturnValue({ loading: false, space: { id: 'default' } } as any);
   });
 
   const getQuery = (result: { current: ReturnType<typeof useOverviewAlertsAnnotations> }) => {
@@ -66,7 +66,19 @@ describe('useOverviewAlertsAnnotations', () => {
     // `kibana.space_ids` until the space resolves, so building the layer
     // before that would transiently expose alert tooltip data from every
     // space.
-    spaceSpy.mockReturnValue({ loading: true } as any);
+    spaceSpy.mockReturnValue({ loading: true, space: undefined } as any);
+
+    const { result } = renderHook(() => useOverviewAlertsAnnotations());
+
+    expect(result.current).toBeUndefined();
+  });
+
+  it('returns undefined when the space lookup has finished but failed to resolve a space', () => {
+    // `useKibanaSpace` reports `loading: false` with `space: undefined` both
+    // before the first resolve and if the lookup fails — only the latter
+    // looks the same as "done and safe to build the layer" if `loading` is
+    // the only thing checked.
+    spaceSpy.mockReturnValue({ loading: false, space: undefined } as any);
 
     const { result } = renderHook(() => useOverviewAlertsAnnotations());
 
