@@ -124,7 +124,7 @@ export class SystemFlyoutService {
   }: {
     session?: EuiFlyoutProps['session'];
     id?: string;
-    onClose?: (flyout: OverlayRef) => void;
+    onClose?: () => void;
   }): ManagedFlyout {
     const flyoutId = `system-flyout-${uuidV4()}`;
 
@@ -148,7 +148,7 @@ export class SystemFlyoutService {
       if (flyoutRef.isClosed) {
         return;
       }
-      onClose?.(flyoutRef);
+      onClose?.();
       flyoutRef.close();
     };
 

@@ -17,7 +17,10 @@ import type { OverlayFlyoutOpenOptions } from './flyout';
  *
  * @deprecated Use {@link OverlayFlyoutTemplateOpenOptions} with `openFlyoutTemplate` instead.
  */
-export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'session'> & {
+export type OverlaySystemFlyoutOpenOptions = Omit<
+  OverlayFlyoutOpenOptions,
+  'session' | 'onClose'
+> & {
   /**
    * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
    * @default "start"
@@ -32,6 +35,11 @@ export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'ses
    * If `title` is provided here, it takes precedence over the top-level `title`.
    */
   flyoutMenuProps?: EuiFlyoutProps['flyoutMenuProps'];
+  /**
+   * Notifies that the flyout was dismissed. The returned {@link OverlayRef} is closed
+   * afterwards, without waiting on the handler.
+   */
+  onClose?: () => void;
 };
 
 /**
