@@ -302,7 +302,7 @@ export const createNlToEsqlGraph = ({
         type: 'execute_query',
         success: true,
         query,
-        results: schemaOnly ? { columns: results.columns, values: [] } : results,
+        results,
       };
     } catch (e) {
       action = {

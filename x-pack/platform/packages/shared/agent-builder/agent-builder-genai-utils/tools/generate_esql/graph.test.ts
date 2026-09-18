@@ -149,7 +149,7 @@ describe('createNlToEsqlGraph — execute_query node', () => {
     expect(outState.results).toEqual(results);
   });
 
-  it('schema execute uses limit 1 and keeps null columns without rewriting the stored query', async () => {
+  it('schema execute uses limit 1, keeps null columns, and returns the probe row', async () => {
     const { chatModel } = createMockModel();
     const graph = buildGraph(chatModel);
     mockedExecuteEsql.mockResolvedValue({
@@ -168,7 +168,7 @@ describe('createNlToEsqlGraph — execute_query node', () => {
     expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('FROM logs-test');
     expect(outState.results).toEqual({
       columns: [{ name: 'count', type: 'long' }],
-      values: [],
+      values: [[42]],
     });
   });
 });

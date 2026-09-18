@@ -45,7 +45,8 @@ export interface GenerateEsqlResponse {
   /**
    * Results from executing the query.
    * Available when {@link GenerateEsqlOptions.execute} is `'data'` or `'schema'`
-   * and the query ran successfully. When `'schema'`, `values` is empty.
+   * and the query ran successfully. When `'schema'`, `values` is a probe sample
+   * of at most one row, not the full result set.
    */
   results?: EsqlResponse;
   /**
@@ -91,9 +92,10 @@ export interface GenerateEsqlOptions {
    * How to run the generated query.
    * - `'data'` (default): execute and return rows — search and other callers that
    *   need the result set.
-   * - `'schema'`: execute only to validate and collect column names (`LIMIT 1`,
-   *   keep all-null columns). Does not change the generated query text. `results.values`
-   *   is empty. Use this when rows are not the product (e.g. visualization authoring).
+   * - `'schema'`: probe-execute to validate and collect columns (`LIMIT 1`,
+   *   keep all-null columns). Does not change the generated query text.
+   *   `results.values` is a sample of at most one row, not the dataset.
+   *   Use this when rows are not the product (e.g. visualization authoring).
    * - `'none'`: do not execute; AST-validate only.
    */
   execute?: GenerateEsqlExecute;
