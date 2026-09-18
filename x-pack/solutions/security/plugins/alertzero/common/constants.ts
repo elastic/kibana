@@ -42,21 +42,21 @@ export const ALERTZERO_ATTACHMENT_TYPES = {
 
 // --- Hunt services (PR 3: hunt-watch-services-lift) ---
 
-/** Run status while a hunt is actively querying source indices. */
-export const HUNT_RUN_STATUS_RUNNING = 'running' as const;
+/** Internal route namespace for the hunt services PR 4's Worker calls through `kibana.request`. */
+export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/threat_intel' as const;
 
-/** Run status once a hunt completes with zero or more environment hits. */
-export const HUNT_RUN_STATUS_COMPLETE = 'complete' as const;
+/** Reports index the hunt services read candidates from and write feedback to. */
+export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
 
-/** Run status when a hunt run fails before producing a result. */
-export const HUNT_RUN_STATUS_FAILED = 'failed' as const;
+/** Investigation conversation id namespace: the id is `uuidv5(${HUNT_INVESTIGATION_ID_NAMESPACE}${reportId})` within the originating space. */
+export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
 
-/** All valid hunt run status values, for schema validation. */
-export const HUNT_RUN_STATUSES = [
-  HUNT_RUN_STATUS_RUNNING,
-  HUNT_RUN_STATUS_COMPLETE,
-  HUNT_RUN_STATUS_FAILED,
-] as const;
+/** Collapsed hunt-once status written to `feedback.last_hunt_status`: `environment_hits_found` maps to `hit`; both clean statuses collapse to `clean`. A blocked scope writes neither. */
+export const HUNT_STATUS_HIT = 'hit' as const;
+export const HUNT_STATUS_CLEAN = 'clean' as const;
+
+/** All valid collapsed hunt statuses, for schema validation. */
+export const HUNT_STATUSES = [HUNT_STATUS_HIT, HUNT_STATUS_CLEAN] as const;
 
 /** Tier 1 hunts scope by IOC lookup against a small, fixed index set. */
 export const HUNT_TIER_1 = 'tier1' as const;
@@ -66,3 +66,10 @@ export const HUNT_TIER_2 = 'tier2' as const;
 
 /** All valid hunt tier values, for schema validation. */
 export const HUNT_TIERS = [HUNT_TIER_1, HUNT_TIER_2] as const;
+
+/**
+ * Space-derived alerts index pattern every hunt's index scope includes
+ * alongside its technology-specific patterns: `.alerts-security.alerts-{spaceId}`
+ * (buildout.md:175). Build with `` `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${spaceId}` ``.
+ */
+export const HUNT_ALERTS_INDEX_PATTERN_PREFIX = '.alerts-security.alerts-' as const;
