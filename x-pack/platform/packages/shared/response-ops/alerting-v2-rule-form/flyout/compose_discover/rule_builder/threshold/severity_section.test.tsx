@@ -132,6 +132,26 @@ describe('SeveritySection', () => {
     expect(screen.getByTestId('ruleBuilderSeverityThreshold-1')).toHaveValue(0.95);
   });
 
+  it('keeps a cleared threshold as NaN instead of coercing it to 0', () => {
+    const { onChange } = renderSection({
+      alertConditions: [condition()],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.8 },
+          { id: 'l2', severity: 'high', threshold: 0.95 },
+        ],
+      },
+    });
+    fireEvent.change(screen.getByTestId('ruleBuilderSeverityThreshold-1'), {
+      target: { value: '' },
+    });
+    const next = onChange.mock.calls[0][0] as SeverityConfig;
+    // Not coerced to 0 — left non-finite so `invalid_threshold` validation can reject it.
+    expect(Number.isNaN(next.levels[1].threshold)).toBe(true);
+  });
+
   it('caps the threshold input with a lower bound for an ascending comparator', () => {
     renderSection({
       alertConditions: [condition({ comparator: Comparator.GT, threshold: [0.8] })],

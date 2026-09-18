@@ -135,6 +135,9 @@ const buildSeverityEvalRhs = (
 
   const operator = COMPARATOR_OP[condition.comparator];
   if (!operator || severity.levels.length === 0) return null;
+  // A band mid-edit can hold a non-finite threshold; skip severity until every band is valid
+  // rather than emitting `<column> > NaN`.
+  if (severity.levels.some((level) => !Number.isFinite(level.threshold))) return null;
 
   const column = escapeField(condition.metric);
   // Emit every level as a band, most-severe first, with no trailing default.

@@ -284,9 +284,11 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                           prepend={condition?.comparator ?? ''}
                           min={thresholdMin}
                           max={thresholdMax}
-                          value={level.threshold}
+                          // Keep an empty/partial entry as NaN (not coerced to 0) so validation
+                          // rejects it instead of silently saving a value the user never typed.
+                          value={Number.isFinite(level.threshold) ? level.threshold : ''}
                           onChange={(e) =>
-                            updateLevel(idx, { threshold: parseFloat(e.target.value) || 0 })
+                            updateLevel(idx, { threshold: parseFloat(e.target.value) })
                           }
                           data-test-subj={`ruleBuilderSeverityThreshold-${idx}`}
                         />

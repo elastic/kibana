@@ -454,6 +454,24 @@ describe('buildThresholdEsql', () => {
       );
       expect(result).not.toContain('severity');
     });
+
+    it('omits severity while a band threshold is non-finite (mid-edit)', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [cpuStat],
+          alertConditions: [cpuCondition],
+          severity: {
+            mode: 'multi',
+            singleLevelSeverity: 'high',
+            levels: [
+              { id: 'l1', severity: 'low', threshold: 0.8 },
+              { id: 'l2', severity: 'high', threshold: NaN },
+            ],
+          },
+        })
+      );
+      expect(result).not.toContain('severity');
+    });
   });
 });
 
