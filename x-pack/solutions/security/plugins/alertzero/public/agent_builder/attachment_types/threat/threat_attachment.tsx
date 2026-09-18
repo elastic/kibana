@@ -8,9 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
+import {
+  buildDiscoverEsqlUrl,
+  buildThreatReportLookupEsql,
+} from '../navigation';
+import { isValidThreatAttachmentData } from './types';
 import type { ThreatAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.label', {
@@ -46,4 +52,28 @@ export const createThreatAttachmentDefinition = ({
       <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />
     </React.Suspense>
   ),
+  getActionButtons: ({ attachment }) => {
+    if (!isValidThreatAttachmentData(attachment?.data)) {
+      return [];
+    }
+
+    const esql = buildThreatReportLookupEsql({ reportId: attachment.data.report_id });
+    const href = buildDiscoverEsqlUrl({ share: navigation.share, esql });
+    if (!href) {
+      return [];
+    }
+
+    return [
+      {
+        label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.openInDiscover', {
+          defaultMessage: 'Open report in Discover',
+        }),
+        icon: 'discoverApp',
+        type: ActionButtonType.SECONDARY,
+        href,
+        openInNewTab: true,
+        handler: () => undefined,
+      },
+    ];
+  },
 });

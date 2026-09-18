@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ThreatAttachmentInlineContent,
   THREAT_ATTACHMENT_EMPTY_TEST_ID,
@@ -15,13 +16,32 @@ import {
 } from './threat_inline_content';
 import { threatAttachmentQueryClient } from './query_client';
 import type { ThreatAttachment } from './types';
+import { buildIocLookupEsql, buildThreatReportLookupEsql } from '../navigation';
 
 const buildAttachment = (data: ThreatAttachment['data']): ThreatAttachment =>
   ({ id: 'att-1', type: 'security.threat', data } as ThreatAttachment);
 
-const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+const mockShare = {
+  url: {
+    locators: {
+      get: () => ({
+        getRedirectUrl: ({ query }: { query: { esql: string } }) =>
+          `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
+      }),
+    },
+  },
+} as unknown as SharePluginStart;
 
-const renderProps = (attachment: ThreatAttachment, http: HttpStart) => ({
+const defaultNavigation = {
+  spaceId: 'default',
+  prependPath: (path: string) => path,
+};
+
+const renderProps = (
+  attachment: ThreatAttachment,
+  http: HttpStart,
+  navigation: typeof defaultNavigation & { share?: SharePluginStart } = defaultNavigation
+) => ({
   attachment,
   http,
   navigation,
@@ -137,5 +157,149 @@ describe('ThreatAttachmentInlineContent', () => {
     await waitFor(() => {
       expect(screen.getByText('Report unavailable')).toBeInTheDocument();
     });
+  });
+
+  it('renders the report id as a Discover link when share is present', async () => {
+    const reportId = 'r-discover';
+    const expectedEsql = buildThreatReportLookupEsql({ reportId });
+    const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId,
+        content: { title: 'Discover Title' },
+        severity: { level: 'high' },
+        source: { name: 'Source' },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: reportId });
+
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(attachment, http, { ...defaultNavigation, share: mockShare })}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Discover Title')).toBeInTheDocument();
+    });
+
+    const link = screen.getByTestId('alertzeroThreatAttachmentReportLink');
+    expect(link).toHaveAttribute('href', expectedHref);
+    expect(link).toHaveTextContent(reportId);
+  });
+
+  it('renders the report id as plain text when share is undefined', async () => {
+    const reportId = 'r-plain';
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId,
+        content: { title: 'Plain Title' },
+        severity: { level: 'medium' },
+        source: { name: 'Source' },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: reportId });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Plain Title')).toBeInTheDocument();
+    });
+
+    const node = screen.getByTestId('alertzeroThreatAttachmentReportLink');
+    expect(node.tagName.toLowerCase()).toBe('span');
+    expect(node).not.toHaveAttribute('href');
+    expect(node).toHaveTextContent(reportId);
+  });
+
+  it('renders an IOC value as a Discover link for ipv4-addr', async () => {
+    const iocValue = '198.51.100.10';
+    const expectedEsql = buildIocLookupEsql({ type: 'ipv4-addr', value: iocValue });
+    const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(
+      expectedEsql as string
+    )}`;
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-ioc',
+        content: { title: 'IOC Title' },
+        severity: { level: 'high' },
+        source: { name: 'Source' },
+        extracted: {
+          iocs: [{ type: 'ipv4-addr', value: iocValue }],
+        },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-ioc' });
+
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(attachment, http, { ...defaultNavigation, share: mockShare })}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('IOC Title')).toBeInTheDocument();
+    });
+
+    const link = screen.getByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-0');
+    expect(link).toHaveAttribute('href', expectedHref);
+    expect(link).toHaveTextContent(iocValue);
+  });
+
+  it('renders an external reference URL as an anchor', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-ext',
+        content: {
+          title: 'External Title',
+          external_references: [
+            {
+              source_name: 'MITRE ATT&CK',
+              url: 'https://attack.mitre.org/techniques/T1078/',
+              external_id: 'T1078',
+            },
+          ],
+        },
+        severity: { level: 'high' },
+        source: { name: 'Source' },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-ext' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('External Title')).toBeInTheDocument();
+    });
+
+    const link = screen.getByRole('link', { name: /MITRE ATT&CK/ });
+    expect(link).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1078/');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('shows Alert hits label rather than alert_hits_total= for evidence', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-evidence',
+        content: { title: 'Evidence Title' },
+        severity: { level: 'high' },
+        source: { name: 'Source' },
+        evidence: {
+          alert_hits_total: 5,
+          last_hunt_status: 'completed',
+          corroborated_rank_score: 0.71,
+        },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-evidence' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Evidence Title')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Alert hits')).toBeInTheDocument();
+    expect(screen.queryByText(/alert_hits_total=/)).not.toBeInTheDocument();
   });
 });

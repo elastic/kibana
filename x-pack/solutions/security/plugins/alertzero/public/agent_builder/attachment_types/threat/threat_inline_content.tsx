@@ -11,6 +11,9 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -22,6 +25,12 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
+import {
+  buildDiscoverEsqlUrl,
+  buildIocLookupEsql,
+  buildThreatReportLookupEsql,
+  DiscoverLink,
+} from '../navigation';
 import { THREAT_REPORT_API_PATH, THREAT_REPORT_API_VERSION } from './threat_report_api';
 import { threatAttachmentQueryClient } from './query_client';
 import { isValidThreatAttachmentData } from './types';
@@ -36,8 +45,23 @@ export const THREAT_ATTACHMENT_TEST_ID = 'alertzeroThreatAttachment';
 export const THREAT_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroThreatAttachmentEmpty';
 export const THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID = 'alertzeroThreatAttachmentUnavailable';
 
+const IOC_VISIBLE_LIMIT = 8;
+
 const cellStyles = css`
   overflow-wrap: anywhere;
+`;
+
+const monoStyles = css`
+  font-family: monospace;
+  overflow-wrap: anywhere;
+`;
+
+const clampedSummaryStyles = css`
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 interface ThreatReportResponse {
@@ -156,12 +180,41 @@ const sectionHeading = (id: string, defaultMessage: string) => (
   </EuiText>
 );
 
-const renderEnrichedSections = (liveData?: ThreatReportLiveData): React.ReactNode => {
+const renderEnrichedSections = ({
+  liveData,
+  navigation,
+}: {
+  liveData?: ThreatReportLiveData;
+  navigation: AttachmentNavigationDeps;
+}): React.ReactNode => {
   if (!liveData) {
     return null;
   }
 
   const sections: React.ReactNode[] = [];
+
+  const externalRefsWithUrl = liveData.externalReferences?.filter((ref) => Boolean(ref.url));
+  if (externalRefsWithUrl?.length) {
+    sections.push(
+      <div key="external-refs">
+        {sectionHeading(
+          'xpack.alertzero.agentBuilder.attachments.threat.externalReferences',
+          'External references'
+        )}
+        <EuiText size="s">
+          <ul>
+            {externalRefsWithUrl.map((ref, index) => (
+              <li key={`${ref.url}-${index}`}>
+                <EuiLink href={ref.url} target="_blank" rel="noopener noreferrer">
+                  {ref.sourceName || ref.externalId || ref.url}
+                </EuiLink>
+              </li>
+            ))}
+          </ul>
+        </EuiText>
+      </div>
+    );
+  }
 
   if (liveData.iocs?.length) {
     const iocsByType = new Map<string, ThreatReportIoc[]>();
@@ -173,19 +226,42 @@ const renderEnrichedSections = (liveData?: ThreatReportLiveData): React.ReactNod
     sections.push(
       <div key="iocs">
         {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.iocs', 'Indicators')}
-        {[...iocsByType.entries()].map(([type, iocs]) => (
-          <div key={type} css={{ marginBottom: 4 }}>
-            <EuiText size="xs" color="subdued" css={cellStyles}>
-              {type}
-            </EuiText>
-            {iocs.map((ioc) => (
-              <EuiBadge key={ioc.value} color="hollow" css={{ marginRight: 4 }}>
-                {ioc.value}
-                {ioc.tier ? ` (${ioc.tier})` : ''}
-              </EuiBadge>
-            ))}
-          </div>
-        ))}
+        {[...iocsByType.entries()].map(([type, iocs]) => {
+          const visible = iocs.slice(0, IOC_VISIBLE_LIMIT);
+          const remaining = iocs.length - visible.length;
+          return (
+            <div key={type} css={{ marginBottom: 4 }}>
+              <EuiText size="xs" color="subdued" css={cellStyles}>
+                {type}
+              </EuiText>
+              {visible.map((ioc, index) => {
+                const esql = buildIocLookupEsql({ type: ioc.type, value: ioc.value });
+                const href = esql
+                  ? buildDiscoverEsqlUrl({ share: navigation.share, esql })
+                  : undefined;
+                const label = `${ioc.value}${ioc.tier ? ` (${ioc.tier})` : ''}`;
+                return (
+                  <span key={`${ioc.value}-${index}`} css={{ marginRight: 4, marginBottom: 4 }}>
+                    <DiscoverLink
+                      href={href}
+                      testSubj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}
+                    >
+                      <EuiBadge color="hollow">{label}</EuiBadge>
+                    </DiscoverLink>
+                  </span>
+                );
+              })}
+              {remaining > 0 && (
+                <EuiText size="xs" color="subdued" css={{ display: 'inline' }}>
+                  {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocsMore', {
+                    defaultMessage: '+{count} more',
+                    values: { count: remaining },
+                  })}
+                </EuiText>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -258,7 +334,11 @@ const renderEnrichedSections = (liveData?: ThreatReportLiveData): React.ReactNod
               name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.summary', {
                 defaultMessage: 'Summary',
               }),
-              render: (summary?: string) => <span css={cellStyles}>{summary}</span>,
+              render: (summary?: string) => (
+                <span css={clampedSummaryStyles} title={summary}>
+                  {summary}
+                </span>
+              ),
             },
           ]}
         />
@@ -278,19 +358,41 @@ const renderEnrichedSections = (liveData?: ThreatReportLiveData): React.ReactNod
   }
 
   if (liveData.evidence) {
-    sections.push(
-      <EuiText key="evidence" size="xs" color="subdued">
-        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.evidence', {
-          defaultMessage:
-            'alert_hits_total={alertHitsTotal}, last_hunt_status={lastHuntStatus}, corroborated_rank_score={corroboratedRankScore}',
-          values: {
-            alertHitsTotal: liveData.evidence.alertHitsTotal ?? 0,
-            lastHuntStatus: liveData.evidence.lastHuntStatus ?? 'unknown',
-            corroboratedRankScore: liveData.evidence.corroboratedRankScore ?? liveData.corroboratedRankScore ?? 0,
-          },
-        })}
-      </EuiText>
-    );
+    const evidenceItems: Array<{ title: string; description: React.ReactNode }> = [];
+    if (liveData.evidence.alertHitsTotal != null) {
+      evidenceItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.alertHits', {
+          defaultMessage: 'Alert hits',
+        }),
+        description: String(liveData.evidence.alertHitsTotal),
+      });
+    }
+    if (liveData.evidence.lastHuntStatus != null) {
+      evidenceItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.lastHuntStatus', {
+          defaultMessage: 'Last hunt status',
+        }),
+        description: liveData.evidence.lastHuntStatus,
+      });
+    }
+    const corroboratedRank =
+      liveData.evidence.corroboratedRankScore ?? liveData.corroboratedRankScore;
+    if (corroboratedRank != null) {
+      evidenceItems.push({
+        title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.corroboratedRank', {
+          defaultMessage: 'Corroborated rank',
+        }),
+        description: String(corroboratedRank),
+      });
+    }
+    if (evidenceItems.length > 0) {
+      sections.push(
+        <div key="evidence">
+          {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.evidence', 'Evidence')}
+          <EuiDescriptionList type="column" compressed listItems={evidenceItems} />
+        </div>
+      );
+    }
   }
 
   if (liveData.regions?.length || liveData.categories?.length) {
@@ -354,6 +456,7 @@ export interface ThreatAttachmentInlineContentProps
 const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContentProps> = ({
   attachment,
   http,
+  navigation,
 }) => {
   const data = attachment?.data;
   const isValid = isValidThreatAttachmentData(data);
@@ -400,45 +503,8 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
 
   const hasAnyField = Boolean(title || severityLevel || sourceName);
 
-  const listItems = [
-    {
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.reportId', {
-        defaultMessage: 'Report',
-      }),
-      description: <span css={cellStyles}>{data.report_id}</span>,
-    },
-  ];
-
-  if (title) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.title', {
-        defaultMessage: 'Title',
-      }),
-      description: <span css={cellStyles}>{title}</span>,
-    });
-  }
-
-  if (severityLevel) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.severity', {
-        defaultMessage: 'Severity',
-      }),
-      description: (
-        <EuiBadge color={SEVERITY_COLOR_MAP[severityLevel] ?? 'hollow'}>
-          {severityScore != null ? `${severityLevel} (${severityScore})` : severityLevel}
-        </EuiBadge>
-      ),
-    });
-  }
-
-  if (sourceName) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.source', {
-        defaultMessage: 'Source',
-      }),
-      description: <span css={cellStyles}>{sourceName}</span>,
-    });
-  }
+  const reportEsql = buildThreatReportLookupEsql({ reportId: data.report_id });
+  const reportHref = buildDiscoverEsqlUrl({ share: navigation.share, esql: reportEsql });
 
   return (
     <EuiPanel
@@ -451,24 +517,60 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
         <EuiSkeletonText lines={2} />
       ) : (
         <>
-          <EuiDescriptionList type="column" compressed listItems={listItems} />
-          {useLive && renderEnrichedSections(liveData)}
+          <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+            {title && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong css={cellStyles}>{title}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            {severityLevel && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={SEVERITY_COLOR_MAP[severityLevel] ?? 'hollow'}>
+                  {severityScore != null ? `${severityLevel} (${severityScore})` : severityLevel}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {sourceName && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <span css={cellStyles}>{sourceName}</span>
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            <DiscoverLink href={reportHref} testSubj="alertzeroThreatAttachmentReportLink">
+              <span css={monoStyles}>{data.report_id}</span>
+            </DiscoverLink>
+          </EuiText>
+
+          {useLive && renderEnrichedSections({ liveData, navigation })}
           {!useLive && (
-            <KbnInfoCallout
-              announceOnMount
-              size="s"
-              data-test-subj={THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID}
-              title={
-                hasAnyField
-                  ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.captured', {
-                      defaultMessage:
-                        'Showing captured fields — the live report could not be resolved.',
-                    })
-                  : i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.unavailable', {
-                      defaultMessage: 'Report unavailable',
-                    })
-              }
-            />
+            <>
+              <EuiSpacer size="s" />
+              <KbnInfoCallout
+                announceOnMount
+                size="s"
+                data-test-subj={THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID}
+                title={
+                  hasAnyField
+                    ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.captured', {
+                        defaultMessage:
+                          'Showing captured fields — the live report could not be resolved.',
+                      })
+                    : i18n.translate(
+                        'xpack.alertzero.agentBuilder.attachments.threat.unavailable',
+                        {
+                          defaultMessage: 'Report unavailable',
+                        }
+                      )
+                }
+              />
+            </>
           )}
         </>
       )}
