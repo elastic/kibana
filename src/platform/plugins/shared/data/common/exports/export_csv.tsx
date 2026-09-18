@@ -32,6 +32,14 @@ export function datatableToCSV(
     quoteValues,
     escapeFormulaValues,
   });
+  // Placeholder is our own constant, not document content: still quote it when quoting
+  // is on (so a csvSeparator of "-" does not produce `--...`), but never formula-escape
+  // it into "'-".
+  const escapePlaceholder = createEscapeValue({
+    separator: csvSeparator,
+    quoteValues,
+    escapeFormulaValues: false,
+  });
 
   const header: string[] = [];
   const sortedColumnIds: string[] = [];
@@ -52,11 +60,10 @@ export function datatableToCSV(
     return sortedColumnIds.map((id) => {
       const value = row[id];
 
-      // Export what the table shows, and the table renders missing values as a dash. Returned
-      // before escaping: NULL_PLACEHOLDER is our own constant rather than document content, so the
-      // formula guard would only turn a leading "-" into "'-" for nothing.
+      // Export what the table shows: missing values as a dash, quoted like any other
+      // non-alphanumeric cell but never formula-escaped.
       if (!raw && isMissingValue(value)) {
-        return NULL_PLACEHOLDER;
+        return escapePlaceholder(NULL_PLACEHOLDER);
       }
 
       return escapeValues(raw ? value : formatters[id].convertToText(value));

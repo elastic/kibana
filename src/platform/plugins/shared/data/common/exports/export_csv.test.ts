@@ -95,7 +95,7 @@ describe('CSV exporter', () => {
     const datatable = getDataTable();
     datatable.rows[0].col1 = value;
 
-    expect(datatableToCSV(datatable, getDefaultOptions())).toMatch('columnOne\r\n-\r\n');
+    expect(datatableToCSV(datatable, getDefaultOptions())).toMatch('columnOne\r\n"-"\r\n');
   });
 
   test('should not let the formula guard turn the dash into an escaped value', () => {
@@ -105,6 +105,15 @@ describe('CSV exporter', () => {
     // "-" starts a formula, but the dash is our own constant rather than document content.
     expect(
       datatableToCSV(datatable, { ...getDefaultOptions(), escapeFormulaValues: true })
+    ).toMatch('columnOne\r\n"-"\r\n');
+  });
+
+  test('should leave the dash unquoted when quoteValues is false', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = null;
+
+    expect(
+      datatableToCSV(datatable, { ...getDefaultOptions(), quoteValues: false })
     ).toMatch('columnOne\r\n-\r\n');
   });
 
@@ -127,5 +136,14 @@ describe('CSV exporter', () => {
         formatFactory: () => ({ convertToText: (v: unknown) => v } as FieldFormat),
       })
     ).toMatch('columnOne\r\n"a,b"\r\n');
+  });
+
+  test('should quote the dash when csvSeparator is -', () => {
+    const datatable = getDataTable({ multipleColumns: true });
+    datatable.rows[0].col1 = null;
+
+    expect(datatableToCSV(datatable, { ...getDefaultOptions(), csvSeparator: '-' })).toBe(
+      'columnOne-columnTwo\r\n"-"-"Formatted_5"\r\n'
+    );
   });
 });
