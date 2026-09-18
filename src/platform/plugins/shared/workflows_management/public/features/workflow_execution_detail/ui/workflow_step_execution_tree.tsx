@@ -43,7 +43,10 @@ import {
 } from './workflow_pseudo_step_context';
 import { areStepExecutionsUnavailable } from '../../../../common';
 import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
-import { buildIterationVirtualId } from '../lib/build_iteration_pseudo_step';
+import {
+  buildIterationVirtualId,
+  parseIterationVirtualId,
+} from '../lib/build_iteration_pseudo_step';
 import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
 import {
   buildIterationStatusOverrides,
@@ -525,7 +528,16 @@ function convertTreeToOpenNodes(
             if (iter) gapChildren.push(iter);
           }
           const gapId = iterationGapId(foreachParentId, entry.from, entry.to);
-          const isExpanded = expandedGapIds.has(gapId);
+          const selectedIteration = selectedId ? parseIterationVirtualId(selectedId) : null;
+          const selectedInThisGap =
+            (selectedIteration != null &&
+              selectedIteration.parentStepId === foreachParentStepId &&
+              selectedIteration.iterationIndex >= entry.from &&
+              selectedIteration.iterationIndex <= entry.to) ||
+            (selectedId != null &&
+              selectedIteration == null &&
+              stepTreeContainsExecutionId(gapChildren, selectedId));
+          const isExpanded = expandedGapIds.has(gapId) || selectedInThisGap;
           nodes.push(
             buildIterationGapNode(
               foreachParentId,
@@ -948,6 +960,131 @@ const collectDefaultExpandedIds = (nodes: OpenTreeNode[], into: Set<string>) => 
   }
 };
 
+const EMPTY_ID_SET: Set<string> = new Set();
+
+const nodeContainsId = (node: OpenTreeNode, id: string): boolean => {
+  if (node.id === id) {
+    return true;
+  }
+  return node.children.some((child) => nodeContainsId(child, id));
+};
+
+const collectContainingIterationIds = (
+  nodes: OpenTreeNode[],
+  selectedId: string | null
+): string[] => {
+  if (!selectedId) {
+    return [];
+  }
+  const ids: string[] = [];
+  const walk = (list: OpenTreeNode[]) => {
+    for (const node of list) {
+      if (nodeContainsId(node, selectedId)) {
+        if (parseIterationVirtualId(node.id) || isIterationStepType(node.row?.stepType)) {
+          ids.push(node.id);
+        }
+        walk(node.children);
+      }
+    }
+  };
+  walk(nodes);
+  return ids;
+};
+
+const withSelectedIterationExpanded = (
+  base: Set<string>,
+  forceExpandIds: string[],
+  userCollapsedIds: Set<string>
+): Set<string> => {
+  if (forceExpandIds.length === 0) {
+    return base;
+  }
+  const next = new Set(base);
+  for (const id of forceExpandIds) {
+    if (userCollapsedIds.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+  }
+  return next;
+};
+
+const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null) => {
+  const [userExpandedIds, setUserExpandedIds] = useState<Set<string> | null>(null);
+  const [collapseOverride, setCollapseOverride] = useState<{
+    selectedId: string;
+    ids: Set<string>;
+  } | null>(null);
+
+  if (collapseOverride && collapseOverride.selectedId !== selectedId) {
+    setCollapseOverride(null);
+  }
+
+  const defaultExpandedIds = useMemo(() => {
+    const ids = new Set<string>();
+    collectDefaultExpandedIds(openNodes, ids);
+    return ids;
+  }, [openNodes]);
+
+  const forceExpandIds = useMemo(
+    () => collectContainingIterationIds(openNodes, selectedId),
+    [openNodes, selectedId]
+  );
+
+  const userCollapsedIds =
+    collapseOverride && selectedId && collapseOverride.selectedId === selectedId
+      ? collapseOverride.ids
+      : EMPTY_ID_SET;
+
+  const expandedIds = withSelectedIterationExpanded(
+    userExpandedIds ?? defaultExpandedIds,
+    forceExpandIds,
+    userCollapsedIds
+  );
+
+  const onToggleExpand = useCallback(
+    (id: string) => {
+      const isCurrentlyExpanded = expandedIds.has(id);
+      setUserExpandedIds((prev) => {
+        const base = prev ?? new Set(defaultExpandedIds);
+        const next = new Set(base);
+        if (isCurrentlyExpanded) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        return next;
+      });
+      if (!selectedId || !forceExpandIds.includes(id)) {
+        return;
+      }
+      setCollapseOverride((prev) => {
+        const ids = new Set(prev?.selectedId === selectedId ? prev.ids : []);
+        if (isCurrentlyExpanded) {
+          ids.add(id);
+        } else {
+          ids.delete(id);
+        }
+        return { selectedId, ids };
+      });
+    },
+    [defaultExpandedIds, expandedIds, forceExpandIds, selectedId]
+  );
+
+  return { expandedIds, onToggleExpand };
+};
+
+const stepTreeContainsExecutionId = (
+  items: StepExecutionTreeItem[],
+  executionId: string
+): boolean =>
+  items.some(
+    (item) =>
+      item.stepExecutionId === executionId ||
+      stepTreeContainsExecutionId(item.children, executionId)
+  );
+
 /**
  * Iterations section rows: full flat list of iteration leaves (no nested step
  * trees / expand chevrons). Gap rows are already disabled via collapseIterations.
@@ -1002,7 +1139,6 @@ export const StepExecutionOpenTree = ({
   'data-test-subj': dataTestSubj,
 }: StepExecutionOpenTreeProps) => {
   const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set());
-  const [userExpandedIds, setUserExpandedIds] = useState<Set<string> | null>(null);
 
   const onToggleGap = useCallback((id: string) => {
     setExpandedGapIds((prev) => {
@@ -1053,29 +1189,7 @@ export const StepExecutionOpenTree = ({
     stepExecutionMap,
   ]);
 
-  const defaultExpandedIds = useMemo(() => {
-    const ids = new Set<string>();
-    collectDefaultExpandedIds(openNodes, ids);
-    return ids;
-  }, [openNodes]);
-
-  const expandedIds = userExpandedIds ?? defaultExpandedIds;
-
-  const onToggleExpand = useCallback(
-    (id: string) => {
-      setUserExpandedIds((prev) => {
-        const base = prev ?? new Set(defaultExpandedIds);
-        const next = new Set(base);
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
-        return next;
-      });
-    },
-    [defaultExpandedIds]
-  );
+  const { expandedIds, onToggleExpand } = useTreeExpandedIds(openNodes, selectedId);
 
   return (
     <div
@@ -1161,7 +1275,6 @@ export const WorkflowStepExecutionTree = ({
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set());
-  const [userExpandedIds, setUserExpandedIds] = useState<Set<string> | null>(null);
   const diagnoseAvailability = useErrorPanelDiagnoseAvailability();
 
   const onDiagnoseStep = useCallback(
@@ -1340,29 +1453,7 @@ export const WorkflowStepExecutionTree = ({
     stepExecutionsUnavailable,
   ]);
 
-  const defaultExpandedIds = useMemo(() => {
-    const ids = new Set<string>();
-    collectDefaultExpandedIds(openNodes, ids);
-    return ids;
-  }, [openNodes]);
-
-  const expandedIds = userExpandedIds ?? defaultExpandedIds;
-
-  const onToggleExpand = useCallback(
-    (id: string) => {
-      setUserExpandedIds((prev) => {
-        const base = prev ?? new Set(defaultExpandedIds);
-        const next = new Set(base);
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
-        return next;
-      });
-    },
-    [defaultExpandedIds]
-  );
+  const { expandedIds, onToggleExpand } = useTreeExpandedIds(openNodes, selectedId);
 
   if (!execution) {
     return (
