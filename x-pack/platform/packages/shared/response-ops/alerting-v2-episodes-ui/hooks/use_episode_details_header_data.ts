@@ -8,7 +8,7 @@
 import type { AlertEpisode, AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeDetailsServices } from '../components/details/types';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../types/action';
-import type { RuleState } from '../types/rule_state';
+import { isRuleLoading, type RuleState } from '../types/rule_state';
 import { useFetchEpisodeQuery } from './use_fetch_episode_query';
 import { useFetchEpisodeActions } from './use_fetch_episode_actions';
 import { useFetchGroupActions } from './use_fetch_group_actions';
@@ -69,7 +69,8 @@ export const useEpisodeDetailsHeaderData = ({
   const isLoading =
     isLoadingEpisode ||
     isLoadingEpisodeActions ||
-    (Boolean(resolvedGroupHash) && isLoadingGroupActions);
+    (Boolean(resolvedGroupHash) && isLoadingGroupActions) ||
+    isRuleLoading(ruleState);
 
   return {
     isLoading,

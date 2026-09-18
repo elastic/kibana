@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { act, render, screen, fireEvent, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import type { EpisodeAction } from '../../actions/types';
@@ -336,6 +337,24 @@ describe('AlertEpisodeDetailsFlyout', () => {
   });
 
   describe('assignee header value', () => {
+    it('falls back to the assignee cell when the action is incompatible', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        episode: { ...mockEpisode, last_assignee_uid: null } as AlertEpisode,
+      });
+      const incompatibleAction = {
+        ...mockEditAssigneeAction,
+        isCompatible: () => false,
+      } as EpisodeAction;
+
+      render(<AlertEpisodeDetailsFlyout {...baseProps} actions={[incompatibleAction]} />, {
+        wrapper: Wrapper,
+      });
+
+      expect(screen.queryByTestId('assigneeInlineControlStub')).not.toBeInTheDocument();
+      expect(mockRenderInlineControl).not.toHaveBeenCalled();
+    });
+
     it('renders the assignee control when the episode has no assignee', () => {
       mockUseEpisodeDetailsHeaderData.mockReturnValue({
         ...baseHeaderData,
@@ -397,5 +416,39 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
       expect(screen.queryByTestId('assigneeInlineControlStub')).not.toBeInTheDocument();
     });
+  });
+
+  it('opens the flapping explanation from the header badge', async () => {
+    const user = userEvent.setup();
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, isFlapping: true });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    await user.click(screen.getByTestId('alertingV2EpisodeFlyoutFlappingBadgeTrigger'));
+
+    expect(await screen.findByTestId('alertEpisodeFlappingPopover')).toBeInTheDocument();
+  });
+
+  it('shows the snooze expiry from the header badge', async () => {
+    const user = userEvent.setup();
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      groupAction: {
+        groupHash: 'group-1',
+        ruleId: 'rule-1',
+        lastDeactivateAction: null,
+        lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        snoozeExpiry: '2035-06-15T14:30:00.000Z',
+        tags: [],
+        lastSnoozeActor: null,
+        lastDeactivateActor: null,
+      },
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    await user.hover(screen.getByTestId('alertingV2EpisodeFlyoutSnoozedBadgeTrigger'));
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent(/snoozed until/i);
+    expect(tooltip).toHaveTextContent(/2035/);
   });
 });

@@ -148,6 +148,19 @@ export const FLYOUT_BADGE_SNOOZED = i18n.translate(
   }
 );
 
+export const getFlyoutSnoozedUntilTooltip = (expiry: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.snoozedUntilTooltip', {
+    defaultMessage: 'Notifications snoozed until {expiry}.',
+    values: { expiry },
+  });
+
+export const FLYOUT_SNOOZED_TOOLTIP_UNKNOWN_EXPIRY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.snoozedTooltipUnknownExpiry',
+  {
+    defaultMessage: 'Notifications are snoozed.',
+  }
+);
+
 export const FLYOUT_BADGE_ACKNOWLEDGED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged',
   {

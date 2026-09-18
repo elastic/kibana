@@ -7,7 +7,7 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiFlexGroup, EuiPanel, EuiSkeletonTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiSkeletonTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 // We use this instead of FlyoutTemplate.Body.Accordion because the latter omits `hasBorder`
@@ -40,6 +40,8 @@ import { formatMetadataListDuration } from './translations';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
+import * as flappingI18n from '../flapping/translations';
+import { FlappingPopover } from '../flapping/flapping_badge';
 
 type TabId = 'overview' | 'timeline' | 'metadata';
 
@@ -105,6 +107,54 @@ const metadataTabStyles = (euiTheme: EuiThemeComputed) => css`
     padding-inline: ${euiTheme.size.m};
   }
 `;
+
+const interactiveBadgeLabelCss = css`
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+`;
+
+const FlappingBadgeLabel = () => (
+  <FlappingPopover
+    renderButton={(onClick) => (
+      <button
+        type="button"
+        css={interactiveBadgeLabelCss}
+        aria-label={flappingI18n.FLAPPING_BADGE_ARIA_LABEL}
+        data-test-subj="alertingV2EpisodeFlyoutFlappingBadgeTrigger"
+        onClick={onClick}
+      >
+        {i18n.FLYOUT_BADGE_FLAPPING}
+      </button>
+    )}
+  />
+);
+
+const SnoozedBadgeLabel = ({
+  expiry,
+  dateFormat,
+}: {
+  expiry: string | null | undefined;
+  dateFormat: string | undefined;
+}) => (
+  <EuiToolTip
+    anchorProps={{ css: { display: 'flex' } }}
+    content={
+      expiry
+        ? i18n.getFlyoutSnoozedUntilTooltip(formatDateTime(expiry, dateFormat))
+        : i18n.FLYOUT_SNOOZED_TOOLTIP_UNKNOWN_EXPIRY
+    }
+  >
+    <span tabIndex={0} data-test-subj="alertingV2EpisodeFlyoutSnoozedBadgeTrigger">
+      {i18n.FLYOUT_BADGE_SNOOZED}
+    </span>
+  </EuiToolTip>
+);
 
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
@@ -212,7 +262,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // The edit assignee action owns its own picker popover, so the header can host it
   // directly instead of routing through the modal that `execute` opens.
-  const assigneeInlineControl = actions
+  const assigneeInlineControl = compatibleActions
     ?.find(({ id }) => id === EDIT_EPISODE_ASSIGNEE_ACTION_ID)
     ?.renderInlineControl?.({
       episodes,
@@ -258,14 +308,14 @@ export const AlertEpisodeDetailsFlyout = ({
           {/* Flapping badge */}
           {isFlapping && (
             <FlyoutTemplate.Header.Badge color="hollow" iconType="chartGauge">
-              {i18n.FLYOUT_BADGE_FLAPPING}
+              <FlappingBadgeLabel />
             </FlyoutTemplate.Header.Badge>
           )}
 
           {/* Snoozed badge */}
           {isSnoozed && (
             <FlyoutTemplate.Header.Badge iconType="bellSlash">
-              {i18n.FLYOUT_BADGE_SNOOZED}
+              <SnoozedBadgeLabel expiry={groupAction?.snoozeExpiry} dateFormat={dateFormat} />
             </FlyoutTemplate.Header.Badge>
           )}
 
