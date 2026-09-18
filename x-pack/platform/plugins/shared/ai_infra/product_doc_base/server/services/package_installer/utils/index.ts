@@ -11,8 +11,6 @@ export {
   removeArtifactFile,
   logArtifactsFolderUsage,
   purgeArtifactsFolder,
-  getArtifactsFolderUsage,
-  type ArtifactsFolderUsage,
 } from './artifacts_folder';
 export { openZipArchive, type ZipArchive } from './zip_archive';
 export { loadManifestFile, loadMappingFile } from './archive_accessors';
@@ -21,4 +19,3 @@ export {
   ensureInferenceDeployed,
 } from './ensure_default_elser_deployed';
 export { isLegacySemanticTextVersion } from './manifest_versions';
-export { indexNdjsonEntry, rewriteInferenceId } from './index_ndjson_entry';

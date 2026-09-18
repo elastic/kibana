@@ -72,11 +72,6 @@ export const getChunkedTaskState = (
   return { requestedAt, state: state.requestedAt === requestedAt ? state : {} };
 };
 
-// Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
-// a capacity slot for one item and completed items are not redone when a later attempt fails.
-export const nextChunkRunResult = (requestedAt: string, remaining: string[]) =>
-  remaining.length > 0 ? { state: { requestedAt, remaining }, runAt: new Date() } : { state: {} };
-
 // Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
 export const deferredRunResult = (state: Record<string, unknown>) => ({
   state,
@@ -174,7 +169,11 @@ export const runInstallChunk = async <T extends string>({
       runAt: new Date(Date.now() + delayMs),
     };
   }
-  return nextChunkRunResult(requestedAt, rest);
+  // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
+  // a capacity slot for one item and completed items are not redone when a later attempt fails.
+  return rest.length > 0
+    ? { state: { requestedAt, remaining: rest }, runAt: new Date() }
+    : { state: {} };
 };
 
 export const getTaskStatus = async ({

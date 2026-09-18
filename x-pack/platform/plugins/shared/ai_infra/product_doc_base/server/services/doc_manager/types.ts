@@ -138,11 +138,6 @@ export interface DocInstallOptions {
    */
   wait?: boolean;
   /**
-   * Maximum time in milliseconds to wait for the task when `wait` is true.
-   * Defaults to 10 minutes.
-   */
-  waitTimeoutMs?: number;
-  /**
    * If provided, the docs will be installed with the model indicated by Inference ID
    */
   inferenceId: string;
@@ -189,11 +184,6 @@ export interface DocUpdateOptions {
    */
   wait?: boolean;
   /**
-   * Maximum time in milliseconds to wait for the task when `wait` is true.
-   * Defaults to 10 minutes.
-   */
-  waitTimeoutMs?: number;
-  /**
    * If provided, the docs will be updated with the model indicated by Inference ID
    */
   inferenceId: string;
@@ -221,14 +211,4 @@ export interface DocUpdateAllOptions {
    * inferenceIds to update
    */
   inferenceIds?: string[];
-  /**
-   * If true, updates run one inference ID at a time and the returned promise waits for each
-   * update task to complete. Defaults to `false`
-   */
-  wait?: boolean;
-  /**
-   * Maximum time in milliseconds to wait for each task when `wait` is true.
-   * Defaults to 10 minutes.
-   */
-  waitTimeoutMs?: number;
 }

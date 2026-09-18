@@ -87,7 +87,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async install(options: DocInstallOptions): Promise<void> {
-    const { request, force = false, wait = false, waitTimeoutMs = TEN_MIN_IN_MS } = options;
+    const { request, force = false, wait = false } = options;
     const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const { status: previousStatus } = await this.getStatus({ inferenceId });
@@ -124,19 +124,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: waitTimeoutMs,
+        timeout: TEN_MIN_IN_MS,
       });
     }
   }
 
   async update(options: DocUpdateOptions): Promise<void> {
-    const {
-      request,
-      wait = false,
-      waitTimeoutMs = TEN_MIN_IN_MS,
-      inferenceId,
-      forceUpdate,
-    } = options;
+    const { request, wait = false, inferenceId, forceUpdate } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -163,14 +157,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: waitTimeoutMs,
+        timeout: TEN_MIN_IN_MS,
       });
     }
   }
 
-  async ensureDefaultProductDocumentation(
-    options: { wait?: boolean; waitTimeoutMs?: number } = {}
-  ): Promise<void> {
+  async ensureDefaultProductDocumentation(): Promise<void> {
     const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
       () => this.esClient.inference.get({}),
       { resourceType: ResourceTypes.productDoc }
@@ -189,7 +181,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
         );
         return;
       }
-      await this.install({ inferenceId, ...options });
+      await this.install({ inferenceId });
       return;
     }
 
@@ -207,7 +199,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { forceUpdate, inferenceIds, wait = false, waitTimeoutMs } = options ?? {};
+    const { forceUpdate, inferenceIds } = options ?? {};
     const idsToUpdate: string[] =
       Array.isArray(inferenceIds) && inferenceIds?.length > 0
         ? inferenceIds
@@ -215,15 +207,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    if (wait) {
-      for (const inferenceId of idsToUpdate) {
-        await this.update({ inferenceId, forceUpdate, wait, waitTimeoutMs });
-      }
-    } else {
-      await Promise.all(
-        idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate }))
-      );
-    }
+    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
     return {
       inferenceIds: idsToUpdate,
     };
@@ -268,6 +252,29 @@ export class DocumentationManager implements DocumentationManagerAPI {
   // The status is checked again under the lock so that nodes starting together do not each
   // reinstall the content the first one has just installed
   private async installDefaultSecurityLabs(inferenceId: string): Promise<void> {
+    await this.runUnderInstallLock(
+      {
+        source: 'ensureDefaultSecurityLabs',
+        inferenceId,
+        failure: 'install Security Labs content',
+      },
+      async (installer) => {
+        const { status } = await this.getSecurityLabsStatus({ inferenceId });
+        if (status === 'installed') {
+          this.logger.debug(
+            `Security Labs for inference ID [${inferenceId}] was installed while waiting for the install lock`
+          );
+          return;
+        }
+        await installer.installSecurityLabs({ inferenceId });
+      }
+    );
+  }
+
+  private async runUnderInstallLock(
+    { source, inferenceId, failure }: { source: string; inferenceId?: string; failure: string },
+    run: (installer: PackageInstaller) => Promise<void>
+  ): Promise<void> {
     const { packageInstaller } = this;
     if (!packageInstaller) {
       throw new Error('PackageInstaller not available');
@@ -275,20 +282,11 @@ export class DocumentationManager implements DocumentationManagerAPI {
     try {
       await waitForInstallLock({
         lockManager: this.lockManager,
-        metadata: { source: 'ensureDefaultSecurityLabs', inferenceId },
-        run: async () => {
-          const { status } = await this.getSecurityLabsStatus({ inferenceId });
-          if (status === 'installed') {
-            this.logger.debug(
-              `Security Labs for inference ID [${inferenceId}] was installed while waiting for the install lock`
-            );
-            return;
-          }
-          await packageInstaller.installSecurityLabs({ inferenceId });
-        },
+        metadata: { source, inferenceId },
+        run: () => run(packageInstaller),
       });
     } catch (error) {
-      this.logger.error(`Failed to install Security Labs content: ${error.message}`);
+      this.logger.error(`Failed to ${failure}: ${error.message}`);
       throw error;
     }
   }
@@ -457,17 +455,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    const { packageInstaller } = this;
-    try {
-      await waitForInstallLock({
-        lockManager: this.lockManager,
-        run: () => packageInstaller.installSecurityLabs({ version, inferenceId }),
-        metadata: { source: 'installSecurityLabs', inferenceId },
-      });
-    } catch (error) {
-      this.logger.error(`Failed to install Security Labs content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'installSecurityLabs', inferenceId, failure: 'install Security Labs content' },
+      (installer) => installer.installSecurityLabs({ version, inferenceId })
+    );
   }
 
   async uninstallSecurityLabs(options: SecurityLabsUninstallOptions): Promise<void> {
@@ -489,17 +480,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    const { packageInstaller } = this;
-    try {
-      await waitForInstallLock({
-        lockManager: this.lockManager,
-        run: () => packageInstaller.uninstallSecurityLabs({ inferenceId }),
-        metadata: { source: 'uninstallSecurityLabs', inferenceId },
-      });
-    } catch (error) {
-      this.logger.error(`Failed to uninstall Security Labs content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'uninstallSecurityLabs', inferenceId, failure: 'uninstall Security Labs content' },
+      (installer) => installer.uninstallSecurityLabs({ inferenceId })
+    );
   }
   async uninstallOpenAPISpec(options: SecurityLabsUninstallOptions): Promise<void> {
     const { request, inferenceId } = options;
@@ -517,17 +501,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
         },
       });
     }
-    const { packageInstaller } = this;
-    try {
-      await waitForInstallLock({
-        lockManager: this.lockManager,
-        run: () => packageInstaller.uninstallOpenAPISpec({ inferenceId }),
-        metadata: { source: 'uninstallOpenApiSpec', inferenceId },
-      });
-    } catch (error) {
-      this.logger.error(`Failed to uninstall OpenAPI Spec content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'uninstallOpenApiSpec', inferenceId, failure: 'uninstall OpenAPI Spec content' },
+      (installer) => installer.uninstallOpenAPISpec({ inferenceId })
+    );
   }
 
   async getSecurityLabsStatus({
@@ -578,17 +555,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    const { packageInstaller } = this;
-    try {
-      await waitForInstallLock({
-        lockManager: this.lockManager,
-        run: () => packageInstaller.installOpenAPISpec({ version, inferenceId }),
-        metadata: { source: 'installOpenApiSpec', inferenceId },
-      });
-    } catch (error) {
-      this.logger.error(`Failed to install OpenAPI Spec content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'installOpenApiSpec', inferenceId, failure: 'install OpenAPI Spec content' },
+      (installer) => installer.installOpenAPISpec({ version, inferenceId })
+    );
   }
 
   async getOpenApiSpecStatus({

@@ -77,7 +77,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
                 if (item === OPENAPI_SPEC_ITEM) {
                   await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId, forceUpdate });
                 } else if (isProductName(item)) {
-                  await packageInstaller.updateProduct({ productName: item, inferenceId });
+                  await packageInstaller.installProduct({ productName: item, inferenceId });
                 }
               },
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },

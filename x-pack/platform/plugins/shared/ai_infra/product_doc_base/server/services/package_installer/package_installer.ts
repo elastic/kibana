@@ -35,15 +35,12 @@ import {
   type ZipArchive,
   ensureInferenceDeployed,
   isLegacySemanticTextVersion,
-  indexNdjsonEntry,
-  rewriteInferenceId,
   checkArtifactAvailable,
   ArtifactNotFoundError,
   resolveArtifactsFolderPath,
   removeArtifactFile,
   logArtifactsFolderUsage,
   purgeArtifactsFolder,
-  type ArtifactsFolderUsage,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -121,8 +118,8 @@ export class PackageInstaller {
   /**
    * Deletes artifact files left behind by a previous process lifetime or a failed install.
    */
-  async purgeArtifactsFolder(): Promise<ArtifactsFolderUsage> {
-    return purgeArtifactsFolder(this.artifactsFolderPath, this.log);
+  async purgeArtifactsFolder(): Promise<void> {
+    await purgeArtifactsFolder(this.artifactsFolderPath, this.log);
   }
 
   // The existing index is only replaced once the new archive has been downloaded and validated
@@ -291,24 +288,6 @@ export class PackageInstaller {
   }
 
   /**
-   * Re-installs a product that was planned for update, unless it has been uninstalled since the plan
-   * was computed. Resolves to `false` when nothing was installed.
-   */
-  async updateProduct(params: { productName: ProductName; inferenceId: string }): Promise<boolean> {
-    const { productName, inferenceId } = params;
-    const installStatuses = await this.productDocClient.getInstallationStatusOrThrow({
-      inferenceId,
-    });
-    if (installStatuses[productName]?.status === 'uninstalled') {
-      this.log.info(
-        `Skipping update of product [${productName}] for inference ID [${inferenceId}]: no longer installed`
-      );
-      return false;
-    }
-    return this.installProduct({ productName, inferenceId });
-  }
-
-  /**
    * Installs the OpenAPI spec when the installed version differs from the version selected for this deployment.
    */
   async ensureOpenApiSpecUpToDate(params: {
@@ -330,25 +309,6 @@ export class PackageInstaller {
         version: openAPISpecVersionToUpgradeTo,
         inferenceId,
       });
-    }
-  }
-
-  /**
-   * Will not upgrade products that are not already installed
-   */
-  async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
-    const productsToUpdate = await this.getProductsToUpdate(params);
-    for (const productName of productsToUpdate) {
-      await this.installProduct({ productName, inferenceId: params.inferenceId });
-    }
-    await this.ensureOpenApiSpecUpToDate(params);
-  }
-
-  async installAll(params: { inferenceId?: string } = {}) {
-    const { inferenceId } = params;
-    const allProducts = Object.values(DocumentationProduct) as ProductName[];
-    for (const productName of allProducts) {
-      await this.installProduct({ productName, inferenceId });
     }
   }
 
@@ -858,20 +818,15 @@ export class PackageInstaller {
           throw new Error(`No content files found for ${productName} in archive`);
         }
 
-        const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
         for (const entryPath of contentEntries) {
           this.log.debug(`Indexing content for entry ${entryPath}`);
-          await indexNdjsonEntry({
-            archive: zipArchive,
-            entryPath,
+          const contentBuffer = await zipArchive.getEntryContent(entryPath);
+          await this.indexContentFile({
             indexName,
             esClient: this.esClient,
-            transformDocument: (document) =>
-              rewriteInferenceId({
-                document,
-                inferenceId: effectiveInferenceId,
-                legacySemanticText,
-              }),
+            contentBuffer,
+            manifestVersion,
+            inferenceId: effectiveInferenceId,
           });
         }
 
@@ -913,6 +868,78 @@ export class PackageInstaller {
       zipArchive?.close();
       await this.cleanupArtifact(artifactFullPath);
     }
+  }
+
+  private async indexContentFile({
+    indexName,
+    esClient,
+    contentBuffer,
+    manifestVersion,
+    inferenceId,
+  }: {
+    indexName: string;
+    esClient: ElasticsearchClient;
+    contentBuffer: Buffer;
+    manifestVersion: string;
+    inferenceId: string;
+  }): Promise<void> {
+    const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
+
+    const fileContent = contentBuffer.toString('utf-8');
+    const lines = fileContent.split('\n');
+
+    const documents = lines
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map((line) => JSON.parse(line))
+      .map((doc) => this.rewriteInferenceId(doc, inferenceId, legacySemanticText));
+
+    const operations: Array<{ index: { _index: string } } | Record<string, any>> = [];
+    for (const document of documents) {
+      operations.push({ index: { _index: indexName } }, document);
+    }
+
+    const response = await esClient.bulk({
+      refresh: false,
+      operations,
+    });
+
+    if (response.errors) {
+      const error =
+        response.items.find((item) => item.index?.error)?.index?.error ?? 'unknown error';
+      throw new Error(`Error indexing documents: ${JSON.stringify(error)}`);
+    }
+  }
+
+  private rewriteInferenceId(
+    document: Record<string, any>,
+    inferenceId: string,
+    legacySemanticText: boolean
+  ): Record<string, any> {
+    // Clone the document to avoid mutating the original
+    const clonedDoc = { ...document };
+
+    if (legacySemanticText) {
+      // For legacy semantic text, modify fields directly on the document
+      Object.values(clonedDoc).forEach((field: any) => {
+        if (field?.inference) {
+          field.inference.inference_id = inferenceId;
+        }
+      });
+    } else {
+      // For non-legacy semantic text, modify fields within _inference_fields
+      if (clonedDoc._inference_fields) {
+        // Clone _inference_fields to avoid mutation issues
+        clonedDoc._inference_fields = { ...clonedDoc._inference_fields };
+        Object.values(clonedDoc._inference_fields).forEach((field: any) => {
+          if (field?.inference) {
+            field.inference = { ...field.inference, inference_id: inferenceId };
+          }
+        });
+      }
+    }
+
+    return clonedDoc;
   }
 
   private async findInstallableProductVersion({

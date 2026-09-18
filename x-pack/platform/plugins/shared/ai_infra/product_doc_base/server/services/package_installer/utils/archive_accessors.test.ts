@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ArtifactManifest } from '@kbn/product-doc-common';
 import type { ZipArchive } from './zip_archive';
@@ -16,7 +15,6 @@ const createMockArchive = (entries: Record<string, string>): ZipArchive => {
     hasEntry: (entryPath) => Object.keys(entries).includes(entryPath),
     getEntryPaths: () => Object.keys(entries),
     getEntryContent: async (entryPath) => Buffer.from(entries[entryPath]),
-    getEntryStream: async (entryPath) => Readable.from([Buffer.from(entries[entryPath])]),
     close: () => undefined,
   };
 };

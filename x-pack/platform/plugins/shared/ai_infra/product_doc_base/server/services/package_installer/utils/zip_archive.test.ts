@@ -41,19 +41,4 @@ describe('ZipArchive', () => {
     const buffer = await archive.getEntryContent('text_1.txt');
     expect(buffer.toString('utf-8')).toEqual('text_1');
   });
-
-  test('#getEntryStream streams the content of the entry', async () => {
-    const stream = await archive.getEntryStream('text_2.txt');
-    const chunks: Buffer[] = [];
-    for await (const chunk of stream) {
-      chunks.push(chunk as Buffer);
-    }
-    expect(Buffer.concat(chunks).toString('utf-8')).toEqual('text_2');
-  });
-
-  test('#getEntryStream throws for unknown entries', () => {
-    expect(() => archive.getEntryStream('not_an_entry')).toThrow(
-      'Entry not_an_entry not found in archive'
-    );
-  });
 });
