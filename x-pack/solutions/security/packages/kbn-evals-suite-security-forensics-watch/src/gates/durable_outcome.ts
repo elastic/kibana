@@ -50,18 +50,63 @@ export interface DurableReportEvaluation {
   correlatedCount: number;
   /** Correlated reports with a complete Evaluation Record shape. */
   shapeValidCount: number;
-  missingFields: string[];
+  /** Fields of the first correlated report that fail the shape check. */
+  invalidFields: string[];
   success: boolean;
 }
 
 const documentOf = (hit: ReportHit): Record<string, unknown> =>
   (hit._source ?? (hit as Record<string, unknown>)) as Record<string, unknown>;
 
-export const hasEvaluationRecordShape = (doc: Record<string, unknown>): boolean =>
-  EVALUATION_RECORD_FIELDS.every((field) => doc[field] !== undefined);
+const isNonEmptyString = (value: unknown): boolean =>
+  typeof value === 'string' && value.trim().length > 0;
 
-export const missingEvaluationRecordFields = (doc: Record<string, unknown>): string[] =>
-  EVALUATION_RECORD_FIELDS.filter((field) => doc[field] === undefined);
+const isNonEmptyArray = (value: unknown): boolean => Array.isArray(value) && value.length > 0;
+
+/** A confidence assessment is only an assessment if it states a level and why. */
+const isConfidenceAssessment = (value: unknown): boolean => {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const assessment = value as Record<string, unknown>;
+  return isNonEmptyString(assessment.overall) || isNonEmptyString(assessment.note);
+};
+
+/**
+ * Per-field validation of the Evaluation Record contract.
+ *
+ * The previous predicate was `field !== undefined`, so a document with every
+ * required key set to `null`, or to an empty array, or an empty
+ * `confidence_assessment: {}`, satisfied it and made the durable-outcome gate
+ * green on a malformed stored report. Types and content are checked now:
+ *
+ *   - `report_status` must be a non-empty string (the readback query already
+ *     restricts to DRAFT, so this catches a null/blank value);
+ *   - `timeline` and `validated_iocs` must be non-empty arrays — a forensic
+ *     report with no timeline and no IoC assessment is not a report;
+ *   - `unresolved_questions` must be an array of non-empty strings; it MAY be
+ *     empty, because "no open questions" is a legitimate finding;
+ *   - `confidence_assessment` must be an object carrying a level or a note.
+ */
+const fieldIsValid = (field: string, value: unknown): boolean => {
+  switch (field) {
+    case 'report_status':
+      return isNonEmptyString(value);
+    case 'timeline':
+    case 'validated_iocs':
+      return isNonEmptyArray(value);
+    case 'unresolved_questions':
+      return Array.isArray(value) && value.every(isNonEmptyString);
+    case 'confidence_assessment':
+      return isConfidenceAssessment(value);
+    default:
+      return value !== undefined && value !== null;
+  }
+};
+
+export const hasEvaluationRecordShape = (doc: Record<string, unknown>): boolean =>
+  EVALUATION_RECORD_FIELDS.every((field) => fieldIsValid(field, doc[field]));
+
+export const invalidEvaluationRecordFields = (doc: Record<string, unknown>): string[] =>
+  EVALUATION_RECORD_FIELDS.filter((field) => !fieldIsValid(field, doc[field]));
 
 const timestampOf = (hit: ReportHit): number | undefined => {
   const raw = documentOf(hit)['@timestamp'];
@@ -117,16 +162,16 @@ export const evaluateDurableReport = ({
   const correlated = recent.filter((hit) => JSON.stringify(documentOf(hit)).includes(runId));
 
   const shaped = correlated.filter((hit) => hasEvaluationRecordShape(documentOf(hit)));
-  const missingFields =
+  const invalidFields =
     shaped.length === 0 && correlated.length > 0
-      ? missingEvaluationRecordFields(documentOf(correlated[0]))
+      ? invalidEvaluationRecordFields(documentOf(correlated[0]))
       : [];
 
   return {
     recentCount: recent.length,
     correlatedCount: correlated.length,
     shapeValidCount: shaped.length,
-    missingFields,
+    invalidFields,
     success: correlated.length > 0 && shaped.length > 0,
   };
 };

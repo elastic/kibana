@@ -9,7 +9,7 @@ import {
   EVALUATION_RECORD_FIELDS,
   evaluateDurableReport,
   hasEvaluationRecordShape,
-  missingEvaluationRecordFields,
+  invalidEvaluationRecordFields,
 } from './durable_outcome';
 
 const RUN_ID = 'dwf-l4-run-1234';
@@ -91,7 +91,7 @@ describe('evaluateDurableReport', () => {
 
     expect(result.correlatedCount).toBe(1);
     expect(result.shapeValidCount).toBe(0);
-    expect(result.missingFields).toEqual(
+    expect(result.invalidFields).toEqual(
       expect.arrayContaining(['timeline', 'validated_iocs', 'confidence_assessment'])
     );
     expect(result.success).toBe(false);
@@ -119,11 +119,40 @@ describe('evaluation record shape', () => {
     expect(hasEvaluationRecordShape(shapeComplete)).toBe(true);
     for (const field of EVALUATION_RECORD_FIELDS) {
       expect(hasEvaluationRecordShape(without(field))).toBe(false);
-      expect(missingEvaluationRecordFields(without(field))).toEqual([field]);
+      expect(invalidEvaluationRecordFields(without(field))).toEqual([field]);
     }
   });
 
   it('treats an explicitly undefined field as missing', () => {
     expect(hasEvaluationRecordShape({ ...shapeComplete, timeline: undefined })).toBe(false);
+  });
+
+  it('rejects a document whose fields are present but empty', () => {
+    // The regression: the predicate was `field !== undefined`, so a stored report
+    // with every key set to null, or to an empty array, or to an empty
+    // confidence_assessment, satisfied the shape and made the durable-outcome gate
+    // green on a malformed document.
+    const nulled = Object.fromEntries(EVALUATION_RECORD_FIELDS.map((field) => [field, null]));
+
+    expect(hasEvaluationRecordShape(nulled)).toBe(false);
+    expect(invalidEvaluationRecordFields(nulled)).toEqual(EVALUATION_RECORD_FIELDS);
+    expect(hasEvaluationRecordShape({ ...shapeComplete, report_status: '   ' })).toBe(false);
+    expect(hasEvaluationRecordShape({ ...shapeComplete, timeline: [] })).toBe(false);
+    expect(hasEvaluationRecordShape({ ...shapeComplete, validated_iocs: [] })).toBe(false);
+    expect(hasEvaluationRecordShape({ ...shapeComplete, confidence_assessment: {} })).toBe(false);
+    expect(hasEvaluationRecordShape({ ...shapeComplete, confidence_assessment: null })).toBe(false);
+    expect(hasEvaluationRecordShape({ ...shapeComplete, unresolved_questions: [null] })).toBe(
+      false
+    );
+    expect(hasEvaluationRecordShape({ ...shapeComplete, unresolved_questions: [''] })).toBe(false);
+  });
+
+  it('accepts an empty unresolved_questions list', () => {
+    // "No open questions" is a legitimate finding, so the list may be empty — it
+    // just has to BE a list of usable strings.
+    expect(hasEvaluationRecordShape({ ...shapeComplete, unresolved_questions: [] })).toBe(true);
+    expect(
+      hasEvaluationRecordShape({ ...shapeComplete, confidence_assessment: { note: 'thin' } })
+    ).toBe(true);
   });
 });

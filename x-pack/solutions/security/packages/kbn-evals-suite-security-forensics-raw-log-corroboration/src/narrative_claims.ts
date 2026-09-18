@@ -67,9 +67,58 @@ export const splitClaimUnits = (text: string): string[] =>
     .map((unit) => unit.trim())
     .filter((unit) => unit.length > 0);
 
+/** Clauses inside a claim unit: a colon, comma or semicolon starts a new one. */
+const clausesOf = (unit: string): string[] =>
+  unit
+    .split(/[,;:]/)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause.length > 0);
+
+/** Negation inside the clause that carries the match. */
+const NEGATION_CUE =
+  /\b(?:no|none|not|never|zero|without|nor|cannot|can't|did\s?n't|does\s?n't|do\s?n't|was\s?n't|were\s?n't|is\s?n't|aren\s?t|unable|failed|absent|missing|insufficient)\b/i;
+
+/** A count of zero for the concept itself: `0 gaps identified`. */
+const ZERO_COUNT = /^\s*0\s+(?:gaps?|corroborat\w*|events?|stages?|items?|findings?)/i;
+
+/**
+ * An empty-list marker in a FOLLOWING clause: `Gaps: none`, `Corroborated: none
+ * identified`. Deliberately narrow — it must be an empty marker for the same
+ * concept, so a heading that merely describes what is absent
+ * (`Gap 1: no WMI telemetry`) stays a positive gap claim.
+ */
+const EMPTY_MARKER =
+  /^(?:none|nil|n\/a|zero|not\s+applicable|no\s+(?:gaps?|corroborat\w*|events?|stages?|items?|findings?|issues?))\b/i;
+
+/**
+ * True when a matching claim unit actually NEGATES the claim it mentions.
+ *
+ * Keyword counting without this treats a correct negative statement as a
+ * positive claim, which fails the dataset bounds in both directions:
+ *
+ *   - `no-raw-telemetry` allows at most 0 corroborated stages, but a correct
+ *     "No stages were corroborated" counted as 1;
+ *   - `full-corroboration` allows at most 0 gaps, but a normal `Gaps: none`
+ *     section counted as 1.
+ *
+ * The negation must sit in the same clause as the match (or be an empty-list
+ * marker right after it) so that an unrelated "no" elsewhere in the sentence
+ * does not suppress a real claim.
+ */
+export const isNegatedClaim = (unit: string, matcher: RegExp): boolean => {
+  const clauses = clausesOf(unit);
+  const matchClauseIndex = clauses.findIndex((clause) => matcher.test(clause));
+  if (matchClauseIndex === -1) return true; // the unit does not match at all
+
+  const matchClause = clauses[matchClauseIndex];
+  if (NEGATION_CUE.test(matchClause) || ZERO_COUNT.test(matchClause)) return true;
+
+  return clauses.slice(matchClauseIndex + 1).some((clause) => EMPTY_MARKER.test(clause));
+};
+
 /**
  * Counts distinct CLAIMS (claim units) that match `pattern`, not distinct word
- * forms.
+ * forms — and not claims the unit negates.
  *
  * A claim is a unit, so the same event described twice in one sentence is one
  * claim and three stage bullets are three claims even when each uses the same
@@ -83,11 +132,16 @@ export const splitClaimUnits = (text: string): string[] =>
  *   - One hedged sentence using "corroborated", "corroborating" and
  *     "corroboration" scored 3, so a report that corroborated nothing passed it.
  *
- * Both directions are pinned in `narrative_claims.test.ts`.
+ * Negated units are then dropped (see `isNegatedClaim`), so "No stages were
+ * corroborated" and "Gaps: none" count as the zero they assert.
+ *
+ * Every direction is pinned in `narrative_claims.test.ts`.
  */
 export const countClaimUnits = (text: string, pattern: RegExp): number => {
   // Rebuild without the global flag: a shared /g regex carries `lastIndex`
   // between `.test()` calls and would skip alternating units.
   const matcher = new RegExp(pattern.source, pattern.flags.replace(/g/g, ''));
-  return splitClaimUnits(text).filter((unit) => matcher.test(unit)).length;
+  return splitClaimUnits(text).filter(
+    (unit) => matcher.test(unit) && !isNegatedClaim(unit, matcher)
+  ).length;
 };

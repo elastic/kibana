@@ -171,9 +171,17 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
         log.info(`[L2] Running ${example.id}: ${example.input.question.slice(0, 100)}...`);
 
         // ── Step 1: invoke the default agent ────────────────────────────────────
+        // The forensics skill is PINNED for this spec: routing (does the default
+        // agent pick deep-watch-forensics from the question alone?) is measured by
+        // `routing_smoke.spec.ts`, and leaving it to the router here made the
+        // quality gate fail on routing misses rather than on report quality. With
+        // the skill pinned, a missing skill call would mean the pin itself broke,
+        // so `skillInvoked` below stays a sanity check on the pin, not a routing
+        // measurement.
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
           input: example.input.question,
+          configurationOverrides: { skillIds: [DEEP_WATCH_FORENSICS_SKILL_ID] },
         });
 
         const toolCallSteps = getToolCallSteps(response);

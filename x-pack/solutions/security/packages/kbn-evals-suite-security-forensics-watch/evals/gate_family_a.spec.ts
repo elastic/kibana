@@ -43,10 +43,59 @@ evaluate.describe(
   'Forensics Watch — Gate Family A (Behavioral)',
   { tag: tags.stateful.classic },
   () => {
+    /**
+     * Is the PND proposal route registered in this deployment?
+     *
+     * `PND_EMIT_PROPOSAL_PATH` is owned by a separate Security plugin
+     * (`x-pack/solutions/security/plugins/pnd`) that is not part of this commit,
+     * so in a deployment built from this tree every call to it answers 404 and A1
+     * fails on a missing dependency rather than on the dedup behaviour it is meant
+     * to measure. The probe distinguishes "route absent" (404 → skip with the
+     * reason, visible in the results) from "route present but rejecting our body"
+     * (400/422 → the gate runs).
+     *
+     * Delete this guard together with the plugin PR.
+     */
+    let pndRouteAvailable: boolean | undefined;
+
+    const statusOf = (error: unknown): number | undefined => {
+      const candidate = error as { response?: { status?: number }; statusCode?: number };
+      if (typeof candidate?.response?.status === 'number') return candidate.response.status;
+      if (typeof candidate?.statusCode === 'number') return candidate.statusCode;
+      const match = /\b(\d{3})\b/.exec(String(error));
+      return match ? Number(match[1]) : undefined;
+    };
+
+    evaluate.beforeAll(async ({ kbnClient, log }) => {
+      try {
+        await kbnClient.request({
+          path: PND_EMIT_PROPOSAL_PATH,
+          method: 'POST',
+          headers: { 'elastic-api-version': PND_API_VERSION },
+          body: {},
+        });
+        pndRouteAvailable = true;
+      } catch (e) {
+        const status = statusOf(e);
+        // Only a 404 proves the route is absent; any other failure means it is
+        // registered and the gate should run (and fail on its own merits).
+        pndRouteAvailable = status !== 404;
+        log.warning(
+          `[A1] PND route probe: status=${status ?? 'unknown'} → available=${pndRouteAvailable}`
+        );
+      }
+    });
+
     // ── A1: Dedup ────────────────────────────────────────────────────────────
     evaluate(
       'A1 — duplicate escalation produces no additional evidence package',
       async ({ kbnClient, esClient, log }) => {
+        evaluate.skip(
+          pndRouteAvailable === false,
+          `PND emit_proposal route is not registered in this deployment (404) — ` +
+            `${PND_EMIT_PROPOSAL_PATH} is owned by the pnd plugin, which is not part of this ` +
+            `commit. Skipping rather than reporting a red that measures nothing.`
+        );
         // Two triggers carrying the SAME orchestrator dedup tag must collapse onto
         // exactly one EvidencePackage. The dedup key is opt-in (`workerRun.dedupTag`)
         // rather than derived from alertId, because gate D6 requires a re-triggered

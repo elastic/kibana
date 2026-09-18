@@ -104,5 +104,45 @@ describe('narrative_claims', () => {
       // alternating matches on the second call.
       expect(countClaimUnits(text, shared)).toBe(3);
     });
+
+    it('does not count a negated claim as a positive one', () => {
+      // Regression, false-failure direction: `no-raw-telemetry` allows at most
+      // ZERO corroborated stages, so a correct "No stages were corroborated"
+      // used to count 1 and fail the bound it actually satisfied.
+      expect(countClaimUnits('No stages were corroborated.', /corroborat\w*/gi)).toBe(0);
+      expect(
+        countClaimUnits('The narrative was not corroborated by any raw log.', /corroborat\w*/gi)
+      ).toBe(0);
+      expect(countClaimUnits('0 gaps identified.', /gap\w*/gi)).toBe(0);
+      expect(countClaimUnits('No gaps were identified.', /gap\w*/gi)).toBe(0);
+    });
+
+    it('does not count an empty-list section as a claim', () => {
+      // The other direction: `full-corroboration` allows at most ZERO gaps, and
+      // a normal "Gaps: none" section used to count 1.
+      expect(countClaimUnits('Gaps: none', /gap\w*/gi)).toBe(0);
+      expect(countClaimUnits('Corroborated: none identified', /corroborat\w*/gi)).toBe(0);
+      expect(countClaimUnits('Gaps found: zero', /gap\w*/gi)).toBe(0);
+    });
+
+    it('still counts a claim whose heading describes what is absent', () => {
+      // The negation guard must stay narrow: "Gap 1: no WMI telemetry" asserts a
+      // gap EXISTS and explains what is missing from it.
+      expect(countClaimUnits('Gap 1: no WMI telemetry', /gap\w*/gi)).toBe(1);
+      expect(
+        countClaimUnits('Corroborated: the beacon, despite no DNS telemetry', /corroborat\w*/gi)
+      ).toBe(1);
+    });
+
+    it('counts the positive claims around a negative one', () => {
+      const text = [
+        'No stages were corroborated for WKSTN-EVAL03.',
+        'Corroborated: initial-access on WKSTN-EVAL01.',
+        'Gaps: none',
+      ].join('\n');
+
+      expect(countClaimUnits(text, /corroborat\w*/gi)).toBe(1);
+      expect(countClaimUnits(text, /gap\w*/gi)).toBe(0);
+    });
   });
 });

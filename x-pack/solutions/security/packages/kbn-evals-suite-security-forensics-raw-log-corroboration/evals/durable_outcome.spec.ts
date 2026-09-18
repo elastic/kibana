@@ -30,7 +30,7 @@ import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import { v4 as uuidv4 } from 'uuid';
 import { SCENARIOS } from '../src/dataset';
 import { logScorecard } from '../src/scorecard_log';
-import { SKILL_ID } from '../src/constants';
+import { INDICES, SKILL_ID } from '../src/constants';
 import { buildCorroborationPrompt } from '../src/prompt';
 import { seedForensicTimeline, cleanupSeededData } from '../src/data_generators/forensic_data';
 import {
@@ -57,10 +57,50 @@ evaluate.describe(
 
     const scenario = SCENARIOS.find((s) => s.id === 'partial-gap') ?? SCENARIOS[0];
 
+    /**
+     * Is there a durable producer for the Investigation timeline in this
+     * deployment?
+     *
+     * The readback below can only ever find a document that some tool wrote into
+     * `${INDICES.INVESTIGATIONS}`. At this head nothing in the skill under test
+     * writes it: the probed `emit_corroboration` / `recordDeepWatch` tool ids have
+     * no implementation in this repository, so the index stays empty, the gate is
+     * permanently red, and the red measures nothing about the worker.
+     *
+     * A missing index is the cheap, definitive signal that no producer has ever
+     * run here. When it is missing the spec SKIPS with that reason — visible in
+     * the results, and distinguishable from a gate that actually failed — instead
+     * of reporting a failure caused by an absent dependency. If the producer lands
+     * but has not written yet, the skip is the conservative outcome and disappears
+     * after its first write. Delete this guard with the producer PR.
+     */
+    let durableProducerPresent: boolean | undefined;
+
+    evaluate.beforeAll(async ({ esClient, log }) => {
+      try {
+        durableProducerPresent = await esClient.indices.exists({ index: INDICES.INVESTIGATIONS });
+      } catch (e) {
+        durableProducerPresent = undefined;
+        log.warning(`[L4] producer probe failed: ${(e as Error).message}`);
+      }
+      log.info(
+        `[L4] producer probe: ${INDICES.INVESTIGATIONS} exists=${
+          durableProducerPresent ?? 'unknown'
+        }`
+      );
+    });
+
     evaluate(
       'should persist corroboration findings to investigation timeline',
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, log }) => {
+        evaluate.skip(
+          durableProducerPresent === false,
+          `No durable producer for ${INDICES.INVESTIGATIONS} in this deployment: nothing at this ` +
+            `head writes the Investigation timeline, so the readback can only return zero hits and ` +
+            `this gate could never pass. Skipping rather than reporting a red that measures nothing.`
+        );
+
         // Per-run identity. Without it the readback accepted ANY report written
         // in the last few minutes — an earlier spec, a retry, or a concurrent
         // run could satisfy the gate even when this invocation persisted

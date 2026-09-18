@@ -98,7 +98,7 @@ evaluate.describe(
             `DRAFT reports written since the run started: ${durable.recentCount}; ` +
             `carrying run id ${runId}: ${durable.correlatedCount}; ` +
             `with a complete Evaluation Record shape: ${durable.shapeValidCount} ` +
-            `(missing: ${durable.missingFields.join(', ') || 'none'}).`,
+            `(invalid: ${durable.invalidFields.join(', ') || 'none'}).`,
           scorecard: {
             produceDraft: produceDraftCalled ? 1 : 0,
             persistedCorrelatedToRun: durable.correlatedCount > 0 ? 1 : 0,
