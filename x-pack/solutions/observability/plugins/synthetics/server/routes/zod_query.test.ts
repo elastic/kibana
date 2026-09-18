@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValidationError } from '@kbn/config-schema';
+import { schema as configSchema, ValidationError } from '@kbn/config-schema';
 import { RouteValidationError } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import {
@@ -13,6 +13,7 @@ import {
   jsonArrayFromString,
   maxArraySizeMessage,
   minLengthMessage,
+  queryNumber,
   routeId,
 } from './zod_query';
 
@@ -22,6 +23,39 @@ const factory = {
     error: new RouteValidationError(error, path),
   }),
 };
+
+describe('queryNumber', () => {
+  const configAccepts = (input: unknown): boolean => {
+    try {
+      configSchema.number().validate(input);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  it.each(['', '   ', '0', '1', '1.5', String(Number.MAX_SAFE_INTEGER), '9007199254740992'])(
+    'matches schema.number() for %j',
+    (input) => {
+      expect(queryNumber.safeParse(input).success).toBe(configAccepts(input));
+    }
+  );
+
+  it('rejects empty and whitespace query strings', () => {
+    expect(queryNumber.safeParse('').success).toBe(false);
+    expect(queryNumber.safeParse('   ').success).toBe(false);
+  });
+
+  it('rejects integers outside Number.MAX_SAFE_INTEGER', () => {
+    expect(queryNumber.safeParse(Number.MAX_SAFE_INTEGER + 1).success).toBe(false);
+    expect(queryNumber.parse(String(Number.MAX_SAFE_INTEGER))).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
+  it('parses ordinary numeric query strings', () => {
+    expect(queryNumber.parse('60')).toBe(60);
+    expect(queryNumber.parse('1.5')).toBe(1.5);
+  });
+});
 
 describe('jsonArrayFromString', () => {
   const schema = jsonArrayFromString(routeId, 100).optional();

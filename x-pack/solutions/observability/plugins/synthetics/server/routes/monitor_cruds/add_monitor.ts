@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { queryBoolean, optionalRouteId } from '../zod_query';
+import { queryBoolean, optionalRouteId, monitorRequestBody } from '../zod_query';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -39,7 +38,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   validation: {
     request: {
-      body: schema.any(),
+      body: monitorRequestBody,
       query: z.strictObject({
         id: optionalRouteId,
         preserve_namespace: queryBoolean.optional(),

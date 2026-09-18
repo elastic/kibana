@@ -28,6 +28,7 @@ import {
   MAX_ROUTE_STRING_LENGTH,
   queryBoolean,
   queryNumber,
+  queryNumberFrom,
 } from './zod_query';
 
 const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
@@ -100,8 +101,8 @@ export const OverviewStatusSchema = z.strictObject({
   // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
   // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
   includeHeartbeatMonitors: queryBoolean.optional(),
-  page: queryNumber.min(1).optional(),
-  perPage: queryNumber.min(1).max(OVERVIEW_STATUS_MAX_PER_PAGE).optional(),
+  page: queryNumberFrom(1).optional(),
+  perPage: queryNumberFrom(1, OVERVIEW_STATUS_MAX_PER_PAGE).optional(),
   sortField: OverviewStatusSortFieldSchema,
   sortOrder: z.enum(['asc', 'desc']).optional(),
   statusFilter: z
