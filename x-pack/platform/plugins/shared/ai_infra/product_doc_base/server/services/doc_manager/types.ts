@@ -202,6 +202,11 @@ export interface DocUpdateAllOptions {
    */
   request?: KibanaRequest;
   /**
+   * If true, the returned promise will wait until all update tasks have completed before resolving.
+   * Defaults to `false`
+   */
+  wait?: boolean;
+  /**
    * If true, the docs with the same version majorMinor version will be forced to updated regardless
    */
   forceUpdate?: boolean;
