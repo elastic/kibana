@@ -322,7 +322,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.SETTINGS.READ,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.AGENTS.READ,
+          ],
         },
       },
       summary: 'Get output agent and policy count',
