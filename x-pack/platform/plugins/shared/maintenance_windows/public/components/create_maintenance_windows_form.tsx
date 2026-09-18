@@ -107,8 +107,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [isAlertingV1Enabled, setIsAlertingV1Enabled] = useState(
     initialValue?.scope?.alerting !== undefined
   );
-  const [query, setQuery] = useState<string>(initialValue?.scope?.alerting?.kql || '');
-  const [filters, setFilters] = useState<Filter[]>(
+  const [alertingV1Kql, setAlertingV1Kql] = useState<string>(
+    initialValue?.scope?.alerting?.kql || ''
+  );
+  const [alertingV1Filters, setAlertingV1Filters] = useState<Filter[]>(
     (initialValue?.scope?.alerting?.filters as Filter[]) || []
   );
   const [alertingV1Errors, setAlertingV1Errors] = useState<string[]>([]);
@@ -150,9 +152,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   // Derived scope payloads — computed inline (cheap derivation from local state).
   const alertingV1Payload = isAlertingV1Enabled
-    ? !query && !filters.length
+    ? !alertingV1Kql && !alertingV1Filters.length
       ? null
-      : { kql: query, filters: transformQueryFilters(filters) }
+      : { kql: alertingV1Kql, filters: transformQueryFilters(alertingV1Filters) }
     : undefined;
 
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
@@ -175,10 +177,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const endDate = moment(formData.endDate);
 
       // Inline payload computation so submit always uses the latest state values.
-      const sqPayload = isAlertingV1Enabled
-        ? !query && !filters.length
+      const v1Payload = isAlertingV1Enabled
+        ? !alertingV1Kql && !alertingV1Filters.length
           ? null
-          : { kql: query, filters: transformQueryFilters(filters) }
+          : { kql: alertingV1Kql, filters: transformQueryFilters(alertingV1Filters) }
         : undefined;
       const v2Payload = isAlertingV2Enabled
         ? alertingV2Kql
@@ -189,7 +191,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       // Build scope: key absent = not selected; { enabled: true } = selected, no filter.
       const scope: Record<string, unknown> = {};
       if (isAlertingV1Enabled) {
-        scope.alerting = { enabled: true, ...(sqPayload ?? {}) };
+        scope.alerting = { enabled: true, ...(v1Payload ?? {}) };
       }
       if (isAlertingV2Enabled) {
         scope.alertingV2 = { enabled: true, ...(v2Payload ?? {}) };
@@ -206,8 +208,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         // Always send scope so an explicit "no scope" ({}) reaches the server instead of
         // triggering the server default { alerting: null } which suppresses all v1 alerts.
         scope,
-        scopedQuery: sqPayload ?? null,
-        ...(showMultipleSolutionsWarning || sqPayload ? { categoryIds: null } : {}),
+        scopedQuery: v1Payload ?? null,
+        ...(showMultipleSolutionsWarning || v1Payload ? { categoryIds: null } : {}),
       } as Parameters<typeof createMaintenanceWindow>[0];
 
       if (isEditMode) {
@@ -224,8 +226,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       alertingV2Errors.length,
       isAlertingV1Enabled,
       isAlertingV2Enabled,
-      query,
-      filters,
+      alertingV1Kql,
+      alertingV1Filters,
       alertingV2Kql,
       defaultTimezone,
       isEditMode,
@@ -256,7 +258,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return ruleTypes.map((ruleType) => ruleType.id);
   }, [ruleTypes, mounted]);
 
-  const onScopeQueryToggle = (isEnabled: boolean) => {
+  const onAlertingV1Toggle = (isEnabled: boolean) => {
     setIsAlertingV1Enabled(isEnabled);
     if (alertingV1Errors.length) setAlertingV1Errors([]);
   };
@@ -266,9 +268,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (alertingV2Errors.length) setAlertingV2Errors([]);
   };
 
-  const onQueryChange = (newQuery: string) => {
+  const onAlertingV1KqlChange = (newKql: string) => {
     if (alertingV1Errors.length) setAlertingV1Errors([]);
-    setQuery(newQuery);
+    setAlertingV1Kql(newKql);
   };
 
   const onAlertingV2KqlChange = (newKql: string) => {
@@ -400,19 +402,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             description={i18n.ALERTS_SCOPE_DESCRIPTION}
             switchLabel={i18n.ALERTS_SCOPE_TITLE}
             switchChecked={isAlertingV1Enabled}
-            onSwitchChange={onScopeQueryToggle}
+            onSwitchChange={onAlertingV1Toggle}
             switchDataTestSubj="maintenanceWindowScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_ALERTS_SUBTITLE}
           >
             <MaintenanceWindowScopedQuery
               ruleTypeIds={ruleTypeIds}
-              query={query}
-              filters={filters}
+              query={alertingV1Kql}
+              filters={alertingV1Filters}
               isLoading={isLoadingRuleTypes}
               isEnabled={isAlertingV1Enabled}
               errors={alertingV1Errors}
-              onQueryChange={onQueryChange}
-              onFiltersChange={setFilters}
+              onQueryChange={onAlertingV1KqlChange}
+              onFiltersChange={setAlertingV1Filters}
             />
           </ScopeSection>
           <ScopeSection
