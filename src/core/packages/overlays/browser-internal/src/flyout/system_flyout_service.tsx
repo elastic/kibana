@@ -148,8 +148,11 @@ export class SystemFlyoutService {
       if (flyoutRef.isClosed) {
         return;
       }
-      onClose?.();
-      flyoutRef.close();
+      try {
+        onClose?.();
+      } finally {
+        flyoutRef.close();
+      }
     };
 
     // A child flyout has to be rendered with the id the subscription below matches on. Left
