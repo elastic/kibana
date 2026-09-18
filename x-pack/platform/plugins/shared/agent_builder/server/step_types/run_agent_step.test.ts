@@ -19,11 +19,19 @@ jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
 }));
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
-import { context as otelContext } from '@opentelemetry/api';
+import { context as otelContext, propagation } from '@opentelemetry/api';
+import { resources } from '@elastic/opentelemetry-node/sdk';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import {
+  WORKFLOW_RUN_ID_BAGGAGE_KEY,
+  initInferenceTracerProvider,
+  shutdownInferenceTracerProvider,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
@@ -929,10 +937,17 @@ describe('ai.agent workflow step (Agent Builder)', () => {
   describe('workflow run id / OTel baggage bridge (#291310)', () => {
     let otelContextManager: AsyncHooksContextManager;
 
-    beforeEach(() => {
+    beforeAll(() => {
+      // `@opentelemetry/api` registers a global context manager exactly once — a second
+      // `setGlobalContextManager` is refused, so a fresh manager per test would silently
+      // leave the *first* one installed and disabled. Register one instance for the block
+      // and only toggle its async hook per test.
       otelContextManager = new AsyncHooksContextManager();
-      otelContextManager.enable();
       otelContext.setGlobalContextManager(otelContextManager);
+    });
+
+    beforeEach(() => {
+      otelContextManager.enable();
     });
 
     afterEach(() => {
@@ -940,11 +955,6 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
 
     it('sets WORKFLOW_RUN_ID_BAGGAGE_KEY baggage around executeAgent when the workflow run id is known', async () => {
-      const { propagation } =
-        jest.requireActual<typeof import('@opentelemetry/api')>('@opentelemetry/api');
-      const { WORKFLOW_RUN_ID_BAGGAGE_KEY } =
-        jest.requireActual<typeof import('@kbn/inference-tracing')>('@kbn/inference-tracing');
-
       let seenBaggageValue: string | undefined;
       const events$ = of({
         type: ChatEventType.roundComplete,
@@ -977,11 +987,6 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
 
     it('does not set baggage when the workflow run id is unknown (default context mock)', async () => {
-      const { propagation } =
-        jest.requireActual<typeof import('@opentelemetry/api')>('@opentelemetry/api');
-      const { WORKFLOW_RUN_ID_BAGGAGE_KEY } =
-        jest.requireActual<typeof import('@kbn/inference-tracing')>('@kbn/inference-tracing');
-
       let baggageWasPresent = true;
       const events$ = of({
         type: ChatEventType.roundComplete,
@@ -1000,6 +1005,62 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       await step.handler(createContext({ input: { message: 'hello' } }));
 
       expect(baggageWasPresent).toBe(false);
+    });
+
+    it('tags an inference span created while the deferred event stream is consumed', async () => {
+      // The agent keeps emitting spans while `events$` is drained, and that drain happens
+      // after `executeAgent()` has already returned — so the baggage has to be
+      // re-established around the subscription too, not only around the call that produces
+      // the stream. This drives a real inference tracer, so it fails if the baggage wrapper
+      // around `events$`, the baggage read, or the attribute mapping is dropped.
+      const captured: tracing.ReadableSpan[] = [];
+      const captureProcessor: tracing.SpanProcessor = {
+        onStart: jest.fn(),
+        onEnd: (span) => {
+          captured.push(span);
+        },
+        forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      };
+      initInferenceTracerProvider({
+        processors: [captureProcessor],
+        resource: resources.resourceFromAttributes({}),
+      });
+
+      try {
+        const events$ = new Observable<any>((subscriber) => {
+          // Deferred: this body runs on subscribe, i.e. outside `executeAgent()`'s own frame.
+          withActiveInferenceSpan('chat test-model', {}, () => undefined);
+          subscriber.next({
+            type: ChatEventType.roundComplete,
+            data: { round: { id: 'r-1', response: { message: 'ok' } } },
+          });
+          subscriber.complete();
+        });
+        const execution = {
+          executeAgent: jest.fn().mockResolvedValue({ executionId: 'exec-1', events$ }),
+        };
+        const serviceManager = { internalStart: { execution } } as any;
+
+        const step = getRunAgentStepDefinition(serviceManager);
+        await step.handler(
+          createContext({
+            input: { message: 'hello' },
+            contextManager: {
+              getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
+              getContext: jest.fn().mockReturnValue({ execution: { id: 'wf-run-42' } }),
+              getScopedEsClient: jest.fn(),
+              renderInputTemplate: jest.fn(),
+              callKibanaApi: jest.fn(),
+            },
+          })
+        );
+
+        expect(captured).toHaveLength(1);
+        expect(captured[0].attributes[WORKFLOW_RUN_ID_BAGGAGE_KEY]).toBe('wf-run-42');
+      } finally {
+        await shutdownInferenceTracerProvider();
+      }
     });
   });
 

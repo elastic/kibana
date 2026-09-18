@@ -16,6 +16,7 @@ import {
   ElasticGenAIAttributes,
   GenAISemanticConventions,
   UserAttributes,
+  WORKFLOW_RUN_ID_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
@@ -643,21 +644,25 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.attributes['elastic.workflow.execution_id']).not.toBe('exec-uuid-789');
     });
 
-    it('preserves kibana.workflows.run_id verbatim in BOTH ID modes', () => {
-      // Contract, pinned deliberately. This attribute is the workflow-execution -> agent-span
-      // join key, so it must stay queryable without the consumer knowing a uiSetting.
-      // Note `elastic.workflow.*` and `gen_ai.conversation.id` above flip between plain and
-      // hashed with `includeRealIds`; a join key that changes encoding with a setting is
-      // exactly the failure mode this attribute exists to avoid.
-      // If hashing is ever extended to this key, this test fails LOUDLY instead of the join
-      // silently returning zero rows.
-      for (const includeRealIds of [false, true]) {
-        const exported = exportWith(
-          { includeRealIds },
-          { 'kibana.workflows.run_id': 'workflow-exec-uuid-abc' }
-        );
-        expect(exported.attributes['kibana.workflows.run_id']).toBe('workflow-exec-uuid-abc');
-      }
+    it('hashes kibana.workflows.run_id when real IDs are disabled, like elastic.workflow.execution_id', () => {
+      // Same identifier class as `elastic.workflow.execution_id` above (a
+      // `.workflows-executions` document id), so it must obey the same
+      // `agentBuilder:tracing:includeRealIds` policy ("Include real conversation and workflow
+      // IDs in traces", off by default). Exporting it verbatim under a second attribute name
+      // would re-expose exactly what the setting anonymizes.
+      const hashed = exportWith(
+        { includeRealIds: false },
+        { [WORKFLOW_RUN_ID_BAGGAGE_KEY]: 'workflow-exec-uuid-abc' }
+      );
+      expect(hashed.attributes[WORKFLOW_RUN_ID_BAGGAGE_KEY]).toMatch(/^[a-f0-9]{16}$/);
+      expect(hashed.attributes[WORKFLOW_RUN_ID_BAGGAGE_KEY]).not.toBe('workflow-exec-uuid-abc');
+
+      // The join key still works when real IDs are on: the value stays queryable as-is.
+      const raw = exportWith(
+        { includeRealIds: true },
+        { [WORKFLOW_RUN_ID_BAGGAGE_KEY]: 'workflow-exec-uuid-abc' }
+      );
+      expect(raw.attributes[WORKFLOW_RUN_ID_BAGGAGE_KEY]).toBe('workflow-exec-uuid-abc');
     });
 
     it('does NOT hash gen_ai.tool.call.id', () => {
