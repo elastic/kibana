@@ -301,21 +301,15 @@ xpack.reporting.export_types.png.enabled: true
 xpack.pageRenderScreenshotting.enabled: true
 xpack.pageRenderScreenshotting.url: https://page-render-service.page-render-service.svc
 
-# The service reads this Kibana's identity off the client certificate we present, and
-# forwards it to UIAM with the token we mint -- so this must be the same certificate as
-# xpack.security.uiam.ssl, which the operator supplies. Same mount the uptime service
-# reads in serverless.oblt.yml.
-xpack.pageRenderScreenshotting.ssl.certificate: /mnt/elastic-internal/http-certs/tls.crt
-xpack.pageRenderScreenshotting.ssl.key: /mnt/elastic-internal/http-certs/tls.key
-# The same CA, from the same mount. cert-manager writes ca.crt into the secret it issues,
-# and both this Kibana's certificate and the service's come from the platform CA -- so the
-# CA that signed ours verifies theirs. That is what "no key material for us to distribute"
-# means in practice.
-#
-# If this file turns out not to be present in the mount, the fix is to point at whatever
-# bundle the operator sets on xpack.security.uiam.ssl.certificateAuthorities. Do not reach
-# for verificationMode: none -- the request carries a live bearer credential.
-xpack.pageRenderScreenshotting.ssl.certificateAuthorities: /mnt/elastic-internal/http-certs/ca.crt
+# The service reads this Kibana's identity off the client certificate we present and
+# forwards it to UIAM with the token we mint, so this must be the certificate UIAM already
+# knows us by: the same one the operator sets on xpack.security.uiam.ssl.
+xpack.pageRenderScreenshotting.ssl.certificate: /mnt/elastic-internal/http-certs/uiam.crt
+xpack.pageRenderScreenshotting.ssl.key: /mnt/elastic-internal/http-certs/uiam.key
+# The platform CA bundle, which is what signs the render service's certificate. Every
+# in-cluster client in the operator's own config verifies against this path; the ca.crt
+# beside our certificate in http-certs is a different CA and does not verify theirs.
+xpack.pageRenderScreenshotting.ssl.certificateAuthorities: /mnt/elastic-internal/trust-bundle/ca.crt
 
 # Disabled Platform plugins
 monitoring.enabled: false
