@@ -346,6 +346,34 @@ paths:
                         "details": "Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds."
                       }
                     }
+        '409':
+          description: >
+            Conflict.
+            Returned when the request specifies an `id` that already belongs to an existing monitor; the existing monitor is left unchanged.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  error:
+                    type: string
+                    example: Conflict
+                  message:
+                    type: string
+                    example: Monitor with id "existing-monitor-id" already exists.
+              examples:
+                duplicateMonitorId:
+                  summary: Duplicate monitor id
+                  description: A 409 error when the supplied `id` already belongs to an existing monitor.
+                  value: |-
+                    {
+                      "statusCode": 409,
+                      "error": "Conflict",
+                      "message": "Monitor with id \"existing-monitor-id\" already exists."
+                    }
   /api/synthetics/monitors/{id}:
     delete:
       summary: Delete a monitor
@@ -1317,6 +1345,12 @@ components:
           type: boolean
           default: true
           description: Specify whether the monitor is enabled.
+        id:
+          type: string
+          description: >
+            A unique identifier for the monitor.
+            If you don't provide one, an identifier is generated automatically.
+            Creating a monitor with an `id` that already exists returns a 409 error; the existing monitor is left unchanged.
         locations:
           type: array
           items:
@@ -1325,12 +1359,19 @@ components:
             The location to deploy the monitor.
             Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
             To list available locations you can:
-            
+
             - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
             - Go to *Synthetics > Management* and click *Create monitor*. Locations will be listed in *Locations*.
           externalDocs:
             url: https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts
             # description:
+        max_attempts:
+          type: integer
+          default: 2
+          description: >
+            The maximum number of attempts for the monitor, including the initial run.
+            An explicit `retest_on_failure` value always takes precedence: `true` resets this to the default of `2`, and `false` forces it to `1`.
+            When `retest_on_failure` isn't set, an explicit `max_attempts` value is used as-is.
         name:
           type: string
           description: The monitor name.

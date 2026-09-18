@@ -141,6 +141,7 @@ export const fetchUpsertMonitor = async ({
   } else {
     return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
       version: INITIAL_REST_VERSION,
+      internal: true,
     });
   }
 };
@@ -153,6 +154,7 @@ export const createGettingStartedMonitor = async ({
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
     gettingStarted: true,
     version: INITIAL_REST_VERSION,
+    internal: true,
   });
 };
 

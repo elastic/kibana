@@ -124,12 +124,13 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
   });
 
+  const syntheticsService = new SyntheticsService({
+    config: {
+      enabled: true,
+    },
+  } as any);
+
   it('should normalize schedule', async function () {
-    const syntheticsService = new SyntheticsService({
-      config: {
-        enabled: true,
-      },
-    } as any);
     const api = new AddEditMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
       request: {
@@ -165,10 +166,60 @@ describe('AddNewMonitorsPublicAPI', () => {
     expect(result.schedule).toEqual({ number: 3, unit: 'm' });
   });
 
-  describe('normalizeMonitor defaults', () => {
-    const syntheticsService = new SyntheticsService({
-      config: {},
+  it('should normalize namespace', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: {},
+      },
+      spaceId: 'default',
     } as any);
+    expect(api.getMonitorNamespace('testnamespace')).toEqual('testnamespace');
+  });
+
+  it('should normalize namespace in test space', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: {},
+      },
+      spaceId: 'test',
+    } as any);
+
+    expect(api.getMonitorNamespace('testnamespace')).toEqual('testnamespace');
+    expect(api.getMonitorNamespace('default')).toEqual('default');
+  });
+
+  it('falls back to the Kibana space for internal calls left at the default namespace', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: { internal: true },
+      },
+      spaceId: 'test',
+    } as any);
+
+    expect(api.getMonitorNamespace('default')).toEqual('test');
+    expect(api.getMonitorNamespace('testnamespace')).toEqual('testnamespace');
+  });
+
+  it('honors an explicit namespace for internal calls when preserve_namespace is set', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: { internal: true, preserve_namespace: true },
+      },
+      spaceId: 'test',
+    } as any);
+
+    expect(api.getMonitorNamespace('default')).toEqual('default');
+  });
+
+  describe('normalizeMonitor defaults', () => {
     const api = new AddEditMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
       request: {
@@ -388,16 +439,21 @@ describe('AddNewMonitorsPublicAPI', () => {
 
   describe('normalizeMonitor - maintenance windows', () => {
     const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
-      const syntheticsService = new SyntheticsService({ config: {} } as any);
-      syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+      const maintenanceWindowsSyntheticsService = new SyntheticsService({ config: {} } as any);
+      maintenanceWindowsSyntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue(maintenanceWindows);
       return {
         api: new AddEditMonitorAPI({
           spaceId: 'default',
-          syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+          syntheticsMonitorClient: new SyntheticsMonitorClient(
+            maintenanceWindowsSyntheticsService,
+            {} as any
+          ),
           request: { body: {} },
         } as any),
         maintenanceWindows,
-        getMaintenanceWindows: syntheticsService.getMaintenanceWindows,
+        getMaintenanceWindows: maintenanceWindowsSyntheticsService.getMaintenanceWindows,
       };
     };
 
