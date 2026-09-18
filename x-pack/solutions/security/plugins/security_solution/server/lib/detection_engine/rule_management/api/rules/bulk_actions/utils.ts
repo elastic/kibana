@@ -38,6 +38,7 @@ export const extractNotFoundAsSkipped = (
     if (
       'item' in err &&
       typeof err.item === 'string' &&
+      err.error instanceof Error &&
       err.error.message === RULE_NOT_FOUND_MESSAGE
     ) {
       skipped.push({ id: err.item, skip_reason: 'RULE_NOT_FOUND' });

@@ -59,38 +59,40 @@ export const bulkDeleteRules = async ({
             skip_reason: 'RULE_NOT_FOUND',
           });
         }
-        continue;
+      } else {
+        throw error;
       }
-      throw error;
     }
 
-    allRules.push(...(result.rules as RuleAlertType[]));
+    if (result) {
+      allRules.push(...(result.rules as RuleAlertType[]));
 
-    for (const error of result.errors) {
-      if (error.status === 404 && rulesById.has(error.rule.id)) {
-        allSkipped.push({
-          id: error.rule.id,
-          name: error.rule.name,
-          skip_reason: 'RULE_NOT_FOUND',
-        });
-        continue;
+      for (const error of result.errors) {
+        if (error.status === 404 && rulesById.has(error.rule.id)) {
+          allSkipped.push({
+            id: error.rule.id,
+            name: error.rule.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        } else {
+          allErrors.push(error);
+        }
       }
-      allErrors.push(error);
-    }
 
-    // Rules that silently drop out of alerting's PIT search (deleted between
-    // our fetch and the PIT query) appear in neither rules nor errors.
-    const returnedIds = new Set([
-      ...result.rules.map((r) => r.id),
-      ...result.errors.map((e) => e.rule.id),
-    ]);
-    for (const id of idsChunk) {
-      if (!returnedIds.has(id)) {
-        allSkipped.push({
-          id,
-          name: rulesById.get(id)?.name,
-          skip_reason: 'RULE_NOT_FOUND',
-        });
+      // Rules that silently drop out of alerting's PIT search (deleted between
+      // our fetch and the PIT query) appear in neither rules nor errors.
+      const returnedIds = new Set([
+        ...result.rules.map((r) => r.id),
+        ...result.errors.map((e) => e.rule.id),
+      ]);
+      for (const id of idsChunk) {
+        if (!returnedIds.has(id)) {
+          allSkipped.push({
+            id,
+            name: rulesById.get(id)?.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        }
       }
     }
   }
