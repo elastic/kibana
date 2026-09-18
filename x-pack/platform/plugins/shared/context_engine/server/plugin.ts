@@ -31,6 +31,7 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { registerDataStreamsRoutes } from './routes/data_streams';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -262,6 +263,9 @@ export class ContextEnginePlugin
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
+
+    // Read-only internal API backing the AI index trace picker's data stream search.
+    registerDataStreamsRoutes({ router });
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),

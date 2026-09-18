@@ -7,37 +7,36 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { DataStreamField } from './data_stream_field';
 
-const dataStreamIndex = {
-  name: 'logs-genai-default',
-  tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-  item: { name: 'logs-genai-default' },
+interface UseSearchDataStreamsArgs {
+  search: string;
+  enabled: boolean;
+}
+
+const mockUseSearchDataStreams = jest.fn();
+
+jest.mock('../../hooks/use_search_data_streams', () => ({
+  useSearchDataStreams: (args: UseSearchDataStreamsArgs) => mockUseSearchDataStreams(args),
+}));
+
+const defaultHookResult = {
+  dataStreams: ['logs-genai-default'],
+  hasMore: false,
+  isLoading: false,
+  isError: false,
 };
 
-const renderField = (
-  props: React.ComponentProps<typeof DataStreamField>,
-  getIndices = jest.fn().mockResolvedValue([
-    dataStreamIndex,
-    {
-      name: 'metrics-foo',
-      tags: [{ key: 'index', name: 'Index', color: 'default' }],
-      item: { name: 'metrics-foo' },
-    },
-  ])
-) => {
+const renderField = (props: React.ComponentProps<typeof DataStreamField>) => {
   const services = coreMock.createStart();
-  const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = getIndices;
   const view = render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={{ ...services, data }}>
+        <KibanaContextProvider services={services}>
           <DataStreamField {...props} />
         </KibanaContextProvider>
       </EuiProvider>
@@ -46,206 +45,131 @@ const renderField = (
   return { ...view, services };
 };
 
-interface Deferred<T> {
-  promise: Promise<T>;
-  resolve: (value: T) => void;
-}
-
-const createDeferred = <T,>(): Deferred<T> => {
-  let resolve: (value: T) => void = () => undefined;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
+const lastHookArgs = (): UseSearchDataStreamsArgs | undefined => {
+  const calls = mockUseSearchDataStreams.mock.calls;
+  return calls[calls.length - 1]?.[0];
 };
 
 describe('DataStreamField', () => {
+  beforeEach(() => {
+    mockUseSearchDataStreams.mockReturnValue(defaultHookResult);
+  });
+
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
   });
 
-  it('loads data streams from the cluster and calls onChange when one is selected', async () => {
-    const getIndices = jest.fn().mockResolvedValue([dataStreamIndex]);
-    const onChange = jest.fn();
-    renderField({ value: undefined, onChange }, getIndices);
+  it('does not enable the search hook before first focus', () => {
+    renderField({ value: undefined, onChange: jest.fn() });
 
-    expect(getIndices).not.toHaveBeenCalled();
+    expect(mockUseSearchDataStreams.mock.calls[0]?.[0]).toEqual({ search: '', enabled: false });
+  });
 
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
+  it('enables the search hook with an empty search on first focus', () => {
+    renderField({ value: undefined, onChange: jest.fn() });
+
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
+    if (!input) {
+      throw new Error('expected combobox input');
+    }
+    fireEvent.focus(input);
+
+    expect(lastHookArgs()).toEqual({ search: '', enabled: true });
+  });
+
+  it('updates search passed to the hook only after the debounce delay', async () => {
+    jest.useFakeTimers();
+    renderField({ value: undefined, onChange: jest.fn() });
+
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
+    if (!input) {
+      throw new Error('expected combobox input');
+    }
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: 'lo' } });
 
-    await waitFor(() => {
-      expect(getIndices).toHaveBeenCalledWith({
-        pattern: '*lo*',
-        isRollupIndex: expect.any(Function),
-      });
+    expect(lastHookArgs()).toEqual({ search: '', enabled: true });
+
+    await act(() => {
+      jest.advanceTimersByTime(299);
+    });
+    expect(lastHookArgs()).toEqual({ search: '', enabled: true });
+
+    await act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(lastHookArgs()).toEqual({ search: 'lo', enabled: true });
+  });
+
+  it('renders options that match the hook dataStreams', () => {
+    mockUseSearchDataStreams.mockReturnValue({
+      ...defaultHookResult,
+      dataStreams: ['logs-genai-default', 'logs-other'],
+    });
+    renderField({ value: undefined, onChange: jest.fn() });
+
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
+    if (!input) {
+      throw new Error('expected combobox input');
+    }
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'lo' } });
+
+    expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
+    expect(screen.getByText('logs-other')).toBeInTheDocument();
+  });
+
+  it('swaps help text when the hook reports hasMore', () => {
+    mockUseSearchDataStreams.mockReturnValue({
+      ...defaultHookResult,
+      hasMore: true,
+    });
+    renderField({ value: undefined, onChange: jest.fn() });
+
+    expect(
+      screen.getByText('Showing the first 50 matches. Refine your search to narrow the results.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows a toast warning on load error instead of rendering the raw error message', () => {
+    mockUseSearchDataStreams.mockReturnValue({
+      ...defaultHookResult,
+      dataStreams: [],
+      isError: true,
     });
 
-    await waitFor(() => {
-      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
-    });
+    const { services } = renderField({ value: undefined, onChange: jest.fn() });
 
+    expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
+      title: 'Unable to load data streams.',
+    });
+    expect(screen.queryByText('Unable to load data streams.')).not.toBeInTheDocument();
+  });
+
+  it('calls onChange when a data stream is selected', () => {
+    const onChange = jest.fn();
+    renderField({ value: undefined, onChange });
+
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
+    if (!input) {
+      throw new Error('expected combobox input');
+    }
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'logs' } });
     fireEvent.click(screen.getByText('logs-genai-default'));
 
     expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-genai-default' });
   });
 
-  it('does not call getIndices on mount', () => {
-    const getIndices = jest.fn().mockResolvedValue([dataStreamIndex]);
-    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
-
-    expect(getIndices).not.toHaveBeenCalled();
-  });
-
-  it('calls getIndices with * once on first focus and not again on a second focus', async () => {
-    const getIndices = jest.fn().mockResolvedValue([dataStreamIndex]);
-    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
-
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
-    fireEvent.focus(input);
-
-    await waitFor(() => {
-      expect(getIndices).toHaveBeenCalledTimes(1);
-    });
-    expect(getIndices).toHaveBeenCalledWith({
-      pattern: '*',
-      isRollupIndex: expect.any(Function),
-    });
-
-    fireEvent.focus(input);
-
-    expect(getIndices).toHaveBeenCalledTimes(1);
-  });
-
-  it('searches on a single character after focus', async () => {
-    const getIndices = jest.fn().mockResolvedValue([dataStreamIndex]);
-    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
-
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
-    fireEvent.focus(input);
-    fireEvent.change(input, { target: { value: 'l' } });
-
-    await waitFor(() => {
-      expect(getIndices).toHaveBeenCalledWith({
-        pattern: '*l*',
-        isRollupIndex: expect.any(Function),
-      });
-    });
-  });
-
-  it('filters out suggestions that are not data streams', async () => {
-    const getIndices = jest.fn().mockResolvedValue([
-      dataStreamIndex,
-      {
-        name: 'metrics-foo',
-        tags: [{ key: 'index', name: 'Index', color: 'default' }],
-        item: { name: 'metrics-foo' },
-      },
-    ]);
-    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
-
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
-    fireEvent.focus(input);
-    fireEvent.change(input, { target: { value: 'lo' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
-    });
-    expect(screen.queryByText('metrics-foo')).not.toBeInTheDocument();
-  });
-
-  it('shows a toast warning when getIndices throws', async () => {
-    const getIndices = jest.fn().mockImplementation(() => {
-      throw new Error('cluster exploded');
-    });
-    const { services } = renderField({ value: undefined, onChange: jest.fn() }, getIndices);
-
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
-    fireEvent.focus(input);
-    fireEvent.change(input, { target: { value: 'lo' } });
-
-    await waitFor(() => {
-      expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: 'Unable to load data streams.',
-      });
-    });
-    expect(screen.queryByText('cluster exploded')).not.toBeInTheDocument();
-  });
-
-  it('does not apply a stale getIndices response after a newer request', async () => {
-    jest.useFakeTimers();
-    const focus = createDeferred<Array<typeof dataStreamIndex>>();
-    const first = createDeferred<Array<typeof dataStreamIndex>>();
-    const second = createDeferred<Array<typeof dataStreamIndex>>();
-    let callCount = 0;
-    const getIndices = jest.fn().mockImplementation(() => {
-      callCount += 1;
-      if (callCount === 1) {
-        return focus.promise;
-      }
-      return callCount === 2 ? first.promise : second.promise;
-    });
-
-    renderField({ value: undefined, onChange: jest.fn() }, getIndices);
-
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
-    fireEvent.focus(input);
-    expect(getIndices).toHaveBeenCalledTimes(1);
-
-    fireEvent.change(input, { target: { value: 'aa' } });
-    await act(() => {
-      jest.advanceTimersByTime(300);
-    });
-    expect(getIndices).toHaveBeenCalledTimes(2);
-
-    fireEvent.change(input, { target: { value: 'bb' } });
-    await act(() => {
-      jest.advanceTimersByTime(300);
-    });
-    expect(getIndices).toHaveBeenCalledTimes(3);
-
-    await act(async () => {
-      second.resolve([
-        {
-          name: 'logs-newer',
-          tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-          item: { name: 'logs-newer' },
-        },
-      ]);
-      await second.promise;
-    });
-
-    expect(screen.getByText('logs-newer')).toBeInTheDocument();
-
-    await act(async () => {
-      first.resolve([
-        {
-          name: 'stale-stream',
-          tags: [{ key: 'data_stream', name: 'Data stream', color: 'default' }],
-          item: { name: 'stale-stream' },
-        },
-      ]);
-      await first.promise;
-    });
-
-    expect(screen.queryByText('stale-stream')).not.toBeInTheDocument();
-    expect(screen.getByText('logs-newer')).toBeInTheDocument();
-  });
-
   it('does not call onChange when typing a name that matches no option and pressing Enter', () => {
-    const getIndices = jest.fn().mockResolvedValue([dataStreamIndex]);
     const onChange = jest.fn();
-    renderField({ value: undefined, onChange }, getIndices);
+    renderField({ value: undefined, onChange });
 
-    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input')!;
+    const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
+    if (!input) {
+      throw new Error('expected combobox input');
+    }
     fireEvent.change(input, { target: { value: 'not-a-real-stream' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
