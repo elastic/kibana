@@ -20,9 +20,15 @@ import { BehaviorSubject } from 'rxjs';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../../common';
-import { getLensCaseAttachment } from './utils';
+import { useCasesConfig } from '../../../../common/lib/kibana';
+import {
+  getLensByRefAttachment,
+  getLensByValueAttachment,
+  getLensLibrarySavedObjectId,
+} from './utils';
 import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { convertToAbsoluteTimeRange } from './convert_to_absolute_time_range';
+import { getNonEmptyField } from '../../../../../common/utils/attachments';
 
 interface Props {
   lensApi: LensApi;
@@ -100,6 +106,8 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({
   });
 
   const timeRange = useStateFromPublishingSubject(lensApi.timeRange$);
+  const savedObjectId = useStateFromPublishingSubject(lensApi.savedObjectId$);
+  const panelTitle = useStateFromPublishingSubject(lensApi.title$);
   const parentTimeRange = useStateFromPublishingSubject(
     apiPublishesTimeRange(lensApi.parentApi)
       ? lensApi.parentApi?.timeRange$
@@ -107,23 +115,46 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({
   );
   const absoluteTimeRange = convertToAbsoluteTimeRange(timeRange);
   const absoluteParentTimeRange = convertToAbsoluteTimeRange(parentTimeRange);
+  const { attachmentsEnabled } = useCasesConfig();
 
   const attachments = useMemo(() => {
     const appliedTimeRange = absoluteTimeRange ?? absoluteParentTimeRange;
     const attributes = getAttributesWithParentSearchContext(lensApi, services);
 
-    return !attributes || !appliedTimeRange
-      ? []
-      : [
-          getLensCaseAttachment({
-            attributes,
-            timeRange: appliedTimeRange,
-            // Pass the Lens chart description (e.g. entity identity such as "host: web-server-1")
-            // as metadata so Cases can surface it alongside the attachment.
-            metadata: attributes.description ? { description: attributes.description } : undefined,
-          }),
-        ];
-  }, [lensApi, services, absoluteTimeRange, absoluteParentTimeRange]);
+    if (!attributes || !appliedTimeRange) {
+      return [];
+    }
+
+    const title = getNonEmptyField(attributes.title) ?? panelTitle;
+    const librarySavedObjectId = attachmentsEnabled
+      ? getNonEmptyField(savedObjectId) ?? getLensLibrarySavedObjectId(lensApi)
+      : undefined;
+
+    const attachment = librarySavedObjectId
+      ? getLensByRefAttachment({
+          attributes,
+          timeRange: appliedTimeRange,
+          savedObjectId: librarySavedObjectId,
+          title,
+        })
+      : getLensByValueAttachment({
+          attributes,
+          timeRange: appliedTimeRange,
+          // Pass the Lens chart description (e.g. entity identity such as "host: web-server-1")
+          // as metadata so Cases can surface it alongside the attachment.
+          metadata: attributes.description ? { description: attributes.description } : undefined,
+        });
+
+    return [attachment];
+  }, [
+    lensApi,
+    services,
+    absoluteTimeRange,
+    absoluteParentTimeRange,
+    attachmentsEnabled,
+    savedObjectId,
+    panelTitle,
+  ]);
 
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });

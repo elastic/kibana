@@ -6,6 +6,7 @@
  */
 
 import type { Attachment, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { AttachmentBoundedTool, AttachmentRepresentation } from './attachments';
 
 /**
@@ -43,4 +44,6 @@ export interface ProcessedRoundInput {
   attachment_refs?: ProcessedAttachmentVersionRef[];
   /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */
   attachment_context?: string;
+  /** Author attributed to this input */
+  author?: ConversationRoundAuthor;
 }

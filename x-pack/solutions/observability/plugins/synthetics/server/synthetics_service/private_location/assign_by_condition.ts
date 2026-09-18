@@ -95,6 +95,80 @@ export const agentIdFromCondition = (condition?: string | null): string | undefi
 };
 
 /**
+ * Config id embedded in a package-policy id, or undefined when the id doesn't
+ * belong to this location. New format is `${configId}-${locationId}`; legacy
+ * space-suffixed format is `${configId}-${locationId}-${spaceId}`, so the
+ * location id is an infix — `indexOf` (not a fixed trailing strip) handles both.
+ */
+export const configIdOf = (policyId: string, locationId: string): string | undefined => {
+  const idx = policyId.indexOf(`-${locationId}`);
+  return idx > 0 ? policyId.slice(0, idx) : undefined;
+};
+
+const isNewFormatPolicyId = (policyId: string, locationId: string): boolean =>
+  policyId.endsWith(`-${locationId}`);
+
+/**
+ * Counts unique monitors pinned to each agent via a stamped `${agent.id}`
+ * condition. A monitor can have both a new-format package policy
+ * (`${configId}-${locationId}`) and a leftover legacy twin
+ * (`${configId}-${locationId}-${spaceId}`); those count as one monitor. The
+ * new-format policy wins when both exist. Policies with no condition, or the
+ * all-agents sentinel, are skipped.
+ */
+export const countMonitorsByAssignedAgent = (
+  packagePolicies: ReadonlyArray<{ id: string; condition?: string | null }>,
+  locationId: string
+): Map<string, number> => {
+  const chosen = new Map<string, { condition?: string | null; isNewFormat: boolean }>();
+  for (const policy of packagePolicies) {
+    const configId = configIdOf(policy.id, locationId);
+    if (!configId) {
+      continue;
+    }
+    const isNewFormat = isNewFormatPolicyId(policy.id, locationId);
+    const existing = chosen.get(configId);
+    if (existing?.isNewFormat && !isNewFormat) {
+      continue;
+    }
+    if (!existing || isNewFormat) {
+      chosen.set(configId, { condition: policy.condition, isNewFormat });
+    }
+  }
+
+  const counts = new Map<string, number>();
+  for (const { condition } of chosen.values()) {
+    const agentId = agentIdFromCondition(condition);
+    if (!agentId) {
+      continue;
+    }
+    counts.set(agentId, (counts.get(agentId) ?? 0) + 1);
+  }
+  return counts;
+};
+
+/**
+ * Assigned agent for one monitor at one location. Prefers the current
+ * `${configId}-${locationId}` package policy; falls back to a legacy
+ * space-suffixed id when the new format is absent.
+ */
+export const assignedAgentIdForMonitorLocation = (
+  packagePolicies: ReadonlyArray<{ id: string; condition?: string | null }>,
+  monitorId: string,
+  locationId: string,
+  spaceId: string
+): string | undefined => {
+  const newId = `${monitorId}-${locationId}`;
+  const exact = packagePolicies.find((policy) => policy.id === newId);
+  if (exact) {
+    return agentIdFromCondition(exact.condition);
+  }
+  const legacyId = `${monitorId}-${locationId}-${spaceId}`;
+  const legacy = packagePolicies.find((policy) => policy.id === legacyId);
+  return legacy ? agentIdFromCondition(legacy.condition) : undefined;
+};
+
+/**
  * Rendezvous placement of a monitor onto one of the location's enrolled agents.
  * Returns the assigned agent id and its ready-to-stamp condition, or undefined
  * when the location has no enrolled agents yet.

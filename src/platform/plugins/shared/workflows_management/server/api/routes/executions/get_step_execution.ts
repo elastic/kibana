@@ -14,7 +14,6 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
-  hasWorkflowExecutionReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -49,9 +48,6 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (!hasWorkflowExecutionReadPrivilege(request)) {
-            return response.forbidden();
-          }
           const { executionId, stepExecutionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId);

@@ -64,7 +64,7 @@ export const RuleDetailsRoute: React.FunctionComponent = () => {
   }
 
   return (
-    <RuleProvider rule={rule}>
+    <RuleProvider rule={rule} key={rule.id}>
       <Suspense fallback={<Skeleton />}>
         <LazyRuleDetailPage />
       </Suspense>

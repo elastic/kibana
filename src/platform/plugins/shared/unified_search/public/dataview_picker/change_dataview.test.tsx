@@ -118,6 +118,15 @@ describe('DataView component', () => {
     jest.clearAllMocks();
   });
 
+  it('can hide the prepended data view label', async () => {
+    render(wrapDataViewComponentInContext({ showDataViewLabel: false }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Data view')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataview-trigger')).toHaveTextContent('Dataview 1');
+    });
+  });
+
   it.each([
     {
       description: 'should not render the add runtime field menu if addField is not given',

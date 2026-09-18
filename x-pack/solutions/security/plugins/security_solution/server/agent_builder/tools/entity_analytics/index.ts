@@ -9,6 +9,10 @@ export { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entit
 export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 export { getEntityGraphTool, SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from './get_entity_graph_tool';
 export {
+  getEntityRiskScoreHistoryTool,
+  SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
+} from './risk_score_history/get_entity_risk_score_history_tool';
+export {
   entityRelationshipHistoryTool,
   SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
 } from './entity_relationship_history_tool';

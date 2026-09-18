@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
@@ -97,5 +98,29 @@ describe('singleSearchAfter', () => {
         ruleExecutionLogger,
       })
     ).rejects.toThrow('Fake Error');
+    expect(ruleExecutionLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Error searching events'),
+      { consoleLogLevel: 'error' }
+    );
+  });
+
+  test('does not log an error when the response exceeds the elasticsearch.maxResponseSize limit', async () => {
+    mockService.scopedClusterClient.asCurrentUser.search.mockRejectedValueOnce(
+      new esErrors.RequestAbortedError(
+        'The content length (209715200) is bigger than the maximum allowed string (104857600)'
+      )
+    );
+    await expect(
+      singleSearchAfter({
+        searchRequest: mockSearchRequest,
+        services: mockService,
+        ruleExecutionLogger,
+      })
+    ).rejects.toThrow('content length');
+    expect(ruleExecutionLogger.error).not.toHaveBeenCalled();
+    expect(ruleExecutionLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Error searching events'),
+      { consoleLogLevel: 'warn' }
+    );
   });
 });

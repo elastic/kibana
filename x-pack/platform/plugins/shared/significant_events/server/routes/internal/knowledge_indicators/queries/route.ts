@@ -41,10 +41,14 @@ import type { PersistQueriesResult } from '../../../../lib/significant_events/pe
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators';
+import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
+// Leave five minutes under the route's idle-socket limit for an in-flight
+// validation call and the agent's forced-completion turn to finish.
+const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -284,6 +288,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
 
     let succeeded = 0;
     let failed = 0;
+    const candidateRuleIds = new Set<string>();
 
     for (const [streamName, { queryIds, backedRuleIds }] of byStream) {
       const definition = streamDefinitionsByName.get(streamName);
@@ -294,6 +299,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
       }
       try {
         await kiClient.deleteQueries(definition, queryIds);
+        backedRuleIds.forEach((ruleId) => candidateRuleIds.add(ruleId));
         succeeded += queryIds.length;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -304,6 +310,22 @@ const bulkDeleteQueriesRoute = createServerRoute({
             `queryIds=[${queryIds.join(',')}]${orphanContext}`
         );
         failed += queryIds.length;
+      }
+    }
+
+    if (candidateRuleIds.size > 0) {
+      try {
+        const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+        await cleanupStaleEvents({
+          eventClient: scopedClients.getEventClient(),
+          rulesClient,
+          candidateRuleIds: [...candidateRuleIds],
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        sigEventsLogger.error(
+          `Failed to clean up significant events after bulk query deletion: ${errorMessage}`
+        );
       }
     }
 
@@ -653,7 +675,13 @@ const generateQueriesRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     const result = await generateKIQueries(
-      { streamName, connectorId, maxExistingQueriesForContext, queryValidationTimeoutMs },
+      {
+        streamName,
+        connectorId,
+        maxExistingQueriesForContext,
+        maxDurationMs: QUERY_GENERATION_MAX_DURATION_MS,
+        queryValidationTimeoutMs,
+      },
       {
         streamsClient,
         inferenceClient,

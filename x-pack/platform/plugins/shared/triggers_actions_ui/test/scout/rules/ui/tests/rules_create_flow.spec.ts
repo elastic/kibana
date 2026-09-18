@@ -13,6 +13,7 @@ import {
   THRESHOLD_TEST_INDEX,
   findRuleIdByName,
   deleteRuleById,
+  openRulesListAndSearch,
 } from '../fixtures';
 
 test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
@@ -105,9 +106,7 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('displays the rule in the rules list', async () => {
-      await page.gotoApp('rules');
-      await expect(page.testSubj.locator('rulesList')).toBeVisible();
-      await page.testSubj.locator('ruleSearchField').fill(ruleName);
+      await openRulesListAndSearch(page, ruleName);
       await expect(
         page.testSubj
           .locator('rulesList')

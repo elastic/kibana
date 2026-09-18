@@ -52,6 +52,7 @@ export type {
 
 export type {
   Notification,
+  NotificationListItem,
   NotificationInput,
   NotificationDocument,
   NotificationContent,

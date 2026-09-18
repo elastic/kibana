@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -38,7 +39,6 @@ import {
   DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
   useFetchDiscoveryQueriesOccurrences,
 } from '../../../../hooks/use_fetch_discovery_queries_occurrences';
-import { useIsCpsMultiProject } from '../../../../hooks/use_is_cps_multi_project';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import { getFormattedError } from '../../../../util/errors';
@@ -50,7 +50,7 @@ import { SparkPlot } from '../../../../components/spark_plot';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { buildDiscoverParams } from '../../../../util/discover_helpers';
 import {
   ACTIONS_COLUMN_TITLE,
   CHART_SERIES_NAME,
@@ -95,14 +95,14 @@ export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { share },
+      start: { cps, share },
     },
     core: {
       notifications: { toasts },
     },
   } = useKibana();
   const { timeState } = useTimefilter();
-  const isCpsMultiProject = useIsCpsMultiProject();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [pagination, setPagination] = useState<{
@@ -329,7 +329,9 @@ export function QueriesTable() {
             description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
             enabled: () => discoverLocator !== undefined,
             onClick: (item: SignificantEventQueryRow) => {
-              discoverLocator?.navigate(buildDiscoverParams(item.query, timeState));
+              discoverLocator?.navigate(
+                buildDiscoverParams(item.query.esql.query, timeState.timeRange)
+              );
             },
             isPrimary: true,
             'data-test-subj': 'significant_events_table_open_in_discover_action',

@@ -10,7 +10,7 @@ import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
@@ -96,7 +96,8 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
 
   const esqlSource =
     isFilterActive && spaceId
-      ? `FROM ${getLatestEntitiesIndexName(
+      ? `FROM ${getEntitiesAlias(
+          ENTITY_LATEST,
           spaceId
         )} | WHERE entity.id IS NOT NULL | KEEP entity.id | SORT entity.id | LIMIT ${MAX_FILTERED_ENTITIES}`
       : undefined;

@@ -48,6 +48,13 @@ Use this whenever you hold a watchlist reference and need its id but are not cer
 This is a read-only lookup; it does not require confirmation. To *enumerate* watchlists ("what watchlists do we have"), use \`security.list_watchlists\` instead.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Get Watchlist ID',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import moment from 'moment';
 import { render, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { hasESData, hasUserDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
 jest.mock('@kbn/shared-ux-page-kibana-template', () => {
-  const MockedComponent = () => 'MockedKibanaPageTemplate';
-  const mockedModule = {
+  const MockTemplate = ({ children }: { children?: ReactNode }) => (
+    <div data-test-subj="mockedKibanaPageTemplate">{children}</div>
+  );
+  MockTemplate.Section = ({ children }: { children?: ReactNode }) => <section>{children}</section>;
+
+  return {
     ...jest.requireActual('@kbn/shared-ux-page-kibana-template'),
-    KibanaPageTemplate: () => {
-      return <MockedComponent />;
-    },
+    KibanaPageTemplate: MockTemplate,
   };
-  return mockedModule;
 });
 
 jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
@@ -34,6 +40,18 @@ jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
     },
   };
 });
+
+jest.mock('../news_feed', () => ({
+  NewsFeed: () => <div data-test-subj="mockedNewsFeed" />,
+}));
+
+jest.mock('../add_data', () => ({
+  AddData: () => <div data-test-subj="mockedAddData" />,
+}));
+
+jest.mock('../manage_data', () => ({
+  ManageData: () => <div data-test-subj="mockedManageData" />,
+}));
 
 const mockNewsFetchResult = {
   error: null,
@@ -142,7 +160,43 @@ const mockFeatures = [
     showOnHomePage: false,
     category: 'data' as FeatureCatalogueCategory,
   },
+  {
+    id: 'index_patterns',
+    title: 'Index Patterns',
+    description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
+    icon: 'indexPatternApp',
+    path: 'index_management_landing_page',
+    showOnHomePage: true,
+    category: 'admin' as FeatureCatalogueCategory,
+  },
+  {
+    id: 'console',
+    title: 'Console',
+    description: 'Skip the UI and manipulate Elasticsearch directly',
+    icon: 'consoleApp',
+    path: '/app/dev_tools#/console',
+    showOnHomePage: false,
+    category: 'admin' as FeatureCatalogueCategory,
+  },
 ];
+
+const renderOverview = (
+  props: Partial<React.ComponentProps<typeof Overview>> = {}
+): ReturnType<typeof render> =>
+  render(
+    <EuiProvider>
+      <I18nProvider>
+        <MockAppHeaderProvider>
+          <Overview
+            newsFetchResult={mockNewsFetchResult}
+            solutions={mockSolutions}
+            features={mockFeatures}
+            {...props}
+          />
+        </MockAppHeaderProvider>
+      </I18nProvider>
+    </EuiProvider>
+  );
 
 describe('Overview', () => {
   beforeEach(() => {
@@ -152,57 +206,69 @@ describe('Overview', () => {
 
   afterAll(() => jest.clearAllMocks());
 
-  test('renders correctly', async () => {
-    const { getByText } = render(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={mockFeatures}
-      />
-    );
+  test('renders the Analytics app header', async () => {
+    const { getByTestId } = renderOverview();
 
     await waitFor(() => {
-      expect(getByText('MockedKibanaPageTemplate')).toBeInTheDocument();
+      expect(getByTestId('mockedKibanaPageTemplate')).toBeInTheDocument();
     });
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Analytics');
+  });
+
+  test('renders manage and dev tools in the app header menu', async () => {
+    const { getByTestId } = renderOverview();
+
+    await waitFor(() => {
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
+    });
+
+    await openAppMenuOverflow();
+
+    expect(getByTestId('homeManage')).toHaveAttribute(
+      'href',
+      expect.stringContaining('/app/management')
+    );
+    expect(getByTestId('homeDevTools')).toHaveAttribute(
+      'href',
+      expect.stringContaining('/app/dev_tools')
+    );
   });
 
   test('renders correctly without solutions', async () => {
-    const { getByText } = render(
-      <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
-    );
+    const { getByTestId } = renderOverview({ solutions: [] });
 
     await waitFor(() => {
-      expect(getByText('MockedKibanaPageTemplate')).toBeInTheDocument();
+      expect(getByTestId('mockedKibanaPageTemplate')).toBeInTheDocument();
     });
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Analytics');
   });
 
-  test('renders correctly without features', async () => {
-    const { getByText } = render(
-      <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
-    );
+  test('hides dev tools when the console feature is missing', async () => {
+    const { getByTestId, queryByTestId } = renderOverview({ features: [] });
 
     await waitFor(() => {
-      expect(getByText('MockedKibanaPageTemplate')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
     });
+
+    await openAppMenuOverflow();
+
+    expect(getByTestId('homeManage')).toBeInTheDocument();
+    expect(queryByTestId('homeDevTools')).not.toBeInTheDocument();
   });
 
   test('renders correctly when there is no user data view', async () => {
     hasESData.mockResolvedValue(true);
     hasUserDataView.mockResolvedValue(false);
 
-    const { getByText, queryByText, queryByLabelText } = render(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={mockFeatures}
-      />
-    );
+    const { getByText, queryByTestId, queryByLabelText } = renderOverview();
 
     await waitFor(() => {
       expect(getByText('MockedAnalyticsNoDataPage')).toBeInTheDocument();
     });
 
-    expect(queryByText('MockedKibanaPageTemplate')).not.toBeInTheDocument();
+    expect(queryByTestId('mockedKibanaPageTemplate')).not.toBeInTheDocument();
     expect(queryByLabelText('Loading')).not.toBeInTheDocument();
   });
 
@@ -210,19 +276,13 @@ describe('Overview', () => {
     hasESData.mockImplementation(() => new Promise(() => {}));
     hasUserDataView.mockImplementation(() => new Promise(() => {}));
 
-    const { getByLabelText, queryByText } = render(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={mockFeatures}
-      />
-    );
+    const { getByLabelText, queryByText, queryByTestId } = renderOverview();
 
     await waitFor(() => {
       expect(getByLabelText('Loading')).toBeInTheDocument();
     });
 
     expect(queryByText('MockedAnalyticsNoDataPage')).not.toBeInTheDocument();
-    expect(queryByText('MockedKibanaPageTemplate')).not.toBeInTheDocument();
+    expect(queryByTestId('mockedKibanaPageTemplate')).not.toBeInTheDocument();
   });
 });

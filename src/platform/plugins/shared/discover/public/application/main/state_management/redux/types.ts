@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord, DiscoverTabType } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -19,7 +19,12 @@ import type {
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
-import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
@@ -34,6 +39,7 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { ExpandedDocRef } from '../../utils/expanded_doc';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
@@ -130,11 +136,21 @@ export interface DiscoverAppState {
    */
   density?: DataGridDensity;
   /**
-   * When true, ES|QL queries use approximate execution for faster, estimated results.
-   * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
-   * be reconsidered in a future version once the embedding story is clearer.
+   * Documents display mode: 'table' or 'json'
    */
-  isApproximate?: boolean;
+  documentsDisplayMode?: DocumentsDisplayMode;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode
+   */
+  jsonModeSettings?: JsonModeSettings;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  esqlApproximation?: boolean;
+  /**
+   * The expanded document reference
+   */
+  expandedDoc?: ExpandedDocRef;
 }
 
 export interface CascadedDocumentsState {
@@ -202,6 +218,7 @@ export interface TabState extends TabItem {
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
     searchSessionId?: string;
+    tabType?: DiscoverTabType;
   };
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
@@ -219,6 +236,7 @@ export interface TabState extends TabItem {
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
+  isWarningCalloutDismissed: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   profileAppStateDefaults: ProfileAppStateDefaults;

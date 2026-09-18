@@ -32,8 +32,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: [],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     expect(result.size).toBe(0);
     expect(esClient.asInternalUser.helpers.esql).not.toHaveBeenCalled();
@@ -44,8 +43,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: false,
+      entityStoreIndexName: null,
     });
     expect(result.size).toBe(0);
     // Existence is decided upstream; this function no longer calls indices.exists itself
@@ -61,8 +59,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
 
     const [args] = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock.calls[0];
@@ -89,8 +86,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     const enrichment = result.get('user:alice');
     expect(enrichment?.name).toBe('Alice');
@@ -127,8 +123,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['user:alice@example.com'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     const enrichment = result.get('user:alice@example.com');
     expect(enrichment?.sourceFields).toBeDefined();
@@ -166,8 +161,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['host:my-server'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     const enrichment = result.get('host:my-server');
     expect(enrichment?.sourceFields?.['host.id']).toBe('my-server');
@@ -201,8 +195,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     const enrichment = result.get('user:alice');
     expect(enrichment?.sourceFields).toBeUndefined();
@@ -218,8 +211,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ids,
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
   });
@@ -247,8 +239,7 @@ describe('fetchEntityEnrichment', () => {
         esClient,
         logger,
         entityIds: ['user:alice'],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
       const expectation = expect(promise).rejects.toBe(transient);
       await jest.runAllTimersAsync();
@@ -278,8 +269,7 @@ describe('fetchEntityEnrichment', () => {
         esClient,
         logger,
         entityIds: ['user:alice'],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
       await jest.runAllTimersAsync();
       const result = await promise;
@@ -305,8 +295,7 @@ describe('fetchEntityEnrichment', () => {
         esClient,
         logger,
         entityIds: ['user:alice'],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
       const expectation = expect(promise).rejects.toBe(permanent);
       await jest.runAllTimersAsync();
@@ -335,8 +324,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['host:myhost'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
     expect(result.get('host:myhost')?.hostIps).toEqual(['192.168.1.1', '10.0.0.1']);
   });
@@ -350,8 +338,7 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
 
     const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock

@@ -133,6 +133,7 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput 
   return {
     name: getPrecisionName(k),
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       let metrics: RagMetrics | null;
       try {
@@ -173,6 +174,7 @@ export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = u
   return {
     name: getRecallName(k),
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       let metrics: RagMetrics | null;
       try {
@@ -213,6 +215,7 @@ export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unkno
   return {
     name: getF1Name(k),
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       let metrics: RagMetrics | null;
       try {

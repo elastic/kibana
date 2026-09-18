@@ -46,6 +46,13 @@ export function createEventStatusUpdateTool({
         defaultMessage: 'Update the status of an existing significant event.',
       })}
     `,
+    annotations: {
+      title: 'Update Significant Event Status',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: eventStatusUpdateSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),

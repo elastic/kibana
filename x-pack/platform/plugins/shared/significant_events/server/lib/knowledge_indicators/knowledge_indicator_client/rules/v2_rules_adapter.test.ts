@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { RulesAdapterV2 } from './v2_rules_adapter';
+import { Parser } from '@elastic/esql';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
   STREAMS_RULE_STREAM_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
@@ -24,13 +26,17 @@ function makeRulesClientMock() {
     createRule: jest.fn(),
     updateRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    ruleExists: jest.fn(),
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
     getTags: jest.fn().mockResolvedValue([]),
   };
 }
 
-function makeAdapter(mock: ReturnType<typeof makeRulesClientMock>) {
-  return new RulesAdapterV2(mock as unknown as RulesClientApi);
+function makeAdapter(
+  mock: ReturnType<typeof makeRulesClientMock>,
+  { isServerless }: Pick<RulesAdapterV2Params, 'isServerless'> = { isServerless: false }
+) {
+  return new RulesAdapterV2({ rulesClient: mock, isServerless });
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -163,6 +169,50 @@ describe('RulesAdapterV2', () => {
     });
   });
 
+  describe('serverless project routing', () => {
+    const SET_DIRECTIVE = `SET project_routing="${PROJECT_ROUTING_ALL}";`;
+
+    it('omits the project routing directive on stateful', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: false });
+      await adapter.createRule('rule-1', createDefinition);
+
+      expect(lastCreateCall(mock).data.query.breach.query).not.toContain('SET project_routing');
+    });
+
+    it('scopes the create breach query across all projects on serverless', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: true });
+      await adapter.createRule('rule-1', createDefinition);
+
+      const query = lastCreateCall(mock).data.query.breach.query;
+      expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
+      expectMetricSeriesBreach(query);
+    });
+
+    it('scopes the update breach query across all projects on serverless', async () => {
+      const mock = makeRulesClientMock();
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: true });
+      await adapter.updateRule('rule-1', updateDefinition);
+
+      const query = lastUpdateCall(mock).data.query.breach.query;
+      expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
+      expectMetricSeriesBreach(query);
+    });
+
+    it('emits a query Alerting v2 rule validation accepts', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: true });
+      await adapter.createRule('rule-1', createDefinition);
+
+      expect(Parser.parseErrors(lastCreateCall(mock).data.query.breach.query)).toEqual([]);
+    });
+  });
+
   describe('createRule', () => {
     it('falls back to updateRule on 409 conflict', async () => {
       const mock = makeRulesClientMock();
@@ -249,6 +299,47 @@ describe('RulesAdapterV2', () => {
         perPage: 500,
         page: 2,
       });
+    });
+  });
+
+  describe('findExistingRuleIds', () => {
+    it('returns only IDs that resolve to live rules', async () => {
+      const mock = makeRulesClientMock();
+      mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
+        Promise.resolve(id === 'live-rule')
+      );
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findExistingRuleIds(['deleted-rule', 'live-rule'])).resolves.toEqual([
+        'live-rule',
+      ]);
+      expect(mock.ruleExists).toHaveBeenCalledTimes(2);
+    });
+
+    it('propagates lookup failures', async () => {
+      const mock = makeRulesClientMock();
+      mock.ruleExists.mockRejectedValueOnce(new Error('lookup failed'));
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findExistingRuleIds(['rule-1'])).rejects.toThrow('lookup failed');
+    });
+
+    it('limits concurrent existence checks', async () => {
+      const mock = makeRulesClientMock();
+      let activeChecks = 0;
+      let maxActiveChecks = 0;
+      mock.ruleExists.mockImplementation(async () => {
+        activeChecks += 1;
+        maxActiveChecks = Math.max(maxActiveChecks, activeChecks);
+        await Promise.resolve();
+        activeChecks -= 1;
+        return true;
+      });
+      const adapter = makeAdapter(mock);
+      const ruleIds = Array.from({ length: 11 }, (_, index) => `rule-${index}`);
+
+      await expect(adapter.findExistingRuleIds(ruleIds)).resolves.toEqual(ruleIds);
+      expect(maxActiveChecks).toBe(10);
     });
   });
 

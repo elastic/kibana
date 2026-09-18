@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
 import { apiTest, testData } from '../fixtures';
 
 /**
@@ -23,6 +24,22 @@ apiTest.describe(
   'Fleet IaC Provisioner render route',
   { tag: tags.serverless.security.complete },
   () => {
+    apiTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          [ENABLE_IAC_PROVISIONER_FLAG]: true,
+        },
+      });
+    });
+
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          [ENABLE_IAC_PROVISIONER_FLAG]: false,
+        },
+      });
+    });
+
     apiTest(
       'rejects a caller without Fleet privileges with 403',
       async ({ apiClient, samlAuth }) => {
@@ -110,8 +127,13 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        // 404 (not 403) proves route authorization succeeded and the handler ran.
+        // 404 (not 403) proves route authorization succeeded and the handler
+        // ran. The body must name the missing package so this does not pass
+        // when the flag override failed and the handler returned the
+        // "IaC Provisioner is not enabled" 404 instead.
         expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toContain('this_package_does_not_exist');
+        expect(response.body.message).not.toBe('IaC Provisioner is not enabled');
       }
     );
   }

@@ -32,7 +32,7 @@ const makeToolCallSignal = (overrides: Partial<Signal> = {}): Signal => ({
     fell_back_to_raw: false,
     producer: 'trace_tool',
     span_id: 'span-1',
-    agent: { id: 'a1', name: 'A1', class: 'user' },
+    agent: { id: 'a1', name: 'A1' },
     returned: { columns: ['x'], row_count: 3 },
     duration_ms: 12,
     round_signals: { esql_count: 1, raw_query_count: 0, ki_retrieval_count: 1 },

@@ -24,8 +24,8 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   EuiBasicTableColumn,
   EuiSearchBarProps,
@@ -894,10 +894,8 @@ export const ManageIntegrationsTable: React.FC<{
 
   if (isError) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
-        iconType="error"
         title={
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.errorTitle"

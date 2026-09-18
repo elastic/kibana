@@ -77,6 +77,20 @@ export interface ActionSchedulerOptions<
    * (`effectiveApiKey`) rather than passing the raw rule SO attributes directly.
    */
   apiKey: string | null;
+  /**
+   * Id of the UIAM API key in `apiKey`, so the enqueued connector tasks record it and the API key
+   * invalidation task's in-use guard can find them. Only ad hoc (backfill) runs supply it today,
+   * and only when `apiKey` resolved to the UIAM key rather than to an Elasticsearch fallback —
+   * see `credentialType` from `getFakeKibanaRequest`.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM credential. Read off the rule
+   * run's own fake request (marked by `getFakeKibanaRequest` from the rule's persisted
+   * `uiamApiKeyExternal` verdict), so the connector tasks authenticate exactly like the rule run
+   * itself: without the UIAM shared secret, which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;

@@ -54,10 +54,12 @@ import type { FipsServiceSetupInternal } from './fips';
 import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
+import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
+import { ServiceAccountsService } from './service_accounts';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
-import { UiamService } from './uiam';
+import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE, UiamService } from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -147,6 +149,25 @@ export class SecurityPlugin
     return this.authenticationStart;
   };
 
+  /**
+   * Captured during `setup`: the project identifiers only exist on the cloud plugin's setup
+   * contract, but service accounts are started later.
+   */
+  private cloudProjectContext?: CloudProjectContext;
+
+  private readonly serviceAccountsService: ServiceAccountsService;
+  private serviceAccountsStart?: ServiceAccountsServiceStart | null;
+  /**
+   * Returns the service account management API, or `null` when service accounts are
+   * not enabled for this deployment.
+   */
+  private readonly getServiceAccountsService = () => {
+    if (this.serviceAccountsStart === undefined) {
+      throw new Error(`serviceAccountsStart is not registered!`);
+    }
+    return this.serviceAccountsStart;
+  };
+
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
   private readonly getFeatureUsageService = () => {
@@ -158,6 +179,7 @@ export class SecurityPlugin
 
   private readonly auditService: AuditService;
   private readonly securityLicenseService = new SecurityLicenseService();
+  private securityLicense?: SecurityLicense;
   private readonly analyticsService: AnalyticsService;
   private readonly authorizationService = new AuthorizationService();
   private readonly elasticsearchService: ElasticsearchService;
@@ -193,6 +215,9 @@ export class SecurityPlugin
       this.initializerContext.logger.get('authentication')
     );
     this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+    this.serviceAccountsService = new ServiceAccountsService(
+      this.initializerContext.logger.get('service-accounts')
+    );
 
     this.elasticsearchService = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
@@ -241,6 +266,16 @@ export class SecurityPlugin
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
+    this.securityLicense = license;
+    const organizationId = cloud?.organizationId;
+    const projectId = cloud?.serverless?.projectId;
+    const projectType = cloud?.serverless?.projectType
+      ? KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE[cloud.serverless.projectType]
+      : undefined;
+    this.cloudProjectContext =
+      organizationId && projectId && projectType
+        ? { organizationId, projectId, projectType }
+        : undefined;
 
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
@@ -271,6 +306,7 @@ export class SecurityPlugin
       config: config.audit,
       logging: core.logging,
       http: core.http,
+      status: core.status,
       isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
@@ -336,6 +372,7 @@ export class SecurityPlugin
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
         getSession: this.getSession,
+        getServiceAccounts: this.getServiceAccountsService,
         audit: this.auditSetup,
         config,
         logger: this.logger,
@@ -364,6 +401,7 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
+      getServiceAccountsService: this.getServiceAccountsService,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
@@ -438,6 +476,16 @@ export class SecurityPlugin
     const kibanaServerResourceURL =
       config.mcp?.oauth2?.metadata?.resource ?? core.http.basePath.publicBaseUrl ?? serverBaseUrl;
 
+    // Shared by every consumer below: constructing a second instance would re-read the
+    // configured TLS material and create a second connection pool.
+    const uiam = config.uiam?.enabled
+      ? new UiamService(this.logger.get('uiam'), config.uiam, {
+          kibanaServerResourceURL,
+          elasticsearchUrl: this.elasticsearchUrl,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+        })
+      : undefined;
+
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -447,19 +495,22 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
-      uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam, {
-            kibanaServerResourceURL,
-            elasticsearchUrl: this.elasticsearchUrl,
-            kibanaVersion: this.initializerContext.env.packageInfo.version,
-          })
-        : undefined,
+      uiam,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       userActivity: core.userActivity,
+    });
+
+    this.serviceAccountsStart = this.serviceAccountsService.start({
+      config,
+      license: this.securityLicense!,
+      uiam,
+      checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+      cloudProjectContext: this.cloudProjectContext,
+      getCurrentUser: this.authenticationStart.getCurrentUser,
     });
 
     this.authorizationService.start({

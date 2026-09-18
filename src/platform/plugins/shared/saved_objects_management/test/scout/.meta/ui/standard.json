@@ -1,5 +1,8 @@
 {
-  "sha1": "f3ab25b20c9d50b76184606165a6967ac635ba7a",
+  "sha1": "8f5ab55cbd3a224d921ca90eb9bef235b87b3634",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "12438030416ccc4-0ca770f7b4f667b",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 21,
+        "column": 27
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 26,
+        "column": 42
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 34,
+        "column": 9
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 43,
+        "column": 8
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 51,
+        "column": 23
       }
     },
     {
@@ -81,7 +84,105 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 94,
+        "line": 57,
+        "column": 5
+      }
+    },
+    {
+      "id": "919736241b0bdf7-c2099c09adb7828",
+      "title": "Saved objects management - import conflicts imports an object after pointing its missing data view at an existing one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 32,
+        "column": 21
+      }
+    },
+    {
+      "id": "919736241b0bdf7-0d55990767271ac",
+      "title": "Saved objects management - import conflicts overwrites an existing object when the user confirms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 42,
+        "column": 8
+      }
+    },
+    {
+      "id": "919736241b0bdf7-17d500a93162f1f",
+      "title": "Saved objects management - import conflicts keeps the existing object when the user skips the overwrite",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 61,
+        "column": 91
+      }
+    },
+    {
+      "id": "919736241b0bdf7-1e96bcd7fbdc5cb",
+      "title": "Saved objects management - import conflicts drops a visualization whose saved search keeps an unresolvable data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 76,
+        "column": 15
+      }
+    },
+    {
+      "id": "919736241b0bdf7-b94d3db5345d8a2",
+      "title": "Saved objects management - import conflicts imports a visualization whose saved search had an unresolved data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "9f7d4f477606ab1-10f2c4f8f00ccf4",
+      "title": "Saved objects management - import objects imports a visualization and lists it as a child of its data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
+        "line": 36,
+        "column": 21
+      }
+    },
+    {
+      "id": "9f7d4f477606ab1-abd11af51c307c8",
+      "title": "Saved objects management - import objects imports objects that reference each other in a cycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
+        "line": 65,
         "column": 7
       }
     },
@@ -95,8 +196,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 48,
+        "column": 13
       }
     },
     {
@@ -109,8 +210,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 85,
-        "column": 22
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -123,8 +224,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/inspect.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 21,
+        "column": 8
       }
     },
     {
@@ -137,7 +238,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/spaces_integration.spec.ts",
-        "line": 39,
+        "line": 31,
         "column": 9
       }
     }

@@ -8157,56 +8157,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -8377,56 +8374,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -8541,56 +8535,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -8705,56 +8696,53 @@
                 },
                 "attachmentFramework": {
                   "properties": {
-                    "persistableAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "attachmentsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
+                            },
+                            "average": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
+                            }
                           }
                         }
                       }
                     },
-                    "externalAttachments": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "average": {
-                            "type": "long"
-                          },
-                          "maxOnACase": {
-                            "type": "long"
-                          },
-                          "total": {
-                            "type": "long"
-                          },
-                          "type": {
-                            "type": "keyword"
+                    "bySavedObject": {
+                      "properties": {
+                        "legacy": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
+                          }
+                        },
+                        "unified": {
+                          "properties": {
+                            "total": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)"
+                              }
+                            }
                           }
                         }
                       }
                     },
                     "files": {
                       "properties": {
-                        "average": {
-                          "type": "long"
-                        },
                         "averageSize": {
-                          "type": "long"
-                        },
-                        "maxOnACase": {
-                          "type": "long"
-                        },
-                        "total": {
                           "type": "long"
                         },
                         "topMimeTypes": {
@@ -9180,6 +9168,750 @@
               "type": "long"
             }
           }
+        },
+        "templates": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates, counting each template once by its latest non-soft-deleted version"
+                  }
+                },
+                "totalEnabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it"
+                  }
+                },
+                "totalDisabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that are disabled"
+                  }
+                },
+                "totalSoftDeleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of templates that have been soft-deleted"
+                  }
+                },
+                "totalMigratedFromV1": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of live templates that were created by the templates v1 to v2 migration rather than authored directly"
+                  }
+                },
+                "versionPercentiles": {
+                  "properties": {
+                    "p50": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 50th percentile of the version across live templates"
+                      }
+                    },
+                    "p90": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 90th percentile of the version across live templates"
+                      }
+                    },
+                    "p99": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Rounded 99th percentile of the version across live templates"
+                      }
+                    }
+                  }
+                },
+                "fieldCount": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Highest number of fields declared by a single live template"
+                      }
+                    },
+                    "average": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Average number of fields declared per live template, rounded"
+                      }
+                    }
+                  }
+                },
+                "fieldDefinitions": {
+                  "properties": {
+                    "totalsByControl": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported"
+                          }
+                        }
+                      }
+                    },
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cases": {
+                  "properties": {
+                    "withTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference a template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference a template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference a template"
+                          }
+                        }
+                      }
+                    },
+                    "withoutTemplate": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases that reference no template"
+                          }
+                        },
+                        "monthly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last month that reference no template"
+                          }
+                        },
+                        "weekly": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last week that reference no template"
+                          }
+                        },
+                        "daily": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Cases created in the last day that reference no template"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fieldLibrary": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it."
+                  }
+                },
+                "totalGlobal": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones."
+                  }
+                },
+                "totalReusable": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references."
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it."
+                  }
+                },
+                "totalGlobal": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones."
+                  }
+                },
+                "totalReusable": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references."
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it."
+                  }
+                },
+                "totalGlobal": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones."
+                  }
+                },
+                "totalReusable": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references."
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it."
+                  }
+                },
+                "totalGlobal": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones."
+                  }
+                },
+                "totalReusable": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references."
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -9272,10 +10004,905 @@
         }
       }
     },
+    "connectors_serverless": {
+      "properties": {
+        "connectors": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "serviceType": {
+                "type": "keyword"
+              },
+              "isNative": {
+                "type": "boolean"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "keyword"
+              },
+              "indexName": {
+                "type": "keyword"
+              },
+              "dlsEnabled": {
+                "type": "boolean"
+              },
+              "sslEnabled": {
+                "type": "boolean"
+              },
+              "fetchSelectively": {
+                "type": "boolean"
+              },
+              "textExtractionServiceEnabled": {
+                "type": "boolean"
+              },
+              "documents": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "volume": {
+                    "type": "long"
+                  },
+                  "inLastSync": {
+                    "type": "long"
+                  }
+                }
+              },
+              "dataSourceSpecific": {
+                "properties": {
+                  "confluence": {
+                    "properties": {
+                      "dataSourceType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "github": {
+                    "properties": {
+                      "isCloud": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "jira": {
+                    "properties": {
+                      "dataSourceType": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "mongodb": {
+                    "properties": {
+                      "directConnect": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "mssql": {
+                    "properties": {
+                      "validateHost": {
+                        "type": "boolean"
+                      },
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "mysql": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "oracle": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "postgresql": {
+                    "properties": {
+                      "tables": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "slack": {
+                    "properties": {
+                      "autoJoinChannelsEnabled": {
+                        "type": "boolean"
+                      },
+                      "syncUsersEnabled": {
+                        "type": "boolean"
+                      },
+                      "fetchLastNDays": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "zoom": {
+                    "properties": {
+                      "recordingAge": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "scheduling": {
+                "properties": {
+                  "accessControl": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "full": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "incremental": {
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "interval": {
+                        "type": "text"
+                      }
+                    }
+                  }
+                }
+              },
+              "syncRules": {
+                "properties": {
+                  "active": {
+                    "properties": {
+                      "withBasicRules": {
+                        "type": "boolean"
+                      },
+                      "withAdvancedRules": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "draft": {
+                    "properties": {
+                      "withBasicRules": {
+                        "type": "boolean"
+                      },
+                      "withAdvancedRules": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "ingestPipeline": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "extractBinaryContent": {
+                    "type": "boolean"
+                  },
+                  "reduceWhitespace": {
+                    "type": "boolean"
+                  },
+                  "runMLInference": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "syncJobs": {
+                "properties": {
+                  "overall": {
+                    "properties": {
+                      "total": {
+                        "type": "long"
+                      },
+                      "last30Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "last7Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "withTextExtractionServiceEnabled": {
+                    "properties": {
+                      "total": {
+                        "type": "long"
+                      },
+                      "last30Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "last7Days": {
+                        "properties": {
+                          "overall": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "accessControl": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "full": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          },
+                          "incremental": {
+                            "properties": {
+                              "total": {
+                                "type": "long"
+                              },
+                              "manual": {
+                                "type": "long"
+                              },
+                              "scheduled": {
+                                "type": "long"
+                              },
+                              "completed": {
+                                "type": "long"
+                              },
+                              "errored": {
+                                "type": "long"
+                              },
+                              "canceled": {
+                                "type": "long"
+                              },
+                              "suspended": {
+                                "type": "long"
+                              },
+                              "idle": {
+                                "type": "long"
+                              },
+                              "running": {
+                                "type": "long"
+                              },
+                              "totalDurationSeconds": {
+                                "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
           "type": "boolean"
+        }
+      }
+    },
+    "entity_store": {
+      "properties": {
+        "legacy_global_state_doc_count": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of entity store global state docs still in legacy config format (defaultsVersion !== latest). Reaches 0 when all stores have been written to at least once"
+          }
         }
       }
     },

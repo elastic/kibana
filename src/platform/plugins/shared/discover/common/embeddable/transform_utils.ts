@@ -23,6 +23,7 @@ import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { JsonModeSettings } from '@kbn/unified-data-table';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
   isDiscoverSessionEsqlTab,
@@ -81,6 +82,8 @@ export function fromStoredSearchEmbeddableByRef(
     rowsPerPage,
     headerRowHeight,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
     grid,
     selectedTabId,
     savedObjectId,
@@ -135,6 +138,8 @@ export function fromStoredSearchEmbeddableByValue(
     rowsPerPage,
     headerRowHeight,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
     grid,
     attributes,
     title,
@@ -258,8 +263,18 @@ export function toStoredTab(
 export function toDiscoverSessionPanelOverrides(
   storedState: StoredSearchEmbeddableState | DiscoverSessionTabAttributes
 ): DiscoverSessionPanelOverrides {
-  const { sort, columns, rowHeight, sampleSize, rowsPerPage, headerRowHeight, density, grid } =
-    storedState;
+  const {
+    sort,
+    columns,
+    rowHeight,
+    sampleSize,
+    rowsPerPage,
+    headerRowHeight,
+    density,
+    documentsDisplayMode,
+    jsonModeSettings,
+    grid,
+  } = storedState;
   return {
     ...(sort && { sort: fromStoredSort(sort) }),
     ...(columns && { column_order: columns }),
@@ -270,6 +285,8 @@ export function toDiscoverSessionPanelOverrides(
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
     ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
+    ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
+    ...fromStoredJsonModeSettings(jsonModeSettings),
   };
 }
 
@@ -285,7 +302,9 @@ export function fromDiscoverSessionPanelOverrides(
     rows_per_page: rowsPerPage,
     header_row_height: headerRowHeight,
     density,
+    documents_display_mode: documentsDisplayMode,
   } = apiState;
+  const jsonModeSettings = toStoredJsonModeSettings(apiState);
   return {
     ...(sort && { sort: toStoredSort(sort) }),
     ...(columnOrder && { columns: columnOrder }),
@@ -294,9 +313,39 @@ export function fromDiscoverSessionPanelOverrides(
     ...(rowsPerPage && { rowsPerPage }),
     ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
     ...(density && { density }),
+    ...(documentsDisplayMode && { documentsDisplayMode }),
+    ...(jsonModeSettings && { jsonModeSettings }),
     ...(Object.keys(columnSettings ?? {}).length && { grid: toStoredGrid(columnSettings) }),
   };
 }
+
+const fromStoredJsonModeSettings = (
+  jsonModeSettings?: JsonModeSettings
+): Pick<DiscoverSessionPanelOverrides, 'hide_nulls' | 'wrap_lines' | 'default_rendered_nodes'> => {
+  if (!jsonModeSettings) {
+    return {};
+  }
+  return {
+    ...(jsonModeSettings.hideNulls !== undefined && { hide_nulls: jsonModeSettings.hideNulls }),
+    ...(jsonModeSettings.wrapLines !== undefined && { wrap_lines: jsonModeSettings.wrapLines }),
+    ...(jsonModeSettings.defaultRenderedNodes !== undefined && {
+      default_rendered_nodes: jsonModeSettings.defaultRenderedNodes,
+    }),
+  };
+};
+
+const toStoredJsonModeSettings = (
+  apiState: DiscoverSessionPanelOverrides
+): JsonModeSettings | undefined => {
+  const jsonModeSettings: JsonModeSettings = {
+    ...(apiState.hide_nulls !== undefined && { hideNulls: apiState.hide_nulls }),
+    ...(apiState.wrap_lines !== undefined && { wrapLines: apiState.wrap_lines }),
+    ...(apiState.default_rendered_nodes !== undefined && {
+      defaultRenderedNodes: apiState.default_rendered_nodes,
+    }),
+  };
+  return Object.keys(jsonModeSettings).length > 0 ? jsonModeSettings : undefined;
+};
 
 export function fromStoredGrid(
   grid: DiscoverSessionTabAttributes['grid']

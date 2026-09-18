@@ -18,6 +18,7 @@ plugins:
     - context_engine
     - cross_cluster_replication
     - custom_branding
+    - custom_content
     - dashboard
     - dashboard_markdown
     - data
@@ -26,15 +27,18 @@ plugins:
     - data_view_management
     - data_views
     - data_views_as_code
+    - data_visualizer
+    - dataset_quality
     - dev_tools
     - discover
-    - discover_enhanced
+    - discoverCustomizationExamples
     - discoveries
     - embeddable_alerts_table
     - entity_store
     - error_boundary_example
     - event_annotation_listing
     - exploratory_view
+    - files_management
     - fleet
     - flyoutSystemExamples
     - gen_ai_settings
@@ -47,6 +51,7 @@ plugins:
     - infra
     - ingest_hub
     - ingest_pipelines
+    - interactive_setup
     - intercepts
     - kibana_overview
     - kql
@@ -60,7 +65,10 @@ plugins:
     - monitoring
     - navigation
     - nightshift
+    - nightshift_investigations
+    - notification_center
     - observability
+    - observability_alerting
     - observability_onboarding
     - osquery
     - painless_lab
@@ -70,6 +78,7 @@ plugins:
     - reindex_service
     - saved_objects_management
     - saved_objects_tagging
+    - searchExamples
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
@@ -78,6 +87,7 @@ plugins:
     - security_solution
     - security_solution_serverless
     - serverless_observability
+    - serverless_vectordb
     - share
     - significant_events
     - significant_events_app
@@ -119,10 +129,12 @@ packages:
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  - x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel.playwright.config.ts
   - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
-  - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts

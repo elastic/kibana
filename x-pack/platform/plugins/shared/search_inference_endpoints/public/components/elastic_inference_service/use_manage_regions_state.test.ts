@@ -473,6 +473,52 @@ describe('useManageRegionsState', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // handleLocationTypeChange
+  // ---------------------------------------------------------------------------
+  describe('handleLocationTypeChange', () => {
+    it('switches activeTab', () => {
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      act(() => result.current.common.handleLocationTypeChange('regions'));
+
+      expect(result.current.common.activeTab).toBe('regions');
+    });
+
+    it('is a no-op when called with the already-active tab', () => {
+      mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.geoTab.onToggleGeo('us'));
+      expect(result.current.geoTab.checkedGeos.size).toBe(2);
+
+      act(() => result.current.common.handleLocationTypeChange('geo'));
+
+      expect(result.current.geoTab.checkedGeos.size).toBe(2);
+    });
+
+    it('resets both tab selections to their seeded values on switch', () => {
+      mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.geoTab.onToggleGeo('us'));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu', 'us']));
+
+      act(() => result.current.common.handleLocationTypeChange('regions'));
+      act(() => result.current.common.handleLocationTypeChange('geo'));
+
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // handleConfirmSave (regions mode)
   // ---------------------------------------------------------------------------
   describe('handleConfirmSave (regions mode)', () => {
@@ -493,10 +539,12 @@ describe('useManageRegionsState', () => {
       act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         {
-          allowed_regions: [
-            { csp: 'aws', region: 'us-east-1' },
-            { csp: 'gcp', region: 'europe-west1' },
-          ],
+          body: {
+            allowed_regions: [
+              { csp: 'aws', region: 'us-east-1' },
+              { csp: 'gcp', region: 'europe-west1' },
+            ],
+          },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
@@ -520,7 +568,7 @@ describe('useManageRegionsState', () => {
       act(() => result.current.regionTab.onToggleRegion('aws::us-east-1'));
       act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] },
+        { body: { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] } },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -560,11 +608,15 @@ describe('useManageRegionsState', () => {
       expect(result.current.common.activeTab).toBe('geo');
       act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ allowed_geos: expect.arrayContaining(['eu', 'us']) }),
+        expect.objectContaining({
+          body: expect.objectContaining({ allowed_geos: expect.arrayContaining(['eu', 'us']) }),
+        }),
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
       expect(mockSaveMutate).not.toHaveBeenCalledWith(
-        expect.objectContaining({ allowed_regions: expect.anything() }),
+        expect.objectContaining({
+          body: expect.objectContaining({ allowed_regions: expect.anything() }),
+        }),
         expect.anything()
       );
     });
@@ -574,8 +626,32 @@ describe('useManageRegionsState', () => {
       act(() => result.current.geoTab.onToggleGeo('eu'));
       act(() => result.current.common.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        { allowed_geos: ['us'] },
+        { body: { allowed_geos: ['us'] } },
         expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+
+    it('does not send force when EuiConfirmModal passes a click event', () => {
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => {
+        result.current.common.handleConfirmSave({ type: 'click' } as unknown as boolean);
+      });
+      expect(mockSaveMutate).toHaveBeenCalledWith(
+        { body: expect.objectContaining({ allowed_geos: expect.arrayContaining(['eu', 'us']) }) },
+        expect.anything()
+      );
+      expect(mockSaveMutate.mock.calls[0][0]).not.toHaveProperty('force');
+    });
+
+    it('sends force: true only when confirm is called with true', () => {
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.common.handleConfirmSave(true));
+      expect(mockSaveMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ allowed_geos: expect.arrayContaining(['eu', 'us']) }),
+          force: true,
+        }),
+        expect.anything()
       );
     });
   });
@@ -636,6 +712,58 @@ describe('useManageRegionsState', () => {
       expect(result.current.common.showDeleteConfirmation).toBe(true);
       act(() => result.current.common.handleCancelDeleteConfirmation());
       expect(result.current.common.showDeleteConfirmation).toBe(false);
+    });
+  });
+
+  describe('confirmation conflict handling', () => {
+    const conflictError = {
+      response: { status: 409 },
+      body: {
+        attributes: {
+          denied_endpoint_ids: ['.elser-2-elastic'],
+          referencing_indexes: ['.elser-2-elastic:my-index'],
+          referencing_pipelines: '.elser-2-elastic:my-pipeline',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu', 'us'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+    });
+
+    it('stores grouped conflict artifacts on in-use 409', () => {
+      mockSaveMutate.mockImplementation(
+        (_vars: unknown, { onError }: { onError: (err: unknown) => void }) => {
+          onError(conflictError);
+        }
+      );
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.common.handleRequestSave());
+      act(() => result.current.common.handleConfirmSave());
+      expect(result.current.common.showConfirmation).toBe(true);
+      expect(result.current.common.conflictArtifacts).toEqual([
+        { type: 'index', name: 'my-index', endpointIds: ['.elser-2-elastic'] },
+        { type: 'pipeline', name: 'my-pipeline', endpointIds: ['.elser-2-elastic'] },
+      ]);
+    });
+
+    it('clears conflict artifacts when confirmation is cancelled', () => {
+      mockSaveMutate.mockImplementation(
+        (_vars: unknown, { onError }: { onError: (err: unknown) => void }) => {
+          onError(conflictError);
+        }
+      );
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.common.handleConfirmSave());
+      expect(result.current.common.conflictArtifacts).toBeDefined();
+      act(() => result.current.common.handleCancelConfirmation());
+      expect(result.current.common.conflictArtifacts).toBeUndefined();
+      expect(result.current.common.showConfirmation).toBe(false);
     });
   });
 

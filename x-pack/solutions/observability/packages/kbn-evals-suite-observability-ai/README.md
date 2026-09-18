@@ -2,7 +2,7 @@
 
 Evaluation suite for Observability AI features, built on [`@kbn/evals`](../../../../platform/packages/shared/kbn-evals/README.md).
 
-This package is separate from [`@kbn/evals-suite-obs-ai-assistant`](../kbn-evals-suite-obs-ai-assistant), which covers the legacy Observability AI Assistant. The evaluations here cover features built on the Agent Builder platform.
+These evaluations cover Observability AI features built on the Agent Builder platform.
 
 - **Suite ID:** `observability-ai`
 - **CI Label:** `evals:observability-ai`

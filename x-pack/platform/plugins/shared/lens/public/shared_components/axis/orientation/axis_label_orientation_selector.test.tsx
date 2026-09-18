@@ -38,7 +38,7 @@ describe('AxisLabelOrientationSelector', () => {
     const button = screen.getByRole('button', { name: /vertical/i });
     await userEvent.click(button);
 
-    expect(setLabelOrientation).toBeCalledTimes(1);
-    expect(setLabelOrientation).toBeCalledWith(-90);
+    expect(setLabelOrientation).toHaveBeenCalledTimes(1);
+    expect(setLabelOrientation).toHaveBeenCalledWith(-90);
   });
 });

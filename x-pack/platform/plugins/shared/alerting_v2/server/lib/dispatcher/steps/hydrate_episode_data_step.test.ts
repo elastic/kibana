@@ -15,10 +15,10 @@ describe('HydrateEpisodeDataStep', () => {
   it('returns continue without querying when dispatchable is empty', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const state = createDispatcherPipelineState({ dispatchable: [] });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
@@ -27,10 +27,10 @@ describe('HydrateEpisodeDataStep', () => {
   it('returns continue without querying when dispatchable is absent', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const state = createDispatcherPipelineState();
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
@@ -39,7 +39,7 @@ describe('HydrateEpisodeDataStep', () => {
   it('attaches data to the matching episode', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [createAlertEpisode({ episode_id: 'ep-1', rule_id: 'r1' })];
 
@@ -50,17 +50,17 @@ describe('HydrateEpisodeDataStep', () => {
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({ host: 'server-01', count: 3 });
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({ host: 'server-01', count: 3 });
   });
 
   it('un-flattens dot-separated keys in data_json', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [createAlertEpisode({ episode_id: 'ep-1' })];
 
@@ -71,11 +71,11 @@ describe('HydrateEpisodeDataStep', () => {
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({
       host: { name: 'srv-01', ip: '10.0.0.1' },
     });
   });
@@ -83,7 +83,7 @@ describe('HydrateEpisodeDataStep', () => {
   it('attaches an empty object for data_json "{}"', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [createAlertEpisode({ episode_id: 'ep-1' })];
 
@@ -92,35 +92,35 @@ describe('HydrateEpisodeDataStep', () => {
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({});
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({});
   });
 
   it('leaves data undefined when the hydration query returns no row for an episode', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [createAlertEpisode({ episode_id: 'ep-missing' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(createEpisodeDataResponse([]));
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toBeUndefined();
+    expect(result.data?.triage?.dispatchable[0].data).toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalled();
   });
 
   it('leaves data undefined when data_json is null', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [createAlertEpisode({ episode_id: 'ep-1' })];
 
@@ -129,17 +129,17 @@ describe('HydrateEpisodeDataStep', () => {
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toBeUndefined();
+    expect(result.data?.triage?.dispatchable[0].data).toBeUndefined();
   });
 
   it('derives range bounds from min/max last_event_timestamp across all episodes', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [
       createAlertEpisode({
@@ -165,7 +165,7 @@ describe('HydrateEpisodeDataStep', () => {
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    await step.execute(state);
+    await step.execute(state, loggerService);
 
     const calledQuery: string = mockEsClient.esql.query.mock.calls[0][0].query;
     expect(calledQuery).toContain('"2026-01-22T07:01:00.000Z"');
@@ -175,7 +175,7 @@ describe('HydrateEpisodeDataStep', () => {
   it('attaches data to each episode independently', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [
       createAlertEpisode({ episode_id: 'ep-1', rule_id: 'r1' }),
@@ -190,18 +190,18 @@ describe('HydrateEpisodeDataStep', () => {
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({ x: 1 });
-    expect(result.data?.dispatchable?.[1].data).toEqual({ y: 2 });
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({ x: 1 });
+    expect(result.data?.triage?.dispatchable[1].data).toEqual({ y: 2 });
   });
 
   it('concatenates results from multiple chunks', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService, loggerService);
+    const step = new HydrateEpisodeDataStep(queryService);
 
     // Two episodes that each end up in different chunks via oversized IDs
     const longId1 = 'a'.repeat(400_000) + '-1';
@@ -220,12 +220,12 @@ describe('HydrateEpisodeDataStep', () => {
       );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    const ep1 = result.data?.dispatchable?.find((e) => e.episode_id === longId1);
-    const ep2 = result.data?.dispatchable?.find((e) => e.episode_id === longId2);
+    const ep1 = result.data?.triage?.dispatchable.find((e) => e.episode_id === longId1);
+    const ep2 = result.data?.triage?.dispatchable.find((e) => e.episode_id === longId2);
     expect(ep1?.data).toEqual({ c: 1 });
     expect(ep2?.data).toEqual({ d: 2 });
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);

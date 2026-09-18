@@ -18,6 +18,22 @@ export const CASES_API_ERROR_CODES = {
    * definition is rejected with a 409 carrying this code.
    */
   FIELD_IDENTITY_IMMUTABLE: 'field_identity_immutable',
+  /**
+   * A case write's `customFields` could not be mirrored into `extended_fields`
+   * because the link between a configured v1 custom field and its v2 field
+   * definition is malformed (duplicate `legacyKey` claims, a type mismatch, or
+   * unparseable definition YAML). The write is rejected with a 400 carrying
+   * this code rather than guessing a storage key.
+   */
+  FIELD_LINKAGE_MALFORMED: 'field_linkage_malformed',
+  /**
+   * One create/update request explicitly supplied both representations of the
+   * same linked field (`customFields` and `extended_fields`) with semantically
+   * different values. There is no meaningful "last" within one request, so the
+   * write is rejected with a 400 carrying this code instead of silently
+   * choosing a side.
+   */
+  FIELD_REPRESENTATIONS_CONFLICT: 'field_representations_conflict',
 } as const;
 
 export type CasesApiErrorCode = (typeof CASES_API_ERROR_CODES)[keyof typeof CASES_API_ERROR_CODES];
@@ -28,11 +44,41 @@ export interface FieldIdentityImmutableErrorAttributes {
   changed: Array<'name' | 'type'>;
 }
 
+/** `attributes` payload for `field_linkage_malformed` (HTTP 400). */
+export interface FieldLinkageMalformedErrorAttributes {
+  code: typeof CASES_API_ERROR_CODES.FIELD_LINKAGE_MALFORMED;
+  fields: Array<{
+    /** The v1 custom field key whose linkage is broken. */
+    key: string;
+    /**
+     * `ambiguous_name_match` and `capacity` are configure-time-only reasons —
+     * they can only be reported when a new definition would need to be
+     * created for a not-yet-linked key, never for an already-resolved link.
+     */
+    reason:
+      | 'duplicate_legacy_key'
+      | 'type_mismatch'
+      | 'unparseable_definition'
+      | 'ambiguous_name_match'
+      | 'capacity';
+  }>;
+}
+
+/** `attributes` payload for `field_representations_conflict` (HTTP 400). */
+export interface FieldRepresentationsConflictErrorAttributes {
+  code: typeof CASES_API_ERROR_CODES.FIELD_REPRESENTATIONS_CONFLICT;
+  /** Immutable v2 field-definition names only — never values. */
+  fields: string[];
+}
+
 /**
  * Union of every typed error-attributes shape Cases serializes. Extend this
  * union when introducing a new machine-readable error code.
  */
-export type CasesApiErrorAttributes = FieldIdentityImmutableErrorAttributes;
+export type CasesApiErrorAttributes =
+  | FieldIdentityImmutableErrorAttributes
+  | FieldLinkageMalformedErrorAttributes
+  | FieldRepresentationsConflictErrorAttributes;
 
 const ALL_ERROR_CODES: readonly string[] = Object.values(CASES_API_ERROR_CODES);
 

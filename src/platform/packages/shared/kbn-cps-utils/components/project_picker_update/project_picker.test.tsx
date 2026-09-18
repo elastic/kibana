@@ -27,89 +27,132 @@ const createProject = (id: string, tags: Partial<CPSProject> = {}): CPSProject =
   ...tags,
 });
 
+const createFetchProjectsByRouting = (projects: CPSProject[]) =>
+  jest.fn(async (routing?: string) => {
+    if (!routing) {
+      return { origin: projects[0] ?? null, linkedProjects: projects.slice(1) };
+    }
+
+    const tagClauses = routing
+      .split(' AND ')
+      .map((clause) => clause.trim())
+      .filter((clause) => clause.includes(':') && !clause.includes('_id'));
+
+    const matched = projects.filter((project) =>
+      tagClauses.every((clause) => {
+        const separatorIndex = clause.indexOf(':');
+        const tag = clause.slice(0, separatorIndex) as keyof CPSProject;
+        const value = clause.slice(separatorIndex + 1);
+        return project[tag] === value;
+      })
+    );
+
+    if (matched.length === 0) {
+      return { origin: null, linkedProjects: [] };
+    }
+
+    return {
+      origin: matched[0],
+      linkedProjects: matched.slice(1),
+    };
+  });
+
 describe('ProjectPicker', () => {
   beforeEach(() => {
     window.IntersectionObserver =
       MockIntersectionObserver as unknown as typeof IntersectionObserver;
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('preserves tag-only routing on mount', async () => {
     const onProjectRoutingChange = jest.fn();
 
+    const originProject = createProject('p1', { _type: 'security' });
+    const linkedProjects = [createProject('p2', { _type: 'observability' })];
+    const availableProjects = [originProject, ...linkedProjects];
+
     render(
       <ProjectPicker
-        availableProjects={[
-          createProject('p1', { _type: 'security' }),
-          createProject('p2', { _type: 'observability' }),
-        ]}
+        availableProjects={availableProjects}
+        originProjectId={originProject._id}
         onProjectRoutingChange={onProjectRoutingChange}
         projectRouting="_type:security"
+        fetchProjectsByRouting={createFetchProjectsByRouting(availableProjects)}
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`projectPickerListItemSwitch-${originProject._id}`)
+      ).toBeInTheDocument();
     });
-    expect(screen.queryByTestId('projectPickerListItemSwitch-p2')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`projectPickerListItemSwitch-${linkedProjects[0]._id}`)
+    ).not.toBeInTheDocument();
     expect(onProjectRoutingChange).not.toHaveBeenCalled();
   });
 
   it('preserves tag filters and decoded exclusions on mount', async () => {
     const onProjectRoutingChange = jest.fn();
 
+    const originProject = createProject('p1', { _type: 'security' });
+    const linkedProjects = [createProject('p2', { _type: 'security' })];
+    const availableProjects = [originProject, ...linkedProjects];
+
     render(
       <ProjectPicker
-        availableProjects={[
-          createProject('p1', { _type: 'security' }),
-          createProject('p2', { _type: 'security' }),
-        ]}
+        availableProjects={availableProjects}
+        originProjectId={originProject._id}
         onProjectRoutingChange={onProjectRoutingChange}
-        projectRouting="_type:security AND _id:* AND NOT _id:p2"
+        fetchProjectsByRouting={createFetchProjectsByRouting(availableProjects)}
+        projectRouting="_type:security AND (_id:* AND NOT _id:p2)"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toHaveAttribute(
-        'aria-checked',
-        'true'
-      );
+      expect(
+        screen.getByTestId(`projectPickerListItemSwitch-${originProject._id}`)
+      ).toHaveAttribute('aria-checked', 'true');
     });
-    expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toHaveAttribute(
-      'aria-checked',
-      'false'
-    );
+    expect(
+      screen.getByTestId(`projectPickerListItemSwitch-${linkedProjects[0]._id}`)
+    ).toHaveAttribute('aria-checked', 'false');
     expect(onProjectRoutingChange).not.toHaveBeenCalled();
   });
 
   it('preserves explicit-ID snapshot routing on mount', async () => {
     const onProjectRoutingChange = jest.fn();
+    const matchingProject = createProject('matching');
+    const matching2Project = createProject('matching2');
+    const nonMatchingProject = createProject('non-matching');
+
+    const availableProjects = [matchingProject, matching2Project, nonMatchingProject];
 
     render(
       <ProjectPicker
-        availableProjects={[
-          createProject('matching'),
-          createProject('matching2'),
-          createProject('non-matching'),
-        ]}
+        availableProjects={availableProjects}
+        originProjectId={matchingProject._id}
         onProjectRoutingChange={onProjectRoutingChange}
-        projectRouting="_id:matching AND _id:matching2"
+        projectRouting="_id:matching OR _id:matching2"
+        projectRoutingStrategy="snapshot"
+        fetchProjectsByRouting={createFetchProjectsByRouting(availableProjects)}
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('projectPickerListItemSwitch-matching')).toHaveAttribute(
-        'aria-checked',
-        'true'
-      );
+      expect(
+        screen.getByTestId(`projectPickerListItemSwitch-${matchingProject._id}`)
+      ).toHaveAttribute('aria-checked', 'true');
     });
-    expect(screen.getByTestId('projectPickerListItemSwitch-matching2')).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
-    expect(screen.getByTestId('projectPickerListItemSwitch-non-matching')).toHaveAttribute(
-      'aria-checked',
-      'false'
-    );
+    expect(
+      screen.getByTestId(`projectPickerListItemSwitch-${matching2Project._id}`)
+    ).toHaveAttribute('aria-checked', 'true');
+    expect(
+      screen.getByTestId(`projectPickerListItemSwitch-${nonMatchingProject._id}`)
+    ).toHaveAttribute('aria-checked', 'false');
     expect(onProjectRoutingChange).not.toHaveBeenCalled();
   });
 });

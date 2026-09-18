@@ -35,7 +35,8 @@ export const renderIacTemplateHandler: FleetRequestHandler<
   const logger = appContextService.getLogger().get('IacProvisioner renderIacTemplateHandler');
   const { provider, flow, integrations: requestedIntegrations } = request.body;
 
-  if (!isIacProvisionerEnabled()) {
+  const iacProvisionerEnabled = await isIacProvisionerEnabled();
+  if (!iacProvisionerEnabled) {
     return response.notFound({
       body: { message: 'IaC Provisioner is not enabled' },
     });

@@ -50,7 +50,7 @@ import {
   OPEN_IN_DISCOVER_ACTION_TITLE,
 } from './translations';
 import { AssetImage } from '../../../../components/asset_image';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { buildDiscoverParams } from '../../../../util/discover_helpers';
 
 interface QueryDetailsFlyoutProps {
   item: StreamQueryStats;
@@ -111,7 +111,7 @@ export function QueryDetailsFlyout({
                 <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="queriesTableQueryDetailsFlyoutActionsButton"
-                    iconType="boxesVertical"
+                    iconType="ellipsis"
                     aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                     onClick={() => setIsActionsPopoverOpen((value) => !value)}
                   />
@@ -220,7 +220,9 @@ export function QueryDetailsFlyout({
                       iconType="discoverApp"
                       iconSide="left"
                       onClick={() =>
-                        discoverLocator.navigate(buildDiscoverParams(item.query, timeState))
+                        discoverLocator.navigate(
+                          buildDiscoverParams(item.query.esql.query, timeState.timeRange)
+                        )
                       }
                     >
                       {OPEN_IN_DISCOVER_ACTION_TITLE}
