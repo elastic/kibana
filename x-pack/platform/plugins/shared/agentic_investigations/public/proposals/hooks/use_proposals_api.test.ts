@@ -79,7 +79,7 @@ describe('retryOnTransientError', () => {
 });
 
 describe('usePendingProposals', () => {
-  it('calls GET on the proposals URL with status=pending and excludeExpired=true', async () => {
+  it('calls GET on the proposals URL filtered to proposals a human can still act on', async () => {
     const http = makeHttp();
     http.get.mockResolvedValue({ proposals: [], total: 0 });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
@@ -93,7 +93,9 @@ describe('usePendingProposals', () => {
 
     expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      query: { status: 'pending', excludeExpired: true },
+      // `excludeSuperseded` drops the earlier attempts of a retried proposal,
+      // so a chain of failures appears once rather than once per attempt.
+      query: { status: 'pending', excludeExpired: true, excludeSuperseded: true },
     });
   });
 
@@ -111,7 +113,12 @@ describe('usePendingProposals', () => {
 
     expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      query: { status: 'pending', excludeExpired: true, conversationId: 'conv-42' },
+      query: {
+        status: 'pending',
+        excludeExpired: true,
+        excludeSuperseded: true,
+        conversationId: 'conv-42',
+      },
     });
   });
 
