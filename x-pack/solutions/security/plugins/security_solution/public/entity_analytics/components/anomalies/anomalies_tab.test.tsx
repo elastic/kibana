@@ -79,6 +79,12 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
   },
 }));
 
+jest.mock('./mitre/components/mitre_attack_chain_placeholder', () => ({
+  MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
+  ),
+}));
+
 jest.mock('./anomalies_tab_timeline', () => ({
   AnomalyTabTimelineSection: ({
     isLoading,
@@ -442,11 +448,7 @@ describe('AnomaliesTab', () => {
       });
       const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
-      // The placeholder renders a hidden MitreAttackChain with no tactic data.
-      expect(screen.getByTestId('mock-mitre-attack-chain')).toHaveAttribute(
-        'data-triggered-tactics',
-        '[]'
-      );
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
     });
 
     it('renders the real MitreAttackChain once overview finishes loading', () => {

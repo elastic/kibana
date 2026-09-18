@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { MitreAttackChain } from './mitre_attack_chain';
+import { MitreTacticDot } from './mitre_tactic_dot';
 
 interface MitreAttackChainPlaceholderProps {
   children?: React.ReactNode;
@@ -24,13 +24,27 @@ export const MitreAttackChainPlaceholder: React.FC<MitreAttackChainPlaceholderPr
       width: 100%;
     `}
   >
+    {/*
+     * Sizing skeleton — establishes the correct panel height without consulting
+     * MITRE query state. MitreAttackChain is a horizontal flex row, so its height
+     * is determined by a single dot column (chip row + dot circle + optional label),
+     * not by the number of tactics. One MitreTacticDot is sufficient and stays
+     * honest if the dot's dimensions change.
+     */}
     <div
       aria-hidden="true"
       css={css`
         visibility: hidden;
+        padding-left: 4px;
+        padding-right: 4px;
       `}
     >
-      <MitreAttackChain triggeredTactics={[]} showLabels={showLabels} anomalyCountByTactic={{}} />
+      <MitreTacticDot
+        tactic="__sizing__"
+        detected={false}
+        showLabel={showLabels}
+        anomalyCount={0}
+      />
     </div>
     {children !== undefined && (
       <div
