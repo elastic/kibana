@@ -267,7 +267,7 @@ describe('Detection Coverage worker', () => {
     });
 
     // The worker parks in WAITING_FOR_CHILD while the gate holds the decision for up to
-    // 72h (80h with the gate's own margin); the engine's default 6h timeout would cancel it.
+    // 168h; the engine's default 6h timeout would cancel it.
     it('outlives the proposal gate it waits on', () => {
       expect(String(workerDefinition.settings?.timeout)).toMatch(/^\d+h$/);
       expect(hours(workerDefinition.settings?.timeout)).toBeGreaterThan(

@@ -10,11 +10,12 @@ tags:
   - security
   - detection-coverage
 settings:
-  # The proposal gate runs for up to 80h (72h decision window plus its own margin)
-  # while this run parks in WAITING_FOR_CHILD. The engine's default 6h workflow
-  # timeout would cancel the check under the analyst, so this must stay above the
-  # gate's own timeout.
-  timeout: "84h"
+  # This run parks in WAITING_FOR_CHILD while the proposal gate holds the decision,
+  # and the engine's default 6h workflow timeout would cancel the check under the
+  # analyst. So this must stay above the gate's own ceiling of `168h` (a 72h
+  # decision window, a second 72h for a proposal re-parked just before its
+  # deadline, plus margin). A test pins the relationship.
+  timeout: "176h"
 triggers:
   - type: manual
     inputs:

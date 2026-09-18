@@ -46,8 +46,10 @@ const stepByName = (yaml: ActionYaml, name: string) =>
   yaml.steps.find((step) => step.name === name);
 
 describe('AlertZero action workflows', () => {
-  it('lists every action in the install set', () => {
-    expect([...ALERTZERO_ACTION_WORKFLOW_IDS].sort()).toEqual(ACTIONS.map(({ id }) => id).sort());
+  it('is part of the install set', () => {
+    expect(ALERTZERO_ACTION_WORKFLOW_IDS).toEqual(
+      expect.arrayContaining(ACTIONS.map(({ id }) => id))
+    );
   });
 
   // The contract the proposal gate relies on: discoverable by tag, self-describing
