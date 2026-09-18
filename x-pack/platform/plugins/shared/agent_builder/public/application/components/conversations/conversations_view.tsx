@@ -12,6 +12,7 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
+import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -43,14 +44,16 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
 
   return (
     <RoutedConversationsProvider>
-      <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-        <div css={headerStyles}>
-          <ConversationHeader />
+      <CanvasProvider>
+        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+          <div css={headerStyles}>
+            <ConversationHeader />
+          </div>
+          <div css={contentStyles}>
+            <Conversation />
+          </div>
         </div>
-        <div css={contentStyles}>
-          <Conversation />
-        </div>
-      </div>
+      </CanvasProvider>
     </RoutedConversationsProvider>
   );
 };

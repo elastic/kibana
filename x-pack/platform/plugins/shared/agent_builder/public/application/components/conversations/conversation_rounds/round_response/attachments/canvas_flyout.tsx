@@ -9,18 +9,28 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_MAIN_CONTAINER_ID } from '@kbn/ui-chrome-layout';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../../../../../hooks/use_navigation';
+import {
+  agentPanelFlyoutStyles,
+  useAgentPanelWidth,
+  useClearAgentPanelPushOffsetOnUnmount,
+} from '../../../../../hooks/use_agent_panel_width';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { useCanvasContext } from './canvas_context';
 
 const DEFAULT_CANVAS_WIDTH = '50vw';
+const AGENT_CANVAS_DEFAULT_WIDTH = '600px';
 const CANVAS_MIN_WIDTH = 300;
+/** Push canvas in the agent column when it is wide enough for chat + a ~600px editor. */
+const CANVAS_PUSH_MIN_AGENT_WIDTH = 1400;
 
 const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
   defaultMessage: 'Attachment preview',
@@ -31,9 +41,9 @@ interface CanvasFlyoutProps {
 }
 
 /**
- * Flyout component for displaying attachments in canvas mode (expanded view).
- * Consumes canvas state from context. In full-screen context, renders at 50% screen width.
- * In sidebar context, uses default flyout width.
+ * Flyout for expanded attachment preview.
+ * In agent-first chrome it stays in the agent column: overlay below 1400px, push when wider.
+ * Full-screen Agent Builder still uses a 50vw push flyout (overlay on narrow viewports).
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
@@ -42,7 +52,10 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const agentPanelWidth = useAgentPanelWidth(isAgentWorkspaceMount);
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
+  useClearAgentPanelPushOffsetOnUnmount(isAgentWorkspaceMount && canvasState != null);
 
   const openSidebarConversation = useCallback(() => {
     openSidebarConversationInternal({ conversationId });
@@ -131,9 +144,16 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
 
-  const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
-  const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
-  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
+  const isAgentCanvasPush =
+    isAgentWorkspaceMount && agentPanelWidth >= CANVAS_PUSH_MIN_AGENT_WIDTH;
+  const isOverlayCanvas = isAgentWorkspaceMount
+    ? !isAgentCanvasPush
+    : isSidebar || isNarrowViewport;
+  const flyoutType = isOverlayCanvas ? 'overlay' : 'push';
+  const width = isAgentWorkspaceMount
+    ? uiDefinition.canvasWidth ?? AGENT_CANVAS_DEFAULT_WIDTH
+    : uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
+  const flyoutSize = isOverlayCanvas ? 'full' : width;
 
   const flyoutBodyStyles = css`
     padding-top: ${euiTheme.size.m};
@@ -152,14 +172,18 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       onClose={closeCanvas}
       aria-label={FLYOUT_ARIA_LABEL}
       ownFocus={false}
-      outsideClickCloses={true}
+      outsideClickCloses={!isAgentWorkspaceMount || isOverlayCanvas}
       minWidth={CANVAS_MIN_WIDTH}
-      maxWidth={DEFAULT_CANVAS_WIDTH}
-      resizable={!isSidebar && !isNarrowViewport}
+      maxWidth={isAgentWorkspaceMount ? undefined : DEFAULT_CANVAS_WIDTH}
+      resizable={!isOverlayCanvas}
       size={flyoutSize}
       type={flyoutType}
+      session={isAgentWorkspaceMount ? 'never' : undefined}
+      hasAnimation={!isAgentWorkspaceMount}
+      container={isAgentWorkspaceMount ? `#${AGENT_MAIN_CONTAINER_ID}` : undefined}
       hideCloseButton
       paddingSize="none"
+      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles : undefined}
     >
       <AttachmentHeader
         icon={header?.icon}

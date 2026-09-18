@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -25,7 +25,12 @@ import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
-import { AGENT_MAIN_CONTAINER_ID, layoutVar } from '@kbn/ui-chrome-layout';
+import { AGENT_MAIN_CONTAINER_ID } from '@kbn/ui-chrome-layout';
+import {
+  agentPanelFlyoutStyles,
+  useAgentPanelWidth,
+  useClearAgentPanelPushOffsetOnUnmount,
+} from '../application/hooks/use_agent_panel_width';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
@@ -250,44 +255,8 @@ export interface ConversationDetailsFlyoutProps {
   onClose: () => void;
 }
 
-/** Pin Chat info to the agent column so it does not push or cover the application workspace. */
-const agentPanelFlyoutStyles = css`
-  top: ${layoutVar('application.top', '0px')} !important;
-  bottom: ${layoutVar('application.bottom', '0px')} !important;
-  right: ${layoutVar('agent.right', '0px')} !important;
-  height: auto !important;
-  max-height: none !important;
-`;
-
 /** Push Chat info when the agent column is at least this wide. */
 const CHAT_INFO_PUSH_MIN_AGENT_WIDTH = 1000;
-
-const useAgentPanelWidth = (enabled: boolean): number => {
-  const [width, setWidth] = useState(0);
-
-  useLayoutEffect(() => {
-    if (!enabled) {
-      setWidth(0);
-      return;
-    }
-
-    const element = document.getElementById(AGENT_MAIN_CONTAINER_ID);
-    if (!element) {
-      return;
-    }
-
-    const updateWidth = () => {
-      setWidth(element.getBoundingClientRect().width);
-    };
-
-    updateWidth();
-    const resizeObserver = new ResizeObserver(updateWidth);
-    resizeObserver.observe(element);
-    return () => resizeObserver.disconnect();
-  }, [enabled]);
-
-  return width;
-};
 
 /** Live variant backed by the active conversation cache. */
 export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyoutProps) => {
@@ -300,6 +269,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const agentPanelWidth = useAgentPanelWidth(isAgentWorkspaceMount);
   const isPushFlyout =
     !isAgentWorkspaceMount || agentPanelWidth >= CHAT_INFO_PUSH_MIN_AGENT_WIDTH;
+  useClearAgentPanelPushOffsetOnUnmount(isAgentWorkspaceMount);
 
   return (
     <EuiFlyout
