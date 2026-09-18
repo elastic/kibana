@@ -93,6 +93,40 @@ describe('listTypesRoute', () => {
     });
   });
 
+  it('maps subActions to sub_actions on spec-sourced connector types', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listTypesRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const listTypes = [
+      createMockConnectorType({
+        id: '.abuseipdb',
+        name: 'AbuseIPDB',
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['workflows'],
+        subActions: ['checkIp', 'reportIp'],
+      }),
+    ];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        expect.objectContaining({
+          id: '.abuseipdb',
+          sub_actions: ['checkIp', 'reportIp'],
+        }),
+      ],
+    });
+  });
+
   it('passes feature_id if provided as query parameter', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

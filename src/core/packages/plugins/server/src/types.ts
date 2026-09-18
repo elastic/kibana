@@ -296,7 +296,10 @@ export interface Plugin<
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 
-  start(core: CoreStart, plugins: TPluginsStart): TStart;
+  start(
+    core: CoreStart,
+    plugins: TPluginsStart
+  ): TStart extends void ? void : TStart | Promise<TStart>;
 
   stop?(): MaybePromise<void>;
 }

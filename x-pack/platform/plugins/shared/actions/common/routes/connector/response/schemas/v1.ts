@@ -162,6 +162,14 @@ export const connectorTypeResponseSchema = schema.object(
         description: 'Indicates whether the connector type supports testing.',
       },
     }),
+    sub_actions: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 256 }), {
+        maxSize: 100,
+        meta: {
+          description: 'Action names defined by a spec-sourced connector type.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_type_response' } }
 );

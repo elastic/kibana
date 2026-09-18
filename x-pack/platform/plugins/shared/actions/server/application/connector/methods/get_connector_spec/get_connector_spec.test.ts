@@ -6,34 +6,42 @@
  */
 
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionsClientContext } from '../../../../actions_client';
 import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 
-// All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
-// synthetic non-testable spec to cover the isTestable: false branch.
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
-  return {
-    ...actual,
-    connectorsSpecs: {
-      ...actual.connectorsSpecs,
-      StubNoTest: {
-        metadata: {
-          id: '.stub-no-test',
-          displayName: 'Stub (no test)',
-          minimumLicense: 'basic',
-          supportedFeatureIds: [],
-        },
-        auth: null,
-        schema: null,
-        actions: {},
-        test: { handler: async () => ({}), enabled: false },
-      },
-    },
-  };
-});
+const stubNoTest: ConnectorSpec = {
+  metadata: {
+    id: '.stub-no-test',
+    displayName: 'Stub (no test)',
+    description: 'Stub connector without a test handler',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  actions: {},
+  test: { handler: async () => ({}), enabled: false },
+};
+
+const stubAbuseipdb: ConnectorSpec = {
+  metadata: {
+    id: '.abuseipdb',
+    displayName: 'AbuseIPDB',
+    description: 'IP reputation checking',
+    minimumLicense: 'gold',
+    supportedFeatureIds: ['workflows'],
+  },
+  actions: {},
+  test: { handler: async () => ({}), enabled: true },
+};
+
+const specsById = new Map<string, ConnectorSpec>([
+  ...Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec] as const),
+  [stubNoTest.metadata.id, stubNoTest],
+  [stubAbuseipdb.metadata.id, stubAbuseipdb],
+]);
 
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
@@ -44,8 +52,21 @@ const configurationUtilities = {
   isEarsExperimentalEnabled: () => false,
 } as unknown as ActionsConfigurationUtilities;
 
+function createRegistry() {
+  return {
+    has: (id: string) => specsById.has(id),
+    get: (id: string) => ({
+      connectorSpec: specsById.get(id),
+    }),
+  };
+}
+
 function createContext(): ActionsClientContext {
-  return { authorization, auditLogger } as unknown as ActionsClientContext;
+  return {
+    authorization,
+    auditLogger,
+    actionTypeRegistry: createRegistry(),
+  } as unknown as ActionsClientContext;
 }
 
 describe('getConnectorSpecAsJsonSchema', () => {

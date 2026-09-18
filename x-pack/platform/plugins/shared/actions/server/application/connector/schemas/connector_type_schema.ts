@@ -30,4 +30,5 @@ export const connectorTypeSchema = schema.object({
   description: schema.maybe(schema.string()),
   isExperimental: schema.maybe(schema.boolean()),
   isTestable: schema.boolean({ defaultValue: false }),
+  subActions: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
 });

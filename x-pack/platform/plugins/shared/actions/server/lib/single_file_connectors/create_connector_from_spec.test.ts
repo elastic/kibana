@@ -76,6 +76,7 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.executor).toBeDefined();
     expect(connectorType.validate.params).toBeDefined();
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
+    expect(connectorType.connectorSpec).toBe(spec);
     expect(connectorType.isExperimental).toBeUndefined();
   });
 

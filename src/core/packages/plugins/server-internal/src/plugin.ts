@@ -169,7 +169,7 @@ export class PluginWrapper<
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.get(Start as ServiceToken<TStart>),
-    ].find(Boolean)!;
+    ].find(Boolean)! as TStart | Promise<TStart>;
 
     if (isPromise(contract)) {
       return contract.then((resolvedContract) => {

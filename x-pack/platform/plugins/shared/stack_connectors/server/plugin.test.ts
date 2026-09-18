@@ -16,9 +16,12 @@ import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { StackConnectorsPlugin } from './plugin';
 import type { ConnectorsPluginsStart } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import { DeclarativeCatalogService } from './declarative_connectors';
+import { CatalogSpecSource } from './declarative_connectors/catalog_spec_source';
 
 jest.mock('../common/experimental_features');
 
@@ -48,7 +51,10 @@ describe('Stack Connectors Plugin', () => {
         ssl: { pfx: { enabled: true } },
       });
 
-      plugin.setup(coreSetup, { actions: actionsSetup });
+      plugin.setup(coreSetup, {
+        actions: actionsSetup,
+        taskManager: taskManagerMock.createSetup(),
+      });
 
       const specConnectorTypes = Object.values(connectorsSpecs).filter(
         (spec) =>
@@ -191,6 +197,12 @@ describe('Stack Connectors Plugin', () => {
         );
       });
 
+      expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '.abuseipdb',
+        })
+      );
+
       // SubAction Connectors
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
@@ -285,6 +297,143 @@ describe('Stack Connectors Plugin', () => {
         })
       );
     });
+
+    const createActionsSetup = () => {
+      const actionsSetup = actionsMock.createSetup();
+      const actionsConfigurationUtilities = actionsSetup.getActionsConfigurationUtilities();
+      actionsSetup.getActionsConfigurationUtilities.mockReturnValue(actionsConfigurationUtilities);
+      (actionsConfigurationUtilities.getWebhookSettings as jest.Mock).mockReturnValue({
+        ssl: { pfx: { enabled: true } },
+      });
+      return actionsSetup;
+    };
+
+    const createTaskManagerSetup = () => taskManagerMock.createSetup();
+    const createTaskManagerStart = () => taskManagerMock.createStart();
+
+    it('does not build a catalog service or register catalog routes when the flag is off', async () => {
+      const startSpy = jest
+        .spyOn(DeclarativeCatalogService.prototype, 'start')
+        .mockResolvedValue(undefined);
+      plugin.setup(coreSetup, {
+        actions: createActionsSetup(),
+        taskManager: createTaskManagerSetup(),
+      });
+
+      const router = coreSetup.http.createRouter.mock.results[0].value;
+      const catalogPaths = [
+        ...router.get.mock.calls.map(([config]: [{ path: string }]) => config.path),
+        ...router.post.mock.calls.map(([config]: [{ path: string }]) => config.path),
+      ].filter((routePath: string) => routePath.includes('declarative_catalog'));
+
+      expect(catalogPaths).toEqual([]);
+      await expect(
+        plugin.start(coreMock.createStart(), {
+          licensing: licensingMock.createStart(),
+        } as unknown as ConnectorsPluginsStart)
+      ).resolves.toBeUndefined();
+      expect(startSpy).not.toHaveBeenCalled();
+      startSpy.mockRestore();
+    });
+
+    it('registers catalog routes and awaits service.start() when the flag is on', async () => {
+      const startSpy = jest
+        .spyOn(DeclarativeCatalogService.prototype, 'start')
+        .mockResolvedValue(undefined);
+      const enabledContext = coreMock.createPluginInitializerContext({
+        declarativeCatalog: {
+          enabled: true,
+          registryUrl: 'http://127.0.0.1:8089',
+          refreshIntervalMs: 60_000,
+        },
+      });
+      mockParseExperimentalConfigValue.mockReturnValue({
+        ...experimentalFeaturesMock,
+      });
+      const enabledPlugin = new StackConnectorsPlugin(enabledContext);
+      const enabledCoreSetup = coreMock.createSetup();
+
+      const taskManagerSetup = createTaskManagerSetup();
+      enabledPlugin.setup(enabledCoreSetup, {
+        actions: createActionsSetup(),
+        taskManager: taskManagerSetup,
+      });
+      expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'stack_connectors:catalog_refresh': expect.objectContaining({
+            timeout: '2m',
+          }),
+        })
+      );
+
+      const router = enabledCoreSetup.http.createRouter.mock.results[0].value;
+      expect(router.get).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/stack_connectors/declarative_catalog/_health',
+        }),
+        expect.any(Function)
+      );
+      expect(router.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/stack_connectors/declarative_catalog/_refresh',
+        }),
+        expect.any(Function)
+      );
+
+      const taskManagerStart = createTaskManagerStart();
+      await enabledPlugin.start(coreMock.createStart(), {
+        licensing: licensingMock.createStart(),
+        actions: actionsMock.createStart(),
+        taskManager: taskManagerStart,
+      } as unknown as ConnectorsPluginsStart);
+      expect(startSpy).toHaveBeenCalledTimes(1);
+      expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'stack_connectors-catalog_refresh',
+          taskType: 'stack_connectors:catalog_refresh',
+          schedule: { interval: '60s' },
+        })
+      );
+      startSpy.mockRestore();
+    });
+
+    it('registers a spec provider in setup() and does not fetch the catalog during start()', async () => {
+      const loadSnapshot = jest.spyOn(CatalogSpecSource.prototype, 'loadSnapshot');
+      const enabledContext = coreMock.createPluginInitializerContext({
+        declarativeCatalog: {
+          enabled: true,
+          registryUrl: 'http://127.0.0.1:8089',
+          refreshIntervalMs: 60_000,
+        },
+      });
+      mockParseExperimentalConfigValue.mockReturnValue({
+        ...experimentalFeaturesMock,
+      });
+      const enabledPlugin = new StackConnectorsPlugin(enabledContext);
+      const enabledCoreSetup = coreMock.createSetup();
+      const actionsSetup = createActionsSetup();
+
+      enabledPlugin.setup(enabledCoreSetup, {
+        actions: actionsSetup,
+        taskManager: createTaskManagerSetup(),
+      });
+      expect(actionsSetup.registerSpecProvider).toHaveBeenCalledTimes(1);
+      expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: '.abuseipdb' })
+      );
+
+      const actionsStart = actionsMock.createStart();
+      actionsStart.getAllTypes.mockReturnValue([]);
+      await enabledPlugin.start(coreMock.createStart(), {
+        licensing: licensingMock.createStart(),
+        actions: actionsStart,
+        taskManager: createTaskManagerStart(),
+      } as unknown as ConnectorsPluginsStart);
+
+      expect(loadSnapshot).not.toHaveBeenCalled();
+      enabledPlugin.stop();
+      loadSnapshot.mockRestore();
+    });
   });
 
   describe('Elastic Cloud trial detection (isElasticCloudTrial)', () => {
@@ -298,7 +447,11 @@ describe('Stack Connectors Plugin', () => {
         actionsSetup.getActionsConfigurationUtilities().getWebhookSettings as jest.Mock
       ).mockReturnValue({ ssl: { pfx: { enabled: true } } });
 
-      plugin.setup(coreMock.createSetup(), { actions: actionsSetup, cloud });
+      plugin.setup(coreMock.createSetup(), {
+        actions: actionsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        cloud,
+      });
       return plugin;
     };
 

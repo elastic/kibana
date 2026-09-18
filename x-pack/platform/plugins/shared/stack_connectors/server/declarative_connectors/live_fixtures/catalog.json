@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403",
+  "activeVersions": {
+    ".abuseipdb": "1.1.0",
+    ".declarative-okta": "1.0.0"
+  },
+  "connectors": [
+    {
+      "id": ".abuseipdb",
+      "version": "1.1.0",
+      "definitionUrl": "connectors/abuseipdb/1.1.0.yaml",
+      "contentHash": "sha256:e548e6566772e664d7770415f6be588a22d24608e6821c534835307cef7a06f2"
+    },
+    {
+      "id": ".abuseipdb",
+      "version": "1.0.0",
+      "definitionUrl": "connectors/abuseipdb/1.0.0.yaml",
+      "contentHash": "sha256:c4b1aecefc5368fdec3dde2dc5f655486ccc8e3c9416276a36d467440455e1d5"
+    },
+    {
+      "id": ".declarative-okta",
+      "version": "1.0.0",
+      "definitionUrl": "connectors/okta/1.0.0.yaml",
+      "contentHash": "sha256:cf6c9c0bcf1415564af77faa32807ea111bf62d402a13d67d7b0f92a38206c4a"
+    }
+  ]
+}

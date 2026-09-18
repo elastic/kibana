@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { registerConnectorTypesFromSpecs } from '.';
 
@@ -28,7 +28,10 @@ describe('registerConnectorTypesFromSpecs', () => {
 
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).not.toContain('.inboundWebhook');
-    expect(ids).toHaveLength(Object.values(connectorsSpecs).length - 1);
+    expect(ids).not.toContain('.abuseipdb');
+    expect(ids).toHaveLength(
+      Object.values(connectorsSpecs).filter((spec) => !isInboundOnlyConnectorSpec(spec)).length
+    );
   });
 
   it('registers inbound-only specs when inbound events are enabled', () => {
@@ -38,6 +41,7 @@ describe('registerConnectorTypesFromSpecs', () => {
 
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).toContain('.inboundWebhook');
+    expect(ids).not.toContain('.abuseipdb');
     expect(ids).toHaveLength(Object.values(connectorsSpecs).length);
   });
 });

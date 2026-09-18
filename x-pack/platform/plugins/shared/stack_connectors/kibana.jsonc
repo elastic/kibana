@@ -16,9 +16,13 @@
       "triggersActionsUi",
       "encryptedSavedObjects",
       "licensing",
-      "spaces"
+      "spaces",
+      "taskManager"
     ],
     "optionalPlugins": ["usageCollection", "cloud"],
     "extraPublicDirs": ["public/common"]
+  },
+  "build": {
+    "noParse": ["server/declarative_connectors/snapshot/*.yaml"]
   }
 }

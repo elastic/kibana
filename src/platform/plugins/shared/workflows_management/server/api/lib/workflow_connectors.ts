@@ -19,7 +19,10 @@ import type {
   GetAvailableConnectorsResponse,
 } from '@kbn/workflows/types/v1';
 
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../../common/connector_sub_actions_map';
+import {
+  CONNECTOR_SUB_ACTIONS_MAP,
+  formatSubActionName,
+} from '../../../common/connector_sub_actions_map';
 
 const eventConnectorTypeIds = new Set(
   Object.values(connectorsSpecs)
@@ -30,7 +33,12 @@ const eventConnectorTypeIds = new Set(
 type ListedActionType = Awaited<ReturnType<PublicMethodsOf<ActionsClient>['listTypes']>>[number];
 
 const toConnectorTypeInfo = (actionType: ListedActionType): ConnectorTypeInfo => {
-  const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+  const subActions = actionType.subActions
+    ? actionType.subActions.map((action) => ({
+        name: action,
+        displayName: formatSubActionName(action),
+      }))
+    : CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
   return {
     actionTypeId: actionType.id,
     displayName: actionType.name,

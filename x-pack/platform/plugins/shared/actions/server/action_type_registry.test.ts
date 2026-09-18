@@ -257,6 +257,31 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
 
+    test('returns subActions for a type with connectorSpec and omits it for a classic type', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-connector',
+          name: 'Spec connector',
+          connectorSpec: {
+            actions: {
+              checkIp: {},
+              reportIp: {},
+            },
+          },
+        })
+      );
+
+      const actionTypes = actionTypeRegistry.list();
+      const classicType = actionTypes.find((type) => type.id === 'my-connector-type');
+      const specType = actionTypes.find((type) => type.id === 'spec-connector');
+
+      expect(classicType?.subActions).toBeUndefined();
+      expect(specType?.subActions).toEqual(['checkIp', 'reportIp']);
+    });
+
     test('returns list of connector types with parameter schema', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const connectorTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);

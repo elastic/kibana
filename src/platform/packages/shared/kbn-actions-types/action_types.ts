@@ -37,6 +37,8 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
+  /** Action names from a spec-sourced connector type; omitted for classic connectors. */
+  subActions?: string[];
 }
 
 export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';

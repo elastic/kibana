@@ -31,9 +31,22 @@ export const configSchema = schema.object({
       }
     },
   }),
+  declarativeCatalog: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    registryUrl: schema.string({
+      defaultValue: 'http://127.0.0.1:8089',
+      minLength: 1,
+      maxLength: 2048,
+    }),
+    refreshIntervalMs: schema.number({
+      defaultValue: 60_000,
+      min: 10_000,
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
+export type DeclarativeCatalogConfig = ConfigSchema['declarativeCatalog'];
 
 export type ConfigType = ConfigSchema & {
   experimentalFeatures: ExperimentalFeatures;
