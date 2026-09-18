@@ -15,6 +15,7 @@ import type { InstallationStatus, ProductInstallState } from '../../../common/in
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   getInstallAllTaskStatus,
+  INSTALL_TASK_WAIT_TIMEOUT_MS,
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
@@ -122,7 +123,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: TEN_MIN_IN_MS,
+        timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
       });
     }
   }
@@ -155,7 +156,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: TEN_MIN_IN_MS,
+        timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
       });
     }
   }

@@ -13,6 +13,7 @@ import type {
 import { DocumentationProduct, ResourceTypes, type ProductName } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
+  INSTALL_TASK_TIMEOUT,
   getRequestTaskStatus,
   runTaskUnderInstallLock,
   scheduleRequestTask,
@@ -37,7 +38,7 @@ export const registerInstallAllTaskDefinition = ({
   taskManager.registerTaskDefinitions({
     [INSTALL_ALL_TASK_TYPE]: {
       title: `Install all product documentation artifacts ${INSTALL_ALL_TASK_TYPE}`,
-      timeout: '20m',
+      timeout: INSTALL_TASK_TIMEOUT,
       maxAttempts: 5,
       createTaskRunner: ({ taskInstance }) => {
         const { inferenceId, requestedAt } = taskInstance.params as RequestTaskParams;

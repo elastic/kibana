@@ -39,4 +39,8 @@ export {
   UNINSTALL_ALL_TASK_ID,
   UNINSTALL_ALL_TASK_ID_MULTILINGUAL,
 } from './uninstall_all';
-export { waitUntilTaskCompleted, type InstallLockManager } from './utils';
+export {
+  waitUntilTaskCompleted,
+  INSTALL_TASK_WAIT_TIMEOUT_MS,
+  type InstallLockManager,
+} from './utils';

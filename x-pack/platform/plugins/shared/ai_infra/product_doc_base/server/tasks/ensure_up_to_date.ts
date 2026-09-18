@@ -13,6 +13,7 @@ import type {
 import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
+  INSTALL_TASK_TIMEOUT,
   runTaskUnderInstallLock,
   scheduleRequestTask,
   type InstallLockManager,
@@ -37,7 +38,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
   taskManager.registerTaskDefinitions({
     [ENSURE_DOC_UP_TO_DATE_TASK_TYPE]: {
       title: 'Ensure product documentation up to date task',
-      timeout: '20m',
+      timeout: INSTALL_TASK_TIMEOUT,
       maxAttempts: 5,
       createTaskRunner: ({ taskInstance }) => {
         const { inferenceId, forceUpdate, requestedAt } =

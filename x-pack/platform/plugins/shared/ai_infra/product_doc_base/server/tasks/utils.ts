@@ -21,6 +21,10 @@ import {
 
 export type { InstallLockManager };
 
+// A full install or update runs in one task run; the waiter allows for scheduling and lock delays on top
+export const INSTALL_TASK_TIMEOUT = '20m';
+export const INSTALL_TASK_WAIT_TIMEOUT_MS = 25 * 60 * 1000;
+
 /**
  * Params shared by the per-request install and update tasks. Each request schedules its own task
  * instance, so the request time is immutable and never mixed up with an earlier request.
