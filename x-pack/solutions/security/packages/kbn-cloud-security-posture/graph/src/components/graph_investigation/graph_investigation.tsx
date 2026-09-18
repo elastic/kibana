@@ -33,7 +33,11 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
-import type { NodeViewModel } from '../types';
+import type {
+  ItemExpandPopoverListItemProps,
+  SeparatorExpandPopoverListItemProps,
+} from '../popovers/primitives/list_graph_popover';
+import type { NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
@@ -369,16 +373,24 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
     // filters out separators and maps iconType + label + onClick + disabled.
     const toToolbarItemsFn =
-      (itemsFn: (node: NodeProps) => Array<{ type: string; [key: string]: unknown }>) =>
+      (
+        itemsFn: (
+          node: NodeProps
+        ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>
+      ) =>
       (node: NodeProps) =>
-        (itemsFn(node) ?? [])
-          .filter((item) => item.type === 'item')
-          .map((item) => ({
-            iconType: item.iconType as string,
-            label: item.label as string,
-            onClick: item.onClick as () => void,
-            disabled: item.disabled as boolean | undefined,
-          }));
+        (itemsFn(node) ?? []).flatMap((item) =>
+          item.type === 'item'
+            ? [
+                {
+                  iconType: item.iconType,
+                  label: item.label,
+                  onClick: item.onClick,
+                  disabled: item.disabled,
+                },
+              ]
+            : []
+        );
 
     const { itemsFn: nodeItemsFn } = nodeExpandPopover;
     const nodeToolbarItemsFn = nodeItemsFn ? toToolbarItemsFn(nodeItemsFn) : undefined;

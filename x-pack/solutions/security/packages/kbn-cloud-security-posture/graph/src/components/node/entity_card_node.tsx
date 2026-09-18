@@ -289,21 +289,28 @@ const SourcesCell = memo<{ sources: string[] }>(({ sources }) => {
   const [first, ...rest] = formatted;
 
   return (
-    <EuiFlexGroup gutterSize="xxs" alignItems="center" responsive={false} css={{ width: '100%' }}>
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="center"
+      responsive={false}
+      css={{ width: '100%', gap: '4px' }}
+    >
       <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
-        <EuiText size="xs">
-          <p
-            css={{
-              margin: 0,
-              fontWeight: 'inherit',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {first}
-          </p>
-        </EuiText>
+        <EuiToolTip position="top" content={first}>
+          <EuiText size="xs" tabIndex={0}>
+            <p
+              css={{
+                margin: 0,
+                fontWeight: 'inherit',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {first}
+            </p>
+          </EuiText>
+        </EuiToolTip>
       </EuiFlexItem>
       {rest.length > 0 && (
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
@@ -347,18 +354,20 @@ const IpsCell = memo<{ ips: string[] }>(({ ips }) => {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ width: '100%' }}>
       <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
-        <EuiText size="xs">
-          <p
-            css={{
-              margin: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {first}
-          </p>
-        </EuiText>
+        <EuiToolTip position="top" content={first}>
+          <EuiText size="xs" tabIndex={0}>
+            <p
+              css={{
+                margin: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {first}
+            </p>
+          </EuiText>
+        </EuiToolTip>
       </EuiFlexItem>
       {rest.length > 0 && (
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
@@ -413,20 +422,27 @@ const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
 const EntityIdsCell = memo<{ entityIds: string[] }>(({ entityIds }) => {
   const [first, ...rest] = entityIds;
   return (
-    <EuiFlexGroup gutterSize="xxs" alignItems="center" responsive={false} css={{ width: '100%' }}>
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="center"
+      responsive={false}
+      css={{ width: '100%', gap: '4px' }}
+    >
       <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
-        <EuiText size="xs">
-          <p
-            css={{
-              margin: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {first}
-          </p>
-        </EuiText>
+        <EuiToolTip position="top" content={first}>
+          <EuiText size="xs" tabIndex={0}>
+            <p
+              css={{
+                margin: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {first}
+            </p>
+          </EuiText>
+        </EuiToolTip>
       </EuiFlexItem>
       {rest.length > 0 && (
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
@@ -545,26 +561,6 @@ const MetadataLabel = ({ children }: { children: React.ReactNode }) => (
       css={css`
         margin: 0;
         font-weight: bold;
-      `}
-    >
-      {children}
-    </p>
-  </EuiText>
-);
-
-/** Bold small value rendered inside a metadata cell. */
-const MetadataValue = ({
-  children,
-  euiTheme,
-}: {
-  children: React.ReactNode;
-  euiTheme: EuiThemeComputed;
-}) => (
-  <EuiText size="xs">
-    <p
-      css={css`
-        margin: 0;
-        font-weight: ${euiTheme.font.weight.semiBold};
       `}
     >
       {children}
