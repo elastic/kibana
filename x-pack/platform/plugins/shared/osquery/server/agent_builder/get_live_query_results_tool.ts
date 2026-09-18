@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { osqueryTool, osqueryLivePathAvailability } from './common';
+import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { pollActionResponses } from './poll_action_responses';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
@@ -22,11 +22,18 @@ export const GET_LIVE_QUERY_RESULTS_TOOL_ID = osqueryTool('get_live_query_result
 const DEFAULT_WAIT_SECONDS = 60;
 const MAX_WAIT_SECONDS = 120;
 const MAX_RESULT_ROWS = 100;
+/**
+ * Fleet action ids are UUIDs (36 chars). The bound exists so a malformed model
+ * call cannot push an arbitrarily large string into the term queries below and
+ * into the echoed error messages.
+ */
+const MAX_ACTION_ID_LENGTH = 128;
 
 const getLiveQueryResultsSchema = z.object({
   action_id: z
     .string()
     .min(1)
+    .max(MAX_ACTION_ID_LENGTH)
     .describe('action_id returned by osquery.run_live_query when dispatching a live query'),
   wait_seconds: z
     .number()
@@ -60,9 +67,17 @@ export const getLiveQueryResultsTool = (
     openWorldHint: false,
   },
   description:
-    'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive.',
+    'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive. Each returned row carries agent_id/agent_name so rows from different hosts stay distinguishable.',
   schema: getLiveQueryResultsSchema,
-  availability: osqueryLivePathAvailability(osqueryContext),
+  // Feature-flag availability only: reading results for an action that was
+  // already dispatched does not depend on the stack still being live-capable.
+  // Gating this read on `osqueryLivePathAvailability` hides already-readable
+  // rows whenever the integration is removed, an agent's status changes, or a
+  // Fleet lookup fails (the capability check is uncached and fails closed).
+  // `readLiveQueries` plus the space-ownership check below are the boundaries
+  // that protect the data, matching the GET action-results route, which has no
+  // capability gate either.
+  availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { action_id: actionId, wait_seconds: waitSeconds, max_rows: maxRows } = input;
     const waitBudgetMs = (waitSeconds ?? DEFAULT_WAIT_SECONDS) * 1_000;
