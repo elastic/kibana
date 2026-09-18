@@ -5,9 +5,9 @@ set -euo pipefail
 # Reads credentials from a file, deletes the file immediately, then makes the API call.
 # This ensures credentials never appear in the calling process's output.
 #
-# When agentBuilder:experimentalFeatures is true, creating a connector automatically
-# indexes it into the Semantic Metadata Layer (SML), making its sub-actions
-# discoverable by AI agents.
+# Connector sub-actions are callable by agents as soon as the connector is created.
+# When agentBuilder:experimentalFeatures is also true, creating a connector additionally
+# indexes it into the Semantic Metadata Layer (SML), improving discoverability for AI agents.
 
 CONNECTOR_TYPE=""
 CONNECTOR_NAME=""
