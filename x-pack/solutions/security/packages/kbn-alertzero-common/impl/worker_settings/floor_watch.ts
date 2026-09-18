@@ -21,7 +21,7 @@ export const ALERT_TRIAGE_DEFAULT_EXTRAS: AlertTriageWorkerExtras = {
 
 export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration<AlertTriageWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  allowedAutonomyLevels: ['manual', 'supervised'] as const,
   extras: { schema: AlertTriageWorkerExtras, defaultValue: ALERT_TRIAGE_DEFAULT_EXTRAS },
 };
 

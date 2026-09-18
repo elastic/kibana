@@ -324,14 +324,12 @@ steps:
   # ---------------------------------------------------------------------------
   # 7. Autonomy gate — create a proposal to close FP alerts if any qualify.
   #
-  #    Autonomy mapping (per the epic, which overrides D15 and the Triage Watch
-  #    catalog — see PR description for the conflict and why the epic wins):
+  #    Autonomy mapping:
   #      manual     → autoApprove: false  (human gate, 72 h queue row)
-  #      supervised → autoApprove: false  (fail-closed for MVP; D37/P17 still open)
-  #      assisted   → autoApprove: true   (auto-closes immediately, no queue row)
+  #      supervised → autoApprove: true   (auto-closes; analyst notified and can undo)
   #
-  #    All three levels go through one gate so the proposal record always exists
-  #    (R11) and there is one mapping site to update when P17 closes.
+  #    Both levels go through the proposal gate so the proposal record always
+  #    exists (R11) and there is one mapping site if the semantics ever change.
   #
   #    Idempotency: the conversation carries `workflow_execution_id` seeded in
   #    step 1. A Worker retry re-creates the Investigation (which 409s on a
@@ -364,7 +362,7 @@ steps:
             input: >-
               🤖 **Alert Triage** — Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
               Autonomy level: {{ consts.worker_settings.autonomy }}.
-              {% if consts.worker_settings.autonomy == 'assisted' %}This proposal will auto-approve immediately.{% else %}A human decision is required.{% endif %}
+              {% if consts.worker_settings.autonomy == 'supervised' %}This proposal will auto-approve immediately; you will be notified and can undo.{% else %}A human decision is required.{% endif %}
 
       - name: create_fp_proposal
         type: workflow.execute
@@ -414,10 +412,8 @@ steps:
               reason: "false_positive"
             impact: high
             confidence: high
-            # Autonomy → autoApprove mapping. One site: update here when P17 closes.
-            # supervised is deliberately fail-closed until D37's principal question
-            # and P17's per-level semantics are settled (see plan §PR4, D37, P17).
-            autoApprove: "${{ consts.worker_settings.autonomy == 'assisted' }}"
+            # Autonomy → autoApprove mapping. One site: update here if semantics change.
+            autoApprove: "${{ consts.worker_settings.autonomy == 'supervised' }}"
 
       # After the gate resolves (human approve or auto-approved), verify the
       # close landed by comparing the action workflow's output closed_count
@@ -533,3 +529,4 @@ steps:
             input: >-
               🤖 **Alert Triage** — Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
               {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+
