@@ -719,11 +719,56 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    // Per-space: only space-a has gated types; primary space (benign) needs no rules-all check.
     expect(atSpaces).toHaveBeenCalledWith(
-      expect.arrayContaining([mockSpaceId, 'space-a']),
+      ['space-a'],
       expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
     );
+    expect(atSpaces).not.toHaveBeenCalledWith(
+      expect.arrayContaining([mockSpaceId]),
+      expect.anything()
+    );
     expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a']));
+  });
+
+  it('checks each Space against only its own gated types, not the global union across Spaces', async () => {
+    // space-a has an existing security_rule, space-b has an existing security_ai_prompt.
+    // Archive is benign. The global-union approach would require rules-all + elasticAssistant
+    // in both spaces, rejecting a caller who has each privilege in only its own Space.
+    // Per-space: space-a needs only rules-all, space-b needs only elasticAssistant.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'dash-1', type: 'dashboard', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'old-rule', type: 'security-rule', version: 1 }],
+          'space-b': [{ id: 'old-prompt', type: 'security-ai-prompt', version: 1 }],
+        },
+      },
+    } as any;
+
+    await checkUploadPackageAssetPrivileges(
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+    );
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    // Two separate atSpaces calls — one per unique action set.
+    expect(atSpaces).toHaveBeenCalledTimes(2);
+    expect(atSpaces).toHaveBeenCalledWith(
+      ['space-a'],
+      expect.objectContaining({ kibana: ['api:rules-all'] })
+    );
+    expect(atSpaces).toHaveBeenCalledWith(
+      ['space-b'],
+      expect.objectContaining({ kibana: ['api:elasticAssistant'] })
+    );
   });
 
   it('skips privilege check when benign archive and additional Space refs are all non-gated', async () => {

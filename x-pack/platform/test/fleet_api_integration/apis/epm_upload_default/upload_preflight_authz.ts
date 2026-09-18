@@ -56,11 +56,14 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      // Wait until the process-wide upload rate-limit (10 s) has expired.
+    });
+
+    beforeEach(async () => {
+      // Wait until the process-wide upload rate-limit (10 s) has expired before each test.
       // The probe uses a deliberately invalid zip so it always fails before
-      // setLastUploadInstallCache() is reached — each probe leaves the slot
-      // unchanged. retry.tryForTime throws on 429 and succeeds on any other
-      // status, so the before() hook unblocks as soon as the window clears.
+      // setLastUploadInstallCache() is reached — each probe leaves the slot unchanged.
+      // retry.tryForTime throws on 429 and succeeds on any other status, so the hook
+      // unblocks as soon as the window clears.
       const probe = Buffer.from('not-a-zip');
       await retry.tryForTime(15_000, async () => {
         const { status } = await supertest
@@ -164,6 +167,85 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
+    });
+
+    it('allows upload of package with security_ai_prompt asset for user with Fleet + elasticAssistant — 200', async () => {
+      const aiPromptAsset = {
+        id: 'test-prompt-id-ok',
+        type: 'security-ai-prompt',
+        attributes: { name: 'Test Prompt', content: 'You are a security assistant.' },
+      };
+      const buf = await buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
+
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(
+          testUsers.fleet_all_int_all_assistant_all.username,
+          testUsers.fleet_all_int_all_assistant_all.password
+        )
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+    });
+
+    it('allows upload of ML security_rule asset for user with Fleet + SIEM + ML all — 200', async () => {
+      const mlRuleAsset = {
+        id: 'test-ml-rule-id-ok',
+        type: 'security-rule',
+        attributes: {
+          name: 'Test ML Rule',
+          type: 'machine_learning',
+          machine_learning_job_id: 'test-ml-job',
+          anomaly_threshold: 50,
+          enabled: false,
+          risk_score: 50,
+          severity: 'medium',
+          version: 1,
+        },
+      };
+      const buf = await buildPackageZipWithAssetType('security_rule', mlRuleAsset);
+
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(
+          testUsers.fleet_all_int_all_siem_all_ml_all.username,
+          testUsers.fleet_all_int_all_siem_all_ml_all.password
+        )
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+    });
+
+    it('rejects upload of ML security_rule for rules-only user (missing ml:canCreateJob) — 403', async () => {
+      const mlRuleAsset = {
+        id: 'test-ml-rule-id-deny',
+        type: 'security-rule',
+        attributes: {
+          name: 'Test ML Rule Deny',
+          type: 'machine_learning',
+          machine_learning_job_id: 'test-ml-job-deny',
+          anomaly_threshold: 50,
+          enabled: false,
+          risk_score: 50,
+          severity: 'medium',
+          version: 1,
+        },
+      };
+      const buf = await buildPackageZipWithAssetType('security_rule', mlRuleAsset);
+
+      // fleet_all_int_all_siem_all has rules-all (via siemV2:all) but not ml:canCreateJob
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(
+          testUsers.fleet_all_int_all_siem_all.username,
+          testUsers.fleet_all_int_all_siem_all.password
+        )
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(403);
     });
   });
 }

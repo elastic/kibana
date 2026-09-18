@@ -95,28 +95,6 @@ export function buildRequiredActions(
   return [...privilegeNames].map((name) => security.authz.actions.api.get(name));
 }
 
-function detectGatedTypesInDestinationSpaces(
-  installation: SavedObject<Installation> | undefined,
-  destinationSpaces: string[],
-  effectivePrimarySpace: string
-): Set<KibanaAssetType> {
-  const found = new Set<KibanaAssetType>();
-  if (!installation) return found;
-
-  for (const space of destinationSpaces) {
-    const refs =
-      space === effectivePrimarySpace
-        ? installation.attributes.installed_kibana
-        : installation.attributes.additional_spaces_installed_kibana?.[space];
-
-    for (const ref of refs ?? []) {
-      const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type);
-      if (assetType) found.add(assetType);
-    }
-  }
-  return found;
-}
-
 export async function checkUploadPackageAssetPrivileges(
   request: KibanaRequest,
   archiveBuffer: Buffer,
@@ -149,20 +127,30 @@ export async function checkUploadPackageAssetPrivileges(
     ];
   }
 
-  // Union gated types from the new archive with gated types in the existing install,
-  // scanned only for the destination spaces. This prevents a caller from removing
-  // privileged assets in any destination by uploading a benign replacement: if the
-  // new archive omits a gated type that exists in an installed Space (including an
-  // additional Space), the cleanup step would delete it without a privilege check.
-  const gatedTypesFromExisting = detectGatedTypesInDestinationSpaces(
-    installation,
-    destinationSpaces,
-    effectivePrimarySpace
-  );
-  const effectiveGatedTypes = new Set([...signals.gatedTypesFound, ...gatedTypesFromExisting]);
+  // Build per-Space gated type sets: archive types (written to every destination Space) union
+  // each Space's own existing gated types (which cleanUpUnusedKibanaAssetsStep would remove).
+  // Keeping these sets per-Space avoids requiring privileges for a type in a Space that never
+  // had it — e.g. if space-a holds rules and space-b holds AI prompts, space-a only needs
+  // rules-all and space-b only needs elasticAssistant, not both everywhere.
+  const spaceGatedTypes = new Map<string, Set<KibanaAssetType>>();
+  for (const space of destinationSpaces) {
+    const types = new Set(signals.gatedTypesFound);
+    if (installation) {
+      const refs =
+        space === effectivePrimarySpace
+          ? installation.attributes.installed_kibana
+          : installation.attributes.additional_spaces_installed_kibana?.[space];
+      for (const ref of refs ?? []) {
+        const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type);
+        if (assetType) types.add(assetType);
+      }
+    }
+    spaceGatedTypes.set(space, types);
+  }
 
-  if (effectiveGatedTypes.size === 0 && !signals.hasMlSecurityRules) {
-    // No gated asset types in archive or existing destination spaces; skip privilege check.
+  const anyGated =
+    [...spaceGatedTypes.values()].some((s) => s.size > 0) || signals.hasMlSecurityRules;
+  if (!anyGated) {
     return [];
   }
 
@@ -176,25 +164,39 @@ export async function checkUploadPackageAssetPrivileges(
     );
   }
 
-  const actions = buildRequiredActions(
-    { ...signals, gatedTypesFound: effectiveGatedTypes },
-    security
-  );
-
-  const checkResult = await security.authz
-    .checkPrivilegesWithRequest(request)
-    .atSpaces(destinationSpaces, { kibana: actions });
-
-  if (!checkResult.hasAllRequested) {
-    const missingActions = checkResult.privileges.kibana
-      .filter((p) => !p.authorized)
-      .map((p) => p.privilege);
-    throw new FleetUnauthorizedError(
-      `Insufficient privileges to upload this package. Missing: ${missingActions.join(', ')}`
+  // Group spaces with identical required action sets to minimise security API calls.
+  // Spaces that need no privileged writes are pre-authorised and skipped.
+  const actionGroupMap = new Map<string, { spaces: string[]; actions: string[] }>();
+  for (const [space, types] of spaceGatedTypes) {
+    const actions = buildRequiredActions(
+      { gatedTypesFound: types, hasMlSecurityRules: signals.hasMlSecurityRules },
+      security
     );
+    if (actions.length === 0) continue;
+    const key = [...actions].sort().join('\0');
+    const group = actionGroupMap.get(key);
+    if (group) {
+      group.spaces.push(space);
+    } else {
+      actionGroupMap.set(key, { spaces: [space], actions });
+    }
   }
 
-  // Return the exact set of Spaces that were authorized so callers can use it to cap
+  for (const { spaces, actions } of actionGroupMap.values()) {
+    const checkResult = await security.authz
+      .checkPrivilegesWithRequest(request)
+      .atSpaces(spaces, { kibana: actions });
+    if (!checkResult.hasAllRequested) {
+      const missingActions = checkResult.privileges.kibana
+        .filter((p) => !p.authorized)
+        .map((p) => p.privilege);
+      throw new FleetUnauthorizedError(
+        `Insufficient privileges to upload this package. Missing: ${missingActions.join(', ')}`
+      );
+    }
+  }
+
+  // Return the exact set of Spaces that were authorised so callers can use it to cap
   // multispace propagation to the same snapshot (preventing TOCTOU bypass).
   return destinationSpaces;
 }

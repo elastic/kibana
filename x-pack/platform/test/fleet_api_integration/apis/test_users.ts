@@ -216,6 +216,31 @@ export const testUsers: {
     username: 'fleet_all_int_all_siem_all',
     password: 'changeme',
   },
+  fleet_all_int_all_assistant_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        securitySolutionAssistant: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all_assistant_all',
+    password: 'changeme',
+  },
+  fleet_all_int_all_siem_all_ml_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        siemV2: ['all'],
+        ml: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all_siem_all_ml_all',
+    password: 'changeme',
+  },
 };
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
