@@ -8,12 +8,11 @@
 import { inject, injectable } from 'inversify';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
   errorResponseSchema,
-  ID_MAX_LENGTH,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -27,10 +26,7 @@ import {
   ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-
-const actionPolicyIdParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the action policy.'),
-});
+import { actionPolicyIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class UpsertActionPolicyRoute extends BaseAlertingRoute {

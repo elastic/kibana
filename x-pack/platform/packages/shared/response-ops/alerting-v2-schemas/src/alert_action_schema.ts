@@ -162,6 +162,7 @@ export const seriesAlertActionParamsSchema = z
       .max(256)
       .describe('Hash identifying the alert episode series to apply the action to.'),
   })
+  .strict()
   .describe('Path parameters for series-level alert action endpoints.');
 export type SeriesAlertActionParams = z.infer<typeof seriesAlertActionParamsSchema>;
 
@@ -173,6 +174,7 @@ export const episodeAlertActionParamsSchema = z
       .max(ID_MAX_LENGTH)
       .describe('Identifier of the alert episode to apply the action to.'),
   })
+  .strict()
   .describe('Path parameters for episode-level alert action endpoints.');
 export type EpisodeAlertActionParams = z.infer<typeof episodeAlertActionParamsSchema>;
 

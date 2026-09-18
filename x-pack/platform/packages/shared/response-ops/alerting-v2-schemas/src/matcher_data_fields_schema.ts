@@ -16,6 +16,7 @@ export const matcherDataFieldsQuerySchema = z
       .optional()
       .describe('Optional matcher expression used to scope suggested data field names.'),
   })
+  .strict()
   .describe('Query parameters for matcher data field suggestions.');
 
 export type MatcherDataFieldsQuery = z.infer<typeof matcherDataFieldsQuerySchema>;
