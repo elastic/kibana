@@ -9,6 +9,7 @@ import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { DefaultPolicyNotificationMessage, policyFactory } from './policy_config';
 import {
+  clearCustomYaraSignaturesIfEnabled,
   disableProtections,
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
@@ -573,6 +574,29 @@ describe('Policy Config helpers', () => {
         memory_protection: { shim_cache: true },
         alerts: { rollback: { self_healing: { enabled: true } } },
       });
+    });
+
+    it('clears an enabled custom_yara_signatures only for OSes in osList', () => {
+      const policy = policyFactory();
+
+      clearCustomYaraSignaturesIfEnabled(policy, ['windows']);
+
+      expect(policy.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(policy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);
+    });
+
+    it('leaves an absent custom_yara_signatures absent when clearing', () => {
+      const policy = policyFactory();
+      delete policy.windows.memory_protection.custom_yara_signatures;
+      delete policy.mac.memory_protection.custom_yara_signatures;
+      policy.linux.memory_protection.custom_yara_signatures = true;
+
+      clearCustomYaraSignaturesIfEnabled(policy, ['windows', 'mac', 'linux']);
+
+      expect(policy.windows.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(policy.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(false);
     });
   });
 });

@@ -468,6 +468,26 @@ export const setCustomYaraSignatures = (
   return policy;
 };
 
+/**
+ * Turns off custom YARA signatures only where they are currently enabled.
+ *
+ * An absent field is left absent: it means "never configured", and manufacturing an explicit
+ * `false` would opt the policy out of the future backfill for a feature the user never had
+ * access to. An enabled field still has to be cleared, otherwise the save is rejected by
+ * license validation.
+ */
+export const clearCustomYaraSignaturesIfEnabled = (
+  policy: PolicyConfig,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    if (policy[os].memory_protection.custom_yara_signatures) {
+      policy[os].memory_protection.custom_yara_signatures = false;
+    }
+  });
+  return policy;
+};
+
 /** Leaf field of every path in `CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS`. */
 const CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD = 'user_yara_rescan_interval_seconds';
 

@@ -323,6 +323,23 @@ describe('Policy Memory Protections Card', () => {
         expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
         expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
       });
+
+      it('should keep an absent custom YARA signatures field absent when memory protection is turned on', async () => {
+        turnMemoryProtectionOff();
+        delete formProps.policy.windows.memory_protection.custom_yara_signatures;
+        delete formProps.policy.mac.memory_protection.custom_yara_signatures;
+        delete formProps.policy.linux.memory_protection.custom_yara_signatures;
+        render();
+
+        await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+
+        const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+        expect(updatedPolicy.windows.memory_protection).not.toHaveProperty(
+          'custom_yara_signatures'
+        );
+        expect(updatedPolicy.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+        expect(updatedPolicy.linux.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      });
     });
 
     describe('and a serverless PLI upsell message is present', () => {

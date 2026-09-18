@@ -24,7 +24,10 @@ import {
   PolicyOperatingSystem,
   ProtectionModes,
 } from '../../../../../../../../common/endpoint/types';
-import { setCustomYaraSignatures } from '../../../../../../../../common/endpoint/models/policy_config_helpers';
+import {
+  clearCustomYaraSignaturesIfEnabled,
+  setCustomYaraSignatures,
+} from '../../../../../../../../common/endpoint/models/policy_config_helpers';
 import type { MemoryProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
@@ -85,16 +88,18 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
     const protection = 'memory_protection';
     const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
 
-    // Turning Memory threat ON must not write custom_yara_signatures=true when CYS is
-    // unavailable; otherwise license validation rejects the save.
+    // Custom YARA signatures follow the Memory threat switch, but only while the feature is
+    // available: writing `true` when it is not would be rejected by license validation, and
+    // writing `false` would manufacture an opt-out for a user who never had the toggle.
     const adjustCustomYaraSignaturesOnProtectionSwitch =
       useCallback<AdjustSubfeatureOnProtectionSwitch>(
         ({ value, policyConfigData, protectionOsList }) => {
-          setCustomYaraSignatures(
-            policyConfigData,
-            value && isCustomYaraSignaturesAvailable,
-            protectionOsList
-          );
+          if (isCustomYaraSignaturesAvailable) {
+            setCustomYaraSignatures(policyConfigData, value, protectionOsList);
+          } else {
+            clearCustomYaraSignaturesIfEnabled(policyConfigData, protectionOsList);
+          }
+
           return policyConfigData;
         },
         [isCustomYaraSignaturesAvailable]
