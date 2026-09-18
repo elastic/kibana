@@ -139,7 +139,10 @@ export default function (providerContext: FtrProviderContext) {
 
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
-        .auth(testUsers.fleet_all_int_all_siem_all.username, testUsers.fleet_all_int_all_siem_all.password)
+        .auth(
+          testUsers.fleet_all_int_all_siem_all.username,
+          testUsers.fleet_all_int_all_siem_all.password
+        )
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)

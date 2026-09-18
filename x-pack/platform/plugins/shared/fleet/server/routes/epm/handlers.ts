@@ -703,10 +703,12 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const installSource = 'upload';
 
   const lastUpload = getLastUploadInstallCache();
-  const wouldBeRateLimited =
-    !!lastUpload && Date.now() - lastUpload < UPLOAD_RETRY_AFTER_MS;
+  const wouldBeRateLimited = !!lastUpload && Date.now() - lastUpload < UPLOAD_RETRY_AFTER_MS;
 
-  if (!wouldBeRateLimited && !appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+  if (
+    !wouldBeRateLimited &&
+    !appContextService.getConfig()?.internal?.skipUploadPackageValidation
+  ) {
     await checkUploadPackageAssetPrivileges(request, archiveBuffer, contentType, spaceId);
   }
 
