@@ -57,6 +57,9 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'agentBuilder:deductiveEnabled': boolean;
+  'agentBuilder:deductiveEndpoint': string;
+  'agentBuilder:deductiveApiKey': string;
   'contextEngine:enabled': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
@@ -228,6 +231,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;

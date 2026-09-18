@@ -1405,19 +1405,6 @@
   "/api/streams/{name}/content/import": {
     "post": "post-streams-name-content-import"
   },
-  "/api/streams/{name}/queries": {
-    "get": "get-streams-name-queries"
-  },
-  "/api/streams/{name}/queries/_bulk": {
-    "post": "post-streams-name-queries-bulk"
-  },
-  "/api/streams/{name}/queries/{queryId}": {
-    "put": "put-streams-name-queries-queryid",
-    "delete": "delete-streams-name-queries-queryid"
-  },
-  "/api/streams/{name}/significant_events": {
-    "get": "get-streams-name-significant-events"
-  },
   "/api/streams/{streamName}/attachments": {
     "get": "get-streams-streamname-attachments"
   },
