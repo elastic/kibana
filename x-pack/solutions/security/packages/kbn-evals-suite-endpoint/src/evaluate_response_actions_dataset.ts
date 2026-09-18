@@ -57,15 +57,23 @@ const LOAD_SKILL_TOOL_ID = 'load_skill';
  */
 const SKILL_ROUTING_TOOL_IDS = new Set([FILESTORE_READ_TOOL_ID, LOAD_SKILL_TOOL_ID]);
 
+/**
+ * Tool ids the trajectory comparison sees. Skill routing is filtered out
+ * everywhere — including against an explicit empty `tool_sequence`, where
+ * loading the skill to check whether an action is available from chat is
+ * still not the model improvising a tool call.
+ */
+const extractTrajectoryToolIds = (output: TaskOutput): string[] =>
+  getToolCallSteps(output)
+    .map((step) => step.tool_id)
+    .filter((id): id is string => typeof id === 'string' && !SKILL_ROUTING_TOOL_IDS.has(id));
+
 export const createResponseActionsTrajectoryEvaluator = (): Evaluator<
   ResponseActionsDatasetExample,
   TaskOutput
 > => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) =>
-      getToolCallSteps(output as TaskOutput)
-        .map((step) => step.tool_id)
-        .filter((id): id is string => typeof id === 'string' && !SKILL_ROUTING_TOOL_IDS.has(id)),
+    extractToolCalls: (output) => extractTrajectoryToolIds(output as TaskOutput),
     goldenPathExtractor: (expected) => {
       const exp = expected as ResponseActionsDatasetExample['output'] | undefined;
       return exp?.tool_sequence ?? [];
@@ -88,11 +96,12 @@ export const createResponseActionsTrajectoryEvaluator = (): Evaluator<
       }
       if (exp.tool_sequence.length === 0) {
         // Explicit empty sequence (e.g. the write-action boundary row): the
-        // model must call NO tools at all. Score directly instead of falling
-        // through to `inner.evaluate`, whose order/coverage weighting is
-        // undefined against an empty expected sequence and would otherwise
-        // report the same N/A as an unannotated row, hiding a real failure.
-        const actual = getToolCallSteps(args.output).map((step) => step.tool_id);
+        // model must call no tool beyond skill routing. Score directly instead
+        // of falling through to `inner.evaluate`, whose order/coverage
+        // weighting is undefined against an empty expected sequence and would
+        // otherwise report the same N/A as an unannotated row, hiding a real
+        // failure.
+        const actual = extractTrajectoryToolIds(args.output);
         const passed = actual.length === 0;
         return {
           score: passed ? 1 : 0,
@@ -111,11 +120,11 @@ export const createResponseActionsTrajectoryEvaluator = (): Evaluator<
  * Scores the negative space of the read-only slice: a row may declare
  * `metadata.forbidden_tools`, and any call to one of them scores 0.
  *
- * The trajectory evaluator cannot cover this case — it returns N/A for rows
- * with an empty `tool_sequence`, which is exactly the "do not improvise a
- * state-changing action" row — so without this evaluator the most
- * consequential assertion in the slice would be carried by an LLM criterion
- * alone.
+ * Complementary to the trajectory evaluator rather than a substitute for it:
+ * the write-boundary row fails any non-routing tool call through its explicit
+ * empty `tool_sequence`, while this evaluator fails the specific ids a row
+ * names — the only trajectory signal available to rows that annotate no
+ * `tool_sequence` at all (e.g. the off-topic distractor row).
  */
 export const createForbiddenToolCallEvaluator = (): Evaluator<
   ResponseActionsDatasetExample,

@@ -136,6 +136,35 @@ describe('getResponseActionStatusTool', () => {
     });
   });
 
+  it('surfaces actionDetails.errors when the action failed', async () => {
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'scan',
+      status: 'failed',
+      wasSuccessful: false,
+      isCompleted: true,
+      wasCanceled: false,
+      hosts: { 'agent-123': { name: 'pr-272111-defend-demo' } },
+      parameters: {},
+      outputs: {},
+      errors: ['Endpoint command failed: scan target not found'],
+      startedAt: '2026-07-13T14:10:00.000Z',
+      completedAt: '2026-07-13T14:12:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+    expect(data.wasSuccessful).toBe(false);
+    // Without the error reason the agent can report the failure but not why
+    // it happened.
+    expect(data.errors).toEqual(['Endpoint command failed: scan target not found']);
+  });
+
   it('returns ToolResultType.error for unexpected lookup failures', async () => {
     mockGetActionDetailsById.mockRejectedValue(new Error('Elasticsearch unavailable'));
 

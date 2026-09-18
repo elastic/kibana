@@ -21,11 +21,14 @@ import {
 
 const SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
 
-// Fixed action ids the golden questions reference directly. Seeded in
-// `beforeAll` via `seedResponseAction` so `get_response_action_status` reads
-// hit real ES documents instead of only exercising the not-found branch.
+// Fixed action ids the golden questions reference directly. The first two are
+// seeded in `beforeAll` via `seedResponseAction` so `get_response_action_status`
+// reads hit real ES documents instead of only exercising the not-found branch;
+// the third is deliberately never seeded, so the not-found branch keeps its own
+// scenario.
 const ACTION_ID_FOUND = '8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e';
 const ACTION_ID_PENDING_SCAN = 'c1db8485-5110-4fef-a683-d5c037a65de5';
+const ACTION_ID_UNKNOWN = '4b1d6f52-9c0e-4c1a-8f4b-1f0a2c6d7e88';
 
 evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
@@ -60,13 +63,13 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
     // Seed the response-action documents the "action status follow-up"
     // golden questions reference by fixed ID, so those reads exercise the
     // real ES `found` path instead of only ever hitting not-found.
-    await seedResponseAction(esClient, {
+    await seedResponseAction(internalEsClient, {
       actionId: ACTION_ID_FOUND,
       agentId: 'eval-agent-era-isolate-001',
       command: 'isolate',
       status: 'successful',
     });
-    await seedResponseAction(esClient, {
+    await seedResponseAction(internalEsClient, {
       actionId: ACTION_ID_PENDING_SCAN,
       agentId: 'eval-agent-era-isolate-001',
       command: 'running-processes',
@@ -176,7 +179,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                   `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_FOUND}`,
                   'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
-                  'Reported the lookup result to the analyst (action status if found, or a clear not-found message)',
+                  `Reported that action ${ACTION_ID_FOUND} is successful (the isolate command completed) rather than a not-found message`,
                 ],
                 tool_sequence: ['endpoint-response-actions.get_response_action_status'],
               },
@@ -191,11 +194,26 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                   `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_PENDING_SCAN}`,
                   'Did not dispatch a new scan or other write action just to check status',
-                  'Reported the current action status or a clear not-found message to the analyst',
+                  `Reported that action ${ACTION_ID_PENDING_SCAN} is still pending rather than a not-found message`,
                 ],
                 tool_sequence: ['endpoint-response-actions.get_response_action_status'],
               },
               metadata: { golden_id: 'era-005-pending-scan-status', row_type: 'happy' },
+            },
+            {
+              input: {
+                question: `What happened to response action ${ACTION_ID_UNKNOWN}?`,
+              },
+              output: {
+                criteria: [
+                  `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                  `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_UNKNOWN}`,
+                  'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
+                  'Reported a clear not-found message for that action ID',
+                ],
+                tool_sequence: ['endpoint-response-actions.get_response_action_status'],
+              },
+              metadata: { golden_id: 'era-010-unknown-action-id', row_type: 'not_found' },
             },
             {
               input: {
@@ -259,9 +277,10 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 golden_id: 'era-009-write-action-boundary',
                 row_type: 'boundary',
                 // This slice ships no write tools, so a model that "helpfully"
-                // improvises one is calling a tool that does not exist. Encode the
-                // negative space explicitly: an empty tool_sequence leaves the
-                // trajectory evaluator N/A, so this is the row's hard signal.
+                // improvises one is calling a tool that does not exist. The
+                // empty tool_sequence already fails any non-routing tool call;
+                // naming the write ids keeps the failure attributed to the
+                // right cause.
                 forbidden_tools: [
                   'endpoint-response-actions.isolate_host',
                   'endpoint-response-actions.unisolate_host',

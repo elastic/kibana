@@ -363,4 +363,76 @@ describe('createEndpointLookupService', () => {
       expect(getHostMetadataList).not.toHaveBeenCalled();
     });
   });
+
+  describe('CPS reconciliation', () => {
+    it('resolves through the scoped metadata index when every Fleet match is hidden by space scoping', async () => {
+      // Origin Fleet knows the hostname but this space cannot see any of its
+      // agents. Under CPS the linked-project endpoint is still visible through
+      // the request-scoped metadata read, so resolution must not stop at the
+      // empty visible set.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'origin-other-space', status: 'online', packages: ['endpoint'] }],
+        }),
+        ensureInCurrentSpace: jest.fn().mockRejectedValue(new NotFoundError('Agent not found')),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [{ metadata: { agent: { id: 'linked-agent' } }, host_status: HostStatus.HEALTHY }],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('shared-host');
+
+      expect(result.kind).toBe('found');
+      expect(result).toHaveProperty('endpoint.agentId', 'linked-agent');
+    });
+
+    it('reports ambiguity when origin Fleet and a linked project both have the hostname live', async () => {
+      // Two live machines sharing a hostname is ambiguous whichever project
+      // they live in; picking the origin one silently would report — or
+      // isolate — the wrong host.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'origin-live', status: 'online', packages: ['endpoint'] }],
+        }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [{ metadata: { agent: { id: 'linked-live' } }, host_status: HostStatus.HEALTHY }],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('shared-host');
+
+      expect(result).toEqual({
+        kind: 'ambiguous',
+        candidates: [
+          { agentId: 'origin-live', status: 'online' },
+          { agentId: 'linked-live', status: HostStatus.HEALTHY },
+        ],
+      });
+    });
+
+    it('does not double-count a metadata entry Fleet already returned for the same agent', async () => {
+      // One agent seen from two views is still one agent, not ambiguity.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-1', status: 'online', packages: ['endpoint'] }],
+        }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [{ metadata: { agent: { id: 'agent-1' } }, host_status: HostStatus.HEALTHY }],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('shared-host');
+
+      expect(result).toEqual({
+        kind: 'found',
+        endpoint: { agentId: 'agent-1', agentType: 'endpoint', packages: ['endpoint'] },
+      });
+    });
+  });
 });

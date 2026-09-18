@@ -469,7 +469,7 @@ export interface SeedResponseActionOptions {
  * golden-question eval needs to assert against).
  */
 export async function seedResponseAction(
-  esClient: Client,
+  internalEsClient: Client,
   { actionId, agentId, command, status, comment }: SeedResponseActionOptions
 ): Promise<void> {
   const generator = new EndpointActionGenerator();
@@ -537,7 +537,7 @@ export async function seedResponseAction(
     );
   }
 
-  const bulkResponse = await esClient.bulk(
+  const bulkResponse = await internalEsClient.bulk(
     { operations, refresh: 'wait_for' },
     { headers: { 'X-elastic-product-origin': 'fleet' } }
   );

@@ -53,8 +53,10 @@ improvise one with another tool.
   or response action state — use the tools above.
 - Never claim an endpoint was isolated, released, or scanned. This skill only
   reads state.
-- Branch on typed tool errors (\`insufficient_privileges\`, \`endpoint_not_found\`,
-  \`action_not_found\`, \`unknown_error\`) — details in \`./reference\`.`;
+- Branch on the typed signals the tools return: a missing host or action is
+  \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`,
+  while \`error: insufficient_privileges\` and \`error: unknown_error\` mean the
+  lookup itself could not run. Details in \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
   endpointAppContextService: EndpointAppContextService

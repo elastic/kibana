@@ -68,6 +68,21 @@ describe('createEndpointResponseActionsSkill', () => {
         expect(skill.content).toContain(writeAction);
       }
     });
+
+    it('distinguishes not-found reasons from error codes in the reference doc', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+
+      // A missing host or action comes back as `found: false` + `reason`, not
+      // as an `error`. Naming a reason an error is what makes the model treat
+      // a normal not-found as an unexpected result instead of asking the
+      // analyst to verify the id. The exact contract lives in the reference
+      // doc the skill points the model to for error-code handling.
+      const reference = skill.referencedContent?.find((c) => c.name === 'reference')?.content;
+      expect(reference).toContain('reason: endpoint_not_found');
+      expect(reference).toContain('reason: action_not_found');
+      expect(reference).toContain('error: insufficient_privileges');
+      expect(reference).toContain('error: unknown_error');
+    });
   });
 
   describe('getInlineTools', () => {
