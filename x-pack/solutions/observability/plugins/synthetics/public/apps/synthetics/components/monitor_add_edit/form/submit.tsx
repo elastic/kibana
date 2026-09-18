@@ -45,12 +45,13 @@ export const ActionBar = ({
 
   const [monitorsPendingDeletion, setMonitorsPendingDeletion] = useState<string[]>([]);
 
-  const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
+  const [submission, setSubmission] = useState<
+    { monitor: SyntheticsMonitor; preserveMaskedParams: boolean } | undefined
+  >(undefined);
 
   const { parametersAreMasked } = useParameterValues();
   const { status, loading, isEdit } = useMonitorSave({
-    monitorData,
-    preserveMaskedParams: parametersAreMasked,
+    submission,
   });
 
   const canEditSynthetics = useCanEditSynthetics();
@@ -59,7 +60,10 @@ export const ActionBar = ({
 
   const formSubmitter = (formData: Record<string, any>) => {
     if (isValid) {
-      setMonitorData(format(formData, readOnly));
+      setSubmission({
+        monitor: format(formData, readOnly),
+        preserveMaskedParams: parametersAreMasked,
+      });
     }
   };
 
