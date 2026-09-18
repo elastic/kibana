@@ -37,7 +37,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      await cleanupSources(apiClient, manager.cookieHeader, TITLE_PREFIX);
+      await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
       await deleteTestIndex(esClient, index);
     });
 

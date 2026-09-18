@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { getSourceCommandQuery } from '@kbn/nightshift-shared';
+import { getSourceCommandQuery, hasMultipleSourceIndices } from '@kbn/nightshift-shared';
 import { validateSourceQuery } from './validate_source_query';
 
 const expectRejected = (esql: string, messagePart: string) => {
@@ -89,5 +89,16 @@ describe('getSourceCommandQuery', () => {
       'FROM logs-a, logs-b*'
     );
     expect(getSourceCommandQuery('ts metrics-* | where host.name == "a"')).toBe('TS metrics-*');
+  });
+});
+
+describe('hasMultipleSourceIndices', () => {
+  it('is false for a single source', () => {
+    expect(hasMultipleSourceIndices('FROM logs-* | WHERE status >= 500')).toBe(false);
+    expect(hasMultipleSourceIndices('TS metrics-*')).toBe(false);
+  });
+
+  it('is true when FROM names several indices', () => {
+    expect(hasMultipleSourceIndices('FROM logs-a, logs-b* | WHERE status >= 500')).toBe(true);
   });
 });

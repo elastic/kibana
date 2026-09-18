@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getSourceCommandQuery } from '@kbn/nightshift-shared';
+import { getSourceCommandQuery, hasMultipleSourceIndices } from '@kbn/nightshift-shared';
 import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_errors';
 
 // ES|QL answers a wildcard that matches nothing with a single placeholder column of this name.
@@ -34,7 +34,8 @@ export const hasNoIndicesBehind = async ({
     return columns.every((column) => column.name === ESQL_EMPTY_RELATION_COLUMN);
   } catch (error) {
     if (isEsqlVerificationError(error)) {
-      return isEsqlUnknownIndexError(error);
+      // One missing concrete name is not an empty relation when other sources may exist.
+      return isEsqlUnknownIndexError(error) && !hasMultipleSourceIndices(esql);
     }
     throw error;
   }
@@ -55,6 +56,9 @@ export const assertSourceQueryExecutes = async ({
     await esClient.esql.query({ query: `${esql}\n| LIMIT 0`, format: 'json' });
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
+      if (hasMultipleSourceIndices(esql)) {
+        throw toBoom(error, 'ES|QL query cannot be executed');
+      }
       return;
     }
     if (isEsqlVerificationError(error)) {

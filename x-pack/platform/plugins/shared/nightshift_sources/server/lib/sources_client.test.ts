@@ -13,6 +13,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { escapeKuery } from '@kbn/es-query';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -164,6 +165,22 @@ describe('SourcesClient', () => {
       await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe('ok');
     });
 
+    it('is unresolvable when Unknown index comes from a multi-source query', async () => {
+      const { client, viewsClient, dataEsClient } = setup();
+      const source = makeSource({
+        esql: 'FROM logs-nginx-*, logs-none | WHERE status >= 500',
+      });
+      viewsClient.getView.mockResolvedValue({
+        name: source.view_name,
+        query: source.esql,
+      });
+      dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
+
+      await expect(client.getHealth(source, { checkResolvable: true })).resolves.toBe(
+        'unresolvable'
+      );
+    });
+
     it('is unresolvable when the view no longer plans against existing indices', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
@@ -274,6 +291,20 @@ describe('SourcesClient', () => {
       await expect(
         client.create({ title: 't', tags: [], esql: 'FROM logs-none' })
       ).resolves.toBeDefined();
+    });
+
+    it('does not treat Unknown index as empty when FROM names several sources', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
+
+      await expect(
+        client.create({
+          title: 't',
+          tags: [],
+          esql: 'FROM logs-nginx-*, logs-none | WHERE status >= 500',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(soClient.create).not.toHaveBeenCalled();
     });
 
     // A wildcard matching nothing resolves to an empty relation, so ES reports the WHERE field
@@ -465,10 +496,26 @@ describe('SourcesClient', () => {
 
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
     });
+
+    it('escapes KQL metacharacters in the title prefix filter', async () => {
+      const { client, soClient } = setup();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
+      const search = 'foo AND "bar"';
+
+      await client.list({ page: 1, perPage: 25, search, enabled: true });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `nightshift-source.attributes.title: ${escapeKuery(
+            search
+          )}* AND nightshift-source.attributes.enabled: true`,
+        })
+      );
+    });
   });
 
   describe('delete', () => {
-    it('deletes the saved object first, then the view', async () => {
+    it('deletes the view first, then the saved object', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
 
@@ -485,7 +532,18 @@ describe('SourcesClient', () => {
 
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
       expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.source-1');
-      expect(callOrder).toEqual(['so', 'view']);
+      expect(callOrder).toEqual(['view', 'so']);
+    });
+
+    it('leaves the saved object in place when the view cannot be deleted', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      viewsClient.deleteView.mockRejectedValue(forbidden('no delete_view'));
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
   });
 

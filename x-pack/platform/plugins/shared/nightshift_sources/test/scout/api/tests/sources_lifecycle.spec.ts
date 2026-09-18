@@ -45,7 +45,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      await cleanupSources(apiClient, manager.cookieHeader, TITLE_PREFIX);
+      await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
       await deleteTestIndex(esClient, index);
     });
 
@@ -75,7 +75,11 @@ apiTest.describe(
           query: body.esql,
         });
 
-        const listed = await listSources(apiClient, manager.cookieHeader);
+        const listed = await listSources(
+          apiClient,
+          manager.cookieHeader,
+          `search=${encodeURIComponent(body.title)}`
+        );
         expect(listed).toHaveStatusCode(200);
         expect(findListed(listed.body, source.id)).toStrictEqual({ source, health: 'ok' });
 
@@ -168,9 +172,17 @@ apiTest.describe(
       expect(disabled.body.source.enabled).toBe(false);
       expect(disabled.body.source.esql_updated_at).toBe(source.esql_updated_at);
 
-      const onlyDisabled = await listSources(apiClient, manager.cookieHeader, 'enabled=false');
+      const onlyDisabled = await listSources(
+        apiClient,
+        manager.cookieHeader,
+        `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=false`
+      );
       expect(listedIds(onlyDisabled.body)).toContain(source.id);
-      const onlyEnabled = await listSources(apiClient, manager.cookieHeader, 'enabled=true');
+      const onlyEnabled = await listSources(
+        apiClient,
+        manager.cookieHeader,
+        `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=true`
+      );
       expect(listedIds(onlyEnabled.body)).not.toContain(source.id);
 
       const enabled = await setSourceEnabled(apiClient, manager.cookieHeader, source.id, true);
@@ -181,6 +193,7 @@ apiTest.describe(
 
     apiTest('paginates sorted by title', async ({ apiClient }) => {
       const titles = ['a', 'b', 'c'].map((letter) => `${TITLE_PREFIX}-${suffix}-page-${letter}`);
+      const pagePrefix = `${TITLE_PREFIX}-${suffix}-page-`;
       const ids: string[] = [];
       for (const title of titles) {
         const { source } = (
@@ -189,21 +202,25 @@ apiTest.describe(
         ids.push(source.id);
       }
 
-      const firstPage = await listSources(apiClient, manager.cookieHeader, 'page=1&per_page=2');
+      const listPage = (page: number) =>
+        listSources(
+          apiClient,
+          manager.cookieHeader,
+          `search=${encodeURIComponent(pagePrefix)}&page=${page}&per_page=2`
+        );
+
+      const firstPage = await listPage(1);
       expect(firstPage).toHaveStatusCode(200);
-      expect(firstPage.body).toMatchObject({ page: 1, per_page: 2 });
-      expect(firstPage.body.total).toBeGreaterThanOrEqual(3);
-      expect(firstPage.body.sources).toHaveLength(2);
+      expect(firstPage.body).toMatchObject({ page: 1, per_page: 2, total: 3 });
+      expect(
+        firstPage.body.sources.map((entry: SourceWithHealth) => entry.source.title)
+      ).toStrictEqual([titles[0], titles[1]]);
 
-      const secondPage = await listSources(apiClient, manager.cookieHeader, 'page=2&per_page=2');
-      expect(secondPage.body).toMatchObject({ page: 2, per_page: 2 });
-
-      const seen = [...firstPage.body.sources, ...secondPage.body.sources].map(
-        (entry: SourceWithHealth) => entry.source.title
-      );
-      const ours = seen.filter((title) => titles.includes(title));
-      expect(ours).toStrictEqual([...ours].sort());
-      expect(new Set(seen).size).toBe(seen.length);
+      const secondPage = await listPage(2);
+      expect(secondPage.body).toMatchObject({ page: 2, per_page: 2, total: 3 });
+      expect(
+        secondPage.body.sources.map((entry: SourceWithHealth) => entry.source.title)
+      ).toStrictEqual([titles[2]]);
 
       const tooMany = await listSources(apiClient, manager.cookieHeader, 'per_page=101');
       expect(tooMany).toHaveStatusCode(400);

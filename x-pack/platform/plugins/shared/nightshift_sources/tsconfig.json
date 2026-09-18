@@ -13,6 +13,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/cps-server-utils",
     "@kbn/es-errors",
+    "@kbn/es-query",
     "@kbn/features-plugin",
     "@kbn/nightshift-shared",
     "@kbn/server-route-repository",

@@ -12,6 +12,13 @@ import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
 
 type CookieHeader = Record<string, string>;
 
+export interface SourceRequestOptions {
+  spaceId?: string;
+}
+
+const spacePath = (path: string, spaceId?: string): string =>
+  spaceId ? `s/${spaceId}/${path}` : path;
+
 /** A per-run suffix so repeated runs against a shared deployment cannot collide. */
 export const uniqueSuffix = (): string => randomUUID().slice(0, 8);
 
@@ -25,51 +32,65 @@ const withHeaders = (cookieHeader: CookieHeader) => ({
 export const createSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
-  body: CreateSourceRequest
+  body: CreateSourceRequest,
+  { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
-  apiClient.post(SOURCES_PATH, { ...withHeaders(cookieHeader), body });
+  apiClient.post(spacePath(SOURCES_PATH, spaceId), { ...withHeaders(cookieHeader), body });
 
 export const getSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
-  id: string
-): Promise<ApiClientResponse> => apiClient.get(`${SOURCES_PATH}/${id}`, withHeaders(cookieHeader));
+  id: string,
+  { spaceId }: SourceRequestOptions = {}
+): Promise<ApiClientResponse> =>
+  apiClient.get(spacePath(`${SOURCES_PATH}/${id}`, spaceId), withHeaders(cookieHeader));
 
 export const listSources = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
-  query = ''
+  query = '',
+  { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
-  apiClient.get(query ? `${SOURCES_PATH}?${query}` : SOURCES_PATH, withHeaders(cookieHeader));
+  apiClient.get(
+    spacePath(query ? `${SOURCES_PATH}?${query}` : SOURCES_PATH, spaceId),
+    withHeaders(cookieHeader)
+  );
 
 export const updateSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
   id: string,
-  body: CreateSourceRequest
+  body: CreateSourceRequest,
+  { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
-  apiClient.put(`${SOURCES_PATH}/${id}`, { ...withHeaders(cookieHeader), body });
+  apiClient.put(spacePath(`${SOURCES_PATH}/${id}`, spaceId), {
+    ...withHeaders(cookieHeader),
+    body,
+  });
 
 export const deleteSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
-  id: string
+  id: string,
+  { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
-  apiClient.delete(`${SOURCES_PATH}/${id}`, withHeaders(cookieHeader));
+  apiClient.delete(spacePath(`${SOURCES_PATH}/${id}`, spaceId), withHeaders(cookieHeader));
 
 export const setSourceEnabled = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
   id: string,
-  enabled: boolean
+  enabled: boolean,
+  { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
-  apiClient.post(`${SOURCES_PATH}/${id}/${enabled ? '_enable' : '_disable'}`, {
+  apiClient.post(spacePath(`${SOURCES_PATH}/${id}/${enabled ? '_enable' : '_disable'}`, spaceId), {
     ...withHeaders(cookieHeader),
     body: {},
   });
 
 interface ListBody {
   sources: SourceWithHealth[];
+  total: number;
 }
 
 export const findListed = (body: ListBody, id: string): SourceWithHealth | undefined =>
@@ -112,15 +133,30 @@ export const readView = async (
 export const cleanupSources = async (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
-  titlePrefix: string
+  titlePrefix: string,
+  { spaceId }: SourceRequestOptions = {}
 ): Promise<void> => {
-  const response = await listSources(apiClient, cookieHeader, 'per_page=100');
-  if (response.statusCode !== 200) {
-    throw new Error(`Failed to list sources for cleanup: ${JSON.stringify(response.body)}`);
+  const ids: string[] = [];
+  for (let page = 1; ; page++) {
+    const response = await listSources(
+      apiClient,
+      cookieHeader,
+      `search=${encodeURIComponent(titlePrefix)}&per_page=100&page=${page}`,
+      { spaceId }
+    );
+    if (response.statusCode !== 200) {
+      throw new Error(`Failed to list sources for cleanup: ${JSON.stringify(response.body)}`);
+    }
+    const { sources, total } = response.body as ListBody;
+    ids.push(...sources.map(({ source }) => source.id));
+    if (sources.length === 0 || ids.length >= total) {
+      break;
+    }
   }
-  for (const { source } of (response.body as ListBody).sources) {
-    if (source.title.startsWith(titlePrefix)) {
-      await deleteSource(apiClient, cookieHeader, source.id);
+  for (const id of ids) {
+    const deleted = await deleteSource(apiClient, cookieHeader, id, { spaceId });
+    if (deleted.statusCode !== 200 && deleted.statusCode !== 404) {
+      throw new Error(`Failed to delete source ${id}: ${JSON.stringify(deleted.body)}`);
     }
   }
 };

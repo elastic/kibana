@@ -119,7 +119,8 @@ const deleteSourceRoute = createNightshiftSourcesServerRoute({
   options: {
     access: 'internal',
     summary: 'Delete a Nightshift source',
-    description: 'Deletes the source, then removes its ES|QL view (a missing view is ignored).',
+    description:
+      'Deletes the ES|QL view (a missing view is ignored), then the source so a failed view delete stays retryable.',
   },
   security: {
     authz: {

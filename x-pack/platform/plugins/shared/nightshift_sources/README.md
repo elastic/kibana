@@ -21,7 +21,7 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | `POST` | `/internal/nightshift/sources` | manage | Validates the query, writes the saved object, creates the view |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Also probes `FROM <view> \| LIMIT 0` for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
-| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the saved object, then removes the view (best-effort) |
+| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
 
@@ -103,7 +103,8 @@ project type in `config/serverless.yml` and back on for Observability Complete i
 
 - `PUT`, `_enable` and `_disable` are last-write-wins; no optimistic concurrency.
 - Deleting a space removes the saved objects but leaves their views behind. Nothing cleans
-  orphaned `$.nightshift.sources.*` views yet.
+  orphaned `$.nightshift.sources.*` views yet. ES|QL views are cluster-global; the Spaces
+  boundary is the saved object, not the view name.
 - The saved objects security extension is excluded for this hidden type, so saved-object-level
   audit events are not emitted; HTTP audit events still are.
 - Views show up in the ES|QL editor's source suggestions under their `$.nightshift.sources.<id>` name.

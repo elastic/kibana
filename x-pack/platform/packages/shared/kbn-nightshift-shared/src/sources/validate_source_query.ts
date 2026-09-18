@@ -68,3 +68,16 @@ export const getSourceCommandQuery = (esql: string): string => {
   const [firstCommand] = root.commands;
   return BasicPrettyPrinter.command(firstCommand);
 };
+
+/**
+ * True when FROM/TS names more than one index. `Unknown index` then cannot mean the whole
+ * source is empty, because another named index may still have data.
+ */
+export const hasMultipleSourceIndices = (esql: string): boolean => {
+  const { root } = Parser.parse(esql);
+  const [firstCommand] = root.commands;
+  if (!firstCommand) {
+    return false;
+  }
+  return Walker.matchAll(firstCommand, { type: 'source', sourceType: 'index' }).length > 1;
+};

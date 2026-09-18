@@ -7,9 +7,11 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { escapeKuery } from '@kbn/es-query';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   getNightshiftSourceViewName,
+  hasMultipleSourceIndices,
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
@@ -147,7 +149,7 @@ export class SourcesClient {
   }): Promise<ListSourcesResponse> {
     const filters: string[] = [];
     if (search) {
-      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${search}*`);
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(search)}*`);
     }
     if (enabled !== undefined) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
@@ -178,12 +180,10 @@ export class SourcesClient {
   async delete(id: string): Promise<void> {
     const { soClient, viewsClient } = this.deps;
     const { attributes } = await this.getSavedObject(id);
-    // SO first: an orphaned view is invisible to Kibana and harmless, while a source
-    // with view_missing health is visible and looks broken.
+    // View first so a failed ES delete leaves the catalog row and DELETE stays retryable.
+    // `deleteView` already ignores 404; anything else must not acknowledge the source as gone.
+    await viewsClient.deleteView(attributes.view_name);
     await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
-    await this.compensate(`clean up view for deleted source ${id}`, () =>
-      viewsClient.deleteView(attributes.view_name)
-    );
   }
 
   /** Flips the flag only; engines reconcile their rules and onboarding from it. */
@@ -242,9 +242,9 @@ export class SourcesClient {
       });
       return 'ok';
     } catch (error) {
-      // The view exists and its query matches, but the underlying index doesn't exist yet.
-      // That's the normal "no data yet" state, not a broken source.
-      if (isEsqlUnknownIndexError(error)) {
+      // A single missing concrete index is the "no data yet" state. Several sources with
+      // one missing name still have data behind the others, so fall through to unresolvable.
+      if (isEsqlUnknownIndexError(error) && !hasMultipleSourceIndices(source.esql)) {
         return 'ok';
       }
       if (!isEsqlVerificationError(error)) {
