@@ -449,7 +449,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
-  it('checks privileges across all additional installed spaces when package is already installed multi-space', async () => {
+  it('includes primary installed_kibana_space_id and additional spaces in privilege check', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
     );
@@ -458,6 +458,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (getInstallationObject as jest.Mock).mockResolvedValue({
       attributes: {
+        installed_kibana_space_id: 'primary-space',
         additional_spaces_installed_kibana: {
           'space-a': [],
           'space-b': [],
@@ -475,8 +476,40 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
-      expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']),
+      expect.arrayContaining([mockSpaceId, 'primary-space', 'space-a', 'space-b']),
       expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
+    );
+  });
+
+  it('enforces privileges in primary space when request originates from a different space', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
+    );
+
+    // Caller has privileges in 'space-x' (the request space) but not in 'primary-space'
+    const security = makeSecurity(false, ['api:rules-all']);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: 'primary-space',
+        additional_spaces_installed_kibana: {},
+      },
+    });
+
+    await expect(
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        'space-x',
+        mockSavedObjectsClient
+      )
+    ).rejects.toThrow(FleetUnauthorizedError);
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      expect.arrayContaining(['space-x', 'primary-space']),
+      expect.anything()
     );
   });
 

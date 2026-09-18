@@ -139,19 +139,24 @@ export async function checkUploadPackageAssetPrivileges(
   // Upgrades propagate Kibana assets into every Space the package is already installed in.
   // Check the caller has the required privileges in all destination Spaces, not just the
   // current one, to prevent privilege escalation into Spaces the caller cannot access.
-  const additionalSpaces = signals.pkgName
-    ? Object.keys(
-        (
-          await getInstallationObject({
-            savedObjectsClient,
-            pkgName: signals.pkgName,
-            failOnUnexpectedError: true,
-          })
-        )?.attributes?.additional_spaces_installed_kibana ?? {}
-      )
-    : [];
+  // Include installed_kibana_space_id (primary Space) because the upload path does not
+  // require the request Space to match the primary; upgrades write into every Space.
+  const installation = signals.pkgName
+    ? await getInstallationObject({
+        savedObjectsClient,
+        pkgName: signals.pkgName,
+        failOnUnexpectedError: true,
+      })
+    : undefined;
 
-  const destinationSpaces = [...new Set([spaceId, ...additionalSpaces])];
+  const primarySpace = installation?.attributes?.installed_kibana_space_id;
+  const additionalSpaces = Object.keys(
+    installation?.attributes?.additional_spaces_installed_kibana ?? {}
+  );
+
+  const destinationSpaces = [
+    ...new Set([spaceId, ...(primarySpace ? [primarySpace] : []), ...additionalSpaces]),
+  ];
 
   const checkResult = await security.authz
     .checkPrivilegesWithRequest(request)
