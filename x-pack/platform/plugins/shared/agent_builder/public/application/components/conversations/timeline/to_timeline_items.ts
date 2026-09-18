@@ -13,6 +13,7 @@ import type { TurnAccumulator, TimelineItem, UserEntry } from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
 import { answeredPauseIds } from './outstanding_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
+import { addTurnStep } from './turn_steps';
 
 /**
  * The turn an execution belongs to. Every execution of a round shares one turn, so a pause and
@@ -88,7 +89,7 @@ export const groupTimelineEvents = (
       case TimelineEventType.executionStep: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.steps.push(withQuestionAnswers(event.data.step, questionAnswers));
+        addTurnStep(acc.steps, withQuestionAnswers(event.data.step, questionAnswers));
         break;
       }
 

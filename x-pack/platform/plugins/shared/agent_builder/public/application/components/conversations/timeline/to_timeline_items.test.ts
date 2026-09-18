@@ -11,6 +11,7 @@ import {
   EventActorType,
 } from '@kbn/agent-builder-common';
 import { groupTimelineEvents, buildItems } from './to_timeline_items';
+import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
@@ -455,6 +456,49 @@ describe('groupTimelineEvents across a pause and its resume', () => {
     if (turn.kind === 'agentTurn') {
       expect(turn.status).toBe('awaiting_prompt');
       expect(turn.executionId).toBe(`${ROUND}::execution`);
+    }
+  });
+
+  it('shows a paused tool call once, resolved, when the resume re-reports it', () => {
+    // The server persists the resolved call again as the resume's first step
+    // (add_round_complete_event.ts), so the turn would otherwise hold it twice.
+    const pausedCall = createToolCallStep({
+      tool_call_id: 'toolu_1',
+      tool_id: 'delete_index',
+      params: {},
+      results: [],
+    });
+    const resolvedCall = {
+      ...pausedCall,
+      results: [{ tool_result_id: 'r1', type: 'other', data: {} }],
+    };
+
+    const events = [
+      createExecutionStartedEvent({
+        id: `${ROUND}::execution_started`,
+        execution_id: `${ROUND}::execution`,
+      }),
+      createExecutionStepEvent({
+        id: `${ROUND}::step::0`,
+        execution_id: `${ROUND}::execution`,
+        data: { step: pausedCall, sequence: 0 },
+      }),
+      createExecutionPausedEvent({ id: PAUSE_ID, execution_id: `${ROUND}::execution` }),
+      answer(),
+      resumeStart(),
+      createExecutionStepEvent({
+        id: `${ROUND}::execution::1::step::0`,
+        execution_id: `${ROUND}::execution::1`,
+        data: { step: resolvedCall, sequence: 0 },
+      }),
+      resumeEnd(),
+    ];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.steps).toEqual([resolvedCall]);
     }
   });
 
