@@ -469,7 +469,7 @@ describe('PackageInstaller', () => {
 
     beforeEach(() => {
       fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
-      jest.spyOn(packageInstaller, 'installProduct').mockResolvedValue(true);
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
     });
 
     it('installs a product that is not installed', async () => {
@@ -478,9 +478,10 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
-      expect(packageInstaller.installProduct).toHaveBeenCalledWith({
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith({
         productName: 'kibana',
-        inferenceId: '.elser',
+        productVersion: '8.16',
+        customInference: undefined,
       });
     });
 
@@ -498,7 +499,7 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(false);
-      expect(packageInstaller.installProduct).not.toHaveBeenCalled();
+      expect(packageInstaller.installPackage).not.toHaveBeenCalled();
     });
 
     it('reinstalls a product that was at the selected version before the request', async () => {
@@ -507,6 +508,36 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
+    });
+
+    it('compares against the installable fallback version, so a retry after a fallback install is skipped', async () => {
+      checkArtifactAvailableMock.mockImplementation(async (url: string) => {
+        if (url.includes('8.16')) {
+          throw new ArtifactNotFoundError(url);
+        }
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15', updatedAt: '2026-09-17T10:30:00.000Z' },
+      } as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(false);
+      expect(packageInstaller.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('installs the resolved fallback version directly', async () => {
+      checkArtifactAvailableMock.mockImplementation(async (url: string) => {
+        if (url.includes('8.16')) {
+          throw new ArtifactNotFoundError(url);
+        }
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+      } as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ productName: 'kibana', productVersion: '8.15' })
+      );
     });
 
     it('skips when the repository has no version for the product', async () => {
@@ -532,7 +563,7 @@ describe('PackageInstaller', () => {
 
     beforeEach(() => {
       fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
-      jest.spyOn(packageInstaller, 'installProduct').mockResolvedValue(true);
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
     });
 
     it('installs when the installed version differs from the selected version', async () => {
@@ -541,9 +572,10 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.updateProductIfNeeded(params)).resolves.toBe(true);
-      expect(packageInstaller.installProduct).toHaveBeenCalledWith({
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith({
         productName: 'kibana',
-        inferenceId: '.elser',
+        productVersion: '8.16',
+        customInference: undefined,
       });
     });
 
@@ -553,7 +585,7 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.updateProductIfNeeded(params)).resolves.toBe(false);
-      expect(packageInstaller.installProduct).not.toHaveBeenCalled();
+      expect(packageInstaller.installPackage).not.toHaveBeenCalled();
     });
 
     it('reinstalls a current version when forced and nobody refreshed it since the request', async () => {
@@ -574,7 +606,7 @@ describe('PackageInstaller', () => {
       await expect(
         packageInstaller.updateProductIfNeeded({ ...params, forceUpdate: true })
       ).resolves.toBe(false);
-      expect(packageInstaller.installProduct).not.toHaveBeenCalled();
+      expect(packageInstaller.installPackage).not.toHaveBeenCalled();
     });
 
     it('skips a product that was uninstalled since the plan was computed', async () => {
@@ -701,6 +733,37 @@ describe('PackageInstaller', () => {
       });
 
       expect(products).toEqual(['kibana', 'security']);
+    });
+  });
+
+  describe('getProductsToUpdate with an unpublished selected artifact', () => {
+    it('does not plan an update when the installable fallback version is already installed', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
+      checkArtifactAvailableMock.mockImplementation(async (url: string) => {
+        if (url.includes('8.16')) {
+          throw new ArtifactNotFoundError(url);
+        }
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15' },
+      } as never);
+
+      await expect(
+        packageInstaller.getProductsToUpdate({ inferenceId: defaultInferenceEndpoints.ELSER })
+      ).resolves.toEqual([]);
+    });
+
+    it('skips a product with no installable artifact at all', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.16'] });
+      checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15' },
+      } as never);
+
+      await expect(
+        packageInstaller.getProductsToUpdate({ inferenceId: defaultInferenceEndpoints.ELSER })
+      ).resolves.toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no artifact available'));
     });
   });
 

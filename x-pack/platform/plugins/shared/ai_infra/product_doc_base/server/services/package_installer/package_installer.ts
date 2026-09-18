@@ -211,29 +211,70 @@ export class PackageInstaller {
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const toUpdate: ProductName[] = [];
-    Object.entries(installStatuses).forEach(([productName, productState]) => {
+    for (const [name, productState] of Object.entries(installStatuses)) {
+      const productName = name as ProductName;
       if (productState.status === 'uninstalled') {
-        return;
+        continue;
       }
-      const availableVersions = repositoryVersions[productName as ProductName];
+      const availableVersions = repositoryVersions[productName];
       if (!availableVersions || !availableVersions.length) {
-        return;
+        continue;
       }
-      // Serverless/"latest" zip file has a special versioning strategy
-      // where we track by last date modified in the bucket
-      const selectedVersion = selectVersion(
-        this.currentVersion,
-        availableVersions,
-        this.isServerless
-      );
-      if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
-        this.log.info(
-          `Updating product [${productName}] from version [${productState.version}] to version [${selectedVersion}]`
+      let installableVersion: string;
+      try {
+        installableVersion = await this.resolveInstallableVersion({
+          productName,
+          inferenceId,
+          availableVersions,
+        });
+      } catch (error) {
+        if (!isArtifactMissingError(error)) {
+          throw error;
+        }
+        this.log.warn(
+          `Skipping update of product [${productName}]: no artifact available for inference ID [${inferenceId}]`
         );
-        toUpdate.push(productName as ProductName);
+        continue;
       }
-    });
+      if (productState.version !== installableVersion || Boolean(forceUpdate)) {
+        this.log.info(
+          `Updating product [${productName}] from version [${productState.version}] to version [${installableVersion}]`
+        );
+        toUpdate.push(productName);
+      }
+    }
     return toUpdate;
+  }
+
+  /**
+   * The version whose artifact is actually available for this inference ID: the version selected for
+   * this deployment, or the newest older one when the selected artifact is not published yet. Persisted
+   * statuses record this version, so it is what retries and overlapping tasks must compare against.
+   */
+  private async resolveInstallableVersion({
+    productName,
+    inferenceId,
+    availableVersions,
+  }: {
+    productName: ProductName;
+    inferenceId: string;
+    availableVersions: string[];
+  }): Promise<string> {
+    // Serverless/"latest" zip file has a special versioning strategy
+    // where we track by last date modified in the bucket
+    const selectedVersion = selectVersion(
+      this.currentVersion,
+      availableVersions,
+      this.isServerless
+    );
+    return this.findInstallableProductVersion({
+      productName,
+      candidateVersions: [
+        selectedVersion,
+        ...getPreviousVersions(selectedVersion, availableVersions),
+      ],
+      inferenceId,
+    });
   }
 
   /**
@@ -290,28 +331,33 @@ export class PackageInstaller {
       return false;
     }
     const productState = installStatuses[productName];
-    const selectedVersion = selectVersion(
-      this.currentVersion,
+    const installableVersion = await this.resolveInstallableVersion({
+      productName,
+      inferenceId,
       availableVersions,
-      this.isServerless
-    );
+    });
     if (
       productState &&
       !isUpdateNeeded({
         status: productState.status,
         version: productState.version,
         updatedAt: productState.updatedAt,
-        selectedVersion,
+        selectedVersion: installableVersion,
         forceUpdate: true,
         since,
       })
     ) {
       this.log.info(
-        `Skipping install of product [${productName}]: version [${selectedVersion}] was installed after this request`
+        `Skipping install of product [${productName}]: version [${installableVersion}] was installed after this request`
       );
       return false;
     }
-    return this.installProduct({ productName, inferenceId });
+    await this.installPackage({
+      productName,
+      productVersion: installableVersion,
+      customInference: await this.getInferenceInfo(inferenceId),
+    });
+    return true;
   }
 
   /**
@@ -338,25 +384,32 @@ export class PackageInstaller {
       );
       return false;
     }
-    const selectedVersion = selectVersion(
-      this.currentVersion,
+    const installableVersion = await this.resolveInstallableVersion({
+      productName,
+      inferenceId,
       availableVersions,
-      this.isServerless
-    );
+    });
     if (
       !isUpdateNeeded({
         status: productState.status,
         version: productState.version,
         updatedAt: productState.updatedAt,
-        selectedVersion,
+        selectedVersion: installableVersion,
         forceUpdate,
         since,
       })
     ) {
-      this.log.info(`Skipping update of product [${productName}]: already at [${selectedVersion}]`);
+      this.log.info(
+        `Skipping update of product [${productName}]: already at [${installableVersion}]`
+      );
       return false;
     }
-    return this.installProduct({ productName, inferenceId });
+    await this.installPackage({
+      productName,
+      productVersion: installableVersion,
+      customInference: await this.getInferenceInfo(inferenceId),
+    });
+    return true;
   }
 
   /**
