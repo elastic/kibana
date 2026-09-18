@@ -57012,7 +57012,6 @@
     "xpack.synthetics.settings.error.couldNotSave": "Falha ao salvar as configurações!",
     "xpack.synthetics.settings.getParams.failed": "Falha ao obter parâmetros globais.",
     "xpack.synthetics.settings.index": "Configurações do Synthetics",
-    "xpack.synthetics.settings.invalid.nanError": "O valor deve ser um número inteiro.",
     "xpack.synthetics.settings.noSpace.error": "Nomes de índice não devem conter espaço",
     "xpack.synthetics.settings.saveSuccess": "Configurações salvas!",
     "xpack.synthetics.settings.statusRule.inspect": "Falha ao inspecionar o tipo de regra de status do monitor.",
