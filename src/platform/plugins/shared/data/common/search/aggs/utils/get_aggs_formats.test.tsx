@@ -13,7 +13,6 @@ import { identity } from 'lodash';
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { expectReactElementWithNull } from '@kbn/field-formats-plugin/common/test_utils';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 import { getAggsFormats } from './get_aggs_formats';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
@@ -74,7 +73,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expectReactElementWithNull(format.convertToReact(undefined));
+    expect(getReactConvertText(format, undefined)).toBe('-');
   });
 
   test('creates custom format for ip_range', () => {
@@ -107,7 +106,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expectReactElementWithNull(format.convertToReact(undefined));
+    expect(getReactConvertText(format, undefined)).toBe('-');
   });
 
   test('creates custom format for range', () => {
@@ -124,7 +123,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expectReactElementWithNull(format.convertToReact(undefined));
+    expect(getReactConvertText(format, undefined)).toBe('-');
   });
 
   test('creates alternative format for range using the template parameter', () => {
