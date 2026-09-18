@@ -11,7 +11,6 @@ import type {
   ConversationEvent,
   ConversationRound,
   RoundInput,
-  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
@@ -34,8 +33,8 @@ const hasResumeExecution = (roundId: string, storedEvents: ConversationEvent[]):
 const roundIdOfDerivedEvent = (id: string): string => id.split(CONVERSATION_EVENT_ID_DELIMITER)[0];
 
 /** Stored round-derived events grouped by round id, in order of first stored position. */
-const storedRoundBlocks = (stored: TimelineEvent[]): Map<string, TimelineEvent[]> => {
-  const blocks = new Map<string, TimelineEvent[]>();
+const storedRoundBlocks = (stored: ConversationEvent[]): Map<string, ConversationEvent[]> => {
+  const blocks = new Map<string, ConversationEvent[]>();
   for (const event of stored) {
     if (!isRoundDerivedEventId(event.id)) {
       continue;
@@ -58,9 +57,9 @@ const storedRoundBlocks = (stored: TimelineEvent[]): Map<string, TimelineEvent[]
  */
 const eventsForKnownRound = (
   round: ConversationRound,
-  storedForRound: TimelineEvent[],
+  storedForRound: ConversationEvent[],
   conversation: Conversation
-): TimelineEvent[] => {
+): ConversationEvent[] => {
   if (!hasResumeExecution(round.id, storedForRound)) {
     return roundToEvents(round, conversation);
   }
@@ -73,7 +72,7 @@ const eventsForKnownRound = (
     return {
       ...event,
       data: { ...data, attachment_refs: round.input.attachment_refs },
-    } as TimelineEvent;
+    };
   });
 };
 
@@ -93,7 +92,7 @@ export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
   const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
   const roundsById = new Map(merged.rounds.map((round) => [round.id, round]));
 
-  const roundDerived: TimelineEvent[] = [];
+  const roundDerived: ConversationEvent[] = [];
   const blocks = storedRoundBlocks(stored);
   for (const [roundId, block] of blocks) {
     const round = roundsById.get(roundId);

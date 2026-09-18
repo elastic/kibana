@@ -3138,6 +3138,7 @@ describe('ConversationClient', () => {
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          conversationEvents: mockConversationEvents,
           eventEmitter: {
             emitMetadataPatched: jest.fn(),
             emitAttachmentEvents: onAttachmentEvents,
