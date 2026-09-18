@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/app-header'
   - '@kbn/utils'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - test-helper
   - package

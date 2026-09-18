@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  ChromeNextGlobalHeader,
-  ChromeNextGlobalHeaderShell,
-  GlobalHeaderRightGroup,
-} from './global_header';
-export type {
-  ChromeNextGlobalHeaderShellProps,
-  GlobalHeaderRightGroupProps,
-} from './global_header';
+import { useMemo } from 'react';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+
+export const useIsProjectChromeStyle = (): boolean => {
+  const { chrome } = useDiscoverServices();
+
+  return useMemo(() => chrome.getChromeStyle() === 'project', [chrome]);
+};
