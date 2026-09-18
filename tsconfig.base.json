@@ -231,6 +231,8 @@
       "@kbn/as-code-filters-schema/*": ["./src/platform/packages/shared/as-code/filters-schema/*"],
       "@kbn/as-code-filters-transforms": ["./src/platform/packages/shared/as-code/filters-transforms"],
       "@kbn/as-code-filters-transforms/*": ["./src/platform/packages/shared/as-code/filters-transforms/*"],
+      "@kbn/as-code-import-flyout-component": ["./src/platform/packages/shared/as-code/import-flyout-component"],
+      "@kbn/as-code-import-flyout-component/*": ["./src/platform/packages/shared/as-code/import-flyout-component/*"],
       "@kbn/as-code-shared-schemas": ["./src/platform/packages/shared/as-code/shared-schemas"],
       "@kbn/as-code-shared-schemas/*": ["./src/platform/packages/shared/as-code/shared-schemas/*"],
       "@kbn/as-code-shared-telemetry": ["./src/platform/packages/shared/as-code/shared-telemetry"],
@@ -1289,6 +1291,8 @@
       "@kbn/eso-plugin/*": ["./x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
       "@kbn/esql": ["./src/platform/plugins/shared/esql"],
       "@kbn/esql/*": ["./src/platform/plugins/shared/esql/*"],
+      "@kbn/esql-browser": ["./src/platform/packages/shared/esql/kbn-esql-browser"],
+      "@kbn/esql-browser/*": ["./src/platform/packages/shared/esql/kbn-esql-browser/*"],
       "@kbn/esql-composer": ["./src/platform/packages/shared/kbn-esql-composer"],
       "@kbn/esql-composer/*": ["./src/platform/packages/shared/kbn-esql-composer/*"],
       "@kbn/esql-datagrid": ["./src/platform/plugins/shared/esql_datagrid"],
@@ -2217,6 +2221,8 @@
       "@kbn/sample-log-parser/*": ["./x-pack/platform/packages/shared/kbn-sample-parser/*"],
       "@kbn/sample-task-plugin": ["./x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin"],
       "@kbn/sample-task-plugin/*": ["./x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/*"],
+      "@kbn/sandbox-plugin": ["./x-pack/platform/plugins/shared/sandbox"],
+      "@kbn/sandbox-plugin/*": ["./x-pack/platform/plugins/shared/sandbox/*"],
       "@kbn/saved-object-export-transforms-plugin": ["./src/platform/test/plugin_functional/plugins/saved_object_export_transforms"],
       "@kbn/saved-object-export-transforms-plugin/*": ["./src/platform/test/plugin_functional/plugins/saved_object_export_transforms/*"],
       "@kbn/saved-object-import-warnings-plugin": ["./src/platform/test/plugin_functional/plugins/saved_object_import_warnings"],
@@ -2979,6 +2985,9 @@
       // resolution can't find the types; redirect to the real .d.ts. Drop
       // these once each package ships proper exports.types.
       "piscina": ["./node_modules/piscina/dist/src/index.d.ts"],
+      "mongodb-connection-string-url": [
+        "./node_modules/mongodb-connection-string-url/lib/index.d.ts"
+      ],
       "canvg": ["./typings/canvg"],
       "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["./typings/@a2a-js-sdk/server"],

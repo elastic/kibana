@@ -243,7 +243,7 @@ The plugin lives at `x-pack/platform/plugins/shared/elastic_console/`.
 
 ### Type check
 ```
-yarn test:type_check --project x-pack/platform/plugins/shared/elastic_console/tsconfig.json
+pnpm test:type_check --project x-pack/platform/plugins/shared/elastic_console/tsconfig.json
 ```
 
 ### Lint

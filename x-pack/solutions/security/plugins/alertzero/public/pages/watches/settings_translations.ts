@@ -34,6 +34,26 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   }
 );
 
+export const SAVE_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.saveWatchSettings',
+  { defaultMessage: 'Save' }
+);
+
+export const DISCARD_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.discardWatchSettings',
+  { defaultMessage: 'Discard' }
+);
+
+export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.saveError',
+  { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
+);
+
+export const WATCH_SETTINGS_INVALID = i18n.translate(
+  'xpack.alertzero.watches.settings.invalidDrafts',
+  { defaultMessage: 'Fix invalid settings before saving.' }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */
@@ -163,6 +183,16 @@ export const autonomyLevelName = (levelId: string): string =>
 export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.autonomy.rangeAriaLabel',
   { defaultMessage: 'Autonomy level' }
+);
+
+export const AUTONOMY_FIXED_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.fixedLabel',
+  { defaultMessage: 'Autonomy level' }
+);
+
+export const AUTONOMY_FIXED_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.fixedHelp',
+  { defaultMessage: 'This Worker supports a single autonomy level.' }
 );
 
 /* -------------------------------------------------------------------------- */
