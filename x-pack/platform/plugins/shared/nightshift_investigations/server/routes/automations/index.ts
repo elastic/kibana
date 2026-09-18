@@ -8,5 +8,6 @@
 export { createAutomationRoute } from './create_automation';
 export { listAutomationsRoute } from './list_automations';
 export { getAutomationRoute } from './get_automation';
+export { getAutomationRunsRoute } from './get_automation_runs';
 export { updateAutomationRoute } from './update_automation';
 export { deleteAutomationRoute } from './delete_automation';

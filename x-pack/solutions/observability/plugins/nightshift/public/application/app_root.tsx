@@ -10,9 +10,10 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { Router } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
 import { NightshiftPage } from '../nightshift_page';
+import { AutomationDetailPage } from '../automations/detail/automation_detail_page';
 import type { NightshiftStartDependencies } from '../types';
 
 const queryClient = new QueryClient();
@@ -43,7 +44,10 @@ export function AppRoot({
         <RedirectAppLinks coreStart={coreStart} data-test-subj="nightshiftMainContainer">
           <PerformanceContextProvider>
             <QueryClientProvider client={queryClient}>
-              <NightshiftPage />
+              <Routes>
+                <Route path="/automations/:id" component={AutomationDetailPage} />
+                <Route component={NightshiftPage} />
+              </Routes>
             </QueryClientProvider>
           </PerformanceContextProvider>
         </RedirectAppLinks>

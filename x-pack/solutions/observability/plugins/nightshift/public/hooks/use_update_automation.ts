@@ -15,6 +15,43 @@ export interface UpdateAutomationParams {
     name?: string;
     description?: string;
     isEnabled?: boolean;
+    trigger?: {
+      rows: Array<
+        | {
+            kind: 'significant_event';
+            severities?: ('80-critical' | '60-high' | '40-medium' | '20-low')[];
+            statuses?: ('pending' | 'open' | 'closed' | 'dismissed')[];
+            streamNames?: string[];
+          }
+        | {
+            kind: 'alert';
+            ruleNamePattern?: string;
+            ruleNameMatchMode?: 'substring' | 'regex';
+            alertStatus?: 'firing' | 'recovered' | 'any';
+            tags?: string[];
+          }
+        | {
+            kind: 'schedule';
+            schedulePreset?: 'hourly' | 'daily' | 'weekly' | 'custom';
+            cronExpression?: string;
+            timezone?: string;
+            scopeQuery?: string;
+          }
+      >;
+    };
+    execution?: {
+      promptTemplate?: string;
+      reasoningMode?: 'investigate' | 'observe';
+      agentId?: string;
+      connectorId?: string;
+    };
+    runtime?: {
+      dailyDispatchLimit?: number;
+      timeoutSeconds?: number;
+      dedupeWindowSeconds?: number;
+      dedupeMode?: 'event_id' | 'rule_id' | 'none';
+      overlapPolicy?: 'drop' | 'cancel_in_progress' | 'queue';
+    };
   };
 }
 

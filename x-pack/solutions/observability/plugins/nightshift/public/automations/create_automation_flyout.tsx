@@ -42,6 +42,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCreateAutomation } from '../hooks/use_create_automation';
+import { useUpdateAutomation } from '../hooks/use_update_automation';
+import type { AutomationRecord } from '../hooks/use_fetch_automations';
 
 type TriggerKind = 'significant_event' | 'alert';
 type AlertStatus = 'any' | 'firing' | 'recovered';
@@ -52,6 +54,10 @@ type SeverityValue = (typeof VALID_SEVERITIES)[number];
 const ALERT_STATUS_VALUES = ['any', 'firing', 'recovered'] as const;
 function isAlertStatus(id: string): id is AlertStatus {
   return (ALERT_STATUS_VALUES as readonly string[]).includes(id);
+}
+
+function isSeverityValue(id: string): id is SeverityValue {
+  return (VALID_SEVERITIES as readonly string[]).includes(id);
 }
 
 interface TriggerEntry {
@@ -75,6 +81,37 @@ const makeTrigger = (kind: TriggerKind): TriggerEntry => ({
   alertStatus: 'any',
   tags: [],
 });
+
+/** Converts stored trigger rows back to editable TriggerEntry objects for the form. */
+function triggerRowsToEntries(rows: AutomationRecord['trigger']['rows']): TriggerEntry[] {
+  const result: TriggerEntry[] = [];
+  for (const row of rows) {
+    if (row.kind === 'significant_event') {
+      const rawSeverities = row.severities ?? [];
+      const severities = rawSeverities.filter(isSeverityValue);
+      result.push({
+        id: makeId(),
+        kind: 'significant_event',
+        severities,
+        ruleNamePattern: '',
+        alertStatus: 'any',
+        tags: [],
+      });
+    } else if (row.kind === 'alert') {
+      const rawAlertStatus = row.alertStatus ?? 'any';
+      result.push({
+        id: makeId(),
+        kind: 'alert',
+        severities: [],
+        ruleNamePattern: row.ruleNamePattern ?? '',
+        alertStatus: isAlertStatus(rawAlertStatus) ? rawAlertStatus : 'any',
+        tags: row.tags ?? [],
+      });
+    }
+    // 'schedule' triggers are not editable in the UI — skip them; the caller shows a warning.
+  }
+  return result;
+}
 
 const SEVERITY_OPTIONS: Array<{ id: SeverityValue; label: string }> = [
   { id: '80-critical', label: 'Critical' },
@@ -460,20 +497,39 @@ function TriggerTypePicker({ onSelect }: { onSelect: (kind: TriggerKind) => void
 
 // ── Main flyout ──────────────────────────────────────────────────────────────
 
-export function CreateAutomationFlyout({
-  onClose,
-  onCreated,
-}: {
+export interface AutomationFlyoutProps {
   onClose: () => void;
-  onCreated?: () => void;
-}): React.ReactElement {
-  const [name, setName] = useState('');
-  const [agentInstructions, setAgentInstructions] = useState('');
-  const [triggers, setTriggers] = useState<TriggerEntry[]>([]);
-  const [dailyLimit, setDailyLimit] = useState(20);
-  const [submitted, setSubmitted] = useState(false);
+  /** Called after a successful save (create or update). */
+  onSaved?: () => void;
+  /** When provided, the flyout operates in edit mode. */
+  automation?: AutomationRecord;
+}
 
-  const { mutateAsync: createAutomation, isLoading, error: mutationError } = useCreateAutomation();
+export function AutomationFlyout({
+  onClose,
+  onSaved,
+  automation,
+}: AutomationFlyoutProps): React.ReactElement {
+  const isEditMode = automation != null;
+
+  const initialTriggers = isEditMode
+    ? triggerRowsToEntries(automation.trigger?.rows ?? [])
+    : [];
+
+  const [name, setName] = useState(isEditMode ? automation.name : '');
+  const [agentInstructions, setAgentInstructions] = useState(
+    isEditMode ? (automation.execution?.promptTemplate ?? '') : ''
+  );
+  const [triggers, setTriggers] = useState<TriggerEntry[]>(initialTriggers);
+  const [dailyLimit, setDailyLimit] = useState(
+    isEditMode ? (automation.runtime?.dailyDispatchLimit ?? 20) : 20
+  );
+  const [submitted, setSubmitted] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const { mutateAsync: createAutomation, isLoading: isCreating } = useCreateAutomation();
+  const { mutateAsync: updateAutomation, isLoading: isUpdating } = useUpdateAutomation();
+  const isLoading = isCreating || isUpdating;
 
   const nameIsValid = name.trim().length > 0;
 
@@ -505,51 +561,111 @@ export function CreateAutomationFlyout({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    setSaveError(null);
     if (!nameIsValid) return;
 
-    await createAutomation({
-      name: name.trim(),
-      trigger: { rows: buildTriggerRows() },
-      execution: {
-        ...(agentInstructions.trim() && { promptTemplate: agentInstructions.trim() }),
-      },
-      completion: {},
-      runtime: { dailyDispatchLimit: dailyLimit },
-    });
-
-    onCreated?.();
-    onClose();
+    try {
+      if (isEditMode) {
+        await updateAutomation({
+          id: automation.id,
+          updates: {
+            name: name.trim(),
+            trigger: { rows: buildTriggerRows() },
+            execution: {
+              ...(agentInstructions.trim() && { promptTemplate: agentInstructions.trim() }),
+            },
+            // Preserve existing runtime settings; only override dailyDispatchLimit
+            runtime: {
+              ...automation.runtime,
+              dailyDispatchLimit: dailyLimit,
+            },
+            // Do not send completion — shallow-merge update would wipe existing config
+          },
+        });
+      } else {
+        await createAutomation({
+          name: name.trim(),
+          trigger: { rows: buildTriggerRows() },
+          execution: {
+            ...(agentInstructions.trim() && { promptTemplate: agentInstructions.trim() }),
+          },
+          completion: {},
+          runtime: { dailyDispatchLimit: dailyLimit },
+        });
+      }
+      onSaved?.();
+      onClose();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : String(err));
+    }
   };
 
+  const formId = isEditMode ? 'editAutomationForm' : 'createAutomationForm';
+  const flyoutTitle = isEditMode
+    ? i18n.translate('xpack.nightshift.automations.flyout.editTitle', {
+        defaultMessage: 'Edit automation',
+      })
+    : i18n.translate('xpack.nightshift.automations.createFlyout.title', {
+        defaultMessage: 'Create automation',
+      });
+  const submitLabel = isEditMode
+    ? i18n.translate('xpack.nightshift.automations.flyout.saveButton', {
+        defaultMessage: 'Save',
+      })
+    : i18n.translate('xpack.nightshift.automations.createFlyout.createButton', {
+        defaultMessage: 'Create',
+      });
+  const errorTitle = isEditMode
+    ? i18n.translate('xpack.nightshift.automations.flyout.editErrorTitle', {
+        defaultMessage: 'Failed to save automation',
+      })
+    : i18n.translate('xpack.nightshift.automations.createFlyout.errorTitle', {
+        defaultMessage: 'Failed to create automation',
+      });
+
+  const hasScheduleTrigger =
+    isEditMode &&
+    (automation.trigger?.rows ?? []).some((r) => r.kind === 'schedule');
+
   return (
-    <EuiFlyout ownFocus size="m" onClose={onClose} data-test-subj="nightshiftCreateAutomationFlyout">
+    <EuiFlyout ownFocus size="m" onClose={onClose} data-test-subj="nightshiftAutomationFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
-            {i18n.translate('xpack.nightshift.automations.createFlyout.title', {
-              defaultMessage: 'Create automation',
-            })}
-          </h2>
+          <h2>{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {mutationError != null && (
+        {saveError != null && (
           <>
-            <EuiCallOut
-              color="danger"
-              iconType="error"
-              title={i18n.translate('xpack.nightshift.automations.createFlyout.errorTitle', {
-                defaultMessage: 'Failed to create automation',
-              })}
-            >
-              <p>{mutationError.message}</p>
+            <EuiCallOut color="danger" iconType="error" title={errorTitle}>
+              <p>{saveError}</p>
             </EuiCallOut>
             <EuiSpacer />
           </>
         )}
 
-        <EuiForm component="form" onSubmit={handleSubmit} id="createAutomationForm">
+        {hasScheduleTrigger && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              title={i18n.translate('xpack.nightshift.automations.flyout.scheduleWarningTitle', {
+                defaultMessage: 'Schedule trigger is read-only',
+              })}
+            >
+              <p>
+                {i18n.translate('xpack.nightshift.automations.flyout.scheduleWarningBody', {
+                  defaultMessage:
+                    'This automation has a schedule trigger that cannot be edited here. Other settings can still be updated.',
+                })}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
+        <EuiForm component="form" onSubmit={handleSubmit} id={formId}>
           <EuiFormRow
             label={i18n.translate('xpack.nightshift.automations.createFlyout.nameLabel', {
               defaultMessage: 'Name',
@@ -648,15 +764,22 @@ export function CreateAutomationFlyout({
         <EuiButton
           fill
           type="submit"
-          form="createAutomationForm"
+          form={formId}
           isLoading={isLoading}
-          data-test-subj="nightshiftCreateAutomationSubmit"
+          data-test-subj="nightshiftAutomationSubmit"
         >
-          {i18n.translate('xpack.nightshift.automations.createFlyout.createButton', {
-            defaultMessage: 'Create',
-          })}
+          {submitLabel}
         </EuiButton>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }
+
+/** Backward-compat alias — existing callers that import CreateAutomationFlyout continue to work. */
+export const CreateAutomationFlyout = ({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated?: () => void;
+}): React.ReactElement => <AutomationFlyout onClose={onClose} onSaved={onCreated} />;

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -59,6 +60,7 @@ export function AutomationListItem({
 }: {
   automation: AutomationRecord;
 }): React.ReactElement {
+  const history = useHistory();
   const { mutate: updateAutomation, isLoading: isUpdating } = useUpdateAutomation();
   const { mutate: deleteAutomation, isLoading: isDeleting } = useDeleteAutomation();
 
@@ -66,7 +68,8 @@ export function AutomationListItem({
     updateAutomation({ id: automation.id, updates: { isEnabled: !automation.isEnabled } });
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const confirmed = window.confirm(
       i18n.translate('xpack.nightshift.automations.listItem.deleteConfirm', {
         defaultMessage: 'Delete automation "{name}"?',
@@ -81,7 +84,13 @@ export function AutomationListItem({
   const summary = triggerSummary(automation);
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftAutomationListItem">
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      data-test-subj="nightshiftAutomationListItem"
+      onClick={() => history.push(`/automations/${automation.id}`)}
+      style={{ cursor: 'pointer' }}
+    >
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
@@ -110,6 +119,8 @@ export function AutomationListItem({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          <div onClick={(e) => e.stopPropagation()}>
           <EuiSwitch
             label={i18n.translate('xpack.nightshift.automations.listItem.enabledLabel', {
               defaultMessage: 'Enabled',
@@ -120,6 +131,7 @@ export function AutomationListItem({
             compressed
             data-test-subj="nightshiftAutomationEnabledToggle"
           />
+          </div>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

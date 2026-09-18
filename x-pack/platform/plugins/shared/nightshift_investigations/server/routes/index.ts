@@ -18,6 +18,7 @@ import {
   createAutomationRoute,
   listAutomationsRoute,
   getAutomationRoute,
+  getAutomationRunsRoute,
   updateAutomationRoute,
   deleteAutomationRoute,
 } from './automations';
@@ -35,6 +36,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...createAutomationRoute,
   ...listAutomationsRoute,
   ...getAutomationRoute,
+  ...getAutomationRunsRoute,
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
 };
