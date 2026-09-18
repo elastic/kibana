@@ -334,6 +334,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_output_agent_policy_count.yaml'),
+        },
         validate: {
           request: GetOutputAgentPolicyCountRequestSchema,
           response: {
