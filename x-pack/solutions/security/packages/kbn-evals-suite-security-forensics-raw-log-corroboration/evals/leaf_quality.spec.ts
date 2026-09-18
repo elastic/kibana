@@ -14,7 +14,7 @@
  * to confirm or identify gaps.
  */
 
-import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
+import { tags, getToolCallSteps, type Example } from '@kbn/evals';
 import { getNarrativeText, countDistinctClaims } from '../src/narrative_claims';
 import { logScorecard } from '../src/scorecard_log';
 import { selectShard } from '../src/select_shard';
@@ -84,9 +84,7 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
     base(
       example.id ?? `raw-log-${example.metadata?.case_id ?? 'unknown'}`,
       { tag: tags.stateful.classic },
-      async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
-
+      async ({ agentBuilderClient, esClient, log }) => {
         log.info(`[L2] Running ${example.id}`);
 
         const response = await agentBuilderClient.converse({
@@ -150,16 +148,10 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
           groundedness: hasQueryReferences ? 1 : 0,
         };
 
-        const metrics = selected.reduce((acc, ev) => {
-          acc[ev.name] = 1;
-          return acc;
-        }, {} as Record<string, number>);
-
         logScorecard(log, {
           level: 'L2',
           exampleId: example.id ?? example.metadata?.case_id ?? 'unknown',
           scorecard,
-          metrics,
         });
 
         return {
@@ -170,7 +162,6 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
             `Corroborated: ${corroboratedCount}, Gaps: ${gapCount}. ` +
             `Grounded: ${hasQueryReferences}.`,
           scorecard,
-          metrics,
         };
       }
     );

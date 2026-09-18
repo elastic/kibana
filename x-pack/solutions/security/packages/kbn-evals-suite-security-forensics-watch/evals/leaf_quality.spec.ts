@@ -43,7 +43,7 @@
  *   - inputTokens / outputTokens / latency : efficiency signals
  */
 
-import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
+import { tags, getToolCallSteps, type Example } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { FORENSIC_CASES } from '../src/dataset';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
@@ -124,8 +124,9 @@ const leafEvaluators = [
   'latency',
 ];
 // Suppress unused-var lint: this list is documentation of the leaf evaluator
-// names used in scorecards above; the actual evaluator selection happens
-// via `selectEvaluators(evaluators)` at runtime.
+// names used in scorecards above. Subset filtering is applied inside the
+// evaluators themselves (`SELECTED_EVALUATORS` via `parseSelectedEvaluators`),
+// not from this file.
 void leafEvaluators;
 
 // ── Spec ─────────────────────────────────────────────────────────────────────
@@ -153,9 +154,7 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
     base(
       example.id ?? `forensic-${example.metadata?.case_id ?? 'unknown'}`,
       { tag: tags.stateful.classic },
-      async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
-
+      async ({ agentBuilderClient, esClient, log }) => {
         log.info(`[L2] Running ${example.id}: ${example.input.question.slice(0, 100)}...`);
 
         // ── Step 1: invoke the default agent ────────────────────────────────────
@@ -307,10 +306,6 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
               },
             ],
           } as unknown as Record<string, unknown>,
-          metrics: selected.reduce((acc, ev) => {
-            acc[ev.name] = 1;
-            return acc;
-          }, {} as Record<string, number>),
         };
       }
     );
