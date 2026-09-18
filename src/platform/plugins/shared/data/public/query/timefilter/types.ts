@@ -18,12 +18,11 @@ export interface TimefilterConfig {
   minRefreshIntervalDefault: number;
 }
 
-// Timefilter accepts moment input but always returns string output
 export type InputTimeRange =
   | TimeRange
   | {
-      from: Moment | string;
-      to: Moment | string;
+      from: Moment;
+      to: Moment;
     };
 
 export type { TimeRangeBounds } from '../../../common';

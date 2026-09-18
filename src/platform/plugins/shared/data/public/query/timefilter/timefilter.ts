@@ -122,12 +122,7 @@ export class Timefilter {
   };
 
   public getTime = (): TimeRange => {
-    const { from, to } = this._time;
-    return {
-      ...this._time,
-      from: moment.isMoment(from) ? from.toISOString() : from,
-      to: moment.isMoment(to) ? to.toISOString() : to,
-    };
+    return { ...this._time };
   };
 
   /**
@@ -144,16 +139,18 @@ export class Timefilter {
    * @property {string|moment} time.from
    * @property {string|moment} time.to
    */
-  public setTime = (time: InputTimeRange) => {
-    // Object.assign used for partially composed updates
-    const newTime = Object.assign(this.getTime(), time);
-    if (areTimeRangesDifferent(this.getTime(), newTime)) {
-      this._time = {
-        from: newTime.from,
-        to: newTime.to,
-      };
+  public setTime = (time: Partial<InputTimeRange>) => {
+    const current = this.getTime();
+    const mode = 'mode' in time ? time.mode : undefined;
+    const newTime: TimeRange = {
+      from: moment.isMoment(time.from) ? time.from.toISOString() : time.from ?? current.from,
+      to: moment.isMoment(time.to) ? time.to.toISOString() : time.to ?? current.to,
+      ...(mode !== undefined ? { mode } : current.mode ? { mode: current.mode } : {}),
+    };
+    if (areTimeRangesDifferent(current, newTime)) {
+      this._time = newTime;
       this._isTimeTouched = true;
-      this._history.add(this._time);
+      this._history.add(newTime);
       this.timeUpdate$.next();
       this.fetch$.next();
     }
