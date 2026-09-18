@@ -14,9 +14,11 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
+import type { ParsedMetricItem } from '../../../../types';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
+import { deriveExemplarsIndex } from '../../../../common/utils/exemplars/derive_exemplars_index';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 
@@ -41,6 +43,12 @@ export interface UseExemplarsAvailabilityParams {
   services: ChartSectionProps['services'];
   /** Forwarded as the `profile_id` APM label on captured errors. */
   profileId: string;
+  /**
+   * Metric items currently in the grid. The probe is skipped when none of them
+   * map to a derivable OTel exemplar index, preventing spurious 400 errors on
+   * non-OTel sources (Metricbeat, Prometheus, etc.).
+   */
+  metricItems: ParsedMetricItem[];
 }
 
 export interface ExemplarsAvailabilityResult {
@@ -78,6 +86,7 @@ export const useExemplarsAvailability = ({
   fetchParams,
   services,
   profileId,
+  metricItems,
 }: UseExemplarsAvailabilityParams): ExemplarsAvailabilityResult => {
   const isExemplarsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EXEMPLARS_ENABLED,
@@ -95,6 +104,16 @@ export const useExemplarsAvailability = ({
   const { value } = useAbortableAsync<ExemplarsAvailabilityResult | undefined>(async () => {
     // Gate before anything else: when the flag is off we do not fetch exemplars at all.
     if (!isExemplarsEnabled || !dataView) {
+      return undefined;
+    }
+
+    // Skip the probe when no metric in the current grid maps to an OTel exemplar
+    // stream. Non-OTel sources (Metricbeat, Prometheus, etc.) have no parallel
+    // exemplars data stream, so probing would produce a 400 on every chart.
+    const hasOtelSource = metricItems.some(
+      (item) => deriveExemplarsIndex(item.indexName) !== undefined
+    );
+    if (!hasOtelSource) {
       return undefined;
     }
 
@@ -116,7 +135,7 @@ export const useExemplarsAvailability = ({
       reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
       return PROBE_FAILED;
     }
-  }, [isExemplarsEnabled, dataView, search, uiSettings, profileId, reportError]);
+  }, [isExemplarsEnabled, dataView, metricItems, search, uiSettings, profileId, reportError]);
 
   return value ?? NOTHING_AVAILABLE;
 };

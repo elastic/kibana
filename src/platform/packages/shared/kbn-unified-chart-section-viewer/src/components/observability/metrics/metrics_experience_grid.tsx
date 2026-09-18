@@ -83,6 +83,7 @@ export const MetricsExperienceGrid = ({
     fetchParams,
     services,
     profileId,
+    metricItems,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({

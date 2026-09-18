@@ -25,6 +25,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { FEATURE_FLAGS } from '../../../../common/constants';
+import type { ParsedMetricItem } from '../../../../types';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
@@ -59,12 +60,33 @@ const createMockServices = () =>
     uiSettings: {},
   } as unknown as ChartSectionProps['services']);
 
+const OTEL_METRIC_ITEM: ParsedMetricItem = {
+  metricName: 'metrics.http.server.request.duration',
+  indexName: 'metrics-generic.otel-default',
+  units: [],
+  metricTypes: [],
+  fieldTypes: [],
+  dimensionFields: [],
+};
+
+const NON_OTEL_METRIC_ITEM: ParsedMetricItem = {
+  metricName: 'system.cpu.total.norm.pct',
+  indexName: 'metrics-system.cpu-default',
+  units: [],
+  metricTypes: [],
+  fieldTypes: [],
+  dimensionFields: [],
+};
+
 /**
  * Built once per test and closed over by the render callback: the probe's dependency
  * list includes `search` and `uiSettings`, so rebuilding these on every render would
  * re-fire the probe indefinitely.
  */
-const createParams = (dataView: DataView | null = createMockDataView()) =>
+const createParams = (
+  dataView: DataView | null = createMockDataView(),
+  metricItems: ParsedMetricItem[] = [OTEL_METRIC_ITEM]
+) =>
   ({
     fetchParams: getFetchParamsMock({
       query: { esql: 'TS metrics-generic.otel-default' },
@@ -74,6 +96,7 @@ const createParams = (dataView: DataView | null = createMockDataView()) =>
     }),
     services: createMockServices(),
     profileId: TEST_PROFILE_ID,
+    metricItems,
   } as UseExemplarsAvailabilityParams);
 
 /**
@@ -189,6 +212,24 @@ describe('useExemplarsAvailability', () => {
 
   it('does not request the probe when there is no data view', async () => {
     const params = createParams(null);
+
+    renderHook(() => useExemplarsAvailability(params));
+
+    await flushProbe();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('does not request the probe when no metric items map to an OTel exemplar index', async () => {
+    const params = createParams(createMockDataView(), [NON_OTEL_METRIC_ITEM]);
+
+    renderHook(() => useExemplarsAvailability(params));
+
+    await flushProbe();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('does not request the probe when metric items are empty (still loading)', async () => {
+    const params = createParams(createMockDataView(), []);
 
     renderHook(() => useExemplarsAvailability(params));
 
