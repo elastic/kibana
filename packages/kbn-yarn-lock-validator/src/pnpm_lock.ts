@@ -72,7 +72,10 @@ interface RawPnpmSnapshot {
 
 /** Parse pnpm-lock.yaml content into a normalized PnpmLock. */
 export function parseLockfile(content: string): PnpmLock {
-  const documents = parseAllDocuments(content).map((doc) => doc.toJSON()) as RawPnpmLock[];
+  const parsedDocuments = parseAllDocuments(content);
+  const parseError = parsedDocuments.flatMap((doc) => doc.errors)[0];
+  if (parseError) throw parseError;
+  const documents = parsedDocuments.map((doc) => doc.toJSON()) as RawPnpmLock[];
 
   // The first document seems to be the package manager document,
   // and the last document is the dependencies document.
