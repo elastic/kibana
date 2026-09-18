@@ -68,6 +68,9 @@ function createMockDeps() {
         asScoped: () => ({ asCurrentUser: mockEsClient }),
       },
     },
+    executionContext: {
+      withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
+    },
   };
   const plugins = {
     licensing: {

@@ -172,10 +172,14 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     const taskManager = {
       registerTaskDefinitions: jest.fn(),
     } as unknown as TaskManagerSetupContract;
+    const executionContextMock = {
+      withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
+    };
     const core = {
       analytics: { reportEvent },
       getStartServices: jest.fn().mockResolvedValue([
         {
+          executionContext: executionContextMock,
           savedObjects: {
             createInternalRepository: jest.fn().mockReturnValue({
               find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),

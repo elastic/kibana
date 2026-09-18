@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { getNewSchedule, registerExtractEntityTasks } from './extract_entity_task';
+import { registerHistorySnapshotTask } from './history_snapshot_task';
 import type { EntityStoreCoreSetup } from '../types';
 
-jest.mock('./factories');
 jest.mock('./should_delete_orphaned_task', () => ({
   shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
 }));
@@ -22,33 +20,8 @@ jest.mock('../telemetry/traces', () => ({
   wrapTaskRun: jest.fn().mockResolvedValue({ state: {} }),
 }));
 
-const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
-  ({
-    id: 'entity_store:v2:extract_entity_task:host:default',
-    taskType: 'entity_store:v2:extract_entity_task:host',
-    schedule,
-  } as ConcreteTaskInstance);
-
-describe('getNewSchedule', () => {
-  it('returns a schedule when frequency differs from the current interval', () => {
-    expect(getNewSchedule('22m', createTaskInstance({ interval: '1m' }))).toEqual({
-      schedule: { interval: '22m' },
-    });
-  });
-
-  it('returns undefined when frequency matches the current interval', () => {
-    expect(getNewSchedule('1m', createTaskInstance({ interval: '1m' }))).toBeUndefined();
-  });
-
-  it('returns a schedule when the task has no interval', () => {
-    expect(getNewSchedule('1m', createTaskInstance())).toEqual({
-      schedule: { interval: '1m' },
-    });
-  });
-});
-
-describe('registerExtractEntityTasks — execution context wrap', () => {
-  it('invokes coreStart.executionContext.withContext with the extract-task label and taskInstance.id', async () => {
+describe('registerHistorySnapshotTask — execution context wrap', () => {
+  it('invokes coreStart.executionContext.withContext with the history-snapshot label and taskInstance.id', async () => {
     const withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
     const core = {
       getStartServices: jest
@@ -60,22 +33,13 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
     const logger = loggerMock.create();
     (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
 
-    registerExtractEntityTasks({
-      taskManager,
-      logger,
-      entityTypes: ['host'],
-      core,
-      isServerless: false,
-    });
+    registerHistorySnapshotTask({ taskManager, logger, core });
 
     const [defs] = registerTaskDefinitions.mock.calls[0];
     const [taskType] = Object.keys(defs);
     const runner = defs[taskType].createTaskRunner({
-      taskInstance: { id: 'task-1', state: { namespace: 'default' } },
-      fakeRequest: {},
+      taskInstance: { id: 'history-snapshot:default', state: { namespace: 'default' } },
       signal: new AbortController().signal,
-      executionUuid: 'run-1',
-      setCustomTaskRunEventFields: jest.fn(),
     });
 
     await runner.run();
@@ -83,8 +47,8 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
     expect(withContextSpy).toHaveBeenCalledWith(
       {
         type: 'security_solution',
-        name: 'entity_analytics-entity_store_extract_task',
-        id: 'task-1',
+        name: 'entity_analytics-entity_store_history_snapshot_task',
+        id: 'history-snapshot:default',
       },
       expect.any(Function)
     );
