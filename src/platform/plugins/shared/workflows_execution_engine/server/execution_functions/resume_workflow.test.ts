@@ -29,6 +29,7 @@ import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { DYNAMIC_TIMEOUT_STATE_KEY } from '../step/wait_for_input_step/hitl_timeout_helpers';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -182,6 +183,65 @@ describe('resumeWorkflow', () => {
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
       }
     );
+
+    it('defers a HITL notification using persisted dynamicTimeout, not the YAML template', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T12:00:15.000Z'));
+        const startedAt = '2025-06-01T12:00:00.000Z';
+        const resume = jest.fn();
+        const load = jest.fn().mockResolvedValue(undefined);
+        mockSetupDependencies.mockResolvedValue({
+          stepIoService: { load },
+          workflowRuntime: {
+            resume,
+            getCurrentNode: () => ({
+              type: 'waitForApproval',
+              stepId: 'await_decision',
+              configuration: { timeout: "{{ inputs.expiresIn | default: '72h' }}" },
+            }),
+          },
+          workflowExecutionGraph: {
+            getWorkflowLevelTimeout: () => undefined,
+            getNode: () => undefined,
+          },
+          workflowExecutionCursor: { currentStackFrames: [] },
+          workflowExecutionState: {
+            getWorkflowExecution: () => ({
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              currentNodeId: 'await_decision',
+              startedAt,
+            }),
+            getLatestStepExecution: () => ({
+              startedAt,
+              state: { [DYNAMIC_TIMEOUT_STATE_KEY]: '30s' },
+            }),
+          },
+        } as never);
+
+        const result = await resumeWorkflow({
+          workflowRunId,
+          spaceId,
+          signal: new AbortController().signal,
+          dependencies,
+          logger,
+          config: createMockWorkflowExecutionEngineConfig(),
+          fakeRequest,
+          workflowsExecutionEngine: mockWorkflowExecutionEngine,
+          workflowExecutionRepository: new WorkflowExecutionRepository(
+            createMockWorkflowDataClient()
+          ),
+          stepExecutionRepository: mockStepExecutionRepositoryForResume,
+        });
+
+        expect(result).toEqual({ retryAt: new Date('2025-06-01T12:00:30.000Z') });
+        expect(load).toHaveBeenCalledTimes(1);
+        expect(resume).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
 
     it('runs resume and loop when execution is not terminal', async () => {
       const resume = jest.fn().mockResolvedValue(undefined);

@@ -23,7 +23,11 @@ const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
 
 type IdleTimeoutHitlStep =
   | StepExecutionRuntime
-  | { node: GraphNodeUnion; startedAt: string | undefined };
+  | {
+      node: GraphNodeUnion;
+      startedAt: string | undefined;
+      state?: Record<string, unknown>;
+    };
 
 /** Returns the earliest deadline across the waiting step and its enclosing timeout scopes. */
 export function getIdleTimeoutResumeDeadlineMs(
@@ -37,7 +41,7 @@ export function getIdleTimeoutResumeDeadlineMs(
   const hitlDeadlineMs =
     'stepExecution' in hitlStep
       ? getHitlIdleDeadlineMsForStep(hitlStep)
-      : getHitlIdleDeadlineMsForNode(hitlStep.node, hitlStep.startedAt);
+      : getHitlIdleDeadlineMsForNode(hitlStep.node, hitlStep.startedAt, hitlStep.state);
   if (hitlDeadlineMs !== undefined) {
     deadlineMs.push(hitlDeadlineMs);
   }
@@ -128,6 +132,7 @@ export function getWorkflowIdleTimeoutResumeAtAfterLoop(
     {
       node,
       startedAt: stepExecution?.startedAt,
+      state: stepExecution?.state,
     }
   );
   if (deadlineMs === undefined) {
