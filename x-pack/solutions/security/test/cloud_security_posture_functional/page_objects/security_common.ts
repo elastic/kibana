@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
+  const browser = getService('browser');
   const pageObjects = getPageObjects(['security']);
 
   const roles = [
@@ -108,6 +109,9 @@ export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrPro
 
     async logout() {
       await pageObjects.security.forceLogout();
+      // forceLogout can return without clearing the session, so drop the cookie to
+      // guarantee the next navigation re-authenticates instead of inheriting this user
+      await browser.deleteAllCookies();
     },
 
     async cleanRoles() {
