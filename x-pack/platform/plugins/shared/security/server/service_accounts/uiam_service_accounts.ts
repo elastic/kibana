@@ -28,6 +28,7 @@ import {
   serviceAccountNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 import {
   getUiamAuthorizationHeaderFromRequest,
   isExternalApiKey,
@@ -106,6 +107,26 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 
   async create(
+    request: KibanaRequest,
+    params: CreateServiceAccountParams
+  ): Promise<ServiceAccount> {
+    try {
+      const account = await this.createAccount(request, params);
+      securityTelemetry.recordServiceAccountCreationAttempt({
+        outcome: 'success',
+        serviceAccountBackend: 'uiam',
+      });
+      return account;
+    } catch (e) {
+      securityTelemetry.recordServiceAccountCreationAttempt({
+        outcome: 'failure',
+        serviceAccountBackend: 'uiam',
+      });
+      throw e;
+    }
+  }
+
+  private async createAccount(
     request: KibanaRequest,
     params: CreateServiceAccountParams
   ): Promise<ServiceAccount> {

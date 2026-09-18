@@ -18,6 +18,14 @@ import type { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
+import { securityTelemetry } from '../otel/instrumentation';
+
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordServiceAccountCreationAttempt: jest.fn(),
+    recordServiceAccountRollbackFailure: jest.fn(),
+  },
+}));
 
 const ACCOUNT_PATH = '/_security/service/kibana/nightshift-relay';
 /** Kibana only ever manages user-managed accounts, so the GET asks for that type explicitly. */
@@ -51,6 +59,7 @@ describe('EsServiceAccounts', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let request: KibanaRequest;
   let getCurrentUser: jest.Mock;
+  let getCurrentUserProfileId: jest.Mock;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 
   /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
@@ -62,6 +71,7 @@ describe('EsServiceAccounts', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     license = licenseMock.create();
     license.isEnabled.mockReturnValue(true);
@@ -81,6 +91,7 @@ describe('EsServiceAccounts', () => {
 
     request = httpServerMock.createKibanaRequest();
     getCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
+    getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
       logger,
@@ -90,7 +101,7 @@ describe('EsServiceAccounts', () => {
       credentialStore,
       canEncrypt: true,
       getCurrentUser,
-      getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
+      getCurrentUserProfileId,
     });
   });
 
@@ -115,6 +126,11 @@ describe('EsServiceAccounts', () => {
       // No read-back: the principal and the name are the ones just written, so a completed
       // creation has no remaining way to fail.
       expect(calls).toHaveLength(3);
+
+      expect(securityTelemetry.recordServiceAccountCreationAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+        serviceAccountBackend: 'es',
+      });
 
       expect(credentialStore.set).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -353,6 +369,9 @@ describe('EsServiceAccounts', () => {
           'Failed to delete the credential of partially created service account'
         )
       );
+      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
+        serviceAccountRollbackResource: 'credential',
+      });
     });
 
     // The forced account delete exists for exactly this case: Elasticsearch refuses an unforced
@@ -403,6 +422,44 @@ describe('EsServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to roll back partially created service account')
       );
+      // The account may still be alive, and this credential is the only record of the token it
+      // holds, so it outlives a rollback that could not remove the account.
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+
+      // Counted separately, since one rollback can strand more than one resource.
+      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
+        serviceAccountRollbackResource: 'token',
+      });
+      expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
+        serviceAccountRollbackResource: 'account',
+      });
+      expect(securityTelemetry.recordServiceAccountCreationAttempt).toHaveBeenCalledWith({
+        outcome: 'failure',
+        serviceAccountBackend: 'es',
+      });
+    });
+
+    // Attribution is worth an extra lookup, but never worth throwing away an account
+    // Elasticsearch already created. The lookup reaches Elasticsearch on most of its paths.
+    it('creates the account even when the user profile lookup rejects', async () => {
+      mockHappyPath();
+      getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({ roles: ['superuser'], profile_uid: undefined })
+      );
+      getCurrentUserProfileId.mockRejectedValue(new Error('profile index unavailable'));
+
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
+        id: 'kibana/nightshift-relay',
+        name: 'nightshift-relay',
+      });
+
+      // Recorded without the profile id rather than not recorded at all.
+      expect(credentialStore.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          createdBy: { type: 'user', username: 'user' },
+        })
+      );
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
     });
 
     it('logs and rethrows an Elasticsearch failure on the account write', async () => {

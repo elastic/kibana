@@ -18,7 +18,7 @@ import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-secur
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
-import { resolveWorkloadBinder } from './bindings';
+import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
 import { ensureManageSecurityPrivilege } from './manage_security_privilege';
@@ -33,6 +33,7 @@ import {
   serviceAccountRoleNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 
 /**
  * The discriminator on an account Elasticsearch reports, which decides whether the account is one
@@ -119,6 +120,26 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     request: KibanaRequest,
     params: CreateServiceAccountParams
   ): Promise<ServiceAccount> {
+    try {
+      const account = await this.createAccount(request, params);
+      securityTelemetry.recordServiceAccountCreationAttempt({
+        outcome: 'success',
+        serviceAccountBackend: 'es',
+      });
+      return account;
+    } catch (e) {
+      securityTelemetry.recordServiceAccountCreationAttempt({
+        outcome: 'failure',
+        serviceAccountBackend: 'es',
+      });
+      throw e;
+    }
+  }
+
+  private async createAccount(
+    request: KibanaRequest,
+    params: CreateServiceAccountParams
+  ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot create a service account: security features are disabled in Elasticsearch'
@@ -196,7 +217,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         createdAt: new Date().toISOString(),
         createdBy: await resolveWorkloadBinder(
           user,
-          async () => (await this.getCurrentUserProfileId(request)) ?? undefined
+          bestEffortUserProfileIdResolver(this.getCurrentUserProfileId, request, this.logger)
         ),
         token,
       });
@@ -310,10 +331,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * here is logged rather than thrown. An account left behind blocks re-creating that name until
    * an operator removes it, which is why the principal is named in the log.
    *
-   * All three deletes are attempted independently. A token Elasticsearch would not give up is the
-   * case the forced account delete exists for, so it must not also be what stops it from running.
-   * The credential is included because a rejected `set` does not prove Elasticsearch never
-   * committed the document.
+   * The deletes are attempted independently. A token Elasticsearch would not give up is the case
+   * the forced account delete exists for, so it must not also be what stops it from running. The
+   * credential is included because a rejected `set` does not prove Elasticsearch never committed
+   * the document, but only once the account it belongs to is actually gone.
    */
   private async rollback(
     esClient: ElasticsearchClient,
@@ -333,12 +354,16 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         { ignore: [404] }
       );
     } catch (e) {
+      securityTelemetry.recordServiceAccountRollbackFailure({
+        serviceAccountRollbackResource: 'token',
+      });
       this.logger.error(
         `Failed to delete the token of partially created service account [${principal}]: ` +
           getDetailedErrorMessage(e)
       );
     }
 
+    let accountDeleted = false;
     try {
       // `force`, so the account still goes away if the token delete above did not land:
       // Elasticsearch refuses an unforced delete while any token remains.
@@ -350,19 +375,31 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         },
         { ignore: [404] }
       );
+      accountDeleted = true;
     } catch (e) {
+      securityTelemetry.recordServiceAccountRollbackFailure({
+        serviceAccountRollbackResource: 'account',
+      });
       this.logger.error(
         `Failed to roll back partially created service account [${principal}]. It may need to be ` +
           `removed manually: ${getDetailedErrorMessage(e)}`
       );
     }
 
-    // Last, so a rollback that gives up partway through leaves a credential for an account that
-    // is already gone, rather than a live Elasticsearch token Kibana has no record of. The delete
-    // is idempotent, so the paths that never reached `set` cost nothing here.
+    // While the account may still be alive, this credential is Kibana's one record of the token
+    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
+    // so the credential outlives a rollback that could not finish.
+    if (!accountDeleted) {
+      return;
+    }
+
+    // The delete is idempotent, so the paths that never reached `set` cost nothing here.
     try {
       await this.credentialStore.delete(principal);
     } catch (e) {
+      securityTelemetry.recordServiceAccountRollbackFailure({
+        serviceAccountRollbackResource: 'credential',
+      });
       this.logger.error(
         `Failed to delete the credential of partially created service account [${principal}]. ` +
           `It may need to be removed manually: ${getDetailedErrorMessage(e)}`
