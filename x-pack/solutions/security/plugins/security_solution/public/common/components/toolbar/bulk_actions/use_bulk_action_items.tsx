@@ -12,6 +12,7 @@ import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
+  CustomBulkActionGroupId,
   CustomBulkActionProp,
   SetEventsDeleted,
   SetEventsLoading,
@@ -36,7 +37,7 @@ export type BulkActionMenuItem = AlertTableContextMenuItem;
  * Structured groups returned for composed bulk-action menus.
  * `casesItems` and `timelineItems` are sub-partitions of custom bulk actions
  * whose producers set `groupId: 'cases'` or `groupId: 'timeline'` respectively.
- * `customItems` holds any remaining custom actions with no recognised group.
+ * `customItems` holds any remaining custom actions that declare no group.
  */
 export interface BulkActionGroups {
   statusItems: BulkActionMenuItem[];
@@ -63,7 +64,7 @@ export interface BulkActionsProps {
 
 type CustomActionGroups = Pick<BulkActionGroups, 'casesItems' | 'timelineItems' | 'customItems'>;
 
-const getCustomActionGroup = (groupId?: string): keyof CustomActionGroups => {
+const getCustomActionGroup = (groupId?: CustomBulkActionGroupId): keyof CustomActionGroups => {
   switch (groupId) {
     case 'cases':
       return 'casesItems';

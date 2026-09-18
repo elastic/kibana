@@ -10,11 +10,15 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 
+/** Groups a custom bulk action can be placed in within the bulk-action menu. */
+export type CustomBulkActionGroupId = 'cases' | 'timeline';
+
 export interface CustomBulkAction {
   key: string;
   label: string;
   icon?: IconType;
-  groupId?: string;
+  /** Optional group to place this action in within the bulk-action menu. Ungrouped actions render last. */
+  groupId?: CustomBulkActionGroupId;
   disableOnQuery?: boolean;
   disabledLabel?: string;
   onClick: (items?: TimelineItem[]) => void;

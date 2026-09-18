@@ -8,12 +8,15 @@
 import type { IconType } from '@elastic/eui';
 import type { TimelineItem } from '../../search_strategy';
 
+/** Groups a custom bulk action can be placed in within the bulk-action menu. */
+export type CustomBulkActionGroupId = 'cases' | 'timeline';
+
 export interface CustomBulkAction {
   key: string;
   label: string;
   icon?: IconType;
-  /** Optional group to place this action in within the bulk-action menu (e.g. 'cases', 'timeline'). */
-  groupId?: string;
+  /** Optional group to place this action in within the bulk-action menu. Ungrouped actions render last. */
+  groupId?: CustomBulkActionGroupId;
   disableOnQuery?: boolean;
   disabledLabel?: string;
   onClick: (items?: TimelineItem[]) => void;
