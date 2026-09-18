@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { QuickFilters } from './quick_filters';
+export { PolicyScopeDescription } from './policy_scope_description';
