@@ -6,13 +6,14 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { TimeRange } from '../use_time_range_param';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
 
 /**
- * Builds a single ES|QL query that counts distinct H/C-risk entities with at
- * least one alert in the last 24h, using a LOOKUP JOIN from alerts → entity-latest.
+ * Builds a single ES|QL query that counts distinct entities with at least one
+ * alert within the selected time window, using a LOOKUP JOIN from alerts → entity-latest.
  *
  * Entity resolution uses kibana.alert.entity.id (stamped at enrichment time, #285223)
  * when present, falling back to derived EUID for older alerts. See alert_euid_pipeline.ts.
@@ -22,13 +23,15 @@ const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
 export const buildEntitiesWithAlertsCountQuery = (
   euid: EntityStoreEuid,
   entitiesIndexName: string,
-  spaceId: string
+  spaceId: string,
+  timeRange: TimeRange = '24h',
+  entityFilterClauses: string[] = []
 ): string => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${alertsIndex(spaceId)}`);
-  parts.push(`| WHERE @timestamp >= NOW() - 24h`);
+  parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
   parts.push(...buildAlertEuidPipeline(euid));
 
   // RENAME @timestamp to avoid it being overwritten by entity-latest's own @timestamp
@@ -40,6 +43,7 @@ export const buildEntitiesWithAlertsCountQuery = (
   // Without this filter, alerts whose derived EUID has no entity-latest entry pass
   // through the LEFT JOIN and inflate COUNT_DISTINCT with unrecognised identifiers.
   parts.push(`| WHERE entity.name IS NOT NULL`);
+  parts.push(...entityFilterClauses);
 
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +17,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildEntitiesWithAlertsCountQuery } from '../queries/entities_with_alerts_lookup_query';
+import type { TimeRange } from '../use_time_range_param';
+import {
+  getEntityFilterESQL,
+  EMPTY_ENTITY_FILTERS,
+  type EntityFilters,
+} from '../use_entity_filters_param';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -47,9 +54,13 @@ const parseAlertsCountResponse = (
 export const useEntitiesWithAlertsCount = ({
   spaceId,
   skip,
+  timeRange = '24h',
+  entityFilters = EMPTY_ENTITY_FILTERS,
 }: {
   spaceId: string;
   skip?: boolean;
+  timeRange?: TimeRange;
+  entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
@@ -65,24 +76,31 @@ export const useEntitiesWithAlertsCount = ({
     Boolean(euidApi) &&
     Boolean(resolvedIndex?.indexName);
 
+  const query = useMemo(() => {
+    if (!resolvedIndex?.indexName || !euidApi) return null;
+    return buildEntitiesWithAlertsCountQuery(
+      euidApi.euid,
+      resolvedIndex.indexName,
+      spaceId,
+      timeRange,
+      getEntityFilterESQL(entityFilters)
+    );
+  }, [euidApi, resolvedIndex?.indexName, spaceId, timeRange, entityFilters]);
+
   const {
     data: queryResult,
     isLoading,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
-    ['entitiesWithAlertsCount', resolvedIndex?.indexName, spaceId],
+    ['entitiesWithAlertsCount', query],
     async ({ signal }) => {
-      if (!resolvedIndex?.indexName || !euidApi) return { count: 0, entityIds: [] };
+      if (!query) return { count: 0, entityIds: [] };
 
-      const raw = await esqlSearch(
-        data.search,
-        buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName, spaceId),
-        signal
-      );
+      const raw = await esqlSearch(data.search, query, signal);
       return parseAlertsCountResponse(raw);
     },
     {
-      enabled: isEnabled,
+      enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
       staleTime: 5 * 60_000,
       refetchOnWindowFocus: false,

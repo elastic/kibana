@@ -6,25 +6,28 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { TimeRange } from '../use_time_range_param';
 
 const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**
  * Builds a single ES|QL query that counts distinct entities with at least one
- * ML anomaly record in the last 24h, using a LOOKUP JOIN from anomalies →
- * entity-latest on the typed EUID (entity.id). Mirrors the anomalies panel pattern.
+ * ML anomaly record within the selected time window, using a LOOKUP JOIN from
+ * anomalies → entity-latest on the typed EUID (entity.id).
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
   euid: EntityStoreEuid,
-  entitiesIndexName: string
+  entitiesIndexName: string,
+  timeRange: TimeRange = '24h',
+  entityFilterClauses: string[] = []
 ): string => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ML_ANOMALIES_INDEX}`);
   parts.push(
-    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 24h`
+    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${timeRange}`
   );
 
   for (const entityType of ENTITY_TYPES) {
@@ -43,6 +46,8 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(`| RENAME event_timestamp AS @timestamp`);
 
   parts.push(`| WHERE entity.name IS NOT NULL`);
+  parts.push(...entityFilterClauses);
+
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );

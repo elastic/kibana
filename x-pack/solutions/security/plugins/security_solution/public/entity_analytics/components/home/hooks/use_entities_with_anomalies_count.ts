@@ -17,6 +17,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/tile_anomaly_count_query';
+import type { TimeRange } from '../use_time_range_param';
+import {
+  getEntityFilterESQL,
+  EMPTY_ENTITY_FILTERS,
+  type EntityFilters,
+} from '../use_entity_filters_param';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -32,9 +38,13 @@ const esqlSearch = async (
 export const useEntitiesWithAnomaliesCount = ({
   spaceId,
   skip,
+  timeRange = '24h',
+  entityFilters = EMPTY_ENTITY_FILTERS,
 }: {
   spaceId: string;
   skip?: boolean;
+  timeRange?: TimeRange;
+  entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
@@ -52,8 +62,13 @@ export const useEntitiesWithAnomaliesCount = ({
 
   const query = useMemo(() => {
     if (!euidApi || !resolvedIndex?.indexName) return null;
-    return buildEntitiesWithAnomaliesCountQuery(euidApi.euid, resolvedIndex.indexName);
-  }, [euidApi, resolvedIndex?.indexName]);
+    return buildEntitiesWithAnomaliesCountQuery(
+      euidApi.euid,
+      resolvedIndex.indexName,
+      timeRange,
+      getEntityFilterESQL(entityFilters)
+    );
+  }, [euidApi, resolvedIndex?.indexName, timeRange, entityFilters]);
 
   const {
     data: queryResult,

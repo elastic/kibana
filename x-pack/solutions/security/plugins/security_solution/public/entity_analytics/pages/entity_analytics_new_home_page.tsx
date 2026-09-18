@@ -128,12 +128,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: alertsCount,
     entityIds: alertsEntityIds,
     isLoading: alertsLoading,
-  } = useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
+  } = useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
-  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
+  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
   const {
     count: watchlistedCount,
     entityIds: watchlistedEntityIds,
@@ -195,15 +195,15 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         id: 'entitiesWithAlerts',
         title: 'Entities with alerts',
         value: alertsLoading ? 0 : alertsCount,
-        description: 'Entities with at least one alert in the last 24h',
-        filterLabel: 'Entities with alerts (24h)',
+        description: `Entities with at least one alert in the last ${timeRange}`,
+        filterLabel: `Entities with alerts (${timeRange})`,
       },
       {
         id: 'entitiesWithAnomalies',
         title: 'Entities with anomalies',
         value: anomaliesLoading ? 0 : anomaliesCount,
-        description: 'Entities with at least one ML anomaly in the last 24h',
-        filterLabel: 'Entities with anomalies (24h)',
+        description: `Entities with at least one ML anomaly in the last ${timeRange}`,
+        filterLabel: `Entities with anomalies (${timeRange})`,
       },
       {
         id: 'riskMovers',
