@@ -36,7 +36,7 @@ const getStartServices = jest.fn().mockResolvedValue([
       client: elasticsearchServiceMock.createClusterClient(),
     },
     executionContext: {
-      withContext: <T,>(_ctx: unknown, fn: () => T) => fn(),
+      withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
     },
   },
   { taskManager: mockTaskManagerStart },

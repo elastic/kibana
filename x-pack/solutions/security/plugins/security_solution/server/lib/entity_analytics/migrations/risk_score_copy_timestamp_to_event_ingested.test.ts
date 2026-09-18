@@ -35,9 +35,7 @@ describe('riskScoreCopyTimestampToEventIngested — execution context wrap', () 
   });
 
   it('wraps the migration run in coreStart.executionContext.withContext with the expected label and id', async () => {
-    const withContext = jest
-      .fn()
-      .mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+    const withContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
     const mockCoreStart = {
       elasticsearch: { client: elasticsearchServiceMock.createClusterClient() },
       executionContext: { withContext },

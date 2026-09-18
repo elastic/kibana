@@ -232,7 +232,7 @@ describe('Lead Generation Task', () => {
           },
         },
         executionContext: {
-          withContext: <T,>(_ctx: unknown, fn: () => T) => fn(),
+          withContext: <T>(_ctx: unknown, fn: () => T) => fn(),
         },
       };
       mockStartPlugins = {
