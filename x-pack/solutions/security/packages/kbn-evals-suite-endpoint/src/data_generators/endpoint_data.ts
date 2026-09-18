@@ -306,6 +306,17 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
 
   let policyId = scenario.policyId;
 
+  // The PACKAGE policy id a seeded response action must name in its
+  // `agent.policy[].integrationPolicyId`. It is not the same thing as the agent
+  // policy id the metadata doc carries: `getActionDetailsById` ->
+  // `fetchActionRequestById` validates the action with
+  // `ensureInCurrentSpace({ integrationPolicyIds, matchAll: false })`, which
+  // resolves those ids through `packagePolicyService.getByIDs` and 404s the
+  // action when none of them exist. A placeholder id therefore makes a seeded
+  // action permanently unreadable (`action_not_found`) even though the document
+  // is in the index.
+  let integrationPolicyId: string | undefined;
+
   // The endpoint metadata route's `buildBaseEndpointMetadataFilter` requires
   // `united.agent.policy_id` to match a real package policy. Without one, the
   // filter yields zero policy IDs and every lookup returns `endpoint_not_found`.
@@ -345,11 +356,13 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       path: '/api/fleet/package_policies',
       query: { perPage: 100 },
     });
-    const hasEndpointPkg = existingPkg.data.items.some(
+    const existingEndpointPkg = existingPkg.data.items.find(
       (p) => p.policy_id === realPolicyId && p.package?.name === 'endpoint'
     );
 
-    if (!hasEndpointPkg) {
+    if (existingEndpointPkg) {
+      integrationPolicyId = existingEndpointPkg.id;
+    } else {
       // Read the installed version from EPM instead of hard-coding a stack
       // version. The Scout config installs `endpoint` at `latest`
       // (`evals_endpoint/stateful/classic.stateful.config.ts`), so the
@@ -371,7 +384,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
         );
       }
 
-      await clients.kbnClient.request<{ item: { id: string } }>({
+      const created = await clients.kbnClient.request<{ item: { id: string } }>({
         method: 'POST',
         path: '/api/fleet/package_policies',
         body: {
@@ -383,6 +396,8 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
           inputs: [],
         },
       });
+
+      integrationPolicyId = created.data.item.id;
     }
 
     // Use the real policy ID for the fleet agent + metadata docs.
@@ -448,13 +463,43 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       document: { '@timestamp': now, ...extra.document },
     });
   }
+
+  return { agentPolicyId: policyId, packagePolicyId: integrationPolicyId };
 }
+
+export interface SeededScenario {
+  /** Agent policy id the seeded metadata doc is attributed to. */
+  agentPolicyId?: string;
+  /** Endpoint package policy id a seeded response action must name. */
+  packagePolicyId?: string;
+}
+
+/**
+ * The package policy id a seeded response action has to carry, as a hard
+ * failure rather than an optional value: an action whose
+ * `agent.policy[].integrationPolicyId` names a policy that does not exist can
+ * only ever answer `action_not_found`, so seeding one would look like coverage
+ * while proving nothing.
+ */
+export const requirePackagePolicyId = ({ packagePolicyId }: SeededScenario): string => {
+  if (!packagePolicyId) {
+    throw new Error(
+      'seedScenario() did not resolve an endpoint package policy id — a response action seeded without it is unreadable (fetchActionRequestById validates it via ensureInCurrentSpace)'
+    );
+  }
+
+  return packagePolicyId;
+};
 
 export interface SeedResponseActionOptions {
   actionId: string;
   agentId: string;
   command: ResponseActionsApiCommandNames;
   status: 'pending' | 'successful' | 'failed';
+  /** Package policy id the action is attributed to — `SeededScenario.packagePolicyId`. */
+  integrationPolicyId: string;
+  /** Agent policy id the action is attributed to — `SeededScenario.agentPolicyId`. */
+  agentPolicyId?: string;
   comment?: string;
 }
 
@@ -470,7 +515,15 @@ export interface SeedResponseActionOptions {
  */
 export async function seedResponseAction(
   internalEsClient: Client,
-  { actionId, agentId, command, status, comment }: SeedResponseActionOptions
+  {
+    actionId,
+    agentId,
+    command,
+    status,
+    integrationPolicyId,
+    agentPolicyId = '',
+    comment,
+  }: SeedResponseActionOptions
 ): Promise<void> {
   const generator = new EndpointActionGenerator();
   const startedAt = new Date().toISOString();
@@ -487,8 +540,8 @@ export async function seedResponseAction(
         {
           agentId,
           elasticAgentId: agentId,
-          integrationPolicyId: 'eval-response-policy',
-          agentPolicyId: '',
+          integrationPolicyId,
+          agentPolicyId,
         },
       ],
     },

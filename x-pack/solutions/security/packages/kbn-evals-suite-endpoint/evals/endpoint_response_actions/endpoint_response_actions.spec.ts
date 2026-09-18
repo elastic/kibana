@@ -11,6 +11,7 @@ import { evaluate } from '../../src/evaluate';
 import {
   waitForEndpointPackage,
   waitForTransformPropagation,
+  requirePackagePolicyId,
   seedScenario,
   seedResponseAction,
 } from '../../src/data_generators/endpoint_data';
@@ -45,7 +46,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
 
     const clients = { esClient, internalEsClient, kbnClient };
     // Seed endpoint data for the read-only scenarios
-    await seedScenario(clients, {
+    const isolateHost = await seedScenario(clients, {
       agentId: 'eval-agent-era-isolate-001',
       hostName: 'eval-host-isolate',
       os: { name: 'Windows', version: '10' },
@@ -62,19 +63,31 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
 
     // Seed the response-action documents the "action status follow-up"
     // golden questions reference by fixed ID, so those reads exercise the
-    // real ES `found` path instead of only ever hitting not-found.
+    // real ES `found` path instead of only ever hitting not-found. The action
+    // documents have to name the package policy `seedScenario` created: the
+    // read validates it with `ensureInCurrentSpace`, so an action naming an
+    // unknown policy answers `action_not_found` no matter what was indexed.
+    const integrationPolicyId = requirePackagePolicyId(isolateHost);
+
     await seedResponseAction(internalEsClient, {
       actionId: ACTION_ID_FOUND,
       agentId: 'eval-agent-era-isolate-001',
       command: 'isolate',
       status: 'successful',
+      integrationPolicyId,
+      agentPolicyId: isolateHost.agentPolicyId,
     });
     await seedResponseAction(internalEsClient, {
       actionId: ACTION_ID_PENDING_SCAN,
       agentId: 'eval-agent-era-isolate-001',
-      command: 'running-processes',
+      // The scenario below is a malware scan, so the seeded action must be one:
+      // a `running-processes` document would make the tool truthfully report a
+      // command the golden question never asked about.
+      command: 'scan',
       status: 'pending',
       comment: 'eval seed: malware scan',
+      integrationPolicyId,
+      agentPolicyId: isolateHost.agentPolicyId,
     });
 
     // The propagation wait must count the ids THIS suite seeds
@@ -179,7 +192,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                   `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_FOUND}`,
                   'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
-                  `Reported that action ${ACTION_ID_FOUND} is successful (the isolate command completed) rather than a not-found message`,
+                  `Reported that action ${ACTION_ID_FOUND} was an isolate command that completed successfully, rather than a not-found message`,
                 ],
                 tool_sequence: ['endpoint-response-actions.get_response_action_status'],
               },
@@ -194,7 +207,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                   `Called endpoint-response-actions.get_response_action_status with action ID ${ACTION_ID_PENDING_SCAN}`,
                   'Did not dispatch a new scan or other write action just to check status',
-                  `Reported that action ${ACTION_ID_PENDING_SCAN} is still pending rather than a not-found message`,
+                  `Reported that action ${ACTION_ID_PENDING_SCAN} is a scan command that is still pending, rather than a not-found message`,
                 ],
                 tool_sequence: ['endpoint-response-actions.get_response_action_status'],
               },

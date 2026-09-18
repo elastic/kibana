@@ -7,12 +7,21 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
-import { seedScenario } from './endpoint_data';
+import { requirePackagePolicyId, seedResponseAction, seedScenario } from './endpoint_data';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 interface RequestCall {
   method: string;
   path: string;
   body?: { package?: { name?: string; version?: string } };
+}
+
+interface BulkCall {
+  operations: Array<{ create?: { _index?: string } } & Record<string, unknown>>;
 }
 
 interface CreateClientsOptions {
@@ -48,6 +57,7 @@ const createClients = ({
   existingPackagePolicies = [],
 }: CreateClientsOptions = {}) => {
   const requests: RequestCall[] = [];
+  const bulkCalls: BulkCall[] = [];
 
   const kbnClient = {
     request: jest.fn(async (call: RequestCall) => {
@@ -83,16 +93,40 @@ const createClients = ({
 
   return {
     requests,
+    bulkCalls,
     clients: {
       kbnClient: kbnClient as unknown as KbnClient,
       esClient: { create: jest.fn().mockResolvedValue({}) } as unknown as Client,
-      internalEsClient: { index: jest.fn().mockResolvedValue({}) } as unknown as Client,
+      internalEsClient: {
+        index: jest.fn().mockResolvedValue({}),
+        bulk: jest.fn(async (call: BulkCall) => {
+          bulkCalls.push(call);
+          return { errors: false };
+        }),
+      } as unknown as Client,
     },
   };
 };
 
 const findPackagePolicyCreate = (requests: RequestCall[]) =>
   requests.find((r) => r.method === 'POST' && r.path === '/api/fleet/package_policies');
+
+/** The `logs-endpoint.actions` document a `seedResponseAction()` bulk call wrote. */
+const findEndpointActionDoc = (bulkCalls: BulkCall[]) => {
+  const call = bulkCalls.find(({ operations }) =>
+    operations.some((op) => op.create?._index === ENDPOINT_ACTIONS_INDEX)
+  );
+
+  if (!call) {
+    throw new Error(`No bulk call wrote to ${ENDPOINT_ACTIONS_INDEX}`);
+  }
+
+  const index = call.operations.findIndex((op) => op.create?._index === ENDPOINT_ACTIONS_INDEX);
+
+  return call.operations[index + 1] as {
+    agent: { policy: Array<{ integrationPolicyId?: string; agentPolicyId?: string }> };
+  };
+};
 
 describe('seedScenario endpoint package policy', () => {
   it('requests the endpoint package version that is actually installed', async () => {
@@ -143,5 +177,79 @@ describe('seedScenario endpoint package policy', () => {
 
     expect(findPackagePolicyCreate(requests)).toBeUndefined();
     expect(requests.find((r) => r.path === '/api/fleet/epm/packages/endpoint')).toBeUndefined();
+  });
+});
+
+describe('seedResponseAction integration policy', () => {
+  const actionId = '8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e';
+
+  it('attributes the seeded action to the package policy seedScenario resolved', async () => {
+    const { clients, bulkCalls } = createClients();
+    const seeded = await seedScenario(clients, scenario);
+
+    // The action read validates this id:
+    // `getActionDetailsById` -> `fetchActionRequestById` ->
+    // `ensureInCurrentSpace({ integrationPolicyIds, matchAll: false })`, which
+    // resolves it through `packagePolicyService.getByIDs` and answers
+    // `action_not_found` when no such policy exists. Seeding a placeholder id
+    // therefore indexes an action the tool can never read back.
+    expect(seeded.packagePolicyId).toBe('pkg-1');
+
+    await seedResponseAction(clients.internalEsClient, {
+      actionId,
+      agentId: scenario.agentId,
+      command: 'isolate',
+      status: 'successful',
+      integrationPolicyId: requirePackagePolicyId(seeded),
+      agentPolicyId: seeded.agentPolicyId,
+    });
+
+    const actionDoc = findEndpointActionDoc(bulkCalls);
+    expect(actionDoc.agent.policy[0].integrationPolicyId).toBe('pkg-1');
+    expect(actionDoc.agent.policy[0].agentPolicyId).toBe('agent-policy-1');
+  });
+
+  it('names the package policy a previous run already left behind', async () => {
+    const { clients } = createClients({
+      existingAgentPolicyId: 'agent-policy-existing',
+      existingPackagePolicies: [
+        { id: 'pkg-existing', policy_id: 'agent-policy-existing', package: { name: 'endpoint' } },
+      ],
+    });
+
+    const seeded = await seedScenario(clients, scenario);
+
+    expect(seeded).toEqual({
+      agentPolicyId: 'agent-policy-existing',
+      packagePolicyId: 'pkg-existing',
+    });
+  });
+
+  it('seeds the ack responses the completion fields are derived from', async () => {
+    const { clients, bulkCalls } = createClients();
+
+    await seedResponseAction(clients.internalEsClient, {
+      actionId,
+      agentId: scenario.agentId,
+      command: 'isolate',
+      status: 'successful',
+      integrationPolicyId: 'pkg-1',
+    });
+
+    const writtenIndices = bulkCalls.flatMap(({ operations }) =>
+      operations.map((op) => op.create?._index).filter((index): index is string => Boolean(index))
+    );
+    expect(writtenIndices).toEqual([
+      AGENT_ACTIONS_INDEX,
+      ENDPOINT_ACTIONS_INDEX,
+      AGENT_ACTIONS_RESULTS_INDEX,
+      ENDPOINT_ACTION_RESPONSES_INDEX,
+    ]);
+  });
+
+  it('fails loudly instead of seeding an action that names no policy', () => {
+    expect(() => requirePackagePolicyId({})).toThrow(
+      /did not resolve an endpoint package policy id/
+    );
   });
 });
