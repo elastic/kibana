@@ -326,7 +326,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -368,7 +367,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1', 'uuid-2']),
         search,
         logger,
@@ -417,7 +415,6 @@ describe('get_tracked_alerts', () => {
 
       await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -443,7 +440,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
         search,
@@ -464,7 +460,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
         search,
@@ -499,7 +494,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -520,7 +514,6 @@ describe('get_tracked_alerts', () => {
 
       await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 500,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
         search,
@@ -530,7 +523,7 @@ describe('get_tracked_alerts', () => {
       });
 
       expect(search.mock.calls[0][0]).toEqual({
-        size: 1000,
+        size: 10000,
         seq_no_primary_term: true,
         query: {
           bool: {
@@ -552,7 +545,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -600,7 +592,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1', 'uuid-2', 'uuid-3']),
         search,
         logger,

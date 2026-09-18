@@ -10,10 +10,13 @@ import { flatMap, get, keys, values } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_END,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
   ALERT_STATUS_RECOVERED,
+  ALERT_TIME_RANGE,
   ALERT_TRACKED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
@@ -273,9 +276,12 @@ export class AlertBuilder<
       )
     );
 
+    const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
+
     const recoveredAlertsToIndex = [];
     for (const id of keys(rawRecoveredAlerts)) {
-      const trackedAlert = this.trackedAlerts.getById(id);
+      const uuid = rawRecoveredAlerts[id].meta?.uuid;
+      const trackedAlert = uuid ? this.trackedAlerts.get(uuid) : undefined;
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
@@ -302,6 +308,11 @@ export class AlertBuilder<
         recoveredAlertsToIndex.push(
           stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
         );
+      } else {
+        this.logger.error(
+          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
+          this.logTags
+        );
       }
     }
 
@@ -316,13 +327,18 @@ export class AlertBuilder<
         keepUuids.add(raw.meta.uuid);
       }
     }
+    for (const delayedAlert of values(delayedAlerts)) {
+      keepUuids.add(delayedAlert.getUuid());
+    }
     // Tracked AAD docs that are not in this run's working set will never be
     // rebuilt. Flip them to false so they stop matching the tracked query.
+    // If the source is still active (lost recovery write), close it too so it
+    // is not frozen as a phantom active alert.
     for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
       if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
         continue;
       }
-      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+      recoveredAlertsToIndex.push(stopTrackingOrphanAlert(alert, this.currentTime));
     }
 
     return recoveredAlertsToIndex;
@@ -401,4 +417,29 @@ export class AlertBuilder<
       get(alert, ALERT_ACTION_GROUP) === undefined
     );
   }
+}
+
+function stopTrackingOrphanAlert<AlertData extends RuleAlertData>(
+  alert: Alert & AlertData,
+  timestamp: string
+): Alert & AlertData {
+  if (get(alert, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
+    return { ...alert, [ALERT_TRACKED]: false };
+  }
+
+  const start = get(alert, ALERT_START) as string | undefined;
+  return {
+    ...alert,
+    [ALERT_TRACKED]: false,
+    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+    [ALERT_END]: timestamp,
+    ...(start
+      ? {
+          [ALERT_TIME_RANGE]: {
+            gte: start,
+            lte: timestamp,
+          },
+        }
+      : {}),
+  };
 }

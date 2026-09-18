@@ -510,7 +510,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.search).toHaveBeenCalledTimes(1);
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
-            size: maxAlerts * 2,
+            size: 10000,
             ignore_unavailable: true,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
@@ -1021,12 +1021,13 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(5);
+          expect(spy).toHaveBeenCalledTimes(6);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'delayed');
           expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
           expect(spy).toHaveBeenNthCalledWith(4, 'trackedRecoveredAlerts');
           expect(spy).toHaveBeenNthCalledWith(5, 'delayed');
+          expect(spy).toHaveBeenNthCalledWith(6, 'delayed');
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,
@@ -1589,6 +1590,98 @@ describe('Alerts Client', () => {
           >;
           const orphanDoc = bulkBody.find((item) => item[ALERT_UUID] === 'orphan-uuid');
           expect(orphanDoc).toEqual(expect.objectContaining({ [ALERT_TRACKED]: false }));
+        });
+
+        test('should close still-active tracked AAD docs that are not in the working set', async () => {
+          const orphanAlert = {
+            ...fetchedAlert1,
+            [ALERT_STATUS]: 'active',
+            [ALERT_INSTANCE_ID]: 'orphan',
+            [ALERT_UUID]: 'orphan-uuid',
+            [ALERT_TRACKED]: true,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'orphan-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: orphanAlert,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          const orphanDoc = bulkBody.find((item) => item[ALERT_UUID] === 'orphan-uuid');
+          expect(orphanDoc).toEqual(
+            expect.objectContaining({
+              [ALERT_TRACKED]: false,
+              [ALERT_STATUS]: 'recovered',
+              [ALERT_END]: date,
+              [ALERT_TIME_RANGE]: {
+                gte: '2023-03-28T12:27:28.159Z',
+                lte: date,
+              },
+            })
+          );
+        });
+
+        test('should log when a recovered alert has no existing AAD document', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+            },
+          });
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error writing recovered alert(1) to .alerts-test.alerts-default - existing alert document not found ${ruleInfo}.`,
+            logTags
+          );
         });
 
         test('should use startedAt time if provided', async () => {

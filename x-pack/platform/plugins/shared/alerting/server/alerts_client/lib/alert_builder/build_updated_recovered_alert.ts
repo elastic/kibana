@@ -9,12 +9,17 @@ import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_RECOVERED,
+  ALERT_TIME_RANGE,
   ALERT_TRACKED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -50,6 +55,28 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   // Omit fields that are overwrite-able with undefined value
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
 
+  const sourceStatus = get(alert, ALERT_STATUS);
+  const recoveredState = legacyRawAlert.state;
+  const recoveredEnd = recoveredState?.end ?? timestamp;
+  const recoveredStart = get(alert, ALERT_START) ?? recoveredState?.start;
+  // Task state is the source of truth for recovery. If the original recovered
+  // write never landed, the source doc is still active — close it here.
+  const recoveryRepair =
+    sourceStatus !== ALERT_STATUS_RECOVERED
+      ? {
+          [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+          [ALERT_END]: recoveredEnd,
+          ...(recoveredStart
+            ? {
+                [ALERT_TIME_RANGE]: {
+                  gte: recoveredStart,
+                  lte: recoveredEnd,
+                },
+              }
+            : {}),
+        }
+      : {};
+
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
@@ -66,6 +93,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
       flappingHistory: legacyRawAlert.meta?.flappingHistory,
     }),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
+    ...recoveryRepair,
   };
 
   // Clean the existing alert document so any nested fields that will be updated

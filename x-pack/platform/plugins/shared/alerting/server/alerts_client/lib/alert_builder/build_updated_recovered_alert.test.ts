@@ -36,6 +36,7 @@ import {
   alertRule,
   existingFlattenedRecoveredAlert,
   existingExpandedRecoveredAlert,
+  existingFlattenedActiveAlert,
 } from '../test_fixtures';
 
 describe('buildUpdatedRecoveredAlert', () => {
@@ -219,6 +220,36 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       [TAGS]: ['rule-', '-tags'],
     });
+  });
+
+  test('should close source doc if it is still active', () => {
+    expect(
+      buildUpdatedRecoveredAlert<{}>({
+        alert: existingFlattenedActiveAlert,
+        legacyRawAlert: {
+          meta: {
+            flapping: true,
+            flappingHistory: [false, false, true, true],
+            maintenanceWindowIds: [],
+          },
+          state: {
+            start: '2023-03-28T12:27:28.159Z',
+            end: '2023-03-29T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        [ALERT_STATUS]: 'recovered',
+        [ALERT_END]: '2023-03-29T12:27:28.159Z',
+        [ALERT_TIME_RANGE]: {
+          gte: '2023-03-28T12:27:28.159Z',
+          lte: '2023-03-29T12:27:28.159Z',
+        },
+      })
+    );
   });
 
   test('should set kibana.alert.tracked to false when not flapping and no state changes', () => {

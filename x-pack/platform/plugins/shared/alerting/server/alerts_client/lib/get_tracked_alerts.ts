@@ -23,9 +23,11 @@ import type { RawAlertInstance, RuleAlertData } from '../../types';
 import type { TrackedAADAlerts, SearchResult } from '../types';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 
+// Tracked docs cannot exceed ~2x maxAlerts; 10k is the ES default window and a safe cap.
+const TRACKED_ALERTS_FETCH_SIZE = 10000;
+
 export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
   ruleId: string;
-  maxAlertLimit: number;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
   search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
@@ -36,7 +38,6 @@ export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
 
 export async function getTrackedAlerts<AlertData extends RuleAlertData>({
   ruleId,
-  maxAlertLimit,
   activeAlertsFromState,
   recoveredAlertsFromState,
   search,
@@ -51,7 +52,6 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
 
   const hits = await fetchTrackedAlerts({
     ruleId,
-    maxAlertLimit,
     search: searchWithRetry,
   });
 
@@ -114,15 +114,13 @@ export function createEmptyTrackedAlerts<
 
 async function fetchTrackedAlerts<AlertData extends RuleAlertData>({
   ruleId,
-  maxAlertLimit,
   search,
 }: {
   ruleId: string;
-  maxAlertLimit: number;
   search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
 }) {
   const alerts = await search({
-    size: maxAlertLimit * 2,
+    size: TRACKED_ALERTS_FETCH_SIZE,
     seq_no_primary_term: true,
     query: {
       bool: {
