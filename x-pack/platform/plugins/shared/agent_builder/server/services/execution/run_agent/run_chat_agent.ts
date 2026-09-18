@@ -31,7 +31,6 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
-  RoundInterruptedEvent,
   SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
@@ -73,10 +72,7 @@ import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
-import { buildAttachmentEvents } from './utils/add_round_complete_event';
-import { buildInterruptedRound } from './utils/round_summary';
-import { formatAttachmentsMetadata } from './utils/attachment_presentation';
-import { mergeAttachmentRefs } from '../../conversation/client/migrate_attachments';
+import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
@@ -486,78 +482,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // own `toArray()` as the completion signal for `round_complete`; this holds the same references.
   const collectedEvents: ConvertedEvents[] = [];
 
-  /**
-   * What is known about the run when it errors or is cancelled: the steps completed so far, the
-   * partial run summary, the processed input and the attachment state — built with the same
-   * expressions the success path uses for `round_complete`, so the persisted projection matches.
-   */
-  const toRoundInterrupted = (): RoundInterruptedEvent => {
-    const endTime = new Date();
-    const { steps: interruptedSteps, summary } = buildInterruptedRound({
+  const toRoundInterrupted = () =>
+    buildRoundInterruptedEvent({
       events: collectedEvents,
+      roundId,
       pendingRound,
       startTime,
-      endTime,
+      processedInput,
+      author,
+      origin,
+      agentId: agentIdForEvents,
+      conversation,
       modelProvider,
       mainConnectorId: model.connector.connectorId,
       configurationOverrides: effectiveOverrides,
       compactionResult,
       relevantSkillsSelection,
       initialTodos,
-    });
-
-    const accessedRefs = context.attachmentStateManager.getAccessedRefs();
-    let input: RoundInput =
-      accessedRefs.length > 0
-        ? {
-            ...processedInput,
-            attachment_refs: mergeAttachmentRefs(processedInput.attachment_refs, accessedRefs),
-          }
-        : processedInput;
-    if (input.attachment_refs && input.attachment_refs.length > 0) {
-      const attachmentContext = formatAttachmentsMetadata(
-        input.attachment_refs,
-        context.attachmentStateManager
-      );
-      if (attachmentContext) {
-        input = { ...input, attachment_context: attachmentContext };
-      }
-    }
-
-    // Identity of the round the success path would have produced: a resume keeps the pending
-    // round's id / author / origin, a fresh round gets the handler's.
-    const identity: Pick<ConversationRound, 'id' | 'author' | 'origin'> = pendingRound
-      ? { id: pendingRound.id, author: pendingRound.author, origin: pendingRound.origin }
-      : {
-          id: roundId,
-          ...(author ? { author } : {}),
-          ...(origin ? { origin: { type: origin.type } } : {}),
-        };
-    const attachmentEvents = buildAttachmentEvents({
-      conversation,
-      round: identity,
+      attachmentStateManager: context.attachmentStateManager,
       chatInputChanges,
-      executionChanges: context.attachmentStateManager.drainChanges(),
-      agentId: agentIdForEvents,
-      createdAt: endTime.toISOString(),
+      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
     });
-    const workspaceId = context.bashService?.getWorkspaceId();
-
-    return {
-      type: ChatEventType.roundInterrupted,
-      data: {
-        round_id: roundId,
-        started_at: startTime.toISOString(),
-        input,
-        steps: interruptedSteps,
-        summary,
-        attachments: context.attachmentStateManager.getAll(),
-        ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
-        ...(workspaceId ? { workspace_id: workspaceId } : {}),
-        ...(pendingRound ? { resumed: true } : {}),
-      },
-    };
-  };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     tap((event) => {
