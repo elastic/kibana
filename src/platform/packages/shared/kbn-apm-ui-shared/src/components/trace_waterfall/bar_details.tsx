@@ -192,7 +192,8 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       // 'mixed' means the row carries both classic APM errors and unprocessed OTel
                       // exception logs; used by use_error_click_handler to route to the Errors page
                       // with an additional OTel panel, rather than to the generic span flyout.
-                      errorSource: hasApm && hasOtel ? 'mixed' : hasOtel ? 'unprocessedOtel' : 'apm',
+                      errorSource:
+                        hasApm && hasOtel ? 'mixed' : hasOtel ? 'unprocessedOtel' : 'apm',
                     });
                   }
                 }}

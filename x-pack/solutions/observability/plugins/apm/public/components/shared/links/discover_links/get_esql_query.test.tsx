@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getESQLQuery,
-  getESQLQueryFromIndexPattern,
-  getApmIndexPattern,
-} from './get_esql_query';
+import { getESQLQuery, getESQLQueryFromIndexPattern, getApmIndexPattern } from './get_esql_query';
 import {
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,

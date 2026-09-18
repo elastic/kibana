@@ -101,7 +101,10 @@ const scenario: Scenario<ApmFields | LogDocument> = async () => {
             .timestamp(ts + 310),
         ]);
 
-      const apmIterable1 = range.interval('1m').rate(1).generator(() => [tx1]);
+      const apmIterable1 = range
+        .interval('1m')
+        .rate(1)
+        .generator(() => [tx1]);
 
       // ------------------------------------------------------------------ //
       // 2. synth-otel-exception-logs-ds  (logs-*.otel-* data stream)
@@ -173,7 +176,10 @@ const scenario: Scenario<ApmFields | LogDocument> = async () => {
             }),
         ]);
 
-      const apmIterable2 = range.interval('1m').rate(1).generator(() => [tx2]);
+      const apmIterable2 = range
+        .interval('1m')
+        .rate(1)
+        .generator(() => [tx2]);
 
       // ------------------------------------------------------------------ //
       // 3. synth-mixed-errors  (1 APM + 2 OTel on the same span)
@@ -206,7 +212,10 @@ const scenario: Scenario<ApmFields | LogDocument> = async () => {
       txOnlyError.fields['transaction.id'] = transactionId3;
       // Deliberately leave span.id unset.
 
-      const apmIterable3 = range.interval('1m').rate(1).generator(() => [tx3, txOnlyError]);
+      const apmIterable3 = range
+        .interval('1m')
+        .rate(1)
+        .generator(() => [tx3, txOnlyError]);
 
       const otelLogIterable3 = range
         .interval('1m')
@@ -250,7 +259,10 @@ const scenario: Scenario<ApmFields | LogDocument> = async () => {
           inst4.error({ message: 'upstream timeout', type: 'TimeoutError' }).timestamp(ts + 40)
         );
 
-      const apmIterable4 = range.interval('1m').rate(1).generator(() => [tx4]);
+      const apmIterable4 = range
+        .interval('1m')
+        .rate(1)
+        .generator(() => [tx4]);
 
       // ------------------------------------------------------------------ //
       // Wire up clients

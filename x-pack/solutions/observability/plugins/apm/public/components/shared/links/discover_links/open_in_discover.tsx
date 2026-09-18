@@ -56,7 +56,8 @@ export function OpenInDiscover({
   // on whether the log-sources pattern resolved (which arrives via queryParams/indexPattern).
   const usesApmIndexSettings = source.indexType !== 'logs';
   const isLoading = usesApmIndexSettings && indexSettingsStatus === FETCH_STATUS.LOADING;
-  const isDisabled = !discoverHref || (usesApmIndexSettings && indexSettingsStatus !== FETCH_STATUS.SUCCESS);
+  const isDisabled =
+    !discoverHref || (usesApmIndexSettings && indexSettingsStatus !== FETCH_STATUS.SUCCESS);
   const ebtProps = ebt ? getEbtProps({ action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER, ...ebt }) : {};
 
   switch (variant) {

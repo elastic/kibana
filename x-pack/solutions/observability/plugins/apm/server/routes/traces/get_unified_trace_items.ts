@@ -65,10 +65,7 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
 
   // Key on span.id when present; fall back to transaction.id for classic APM errors that carry
   // only a transaction ref (gap #1 from #290844). Both sources use the same logic.
-  const allErrors = [
-    ...unifiedTraceErrors.apmErrors,
-    ...unifiedTraceErrors.unprocessedOtelErrors,
-  ];
+  const allErrors = [...unifiedTraceErrors.apmErrors, ...unifiedTraceErrors.unprocessedOtelErrors];
   for (const errorDoc of allErrors) {
     const docId = errorDoc.span?.id ?? errorDoc.transaction?.id;
     if (docId) {

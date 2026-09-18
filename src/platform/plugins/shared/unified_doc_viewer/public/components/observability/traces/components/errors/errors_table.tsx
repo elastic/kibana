@@ -65,9 +65,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     // The section-level "Open in Discover" spans both APM errors and unprocessed OTel errors.
     // Widen the index pattern to cover both: join the APM error pattern and the log sources (if
     // configured) so that datasets outside `logs-apm*,apm-*,logs-*.otel-*` are also included.
-    const errorsIndexPattern = [indexes.apm.errors, indexes.logs]
-      .filter(Boolean)
-      .join(',');
+    const errorsIndexPattern = [indexes.apm.errors, indexes.logs].filter(Boolean).join(',');
 
     const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
       indexPattern: errorsIndexPattern,

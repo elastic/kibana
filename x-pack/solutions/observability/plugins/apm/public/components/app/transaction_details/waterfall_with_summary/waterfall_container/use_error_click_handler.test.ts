@@ -306,9 +306,7 @@ describe('useErrorClickHandler', () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useErrorClickHandler(otelTraceItems, mockOnOpenDocFlyout)
-    );
+    const { result } = renderHook(() => useErrorClickHandler(otelTraceItems, mockOnOpenDocFlyout));
 
     result.current({
       traceId: 'trace-123',

@@ -59,7 +59,12 @@ export function useErrorClickHandler(
       // Multiple errors where ALL are unprocessed OTel (pure-OTel span) → span flyout with errors
       // table. Mixed rows (errorSource === 'mixed') fall through to the Errors page below.
       if (errorCount > 1 && errorSource === 'unprocessedOtel') {
-        onOpenDocFlyout({ type: 'span', docId, docIndex: undefined, activeSection: 'errors-table' });
+        onOpenDocFlyout({
+          type: 'span',
+          docId,
+          docIndex: undefined,
+          activeSection: 'errors-table',
+        });
         return;
       }
 

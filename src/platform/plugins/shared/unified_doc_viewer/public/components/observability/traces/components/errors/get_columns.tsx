@@ -90,9 +90,7 @@ const ErrorMessageLinkCell = ({
   // For unprocessed OTel errors, target the configured log sources so that datasets outside
   // `logs-apm*,apm-*,logs-*.otel-*` (e.g. `logs-generic.otel-default`) are reachable.
   const indexPattern =
-    item.source === 'unprocessedOtel' && indexes.logs
-      ? indexes.logs
-      : indexes.apm.errors;
+    item.source === 'unprocessedOtel' && indexes.logs ? indexes.logs : indexes.apm.errors;
 
   const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
 
