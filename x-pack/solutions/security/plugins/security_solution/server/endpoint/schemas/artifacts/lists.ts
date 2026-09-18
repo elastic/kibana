@@ -162,3 +162,17 @@ export const wrappedTranslatedExceptionList = t.exact(
   })
 );
 export type WrappedTranslatedExceptionList = t.TypeOf<typeof wrappedTranslatedExceptionList>;
+
+export const translatedYaraRule = t.exact(
+  t.type({
+    yara_rule_data: t.string,
+  })
+);
+export type TranslatedYaraRule = t.TypeOf<typeof translatedYaraRule>;
+
+export const wrappedTranslatedYaraRulesList = t.exact(
+  t.type({
+    entries: t.array(translatedYaraRule),
+  })
+);
+export type WrappedTranslatedYaraRulesList = t.TypeOf<typeof wrappedTranslatedYaraRulesList>;

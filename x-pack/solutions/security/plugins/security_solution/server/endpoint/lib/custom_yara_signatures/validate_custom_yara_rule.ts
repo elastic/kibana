@@ -14,7 +14,7 @@ import {
   MetaScanTypeValue,
   MetaOsValue,
 } from '../../../../common/endpoint/types';
-import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
+import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from './constants';
 
 const hasDuplicateValues = (values: string[]): boolean => new Set(values).size !== values.length;
 
@@ -51,12 +51,13 @@ export const validateCustomYaraRule = async (
   const textLines = ruleText.split('\n');
 
   for (const rule of result.rules) {
-    validateRuleIdentifierLength(rule, textLines, result);
     validateMetaFieldsOfInterestForDuplication(rule, textLines, result);
     validateMetaArchField(rule, textLines, result);
     validateMetaScanTypeField(rule, textLines, result);
     validateMetaOsField(rule, textLines, result, osTypes);
   }
+
+  validateMetaFieldsConsistencyAcrossRules(result.rules, textLines, result);
 
   return result;
 };
@@ -92,23 +93,6 @@ const findFirstOccurrenceLineNumberAfterLineNumber = (
   );
 
   return lineIndex + 1;
-};
-
-const validateRuleIdentifierLength = (
-  rule: YaraCompiledRule,
-  textLines: string[],
-  result: YaraValidateResult
-) => {
-  if (rule.identifier.length > MAXIMUM_RULE_IDENTIFIER_LENGTH) {
-    const lineNumber = getRuleIdentifierLineNumber(textLines, rule.identifier);
-
-    result.errorCount++;
-    result.errors.push({
-      message: `Too long rule identifier "${rule.identifier}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`,
-      line: lineNumber,
-      severity: 'error',
-    });
-  }
 };
 
 const validateMetaFieldsOfInterestForDuplication = (
@@ -260,3 +244,51 @@ const shortenMetaValue = (value: string): string =>
   value.length > MAXIMUM_META_VALUE_LENGTH
     ? `${value.slice(0, MAXIMUM_META_VALUE_LENGTH)}...`
     : value;
+
+/**
+ * Within one artifact entry, each meta field of interest must be either omitted on every rule
+ * or set to the same values on every rule. Checked independently per field.
+ */
+const validateMetaFieldsConsistencyAcrossRules = (
+  rules: YaraCompiledRule[],
+  textLines: string[],
+  result: YaraValidateResult
+) => {
+  if (rules.length < 2) {
+    return;
+  }
+
+  const [referenceRule, ...restOfRules] = rules;
+
+  for (const metaKey of Object.values(YaraMetaKeyOfInterest)) {
+    const referenceValue = unifyMetaFieldValues(referenceRule.meta[metaKey]);
+
+    for (const rule of restOfRules) {
+      const value = unifyMetaFieldValues(rule.meta[metaKey]);
+      if (value !== referenceValue) {
+        const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
+        const lineNumber =
+          value !== undefined
+            ? findFirstOccurrenceLineNumberAfterLineNumber(textLines, metaKey, lineNumberOfRule)
+            : lineNumberOfRule;
+
+        result.errorCount++;
+        result.errors.push({
+          message: `Inconsistent "meta.${metaKey}" across rules in this entry. All rules must omit "meta.${metaKey}" or use the same value; found ${describeMetaValue(
+            referenceValue
+          )} on rule "${referenceRule.identifier}" and ${describeMetaValue(value)} on rule "${
+            rule.identifier
+          }"`,
+          line: lineNumber,
+          severity: 'error',
+        });
+      }
+    }
+  }
+};
+
+const describeMetaValue = (value: string | undefined): string =>
+  value === undefined ? 'omitted' : `"${shortenMetaValue(value)}"`;
+
+const unifyMetaFieldValues = (values?: string): string | undefined =>
+  values?.split(/, ?/).sort().join(', ') ?? undefined;

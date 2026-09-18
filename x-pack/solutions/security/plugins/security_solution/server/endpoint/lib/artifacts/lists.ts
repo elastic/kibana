@@ -18,6 +18,7 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
+  DISABLED_ARTIFACT_TAG,
   PROCESS_DESCENDANT_EXTRA_ENTRY,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
@@ -32,7 +33,9 @@ import type {
   TranslatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
+  TranslatedYaraRule,
   WrappedTranslatedExceptionList,
+  WrappedTranslatedYaraRulesList,
   TranslatedEntriesOfProcessDescendants,
   TranslatedEntryTrustDescendants,
 } from '../../schemas';
@@ -44,10 +47,11 @@ import {
   translatedEntryMatchWildcardMatcher,
   translatedEntryNestedEntry,
   wrappedTranslatedExceptionList,
+  wrappedTranslatedYaraRulesList,
 } from '../../schemas';
 
 export async function buildArtifact(
-  exceptions: WrappedTranslatedExceptionList,
+  exceptions: WrappedTranslatedExceptionList | WrappedTranslatedYaraRulesList,
   schemaVersion: string,
   os: string,
   name: string
@@ -74,13 +78,14 @@ export type ArtifactListId =
   | typeof ENDPOINT_ARTIFACT_LISTS.trustedDevices.id
   | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id
   | typeof ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
-  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id;
+  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
   schemaVersion: string,
   experimentalFeatures: ExperimentalFeatures
-) {
+): WrappedTranslatedExceptionList {
   const translatedExceptions = {
     entries: translateToEndpointExceptions(exceptions, schemaVersion, experimentalFeatures),
   };
@@ -90,6 +95,21 @@ export function convertExceptionsToEndpointFormat(
   }
 
   return validated as WrappedTranslatedExceptionList;
+}
+
+export function convertYaraRulesToEndpointFormat(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string
+): WrappedTranslatedYaraRulesList {
+  const translatedYaraRules = {
+    entries: translateToYaraRules(exceptions, schemaVersion),
+  };
+  const [validated, errors] = validate(translatedYaraRules, wrappedTranslatedYaraRulesList);
+  if (errors != null) {
+    throw new Error(errors);
+  }
+
+  return validated as WrappedTranslatedYaraRulesList;
 }
 
 export async function getFilteredEndpointExceptionListRaw({
@@ -146,6 +166,34 @@ export async function getAllItemsFromEndpointExceptionList({
     filter: osFilter,
     listId,
   });
+}
+
+/**
+ * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
+ * @param exceptions
+ * @param schemaVersion
+ */
+function translateToYaraRules(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string
+): TranslatedYaraRule[] {
+  if (schemaVersion === 'v1') {
+    const translatedItems: TranslatedYaraRule[] = [];
+
+    for (const exception of exceptions) {
+      if (!(exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
+        const [entry] = exception.entries;
+
+        if (entry?.type === 'match' && typeof entry.value === 'string') {
+          translatedItems.push({ yara_rule_data: entry.value });
+        }
+      }
+    }
+
+    return translatedItems;
+  } else {
+    throw new Error('unsupported schemaVersion');
+  }
 }
 
 /**
