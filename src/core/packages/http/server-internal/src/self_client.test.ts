@@ -108,6 +108,29 @@ describe('InternalHttpSelfScopedClient', () => {
     jest.clearAllMocks();
   });
 
+  it('supports buffered raw bodies and rejects streams', async () => {
+    const { self } = createClient();
+    await self.asScoped(createRequest()).fetch('/api/upload', {
+      method: 'POST',
+      rawBody: new URLSearchParams({ value: 'one' }),
+    });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.headers.get('content-type')).toContain('application/x-www-form-urlencoded');
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/upload', {
+        method: 'POST',
+        rawBody: new ReadableStream(),
+      } as any)
+    ).rejects.toThrow();
+  });
+
+  it('uses the local listener when a call explicitly targets local', async () => {
+    const { self } = createClient({ publicBaseUrl: 'https://public.example.com/base' });
+    await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
+  });
+
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {
     const { authRequestHeaders, self } = createClient();
     const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
@@ -130,6 +153,14 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 60_000);
     setTimeoutSpy.mockRestore();
+  });
+
+  it('logs the effective local target for a per-call local override', async () => {
+    const { log, self } = createClient({ publicBaseUrl: 'https://public.example.com/base' });
+    await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
+    expect(log.debug).toHaveBeenCalledWith(expect.any(Function), {
+      labels: expect.objectContaining({ self_http_target_mode: 'local' }),
+    });
   });
 
   it('logs only the source route template and methods plus the target mode', async () => {
@@ -267,8 +298,151 @@ describe('InternalHttpSelfScopedClient', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(Request),
-      expect.objectContaining({ redirect: 'error' })
+      expect.objectContaining({ redirect: 'manual' })
     );
+  });
+
+  it('errors on a 3xx response when maxRedirects is 0', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(null, { status: 302, headers: { location: '/api/next' } })
+    );
+    const { self } = createClient();
+
+    await expect(self.asScoped(createFakeRequest()).fetch('/api/status')).rejects.toThrow(
+      'server.selfHttp.maxRedirects is 0'
+    );
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('follows a same-origin redirect when maxRedirects allows it', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await expect(self.asScoped(createFakeRequest()).fetch('/api/status')).resolves.toEqual({
+      ok: true,
+    });
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    expect(secondRequest.method).toBe('GET');
+    expect(new URL(secondRequest.url).pathname).toBe('/api/next');
+  });
+
+  it('refuses a cross-origin redirect even when maxRedirects allows hops', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(null, {
+        status: 302,
+        headers: { location: 'https://evil.example/steal' },
+      })
+    );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 5, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await expect(self.asScoped(createFakeRequest()).fetch('/api/status')).rejects.toThrow(
+      'cross-origin redirect'
+    );
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('converts POST plus 302 into a GET follow-up without a body', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await self.asScoped(createFakeRequest()).fetch('/api/status', {
+      method: 'POST',
+      body: { hello: 'world' },
+    });
+
+    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    expect(secondRequest.method).toBe('GET');
+    expect(secondRequest.headers.get('content-type')).toBeNull();
+  });
+
+  it('returns the last-hop request when asResponse follows a redirect', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    const result = await self.asScoped(createFakeRequest()).fetch('/api/status', {
+      method: 'POST',
+      body: { hello: 'world' },
+      asResponse: true,
+    });
+
+    expect(result.request.method).toBe('GET');
+    expect(new URL(result.request.url).pathname).toBe('/api/next');
+    expect(result.body).toEqual({ ok: true });
+  });
+
+  it('preserves PUT on a 302 follow-up', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await self.asScoped(createFakeRequest()).fetch('/api/status', {
+      method: 'PUT',
+      body: { hello: 'world' },
+    });
+
+    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    expect(secondRequest.method).toBe('PUT');
   });
 
   it('uses and reloads verified custom TLS trust for local and public HTTPS targets', async () => {

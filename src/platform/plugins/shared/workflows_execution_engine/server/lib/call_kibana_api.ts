@@ -55,8 +55,16 @@ export class CallKibanaApiResponseTooLargeError extends Error {
  * Public input for `callKibanaApi`. Kept intentionally minimal: the transport (Core's HTTP
  * self client) is an implementation detail the caller-visible API does not expose.
  */
+export type BufferedRawBody =
+  | FormData
+  | Blob
+  | URLSearchParams
+  | ArrayBuffer
+  | ArrayBufferView<ArrayBuffer>;
+
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  target?: 'local';
   /**
    * Space-relative route path starting with `/`, e.g. `/api/cases`. When `deps.spaceId`
    * is a non-default space, it is prefixed with `/s/{spaceId}` automatically; pass the
@@ -64,19 +72,26 @@ export interface CallKibanaApiParams {
    */
   path: string;
   body?: unknown;
+  /** Buffered non-JSON body, mutually exclusive with `body` (used for FormData uploads). */
+  rawBody?: BufferedRawBody | null;
   query?: Record<string, string | number | boolean | undefined>;
   /**
-   * Caller-supplied headers. Cross-cutting headers (Authorization, x-elastic-internal-origin-request,
-   * event-chain headers, Content-Type) are managed by the helper and cannot be overridden.
+   * Caller-supplied headers. Authentication, internal-origin, and event-chain headers are managed
+   * by the helper. JSON requests default to `application/json`, while an explicit caller content
+   * type is preserved; FormData controls its own multipart boundary.
    */
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  /** Optional per-call response size cap. */
+  maxResponseBytes?: number;
 }
 
 export interface CallKibanaApiResult<T = unknown> {
   status: number;
   headers: Record<string, string>;
   body: T;
+  /** Absolute URL the self client actually requested. */
+  url: string;
 }
 
 /**
@@ -106,7 +121,6 @@ export interface CallKibanaApiDeps {
  */
 const RESERVED_HEADER_NAMES = new Set([
   'authorization',
-  'content-type',
   'kbn-xsrf',
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST.toLowerCase(),
@@ -117,12 +131,16 @@ const RESERVED_HEADER_NAMES = new Set([
 ]);
 
 const stripReservedHeaders = (
-  headers: Record<string, string> | undefined
+  headers: Record<string, string> | undefined,
+  isFormData: boolean
 ): Record<string, string> => {
   if (!headers) return {};
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(headers)) {
-    if (!RESERVED_HEADER_NAMES.has(name.toLowerCase())) {
+    const reserved =
+      RESERVED_HEADER_NAMES.has(name.toLowerCase()) ||
+      (isFormData && name.toLowerCase() === 'content-type');
+    if (!reserved) {
       out[name] = value;
     }
   }
@@ -195,6 +213,34 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
     : text;
 };
 
+const validateSpaceRelativePath = (path: string): void => {
+  if (
+    !path.startsWith('/') ||
+    path.startsWith('//') ||
+    path.includes('\\') ||
+    /[\u0000-\u001F\u007F]/.test(path)
+  ) {
+    throw new Error(`Invalid Kibana API path "${path}".`);
+  }
+  for (const segment of path.split('/')) {
+    let decodedSegment: string;
+    try {
+      decodedSegment = decodeURIComponent(segment);
+    } catch {
+      throw new Error(`Invalid Kibana API path "${path}".`);
+    }
+    if (
+      decodedSegment === '.' ||
+      decodedSegment === '..' ||
+      decodedSegment.includes('\\') ||
+      decodedSegment.includes('/') ||
+      /[\u0000-\u001F\u007F]/.test(decodedSegment)
+    ) {
+      throw new Error(`Invalid Kibana API path "${path}".`);
+    }
+  }
+};
+
 /**
  * Calls a Kibana HTTP route on the running Kibana instance using the workflow's fake request
  * for authentication and origin marking. Throws a {@link KibanaApiCallError} on non-2xx
@@ -216,7 +262,8 @@ export async function callKibanaApi<T = unknown>(
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
   const { fakeRequest, workflowRunId, coreStart, spaceId } = deps;
-  const maxResponseBytes = deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
+  const maxResponseBytes =
+    params.maxResponseBytes ?? deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(fakeRequest);
   if (!authorizationHeader) {
@@ -224,27 +271,39 @@ export async function callKibanaApi<T = unknown>(
   }
 
   // Only the headers Core's self client does not manage for us: caller-supplied custom headers
-  // (reserved ones stripped) plus the engine's event-chain propagation. Authorization, Content-Type,
-  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself.
+  // (reserved ones stripped) plus the engine's event-chain propagation. Authorization,
+  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself; JSON
+  // requests receive a default content type unless the caller supplied one.
+  const callerHeaders = stripReservedHeaders(params.headers, params.rawBody instanceof FormData);
+  const hasContentType = Object.keys(callerHeaders).some(
+    (name) => name.toLowerCase() === 'content-type'
+  );
   const outboundHeaders: Record<string, string> = {
-    ...stripReservedHeaders(params.headers),
+    ...(!hasContentType && params.rawBody === undefined
+      ? { 'content-type': 'application/json' }
+      : {}),
+    ...callerHeaders,
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
     ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };
 
-  // The workflow's fake request carries neither a space nor the server base path, so both have to
-  // be encoded in the path. Apply the space first to keep the server base path outermost.
+  // Callers provide space-relative paths; this helper owns the space prefix exactly once. The
+  // server base path stays outermost.
+  validateSpaceRelativePath(params.path);
   const path = coreStart.http.basePath.prepend(applySpacePrefix(params.path, spaceId));
-  const { response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
+  const { request, response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,
+    target: params.target,
     headers: outboundHeaders,
     query: params.query,
     body: params.body ?? undefined,
+    rawBody: params.rawBody,
     // Mark the loopback as Kibana-internal so internal routes stay reachable.
     access: 'internal',
     asResponse: true,
     rawResponse: true,
-    // The workflow fake request has no base path, and any space is already encoded in `path`.
+    // Fake requests carry no base path. `createUrl` leaves `path` untouched when this is
+    // false, so the string above must already include `server.basePath` when configured.
     prependBasePath: false,
     signal: params.signal,
   });
@@ -261,6 +320,7 @@ export async function callKibanaApi<T = unknown>(
       headers: headersToRecord(response.headers),
       body: errorBody,
       message: `HTTP ${response.status}: ${stringifyErrorBodyForMessage(errorBody)}`,
+      url: request.url,
     });
   }
 
@@ -270,5 +330,6 @@ export async function callKibanaApi<T = unknown>(
     status: response.status,
     headers: headersToRecord(response.headers),
     body,
+    url: request.url,
   };
 }

@@ -99,18 +99,24 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     this.validateRequestContext();
 
     const fetchOptions = { ...options, path };
-    const request = this.createRequest(path, options);
-    this.logAttempt(request.method);
+    let request = this.createRequest(path, options);
+    this.logAttempt(request.method, options.target);
     const cleanup: Array<() => void> = [];
 
     try {
       const signal = this.createSignal(options, cleanup);
       const fetchInit: SelfFetchInit = {
         signal,
-        redirect: 'error',
-        dispatcher: this.dispatcherProvider.get(new URL(request.url)),
+        redirect: 'manual',
+        dispatcher: this.dispatcherProvider.get(
+          new URL(request.url),
+          this.getEffectiveTarget(options.target)
+        ),
       };
-      const response = await fetch(request, fetchInit);
+      const maxRedirects = this.params.getHttpConfig().selfHttp.maxRedirects ?? 0;
+      const followed = await followSameOriginRedirects(request, fetchInit, maxRedirects);
+      request = followed.request;
+      const response = followed.response;
 
       if (options.rawResponse) {
         return { fetchOptions, request, response };
@@ -137,9 +143,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private logAttempt(targetMethod: string): void {
-    const targetMode =
-      this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+  private logAttempt(targetMethod: string, target?: 'local'): void {
+    const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
 
     this.params.log.debug(() => 'Kibana scoped self HTTP call attempted', {
       labels: {
@@ -169,7 +174,18 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const method = options.method ?? 'GET';
     const url = this.createUrl(path, options);
     const headers = this.createHeaders(options);
-    const body = serializeBody(headers, options.body);
+    if (options.body !== undefined && options.rawBody !== undefined) {
+      throw new Error('Invalid self HTTP options, body and rawBody are mutually exclusive.');
+    }
+    if (
+      options.rawBody !== undefined &&
+      options.rawBody !== null &&
+      !isBufferedRawBody(options.rawBody)
+    ) {
+      throw new Error('Invalid self HTTP rawBody, only buffered body types are supported.');
+    }
+    const body =
+      options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
 
     return new Request(url, {
       method,
@@ -179,7 +195,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   }
 
   private createUrl<TRequestBody>(path: string, options: HttpSelfFetchOptions<TRequestBody>): URL {
-    const baseUrl = this.getBaseUrl();
+    const baseUrl = this.getBaseUrl(options.target);
     const pathname =
       options.prependBasePath === false ? path : `${this.getRequestBasePath()}${path}`;
     const url = new URL(pathname, baseUrl);
@@ -203,6 +219,11 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return url;
   }
 
+  private getEffectiveTarget(target?: 'local'): 'local' | 'public' {
+    if (target === 'local') return 'local';
+    return this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+  }
+
   private getRequestBasePath(): string {
     if (!this.request.isFakeRequest) {
       return this.request.basePath;
@@ -210,8 +231,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return `${this.params.basePath.serverBasePath}${getSpaceUrlPrefix(this.request.spaceId)}`;
   }
 
-  private getBaseUrl(): URL {
-    if (this.params.target === 'auto' && this.params.basePath.publicBaseUrl) {
+  private getBaseUrl(target?: 'local'): URL {
+    if (this.getEffectiveTarget(target) === 'public' && this.params.basePath.publicBaseUrl) {
       return new URL(this.params.basePath.publicBaseUrl);
     }
 
@@ -308,6 +329,108 @@ const isHttpSelfFetchError = (error: unknown): error is HttpSelfFetchError => {
   return error instanceof Error && error.name === 'HttpSelfFetchError';
 };
 
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+
+const discardResponseBody = (response: Response): void => {
+  void response.body?.cancel();
+};
+
+// Fetch: 301/302 rewrite POST to GET; 303 rewrites every method except GET/HEAD.
+const redirectUsesGet = (method: string, status: number): boolean => {
+  if (status === 303) {
+    return method !== 'GET' && method !== 'HEAD';
+  }
+  return (status === 301 || status === 302) && method === 'POST';
+};
+
+const headersWithoutBodyMetadata = (headers: Headers): Headers => {
+  const next = new Headers(headers);
+  next.delete('content-encoding');
+  next.delete('content-language');
+  next.delete('content-length');
+  next.delete('content-location');
+  next.delete('content-type');
+  next.delete('transfer-encoding');
+  return next;
+};
+
+const followSameOriginRedirects = async (
+  initialRequest: Request,
+  fetchInit: SelfFetchInit,
+  maxRedirects: number
+): Promise<{ request: Request; response: Response }> => {
+  const origin = new URL(initialRequest.url).origin;
+  const visited = new Set<string>();
+  let currentRequest = initialRequest;
+  let hops = 0;
+  let response = await fetchRedirectHop(currentRequest, fetchInit, visited);
+
+  while (REDIRECT_STATUSES.has(response.status)) {
+    if (hops >= maxRedirects) {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        maxRedirects === 0
+          ? `Kibana self HTTP call received a redirect (${response.status}) but server.selfHttp.maxRedirects is 0.`
+          : `Kibana self HTTP call exceeded server.selfHttp.maxRedirects (${maxRedirects}).`,
+        currentRequest,
+        response
+      );
+    }
+
+    const location = response.headers.get('location');
+    if (!location) {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        'Kibana self HTTP call received a redirect without a Location header.',
+        currentRequest,
+        response
+      );
+    }
+
+    const nextUrl = new URL(location, currentRequest.url);
+    if (nextUrl.origin !== origin) {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        'Kibana self HTTP call refused a cross-origin redirect.',
+        currentRequest,
+        response
+      );
+    }
+
+    hops += 1;
+    discardResponseBody(response);
+
+    if (redirectUsesGet(currentRequest.method, response.status)) {
+      currentRequest = new Request(nextUrl, {
+        method: 'GET',
+        headers: headersWithoutBodyMetadata(currentRequest.headers),
+      });
+    } else {
+      currentRequest = new Request(nextUrl, currentRequest);
+    }
+
+    response = await fetchRedirectHop(currentRequest, fetchInit, visited);
+  }
+
+  return { request: currentRequest, response };
+};
+
+const fetchRedirectHop = async (
+  currentRequest: Request,
+  fetchInit: SelfFetchInit,
+  visited: Set<string>
+): Promise<Response> => {
+  const visitKey = `${currentRequest.method}:${currentRequest.url}`;
+  if (visited.has(visitKey)) {
+    throw createHttpSelfFetchError(
+      'Kibana self HTTP call detected a redirect loop.',
+      currentRequest
+    );
+  }
+  visited.add(visitKey);
+  return fetch(currentRequest.clone(), fetchInit);
+};
+
 const validateFetchArguments = <TRequestBody>(
   path: string,
   options: HttpSelfFetchOptions<TRequestBody>
@@ -380,6 +503,13 @@ const addHeaders = (
     }
   }
 };
+
+const isBufferedRawBody = (body: unknown): boolean =>
+  body instanceof FormData ||
+  body instanceof Blob ||
+  body instanceof URLSearchParams ||
+  body instanceof ArrayBuffer ||
+  ArrayBuffer.isView(body);
 
 const serializeBody = <TRequestBody>(
   headers: Headers,

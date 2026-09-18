@@ -14,6 +14,7 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllVariables } from './collect_all_variables';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
+import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 import { validateParallelFanOut } from './validate_parallel_fan_out';
@@ -71,6 +72,7 @@ export function runWorkflowYamlValidations({
   if (workflowLookup && lineCounter) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
+      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
       ...validateParallelFanOut(workflowLookup, lineCounter)

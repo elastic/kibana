@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { Logger } from '@kbn/logging';
+import {
+  collectIgnoredKibanaFetcherStepNames,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -73,6 +78,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
   nameFallback?: string;
+  logger?: Logger;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -83,6 +89,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     spaceId,
     triggerDefinitions,
     nameFallback,
+    logger,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -109,6 +116,23 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   }
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);
+
+  const ignoredFetcherSteps = collectIgnoredKibanaFetcherStepNames(
+    validation.parsedWorkflow?.steps
+  );
+  if (logger && ignoredFetcherSteps.length > 0) {
+    logger.warn(
+      `Workflow "${workflowToCreate.name}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
+      {
+        event: { action: 'workflow-persist' },
+        tags: ['kibana', 'deprecated'],
+        labels: {
+          workflow_id: id,
+          step_names: ignoredFetcherSteps.join(','),
+        },
+      }
+    );
+  }
 
   const workflowData: WorkflowProperties = {
     name: workflowToCreate.name,
