@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiPopover,
+  EuiScreenReaderOnly,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -66,12 +67,14 @@ export const EpisodeAssigneeInlineControl = ({
         size="xs"
         flush="both"
         color="text"
-        aria-label={i18n.ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL}
         isDisabled={isDisabled}
         data-test-subj={dataTestSubj ?? 'alertingV2EpisodeAssigneeChangeButton'}
         onClick={togglePopover}
       >
         <AlertEpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={userProfile} />
+        <EuiScreenReaderOnly>
+          <span>{i18n.ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL}</span>
+        </EuiScreenReaderOnly>
       </EuiButtonEmpty>
     </EuiToolTip>
   ) : (

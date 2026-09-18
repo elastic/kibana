@@ -95,7 +95,7 @@ describe('EpisodeAssigneeInlineControl', () => {
 
       expect(screen.queryByTestId('alertingV2EpisodeAssigneeAddButton')).not.toBeInTheDocument();
       const button = screen.getByTestId('alertingV2EpisodeAssigneeChangeButton');
-      expect(button).toHaveAttribute('aria-label', 'Change assignee');
+      expect(button).toHaveAccessibleName('uid-existing Change assignee');
       expect(screen.getByTestId('assigneeCellStub')).toHaveTextContent('uid-existing');
     });
 
