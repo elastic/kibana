@@ -161,11 +161,6 @@ export const ActionPolicyDetailsFlyout = ({
               />
             </Badge>
           )}
-          {policy.tags?.map((tag) => (
-            <Badge key={tag} color="hollow" data-test-subj="actionPolicyDetailsFlyoutTagBadge">
-              {tag}
-            </Badge>
-          ))}
 
           <InfoBlock
             title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.header.enabled', {

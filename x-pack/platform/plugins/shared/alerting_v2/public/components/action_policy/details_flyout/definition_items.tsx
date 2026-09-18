@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, type EuiDescriptionListProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, type EuiDescriptionListProps } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +17,6 @@ import {
   getGroupingModeLabel,
 } from '../labels';
 import { BadgeList } from '../badge_list';
-import { PopoverItems } from '../../popover_items';
 import { DestinationRow } from './destination_row';
 import { MatcherSummary } from './matcher_summary';
 
@@ -35,43 +34,6 @@ export const getDescriptionItem = (policy: Partial<ActionPolicyResponse>): ListI
   };
 };
 
-export const getTagsItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
-  const { tags } = policy;
-  return {
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.tags', {
-      defaultMessage: 'Tags',
-    }),
-    description:
-      tags && tags.length > 0 ? (
-        <PopoverItems
-          items={tags}
-          numberOfItemsToDisplay={1}
-          wrapItems
-          popoverTitle={i18n.translate(
-            'xpack.alertingV2.actionPolicyDefinition.tags.popoverTitle',
-            { defaultMessage: 'Tags' }
-          )}
-          popoverButtonTitle={`+${Math.max(tags.length - 1, 0)}`}
-          dataTestPrefix="actionPolicyDefinitionTags"
-          renderItem={(tag) => (
-            <EuiBadge
-              key={tag}
-              color="hollow"
-              title={tag}
-              css={{
-                maxWidth: '100%',
-                '.euiBadge__text': { minWidth: 0 },
-              }}
-            >
-              {tag}
-            </EuiBadge>
-          )}
-        />
-      ) : (
-        EMPTY_VALUE
-      ),
-  };
-};
 
 export const getMatcherItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
   const { matcher } = policy;

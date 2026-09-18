@@ -10,7 +10,6 @@ import { EuiDescriptionList } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import {
   getDescriptionItem,
-  getTagsItem,
   getMatcherItem,
   getDispatchModeItem,
   getGroupByItem,
@@ -27,7 +26,6 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
 
   const items = [
     getDescriptionItem(policy),
-    getTagsItem(policy),
     getMatcherItem(policy),
     getDispatchModeItem(policy),
     ...(groupByItem ? [groupByItem] : []),
