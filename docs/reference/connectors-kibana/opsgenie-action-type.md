@@ -64,7 +64,9 @@ You can configure the create alert action through the form view or using a JSON 
 The create alert action form has the following configuration properties.
 
 Message
-:   The message for the alert (required). {{opsgenie}} limits this field to 130 characters. {{kib}} truncates longer values, including values expanded from Mustache templates, instead of failing the action. Values longer than 15,000 characters are still rejected.
+:   The message for the alert (required). 
+    
+    {applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` {{opsgenie}} limits this field to 130 characters. {{kib}} truncates longer values, including values expanded from Mustache templates, instead of failing the action. Values longer than 15,000 characters are still rejected.
 
 Opsgenie tags
 :   The tags for the alert (optional).
