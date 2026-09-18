@@ -99,8 +99,9 @@ const findTargetError = (query: string | undefined, index: string | undefined) =
  * Resolve a visualization-ready ES|QL query, shared by the Lens and Vega
  * engines so both generate queries the same way.
  *
- * `generateEsql` validates and executes candidate queries in a bounded retry
- * loop, so a returned `query` is one that actually runs. A query is treated as
+ * `generateEsql` validates with `execute: 'schema'` (probe LIMIT 1, keep
+ * all-null columns) in a bounded retry loop, so a returned `query` is one that
+ * actually runs and `columns` come from that probe. A query is treated as
  * failed when none was produced or the loop still reported an execution error,
  * ensuring an unrunnable query never reaches config/spec authoring. On edits,
  * `existingQueries` seed the request so a query-changing edit is not blocked.

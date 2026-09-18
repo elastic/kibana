@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createGenerateConfigPrompt } from './prompts';
 
@@ -29,7 +30,7 @@ describe('Lens config prompt', () => {
     expect(prompt).toContain(
       'This is an appearance-only edit. Each layer keeps its existing data_source'
     );
-    expect(prompt).not.toContain('Bind only result columns from the resolved ES|QL query');
+    expect(prompt).not.toContain('Bind only these executed result columns');
     expect(prompt).not.toContain('Reauthor the presentation.');
   });
 
@@ -53,7 +54,10 @@ describe('Lens config prompt', () => {
     });
 
     expect(system).toEqual(['system', expect.not.stringContaining('EDIT RULES')]);
-    expect(system).toEqual(['system', expect.stringContaining('Bind only result columns')]);
+    expect(system).toEqual([
+      'system',
+      expect.stringContaining('No column information is available; infer fields from the ES|QL query'),
+    ]);
     expect(human).toEqual(['human', expect.stringContaining('Resolved ES|QL query:')]);
   });
 
@@ -112,5 +116,45 @@ describe('Lens config prompt', () => {
     expect(system).toEqual(['system', expect.not.stringContaining('COLOR MECHANICS')]);
     expect(system).toEqual(['system', expect.not.stringContaining('threshold')]);
     expect(system).toEqual(['system', expect.not.stringContaining('COLOR GUIDANCE')]);
+  });
+});
+
+const systemText = (columns?: EsqlEsqlColumnInfo[]): string => {
+  const [system] = createGenerateConfigPrompt({
+    nlQuery: 'count logs by status',
+    esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY status',
+    columns,
+    chartType: SupportedChartType.Metric,
+    schema: {},
+  });
+  return String((system as [string, string])[1]);
+};
+
+describe('createGenerateConfigPrompt', () => {
+  it('lists executed ES|QL columns as the only bindable names', () => {
+    const text = systemText([
+      { name: 'count', type: 'long' },
+      { name: 'status', type: 'keyword' },
+    ]);
+
+    expect(text).toContain('<columns>');
+    expect(text).toContain('- "count" (long)');
+    expect(text).toContain('- "status" (keyword)');
+    expect(text).toContain('2. Bind only these executed result columns, using their exact names');
+    expect(text).not.toContain('No column information is available');
+  });
+
+  it('lists an empty columns block when execute returned no columns', () => {
+    const text = systemText([]);
+    expect(text).toContain('<columns>');
+    expect(text).not.toContain('No column information is available');
+  });
+
+  it('falls back to query-text inference when columns were never executed', () => {
+    const text = systemText();
+    expect(text).toContain(
+      'No column information is available; infer fields from the ES|QL query: FROM logs-* | STATS count = COUNT(*) BY status'
+    );
+    expect(text).not.toContain('<columns>');
   });
 });
