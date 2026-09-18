@@ -404,11 +404,14 @@ export const getMockThreatMatchRuleSO = ({
   ruleId = 'a6261241-b236-4f5b-ac09-deab86330b3a',
   isElastic = false,
   isCustomized = false,
+  hasRuleSource = true,
   hasNegateThreatMapping = false,
 }: {
   ruleId?: string;
   isElastic?: boolean;
   isCustomized?: boolean;
+  /** Legacy rules that have never been rewritten do not have `ruleSource` persisted */
+  hasRuleSource?: boolean;
   hasNegateThreatMapping?: boolean;
 } = {}): RuleSearchResult =>
   ({
@@ -427,15 +430,7 @@ export const getMockThreatMatchRuleSO = ({
         from: 'now-5001h',
         ruleId,
         immutable: isElastic,
-        ruleSource: isElastic
-          ? {
-              type: 'external',
-              isCustomized,
-              customizedFields: isCustomized
-                ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
-                : [],
-            }
-          : { type: 'internal' },
+        ruleSource: getRuleSource({ isElastic, isCustomized, hasRuleSource }),
         license: '',
         outputIndex: '',
         meta: {
@@ -554,3 +549,29 @@ export const getMockPrebuiltRuleAssetSearchResponse = (
       })),
     },
   } as unknown as PrebuiltRuleAssetSearchResponse);
+
+const getRuleSource = ({
+  isElastic,
+  isCustomized,
+  hasRuleSource,
+}: {
+  isElastic: boolean;
+  isCustomized: boolean;
+  hasRuleSource: boolean;
+}) => {
+  if (!hasRuleSource) {
+    return undefined;
+  }
+
+  if (!isElastic) {
+    return { type: 'internal' };
+  }
+
+  return {
+    type: 'external',
+    isCustomized,
+    customizedFields: isCustomized
+      ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+      : [],
+  };
+};

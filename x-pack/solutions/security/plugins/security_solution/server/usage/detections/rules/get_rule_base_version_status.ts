@@ -6,26 +6,31 @@
  */
 
 import { getInitialRuleBaseVersionStatus } from './get_initial_usage';
-import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
-import type { RuleBaseVersionCounts } from './types';
+import type { RuleBaseVersionCounts, RuleMetric } from './types';
 
+type RuleBaseVersionInfo = Pick<RuleMetric, 'is_customized' | 'has_base_version'>;
+
+/**
+ * Cross-tabs prebuilt rules by customization and base version presence. Expects all installed
+ * prebuilt rules, including legacy ones without a persisted `ruleSource`.
+ */
 export const getRuleBaseVersionStatus = (
-  ruleSources: ReadonlyArray<ExternalRuleSourceInfo>
+  prebuiltRules: ReadonlyArray<RuleBaseVersionInfo>
 ): RuleBaseVersionCounts => {
   const counts = getInitialRuleBaseVersionStatus();
 
-  ruleSources.forEach((ruleSource) => {
-    if (ruleSource.is_customized && ruleSource.has_base_version) {
+  prebuiltRules.forEach((rule) => {
+    if (rule.is_customized && rule.has_base_version) {
       counts.customized_with_base_version += 1;
       return;
     }
 
-    if (ruleSource.is_customized) {
+    if (rule.is_customized) {
       counts.customized_without_base_version += 1;
       return;
     }
 
-    if (ruleSource.has_base_version) {
+    if (rule.has_base_version) {
       counts.noncustomized_with_base_version += 1;
       return;
     }

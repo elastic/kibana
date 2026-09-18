@@ -216,7 +216,7 @@ export const getRuleMetrics = async ({
       elastic_detection_rule_customization_status: getRuleCustomizationStatus(externalRuleSources),
       elastic_detection_rule_customization_status_missing_base_version:
         getRuleCustomizationMissingBaseVersionStatus(externalRuleSources),
-      elastic_detection_rule_base_version_status: getRuleBaseVersionStatus(externalRuleSources),
+      elastic_detection_rule_base_version_status: getRuleBaseVersionStatus(elasticRuleObjects),
       elastic_detection_rule_deprecated_status: { total: numDeprecated },
       ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),

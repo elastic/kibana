@@ -239,7 +239,7 @@ describe('Detections Usage and Metrics', () => {
           elastic_detection_rule_base_version_status: {
             customized_with_base_version: 0,
             customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
+            noncustomized_with_base_version: 1,
             noncustomized_without_base_version: 0,
           },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
@@ -396,7 +396,7 @@ describe('Detections Usage and Metrics', () => {
           elastic_detection_rule_base_version_status: {
             customized_with_base_version: 0,
             customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
+            noncustomized_with_base_version: 1,
             noncustomized_without_base_version: 0,
           },
         },
@@ -878,7 +878,7 @@ describe('Detections Usage and Metrics', () => {
           elastic_detection_rule_base_version_status: {
             customized_with_base_version: 0,
             customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
+            noncustomized_with_base_version: 1,
             noncustomized_without_base_version: 0,
           },
         },
@@ -1034,7 +1034,7 @@ describe('Detections Usage and Metrics', () => {
           elastic_detection_rule_base_version_status: {
             customized_with_base_version: 0,
             customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
+            noncustomized_with_base_version: 1,
             noncustomized_without_base_version: 0,
           },
         },
@@ -1614,7 +1614,7 @@ describe('Detections Usage and Metrics', () => {
           elastic_detection_rule_base_version_status: {
             customized_with_base_version: 0,
             customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
+            noncustomized_with_base_version: 1,
             noncustomized_without_base_version: 0,
           },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
@@ -1739,6 +1739,17 @@ describe('Detections Usage and Metrics', () => {
             getMockThreatMatchRuleSO({ ruleId: 'noncustomized-with-base-1', isElastic: true }),
             getMockThreatMatchRuleSO({ ruleId: 'noncustomized-with-base-2', isElastic: true }),
             getMockThreatMatchRuleSO({ ruleId: 'noncustomized-without-base', isElastic: true }),
+            // legacy prebuilt rules without a persisted `ruleSource` are still counted
+            getMockThreatMatchRuleSO({
+              ruleId: 'legacy-with-base',
+              isElastic: true,
+              hasRuleSource: false,
+            }),
+            getMockThreatMatchRuleSO({
+              ruleId: 'legacy-without-base',
+              isElastic: true,
+              hasRuleSource: false,
+            }),
             // custom rules are excluded from the aggregates
             getMockThreatMatchRuleSO({ ruleId: 'custom-rule' }),
           ])
@@ -1752,6 +1763,7 @@ describe('Detections Usage and Metrics', () => {
             { rule_id: 'customized-with-base', version: 1 },
             { rule_id: 'noncustomized-with-base-1', version: 1 },
             { rule_id: 'noncustomized-with-base-2', version: 1 },
+            { rule_id: 'legacy-with-base', version: 1 },
           ])
         );
 
@@ -1770,6 +1782,8 @@ describe('Detections Usage and Metrics', () => {
                       'security-rule:noncustomized-with-base-1_1',
                       'security-rule:noncustomized-with-base-2_1',
                       'security-rule:noncustomized-without-base_1',
+                      'security-rule:legacy-with-base_1',
+                      'security-rule:legacy-without-base_1',
                     ],
                   },
                 },
@@ -1783,8 +1797,8 @@ describe('Detections Usage and Metrics', () => {
           {
             customized_with_base_version: 1,
             customized_without_base_version: 1,
-            noncustomized_with_base_version: 2,
-            noncustomized_without_base_version: 1,
+            noncustomized_with_base_version: 3,
+            noncustomized_without_base_version: 2,
           }
         );
         // customized mock rules have `tags`, `name` and `description` customized
@@ -1806,7 +1820,7 @@ describe('Detections Usage and Metrics', () => {
             description: 1,
           }
         );
-        expect(result).toHaveProperty('detection_rules.detection_rule_detail.length', 5);
+        expect(result).toHaveProperty('detection_rules.detection_rule_detail.length', 7);
         expect(result).toHaveProperty(
           'detection_rules.detection_rule_detail',
           expect.arrayContaining([
@@ -1827,6 +1841,8 @@ describe('Detections Usage and Metrics', () => {
               rule_id: 'noncustomized-without-base',
               has_base_version: false,
             }),
+            expect.objectContaining({ rule_id: 'legacy-with-base', has_base_version: true }),
+            expect.objectContaining({ rule_id: 'legacy-without-base', has_base_version: false }),
           ])
         );
       });
