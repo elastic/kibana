@@ -60,6 +60,7 @@ async function setup() {
     dockerTag: '',
     dockerTagQualifier: '',
     downloadFreshNode: true,
+    withDevTools: false,
     withExamplePlugins: false,
     withTestPlugins: true,
   });

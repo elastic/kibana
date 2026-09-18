@@ -55,6 +55,7 @@ async function setup(actualShaSums?: Record<string, string>) {
     dockerTag: '',
     dockerTagQualifier: '',
     downloadFreshNode: true,
+    withDevTools: false,
     withExamplePlugins: false,
     withTestPlugins: true,
   });

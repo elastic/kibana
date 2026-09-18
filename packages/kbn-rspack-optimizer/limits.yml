@@ -53,7 +53,6 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
-  developerToolbar: 1951
   devTools: 4281
   discover: 18086
   discoverEnhanced: 1359
@@ -106,7 +105,6 @@ pageLoadAssetSize:
   ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
-  inspectComponent: 1141
   inspector: 586
   interactiveSetup: 32694
   intercepts: 14374

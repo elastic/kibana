@@ -20,6 +20,8 @@ export interface DiscoverPluginsOptions {
   repoRoot: string;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include developer-tools plugins. Default false. */
+  devTools?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   paths?: string[];
   /** Directories scanned for plugins */
@@ -61,6 +63,7 @@ export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<
     repoRoot,
     examples = false,
     testPlugins = false,
+    devTools = false,
     paths,
     parentDirs,
     allowlistPluginGroups,
@@ -68,6 +71,7 @@ export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<
   const pluginFilter = getPluginPackagesFilter({
     examples,
     testPlugins,
+    devTools,
     browser: true,
     paths,
     parentDirs,

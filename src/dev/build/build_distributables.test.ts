@@ -91,6 +91,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   targetServerlessPlatforms: false,
   skipServerless: false,
   tarZstd: false,
+  withDevTools: false,
   withExamplePlugins: false,
   withTestPlugins: false,
   eprRegistry: 'snapshot',

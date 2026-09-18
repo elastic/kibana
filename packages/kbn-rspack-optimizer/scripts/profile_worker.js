@@ -44,12 +44,13 @@ var statsOnly = process.env.RSPACK_PROFILE_STATS_ONLY === 'true';
 
 // Parse command line arguments (same as main CLI, minus --profile and --profile-stats-only)
 var args = getopts(process.argv.slice(2), {
-  boolean: ['dist', 'examples', 'test-plugins', 'no-cache', 'verbose', 'quiet'],
+  boolean: ['dist', 'examples', 'test-plugins', 'dev-tools', 'no-cache', 'verbose', 'quiet'],
   string: ['themes', 'output-root', 'profile-focus', 'limits', 'plugin-groups'],
   default: {
     dist: false,
     examples: false,
     'test-plugins': false,
+    'dev-tools': false,
     'no-cache': false,
   },
 });
@@ -175,6 +176,7 @@ async function main() {
       cache: !args['no-cache'],
       examples: args.examples,
       testPlugins: args['test-plugins'],
+      devTools: args['dev-tools'],
       allowlistPluginGroups: allowlistPluginGroups,
       themeTags: themes,
       log: log,

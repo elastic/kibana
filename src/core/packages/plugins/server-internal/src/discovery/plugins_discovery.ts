@@ -69,6 +69,9 @@ export function discover({
         allowlistPluginGroups: config.allowlistPluginGroups,
         oss: coreContext.env.cliArgs.oss,
         examples: coreContext.env.cliArgs.runExamples,
+        // Always include if the files are present. Dist omit is the production wall;
+        // a --dev zip cannot pass a runtime flag analogous to --run-examples.
+        devTools: true,
         paths: config.additionalPluginPaths,
         parentDirs: config.pluginSearchPaths,
       })

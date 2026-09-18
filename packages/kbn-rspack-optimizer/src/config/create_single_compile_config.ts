@@ -84,6 +84,8 @@ export interface SingleCompileConfigOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include developer-tools plugins. Default false. */
+  devTools?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
   /** Directories scanned for plugins */
@@ -127,6 +129,7 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
+    devTools = false,
     pluginPaths,
     pluginScanDirs,
     allowlistPluginGroups,
@@ -152,6 +155,7 @@ export async function createSingleCompileConfig(
     repoRoot,
     examples,
     testPlugins,
+    devTools,
     paths: pluginPaths,
     parentDirs: pluginScanDirs,
     allowlistPluginGroups,

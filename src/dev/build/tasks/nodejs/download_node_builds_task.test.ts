@@ -47,6 +47,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     dockerTag: '',
     dockerTagQualifier: '',
     downloadFreshNode: true,
+    withDevTools: false,
     withExamplePlugins: false,
     withTestPlugins: true,
   });

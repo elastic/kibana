@@ -88,6 +88,7 @@ describe('RspackOptimizer', () => {
         cache: undefined,
         dist: true,
         examples: undefined,
+        devTools: undefined,
         themeTags: ['borealislight', 'borealisdark'],
         hmr: undefined,
         pluginPaths: ['/repo/analytics_ftr_helpers'],

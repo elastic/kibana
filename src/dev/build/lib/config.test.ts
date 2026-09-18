@@ -30,7 +30,8 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 const setup = async ({
   targetAllPlatforms = true,
   isRelease = true,
-}: { targetAllPlatforms?: boolean; isRelease?: boolean } = {}) => {
+  withDevTools = false,
+}: { targetAllPlatforms?: boolean; isRelease?: boolean; withDevTools?: boolean } = {}) => {
   return await Config.create({
     isRelease,
     targetAllPlatforms,
@@ -43,6 +44,7 @@ const setup = async ({
     dockerTag: '',
     dockerTagQualifier: '',
     downloadFreshNode: true,
+    withDevTools,
     withExamplePlugins: false,
     withTestPlugins: true,
   });
@@ -233,5 +235,36 @@ describe('#resolveFromTarget()', () => {
   it('resolves a relative path, from the target directory', async () => {
     const config = await setup();
     expect(config.resolveFromTarget()).toBe(resolve(REPO_ROOT, 'target'));
+  });
+});
+
+const DEV_TOOL_PLUGIN_IDS = ['developerToolbar', 'inspectComponent'];
+const DEV_TOOL_PACKAGE_IDS = ['@kbn/developer-toolbar', '@kbn/design-tools'];
+
+describe('#getDistPluginsFromRepo() / #getDistPackagesFromRepo()', () => {
+  it('omits developer-tools plugins and packages by default', async () => {
+    const config = await setup();
+    const pluginIds = config.getDistPluginsFromRepo().map((p) => p.manifest.plugin.id);
+    const packageIds = config.getDistPackagesFromRepo().map((p) => p.manifest.id);
+
+    for (const id of DEV_TOOL_PLUGIN_IDS) {
+      expect(pluginIds).not.toContain(id);
+    }
+    for (const id of DEV_TOOL_PACKAGE_IDS) {
+      expect(packageIds).not.toContain(id);
+    }
+  });
+
+  it('includes developer-tools plugins and packages when withDevTools is true', async () => {
+    const config = await setup({ withDevTools: true });
+    const pluginIds = config.getDistPluginsFromRepo().map((p) => p.manifest.plugin.id);
+    const packageIds = config.getDistPackagesFromRepo().map((p) => p.manifest.id);
+
+    for (const id of DEV_TOOL_PLUGIN_IDS) {
+      expect(pluginIds).toContain(id);
+    }
+    for (const id of DEV_TOOL_PACKAGE_IDS) {
+      expect(packageIds).toContain(id);
+    }
   });
 });
