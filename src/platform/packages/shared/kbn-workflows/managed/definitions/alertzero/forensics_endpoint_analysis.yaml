@@ -12,8 +12,10 @@ tags:
   - watch-forensics
 
 settings:
-  # Installed per space, so the key needs no space component. One sweep at a time:
-  # overlapping ticks would dispatch the same pending indicators twice.
+  # A concurrency group is (key, spaceId): every slot query filters on the
+  # execution's own space, so a constant key already means one sweep per space
+  # rather than one across the deployment. One at a time: overlapping ticks would
+  # dispatch the same pending indicators twice.
   concurrency:
     key: endpoint-analysis-sweep
     strategy: drop
@@ -34,6 +36,12 @@ triggers:
         ai_index_id:
           type: string
           maxLength: 256
+          # This is interpolated into the search target below, where a comma or a
+          # `*` is valid multi-target syntax — so a length bound alone would let a
+          # manual run point the sweep at indices outside the AI index. Mirrors
+          # AI_INDEX_ID_PATTERN in the context engine, which is what an AI index id
+          # is checked against when one is created.
+          pattern: "^[a-z0-9][a-z0-9_-]*$"
           description: "AI index that holds the indicators. Default: security-investigations."
         batch_size:
           type: integer
@@ -52,6 +60,8 @@ outputs:
     pending:
       type: number
     started:
+      type: number
+    dispatch_failed:
       type: number
     search_failed:
       type: boolean
@@ -119,19 +129,26 @@ steps:
   # alert indices. Async because a forensic run takes up to 15m: a synchronous call
   # would hold this worker's only concurrency slot for that whole time and stack
   # every later tick behind it.
-  # An indicator stays pending until the child marks it processed, so the next tick
+  # An indicator stays pending until the child retires it, so the next tick
   # re-dispatches the same one; the child's per-indicator drop concurrency collapses
   # those duplicates. Because the batch is always the oldest pending indicators,
   # that also caps this space at `batch_size` analyses in flight.
-  # Continue on failure so one rejected dispatch cannot cost the rest of the batch.
+  # `parallel` rather than `foreach` for the sake of the counts below: a `foreach`
+  # keeps only its last iteration's output and publishes no aggregate, so there is
+  # no way to tell from the far side how many dispatches were actually accepted.
+  # Settled gives the same "one rejection must not cost the rest of the batch"
+  # guarantee as `on-failure: continue`, but records each branch's outcome instead
+  # of clearing it — which is what makes a failed dispatch reportable.
   - name: start_runs
-    type: foreach
+    type: parallel
     foreach: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows }}"
+    mode: settled
+    concurrency:
+      # Covers consts.batch_size, which the input can only lower.
+      max: 2
     steps:
       - name: start_run
         type: workflow.executeAsync
-        on-failure:
-          continue: true
         with:
           workflow-id: system-security-forensics-run-endpoint-analysis
           inputs:
@@ -148,5 +165,12 @@ steps:
     status: completed
     with:
       pending: "${{ steps.search_pending_indicators.output.hits.total.value | default: 0 }}"
-      started: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size }}"
+      # Runs actually accepted by the child, not indicators we tried to hand off.
+      # An empty batch finishes the fan-out with a zero aggregate, so the common
+      # nothing-pending tick reports 0 here without any special casing.
+      started: "${{ steps.start_runs.output.succeeded | default: 0 }}"
+      # The signal a silent dispatch failure would otherwise cost us. Those
+      # indicators stay pending and the next tick retries them, so a non-zero value
+      # is not data loss — but a value that stays non-zero is a real fault.
+      dispatch_failed: "${{ steps.start_runs.output.failed | default: 0 }}"
       search_failed: "${{ steps.search_pending_indicators.error != null }}"

@@ -26,7 +26,13 @@ const definition = parse(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.yaml
   name?: string;
   tags?: string[];
   settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
-  triggers?: Array<{ type: string; inputs?: { required?: string[] } }>;
+  triggers?: Array<{
+    type: string;
+    inputs?: {
+      required?: string[];
+      properties?: Record<string, { pattern?: string; maxLength?: number }>;
+    };
+  }>;
   consts?: Record<string, unknown>;
   steps: YamlStep[];
 };
@@ -52,6 +58,19 @@ describe('Endpoint analysis run', () => {
   it('requires ki_id and ai_index_id and owns no worker settings', () => {
     expect(definition.triggers?.[0]?.inputs?.required).toEqual(['ki_id', 'ai_index_id']);
     expect(definition.consts?.worker_settings).toBeUndefined();
+  });
+
+  // `ai_index_id` reaches both the `read_ki` target and `updateKi`. A comma or `*`
+  // is valid multi-target syntax, so without a charset bound a manual run could
+  // read a document from outside the AI index and feed it to the forensic agent.
+  it('rejects an ai_index_id that could widen the read target', () => {
+    const { pattern } = definition.triggers?.[0]?.inputs?.properties?.ai_index_id ?? {};
+    expect(pattern).toBeDefined();
+
+    const accepts = (value: string) => new RegExp(pattern as string).test(value);
+    expect(accepts('security-investigations')).toBe(true);
+    expect(accepts('security-investigations,.alerts-security.alerts-default')).toBe(false);
+    expect(accepts('*')).toBe(false);
   });
 
   // The dispatching Worker re-sends a pending indicator every tick until this run

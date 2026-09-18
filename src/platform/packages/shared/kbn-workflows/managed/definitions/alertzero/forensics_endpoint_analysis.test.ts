@@ -22,6 +22,9 @@ interface YamlStep {
   steps?: YamlStep[];
   else?: YamlStep[];
   if?: string;
+  mode?: string;
+  concurrency?: { max?: number };
+  'on-failure'?: { continue?: boolean };
 }
 
 const yaml = renderCommonWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, {
@@ -34,7 +37,10 @@ const definition = parse(yaml) as {
   triggers?: Array<{
     type: string;
     with?: { every?: string };
-    inputs?: { required?: string[] };
+    inputs?: {
+      required?: string[];
+      properties?: Record<string, { pattern?: string; maxLength?: number }>;
+    };
   }>;
   steps: YamlStep[];
 };
@@ -68,12 +74,30 @@ describe('Endpoint analysis worker', () => {
     expect(manual?.inputs?.required).toBeUndefined();
   });
 
+  // A concurrency group is (key, spaceId), so the constant key is already one sweep
+  // per space. Adding `workflow.spaceId` to it would be redundant, and the literal
+  // is what makes that reliance explicit.
   it('runs one sweep at a time per space', () => {
     expect(definition.settings?.concurrency).toEqual({
       key: 'endpoint-analysis-sweep',
       strategy: 'drop',
       max: 1,
     });
+  });
+
+  // `ai_index_id` is interpolated into the search target, where a comma or `*` is
+  // valid multi-target syntax. A length bound alone would let a manual run read
+  // outside the AI index, so the charset is what actually closes that off.
+  it('rejects an ai_index_id that could widen the search target', () => {
+    const manual = definition.triggers?.find(({ type }) => type === 'manual');
+    const { pattern } = manual?.inputs?.properties?.ai_index_id ?? {};
+    expect(pattern).toBeDefined();
+
+    const accepts = (value: string) => new RegExp(pattern as string).test(value);
+    expect(accepts('security-investigations')).toBe(true);
+    expect(accepts('security-investigations,.alerts-security.alerts-default')).toBe(false);
+    expect(accepts('*')).toBe(false);
+    expect(accepts('security-*')).toBe(false);
   });
 
   it('searches this space for pending analysis indicators', () => {
@@ -124,5 +148,27 @@ describe('Endpoint analysis worker', () => {
 
   it('starts up to two analyses per sweep', () => {
     expect(yaml).toContain('batch_size: 2');
+    expect(stepByName('start_runs')?.concurrency?.max).toBe(2);
+  });
+
+  // Settled keeps the "one rejection must not cost the rest of the batch" property
+  // while leaving each branch's outcome in the aggregate. `on-failure: continue`
+  // would clear the branch error, which is what made the old count unable to tell a
+  // rejected dispatch from an accepted one.
+  it('fans out settled so a rejected dispatch is recorded rather than cleared', () => {
+    const fanOut = stepByName('start_runs');
+    expect(fanOut?.type).toBe('parallel');
+    expect(fanOut?.mode).toBe('settled');
+    expect(stepByName('start_run')?.['on-failure']).toBeUndefined();
+  });
+
+  // A `foreach` publishes no aggregate and keeps only its last iteration, so the
+  // count had no way to distinguish dispatches that were accepted from ones merely
+  // attempted, and every batch reported as fully started.
+  it('counts the dispatches the child accepted, not the ones it attempted', () => {
+    const result = stepByName('emit_result')?.with;
+    expect(result?.started).toBe('${{ steps.start_runs.output.succeeded | default: 0 }}');
+    expect(result?.dispatch_failed).toBe('${{ steps.start_runs.output.failed | default: 0 }}');
+    expect(result?.started).not.toContain('resolve_dispatch_batch');
   });
 });

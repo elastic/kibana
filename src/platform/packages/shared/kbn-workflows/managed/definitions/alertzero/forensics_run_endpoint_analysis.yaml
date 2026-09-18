@@ -15,6 +15,10 @@ settings:
   # One run per indicator. The per-space worker re-dispatches an indicator on every
   # tick until this run retires it, so this is what collapses those repeats into the
   # run already in flight instead of re-analyzing the same host.
+  # The group is (key, spaceId) even though this workflow is installed globally: a
+  # child inherits its parent's space, and every slot query filters on it. That is
+  # sound here because an indicator carries `attributes.space_id` and only that
+  # space's sweep selects it, so one `ki_id` is never dispatched from two spaces.
   concurrency:
     key: "endpoint-analysis-{{ inputs.ki_id }}"
     strategy: drop
@@ -36,6 +40,12 @@ triggers:
           type: string
           minLength: 1
           maxLength: 256
+          # Interpolated into the `read_ki` search target and handed to
+          # `context-engine.updateKi`. A comma or `*` is valid multi-target syntax,
+          # so a length bound alone would let a manual run read a document from
+          # outside the AI index and feed it to the forensic agent. Mirrors
+          # AI_INDEX_ID_PATTERN in the context engine.
+          pattern: "^[a-z0-9][a-z0-9_-]*$"
           description: AI index that holds the indicator. The result is written to the same index.
       required:
         - ki_id
