@@ -142,9 +142,9 @@ export const Proposal = lazySchema(() =>
      */
     parentConversationId: z.string().describe('Investigation id this proposal belongs to'),
     /**
-     * Proposal action type (e.g. contain, escalate, tune)
+     * Proposal action type (e.g. respond, investigate, configure)
      */
-    type: z.string().describe('Proposal action type (e.g. contain, escalate, tune)'),
+    type: z.string().describe('Proposal action type (e.g. respond, investigate, configure)'),
     confidence: z.number().min(0).max(1),
     reasoning: z.string(),
     evidenceRefs: z.array(EvidenceRef),
