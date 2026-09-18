@@ -153,6 +153,29 @@ describe('Significant Events timestamp rendering', () => {
   });
 });
 
+describe('SignificantEventFlyout actions menu', () => {
+  it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
+
+    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
+
+    expect(screen.getByText('Dismiss significant event')).toBeInTheDocument();
+    expect(screen.getByTestId('sigEventCloseButton')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Dismiss significant event'));
+
+    expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
+  });
+
+  it('does not expose actions for an already dismissed event', () => {
+    render(
+      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
+    );
+
+    expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
+  });
+});
+
 describe('selectedEvent deep link', () => {
   const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
   const mockUseSignificantEventsUrlState = useSignificantEventsUrlState as jest.Mock;

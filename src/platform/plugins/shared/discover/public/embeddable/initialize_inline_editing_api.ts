@@ -211,6 +211,7 @@ const createSnapshot = ({
   api: { savedSearch$ },
 }: SearchEmbeddableDeps): InlineEditSnapshot => ({
   serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
+  tabTypeState: savedSearch$.getValue().tabTypeState,
   sort: stateManager.sort.getValue(),
   columns: stateManager.columns.getValue(),
   grid: stateManager.grid.getValue(),
