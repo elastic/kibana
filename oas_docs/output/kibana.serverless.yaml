@@ -89127,6 +89127,8 @@ components:
             - id
             - name
             - executionId
+      required:
+        - workflow
     Cases_related_case:
       description: |
         Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
