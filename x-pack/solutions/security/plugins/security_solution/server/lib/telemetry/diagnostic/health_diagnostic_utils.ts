@@ -183,7 +183,7 @@ export async function applyFilterlist(
     const hasRules = Object.keys(rules).length > 0;
     const result: string[] = [];
     for (const rawDoc of data) {
-      const doc = unflatten(rawDoc as AnyObject);
+      const doc = hasRules ? unflatten(rawDoc as AnyObject) : rawDoc;
       const subDoc = hasRules ? await applyFilterToDoc(doc) : doc;
       result.push(encryptDocumentAsJson(subDoc, dek, encryptedDEK, keyId));
     }

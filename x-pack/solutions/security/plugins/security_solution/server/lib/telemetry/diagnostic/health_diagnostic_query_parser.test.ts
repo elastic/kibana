@@ -903,6 +903,12 @@ describe('expiresAt', () => {
     expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T23:59:59.000Z' });
   });
 
+  it('accepts an ISO datetime with a timezone offset and normalises it to UTC', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59+01:00'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T22:59:59.000Z' });
+  });
+
   it('accepts an unquoted YAML date (parsed as Date object by the YAML library)', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: 2099-12-31`;
     const [result] = parseHealthDiagnosticQueries(yaml);

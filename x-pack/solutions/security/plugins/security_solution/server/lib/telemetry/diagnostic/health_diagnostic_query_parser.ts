@@ -28,7 +28,7 @@ const queryTypeSchema = z.enum(QueryType);
 const expiresAtSchema = z
   .preprocess(
     (val) => (val instanceof Date ? val.toISOString() : val),
-    z.union([z.iso.date(), z.iso.datetime()])
+    z.union([z.iso.date(), z.iso.datetime({ offset: true })])
   )
   .transform((val) => new Date(val).toISOString())
   .optional();

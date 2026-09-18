@@ -850,6 +850,22 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       }
     });
 
+    it('encrypts an array-shaped rawDoc unchanged when no filterlist rules', async () => {
+      const arrayDoc = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
+      const result = await applyFilterlist([arrayDoc], {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      expect(decryptBlob(result[0] as string)).toEqual(arrayDoc);
+    });
+
+    it('encrypts the raw document without unflattening dotted keys when no filterlist rules', async () => {
+      const rawDoc = { 'process.name': 'cmd.exe', 'host.ip': '1.2.3.4' };
+      const result = await applyFilterlist([rawDoc], {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      expect(decryptBlob(result[0] as string)).toEqual(rawDoc);
+    });
+
     it('throws when encryptDocument is true but encryptionKeyId is missing', async () => {
       await expect(
         applyFilterlist([{ a: 1 }], {}, 'salt', { encryptDocument: true as const }, keys)
