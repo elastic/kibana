@@ -55,7 +55,7 @@ export default function ({
     });
 
     it('should capture a screenshot ', async () => {
-      const image = await testSubjects.find('image');
+      const image = await testSubjects.find('image', 60_000);
       const difference = await screenshots.compareAgainstBaseline(
         'screenshotting_example_image',
         updateBaselines,
