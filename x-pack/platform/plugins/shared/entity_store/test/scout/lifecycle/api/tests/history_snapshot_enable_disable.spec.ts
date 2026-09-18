@@ -15,7 +15,6 @@ import {
   ENTITY_STORE_TAGS,
 } from '../../../common/fixtures/constants';
 import { waitForStoreNotInstalled } from '../../../common/fixtures/helpers';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 
@@ -25,7 +24,7 @@ const HISTORY_SNAPSHOT_TASK_ID = 'entity_store:v2:history_snapshot_task:default'
 // The routes declare DEFAULT_ENTITY_STORE_PERMISSIONS = { requiredPrivileges: ['securitySolution'] }.
 const HISTORY_SNAPSHOT_OPERATOR_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
+  kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
 };
 
 // No Security Solution access — must be rejected with 403 on both routes.
@@ -43,7 +42,7 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
   // Under-privileged API key: must be rejected with 403.
   let unprivilegedApiKeyHeader: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ samlAuth, requestAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
     internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
@@ -57,12 +56,6 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
       NO_SECURITY_SOLUTION_ROLE
     );
     unprivilegedApiKeyHeader = { ...unprivilegedKey, ...PUBLIC_HEADERS };
-
-    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
-  });
-
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
   });
 
   const install = async (apiClient: ApiWorkerFixtures['apiClient']) => {
