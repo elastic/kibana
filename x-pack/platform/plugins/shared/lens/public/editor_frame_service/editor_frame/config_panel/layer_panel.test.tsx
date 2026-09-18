@@ -39,16 +39,11 @@ import { ESQLEditor } from './esql_editor';
 import type { LayerPanelProps } from './types';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 import { onActiveDataChange } from '../../../state_management';
-import { useHasMultipleVisibleLayers } from './use_has_multiple_visible_layers';
 
 jest.mock('../../../id_generator');
 
 jest.mock('./esql_editor', () => ({
   ESQLEditor: jest.fn(() => <div data-test-subj="mockESQLEditor" />),
-}));
-
-jest.mock('./use_has_multiple_visible_layers', () => ({
-  useHasMultipleVisibleLayers: jest.fn(),
 }));
 
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
@@ -182,12 +177,6 @@ describe('LayerPanel', () => {
   beforeEach(() => {
     mockVisualization = createMockVisualization(faker.string.alphanumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
-    jest
-      .mocked(useHasMultipleVisibleLayers)
-      .mockImplementation(
-        ({ activeVisualization, visualizationState }) =>
-          (activeVisualization?.getLayerIds(visualizationState).length ?? 0) > 1
-      );
     mockDatasource = createMockDatasource();
     mockTextBasedDatasource = createMockDatasource('textBased', {
       isTextBasedLanguage: jest.fn(() => true),
@@ -1205,7 +1194,6 @@ describe('LayerPanel', () => {
 
     it('uses the global query path when the only additional layer is a hidden trendline', () => {
       mockVisualization.getLayerIds.mockReturnValue(['data', 'trendline']);
-      jest.mocked(useHasMultipleVisibleLayers).mockReturnValue(false);
       const framePublicAPI = {
         ...createMockFramePublicAPI(),
         datasourceLayers: {
@@ -1231,7 +1219,7 @@ describe('LayerPanel', () => {
       renderLayerPanel({
         propsOverrides: {
           layerId: 'data',
-          isOnlyLayer: false,
+          isOnlyLayer: true,
           framePublicAPI,
           attributes: makeTextBasedAttributes(
             textBasedState.datasourceStates.textBased.state.layers
