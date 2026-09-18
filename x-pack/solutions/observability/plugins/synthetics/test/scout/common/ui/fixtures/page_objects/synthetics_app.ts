@@ -231,7 +231,7 @@ export class SyntheticsAppPage {
     await this.selectMonitorType('syntheticsMonitorTypeAPI');
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     await this.page.testSubj.click('syntheticsSourceTab__inline');
-    await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj('codeEditorContainer', inlineScript);
   }
 
   async createMonitor({
