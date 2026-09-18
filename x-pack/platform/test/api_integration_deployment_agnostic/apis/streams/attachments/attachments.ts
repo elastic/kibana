@@ -1286,6 +1286,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const logicalSloId = `${name}-${Date.now()}-${randomSuffix}`;
         return kibanaServer.savedObjects.create({
           type: 'slo',
+          overwrite: false,
           attributes: {
             ...sloFixture(name),
             id: logicalSloId,
