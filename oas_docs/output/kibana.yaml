@@ -53764,6 +53764,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getOutputAgentPolicyCountExample:
+                  description: Number of agent policies and active agents using this output
+                  value:
+                    agentCount: 1250
+                    agentPolicyCount: 42
               schema:
                 additionalProperties: false
                 type: object
@@ -53777,10 +53783,17 @@ paths:
                 required:
                   - agentPolicyCount
                   - agentCount
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53799,10 +53812,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: Output not found
+                  value:
+                    error: Not Found
+                    message: Output my-output-id not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53821,7 +53841,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Not found.
+          description: Not Found
       summary: Get output agent and policy count
       tags:
         - Fleet outputs
