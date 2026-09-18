@@ -30,7 +30,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
     name: i18n.translate('xpack.agenticInvestigations.featureName', {
-      defaultMessage: 'Proposed Actions',
+      defaultMessage: 'Agentic Investigations',
     }),
     minimumLicense: 'enterprise',
     // Sits just after Workflows (3000), whose platform it builds on, and after

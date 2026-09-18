@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationPublicClient,
@@ -80,13 +81,15 @@ export class EscalationsService {
     }
 
     // Copy investigation metadata to the escalation, filtered to the keys the escalation template
-    // declares. Excludes linked_investigations (set below) and status (let the template default apply).
+    // declares. Excludes linked_investigations (set below), status (let the template default
+    // apply), and close_reason (it describes why the *escalation* was closed, not the
+    // investigation — inheriting it would yield an open escalation with a stale close reason).
     const filteredMetadata = filterMetadataToTemplateFields({
       metadata: investigation.metadata as
         | Record<string, string | number | boolean | string[]>
         | undefined,
       declaredFields: Object.keys(escalationTemplate.fields),
-      exclude: [ESCALATION_LINKED_INVESTIGATIONS_FIELD, 'status'],
+      exclude: [ESCALATION_LINKED_INVESTIGATIONS_FIELD, 'status', 'close_reason'],
     });
 
     const metadata = {
@@ -136,9 +139,24 @@ export class EscalationsService {
     let result: EscalationConversation = current;
 
     if (body.linked_investigations?.length) {
-      const prev = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
+      // Validate that every id being appended is an accessible investigation.
+      // bulkGet omits inaccessible / non-existent ids silently, so we detect them
+      // via absence in the result map.
       const toAdd = body.linked_investigations;
-      const union = [...prev, ...toAdd.filter((id) => !prev.includes(id))];
+      const resolved = await client.bulkGet(toAdd);
+      for (const id of toAdd) {
+        const conv = resolved.get(id);
+        if (!conv) {
+          throw createConversationNotFoundError({ conversationId: id });
+        }
+        if (conv.template_id !== INVESTIGATION_TEMPLATE_ID) {
+          throw new InvalidLinkedInvestigationError(id);
+        }
+      }
+
+      const prev = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
+      // Use a Set so duplicates within the incoming payload and against prev are both removed.
+      const union = [...new Set([...prev, ...toAdd])];
 
       if (union.length > MAX_ESCALATION_LINKED_INVESTIGATIONS) {
         throw new TooManyLinkedInvestigationsError(

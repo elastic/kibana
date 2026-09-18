@@ -215,7 +215,7 @@ export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
 
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
-export const TEMPLATE_ID_INCIDENT = 'incident' as const;
+export const TEMPLATE_ID_ESCALATION = 'escalation' as const;
 
 export const API_VERSIONS = {
   internal: {

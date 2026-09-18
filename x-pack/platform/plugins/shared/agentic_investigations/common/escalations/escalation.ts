@@ -86,6 +86,10 @@ export const updateEscalationRequestSchema = z
      * MVP caveat: the union is computed outside the OCC write callback, so two concurrent
      * requests could each read the same stale list and one link could be silently lost.
      * Follow-up: elastic/security-team#19370 (race-safe append).
+     *
+     * Cannot be combined with `title` in a single request: the two fields map to separate
+     * storage writes with no atomic rollback between them. Once agent_builder exposes a
+     * combined OCC-protected mutation, this restriction will be lifted.
      */
     [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: z
       .array(conversationIdSchema)
@@ -97,6 +101,16 @@ export const updateEscalationRequestSchema = z
     (value) =>
       value.title !== undefined || value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined,
     { message: 'at least one of title or linked_investigations must be provided' }
+  )
+  .refine(
+    (value) =>
+      !(
+        value.title !== undefined && value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined
+      ),
+    {
+      message:
+        'title and linked_investigations cannot be updated in the same request; send separate PATCH calls',
+    }
   );
 
 export type UpdateEscalationRequest = z.infer<typeof updateEscalationRequestSchema>;

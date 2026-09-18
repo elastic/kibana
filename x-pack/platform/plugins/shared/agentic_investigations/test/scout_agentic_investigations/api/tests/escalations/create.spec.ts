@@ -14,6 +14,8 @@ import {
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
   AB_CONVERSATION_BY_ID_PATH,
+  expectCreated,
+  deleteConversations,
 } from '../../fixtures';
 
 const ESCALATION_TEMPLATE_ID = 'escalation';
@@ -25,7 +27,8 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
     let investigationId: string;
-    const createdEscalationIds: string[] = [];
+    // Tracks all conversations created during the suite so afterAll can clean them up.
+    const createdIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
@@ -44,31 +47,17 @@ apiTest.describe(
             status: 'open',
             severity: 'high',
             summary: 'Suspicious PowerShell',
+            close_reason: 'resolved', // Intentionally set; the escalation must NOT inherit it.
             workflow_execution_id: 'wf-scout-test',
           },
         },
         responseType: 'json',
       });
-      if (result.statusCode !== 200 || !result.body.id) {
-        throw new Error(
-          `Setup: failed to create investigation (status ${result.statusCode}): ${JSON.stringify(
-            result.body
-          )}`
-        );
-      }
-      investigationId = result.body.id;
+      investigationId = expectCreated(result, 'investigation');
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
-      await Promise.allSettled(
-        [investigationId, ...createdEscalationIds].filter(Boolean).map((id) =>
-          apiClient
-            .delete(AB_CONVERSATION_BY_ID_PATH(id), {
-              headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-            })
-            .catch(() => {})
-        )
-      );
+      await deleteConversations(apiClient, [investigationId, ...createdIds], cookieHeader);
     });
 
     apiTest('creates a public escalation and returns 200', async ({ apiClient }) => {
@@ -84,7 +73,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.template_id).toBe(ESCALATION_TEMPLATE_ID);
       expect(response.body.title).toBe('Scout test investigation');
-      if (response.body.id) createdEscalationIds.push(response.body.id);
+      if (response.body.id) createdIds.push(response.body.id);
     });
 
     apiTest(
@@ -103,7 +92,7 @@ apiTest.describe(
         const { metadata } = response.body;
         expect(metadata.severity).toBe('high');
         expect(metadata.summary).toBe('Suspicious PowerShell');
-        if (response.body.id) createdEscalationIds.push(response.body.id);
+        if (response.body.id) createdIds.push(response.body.id);
       }
     );
 
@@ -121,7 +110,27 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.metadata?.workflow_execution_id).toBeUndefined();
-        if (response.body.id) createdEscalationIds.push(response.body.id);
+        if (response.body.id) createdIds.push(response.body.id);
+      }
+    );
+
+    apiTest(
+      'does NOT copy close_reason — escalation-lifecycle field, not inherited from investigation',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(CREATE_ESCALATION_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: {
+            linked_investigation_id: investigationId,
+            visibility: 'public',
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        // The investigation was seeded with close_reason: 'resolved'. A new escalation must
+        // not inherit it — doing so would yield an open escalation with a stale close_reason.
+        expect(response.body.metadata?.close_reason).toBeUndefined();
+        if (response.body.id) createdIds.push(response.body.id);
       }
     );
 
@@ -139,7 +148,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.metadata.status).toBe('open');
-        if (response.body.id) createdEscalationIds.push(response.body.id);
+        if (response.body.id) createdIds.push(response.body.id);
       }
     );
 
@@ -155,7 +164,7 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.metadata.linked_investigations).toStrictEqual([investigationId]);
-      if (response.body.id) createdEscalationIds.push(response.body.id);
+      if (response.body.id) createdIds.push(response.body.id);
     });
 
     apiTest('returns 400 when public + collaborators is provided', async ({ apiClient }) => {
@@ -190,6 +199,7 @@ apiTest.describe(
       'returns 400 when linked_investigation_id points at a non-investigation',
       async ({ apiClient }) => {
         // Create a conversation with the escalation template (wrong template for this check).
+        // Register in createdIds immediately so afterAll deletes it even if the assertions fail.
         const seedResponse = await apiClient.post(AB_CONVERSATIONS_PATH, {
           headers: { ...PUBLIC_HEADERS, ...cookieHeader },
           body: {
@@ -200,7 +210,9 @@ apiTest.describe(
           },
           responseType: 'json',
         });
-        const wrongId = seedResponse.body.id;
+        const wrongId = expectCreated(seedResponse, 'wrong-template conversation');
+        // Push before the assertion so it is cleaned up even when the assertion fails.
+        createdIds.push(wrongId);
 
         const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
@@ -212,12 +224,6 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
-
-        await apiClient
-          .delete(AB_CONVERSATION_BY_ID_PATH(wrongId), {
-            headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-          })
-          .catch(() => {});
       }
     );
 

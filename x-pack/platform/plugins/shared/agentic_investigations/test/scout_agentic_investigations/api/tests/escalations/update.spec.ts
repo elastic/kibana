@@ -14,7 +14,8 @@ import {
   CREATE_ESCALATION_PATH,
   ESCALATION_BY_ID_PATH,
   AB_CONVERSATIONS_PATH,
-  AB_CONVERSATION_BY_ID_PATH,
+  expectCreated,
+  deleteConversations,
 } from '../../fixtures';
 
 apiTest.describe(
@@ -55,8 +56,8 @@ apiTest.describe(
           responseType: 'json',
         }),
       ]);
-      investigationId = inv1.body.id;
-      secondInvestigationId = inv2.body.id;
+      investigationId = expectCreated(inv1, 'first investigation');
+      secondInvestigationId = expectCreated(inv2, 'second investigation');
 
       // Create the escalation to update
       const createResponse = await apiClient.post(CREATE_ESCALATION_PATH, {
@@ -64,25 +65,14 @@ apiTest.describe(
         body: { linked_investigation_id: investigationId, visibility: 'public' },
         responseType: 'json',
       });
-      if (createResponse.statusCode !== 200 || !createResponse.body.id) {
-        throw new Error(
-          `Setup: failed to create escalation (status ${
-            createResponse.statusCode
-          }): ${JSON.stringify(createResponse.body)}`
-        );
-      }
-      escalationId = createResponse.body.id;
+      escalationId = expectCreated(createResponse, 'escalation');
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
-      await Promise.allSettled(
-        [investigationId, secondInvestigationId, escalationId].filter(Boolean).map((id) =>
-          apiClient
-            .delete(AB_CONVERSATION_BY_ID_PATH(id), {
-              headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-            })
-            .catch(() => {})
-        )
+      await deleteConversations(
+        apiClient,
+        [investigationId, secondInvestigationId, escalationId],
+        cookieHeader
       );
     });
 
@@ -111,18 +101,13 @@ apiTest.describe(
     });
 
     apiTest(
-      'deduplicates — patching the same id twice produces no duplicate',
+      'deduplicates — appending the same id twice within one request produces no duplicate',
       async ({ apiClient }) => {
-        // First append secondInvestigationId, then append it again and verify no duplicate.
-        await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
-          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-          body: { linked_investigations: [secondInvestigationId] },
-          responseType: 'json',
-        });
-
+        // Send both ids in the same payload so dedup of the incoming array is tested
+        // independently (not relying on a previous test having already appended the id).
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-          body: { linked_investigations: [secondInvestigationId] },
+          body: { linked_investigations: [secondInvestigationId, secondInvestigationId] },
           responseType: 'json',
         });
 
@@ -156,6 +141,21 @@ apiTest.describe(
     });
 
     apiTest(
+      'returns 400 when both title and linked_investigations are supplied together',
+      async ({ apiClient }) => {
+        // The two fields map to separate storage writes; combining them is rejected
+        // at the schema layer until agent_builder exposes an atomic combined mutation.
+        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: { title: 'Combined title', linked_investigations: [secondInvestigationId] },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(400);
+      }
+    );
+
+    apiTest(
       'returns 403 for a caller without the manage_escalations privilege',
       async ({ apiClient }) => {
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
@@ -177,5 +177,19 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(404);
     });
+
+    apiTest(
+      'returns 404 when linked_investigations contains a nonexistent id',
+      async ({ apiClient }) => {
+        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: { linked_investigations: ['nonexistent-investigation-00000000'] },
+          responseType: 'json',
+        });
+
+        // Access denial and not-found both surface as 404 (documented behaviour).
+        expect(response).toHaveStatusCode(404);
+      }
+    );
   }
 );

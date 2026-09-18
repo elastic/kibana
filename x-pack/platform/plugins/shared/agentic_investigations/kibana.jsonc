@@ -10,7 +10,7 @@
     "configPath": ["xpack", "agenticInvestigations"],
     "browser": true,
     "server": true,
-    "requiredPlugins": ["agentBuilder", "features", "workflowsExtensions", "workflowsManagement"],
+    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "features", "workflowsExtensions", "workflowsManagement"],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["security", "spaces"],
     "extraPublicDirs": ["common"]

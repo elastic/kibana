@@ -14,7 +14,8 @@ import {
   LIST_ESCALATIONS_PATH,
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
-  AB_CONVERSATION_BY_ID_PATH,
+  expectCreated,
+  deleteConversations,
 } from '../../fixtures';
 
 const ESCALATION_TEMPLATE_ID = 'escalation';
@@ -51,7 +52,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      openInvestigationId = invResult.body.id;
+      openInvestigationId = expectCreated(invResult, 'open investigation');
 
       // Open escalation — must appear in the list.
       const openResult = await apiClient.post(CREATE_ESCALATION_PATH, {
@@ -59,7 +60,7 @@ apiTest.describe(
         body: { linked_investigation_id: openInvestigationId, visibility: 'public' },
         responseType: 'json',
       });
-      openEscalationId = openResult.body.id;
+      openEscalationId = expectCreated(openResult, 'open escalation');
 
       // Closed escalation — created directly via the Agent Builder API so we can set
       // status: "closed" at creation time. Must NOT appear in the list.
@@ -73,7 +74,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      closedEscalationId = closedResult.body.id;
+      closedEscalationId = expectCreated(closedResult, 'closed escalation');
 
       // Investigation (wrong template) — must NOT appear in the escalations list.
       const wrongTemplateResult = await apiClient.post(AB_CONVERSATIONS_PATH, {
@@ -86,7 +87,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      investigationId = wrongTemplateResult.body.id;
+      investigationId = expectCreated(wrongTemplateResult, 'wrong-template investigation');
 
       // Investigation backing the private escalation.
       const privateInvResult = await apiClient.post(AB_CONVERSATIONS_PATH, {
@@ -99,7 +100,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      privateInvestigationId = privateInvResult.body.id;
+      privateInvestigationId = expectCreated(privateInvResult, 'private investigation');
 
       // Private escalation owned by admin with a collaborator that is neither admin nor
       // viewer. Viewer (not owner, not a listed collaborator) must NOT see it in the list.
@@ -112,11 +113,12 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      privateEscalationId = privateResult.body.id;
+      privateEscalationId = expectCreated(privateResult, 'private escalation');
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
-      await Promise.allSettled(
+      await deleteConversations(
+        apiClient,
         [
           openEscalationId,
           closedEscalationId,
@@ -124,15 +126,8 @@ apiTest.describe(
           privateEscalationId,
           openInvestigationId,
           privateInvestigationId,
-        ]
-          .filter(Boolean)
-          .map((id) =>
-            apiClient
-              .delete(AB_CONVERSATION_BY_ID_PATH(id), {
-                headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-              })
-              .catch(() => {})
-          )
+        ],
+        cookieHeader
       );
     });
 

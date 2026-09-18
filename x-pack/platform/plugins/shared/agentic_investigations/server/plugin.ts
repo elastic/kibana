@@ -70,9 +70,7 @@ export class AgenticInvestigationsPlugin
 
     registerFeatures({ features });
 
-    if (agentBuilder) {
-      registerProposalAttachment(agentBuilder);
-    }
+    registerProposalAttachment(agentBuilder);
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
