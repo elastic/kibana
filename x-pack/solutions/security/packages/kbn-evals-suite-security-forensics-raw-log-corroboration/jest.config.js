@@ -9,6 +9,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch-raw-log-corroboration/src',
+    '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-raw-log-corroboration/src',
   ],
 };

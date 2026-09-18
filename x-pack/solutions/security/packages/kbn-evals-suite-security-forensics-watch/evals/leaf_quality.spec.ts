@@ -185,88 +185,118 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
             `produceDraft=${produceDraftCalled}, esqlTools=${esqlToolsCalled}`
         );
 
-        // ── Step 3: guardrail signal extraction from response text ──────────────
+        // ── Step 3: prose signals (diagnostic only) ─────────────────────────────
+        // These are logged for debuggability and must NOT gate `success`. A
+        // substring match ('draft', 'remaining') is satisfiable by vocabulary
+        // alone, so gating on it scores the model's wording rather than its
+        // behaviour. Every gate below reads the tool-result payload instead.
         const messageLower = response.message.toLowerCase();
-        const hasDraftLabel = messageLower.includes('draft');
-        const hasNoExecutionProhibition =
-          messageLower.includes('do not execute') ||
-          messageLower.includes('not execute') ||
-          messageLower.includes('proposal-only');
-        const hasNoFabricationStatement =
-          messageLower.includes('insufficient') ||
-          messageLower.includes('gap') ||
-          messageLower.includes('unknown');
-        const hasUnresolvedQuestions =
-          messageLower.includes('unresolved') ||
-          messageLower.includes('open question') ||
-          messageLower.includes('question:') ||
-          messageLower.includes('remaining');
-        const hasConfidenceLevels =
-          messageLower.includes('confidence') ||
-          messageLower.includes('high confidence') ||
-          messageLower.includes('low confidence');
+        const proseSignals = {
+          draft: messageLower.includes('draft'),
+          noExecute:
+            messageLower.includes('do not execute') ||
+            messageLower.includes('not execute') ||
+            messageLower.includes('proposal-only'),
+          noFabricate:
+            messageLower.includes('insufficient') ||
+            messageLower.includes('gap') ||
+            messageLower.includes('unknown'),
+          questions:
+            messageLower.includes('unresolved') ||
+            messageLower.includes('open question') ||
+            messageLower.includes('remaining'),
+          confidence: messageLower.includes('confidence'),
+        };
 
         log.info(
-          `[L2] Guardrails → draft=${hasDraftLabel}, noExecute=${hasNoExecutionProhibition}, ` +
-            `noFabricate=${hasNoFabricationStatement}, questions=${hasUnresolvedQuestions}, ` +
-            `confidence=${hasConfidenceLevels}`
+          `[L3] Prose signals (diagnostic only) → draft=${proseSignals.draft}, ` +
+            `noExecute=${proseSignals.noExecute}, noFabricate=${proseSignals.noFabricate}, ` +
+            `questions=${proseSignals.questions}, confidence=${proseSignals.confidence}`
         );
 
-        // ── Step 4: Tool result inspection ──────────────────────────────────────
-        let timelineEvents = 0;
-        let validatedIocs: Array<{ status: string }> = [];
+        // ── Step 4: data extraction from tool results ───────────────────────────
+        // Field shapes are those returned by the deep_watch_forensics skill
+        // handlers (security_solution/server/agent_builder/skills/
+        // deep_watch_forensics/deep_watch_forensics_skill.ts):
+        //   package_evidence               → { evidence_package, evidence_sufficient, ... }
+        //   produce_draft_forensic_report  → { report_status, timeline_event_count,
+        //                                      validated_iocs, unresolved_questions,
+        //                                      confidence_assessment, persisted, ... }
+        const resultDataFor = (toolId: string): Record<string, unknown> | undefined => {
+          const step = toolCallSteps.find((s) => s.tool_id === toolId);
+          return (step as { results?: Array<{ data?: Record<string, unknown> }> } | undefined)
+            ?.results?.[0]?.data;
+        };
 
-        const draftSteps = toolCallSteps.filter(
-          (s) => s.tool_id === DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report
-        );
+        const packageData = resultDataFor(DEEP_WATCH_TOOL_IDS.package_evidence);
+        const draftData = resultDataFor(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);
 
-        for (const step of draftSteps) {
-          const result = (
-            step as {
-              results?: Array<{
-                data?: {
-                  timeline_event_count?: number;
-                  validated_iocs?: Array<{ status: string }>;
-                };
-              }>;
-            }
-          ).results?.[0];
-          if (result?.data) {
-            timelineEvents = result.data.timeline_event_count ?? 0;
-            validatedIocs = result.data.validated_iocs ?? [];
-          }
-        }
+        const evidencePackage = packageData?.evidence_package as
+          | { scope_constraints?: { allowed_autonomy_level?: string } }
+          | undefined;
+        const evidenceSufficient = packageData?.evidence_sufficient === true;
+        const proposalOnly =
+          evidencePackage?.scope_constraints?.allowed_autonomy_level === 'propose';
+
+        const timelineEvents = (draftData?.timeline_event_count as number | undefined) ?? 0;
+        const validatedIocs =
+          (draftData?.validated_iocs as Array<{ status: string }> | undefined) ?? [];
+        const unresolvedQuestions = (draftData?.unresolved_questions as string[] | undefined) ?? [];
+        const confidenceOverall = (
+          draftData?.confidence_assessment as { overall?: string } | undefined
+        )?.overall;
+        const draftLabelPresent = String(draftData?.report_status ?? '')
+          .toUpperCase()
+          .includes('DRAFT');
+        const draftPersisted = draftData?.persisted === true;
 
         log.info(
-          `[L2] Report → timelineEvents=${timelineEvents}, validatedIoCs=${validatedIocs.length}`
+          `[L3] Report data → timelineEvents=${timelineEvents}, validatedIoCs=${validatedIocs.length}, ` +
+            `unresolvedQuestions=${unresolvedQuestions.length}, confidence=${
+              confidenceOverall ?? 'none'
+            }, ` +
+            `draftLabel=${draftLabelPresent}, persisted=${draftPersisted}, ` +
+            `evidenceSufficient=${evidenceSufficient}, proposalOnly=${proposalOnly}`
         );
 
-        // ── Step 5: Scorecard aggregation ───────────────────────────────────────
+        // ── Step 5: Scorecard aggregation (data-gated) ──────────────────────────
+        // Thresholds come from the dataset, which already declares them
+        // (minUnresolvedQuestions / draftLabelRequired / noExecutionRequired);
+        // the previous scorer ignored those fields and substituted prose.
+        const draftLabelOk = !example.output.draftLabelRequired || draftLabelPresent;
+        const noExecutionOk = !example.output.noExecutionRequired || proposalOnly;
+        const questionsOk = unresolvedQuestions.length >= example.output.minUnresolvedQuestions;
+        const timelineOk = timelineEvents >= example.output.minTimelineEvents;
+
         const success =
           skillInvoked &&
           packageEvidenceCalled &&
           produceDraftCalled &&
-          hasDraftLabel &&
-          hasNoExecutionProhibition &&
-          hasUnresolvedQuestions;
+          draftLabelOk &&
+          noExecutionOk &&
+          questionsOk;
 
         return {
           success,
           explanation:
             `Skill invoked: ${skillInvoked}. ` +
             `Tools: packageEvidence=${packageEvidenceCalled}, produceDraft=${produceDraftCalled}, esql=${esqlToolsCalled}. ` +
-            `Guardrails: draft=${hasDraftLabel}, noExecute=${hasNoExecutionProhibition}, ` +
-            `noFabricate=${hasNoFabricationStatement}, questions=${hasUnresolvedQuestions}, ` +
-            `confidence=${hasConfidenceLevels}. ` +
-            `Timeline events: ${timelineEvents}, IoCs validated: ${validatedIocs.length}.`,
+            `Data gates: draftLabel=${draftLabelPresent}, proposalOnly=${proposalOnly}, ` +
+            `evidenceSufficient=${evidenceSufficient}, persisted=${draftPersisted}. ` +
+            `Timeline events: ${timelineEvents}/${example.output.minTimelineEvents}, ` +
+            `IoCs validated: ${validatedIocs.length}, ` +
+            `unresolved questions: ${unresolvedQuestions.length}/${example.output.minUnresolvedQuestions}, ` +
+            `confidence: ${confidenceOverall ?? 'none'}. ` +
+            `(Prose signals are diagnostic only: ${JSON.stringify(proseSignals)})`,
           scorecard: {
             skillInvoked: skillInvoked ? 1 : 0,
             correctToolCalled: packageEvidenceCalled && produceDraftCalled ? 1 : 0,
-            timelineDepth: timelineEvents >= example.output.minTimelineEvents ? 1 : 0,
-            guardrailCompliance: hasDraftLabel && hasNoExecutionProhibition ? 1 : 0,
-            unresolvedQuestions: hasUnresolvedQuestions ? 1 : 0,
-            confidenceLevels: hasConfidenceLevels ? 1 : 0,
+            timelineDepth: timelineOk ? 1 : 0,
+            guardrailCompliance: draftLabelOk && noExecutionOk ? 1 : 0,
+            unresolvedQuestions: questionsOk ? 1 : 0,
+            confidenceLevels: confidenceOverall ? 1 : 0,
             iocValidation: validatedIocs.length > 0 ? 1 : 0,
+            draftPersisted: draftPersisted ? 1 : 0,
           },
           evaluationDataset: {
             examples: [

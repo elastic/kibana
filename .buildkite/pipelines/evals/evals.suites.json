@@ -414,10 +414,10 @@
       ]
     },
     {
-      "id": "security-forensics-watch-raw-log-corroboration",
+      "id": "security-forensics-raw-log-corroboration",
       "name": "Security Forensics Watch Raw Log Corroboration",
       "slackChannel": "#security-generative-ai-evals",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch-raw-log-corroboration/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-raw-log-corroboration/playwright.config.ts",
       "serverConfigSet": "evals_detection_watch_rule_creation",
       "tags": [
         "security",
@@ -425,7 +425,7 @@
         "pnd"
       ],
       "ciLabels": [
-        "evals:security-forensics-watch-raw-log-corroboration"
+        "evals:security-forensics-raw-log-corroboration"
       ]
     },
     {

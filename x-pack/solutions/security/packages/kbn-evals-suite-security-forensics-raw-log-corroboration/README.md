@@ -25,13 +25,13 @@ _Forensics Watch was formerly **Deep Watch** (AlertZero decision D25)._
 ```bash
 # L1/L2 deterministic evaluators (no stack required):
 node scripts/jest --config \
-  x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch-raw-log-corroboration/jest.config.js
+  x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-raw-log-corroboration/jest.config.js
 
 # Live L0/L3/L4 scorecard, against a running Scout stack with EIS connectors.
 # Eval suites use createPlaywrightEvalsConfig, so they run via scripts/evals
 # (scripts/scout run-tests rejects them). The judge must come from a different
 # model family than the candidate — never self-judge.
-node scripts/evals run --suite security-forensics-watch-raw-log-corroboration \
+node scripts/evals run --suite security-forensics-raw-log-corroboration \
   --model eis-anthropic-claude-5-sonnet --judge eis-google-gemini-3-0-flash
 ```
 
@@ -47,7 +47,7 @@ Set `EVAL_SCORECARD_LOG=1` to emit one line per example instead:
 
 ```bash
 EVAL_SCORECARD_LOG=1 node scripts/evals run \
-  --suite security-forensics-watch-raw-log-corroboration \
+  --suite security-forensics-raw-log-corroboration \
   --model eis-anthropic-claude-5-sonnet --judge eis-google-gemini-3-0-flash \
   2>&1 | tee run.log
 
@@ -73,7 +73,7 @@ where parallel `tsc -b` invocations corrupt shared project references.
 repeated-sampling sweep can fan out across stacks instead of serialising:
 
 ```bash
-EVAL_SHARD=1/3 node scripts/evals run --suite security-forensics-watch-raw-log-corroboration ...
+EVAL_SHARD=1/3 node scripts/evals run --suite security-forensics-raw-log-corroboration ...
 ```
 
 Shards are assigned by stride (`position % total`), and a malformed spec throws
