@@ -49,6 +49,10 @@ describe('esql_queries', () => {
     );
   });
 
+  it('returns undefined for an empty report ids array', () => {
+    expect(buildThreatReportsInEsql({ reportIds: [] })).toBeUndefined();
+  });
+
   it('returns undefined IOC query for unknown types', () => {
     expect(buildIocLookupEsql({ type: 'unknown', value: 'x' })).toBeUndefined();
   });

@@ -7,12 +7,25 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiBasicTable, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiDescriptionList,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
+import {
+  buildDiscoverEsqlUrl,
+  buildIocLookupEsql,
+  buildThreatReportLookupEsql,
+  DiscoverLink,
+} from '../navigation';
 import { parseHuntCorrelationData } from './types';
-import type { DiamondScore, HuntCorrelationAttachment } from './types';
+import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './types';
 
 export interface HuntCorrelationInlineContentProps
   extends AttachmentRenderProps<HuntCorrelationAttachment> {
@@ -22,12 +35,52 @@ export interface HuntCorrelationInlineContentProps
 export const HUNT_CORRELATION_ATTACHMENT_TEST_ID = 'alertzeroHuntCorrelationAttachment';
 export const HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroHuntCorrelationAttachmentEmpty';
 
+const HASH_LIKE_ANCHOR_KINDS = new Set<Anchor['kind']>(['hash', 'ioc_set_hash']);
+
 const cellStyles = css`
   overflow-wrap: anywhere;
 `;
 
+const getUniqueRelatedReportIds = (diamondScores: DiamondScore[]): string[] => [
+  ...new Set(diamondScores.map((score) => score.related_report_id)),
+];
+
+const renderAnchorValue = ({
+  kind,
+  value,
+  index,
+  navigation,
+}: {
+  kind: Anchor['kind'];
+  value: string;
+  index: number;
+  navigation: AttachmentNavigationDeps;
+}): React.ReactNode => {
+  const badge = (
+    <EuiBadge color="hollow" css={{ marginRight: 4 }}>
+      {value}
+    </EuiBadge>
+  );
+
+  if (!HASH_LIKE_ANCHOR_KINDS.has(kind)) {
+    return badge;
+  }
+
+  const esql = buildIocLookupEsql({ type: 'hash', value });
+  const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
+
+  return (
+    <span css={{ marginRight: 4 }}>
+      <DiscoverLink href={href} testSubj={`alertzeroHuntCorrelationAnchorLink-${kind}-${index}`}>
+        {badge}
+      </DiscoverLink>
+    </span>
+  );
+};
+
 export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContentProps> = ({
   attachment,
+  navigation,
 }) => {
   const parsed = parseHuntCorrelationData(attachment?.data);
 
@@ -48,12 +101,14 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
     );
   }
 
-  const anchorsByKind = new Map<string, string[]>();
+  const anchorsByKind = new Map<Anchor['kind'], string[]>();
   for (const anchor of parsed.anchors) {
     const values = anchorsByKind.get(anchor.kind) ?? [];
     values.push(anchor.value);
     anchorsByKind.set(anchor.kind, values);
   }
+
+  const uniqueRelatedReportIds = getUniqueRelatedReportIds(parsed.diamondScores);
 
   return (
     <EuiPanel
@@ -62,6 +117,17 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
       paddingSize="m"
       data-test-subj={HUNT_CORRELATION_ATTACHMENT_TEST_ID}
     >
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.huntCorrelation.heroSummary', {
+          defaultMessage: '{anchorCount} anchors · {reportCount} related reports',
+          values: {
+            anchorCount: parsed.anchors.length,
+            reportCount: uniqueRelatedReportIds.length,
+          },
+        })}
+      </EuiText>
+
+      <EuiSpacer size="s" />
       <EuiText size="s">
         <strong>
           {i18n.translate('xpack.alertzero.agentBuilder.attachments.huntCorrelation.anchors', {
@@ -81,10 +147,15 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
             <EuiText size="xs" color="subdued" css={cellStyles}>
               {kind}
             </EuiText>
-            {values.map((value) => (
-              <EuiBadge key={value} color="hollow" css={{ marginRight: 4 }}>
-                {value}
-              </EuiBadge>
+            {values.map((value, index) => (
+              <React.Fragment key={`${kind}-${value}-${index}`}>
+                {renderAnchorValue({
+                  kind,
+                  value,
+                  index,
+                  navigation,
+                })}
+              </React.Fragment>
             ))}
           </div>
         ))
@@ -127,7 +198,18 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
                 'xpack.alertzero.agentBuilder.attachments.huntCorrelation.relatedReport',
                 { defaultMessage: 'Related report' }
               ),
-              render: (relatedReportId: string) => <span css={cellStyles}>{relatedReportId}</span>,
+              render: (relatedReportId: string) => {
+                const esql = buildThreatReportLookupEsql({ reportId: relatedReportId });
+                const href = buildDiscoverEsqlUrl({ share: navigation.share, esql });
+                return (
+                  <DiscoverLink
+                    href={href}
+                    testSubj={`alertzeroHuntCorrelationRelatedReportLink-${relatedReportId}`}
+                  >
+                    <span css={cellStyles}>{relatedReportId}</span>
+                  </DiscoverLink>
+                );
+              },
             },
             {
               field: 'score',
@@ -143,16 +225,34 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
       {parsed.thresholds && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.alertzero.agentBuilder.attachments.huntCorrelation.thresholds', {
-              defaultMessage:
-                'Thresholds: anchor_match={anchorMatch}, diamond_vertex={diamondVertex}',
-              values: {
-                anchorMatch: parsed.thresholds.anchor_match,
-                diamondVertex: parsed.thresholds.diamond_vertex,
+          <EuiDescriptionList
+            type="column"
+            compressed
+            listItems={[
+              {
+                title: i18n.translate(
+                  'xpack.alertzero.agentBuilder.attachments.huntCorrelation.anchorMatch',
+                  { defaultMessage: 'Anchor match' }
+                ),
+                description: (
+                  <EuiText size="xs" color="subdued">
+                    {parsed.thresholds.anchor_match}
+                  </EuiText>
+                ),
               },
-            })}
-          </EuiText>
+              {
+                title: i18n.translate(
+                  'xpack.alertzero.agentBuilder.attachments.huntCorrelation.diamondVertex',
+                  { defaultMessage: 'Diamond vertex' }
+                ),
+                description: (
+                  <EuiText size="xs" color="subdued">
+                    {parsed.thresholds.diamond_vertex}
+                  </EuiText>
+                ),
+              },
+            ]}
+          />
         </>
       )}
     </EuiPanel>

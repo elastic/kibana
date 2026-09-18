@@ -7,19 +7,41 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   HuntCorrelationInlineContent,
   HUNT_CORRELATION_ATTACHMENT_TEST_ID,
   HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID,
 } from './hunt_correlation_inline_content';
 import type { HuntCorrelationAttachment } from './types';
+import {
+  buildIocLookupEsql,
+  buildThreatReportLookupEsql,
+} from '../navigation';
 
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
   ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
 
-const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+const mockShare = {
+  url: {
+    locators: {
+      get: () => ({
+        getRedirectUrl: ({ query }: { query: { esql: string } }) =>
+          `https://example.test/discover?esql=${encodeURIComponent(query.esql)}`,
+      }),
+    },
+  },
+} as unknown as SharePluginStart;
 
-const renderProps = (attachment: HuntCorrelationAttachment) => ({
+const defaultNavigation = {
+  spaceId: 'default',
+  prependPath: (path: string) => path,
+};
+
+const renderProps = (
+  attachment: HuntCorrelationAttachment,
+  navigation: typeof defaultNavigation & { share?: SharePluginStart } = defaultNavigation
+) => ({
   attachment,
   navigation,
   isSidebar: false,
@@ -47,7 +69,7 @@ describe('HuntCorrelationInlineContent', () => {
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders anchors, diamond scores, and thresholds from a valid payload', () => {
+  it('renders anchors, diamond scores, and labeled thresholds from a valid payload', () => {
     render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('abc123')).toBeInTheDocument();
@@ -55,9 +77,97 @@ describe('HuntCorrelationInlineContent', () => {
     expect(screen.getByText('infrastructure')).toBeInTheDocument();
     expect(screen.getByText('report-2')).toBeInTheDocument();
     expect(screen.getByText('0.75')).toBeInTheDocument();
-    expect(
-      screen.getByText('Thresholds: anchor_match=0.9, diamond_vertex=0.6')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Anchor match')).toBeInTheDocument();
+    expect(screen.getByText('Diamond vertex')).toBeInTheDocument();
+    expect(screen.getByText('0.9')).toBeInTheDocument();
+    expect(screen.getByText('0.6')).toBeInTheDocument();
+  });
+
+  it('does not render the literal anchor_match= debug string', () => {
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
+    expect(screen.queryByText(/anchor_match=/)).not.toBeInTheDocument();
+  });
+
+  it('renders a hero summary with unique related report count', () => {
+    const data: HuntCorrelationAttachment['data'] = {
+      ...baseData,
+      anchors: [
+        { kind: 'hash', value: 'abc123' },
+        { kind: 'actor', value: 'APT-99' },
+        { kind: 'ioc_set_hash', value: 'set-hash-1' },
+      ],
+      diamond_scores: [
+        { vertex: 'infrastructure', related_report_id: 'report-2', score: 0.75 },
+        { vertex: 'adversary', related_report_id: 'report-3', score: 0.8 },
+        { vertex: 'capability', related_report_id: 'report-2', score: 0.5 },
+      ],
+    };
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(data))} />);
+    expect(screen.getByText('3 anchors · 2 related reports')).toBeInTheDocument();
+  });
+
+  it('renders related report id as a Discover link when share is present', () => {
+    const reportId = 'report-2';
+    const expectedEsql = buildThreatReportLookupEsql({ reportId });
+    const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
+
+    render(
+      <HuntCorrelationInlineContent
+        {...renderProps(buildAttachment(baseData), { ...defaultNavigation, share: mockShare })}
+      />
+    );
+
+    const link = screen.getByTestId(`alertzeroHuntCorrelationRelatedReportLink-${reportId}`);
+    expect(link).toHaveAttribute('href', expectedHref);
+    expect(link).toHaveTextContent(reportId);
+  });
+
+  it('renders related report id as plain text when share is undefined', () => {
+    const reportId = 'report-2';
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
+
+    const node = screen.getByTestId(`alertzeroHuntCorrelationRelatedReportLink-${reportId}`);
+    expect(node.tagName.toLowerCase()).toBe('span');
+    expect(node).not.toHaveAttribute('href');
+    expect(node).toHaveTextContent(reportId);
+  });
+
+  it('renders hash and ioc_set_hash anchors as Discover links when share is present', () => {
+    const hashValue = 'abc123';
+    const iocSetHashValue = 'set-hash-1';
+    const data: HuntCorrelationAttachment['data'] = {
+      ...baseData,
+      anchors: [
+        { kind: 'hash', value: hashValue },
+        { kind: 'ioc_set_hash', value: iocSetHashValue },
+        { kind: 'actor', value: 'APT-99' },
+      ],
+    };
+    const hashEsql = buildIocLookupEsql({ type: 'hash', value: hashValue });
+    const iocSetEsql = buildIocLookupEsql({ type: 'hash', value: iocSetHashValue });
+
+    render(
+      <HuntCorrelationInlineContent
+        {...renderProps(buildAttachment(data), { ...defaultNavigation, share: mockShare })}
+      />
+    );
+
+    const hashLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-hash-0');
+    expect(hashLink).toHaveAttribute(
+      'href',
+      `https://example.test/discover?esql=${encodeURIComponent(hashEsql as string)}`
+    );
+    expect(hashLink).toHaveTextContent(hashValue);
+
+    const iocSetLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-ioc_set_hash-0');
+    expect(iocSetLink).toHaveAttribute(
+      'href',
+      `https://example.test/discover?esql=${encodeURIComponent(iocSetEsql as string)}`
+    );
+    expect(iocSetLink).toHaveTextContent(iocSetHashValue);
+
+    expect(screen.queryByTestId('alertzeroHuntCorrelationAnchorLink-actor-0')).not.toBeInTheDocument();
+    expect(screen.getByText('APT-99')).toBeInTheDocument();
   });
 
   it('drops malformed anchor entries but keeps the valid ones', () => {

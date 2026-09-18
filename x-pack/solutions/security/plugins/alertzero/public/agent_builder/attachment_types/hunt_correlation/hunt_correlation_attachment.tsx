@@ -8,8 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
+import {
+  buildDiscoverEsqlUrl,
+  buildThreatReportsInEsql,
+} from '../navigation';
+import { parseHuntCorrelationData } from './types';
 import type { HuntCorrelationAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -40,4 +46,41 @@ export const createHuntCorrelationAttachmentDefinition = ({
       <LazyHuntCorrelationInlineContent {...props} navigation={navigation} />
     </React.Suspense>
   ),
+  getActionButtons: ({ attachment }) => {
+    const parsed = parseHuntCorrelationData(attachment?.data);
+    if (!parsed) {
+      return [];
+    }
+
+    const reportIds = [
+      ...new Set(parsed.diamondScores.map((score) => score.related_report_id)),
+    ];
+    if (reportIds.length === 0) {
+      return [];
+    }
+
+    const esql = buildThreatReportsInEsql({ reportIds });
+    if (!esql) {
+      return [];
+    }
+
+    const href = buildDiscoverEsqlUrl({ share: navigation.share, esql });
+    if (!href) {
+      return [];
+    }
+
+    return [
+      {
+        label: i18n.translate(
+          'xpack.alertzero.agentBuilder.attachments.huntCorrelation.openRelatedReports',
+          { defaultMessage: 'Open related reports in Discover' }
+        ),
+        icon: 'discoverApp',
+        type: ActionButtonType.SECONDARY,
+        href,
+        openInNewTab: true,
+        handler: () => undefined,
+      },
+    ];
+  },
 });

@@ -52,8 +52,16 @@ export const buildThreatReportLookupEsql = ({ reportId }: { reportId: string }):
   return `FROM ${quoteEsqlIdentifier(THREAT_REPORTS_INDEX_PATTERN)} | WHERE _id == "${escapedReportId}"`;
 };
 
-export const buildThreatReportsInEsql = ({ reportIds }: { reportIds: string[] }): string => {
+export const buildThreatReportsInEsql = ({
+  reportIds,
+}: {
+  reportIds: string[];
+}): string | undefined => {
   const uniqueReportIds = [...new Set(reportIds)];
+  if (uniqueReportIds.length === 0) {
+    return undefined;
+  }
+
   const quotedIds = uniqueReportIds.map((reportId) => `"${escapeEsqlString(reportId)}"`).join(', ');
   return `FROM ${quoteEsqlIdentifier(THREAT_REPORTS_INDEX_PATTERN)} | WHERE _id IN (${quotedIds})`;
 };
