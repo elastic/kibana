@@ -16,16 +16,10 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import type { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from './conversations';
 
-/**
- * Whether a chat request executes the agent. `never` appends the user message to an existing
- * conversation and returns, leaving the execution options unused.
- */
-export enum ChatTriggerMode {
-  Always = 'always',
-  Never = 'never',
-}
+export { ChatTriggerMode } from '@kbn/agent-builder-common';
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).

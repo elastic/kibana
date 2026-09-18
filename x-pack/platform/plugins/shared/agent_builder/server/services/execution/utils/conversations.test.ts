@@ -14,7 +14,9 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundStep,
   RoundCompleteEvent,
+  TimelineEvent,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   ChatEventType,
   CONVERSATION_SCHEMA_VERSION,
@@ -36,7 +38,7 @@ import {
   appendResumeExecution$,
   appendRoundTerminated$,
   getConversation,
-  persistRoundInput,
+  persistUserMessage,
 } from './conversations';
 
 const attachmentAddedEvent = (id = 'att-evt-1'): AttachmentTimelineEvent => ({
@@ -264,7 +266,7 @@ describe('conversations utils', () => {
     });
   });
 
-  describe('persistRoundInput (receipt-time input write)', () => {
+  describe('persistUserMessage', () => {
     const withOperation = (
       conversation: Conversation,
       operation: 'CREATE' | 'UPDATE'
@@ -273,26 +275,32 @@ describe('conversations utils', () => {
     const runReceipt = async ({
       conversation,
       conversationClient,
-      roundId = 'round-1',
+      eventId = 'round-1::user_message',
       receivedAt = new Date('2024-01-01T00:00:00.000Z'),
       input = { message: 'hi' },
       author,
+      additionalEvents,
+      attachments,
     }: {
       conversation: ConversationWithOperation;
       conversationClient: ReturnType<typeof createConversationClientMock>;
-      roundId?: string;
+      eventId?: string;
       receivedAt?: Date;
       input?: { message?: string };
       author?: ConversationRoundAuthor;
+      additionalEvents?: TimelineEvent[];
+      attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
     }) => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
-      await persistRoundInput({
+      return persistUserMessage({
         conversation,
         conversationClient,
-        roundId,
+        eventId,
         receivedAt,
         input,
         author,
+        additionalEvents,
+        attachments,
       });
     };
 
@@ -364,10 +372,10 @@ describe('conversations utils', () => {
       conversationClient.create.mockRejectedValueOnce(boom);
 
       await expect(
-        persistRoundInput({
+        persistUserMessage({
           conversation,
           conversationClient,
-          roundId: 'round-1',
+          eventId: 'round-1::user_message',
           receivedAt: new Date(),
           input: { message: 'hi' },
         })

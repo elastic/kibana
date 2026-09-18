@@ -212,7 +212,6 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
-      attachments,
       eventBus: conversationEventBus,
     });
 

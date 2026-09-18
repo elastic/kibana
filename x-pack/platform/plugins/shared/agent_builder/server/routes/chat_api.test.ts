@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { registerChatRoutes } from './chat';
 import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ChatEventType, TimelineEventType, createBadRequestError } from '@kbn/agent-builder-common';
+import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
 import { registerChatApiRoutes } from './chat_api';
 
@@ -309,85 +308,20 @@ describe('registerChatApiRoutes', () => {
   });
 });
 
-describe('user message acknowledgements', () => {
-  it('persists through sync converse without execution setup', async () => {
-    const { router, handlers } = captureHandlers();
-    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
-    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
-    const executeAgent = jest.fn();
-    const validateCallbackUrl = jest.fn();
-    const getStartServices = jest.fn();
-    const services = {
-      conversations: {
-        getScopedClient: async () => ({ get: async () => conversation }),
-        appendUserMessage,
-      },
-      attachments: {
-        getTypeDefinition: jest.fn(),
-        validateAttachmentInputs: jest.fn().mockImplementation(async (attachments) =>
-          attachments?.map((attachment: { type: string; data: unknown }) => ({
-            id: 'attachment-1',
-            type: attachment.type,
-            data: attachment.data,
-          }))
-        ),
-      },
-      execution: { executeAgent },
-      callbackDeliveryService: { validateCallbackUrl },
-    };
-    const deps = {
-      router,
-      getInternalServices: () => services,
-      coreSetup: { getStartServices },
-      logger: loggingSystemMock.createLogger(),
-    };
-    registerChatApiRoutes(deps as never);
-    registerChatRoutes(deps as never);
-    const response = buildResponse();
-    const result = await handlers[`${chatApiPath}/converse`](
-      {
-        ...activeContext(true),
-        agentBuilder: Promise.resolve({ spaces: { getSpaceId: () => 'default' } }),
-      },
-      {
-        body: {
-          trigger_mode: 'never',
-          conversation_id: '00000000-0000-4000-8000-000000000001',
-          input: 'context',
-        },
-      },
-      response
-    );
-    expect(result.status).toBe(200);
-    expect(appendUserMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'context', attachments: undefined })
-    );
-    expect(result.payload).toEqual(conversation);
-    expect(executeAgent).not.toHaveBeenCalled();
-    expect(validateCallbackUrl).not.toHaveBeenCalled();
-    expect(getStartServices).not.toHaveBeenCalled();
-  });
+describe('user message requests', () => {
+  const conversation = { id: 'conv-1', events: [{ id: 'e1' }], rounds: [] };
 
-  it('ignores execution options on a user message request', async () => {
+  const converse = async (body: Record<string, unknown>) => {
     const { router, handlers } = captureHandlers();
-    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
-    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
-    const executeAgent = jest.fn();
-    const services = {
-      conversations: {
-        getScopedClient: async () => ({ get: async () => conversation }),
-        appendUserMessage,
-      },
-      attachments: {
-        getTypeDefinition: jest.fn(),
-        validateAttachmentInputs: jest.fn().mockResolvedValue(undefined),
-      },
-      execution: { executeAgent },
-    };
+    const executeAgent = jest.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const get = jest.fn().mockResolvedValue(conversation);
 
     registerChatApiRoutes({
       router,
-      getInternalServices: () => services,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+      }),
       coreSetup: {} as never,
       pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
@@ -396,118 +330,40 @@ describe('user message acknowledgements', () => {
     const response = buildResponse();
     const result = await handlers[`${chatApiPath}/converse`](
       activeContext(true),
-      {
-        body: {
-          trigger_mode: 'never',
-          conversation_id: '00000000-0000-4000-8000-000000000001',
-          input: 'context',
-          agent_id: 'agent-1',
-          connector_id: 'connector-1',
-          read_only: true,
-          _execution_mode: 'local',
-        },
-      },
+      { body },
       response
     );
 
-    expect(result.status).toBe(200);
-    expect(appendUserMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationId: '00000000-0000-4000-8000-000000000001' })
+    return { executeAgent, result };
+  };
+
+  it('hands the trigger mode to the execution service, with everything else it was sent', async () => {
+    const { executeAgent, result } = await converse({
+      trigger_mode: 'never',
+      conversation_id: '00000000-0000-4000-8000-000000000001',
+      input: 'Pool limit is now 200',
+      connector_id: 'connector-1',
+    });
+
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          triggerMode: 'never',
+          conversationId: '00000000-0000-4000-8000-000000000001',
+          connectorId: 'connector-1',
+          nextInput: expect.objectContaining({ message: 'Pool limit is now 200' }),
+        }),
+      })
     );
-    expect(executeAgent).not.toHaveBeenCalled();
+    // The route reads the conversation the same way for either mode.
+    expect(result).toEqual({ status: 200, payload: conversation });
   });
 
-  it('requires conversation_id before persisting a user message request', async () => {
-    const { router, handlers } = captureHandlers();
-    const getInternalServices = jest.fn();
+  it('leaves the mode to the service when the request omits it', async () => {
+    // The schema defaults `trigger_mode` to always; a request that never reaches it carries none.
+    const { executeAgent } = await converse({ input: 'Hello' });
 
-    registerChatApiRoutes({
-      router,
-      getInternalServices,
-      coreSetup: {} as never,
-      pluginsSetup: {},
-      logger: loggingSystemMock.createLogger(),
-    } as never);
-
-    const response = buildResponse();
-    const result = await handlers[`${chatApiPath}/converse`](
-      activeContext(true),
-      { body: { trigger_mode: 'never', input: 'context' } },
-      response
-    );
-
-    expect(result.status).toBe(400);
-    expect(getInternalServices).not.toHaveBeenCalled();
-  });
-
-  it('returns a bad request when user message attachments are invalid', async () => {
-    const { router, handlers } = captureHandlers();
-    const appendUserMessage = jest.fn();
-    const services = {
-      conversations: {
-        getScopedClient: async () => ({ get: async () => ({}) }),
-        appendUserMessage,
-      },
-      attachments: {
-        getTypeDefinition: jest.fn(),
-        validateAttachmentInputs: jest
-          .fn()
-          .mockRejectedValue(
-            createBadRequestError('Attachment validation failed: Unknown attachment type: bad')
-          ),
-      },
-    };
-
-    registerChatApiRoutes({
-      router,
-      getInternalServices: () => services,
-      coreSetup: {} as never,
-      pluginsSetup: {},
-      logger: loggingSystemMock.createLogger(),
-    } as never);
-
-    const response = buildResponse();
-    const result = await handlers[`${chatApiPath}/converse`](
-      activeContext(true),
-      {
-        body: {
-          trigger_mode: 'never',
-          conversation_id: '00000000-0000-4000-8000-000000000001',
-          attachments: [{ type: 'bad', data: {} }],
-        },
-      },
-      response
-    );
-
-    expect(result.status).toBe(400);
-    expect(appendUserMessage).not.toHaveBeenCalled();
-  });
-
-  it('requires input or attachments before persisting a user message request', async () => {
-    const { router, handlers } = captureHandlers();
-    const getInternalServices = jest.fn();
-
-    registerChatApiRoutes({
-      router,
-      getInternalServices,
-      coreSetup: {} as never,
-      pluginsSetup: {},
-      logger: loggingSystemMock.createLogger(),
-    } as never);
-
-    const response = buildResponse();
-    const result = await handlers[`${chatApiPath}/converse`](
-      activeContext(true),
-      {
-        body: {
-          trigger_mode: 'never',
-          conversation_id: '00000000-0000-4000-8000-000000000001',
-        },
-      },
-      response
-    );
-
-    expect(result.status).toBe(400);
-    expect(getInternalServices).not.toHaveBeenCalled();
+    const [{ params }] = executeAgent.mock.calls[0];
+    expect(params).not.toHaveProperty('triggerMode');
   });
 });

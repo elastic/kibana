@@ -134,6 +134,7 @@ export const getConverseHelpers = ({
       configuration_overrides: configurationOverrides,
       project_routing: projectRouting,
       reasoning_level: reasoningLevel,
+      trigger_mode: triggerMode,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
@@ -164,6 +165,7 @@ export const getConverseHelpers = ({
           prompts,
           attachments,
         },
+        ...(triggerMode ? { triggerMode } : {}),
       },
     });
   };

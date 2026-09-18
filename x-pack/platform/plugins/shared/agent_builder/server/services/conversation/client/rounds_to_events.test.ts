@@ -231,7 +231,15 @@ describe('userMessageEvent (split builder)', () => {
   it('produces exactly one user_message event with the round input and actor', () => {
     const round = baseRound();
     const conversation = baseConversation([round]);
-    const event = userMessageEvent(round, conversation);
+    const event = userMessageEvent(
+      {
+        id: `${round.id}::user_message`,
+        createdAt: round.started_at,
+        input: round.input,
+        author: round.author,
+      },
+      conversation
+    );
 
     expect(event).toMatchObject({
       id: 'round-1::user_message',

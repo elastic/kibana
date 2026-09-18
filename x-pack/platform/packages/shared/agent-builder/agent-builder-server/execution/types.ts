@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import type {
   AgentExecutionMode,
   ChatEvent,
+  ChatTriggerMode,
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
@@ -105,6 +106,21 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
     subagentName: string;
     subagentPurpose?: string;
   };
+  /**
+   * Whether the agent runs. `never` persists the user message and stops there, leaving every
+   * other option here unused. Defaults to `always`.
+   */
+  triggerMode?: ChatTriggerMode;
+  /**
+   * @internal Id of the round the caller opened, so the run reuses the ids of the events already
+   * written for it. Set by the execution service; callers should leave it unset.
+   */
+  roundId?: string;
+  /**
+   * @internal Whether this request created the conversation, which the run reports as a creation
+   * rather than an update. Set by the execution service; callers should leave it unset.
+   */
+  conversationCreated?: boolean;
 }
 
 /**
@@ -175,8 +191,8 @@ export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecuti
  * Result of executing an agent.
  */
 export interface ExecuteAgentResult {
-  /** The unique execution ID. */
-  executionId: string;
+  /** The unique execution ID. Absent when `trigger_mode: 'never'` persisted a message instead. */
+  executionId?: string;
   /**
    * Observable of events for this execution.
    * - Local mode: the live agent event stream (multicasted).

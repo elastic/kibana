@@ -7,9 +7,25 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
-import { AgentExecutionMode, createNonInteractiveConfig } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  createInternalError,
+  createNonInteractiveConfig,
+} from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
-import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type {
+  AgentExecutionService,
+  ExecuteAgentResult,
+} from '@kbn/agent-builder-server/execution';
+
+/** Sub-agents always run, so a result without an execution means something went wrong. */
+const started = ({ executionId, events$ }: ExecuteAgentResult) => {
+  if (!executionId) {
+    throw createInternalError('Sub-agent execution did not start');
+  }
+
+  return { executionId, events$ };
+};
 
 export const createSubAgentExecutor = ({
   request,
@@ -28,59 +44,65 @@ export const createSubAgentExecutor = ({
   return {
     executeSubAgent: async (params) => {
       const executionService = getExecutionService();
-      return executionService.executeAgent({
-        mode: AgentExecutionMode.standalone,
-        interactive: subAgentInteractivity,
-        request,
-        params: {
-          agentId: params.agentId,
-          connectorId: params.connectorId,
-          parentExecutionId: params.parentExecutionId,
-          nextInput: { message: params.prompt },
-          projectRouting,
-        },
-        abortSignal: params.abortSignal,
-      });
+      return started(
+        await executionService.executeAgent({
+          mode: AgentExecutionMode.standalone,
+          interactive: subAgentInteractivity,
+          request,
+          params: {
+            agentId: params.agentId,
+            connectorId: params.connectorId,
+            parentExecutionId: params.parentExecutionId,
+            nextInput: { message: params.prompt },
+            projectRouting,
+          },
+          abortSignal: params.abortSignal,
+        })
+      );
     },
 
     createSubAgent: async (params) => {
       const executionService = getExecutionService();
-      return executionService.executeAgent({
-        mode: AgentExecutionMode.conversation,
-        interactive: subAgentInteractivity,
-        request,
-        params: {
-          agentId: params.agentId,
-          connectorId: params.connectorId,
-          parentExecutionId: params.parentExecutionId,
-          conversationId: params.conversationId,
-          autoCreateConversationWithId: true,
-          nextInput: { message: params.prompt },
-          subagentCreation: {
-            parentConversationId: params.parentConversationId,
-            subagentName: params.subagentName,
-            subagentPurpose: params.subagentPurpose,
+      return started(
+        await executionService.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          interactive: subAgentInteractivity,
+          request,
+          params: {
+            agentId: params.agentId,
+            connectorId: params.connectorId,
+            parentExecutionId: params.parentExecutionId,
+            conversationId: params.conversationId,
+            autoCreateConversationWithId: true,
+            nextInput: { message: params.prompt },
+            subagentCreation: {
+              parentConversationId: params.parentConversationId,
+              subagentName: params.subagentName,
+              subagentPurpose: params.subagentPurpose,
+            },
           },
-        },
-        abortSignal: params.abortSignal,
-      });
+          abortSignal: params.abortSignal,
+        })
+      );
     },
 
     sendToSubAgent: async (params) => {
       const executionService = getExecutionService();
-      return executionService.executeAgent({
-        mode: AgentExecutionMode.conversation,
-        interactive: subAgentInteractivity,
-        request,
-        params: {
-          connectorId: params.connectorId,
-          parentExecutionId: params.parentExecutionId,
-          conversationId: params.conversationId,
-          autoCreateConversationWithId: false,
-          nextInput: { message: params.prompt },
-        },
-        abortSignal: params.abortSignal,
-      });
+      return started(
+        await executionService.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          interactive: subAgentInteractivity,
+          request,
+          params: {
+            connectorId: params.connectorId,
+            parentExecutionId: params.parentExecutionId,
+            conversationId: params.conversationId,
+            autoCreateConversationWithId: false,
+            nextInput: { message: params.prompt },
+          },
+          abortSignal: params.abortSignal,
+        })
+      );
     },
 
     getExecution: async (executionId) => {
