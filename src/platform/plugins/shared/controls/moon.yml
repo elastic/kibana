@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/css-utils'
   - '@kbn/esql-utils'
+  - '@kbn/esql-browser'
   - '@kbn/search-types'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
@@ -49,7 +50,6 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/controls-renderer'
-  - '@kbn/field-formats-common'
   - '@kbn/ui-callout'
 tags:
   - plugin

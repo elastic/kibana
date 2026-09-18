@@ -30,7 +30,6 @@ export const actionPolicyResponseSchema = z
       .array(z.string())
       .nullable()
       .describe('The fields used to group alerts, or null for no grouping.'),
-    tags: z.array(z.string()).nullable().describe('Tags associated with the action policy.'),
     grouping_mode: groupingModeSchema
       .nullable()
       .describe('The grouping mode for alert notifications.'),
