@@ -110,7 +110,7 @@ export const createEventInvestigationAttachTool = ({
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await attachEventInvestigationToolHandler({
-          eventClient: getEventClient(),
+          eventClient: await getEventClient(),
           eventUuid: toolParams.event_uuid,
           workflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,

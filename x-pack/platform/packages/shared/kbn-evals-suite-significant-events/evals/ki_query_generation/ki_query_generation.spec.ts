@@ -267,6 +267,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 { kis, sampleLogs, sampleDocs },
               ])
             );
+            const readOnlyDataStreamClient = {
+              create: () =>
+                Promise.reject(new Error('Memory writes are not supported in this eval')),
+            };
 
             const executeAgentBuilderTool = async (
               toolId: string,

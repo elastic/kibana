@@ -44,7 +44,7 @@ dependsOn:
   - '@kbn/nightshift-ai'
   - '@kbn/config-schema'
   - '@kbn/management-settings-ids'
-  - '@kbn/data-streams'
+  - '@kbn/core-data-streams-server'
   - '@kbn/streamlang'
   - '@kbn/es-mappings'
   - '@kbn/alerting-plugin'

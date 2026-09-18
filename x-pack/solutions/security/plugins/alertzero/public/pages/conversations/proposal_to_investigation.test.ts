@@ -81,7 +81,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         category: 'respond',
-        status: 'dismissed',
+        decision: 'dismissed',
+        status: 'no_action',
         decidedAt: '2026-09-10T11:00:00.000Z',
       });
       expect(result.recommendedAction).toBe('closed');
@@ -164,7 +165,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         decidedAt: '2026-09-10T11:00:00.000Z',
-        status: 'approved',
+        decision: 'approved',
+        status: 'succeeded',
       });
       expect(result.pendingProposalCount).toBe(0);
     });

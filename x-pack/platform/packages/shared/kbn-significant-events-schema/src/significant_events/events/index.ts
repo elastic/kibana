@@ -72,7 +72,7 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .optional()
     .describe(
       dedent`
-        Concise operator-facing rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        Concise rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
         ${ASSESSMENT_NOTE_ROLE_RULE}
         Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, or detection artifacts.
 

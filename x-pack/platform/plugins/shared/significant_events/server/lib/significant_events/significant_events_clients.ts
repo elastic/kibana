@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { DataStreamClient } from '@kbn/data-streams';
-import type { AnyDataStreamDefinition } from '@kbn/data-streams';
-import { DetectionService, detectionsDataStream } from './detections';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import {
+  DetectionService,
+  detectionsDataStream,
+  type StoredDetection,
+  type detectionsMappings,
+} from './detections';
 import type { DetectionClient } from './detections';
-import { EventService, eventsDataStream } from './events';
+import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
 import type { EventClient } from './events';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
@@ -20,14 +24,9 @@ export interface SignificantEventsServices {
 }
 
 export interface SignificantEventsClients {
-  getDetectionClient: () => DetectionClient;
-  getEventClient: () => EventClient;
+  getDetectionClient: () => Promise<DetectionClient>;
+  getEventClient: () => Promise<EventClient>;
 }
-
-const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
-  detectionsDataStream,
-  eventsDataStream,
-];
 
 export function createSignificantEventsServices(): SignificantEventsServices {
   return {
@@ -38,51 +37,35 @@ export function createSignificantEventsServices(): SignificantEventsServices {
 
 export function createSignificantEventsClients({
   services,
+  dataStreams,
   esClient,
   space,
   triggerEmitter,
 }: {
   services: SignificantEventsServices;
+  dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
 }): SignificantEventsClients {
   return {
-    getDetectionClient: () => services.detection.getClient({ esClient, space }),
-    getEventClient: () => services.event.getClient({ esClient, space, triggerEmitter }),
+    getDetectionClient: async () =>
+      services.detection.getClient({
+        dataStreamClient: await dataStreams.initializeClient<
+          typeof detectionsMappings,
+          StoredDetection
+        >(detectionsDataStream.name),
+        esClient,
+        space,
+      }),
+    getEventClient: async () =>
+      services.event.getClient({
+        dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
+          eventsDataStream.name
+        ),
+        esClient,
+        space,
+        triggerEmitter,
+      }),
   };
-}
-
-export async function initializeSignificantEventsTemplates({
-  esClient,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}): Promise<void> {
-  // Attempt every template, then reject with an aggregate naming each failed one. Swallowing the
-  // errors here would make the caller's install aggregate report success even when a template failed.
-  const results = await Promise.allSettled(
-    SIGNIFICANT_EVENTS_DATA_STREAMS.map((definition) =>
-      DataStreamClient.initializeTemplate({
-        dataStream: definition,
-        elasticsearchClient: esClient,
-        logger,
-      })
-    )
-  );
-
-  const failures = results.flatMap((result, index) =>
-    result.status === 'rejected'
-      ? [
-          `${SIGNIFICANT_EVENTS_DATA_STREAMS[index].name} (${
-            result.reason instanceof Error ? result.reason.message : String(result.reason)
-          })`,
-        ]
-      : []
-  );
-
-  if (failures.length > 0) {
-    throw new Error(`Failed to initialize significant events templates: [${failures.join('; ')}]`);
-  }
 }
