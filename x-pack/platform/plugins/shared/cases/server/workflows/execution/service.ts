@@ -21,7 +21,11 @@ import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../c
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
-import { parseSelectedAlertPairs, validateOrigin } from './validate_origin';
+import {
+  parseSelectedAlertPairs,
+  rejectDocumentIdSelections,
+  validateOrigin,
+} from './validate_origin';
 import type { EnsureAuthorizedToRunWorkflowParams } from './authorize_workflow_run';
 
 interface RunWorkflowParams {
@@ -126,6 +130,7 @@ export class CasesWorkflowRunService {
     // Parse and validate alertIds shape eagerly — any malformed entry throws 400 here,
     // before any case fetch, so the validated set equals what preprocessing later fetches.
     const selectedAlerts = parseSelectedAlertPairs(body.inputs);
+    rejectDocumentIdSelections(body.inputs);
 
     if (body.origin === undefined) {
       if (selectedAlerts.length > 0) {
@@ -186,9 +191,9 @@ export class CasesWorkflowRunService {
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
     //
-    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
-    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
-    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
+    // eventOverrides injects the server-owned caseIds into `event` *after* trigger preprocessing
+    // runs. Preprocessing replaces the whole `event` object with the alert-event shape, so
+    // pre-merging caseIds into event (before the call) would silently drop them on alert runs.
     const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,

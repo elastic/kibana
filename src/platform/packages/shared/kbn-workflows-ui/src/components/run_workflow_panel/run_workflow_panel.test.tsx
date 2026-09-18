@@ -305,6 +305,29 @@ describe('RunWorkflowPanel', () => {
     );
   });
 
+  describe('notice', () => {
+    it('renders a caller-supplied notice above the selector', () => {
+      renderComponent({ notice: <div data-test-subj="selection-notice">{'Heads up'}</div> });
+
+      expect(screen.getByTestId('selection-notice')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-selector-mock')).toBeInTheDocument();
+    });
+
+    it('renders nothing extra when no notice is provided', () => {
+      renderComponent();
+
+      expect(screen.queryByTestId('selection-notice')).not.toBeInTheDocument();
+    });
+
+    it('does not block execution', () => {
+      renderComponent({ notice: <div data-test-subj="selection-notice">{'Heads up'}</div> });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+
+      expect(screen.getByTestId('run-workflow-execute-button')).not.toBeDisabled();
+    });
+  });
+
   describe('managed workflow fetching', () => {
     it('does not fetch managed workflows when no visibility is provided', () => {
       // Without a visibility prop the server would return all managed workflows regardless of

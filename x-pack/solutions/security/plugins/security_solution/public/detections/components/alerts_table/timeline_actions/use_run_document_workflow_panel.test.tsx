@@ -254,6 +254,40 @@ describe('useRunDocumentWorkflowPanel', () => {
         alertWorkflow,
       ]);
     });
+
+    // Bulk callers send id pairs instead of embedding each document's source, which is what
+    // keeps a large selection inside the request payload limit.
+    it('sends documentIds instead of documents when the caller selects by id', async () => {
+      const documentIds = [
+        { _id: 'doc-1', _index: 'documents-index' },
+        { _id: 'doc-2', _index: 'documents-index' },
+      ];
+      const closePopover = jest.fn();
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ closePopover, documentIds }),
+        { wrapper: TestProviders }
+      );
+      const { getByTestId } = renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      });
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'document',
+          documentIds,
+        },
+      });
+      expect(panelProps.inputs).not.toHaveProperty('event.documents');
+    });
   });
 });
 // Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:

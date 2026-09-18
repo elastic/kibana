@@ -59,6 +59,12 @@ export interface RunWorkflowPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * Rendered above the workflow selector. Consumers use this to explain something about the
+   * selection the workflow will run against — for example that a selection larger than the
+   * supported maximum will be trimmed.
+   */
+  notice?: React.ReactNode;
 }
 
 interface RunWorkflowPanelServices {
@@ -75,6 +81,7 @@ export const RunWorkflowPanel = ({
   filterWorkflow,
   onClose,
   onExecute,
+  notice,
 }: RunWorkflowPanelProps) => {
   const {
     services: { application, notifications, rendering },
@@ -190,6 +197,7 @@ export const RunWorkflowPanel = ({
 
   return (
     <>
+      {notice}
       <div css={{ position: 'relative' }}>
         {workflowSelector}
         {isLoading && (
