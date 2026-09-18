@@ -13,6 +13,13 @@ import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 /** Converts ES|QL columns to the `columnsMeta` shape consumed by the unified data table. */
 export function columnsToColumnsMeta(columns: readonly Column[]): DataTableColumnsMeta {
   return Object.fromEntries(
-    columns.map((c) => [c.name, c.esType ? { type: c.type, esType: c.esType } : { type: c.type }])
+    columns.map((c) => [
+      c.name,
+      {
+        type: c.type,
+        ...(c.esType ? { esType: c.esType } : {}),
+        isComputedColumn: c.source === 'esql-result',
+      },
+    ])
   ) as DataTableColumnsMeta;
 }

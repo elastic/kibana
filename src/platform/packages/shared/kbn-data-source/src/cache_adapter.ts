@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { Column } from './types';
 import type { EsqlSource } from './sources/esql_source';
 
 /**
- * Transitional shim. Registers a thin DataView in the `dataViewsService` cache so that
- * consumers still calling `dataViewsService.get(id)` for ES|QL ids keep resolving.
- * Delete this file once all such consumers migrate to `DataSourceService.get()`.
+ * Transitional shim. Registers a DataView in the `dataViewsService` cache so that
+ * consumers still calling `dataViewsService.get(id)` for ES|QL ids keep resolving
+ * (filter editor, generateFilters meta.index).
  *
- * Uses `skipFetchFields: true` — never call `_field_caps`. Query columns live on
- * `EsqlSource`; the shim only injects `timeFieldName` so `DataView.isTimeBased()`
- * stays true. The cache is cleared first so re-registration picks up a new time field.
+ * Uses `skipFetchFields: true` — never call `_field_caps`. Fields are copied from
+ * `EsqlSource.getColumns()` (LIMIT 0 / source_info). The cache is cleared first so
+ * re-registration picks up a new schema or time field.
  */
 export async function registerEsqlSourceInDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
@@ -33,7 +34,7 @@ export async function registerEsqlSourceInDataViewsCache(
       title: source.title,
       type: ESQL_TYPE,
       timeFieldName: source.timeFieldName,
-      fields: makeTimeFieldSpec(source.timeFieldName),
+      fields: makeShimFieldSpecs(source),
     },
     true // skipFetchFields — never call _field_caps for ES|QL adapter DVs
   );
@@ -48,22 +49,39 @@ export function unregisterFromDataViewsCache(
 }
 
 /**
- * `DataView.isTimeBased()` requires the time field to exist in `fields`, not just
- * `timeFieldName` on the spec. Query result columns are not copied — they belong
- * on `EsqlSource.getColumns()`.
+ * Copies LIMIT 0 columns onto the shim so `dataViews.get(esql-id)` has the same
+ * names as the query (needed by the dashboard filter editor). If the time field
+ * is not in the result columns, it is still injected so `DataView.isTimeBased()`
+ * stays true.
  */
-function makeTimeFieldSpec(timeFieldName?: string) {
-  if (!timeFieldName) {
-    return {};
+function makeShimFieldSpecs(source: EsqlSource): Record<string, FieldSpec> {
+  const fields: Record<string, FieldSpec> = {};
+
+  for (const column of source.getColumns()) {
+    fields[column.name] = columnToFieldSpec(column);
   }
 
-  return {
-    [timeFieldName]: {
-      name: timeFieldName,
+  if (source.timeFieldName && !fields[source.timeFieldName]) {
+    fields[source.timeFieldName] = {
+      name: source.timeFieldName,
       type: KBN_FIELD_TYPES.DATE,
       esTypes: ['date'],
       searchable: true,
       aggregatable: true,
-    },
+      isComputedColumn: false,
+    };
+  }
+
+  return fields;
+}
+
+function columnToFieldSpec(column: Column): FieldSpec {
+  return {
+    name: column.name,
+    type: column.type,
+    esTypes: column.esType ? [column.esType] : undefined,
+    searchable: true,
+    aggregatable: column.type === KBN_FIELD_TYPES.DATE,
+    isComputedColumn: column.source === 'esql-result',
   };
 }

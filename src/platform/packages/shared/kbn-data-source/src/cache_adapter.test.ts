@@ -14,11 +14,17 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { registerEsqlSourceInDataViewsCache, unregisterFromDataViewsCache } from './cache_adapter';
 import { EsqlSource } from './sources/esql_source';
 
-function makeColumn(name: string, type: string, esType?: string): DatatableColumn {
+function makeColumn(
+  name: string,
+  type: string,
+  esType?: string,
+  isComputedColumn?: boolean
+): DatatableColumn {
   return {
     id: name,
     name,
     meta: { type: type as DatatableColumn['meta']['type'], esType },
+    ...(isComputedColumn ? { isComputedColumn: true } : {}),
   };
 }
 
@@ -32,7 +38,7 @@ function createMockDataViewsService() {
 describe('registerEsqlSourceInDataViewsCache', () => {
   beforeEach(() => EsqlSource.clearCache());
 
-  it('creates an ad-hoc DataView with only the time field in fields', async () => {
+  it('creates an ad-hoc DataView with LIMIT 0 columns and skipFetchFields', async () => {
     const dataViews = createMockDataViewsService();
     const source = await EsqlSource.create({
       query: 'FROM logs-*',
@@ -53,12 +59,29 @@ describe('registerEsqlSourceInDataViewsCache', () => {
         type: ESQL_TYPE,
         timeFieldName: '@timestamp',
         fields: {
+          message: {
+            name: 'message',
+            type: KBN_FIELD_TYPES.STRING,
+            esTypes: ['keyword'],
+            searchable: true,
+            aggregatable: false,
+            isComputedColumn: false,
+          },
+          bytes: {
+            name: 'bytes',
+            type: KBN_FIELD_TYPES.NUMBER,
+            esTypes: ['long'],
+            searchable: true,
+            aggregatable: false,
+            isComputedColumn: false,
+          },
           '@timestamp': {
             name: '@timestamp',
             type: KBN_FIELD_TYPES.DATE,
             esTypes: ['date'],
             searchable: true,
             aggregatable: true,
+            isComputedColumn: false,
           },
         },
       },
@@ -66,7 +89,7 @@ describe('registerEsqlSourceInDataViewsCache', () => {
     );
   });
 
-  it('does not copy query result columns onto the DataView spec', async () => {
+  it('copies query result columns onto the DataView spec', async () => {
     const dataViews = createMockDataViewsService();
     const source = await EsqlSource.create({
       query: 'FROM logs-* | KEEP message',
@@ -79,11 +102,27 @@ describe('registerEsqlSourceInDataViewsCache', () => {
     const spec = (dataViews.create as jest.Mock).mock.calls[0][0] as {
       fields: Record<string, unknown>;
     };
-    expect(spec.fields).not.toHaveProperty('message');
-    expect(Object.keys(spec.fields)).toEqual(['@timestamp']);
+    expect(spec.fields).toHaveProperty('message');
+    expect(spec.fields).toHaveProperty('@timestamp');
   });
 
-  it('creates an empty fields spec when the source has no time field', async () => {
+  it('marks EVAL/STATS columns as computed', async () => {
+    const dataViews = createMockDataViewsService();
+    const source = await EsqlSource.create({
+      query: 'FROM logs-* | STATS avg_bytes = AVG(bytes)',
+      resultColumns: [makeColumn('avg_bytes', 'number', 'double', true)],
+      timeFieldName: '@timestamp',
+    });
+
+    await registerEsqlSourceInDataViewsCache(dataViews, source);
+
+    const spec = (dataViews.create as jest.Mock).mock.calls[0][0] as {
+      fields: Record<string, { isComputedColumn?: boolean }>;
+    };
+    expect(spec.fields.avg_bytes.isComputedColumn).toBe(true);
+  });
+
+  it('creates fields from result columns when the source has no time field', async () => {
     const dataViews = createMockDataViewsService();
     const source = await EsqlSource.create({
       query: 'FROM logs-*',
@@ -95,7 +134,16 @@ describe('registerEsqlSourceInDataViewsCache', () => {
     expect(dataViews.create).toHaveBeenCalledWith(
       expect.objectContaining({
         timeFieldName: undefined,
-        fields: {},
+        fields: {
+          message: {
+            name: 'message',
+            type: KBN_FIELD_TYPES.STRING,
+            esTypes: undefined,
+            searchable: true,
+            aggregatable: false,
+            isComputedColumn: false,
+          },
+        },
       }),
       true
     );

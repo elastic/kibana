@@ -161,6 +161,7 @@ const createMockEsqlSourceForFetch = (columnNames: string[]): EsqlSource => {
     name,
     type: 'string' as const,
     esType: 'keyword',
+    source: 'index' as const,
   }));
   const source = {
     kind: 'esql' as const,
@@ -235,9 +236,14 @@ describe('initialize fetch ES|QL', () => {
     expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
     expect(mockFetchEsql).toHaveBeenCalledTimes(1);
     expect(mocked.stateManager.columnsMeta.getValue()).toEqual({
-      message: { type: 'string', esType: 'keyword' },
+      message: { type: 'string', esType: 'keyword', isComputedColumn: false },
     });
-    expect(esqlSource$.getValue()?.getColumns().map((column) => column.name)).toEqual(['message']);
+    expect(
+      esqlSource$
+        .getValue()
+        ?.getColumns()
+        .map((column) => column.name)
+    ).toEqual(['message']);
   });
 
   it('does not re-resolve EsqlSource when the query identity is unchanged', async () => {
@@ -267,4 +273,3 @@ describe('initialize fetch ES|QL', () => {
     expect(mockResolveEsqlSource).toHaveBeenCalledTimes(2);
   });
 });
-
