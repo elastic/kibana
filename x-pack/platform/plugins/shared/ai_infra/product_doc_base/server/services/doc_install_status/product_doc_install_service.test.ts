@@ -194,6 +194,47 @@ describe('ProductDocInstallClient', () => {
   });
 
   describe('status setters', () => {
+    it.each([
+      [
+        'product documentation',
+        () => service.setInstallationFailed('kibana', 'boom', inferenceId),
+        { product_name: 'kibana', resource_type: ResourceTypes.productDoc },
+      ],
+      [
+        'Security Labs',
+        () => service.setSecurityLabsInstallationFailed({ failureReason: 'boom', inferenceId }),
+        { product_name: 'security', resource_type: ResourceTypes.securityLabs },
+      ],
+      [
+        'the OpenAPI spec',
+        () =>
+          service.setOpenapiSpecInstallationFailed({
+            productName: 'kibana',
+            productVersion: '9.6',
+            failureReason: 'boom',
+            inferenceId,
+          }),
+        { product_name: 'kibana', resource_type: ResourceTypes.openapiSpec },
+      ],
+    ])(
+      'records a failure of %s even when no status was written before',
+      async (_label, setFailed, expected) => {
+        soClient.update.mockResolvedValueOnce({} as any);
+
+        await setFailed();
+
+        expect(soClient.update).toHaveBeenCalledWith(
+          'product-doc-install-status',
+          expect.any(String),
+          expect.objectContaining({
+            installation_status: 'error',
+            last_installation_failure_reason: 'boom',
+          }),
+          { upsert: expect.objectContaining({ installation_status: 'error', ...expected }) }
+        );
+      }
+    );
+
     it('writes resource_type=product_doc when setting installation started', async () => {
       soClient.update.mockResolvedValueOnce({} as any);
 

@@ -178,11 +178,15 @@ export class ProductDocInstallClient {
     inferenceId: string | undefined
   ) {
     const objectId = getObjectIdFromProductName(productName, inferenceId);
-    await this.soClient.update<TypeAttributes>(typeName, objectId, {
-      installation_status: 'error',
+    const attributes = {
+      installation_status: 'error' as const,
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
       resource_type: ResourceTypes.productDoc,
+    };
+    // The install may fail before any status was written for this product
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: { ...attributes, product_name: productName, product_version: '' },
     });
   }
 
@@ -268,12 +272,16 @@ export class ProductDocInstallClient {
   }) {
     const { version, failureReason, inferenceId } = fields;
     const objectId = getSecurityLabsObjectId(inferenceId);
-    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+    const attributes = {
       ...(version ? { product_version: version } : {}),
-      installation_status: 'error',
+      installation_status: 'error' as const,
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
       resource_type: ResourceTypes.securityLabs,
+    };
+    // The install may fail before any status was written
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: { ...attributes, product_name: 'security', product_version: version ?? '' },
     });
   }
 
@@ -365,13 +373,17 @@ export class ProductDocInstallClient {
   }) {
     const { productName, productVersion, failureReason, inferenceId } = fields;
     const objectId = getOpenAPISpecObjectId(inferenceId);
-    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+    const attributes: TypeAttributes = {
       installation_status: 'error',
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
       resource_type: ResourceTypes.openapiSpec,
       product_name: productName,
       product_version: productVersion,
+    };
+    // The install may fail before any status was written
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: attributes,
     });
   }
 
