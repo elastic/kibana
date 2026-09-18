@@ -21,7 +21,6 @@ import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
-import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
 import {
   invalidateStoredConnectorEventIdentity,
   loadPreviousConnectorEventIdentity,
@@ -169,13 +168,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       : validatedActionTypeConfig;
 
-  const storedConfig = attributes.config as Record<string, unknown> | undefined;
-  const configWithIngress = preserveInboundIngressHashIfNeeded({
-    actionTypeId,
-    config: configForSave as Record<string, unknown>,
-    storedConfig,
-  });
-
   const previousIdentity = connectorTypeHasInboundEvents(actionTypeId)
     ? await loadPreviousConnectorEventIdentity(context, id)
     : undefined;
@@ -199,7 +191,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configWithIngress,
+          config: configForSave,
           secrets: validatedActionTypeSecrets,
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
