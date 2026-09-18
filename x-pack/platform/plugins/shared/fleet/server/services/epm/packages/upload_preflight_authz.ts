@@ -24,9 +24,7 @@ const GATED_TYPE_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly s
   [KibanaAssetType.securityAIPrompt]: ['elasticAssistant'],
 };
 
-const GATED_ASSET_TYPES = new Set(
-  Object.keys(GATED_TYPE_REQUIRED_PRIVILEGES) as KibanaAssetType[]
-);
+const GATED_ASSET_TYPES = new Set(Object.keys(GATED_TYPE_REQUIRED_PRIVILEGES) as KibanaAssetType[]);
 
 // Maps SO types stored in installed_kibana refs back to KibanaAssetType for privilege decisions.
 const SO_TYPE_TO_ASSET_TYPE = new Map<KibanaSavedObjectType, KibanaAssetType>([

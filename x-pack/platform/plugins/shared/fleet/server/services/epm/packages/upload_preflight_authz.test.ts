@@ -246,7 +246,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        'mypackage',
+        undefined
       )
     ).resolves.toEqual([]);
 
@@ -265,7 +270,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -294,7 +304,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -319,7 +334,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        'mypackage',
+        undefined
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -334,7 +354,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        'mypackage',
+        undefined
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -348,7 +373,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -372,7 +402,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -396,7 +431,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        'mypackage',
+        undefined
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -417,7 +457,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -443,7 +488,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, 'space-x', 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      'space-x',
+      'mypackage',
+      installation
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -470,7 +520,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']));
@@ -493,7 +548,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, 'space-x', 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      'space-x',
+      'mypackage',
+      installation
     );
 
     expect(result).toEqual(['space-x']);
@@ -516,7 +576,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
@@ -546,7 +611,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        'mypackage',
+        installation
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -568,7 +638,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     expect(result).toEqual([]);
@@ -593,8 +668,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId,
-      'security_detection_engine', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'security_detection_engine',
+      installation
     );
 
     expect(result).toEqual([mockSpaceId]);
@@ -630,7 +709,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
@@ -661,7 +745,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     expect(result).toEqual([]);
