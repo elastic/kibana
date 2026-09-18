@@ -17,6 +17,7 @@ import type {
   EuiFlyoutProps,
   EuiIconProps,
 } from '@elastic/eui';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type {
   FlyoutSectionAction,
@@ -206,17 +207,15 @@ type MenuTriggerOwnedProps =
 /**
  * Props for the <FlyoutTemplate.Footer.PrimaryActionMenu> component.
  *
- * Anything `EuiButton` accepts is forwarded to the trigger button, apart from the props
- * the template owns. The props declared below configure the menu itself.
+ * Anything `EuiButton` accepts for a button element is forwarded to the trigger button,
+ * apart from the props the template owns. The props declared below configure the menu itself.
  */
 export type FlyoutFooterPrimaryActionMenuProps = Omit<
-  EuiButtonProps,
+  EuiButtonPropsForButton,
   MenuTriggerOwnedProps | 'aria-label' | 'data-test-subj'
 > &
   Pick<EuiContextMenuProps, 'onPanelChange'> &
   DataAttributeProps & {
-    /** The HTML ID of the button that opens the menu. */
-    id?: string;
     /** The text on the button that opens the menu (e.g. "Take action"). */
     label: string;
     /** The panels and items inside the menu. For performance and to keep keyboard navigation working, you should wrap this array in a useMemo hook. */
