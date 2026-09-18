@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { generateFormFields } from '@kbn/response-ops-form-generator';
+import { FormGeneratorFieldContext, generateFormFields } from '@kbn/response-ops-form-generator';
 import { getMeta, setMeta } from '@kbn/connector-specs';
-import type { RuleActionParam } from '@kbn/alerting-types';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import type { z } from '@kbn/zod/v4';
+import { AddMessageVariables } from '../../add_message_variables';
 import type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import type { ActionParamsProps } from '../types';
 import type { SpecActionParams } from '../types/spec_action_params';
@@ -30,7 +31,21 @@ const SpecActionParamsForm: React.FC<{
   disabled?: boolean;
   editAction: ActionParamsProps<SpecActionParams>['editAction'];
   index: number;
-}> = ({ schema, defaultValue, disabled, editAction, index }) => {
+  messageField?: string;
+  defaultMessage?: string;
+  useDefaultMessage?: boolean;
+  messageVariables?: ActionVariable[];
+}> = ({
+  schema,
+  defaultValue,
+  disabled,
+  editAction,
+  index,
+  messageField,
+  defaultMessage,
+  useDefaultMessage,
+  messageVariables,
+}) => {
   const { form } = useForm({ defaultValue });
   const lastEmittedRef = useRef<unknown>(defaultValue);
 
@@ -46,14 +61,49 @@ const SpecActionParamsForm: React.FC<{
     return () => subscription.unsubscribe();
   }, [editAction, form, index]);
 
+  useEffect(() => {
+    if (!messageField || defaultMessage === undefined) {
+      return;
+    }
+    const current = form.getFormData()?.[messageField];
+    if (useDefaultMessage || current === undefined || current === null || current === '') {
+      form.setFieldValue(messageField, defaultMessage);
+    }
+  }, [defaultMessage, form, messageField, useDefaultMessage]);
+
+  const renderLabelAppend = useCallback(
+    ({
+      path,
+      currentValue,
+      setValue,
+    }: {
+      path: string;
+      currentValue: unknown;
+      setValue: (value: string) => void;
+    }) => (
+      <AddMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={path}
+        onSelectEventHandler={(variable) =>
+          setValue(`${typeof currentValue === 'string' ? currentValue : ''}{{${variable.name}}}`)
+        }
+      />
+    ),
+    [messageVariables]
+  );
+
+  const fieldContextValue = useMemo(() => ({ renderLabelAppend }), [renderLabelAppend]);
+
   return (
-    <Form form={form}>
-      {generateFormFields({
-        schema,
-        formConfig: { disabled },
-        metaFunctions: { getMeta, setMeta },
-      })}
-    </Form>
+    <FormGeneratorFieldContext.Provider value={fieldContextValue}>
+      <Form form={form}>
+        {generateFormFields({
+          schema,
+          formConfig: { disabled },
+          metaFunctions: { getMeta, setMeta },
+        })}
+      </Form>
+    </FormGeneratorFieldContext.Provider>
   );
 };
 
@@ -67,7 +117,16 @@ export const bindSpecActionParamsFields = (
 
 export const SpecActionParamsFields: React.FC<
   ActionParamsProps<SpecActionParams> & { spec: ConnectorSpecResponse }
-> = ({ spec, actionParams, editAction, index, isDisabled }) => {
+> = ({
+  spec,
+  actionParams,
+  editAction,
+  index,
+  isDisabled,
+  messageVariables,
+  defaultMessage,
+  useDefaultMessage,
+}) => {
   const actionNames = Object.keys(spec.actions);
   const defaultSubAction = getSpecDefaultSubAction(spec);
   const subAction = actionParams.subAction ?? defaultSubAction;
@@ -123,6 +182,10 @@ export const SpecActionParamsFields: React.FC<
           disabled={isDisabled}
           editAction={editAction}
           index={index}
+          messageField={spec.alerting?.messageField}
+          defaultMessage={defaultMessage}
+          useDefaultMessage={useDefaultMessage}
+          messageVariables={messageVariables}
         />
       )}
     </>

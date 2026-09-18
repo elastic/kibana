@@ -56,6 +56,28 @@ Default schema mappings:
 
 When a field has no `label` meta, the last path segment is converted with `startCase` (for example `threadTs` → `Thread Ts`). When `helpText` is absent, `description` meta is used.
 
+`FormGeneratorFieldContext` lets a parent inject extra label content (for example an "Add variable" button) into generated text fields:
+
+```tsx
+import { FormGeneratorFieldContext, generateFormFields } from '@kbn/response-ops-form-generator';
+
+<FormGeneratorFieldContext.Provider
+  value={{
+    renderLabelAppend: ({ path, currentValue, setValue }) => (
+      <AddMessageVariables
+        paramsProperty={path}
+        messageVariables={messageVariables}
+        onSelectEventHandler={(variable) =>
+          setValue(`${currentValue ?? ''}{{${variable.name}}}`)
+        }
+      />
+    ),
+  }}
+>
+  <Form form={form}>{generateFormFields({ schema })}</Form>
+</FormGeneratorFieldContext.Provider>
+```
+
 ## Development
 
 ```sh
