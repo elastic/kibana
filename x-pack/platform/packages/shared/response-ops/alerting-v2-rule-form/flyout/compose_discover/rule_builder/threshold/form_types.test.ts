@@ -148,6 +148,22 @@ describe('severity helpers', () => {
       });
     });
 
+    it('collapses multi bands to the most severe level when downgrading to single', () => {
+      const multiBands = {
+        mode: 'multi' as const,
+        singleLevelSeverity: 'info' as const, // placeholder from parsing; must not survive
+        levels: [
+          { id: 'l1', severity: 'high' as const, threshold: 80 },
+          { id: 'l2', severity: 'critical' as const, threshold: 90 },
+        ],
+      };
+      expect(reconcileSeverity(multiBands, [condition(Comparator.BETWEEN)])).toEqual({
+        mode: 'single',
+        singleLevelSeverity: 'critical',
+        levels: [],
+      });
+    });
+
     it('keeps a valid multi config unchanged', () => {
       expect(reconcileSeverity(severity, [condition(Comparator.GT)])).toEqual(severity);
     });

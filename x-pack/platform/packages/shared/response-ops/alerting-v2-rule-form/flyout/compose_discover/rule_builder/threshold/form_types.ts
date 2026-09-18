@@ -307,6 +307,16 @@ export const nextSeverityLevel = (levels: SeverityLevel[]): AlertEventSeverity =
   return SEVERITY_LEVELS.find((severity) => !used.has(severity)) ?? SEVERITY_LEVELS[0];
 };
 
+/** The most severe level in a set, or `undefined` when there are none. */
+export const mostSevereSeverity = (levels: SeverityLevel[]): AlertEventSeverity | undefined =>
+  levels.reduce<AlertEventSeverity | undefined>(
+    (max, lvl) =>
+      max === undefined || SEVERITY_LEVELS.indexOf(lvl.severity) > SEVERITY_LEVELS.indexOf(max)
+        ? lvl.severity
+        : max,
+    undefined
+  );
+
 /**
  * Drop or downgrade severity config that is no longer applicable: severity is cleared for
  * multiple conditions or when a stat/evaluation is named `severity` (it would collide with the
@@ -320,7 +330,13 @@ export const reconcileSeverity = (
   if (!severity || !isSeveritySupported(alertConditions) || hasReservedLabel) return undefined;
   const [condition] = alertConditions;
   if (severity.mode === 'multi' && !isMultiSeveritySupported(condition.comparator)) {
-    return { ...severity, mode: 'single' };
+    // Collapse the escalating bands into one level (the most severe).
+    return {
+      ...severity,
+      mode: 'single',
+      singleLevelSeverity: mostSevereSeverity(severity.levels) ?? severity.singleLevelSeverity,
+      levels: [],
+    };
   }
   return severity;
 };
