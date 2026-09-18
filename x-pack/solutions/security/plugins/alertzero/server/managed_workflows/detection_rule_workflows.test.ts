@@ -11,6 +11,8 @@ import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   getManagedWorkflowDefinition,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -29,6 +31,8 @@ const DETECTION_WORKFLOW_IDS = [
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
 ];
 
 const getManagedYaml = (workflowId: string): string => {
@@ -1001,6 +1005,247 @@ describe('detection rule workflows', () => {
             `steps.summarize_decisions.output.${key}`
           );
         }
+      });
+    });
+
+    describe('coverage sweep', () => {
+      const sweep = parse(
+        getManagedWorkflowDefinition(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
+      const review = parse(
+        getManagedWorkflowDefinition(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
+      const sweepSteps = flattenSteps(sweep.steps as unknown as NestedStep[]);
+      const consts = sweep.consts as Record<string, unknown>;
+      const step = (name: string) => sweepSteps.find((s) => s.name === name)!;
+      const withOf = (name: string) => step(name).with as Record<string, unknown>;
+      const sweepTypes = sweepSteps.map(({ type }) => type);
+
+      // The review keys its concurrency group on the indicator id and the sweep parses
+      // those keys back into ids. If the prefix drifts on either side the sweep excludes
+      // nothing and re-dispatches every open indicator.
+      it('parses the review concurrency key prefix the review actually uses', () => {
+        const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
+          .settings as { concurrency: { key: string; strategy: string; max: number } };
+        const collect = String(withOf('collect_active_indicators').parsed);
+
+        expect(concurrency.key).toBe('coverage-{{ inputs.ki_id }}');
+        expect(concurrency.strategy).toBe('drop');
+        expect(concurrency.max).toBe(1);
+        expect(collect).toContain("map: 'concurrencyGroupKey'");
+        expect(collect).toContain("remove: 'coverage-'");
+      });
+
+      // `remove` strips every occurrence, not a prefix, and `join`/`split` use a comma.
+      // A comma inside a key would yield more ids than there are reviews, and a fragment
+      // could name an unrelated indicator. The ids are published only when the parse
+      // yields exactly one id per active review, the same integrity check the rule-tuning
+      // sweep applies.
+      it('publishes the parsed ids only when they match the number of active reviews', () => {
+        const collect = withOf('collect_active_indicators');
+        const resolve = step('resolve_active_indicators');
+
+        expect(String(collect.parsed_count)).toContain("remove: 'coverage-'");
+        expect(String(collect.parsed_count)).toContain('| size');
+        expect(String(resolve.if)).toContain(
+          'steps.collect_active_indicators.output.parsed_count == steps.collect_active_indicators.output.count'
+        );
+        expect(String((resolve.with as Record<string, unknown>).indicator_ids)).toContain(
+          'steps.collect_active_indicators.output.parsed'
+        );
+      });
+
+      // Active reviews are read from the engine, never from the indicator. If the lookup
+      // fails, the sweep continues with an empty list. Then every pending indicator is a
+      // candidate, and the review's own concurrency key drops a duplicate review.
+      it('lists active reviews of the review workflow and continues when the lookup fails', () => {
+        const lookup = step('list_active_reviews');
+        const path = String(lookup.with?.path);
+
+        expect(lookup.type).toBe('kibana.request');
+        expect(path).toContain('/s/{{ workflow.spaceId }}/api/workflows/workflow/');
+        expect(path).toContain(
+          `/api/workflows/workflow/${ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID}/executions?`
+        );
+        for (const status of [
+          'pending',
+          'queued',
+          'waiting',
+          'waiting_for_input',
+          'waiting_for_child',
+          'running',
+        ]) {
+          expect(path).toContain(`statuses=${status}`);
+        }
+        // The executions API rejects size > 100. size=100 is the maximum allowed.
+        expect(path).toContain('size=100');
+        expect(lookup['on-failure']).toEqual({ continue: true });
+      });
+
+      // Limit of active reviews per space: free = maximum minus active, never below zero.
+      // The manual input can only lower the maximum.
+      it('tops the space up to max_open_checks and no further', () => {
+        const free = String(withOf('resolve_free_slots').free);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.max_open_checks).toBe(100);
+        expect(free).toContain('inputs.max_open_checks | default: consts.max_open_checks');
+        expect(free).toContain('minus: steps.collect_active_indicators.output.count');
+        expect(free).toContain('at_least: 0');
+        // dispatch is capped by both the ceiling and the per-sweep batch size
+        const dispatch = String(withOf('resolve_dispatch_batch').indicators);
+        expect(dispatch).toContain('slice: 0, steps.resolve_free_slots.output.free');
+        expect(dispatch).toContain('slice: 0, steps.resolve_batch_size.output.size');
+        expect(inputs.max_open_checks.maximum).toBe(consts.max_open_checks);
+      });
+
+      it('resolves batch_size from input or default and caps dispatch to it', () => {
+        const batchSize = String(withOf('resolve_batch_size').size);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.batch_size).toBe(5);
+        expect(batchSize).toContain('inputs.batch_size | default: consts.batch_size');
+        expect(inputs.batch_size.maximum).toBe(50);
+      });
+
+      // Indicators with an active review are excluded in the query itself, so they never
+      // take a result slot from a free one. The search size is the maximum allowed batch_size
+      // input (50) so all valid batch sizes have enough candidates to slice from.
+      it('searches pending indicators minus the active ones, sized for the max batch', () => {
+        const search = step('search_pending_indicators');
+        const query = JSON.stringify(search.with?.query);
+
+        expect(search.type).toBe('elasticsearch.search');
+        expect(String(search.with?.index)).toContain('ai-index-idx-');
+        expect(query).toContain('"type":"security.coverage"');
+        expect(query).toContain('"attributes.status":"pending"');
+        expect(query).toContain('must_not');
+        expect(query).toContain(
+          '"ids":{"values":"${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"}'
+        );
+        expect(search.with?.size).toBe(50);
+        expect(search['on-failure']).toEqual({ continue: true });
+      });
+
+      // Only `_id` reaches the review. An indicator's content can be 64 kB, so 50 hits
+      // would move megabytes the sweep never reads.
+      it('reads no indicator content', () => {
+        expect(step('search_pending_indicators').with?._source).toBe(false);
+        expect(
+          ((step('start_reviews').steps ?? [])[0].with?.inputs as Record<string, string>).ki_id
+        ).toBe('{{ foreach.item._id }}');
+      });
+
+      // The window counts from the indicator's creation time, which `context-engine`
+      // stamps once. An indicator that leaves the window is never reviewed, so the sweep
+      // takes the oldest ones in the window first.
+      it('looks back a bounded number of days and takes the oldest indicators first', () => {
+        const search = step('search_pending_indicators');
+        const query = JSON.stringify(search.with?.query);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { minimum?: number; maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.lookback_days).toBe(7);
+        expect(query).toContain(
+          '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
+        );
+        expect(JSON.stringify(search.with?.sort)).toContain('"order":"asc"');
+        expect(inputs.lookback_days.minimum).toBe(1);
+        expect(inputs.lookback_days.maximum).toBe(90);
+      });
+
+      // Async fan-out: the sweep starts one review per indicator and exits. Each review
+      // waits for its approval in its own execution. Nothing in the sweep waits.
+      it('starts one async review per indicator and never waits for an approval', () => {
+        const loop = step('start_reviews') as NestedStep & { foreach?: string };
+        const launches = sweepSteps.filter(({ type }) => type === 'workflow.executeAsync');
+
+        expect(loop.type).toBe('foreach');
+        expect(String(loop.foreach)).toContain('steps.resolve_dispatch_batch.output.indicators');
+        expect(launches.map(({ name }) => name)).toEqual(['start_review']);
+        expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID);
+        expect((launches[0].with?.inputs as Record<string, string>).ki_id).toBe(
+          '{{ foreach.item._id }}'
+        );
+        expect(sweepTypes).not.toContain('workflow.execute');
+        expect(sweepTypes).not.toContain('waitForApproval');
+        expect(sweepTypes).not.toContain('parallel');
+      });
+
+      // The sweep exits in seconds, so one at a time per space is enough. A schedule
+      // cannot live on a workflow installed in the global space, so it is manual only.
+      it('is manual-only with one sweep per space at a time', () => {
+        const triggers = sweep.triggers as unknown as Array<{ type: string }>;
+        const { concurrency } = (sweep as unknown as { settings: Record<string, unknown> })
+          .settings as { concurrency: { strategy: string; max: number } };
+
+        expect(triggers.map(({ type }) => type)).toEqual(['manual']);
+        expect(concurrency.strategy).toBe('drop');
+        expect(concurrency.max).toBe(1);
+      });
+
+      // The sweep reads the queue and never writes to it; the review owns the outcome.
+      it('never writes to the knowledge indicators', () => {
+        for (const type of [
+          'context-engine.createKi',
+          'context-engine.updateKi',
+          'context-engine.deleteKi',
+          'elasticsearch.index',
+          'elasticsearch.update',
+        ]) {
+          expect(sweepTypes).not.toContain(type);
+        }
+      });
+
+      // The coverage skill lives in the review; the sweep runs no agent.
+      it('keeps the coverage skill inside the review', () => {
+        const skills = (id: string) =>
+          projectSkillsFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
+
+        expect(skills(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID)).toEqual([]);
+        expect(skills(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 'detection-coverage', kind: 'skill' }),
+          ])
+        );
+      });
+
+      // A sweep that reports zero pending because a read failed is not an empty queue,
+      // so each failed read is reported separately.
+      it('reports the queue and each failed read separately', () => {
+        const emit = withOf('emit_result') as Record<string, string>;
+        const outputs = (sweep.outputs as Array<{ name: string }>).map(({ name }) => name);
+
+        expect(outputs).toEqual([
+          'pending',
+          'started',
+          'in_flight',
+          'search_failed',
+          'lookup_failed',
+        ]);
+        expect(String(emit.pending)).toContain(
+          'steps.search_pending_indicators.output.hits.total.value'
+        );
+        expect(String(emit.started)).toContain('steps.resolve_dispatch_batch.output.indicators');
+        expect(String(emit.in_flight)).toContain('steps.collect_active_indicators.output.count');
+        expect(String(emit.search_failed)).toContain(
+          'steps.search_pending_indicators.error != null'
+        );
+        expect(String(emit.lookup_failed)).toContain('steps.list_active_reviews.error != null');
       });
     });
   });
