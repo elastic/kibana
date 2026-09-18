@@ -10,9 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
-    "requiredPlugins": [
-      "taskManager"
-    ],
+    "requiredPlugins": ["share", "taskManager"],
     "optionalPlugins": [
       "actions",
       "agentBuilder",
@@ -25,6 +23,6 @@
       "workflowsManagement",
     ],
     "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
   },
 }

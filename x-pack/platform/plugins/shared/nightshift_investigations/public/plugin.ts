@@ -7,6 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import { InvestigationLocatorDefinition, type InvestigationLocator } from '../common/locators';
 import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
@@ -14,28 +16,55 @@ import {
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers';
 
 export interface NightshiftInvestigationsPublicSetupDeps {
+  share: SharePluginSetup;
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
-export type NightshiftInvestigationsPublicSetup = void;
+export interface NightshiftInvestigationsPublicSetup {
+  locators: {
+    investigation: InvestigationLocator;
+  };
+}
 
 export interface NightshiftInvestigationsPublicStart {
   investigationsClient: NightshiftInvestigationsRepositoryClient;
+  locators: {
+    investigation: InvestigationLocator;
+  };
 }
 
 export class NightshiftInvestigationsPublicPlugin
-  implements Plugin<NightshiftInvestigationsPublicSetup, NightshiftInvestigationsPublicStart>
+  implements
+    Plugin<
+      NightshiftInvestigationsPublicSetup,
+      NightshiftInvestigationsPublicStart,
+      NightshiftInvestigationsPublicSetupDeps
+    >
 {
+  private investigationLocator!: InvestigationLocator;
+
   setup(
     _core: CoreSetup,
-    { workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps
+    { share, workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps
   ): NightshiftInvestigationsPublicSetup {
     registerInvestigationsWorkflowTriggers(workflowsExtensions);
+
+    const investigationLocator = share.url.locators.create(new InvestigationLocatorDefinition());
+    this.investigationLocator = investigationLocator;
+
+    return {
+      locators: {
+        investigation: investigationLocator,
+      },
+    };
   }
 
   start(core: CoreStart): NightshiftInvestigationsPublicStart {
     return {
       investigationsClient: createNightshiftInvestigationsRepositoryClient(core),
+      locators: {
+        investigation: this.investigationLocator,
+      },
     };
   }
 }

@@ -15,6 +15,11 @@ export type {
   NightshiftInvestigationsPublicSetup,
   NightshiftInvestigationsPublicStart,
 } from './plugin';
+export {
+  NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
+  type InvestigationLocatorParams,
+  type InvestigationLocator,
+} from '../common/locators';
 export type {
   NightshiftInvestigationsRepositoryClient,
   NightshiftInvestigationsEndpoint,
