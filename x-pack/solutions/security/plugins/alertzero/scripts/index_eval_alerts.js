@@ -64,7 +64,7 @@ async function esRequest(method, path, body) {
 }
 
 const ts = (offsetMinutes) => {
-  const d = new Date('2024-06-15T09:00:00Z');
+  const d = new Date();
   d.setMinutes(d.getMinutes() + offsetMinutes);
   return d.toISOString();
 };
@@ -133,8 +133,8 @@ const buildDoc = ({
     'kibana.alert.rule.description': ruleDescription,
     'kibana.alert.rule.severity': severity,
     'kibana.alert.rule.risk_score': riskScore,
-    'kibana.alert.rule.uuid': `${id}-rule`,
-    'kibana.alert.rule.rule_id': `${id}-rule`,
+    'kibana.alert.rule.uuid': randomUUID(),
+    'kibana.alert.rule.rule_id': randomUUID(),
     'kibana.alert.rule.threat': [
       {
         framework: 'MITRE ATT&CK',
@@ -412,13 +412,15 @@ async function indexAlerts() {
   const indexed = [];
 
   for (const tmpl of ALERT_TEMPLATES) {
+    const alertUuid = randomUUID();
     const id = `eval-${runId}-${tmpl.label}`;
-    const doc = buildDoc({ ...tmpl, id });
-    // Tag for easy cleanup
+    const doc = buildDoc({ ...tmpl, id: alertUuid });
+    // Tag for easy cleanup; preserve label for Worker trigger payload
     doc['kibana.alert.rule.tags'] = ['eval-fixture'];
+    doc['kibana.alert.rule.rule_id'] = `eval-rule-${tmpl.label}`;
 
-    await esRequest('PUT', `/${INDEX}/_doc/${id}`, doc);
-    indexed.push({ id, label: tmpl.label, expected: tmpl.expected });
+    await esRequest('PUT', `/${INDEX}/_doc/${alertUuid}`, doc);
+    indexed.push({ id: alertUuid, label: tmpl.label, expected: tmpl.expected });
     process.stdout.write(`  ✓ ${id}  (expected: ${tmpl.expected})\n`);
   }
 
