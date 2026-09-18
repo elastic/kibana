@@ -463,7 +463,9 @@ export function createRuleDescriptionEvaluator(
  *
  * If a ReferenceRule sets `tool_sequence` explicitly, that overrides the default.
  */
-function defaultGoldenSequence(expected: Partial<ReferenceRule> | null | undefined): string[] {
+export function defaultGoldenSequence(
+  expected: Partial<ReferenceRule> | null | undefined
+): string[] {
   if (expected?.tool_sequence !== undefined) {
     return expected.tool_sequence;
   }
@@ -476,21 +478,27 @@ function defaultGoldenSequence(expected: Partial<ReferenceRule> | null | undefin
 /**
  * Trajectory evaluator scoring tool-call alignment.
  *
- * Coverage matters more than strict order for this suite (the
- * `security.create_detection_rule` tool's a-tool-handles-everything contract
- * means there's no canonical multi-tool order to enforce), so coverage weight
- * is the dominant factor.
+ * The suite asserts an exact sequence — the SKILL.md flow is "call
+ * `security.create_detection_rule` once, then stop" — so `penalizeExtraCalls` is on:
+ * the shared evaluator's order/coverage terms are both divided by the golden path alone,
+ * which means a single expected call would otherwise score 1.0 for any sequence that
+ * merely contains it (extra tools, or the same tool called twice). With the penalty, the
+ * weighted score is scaled by `golden.length / actual.length`, so only an exact-length,
+ * fully-covered sequence reaches 1.0. Order stays weighted lower than coverage (0.4/0.6)
+ * because there is no canonical multi-tool order to enforce; a misordered but complete
+ * sequence is reported through `orderScore`, not treated as an extra call.
  *
  * Wrapping: agent/env errors and missing-index failures already return N/A via
  * `skipAgentErrors` / `skipMissingIndexFailures`, so we don't double-wrap.
  */
-function createRuleTrajectoryEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+export function createRuleTrajectoryEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   const inner = createTrajectoryEvaluator({
     extractToolCalls: (output: unknown) => (output as RuleGenerationTaskOutput)?.toolCalls ?? [],
     goldenPathExtractor: (expected: unknown) =>
       defaultGoldenSequence(expected as Partial<ReferenceRule>),
     orderWeight: 0.4,
     coverageWeight: 0.6,
+    penalizeExtraCalls: true,
   });
 
   // Rename so the report column is descriptive rather than the generic 'trajectory'.
@@ -554,7 +562,8 @@ export function createEvaluateDataset({
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
     // Tool Trajectory — tool-call coverage + order vs. the golden sequence the
-    // detection-rule-edit SKILL.md prescribes. Applies to negatives too (golden = []).
+    // detection-rule-edit SKILL.md prescribes. Applies to negatives too (golden = []),
+    // and penalizes extra/duplicate calls so the advertised exact sequence is enforced.
     skip(createRuleTrajectoryEvaluator()),
     // Trace-based observability (zero per-example LLM cost — reads OTel spans).
     // The `reportDisplayOptions` in evaluate.ts has already declared formatting for these.

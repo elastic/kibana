@@ -126,4 +126,79 @@ describe('createTrajectoryEvaluator', () => {
       })
     ).toThrow('orderWeight (0.3) + coverageWeight (0.3) must sum to 1');
   });
+
+  describe('penalizeExtraCalls', () => {
+    const strictEvaluator = createTrajectoryEvaluator({
+      extractToolCalls: (output: unknown) => (output as { tools: string[] }).tools,
+      goldenPathExtractor: (expected: unknown) => (expected as { tools: string[] }).tools,
+      penalizeExtraCalls: true,
+    });
+
+    it('leaves extra calls unpenalized by default', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'display'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      // The opt-in flag must not change the default behaviour other suites rely on.
+      expect(result.score).toBe(1.0);
+      expect(result.metadata).toMatchObject({ precision: 1 });
+    });
+
+    it('scales the score down for an extra call', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'hack'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.5);
+      expect(result.label).toBe('extra-or-duplicate-tools');
+      expect(result.metadata).toMatchObject({
+        precision: 0.5,
+        exactSequence: false,
+        extraTools: ['hack'],
+      });
+    });
+
+    it('scales the score down for a duplicated golden call', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'search'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.5);
+      expect(result.metadata).toMatchObject({ duplicateTools: ['search'], extraTools: [] });
+    });
+
+    it('does not penalize a shorter actual sequence', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search'] },
+        expected: { tools: ['search', 'filter'] },
+        metadata: null,
+      });
+
+      // Missing calls are already reflected by order/coverage; the ratio stays 1.
+      expect(result.metadata).toMatchObject({ precision: 1, exactSequence: false });
+      expect(result.score).toBeCloseTo(0.5 * 0.5 + 0.5 * 0.5);
+    });
+
+    it('keeps a perfect score for the exact sequence', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'display'] },
+        expected: { tools: ['search', 'display'] },
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.metadata).toMatchObject({ precision: 1, exactSequence: true });
+    });
+  });
 });

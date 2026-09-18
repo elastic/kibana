@@ -15,6 +15,13 @@ const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
 
+/**
+ * The skill the rule-creation prompt expects the agent to load. Mirrors the `skillName`
+ * passed to `createSkillInvocationEvaluator` in evaluate_dataset.ts, and is used to tell a
+ * SKILL.md load apart from an unrelated file read (see {@link isExpectedSkillLoad}).
+ */
+const DETECTION_RULE_SKILL_NAME = 'detection-rule-edit';
+
 export type EvalFetch = (path: string, options?: Record<string, unknown>) => Promise<unknown>;
 
 interface ToolResult {
@@ -25,6 +32,7 @@ interface ToolResult {
 interface RuleToolStep {
   type: string;
   tool_id?: string;
+  params?: Record<string, unknown>;
   results?: ToolResult[];
 }
 
@@ -39,20 +47,68 @@ interface SecurityRuleGenerationLog {
   error?: (msg: string) => void;
 }
 
-/**
- * HTTP status codes that should NOT be retried — these are deterministic
- * client errors (bad auth, malformed request, missing connector) where
- * retrying just wastes budget. Everything else (5xx, network errors,
- * ECONNRESET/ETIMEDOUT) is treated as transient.
- */
-const NON_RETRYABLE_HTTP_STATUSES = new Set([400, 401, 403, 404, 422]);
-
-function isNonRetryable(error: unknown): boolean {
-  const status =
+function errorStatus(error: unknown): number | undefined {
+  return (
     (error as { response?: { status?: number } })?.response?.status ??
     (error as { status?: number })?.status ??
-    (error as { statusCode?: number })?.statusCode;
-  return typeof status === 'number' && NON_RETRYABLE_HTTP_STATUSES.has(status);
+    (error as { statusCode?: number })?.statusCode
+  );
+}
+
+/**
+ * Network error codes reach us wrapped (`KbnClientRequesterError` carries the underlying
+ * failure as `Error.cause`), so walk the cause chain rather than reading one level.
+ */
+function errorCode(error: unknown): string | undefined {
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current; depth++) {
+    const code = (current as { code?: unknown }).code;
+    if (typeof code === 'string') {
+      return code;
+    }
+    current = (current as { cause?: unknown }).cause;
+  }
+  return undefined;
+}
+
+/**
+ * A converse round is NOT idempotent — the agent can execute
+ * `security.create_detection_rule`, and the API has no idempotency key or request id that
+ * would let a repeat be deduplicated. Retrying an ambiguous failure is therefore how a
+ * single example creates two rules and keeps only the second attempt's trace: a response we
+ * received but could not use (5xx other than 429/503), or a connection reset/timeout after
+ * the request was written (`ECONNRESET`, `ETIMEDOUT`, socket hang up).
+ *
+ * Only failures that prove the request never ran are retried:
+ *   - HTTP 429/503 — the service declined to process it. This is a subset of the statuses the
+ *     shared eval HTTP handler retries (`@kbn/evals/src/utils/http_handler_from_kbn_client.ts`
+ *     retries 429/503/504); 504 is a gateway timeout, so the round may well have run and it is
+ *     deliberately left out here.
+ *   - Connection-establishment errors (`ECONNREFUSED`, `ENOTFOUND`, `EAI_AGAIN`) — nothing
+ *     was sent, so nothing can have executed.
+ * Everything else is surfaced as an agent error (the dataset summary reports it) instead of
+ * silently duplicating a side effect.
+ */
+const RETRYABLE_HTTP_STATUSES = new Set([429, 503]);
+const RETRYABLE_NETWORK_CODES = new Set(['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN']);
+
+function isRetrySafe(error: unknown): boolean {
+  const status = errorStatus(error);
+  if (typeof status === 'number') {
+    return RETRYABLE_HTTP_STATUSES.has(status);
+  }
+
+  const code = errorCode(error);
+  if (code && RETRYABLE_NETWORK_CODES.has(code)) {
+    return true;
+  }
+
+  // The requester formats network failures into the message ("Cause: ECONNREFUSED"), which
+  // survives even when the code itself is nested beyond the cause-walk depth above.
+  const message = error instanceof Error ? error.message : String(error);
+  return [...RETRYABLE_NETWORK_CODES].some((retryableCode) =>
+    new RegExp(`\\b${retryableCode}\\b`).test(message)
+  );
 }
 
 export class SecurityRuleGenerationClient {
@@ -68,9 +124,11 @@ export class SecurityRuleGenerationClient {
     traceId?: string;
     /**
      * Tool IDs invoked during the conversation, in order. Powers the trajectory
-     * evaluator. Skill-routing calls (`load_skill`, `read_file`, and the legacy
-     * `filestore.read`) are filtered out because those are SKILL.md loads that
-     * the skill-invocation evaluator already covers.
+     * evaluator. Calls that load the expected `detection-rule-edit` SKILL.md
+     * (`load_skill` with the skill name, `read_file`/legacy `filestore.read` with
+     * `<skill>/SKILL.md`) are filtered out because the skill-invocation evaluator
+     * already covers them; other calls to those same tools are kept so they stay
+     * visible as extra tools.
      */
     toolCalls?: string[];
   }> {
@@ -102,9 +160,9 @@ export class SecurityRuleGenerationClient {
             body: JSON.stringify(payload),
           })) as ConverseResponse;
         } catch (err) {
-          // Deterministic client errors (bad auth, malformed request, missing
-          // connector) should NOT be retried — AbortError stops pRetry immediately.
-          if (isNonRetryable(err)) {
+          // Anything that is not provably a pre-execution failure aborts pRetry — see
+          // `isRetrySafe`: a retried round can create a second detection rule.
+          if (!isRetrySafe(err)) {
             throw new AbortError(err instanceof Error ? err : new Error(String(err)));
           }
           throw err;
@@ -151,20 +209,37 @@ export class SecurityRuleGenerationClient {
 }
 
 /**
- * Extracts tool IDs in invocation order from a ConverseResponse, dropping
- * skill-routing calls (`load_skill`, `read_file`, and the legacy
- * `filestore.read`) — those are SKILL.md loads, already covered by the
- * skill-invocation evaluator, and would otherwise dominate the trajectory
- * evaluator's "extra tools" list.
+ * Tools the agent uses to load skill content. A call to one of these is only a SKILL.md load
+ * when its arguments name the expected skill — the same argument shape the skill-invocation
+ * evaluator matches in its span query (`skill_invocation.ts`: `load_skill` arguments containing
+ * the skill name, or `filestore.read` arguments pointing at `<skill>/SKILL.md`). `read_file` is
+ * the current id of that same file-read tool and `filestore.read` its legacy id, so both get the
+ * path form here.
  */
 const SKILL_ROUTING_TOOL_IDS = new Set(['load_skill', 'read_file', 'filestore.read']);
+
+/**
+ * True only for calls that load the expected SKILL.md. Filtering by tool id alone would hide
+ * unrelated work as well: a `read_file` of some other path, or a `load_skill` for a different
+ * skill, is not covered by the skill-invocation evaluator, and dropping it would let a
+ * negative case score a perfect trajectory on an empty list and hide extra tools on positives.
+ */
+const isExpectedSkillLoad = (step: RuleToolStep): boolean => {
+  if (!step.tool_id || !SKILL_ROUTING_TOOL_IDS.has(step.tool_id)) {
+    return false;
+  }
+  const args = JSON.stringify(step.params ?? {});
+  return step.tool_id === 'load_skill'
+    ? args.includes(DETECTION_RULE_SKILL_NAME)
+    : args.includes(`/${DETECTION_RULE_SKILL_NAME}/SKILL.md`);
+};
 
 const extractInvokedToolIds = (response: ConverseResponse): string[] => {
   return (
     response.steps
       ?.filter((step) => step.type === 'tool_call' && !!step.tool_id)
-      .map((step) => step.tool_id as string)
-      .filter((id) => !SKILL_ROUTING_TOOL_IDS.has(id)) ?? []
+      .filter((step) => !isExpectedSkillLoad(step))
+      .map((step) => step.tool_id as string) ?? []
   );
 };
 

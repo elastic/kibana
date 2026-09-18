@@ -23,7 +23,9 @@ This package evaluates the quality of AI-generated detection rules against known
 
 ## API Flow
 
-The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) and extracts tool results from the `security.create_detection_rule` tool call steps, matching the pattern used by the agent-builder eval suite.
+The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) and extracts tool results from the `security.create_detection_rule` tool call steps, matching the pattern used by the agent-builder eval suite. It also propagates the round's `trace_id` and the ordered tool calls (`toolCalls`) to the evaluators — the trace-based evaluators need the former, the trajectory evaluator the latter.
+
+A converse round is **not** idempotent: it can execute `security.create_detection_rule`, and the API exposes no idempotency key that would let a repeat be deduplicated. The client therefore retries only failures that prove the request never reached the agent runtime — HTTP 429/503 (the service declined to process it) and connection-establishment errors (`ECONNREFUSED`, `ENOTFOUND`, `EAI_AGAIN`). Ambiguous failures (any other 5xx, `ECONNRESET`, `ETIMEDOUT`, socket hang up) are surfaced as agent errors instead of being retried, because a retry there can create the rule twice and keep only the second attempt's trace.
 
 ## Package Structure
 
@@ -40,8 +42,10 @@ kbn-evals-suite-security-ai-rules/
 │   └── negative_pairs.ts         # 5 prompts that should NOT produce a valid rule
 └── src/
     ├── chat_client.ts            # Agent Builder API client (sync converse)
+    ├── chat_client.test.ts       # Unit tests: payload, trace/tool-call propagation, retry policy
     ├── evaluate.ts               # Suite-specific eval fixture extensions
     ├── evaluate_dataset.ts       # Experiment runner + all evaluator definitions
+    ├── trajectory_evaluator.test.ts # Unit tests for the Tool Trajectory golden-sequence rules
     ├── helpers.ts                # Utility functions (MITRE extraction, syntax check, etc.)
     └── helpers.test.ts           # Unit tests for helpers
 ```
@@ -164,12 +168,16 @@ createRuleDescriptionEvaluator(evaluators),
 
 ### Tool Trajectory (CODE — 0 to 1)
 
-Scores tool-call coverage and order against a golden sequence using LCS for order (weight 0.4) and set intersection for coverage (weight 0.6). The default golden sequence is inferred from each example's `category`:
+Scores tool-call coverage and order against a golden sequence using LCS for order (weight 0.4) and set intersection for coverage (weight 0.6). Both terms are divided by the golden path alone, so the score is additionally scaled by `golden.length / actual.length` (`penalizeExtraCalls`) — without it, a single expected call is matched perfectly by *any* sequence that contains it, including `attachment_update` calls or the creation tool invoked twice. With the penalty, only an exact-length, fully-covered sequence reaches 1.0, and extra/duplicate calls are reported in `metadata.extraTools` / `metadata.duplicateTools` and labelled `extra-or-duplicate-tools`.
 
-- `category: 'negative'` → `[]` (no tools expected; agent should refuse)
+The default golden sequence is inferred from each example's `category`:
+
+- `category: 'negative'` → `[]` (no tools expected; agent should refuse — any tool call scores 0)
 - otherwise → `['security.create_detection_rule']` (the canonical creation flow per `detection-rule-edit/SKILL.md`)
 
-Override the default by setting `tool_sequence: string[]` on a `ReferenceRule`. Skill-routing calls (`load_skill`, `read_file`, and the legacy `filestore.read`) are filtered from observed tool calls because those are SKILL.md loads covered by the Skill Invocation evaluator.
+Override the default by setting `tool_sequence: string[]` on a `ReferenceRule`.
+
+Calls that load the expected SKILL.md — `load_skill` with arguments naming `detection-rule-edit`, or `read_file` / the legacy `filestore.read` with a `<skill>/SKILL.md` path — are filtered from observed tool calls because the Skill Invocation evaluator already covers them. Filtering is argument-based on purpose: a `read_file` of an unrelated path or a `load_skill` for a different skill stays in the trajectory, so it is visible as an extra tool (positive cases) or as an unexpected call (negative cases).
 
 ### Skill Invocation (TRACE-BASED — binary: 0 or 1)
 
@@ -185,7 +193,13 @@ Five evaluators that query OTel spans for non-functional signals:
 
 ### Skip Wrappers
 
-All evaluators except Rejection are wrapped with `skipNegativeCases` (returns N/A for negative test examples). All evaluators are wrapped with `skipMissingIndexFailures` (returns N/A when the rule creation tool failed due to missing index patterns). The ES|QL equivalence evaluator additionally uses `skipNonEsqlReferences` to avoid meaningless comparisons when no ES|QL ground truth exists.
+`skipNegativeCases` (N/A for `category: 'negative'` examples) is applied to the ten structural CODE evaluators and to ES|QL Functional Equivalence. `skipMissingIndexFailures` (N/A when the rule creation tool failed because no index pattern matched) and `skipAgentErrors` (N/A for any other agent/environment error) are applied to those same evaluators plus Rejection and Tool Trajectory, via the `skip(...)` helper in `createEvaluateDataset`. ES|QL Functional Equivalence additionally uses `skipNonEsqlReferences` when the reference rule has no ES|QL ground truth.
+
+Three evaluators are deliberately **not** wrapped:
+
+- **Rejection** — it is the evaluator that scores negative cases, so it must run on them.
+- **Tool Trajectory** — negative cases are evaluated against the empty golden sequence, which is how a tool call on a refusal prompt is caught. It is still wrapped with `skipAgentErrors` / `skipMissingIndexFailures`, so an infrastructure failure returns N/A rather than a trajectory score.
+- **The five trace-based observability evaluators and Skill Invocation** — they read OTel spans rather than the generated rule, and handle their missing-data cases themselves (`trace_based/factory.ts`): a missing `traceId` returns N/A (`score: null`, label `unavailable`); an invalid one, or a span query that exhausts its retries without ever producing a value, returns label `error` with no score; a metric the provider never emitted for a complete trace returns N/A with label `unavailable`; and a query that fails after a usable value was already seen returns that value with label `potentially_incomplete`. `skip(...)` is therefore not applied to them, so a missing-index example can still report `error`/`unavailable`/`potentially_incomplete` in those columns while the CODE evaluators report N/A.
 
 ## Viewing Results
 
