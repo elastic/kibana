@@ -34,6 +34,7 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_COPY_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   GetEvaluationDatasetsRequestQuery,
@@ -54,6 +55,7 @@ import { registerGetDatasetRoute } from './get_dataset';
 import { registerUpdateDatasetRoute } from './update_dataset';
 import { registerDeleteDatasetRoute } from './delete_dataset';
 import { registerAddExamplesRoute } from './add_examples';
+import { registerCopyDatasetRoute } from './copy_dataset';
 import { registerUpdateExampleRoute } from './update_example';
 import { registerDeleteExampleRoute } from './delete_example';
 import { registerUpsertDatasetRoute } from './upsert_dataset';
@@ -107,6 +109,7 @@ const buildRouteSetup = ({
     deleteExample: jest.fn(),
     upsert: jest.fn(),
     resolveByName: jest.fn(),
+    copy: jest.fn(),
   };
 
   const datasetService = {
@@ -1001,6 +1004,129 @@ describe('dataset routes', () => {
       expect(datasetClient.datasetExists).not.toHaveBeenCalled();
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ added: 2, skipped_duplicates: 1 });
+    });
+  });
+
+  describe('POST /internal/evals/datasets/{datasetId}/_copy', () => {
+    const body = { name: 'qa-dataset-copy', description: 'Copied dataset' };
+
+    it('copies a dataset in the active space', async () => {
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+        spaceId: 'sales',
+      });
+      datasetClient.copy.mockResolvedValueOnce({
+        ...dataset,
+        id: 'dataset-copy',
+        name: body.name,
+        examples_count: 2,
+        examples: [],
+      });
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body,
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+      expect(datasetClient.copy).toHaveBeenCalledWith(datasetId, body);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        dataset_id: 'dataset-copy',
+        name: body.name,
+        examples_count: 2,
+      });
+    });
+
+    it('returns 404 when the source dataset does not exist', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+      });
+      datasetClient.copy.mockResolvedValueOnce(undefined);
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body,
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+    });
+
+    it('returns 409 when the copy name already exists', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+      });
+      datasetClient.copy.mockRejectedValueOnce(new DatasetAlreadyExistsError(body.name));
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body,
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('already exists');
+    });
+
+    it('forwards the JSON body to a remote Kibana', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+      });
+      mockedForwardToRemoteKibana.mockResolvedValueOnce({
+        statusCode: 200,
+        body: { dataset_id: 'remote-copy', name: body.name, examples_count: 2 },
+      });
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        query: { [DESTINATION_QUERY_PARAM]: 'remote-1' },
+        body,
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(mockedForwardToRemoteKibana).toHaveBeenCalledWith(
+        expect.objectContaining({
+          remoteId: 'remote-1',
+          request,
+          method: 'POST',
+          body,
+        })
+      );
+      expect(datasetClient.copy).not.toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        dataset_id: 'remote-copy',
+        name: body.name,
+        examples_count: 2,
+      });
     });
   });
 

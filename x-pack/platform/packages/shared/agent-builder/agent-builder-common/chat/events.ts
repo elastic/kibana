@@ -6,6 +6,12 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
+import type {
+  AttachmentTimelineEvent,
+  ExecutionStartedEvent,
+  ExecutionTerminatedEvent,
+} from './timeline_events';
+import { TimelineEventType } from './timeline_events';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
@@ -324,12 +330,24 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /**
+   * Present only on a resumed round. Carries the resume execution (`exec_k`) as its own round so the
+   * persistence layer can append it to the timeline append-only, without rewriting the pause.
+   */
+  resume_execution?: {
+    follow_up_round: ConversationRound;
+  };
   /** if the prompt state was updated during the round, contains the up-to-date version */
   conversation_state?: ConversationInternalState;
   /**
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Attachment lifecycle events produced by this round: `chat_input` changes (attachments sent with
+   * the message) and `execution` changes (made by tools). Persisted alongside the round's events.
+   */
+  attachment_events?: AttachmentTimelineEvent[];
   /**
    * Set when this round initialized the bash/VFS workspace for this conversation.
    */
@@ -512,6 +530,18 @@ export type ChatAgentEvent =
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
 
+export const isExecutionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionStartedEvent => {
+  return event.type === TimelineEventType.executionStarted;
+};
+
+export const isExecutionTerminatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionTerminatedEvent => {
+  return event.type === TimelineEventType.executionTerminated;
+};
+
 /**
  * All types of events that can be emitted from the chat API.
  */
@@ -519,4 +549,6 @@ export type ChatEvent =
   | ChatAgentEvent
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
-  | ConversationIdSetEvent;
+  | ConversationIdSetEvent
+  | ExecutionStartedEvent
+  | ExecutionTerminatedEvent;

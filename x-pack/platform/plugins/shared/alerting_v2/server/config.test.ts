@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { configSchema, getQueryRowLimit, NON_STREAMING_MAX_ROWS } from './config';
+import { configSchema, getQueryRowLimit } from './config';
+import {
+  ESQL_RESPONSE_FORMAT_NAMES,
+  NON_STREAMING_MAX_ROWS,
+} from './lib/services/query_service/formats';
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -59,9 +63,9 @@ describe('alerting_v2 config schema', () => {
   });
 
   describe('rules.maxScheduledPerMinute', () => {
-    it('defaults to 400', () => {
+    it('defaults to 32000 (the v1 hosted budget; serverless overrides to 400)', () => {
       const config = configSchema.validate({});
-      expect(config.rules.maxScheduledPerMinute).toBe(400);
+      expect(config.rules.maxScheduledPerMinute).toBe(32000);
     });
 
     it('rejects negative values', () => {
@@ -216,6 +220,14 @@ describe('alerting_v2 config schema', () => {
 
     it('rejects an unknown format', () => {
       expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
+    });
+
+    it('accepts every name the format registry advertises', () => {
+      for (const name of ESQL_RESPONSE_FORMAT_NAMES) {
+        expect(configSchema.validate({ esql: { responseFormat: name } }).esql.responseFormat).toBe(
+          name
+        );
+      }
     });
   });
 });

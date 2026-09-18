@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { DocLinksStart } from '@kbn/core/public';
 import { LatencyAggregationType } from '@kbn/apm-types';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
 import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
@@ -58,7 +60,14 @@ const locators = {
   }),
 } as unknown as SharePluginStart['url']['locators'];
 
+const TROUBLESHOOTING_DOCS_HREF = 'https://docs.example/apm/common-problems#too-many-transactions';
+
+const docLinks = {
+  links: { apm: { troubleshootingTooManyTransactions: TROUBLESHOOTING_DOCS_HREF } },
+} as unknown as DocLinksStart;
+
 const BASE_PROPS = {
+  docLinks,
   http: {} as unknown as HttpStart,
   notifications: { toasts: { addDanger: jest.fn() } } as any,
   serviceName: 'frontend-node',
@@ -87,10 +96,34 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(link.getAttribute('href')).toContain('production');
   });
 
+  it('calls onTransactionClick instead of navigating when provided', () => {
+    const onTransactionClick = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection {...BASE_PROPS} onTransactionClick={onTransactionClick} />
+    );
+
+    const link = screen.getByRole('button', { name: 'GET /api/orders' });
+    expect(link).toBeInTheDocument();
+    expect(link.getAttribute('href')).toBeNull();
+
+    link.click();
+    expect(onTransactionClick).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'GET /api/orders' })
+    );
+  });
+
   it('renders the Open in APM header link when locators are provided', () => {
     render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
 
     expect(screen.getByRole('link', { name: 'Open in APM' })).toBeInTheDocument();
+  });
+
+  it('forwards projectRouting to the data hook', () => {
+    render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} projectRouting="_alias:*" />);
+
+    expect(mockedUseServiceFlyoutTransactionData).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
   });
 
   it('renders transaction names as plain text when locators are not provided', () => {
@@ -124,6 +157,39 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(badge).toBeInTheDocument();
     expect(badge.getAttribute('href')).toContain('serviceAlertsLocator');
     expect(badge.getAttribute('href')).toContain('frontend-node');
+  });
+
+  it('resolves the max groups tooltip docs link through the doc links service', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [
+        ...FIXTURE_ITEMS,
+        {
+          name: '_other',
+          transactionType: 'request',
+          latency: { value: null },
+          throughput: { value: 0 },
+          errorRate: { value: null },
+          alertsCount: 0,
+        },
+      ],
+      maxCountExceeded: true,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutTransactionsSection {...BASE_PROPS} />
+      </IntlProvider>
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'More information about remaining transactions' })
+    );
+
+    expect(screen.getByTestId('apmMaxGroupsTooltipDocsLink')).toHaveAttribute(
+      'href',
+      TROUBLESHOOTING_DOCS_HREF
+    );
   });
 
   describe('sparkline loading state', () => {
