@@ -21,12 +21,14 @@ import {
 } from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
+type ImpactService = ReturnType<AgenticInvestigationsPluginStart['getImpactService']>;
 
 export class ConversationProposalsService {
   constructor(
     private readonly proposalsService: ProposalsService,
     private readonly agentBuilder: AgentBuilderPluginStart,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly impactService: ImpactService
   ) {}
 
   async list(
@@ -45,19 +47,21 @@ export class ConversationProposalsService {
       spaceId
     );
 
-    const titles = await this.getTitles(
-      proposals.map((p) => p.conversationId),
-      request
-    );
+    const conversationIds = proposals.map((p) => p.conversationId);
+    const [titles, entityIds] = await Promise.all([
+      this.getTitles(conversationIds, request),
+      this.getEntityIds(conversationIds, spaceId),
+    ]);
 
-    const groups = this.groupProposals(proposals, titles);
+    const groups = this.groupProposals(proposals, titles, entityIds);
     const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
     return { groups, total, truncated };
   }
 
   private groupProposals(
     proposals: ProposalWithMetadata[],
-    titles: Map<string, string>
+    titles: Map<string, string>,
+    entityIds: Map<string, string[]>
   ): ProposalGroups {
     const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
 
@@ -66,6 +70,9 @@ export class ConversationProposalsService {
         ...proposal,
         ...(titles.has(proposal.conversationId)
           ? { conversationTitle: titles.get(proposal.conversationId) }
+          : {}),
+        ...(entityIds.has(proposal.conversationId)
+          ? { entityIds: entityIds.get(proposal.conversationId) }
           : {}),
       };
 
@@ -106,6 +113,25 @@ export class ConversationProposalsService {
       );
     } catch (err) {
       this.logger.debug(`Could not resolve conversation titles: ${err}`);
+      return new Map();
+    }
+  }
+
+  /**
+   * Second pass after the proposal list: Impact lives in its own index, keyed
+   * by conversationId. Failure here omits the field the same way a missing
+   * title does — the queue is still usable without pills.
+   */
+  private async getEntityIds(
+    conversationIds: string[],
+    spaceId: string
+  ): Promise<Map<string, string[]>> {
+    const uniqueIds = [...new Set(conversationIds)];
+    try {
+      const impacts = await this.impactService.listByConversationIds(uniqueIds, spaceId);
+      return new Map(impacts.map((impact) => [impact.conversationId, impact.entityIds]));
+    } catch (err) {
+      this.logger.debug(`Could not resolve investigation impact: ${err}`);
       return new Map();
     }
   }

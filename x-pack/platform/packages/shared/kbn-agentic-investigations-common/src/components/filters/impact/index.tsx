@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
-
-export interface ActionImpactItemStatus {
-  label: string;
-  /** @default 'check' */
-  iconType?: IconType;
-  /** @default 'success' */
-  color?: 'success' | 'warning' | 'danger';
-}
+export { Impact } from './impact';
+export { investigationEntityIds } from './entity_ids';

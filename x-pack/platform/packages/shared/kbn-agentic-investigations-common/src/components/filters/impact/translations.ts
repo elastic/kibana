@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export interface ActionImpactItemStatus {
-  label: string;
-  /** @default 'check' */
-  iconType?: IconType;
-  /** @default 'success' */
-  color?: 'success' | 'warning' | 'danger';
-}
+export const IMPACT_LABELS = Object.freeze({
+  title: i18n.translate('xpack.alertzero.impact.title', {
+    defaultMessage: 'Impact',
+  }),
+});

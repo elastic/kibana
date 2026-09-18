@@ -65,8 +65,29 @@ const makeAgentBuilder = (titlesById?: Record<string, string>): AgentBuilderPlug
     },
   } as unknown as AgentBuilderPluginStart);
 
+const makeImpactService = (
+  entityIdsByConversationId: Record<string, string[]> = {}
+): ReturnType<AgenticInvestigationsPluginStart['getImpactService']> =>
+  ({
+    listByConversationIds: jest.fn().mockImplementation(async (ids: string[]) =>
+      ids.flatMap((conversationId) => {
+        const entityIds = entityIdsByConversationId[conversationId];
+        return entityIds ? [{ conversationId, entityIds }] : [];
+      })
+    ),
+  } as unknown as ReturnType<AgenticInvestigationsPluginStart['getImpactService']>);
+
+const logger = loggingSystemMock.createLogger();
+
+const createService = (
+  proposalsService: ReturnType<typeof makeProposalsService>,
+  agentBuilder: AgentBuilderPluginStart = makeAgentBuilder(),
+  impactService: ReturnType<
+    AgenticInvestigationsPluginStart['getImpactService']
+  > = makeImpactService()
+) => new ConversationProposalsService(proposalsService, agentBuilder, logger, impactService);
+
 describe('ConversationProposalsService', () => {
-  const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
   const query = { windowHours: 24 };
   const spaceId = 'default';
@@ -77,7 +98,7 @@ describe('ConversationProposalsService', () => {
 
   it('calls listByWindow with the provided query and spaceId', async () => {
     const proposalsService = makeProposalsService();
-    const service = new ConversationProposalsService(proposalsService, makeAgentBuilder(), logger);
+    const service = createService(proposalsService);
 
     await service.list(query, request, spaceId);
 
@@ -103,11 +124,7 @@ describe('ConversationProposalsService', () => {
       conversations: { getScopedClient },
     } as unknown as AgentBuilderPluginStart;
 
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      agentBuilder,
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), agentBuilder);
     await service.list(query, request, spaceId);
 
     const scopedClient = await getScopedClient.mock.results[0].value;
@@ -122,11 +139,7 @@ describe('ConversationProposalsService', () => {
     // 'bad' is not in the returned map (inaccessible / not found)
     const agentBuilder = makeAgentBuilder({ good: 'Title for good' });
 
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      agentBuilder,
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), agentBuilder);
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.investigate).toHaveLength(2);
@@ -146,11 +159,7 @@ describe('ConversationProposalsService', () => {
       conversations: { getScopedClient },
     } as unknown as AgentBuilderPluginStart;
 
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      agentBuilder,
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), agentBuilder);
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.investigate).toHaveLength(2);
@@ -163,7 +172,7 @@ describe('ConversationProposalsService', () => {
       total: 501,
       truncated: true,
     });
-    const service = new ConversationProposalsService(proposalsService, makeAgentBuilder(), logger);
+    const service = createService(proposalsService);
 
     const result = await service.list(query, request, spaceId);
 
@@ -177,11 +186,7 @@ describe('ConversationProposalsService', () => {
     const proposals = [makeProposal({ conversationId: 'conv-xyz' })];
     const agentBuilder = makeAgentBuilder({ 'conv-xyz': 'My investigation' });
 
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      agentBuilder,
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), agentBuilder);
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.investigate[0].conversationTitle).toBe('My investigation');
@@ -189,11 +194,7 @@ describe('ConversationProposalsService', () => {
 
   it('places a pending proposal under its category, not under closed', async () => {
     const proposals = [makeProposal({ status: 'pending', category: 'contain' })];
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.contain).toHaveLength(1);
@@ -209,11 +210,7 @@ describe('ConversationProposalsService', () => {
         decidedAt: '2026-09-09T10:00:00.000Z',
       }),
     ];
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
@@ -227,11 +224,7 @@ describe('ConversationProposalsService', () => {
     const proposals = [
       makeProposal({ decision: 'approved', status: 'executing', category: 'contain' }),
     ];
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
@@ -252,11 +245,7 @@ describe('ConversationProposalsService', () => {
         decidedAt: '2026-09-09T10:00:00.000Z',
       }),
     ];
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(1);
@@ -264,11 +253,7 @@ describe('ConversationProposalsService', () => {
   });
 
   it('only initializes closed by default; other keys created on demand', async () => {
-    const service = new ConversationProposalsService(
-      makeProposalsService([]),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService([]), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups).toHaveProperty(CLOSED_GROUP_KEY);
@@ -277,11 +262,7 @@ describe('ConversationProposalsService', () => {
 
   it('creates a category key on demand for any category string', async () => {
     const proposals = [makeProposal({ status: 'pending', category: 'remediate' })];
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups.remediate).toHaveLength(1);
@@ -302,11 +283,7 @@ describe('ConversationProposalsService', () => {
         decidedAt: '2026-09-09T10:00:00.000Z',
       }),
     ];
-    const service = new ConversationProposalsService(
-      makeProposalsService(proposals),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService(proposals), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups[CLOSED_GROUP_KEY][0].id).toBe('newer');
@@ -315,14 +292,49 @@ describe('ConversationProposalsService', () => {
 
   it('drops a pending proposal with no category', async () => {
     const proposal = makeProposal({ status: 'pending', category: undefined });
-    const service = new ConversationProposalsService(
-      makeProposalsService([proposal]),
-      makeAgentBuilder(),
-      logger
-    );
+    const service = createService(makeProposalsService([proposal]), makeAgentBuilder());
     const result = await service.list(query, request, spaceId);
 
     expect(result.groups[CLOSED_GROUP_KEY]).toHaveLength(0);
     expect(Object.keys(result.groups)).toEqual([CLOSED_GROUP_KEY]);
+  });
+
+  it('attaches hydrated entity ids to each proposal for the same conversation', async () => {
+    const proposals = [
+      makeProposal({ id: 'p1', conversationId: 'shared' }),
+      makeProposal({ id: 'p2', conversationId: 'shared' }),
+      makeProposal({ id: 'p3', conversationId: 'other' }),
+    ];
+    const impactService = makeImpactService({ shared: ['user-1', 'host-1'] });
+    const listByConversationIds = impactService.listByConversationIds as jest.Mock;
+
+    const service = createService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      impactService
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(listByConversationIds).toHaveBeenCalledWith(['shared', 'other'], spaceId);
+    expect(result.groups.investigate[0].entityIds).toEqual(['user-1', 'host-1']);
+    expect(result.groups.investigate[1].entityIds).toEqual(['user-1', 'host-1']);
+    expect(result.groups.investigate[2]).not.toHaveProperty('entityIds');
+  });
+
+  it('still resolves when the impact fetch fails', async () => {
+    const proposals = [makeProposal()];
+    const impactService = {
+      listByConversationIds: jest.fn().mockRejectedValue(new Error('index missing')),
+    } as unknown as ReturnType<AgenticInvestigationsPluginStart['getImpactService']>;
+
+    const service = createService(
+      makeProposalsService(proposals),
+      makeAgentBuilder(),
+      impactService
+    );
+    const result = await service.list(query, request, spaceId);
+
+    expect(result.groups.investigate).toHaveLength(1);
+    expect(result.groups.investigate[0]).not.toHaveProperty('entityIds');
   });
 });

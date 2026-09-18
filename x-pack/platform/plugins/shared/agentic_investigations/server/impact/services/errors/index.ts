@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const BLAST_RADIUS_LABELS = Object.freeze({
-  title: i18n.translate('xpack.alertzero.blastRadius.title', {
-    defaultMessage: 'Blast radius',
-  }),
-});
+export { ImpactNotFoundError } from './impact_not_found_error';
+export { ImpactInvalidRequestError } from './impact_invalid_request_error';

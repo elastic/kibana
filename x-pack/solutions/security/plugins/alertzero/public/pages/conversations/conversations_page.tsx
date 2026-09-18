@@ -24,7 +24,8 @@ import {
   type RecommendedAction,
   InvestigationDetailsFlyout,
   InvestigationActionModals,
-  BlastRadius,
+  Impact,
+  investigationEntityIds,
 } from '@kbn/agentic-investigations-common';
 import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -253,7 +254,9 @@ export const ConversationsPage: React.FC = () => {
   const filteredQueueItems = useMemo(
     () =>
       sortedConversations.filter((conversation) => {
-        if (surfaceFilter && conversation.affectedSurface !== surfaceFilter) return false;
+        if (surfaceFilter && !investigationEntityIds(conversation).includes(surfaceFilter)) {
+          return false;
+        }
         return true;
       }),
     [sortedConversations, surfaceFilter]
@@ -322,7 +325,7 @@ export const ConversationsPage: React.FC = () => {
           <ProposalsTrendChartRow />
         </EuiFlexItem>
         <EuiFlexItem>
-          <BlastRadius
+          <Impact
             investigations={sortedConversations}
             surfaceFilter={surfaceFilter}
             onSurfaceFilterChange={setSurfaceFilter}

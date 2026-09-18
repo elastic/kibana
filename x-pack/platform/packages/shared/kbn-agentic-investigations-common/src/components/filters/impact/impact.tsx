@@ -18,15 +18,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '../../../types';
-import { BLAST_RADIUS_LABELS } from './translations';
+import { investigationEntityIds } from './entity_ids';
+import { IMPACT_LABELS } from './translations';
 
-interface BlastRadiusProps {
+interface ImpactProps {
   investigations: Investigation[];
   surfaceFilter: string | null;
   onSurfaceFilterChange: (surface: string | null) => void;
 }
 
-export const BlastRadius: React.FC<BlastRadiusProps> = ({
+export const Impact: React.FC<ImpactProps> = ({
   investigations,
   surfaceFilter,
   onSurfaceFilterChange,
@@ -37,8 +38,10 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
     const seen = new Set<string>();
     const labels: string[] = [];
     for (const investigation of investigations) {
-      const surface = investigation.affectedSurface?.trim();
-      if (surface && !seen.has(surface)) {
+      for (const surface of investigationEntityIds(investigation)) {
+        if (seen.has(surface)) {
+          continue;
+        }
         seen.add(surface);
         labels.push(surface);
       }
@@ -53,7 +56,7 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
   return (
     <>
       <EuiTitle size="xxs" css={css({ fontWeight: euiTheme.font.weight.semiBold })}>
-        <h3>{BLAST_RADIUS_LABELS.title}</h3>
+        <h3>{IMPACT_LABELS.title}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup
@@ -61,7 +64,7 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
         wrap
         responsive={false}
         alignItems="center"
-        aria-label={BLAST_RADIUS_LABELS.title}
+        aria-label={IMPACT_LABELS.title}
       >
         {surfaces.map((surface) => (
           <EuiFlexItem key={surface} grow={false}>
@@ -99,7 +102,10 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
-                    {investigations.filter((i) => i.affectedSurface === surface).length}
+                    {
+                      investigations.filter((i) => investigationEntityIds(i).includes(surface))
+                        .length
+                    }
                   </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
