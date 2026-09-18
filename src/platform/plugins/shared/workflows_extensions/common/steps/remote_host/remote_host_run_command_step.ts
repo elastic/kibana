@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const RemoteHostRunCommandStepTypeId = 'remoteHost.runCommand' as const;
+export const SshHostRunCommandStepTypeId = 'ssh-host.runCommand' as const;
 
 export const REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB
 
@@ -37,7 +37,7 @@ export const remoteHostRunCommandStepCommonDefinition: CommonStepDefinition<
   RemoteHostRunCommandStepOutputSchema,
   RemoteHostRunCommandStepConfigSchema
 > = {
-  id: RemoteHostRunCommandStepTypeId,
+  id: SshHostRunCommandStepTypeId,
   category: StepCategory.Kibana,
   // stability: 'tech_preview',
   label: i18n.translate('workflowsExtensions.remoteHostRunCommandStep.label', {
@@ -57,7 +57,7 @@ Standard output and stderr are captured to logs.
 
 \`\`\`yaml
 - name: get-hostname
-  type: remoteHost.runCommand
+  type: ssh-host.runCommand
   config:
     connector-id: my-ssh-host-connector
   with:
@@ -69,7 +69,7 @@ Standard output and stderr are captured to logs.
 
 \`\`\`yaml
 - name: disk-info
-  type: remoteHost.runCommand
+  type: ssh-host.runCommand
   config:
     connector-id: my-ssh-host-connector
   with:
@@ -82,7 +82,7 @@ Standard output and stderr are captured to logs.
 
 \`\`\`yaml
 - name: deploy
-  type: remoteHost.runCommand
+  type: ssh-host.runCommand
   config:
     connector-id: my-ssh-host-connector
   with:

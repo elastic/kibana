@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const RemoteHostDownloadFileStepTypeId = 'remoteHost.downloadFile' as const;
+export const SshHostDownloadFileStepTypeId = 'ssh-host.downloadFile' as const;
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().min(1),
@@ -35,7 +35,7 @@ export const remoteHostDownloadFileStepCommonDefinition: CommonStepDefinition<
   RemoteHostDownloadFileStepOutputSchema,
   RemoteHostDownloadFileStepConfigSchema
 > = {
-  id: RemoteHostDownloadFileStepTypeId,
+  id: SshHostDownloadFileStepTypeId,
   category: StepCategory.Kibana,
   stability: 'tech_preview',
   label: i18n.translate('workflowsExtensions.remoteHostDownloadFileStep.label', {
@@ -53,7 +53,7 @@ Download a file from a remote host via an SSH Host connector.
 
 \`\`\`yaml
 - name: fetch-log
-  type: remoteHost.downloadFile
+  type: ssh-host.downloadFile
   config:
     connector-id: my-ssh-host-connector
   with:

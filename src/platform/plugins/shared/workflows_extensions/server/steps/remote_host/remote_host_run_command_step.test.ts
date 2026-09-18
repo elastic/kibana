@@ -74,7 +74,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       },
       abortSignal: new AbortController().signal,
       stepId: 'run-command',
-      stepType: 'remoteHost.runCommand',
+      stepType: 'ssh-host.runCommand',
     };
 
     return {
