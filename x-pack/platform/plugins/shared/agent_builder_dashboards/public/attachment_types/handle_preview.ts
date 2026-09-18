@@ -19,6 +19,7 @@ export const handlePreview = async ({
   dashboardLocator,
   checkSavedDashboardExist,
   openCanvas,
+  preferCanvasPreview,
 }: {
   attachment: DashboardAttachment;
   dashboardApi?: DashboardApi;
@@ -27,7 +28,40 @@ export const handlePreview = async ({
   dashboardLocator?: DashboardRendererProps['locator'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
+  /** When false, open Dashboards via locator instead of canvas. */
+  preferCanvasPreview?: boolean;
 }) => {
+  const getExistingDashboardId = async () => {
+    if (!attachment.origin) {
+      return undefined;
+    }
+
+    const exists = await checkSavedDashboardExist(attachment.origin);
+    return exists ? attachment.origin : undefined;
+  };
+
+  const openInDashboardViaLocator = async () => {
+    if (!dashboardLocator) {
+      return;
+    }
+
+    const dashboardState = attachmentDataToDashboardState(attachment.data);
+    await handleEditInDashboard({
+      locator: dashboardLocator,
+      getExistingDashboardId,
+      dashboardLocatorParams: {
+        ...dashboardState,
+        viewMode: 'edit',
+      },
+    });
+  };
+
+  // Agent workspace: open the owning Dashboards app instead of canvas
+  if (preferCanvasPreview === false && dashboardLocator && canWriteDashboards && !isSidebar) {
+    await openInDashboardViaLocator();
+    return;
+  }
+
   // sidebar in dashboard experience - synchronize dashboard app to attachment
   if (dashboardApi && canWriteDashboards) {
     return previewAttachmentInDashboard({
@@ -39,22 +73,7 @@ export const handlePreview = async ({
 
   // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
   if (isSidebar && dashboardLocator && canWriteDashboards) {
-    const dashboardState = attachmentDataToDashboardState(attachment.data);
-    return handleEditInDashboard({
-      locator: dashboardLocator,
-      getExistingDashboardId: async () => {
-        if (!attachment.origin) {
-          return undefined;
-        }
-
-        const exists = await checkSavedDashboardExist(attachment.origin);
-        return exists ? attachment.origin : undefined;
-      },
-      dashboardLocatorParams: {
-        ...dashboardState,
-        viewMode: 'edit',
-      },
-    });
+    return openInDashboardViaLocator();
   }
 
   // full screen - open canvas
