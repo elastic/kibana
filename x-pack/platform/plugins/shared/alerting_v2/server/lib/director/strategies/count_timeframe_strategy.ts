@@ -198,9 +198,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     if (
       this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
     ) {
-      // Non-emitting no_data events enter pending without threshold evaluation — they are not
-      // breaches, so counting them as a match would produce false active alerts.
-      if (this.isNonEmittingNoData(alertEvent.status, rule.no_data_strategy)) {
+      // Only count actual breaches (and intentional no_data+emit) as a match. Recovered and
+      // non-emitting no_data events enter pending without threshold evaluation to avoid
+      // false active alerts.
+      if (!this.isBreachEvent(alertEvent.status, rule.no_data_strategy)) {
         return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
       }
       return this.getFirstEntryStateTransition(this.getPendingThreshold(rule, stateTransition), {
@@ -268,11 +269,15 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     return nextStatus === targetStatus && currentStatus !== targetStatus;
   }
 
-  private isNonEmittingNoData(
+  private isBreachEvent(
     eventStatus: AlertEventStatus,
     noDataStrategyValue: RuleResponse['no_data_strategy']
   ): boolean {
-    return eventStatus === alertEventStatus.no_data && noDataStrategyValue !== noDataStrategy.emit;
+    if (eventStatus === alertEventStatus.breached) return true;
+    if (eventStatus === alertEventStatus.no_data) {
+      return noDataStrategyValue === noDataStrategy.emit;
+    }
+    return false;
   }
 
   private getPendingThreshold(

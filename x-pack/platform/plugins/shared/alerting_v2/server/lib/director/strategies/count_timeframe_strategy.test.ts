@@ -179,6 +179,15 @@ describe('CountTimeframeStrategy', () => {
       });
     });
 
+    it('stays pending on an initial recovered event (not a breach)', () => {
+      expectTransition({
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        expectedStatusCount: 1,
+      });
+    });
+
     it.each(['last_known_status', 'none'] as const)(
       'stays pending on a no_data event when no_data_strategy is %s (not a breach)',
       (noDataStrategyValue) => {
