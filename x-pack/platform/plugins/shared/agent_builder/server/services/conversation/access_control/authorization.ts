@@ -8,7 +8,13 @@
 import type { ConversationWithoutRounds, CurrentUser } from '@kbn/agent-builder-common';
 import { isPublicConversation } from '@kbn/agent-builder-common';
 
-export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
+export type ConversationAccess =
+  | 'converse'
+  | 'owner'
+  | 'patchMetadata'
+  | 'rename'
+  | 'delete'
+  | 'updateAccessControl';
 
 interface ConversationOwner {
   userId?: string;
@@ -82,6 +88,22 @@ export const hasConversationOwnerAccess = ({
     owner: { userId: conversation.user.id, username: conversation.user.username },
     user,
   });
+
+/**
+ * Allows the conversation owner, or an admin acting on a public conversation.
+ * This is the access level for patching template-controlled metadata fields (e.g. status,
+ * severity). It mirrors the rename/delete precedent: ownership check first, admin+public
+ * fallback for workflow runs that resume under a different identity after a HITL gate.
+ */
+export const hasConversationPatchMetadataAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
+}): boolean =>
+  hasConversationOwnerAccess({ conversation, user }) ||
+  (user.isAdmin && isPublicConversation(conversation.access_control));
 
 export const hasConversationRenameAccess = ({
   conversation,
