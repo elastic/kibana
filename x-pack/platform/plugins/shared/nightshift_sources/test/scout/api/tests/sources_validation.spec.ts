@@ -58,6 +58,11 @@ apiTest.describe(
         `FROM remote:${index}`,
         'Remote cluster references are not allowed',
       ],
+      [
+        'a $ wildcard that matches a hyphenated source view',
+        'FROM $.*.sources.*-*',
+        'Nightshift source views cannot be used as a source',
+      ],
     ] as const;
 
     for (const [label, esql, message] of rejected) {
@@ -146,6 +151,15 @@ apiTest.describe(
           esql: `FROM ${index} | WHERE nope_field > 1`,
         });
         expect(unresolved).toHaveStatusCode(400);
+
+        const overlappingView = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: 'FROM $.*.sources.*-*',
+        });
+        expect(overlappingView).toHaveStatusCode(400);
+        expect(overlappingView.body.message).toContain(
+          'Nightshift source views cannot be used as a source'
+        );
 
         const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
         expect(fetched).toHaveStatusCode(200);

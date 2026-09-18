@@ -51,17 +51,19 @@ A source is rows only. On create and update the ES|QL must:
 - not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
 - not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
-  `$.nightshift.*`, `$.*`), or the new view can match itself.
+  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself.
 
 The view name is `$.nightshift.sources.<slug>`. `<slug>` is derived from the title at create
 (`nginx-errors` from "Nginx errors") and never changes, even if the title does. If that name is
 already taken — another source in any space, or an orphaned view — create walks `-2`, `-3`, …
 The saved-object id stays a uuid; it is not in the view name.
 
-Wildcards, several sources and date math are fine. The query is then executed as
-`<esql> | LIMIT 0` as the calling user. A pattern that matches no index yet is accepted, which
-means field names in `WHERE` are only checked once data exists; if they turn out wrong the
-source's health becomes `unresolvable`.
+Wildcards, several sources and date math are fine. Create always runs `<esql> | LIMIT 0` as
+the calling user. Update does too when the normalized query changes. A title-only PUT, or a
+repair that sends the stored query, skips that probe so a vanished `WHERE` field cannot block
+rename or restoring a deleted view; GET reports `unresolvable` instead. A pattern that
+matches no index yet is accepted, which means field names in `WHERE` are only checked once
+data exists.
 
 ## Health
 
@@ -128,6 +130,9 @@ project type in `config/serverless.yml` and back on for Observability Complete i
   `PUT` of the current values repairs it. `DELETE` cannot take a version: Core's `soClient.delete`
   has no version option. A concurrent `PUT` can recreate the view after `DELETE` has removed it
   and still delete the catalog row, leaving an orphaned view.
+- Create allocates the slug with a cross-space find then a view write, not an atomic reserve.
+  Two concurrent POSTs of the same title can share a `view_name`; the later `putView` wins,
+  `GET` reports `view_drift`, and a `PUT` of the earlier source's values repairs it.
 - Deleting a space removes the saved objects but leaves their views behind. Nothing cleans
   orphaned `$.nightshift.sources.*` views yet. ES|QL views are cluster-global; the Spaces
   boundary is the saved object, not the view name.

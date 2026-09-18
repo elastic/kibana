@@ -94,6 +94,9 @@ describe('validateSourceQuery', () => {
       expectRejected('FROM $.*', 'found "$.*"');
       expectRejected('FROM $.nightshift.*', 'found "$.nightshift.*"');
       expectRejected('FROM logs-*, $.nightshift.* | WHERE status >= 500', 'found "$.nightshift.*"');
+      // Requires a hyphen the old `…sources.x` example did not have.
+      expectRejected('FROM $.*.sources.*-*', 'found "$.*.sources.*-*"');
+      expectRejected('FROM $.*-*', 'found "$.*-*"');
     });
   });
 });

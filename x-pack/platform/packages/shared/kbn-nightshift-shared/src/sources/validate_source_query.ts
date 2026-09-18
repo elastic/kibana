@@ -12,7 +12,13 @@ const SOURCE_COMMANDS = new Set(['from', 'ts']);
 const ALLOWED_PROCESSING_COMMANDS = new Set(['where']);
 // Drop the trailing `.` so `$.nightshift.sources` and `$.nightshift.sources*` match too.
 const NIGHTSHIFT_SOURCE_VIEW_NAMESPACE = NIGHTSHIFT_SOURCE_VIEW_PREFIX.slice(0, -1);
-const NIGHTSHIFT_SOURCE_VIEW_EXAMPLE = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}x`;
+// `x` is the punctuation-only fallback. Hyphenated names are what a real title produces; a
+// single letter misses patterns such as `$.*.sources.*-*`.
+const NIGHTSHIFT_SOURCE_VIEW_EXAMPLES = [
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}x`,
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}nginx-errors`,
+  `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}nginx-errors-2`,
+] as const;
 
 /**
  * ES `simpleMatch`: `*` is multi-segment, so `$.nightshift.*` hits `$.nightshift.sources.<slug>`.
@@ -25,7 +31,7 @@ const isNightshiftSourceViewPattern = (name: string): boolean => {
   }
   return (
     pattern.startsWith(NIGHTSHIFT_SOURCE_VIEW_NAMESPACE) ||
-    esWildcardMatches(pattern, NIGHTSHIFT_SOURCE_VIEW_EXAMPLE)
+    NIGHTSHIFT_SOURCE_VIEW_EXAMPLES.some((example) => esWildcardMatches(pattern, example))
   );
 };
 
