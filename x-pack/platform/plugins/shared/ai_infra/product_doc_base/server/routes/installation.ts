@@ -291,6 +291,7 @@ export const registerInstallationRoutes = ({
       const updated = await documentationManager.updateAll({
         request: req,
         forceUpdate,
+        wait: true,
         // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
         inferenceIds: req.body.inferenceIds ?? [],
       });

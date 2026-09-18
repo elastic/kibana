@@ -26,6 +26,10 @@ import {
   getTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
+import {
+  ENSURE_DOC_UP_TO_DATE_TASK_ID,
+  ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL,
+} from '../../tasks/ensure_up_to_date';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
@@ -428,6 +432,25 @@ describe('DocumentationManager', () => {
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
+    });
+
+    it('calls waitUntilTaskCompleted for each inferenceId if wait=true', async () => {
+      scheduleEnsureUpToDateTaskMock.mockImplementation(async ({ inferenceId }) =>
+        inferenceId === defaultInferenceEndpoints.ELSER
+          ? ENSURE_DOC_UP_TO_DATE_TASK_ID
+          : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL
+      );
+
+      await docManager.updateAll({ wait: true });
+
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
+      expect(waitUntilTaskCompletedMock).toHaveBeenCalledTimes(2);
+      expect(waitUntilTaskCompletedMock).toHaveBeenCalledWith(
+        expect.objectContaining({ taskId: ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL })
+      );
+      expect(waitUntilTaskCompletedMock).toHaveBeenCalledWith(
+        expect.objectContaining({ taskId: ENSURE_DOC_UP_TO_DATE_TASK_ID })
+      );
     });
   });
 
