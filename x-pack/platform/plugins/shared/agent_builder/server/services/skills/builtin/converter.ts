@@ -28,6 +28,7 @@ export const convertBuiltinSkill = ({
   basePath: skill.basePath,
   getRegistryTools: () => skill.getRegistryTools?.() ?? [],
   getInlineTools: skill.getInlineTools,
+  getExcludedToolIds: skill.getExcludedToolIds,
   isAvailable: skill.availability
     ? (ctx) => cache.getOrCompute(skill.id, skill.availability!, ctx)
     : undefined,

@@ -73,7 +73,10 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
-    description: 'Retrieve mappings for indices, aliases or datastreams.',
+    description:
+      'Retrieve mappings for indices, aliases or datastreams. ' +
+      'Do NOT use this tool if a more specific skill is available for the request (see the SKILLS section) — ' +
+      'prefer loading that skill first, since its dedicated tools are scoped to the right indices for that domain.',
     annotations: {
       title: 'Get Index Mapping',
       readOnlyHint: true,

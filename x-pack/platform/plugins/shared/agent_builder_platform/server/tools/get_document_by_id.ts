@@ -22,7 +22,10 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
     id: platformCoreTools.getDocumentById,
     type: ToolType.builtin,
     description:
-      'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
+      'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name. ' +
+      'Do NOT use this tool if a more specific skill is available for the request (see the SKILLS section) — ' +
+      'prefer loading that skill first, since its dedicated tools return the fields you need without a ' +
+      'general-purpose document fetch.',
     annotations: {
       title: 'Get Document by ID',
       readOnlyHint: true,

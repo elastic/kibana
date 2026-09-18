@@ -29,9 +29,12 @@ export {
 } from './constants';
 export {
   type ByIdsToolSelection,
+  type ExcludeToolSelection,
+  type ResolvableToolSelection,
   type ToolSelection,
   type ToolSelectionRelevantFields,
   isByIdsToolSelection,
+  isExcludeToolSelection,
   toolMatchSelection,
   filterToolsBySelection,
   allToolsSelectionWildcard,

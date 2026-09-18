@@ -89,4 +89,19 @@ export interface InternalSkillDefinition {
    * filtered from registry queries (`has`, `get`, `list`, `bulkGet`).
    */
   isAvailable?: (context: AvailabilityContext) => MaybePromise<AvailabilityResult>;
+  /**
+   * Returns the IDs of builtin/default tools that this skill *shadows* while it is loaded.
+   *
+   * When the skill is active, these tool IDs are removed from the resolved tool set (even
+   * when they would otherwise be bound via `enable_elastic_capabilities` /
+   * `defaultAgentToolIds`), so the model reaches for the skill's dedicated tools instead of a
+   * competing general-purpose builtin. This is the per-tool complement to
+   * `excludeFromElasticCapabilities` (which excludes the *skill itself*), and is the mechanism
+   * behind subtractive tool binding (RFC security-team#18054).
+   *
+   * Only builtin (read-only) skills may declare exclusions, and each ID must belong to
+   * `defaultAgentToolIds` — a skill may not exclude another skill's inline/dynamic tool.
+   * Exclusions from all loaded skills are unioned before the subtract pass.
+   */
+  getExcludedToolIds?: () => MaybePromise<string[]>;
 }

@@ -153,4 +153,84 @@ describe('selectTools', () => {
       ToolOrigin.inline
     );
   });
+
+  describe('subtractive tool binding (getExcludedToolIds)', () => {
+    const buildParams = ({ previousDynamicToolIds }: { previousDynamicToolIds: string[] }) => {
+      // Two builtin tools bound via enable_elastic_capabilities; the skill shadows one of them.
+      const shadowedTool = createExecutableTool('platform.core.get_document_by_id');
+      const keptTool = createExecutableTool('platform.core.search');
+      const dynamicInlineTool = createExecutableTool('security.find_rules');
+
+      const skills = {
+        convertSkillTool: jest.fn().mockReturnValue(dynamicInlineTool),
+      } as any;
+
+      const filteredSkills = [
+        {
+          getInlineTools: jest
+            .fn()
+            .mockResolvedValue([{ id: 'security.find_rules', type: ToolType.builtin }]),
+          getExcludedToolIds: jest.fn().mockResolvedValue(['platform.core.get_document_by_id']),
+        },
+      ] as any;
+
+      const toolProvider = {
+        list: jest.fn().mockResolvedValue([shadowedTool, keptTool]),
+      } as any;
+
+      return {
+        conversation: {
+          attachmentTypes: [],
+          attachmentStateManager: { getActive: jest.fn().mockReturnValue([]) },
+        } as any,
+        previousDynamicToolIds,
+        filteredSkills,
+        skills,
+        request: {} as any,
+        toolProvider,
+        agentConfiguration: {
+          tools: [{ tool_ids: ['platform.core.get_document_by_id', 'platform.core.search'] }],
+          enable_elastic_capabilities: true,
+        } as any,
+        attachmentsService: { getTypeDefinition: jest.fn() } as any,
+        spaceId: 'default',
+        runner: { runInternalTool: jest.fn() } as any,
+      };
+    };
+
+    it('removes a shadowed builtin once the skill is loaded (inline tool in previousDynamicToolIds)', async () => {
+      const result = await selectTools(
+        buildParams({ previousDynamicToolIds: ['security.find_rules'] })
+      );
+      const allIds = [...result.staticTools, ...result.dynamicTools].map((t) => t.id);
+      expect(allIds).not.toContain('platform.core.get_document_by_id');
+      expect(allIds).toContain('platform.core.search');
+    });
+
+    it('keeps the shadowed builtin when the skill has not been loaded this turn', async () => {
+      const result = await selectTools(buildParams({ previousDynamicToolIds: [] }));
+      const allIds = [...result.staticTools, ...result.dynamicTools].map((t) => t.id);
+      expect(allIds).toContain('platform.core.get_document_by_id');
+      expect(allIds).toContain('platform.core.search');
+    });
+
+    it('also subtracts a shadowed builtin that arrives through the dynamic-tools branch', async () => {
+      const result = await selectTools(
+        buildParams({
+          previousDynamicToolIds: ['security.find_rules', 'platform.core.get_document_by_id'],
+        })
+      );
+      const dynamicIds = result.dynamicTools.map((t) => t.id);
+      expect(dynamicIds).toContain('security.find_rules');
+      expect(dynamicIds).not.toContain('platform.core.get_document_by_id');
+    });
+
+    it('binds the skill tool and every unshadowed builtin unchanged', async () => {
+      const result = await selectTools(
+        buildParams({ previousDynamicToolIds: ['security.find_rules'] })
+      );
+      expect(result.staticTools.map((t) => t.id)).toContain('platform.core.search');
+      expect(result.dynamicTools.map((t) => t.id)).toContain('security.find_rules');
+    });
+  });
 });
