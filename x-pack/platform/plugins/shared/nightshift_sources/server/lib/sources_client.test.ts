@@ -438,7 +438,20 @@ describe('SourcesClient', () => {
       await expect(
         client.create({ title: 't', tags: [], esql: 'FROM logs-*' })
       ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.t');
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, expect.any(String));
+    });
+
+    it('keeps the saved object when the failed create cannot delete its view', async () => {
+      const { client, soClient, viewsClient } = setup();
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+      viewsClient.deleteView.mockRejectedValue(forbidden('no delete_view'));
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.t');
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -627,8 +640,8 @@ describe('SourcesClient', () => {
       );
     });
 
-    it('restores without a version when the update response does not stamp one', async () => {
-      const { client, soClient, viewsClient } = setup();
+    it('skips restore when the update response does not stamp a version', async () => {
+      const { client, soClient, viewsClient, logger } = setup();
       const previous = makeAttributes();
       soClient.get.mockResolvedValue(makeSavedObject(previous));
       soClient.update.mockResolvedValueOnce(makeSavedObject(previous));
@@ -638,11 +651,9 @@ describe('SourcesClient', () => {
         client.update('source-1', { title: 'new', tags: [], esql: 'FROM logs-other-*' })
       ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
-      expect(soClient.update).toHaveBeenLastCalledWith(
-        NIGHTSHIFT_SOURCE_SO_TYPE,
-        'source-1',
-        previous,
-        FULL_UPDATE
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipped restoring source source-1')
       );
     });
 

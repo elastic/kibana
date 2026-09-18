@@ -274,6 +274,7 @@ apiTest.describe(
       ]);
 
       const secondPage = await listPage(2);
+      expect(secondPage).toHaveStatusCode(200);
       expect(secondPage.body).toMatchObject({ page: 2, per_page: 2, total: 3 });
       expect(secondPage.body.sources.map((source: NightshiftSource) => source.title)).toStrictEqual(
         [titles[2]]

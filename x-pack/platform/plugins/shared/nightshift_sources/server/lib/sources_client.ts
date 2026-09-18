@@ -114,8 +114,14 @@ export class SourcesClient {
     try {
       await viewsClient.putView(attributes.view_name, attributes.esql);
     } catch (error) {
-      await this.compensate(`roll back source ${id} after its view could not be created`, () =>
-        soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id)
+      // putView can time out after ES committed the view. Delete that first so we do not
+      // drop the only catalog handle on an orphan. If the view delete fails, leave the SO.
+      await this.compensate(
+        `roll back source ${id} after its view could not be created`,
+        async () => {
+          await viewsClient.deleteView(attributes.view_name);
+          await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
+        }
       );
       throw error;
     }
@@ -157,13 +163,19 @@ export class SourcesClient {
     try {
       await viewsClient.putView(attributes.view_name, attributes.esql);
     } catch (error) {
-      await this.compensate(`restore source ${id} after its view could not be updated`, () =>
-        soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, {
-          ...FULL_UPDATE,
-          // Update's version is typed optional; passing undefined would drop OCC on the restore.
-          ...(typeof updated.version === 'string' ? { version: updated.version } : {}),
-        })
-      );
+      if (typeof updated.version === 'string') {
+        await this.compensate(`restore source ${id} after its view could not be updated`, () =>
+          soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, {
+            ...FULL_UPDATE,
+            version: updated.version,
+          })
+        );
+      } else {
+        // No OCC token: an unversioned restore could overwrite a newer PUT.
+        this.deps.logger.warn(
+          `Skipped restoring source ${id} after its view could not be updated: update response had no version`
+        );
+      }
       throw error;
     }
 
