@@ -116,6 +116,10 @@ function isWorkflowSourcedChainContext(context: EventChainContext | undefined): 
   return context !== undefined;
 }
 
+function isConnectorSourcedEvent(payload: Record<string, unknown>): boolean {
+  return typeof payload.connectorId === 'string' && payload.connectorId.length > 0;
+}
+
 function getMatchingTriggerOn(
   workflow: WorkflowDetailDto,
   triggerId: string,
@@ -246,7 +250,17 @@ export class TriggerEventHandler {
     }
 
     let scheduleStats: TriggerEventScheduleStats;
-    if (this.config.enabled && workflows.length > 0) {
+    if (
+      this.config.enabled &&
+      workflows.length > 0 &&
+      isConnectorSourcedEvent(payload) &&
+      !request.headers?.authorization
+    ) {
+      this.logger.warn(
+        `Skipping schedule for connector event ${triggerId}: request has no Authorization header`
+      );
+      scheduleStats = createEmptyTriggerScheduleStats();
+    } else if (this.config.enabled && workflows.length > 0) {
       const eventParams: ScheduleEventParams = {
         payload,
         timestamp,
@@ -277,8 +291,8 @@ export class TriggerEventHandler {
   }
 
   /**
-   * Ensures the trigger is registered and, when defined, `eventSchema` matches the same event object
-   * used for KQL resolution and scheduling (`timestamp`, `spaceId`, `eventChainDepth` included).
+   * Ensures the trigger is registered and validates the raw emitted payload against `eventSchema`.
+   * Runtime context fields are added only after validation for KQL resolution and scheduling.
    */
   private validateTrigger(
     triggerId: string,

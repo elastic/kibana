@@ -7,11 +7,18 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
+import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
+import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
   GetInvestigationResponse,
@@ -46,10 +53,12 @@ import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
+  InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
+import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
@@ -77,8 +86,65 @@ const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
 const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
   typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
 
+const INVESTIGATION_WORKFLOW_IDS = new Set([
+  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+]);
+
+/**
+ * A manual investigation has no stored entity to write results back to, so it runs the lean
+ * deductive workflow; every other subject runs the significant-events workflow, which attaches
+ * its findings to the event or alert it was started from.
+ */
+const workflowIdForSubject = (subject: InvestigationSubject): string =>
+  subject.type === 'manual'
+    ? DEDUCTIVE_INVESTIGATION_WORKFLOW_ID
+    : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
+
+/** Each workflow calls its own agent, so the pre-install has to follow the same split. */
+const installAgentForSubject = (subject: InvestigationSubject) =>
+  subject.type === 'manual' ? installDeductiveInvestigationAgent : installInvestigationAgent;
+
+/** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
+const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
+
+/**
+ * A manual investigation's subject id is the placeholder `manual`, so until the agent writes its
+ * summary the UI would label the run "manual". The prompt is the only thing that describes the run
+ * at this point, so it stands in as the subject summary; the agent's summary takes precedence once
+ * the run completes.
+ */
+const withDerivedSubjectSummary = (
+  subject: InvestigationSubject,
+  message: string
+): InvestigationSubject => {
+  if (subject.type !== 'manual' || subject.summary) {
+    return subject;
+  }
+
+  const collapsed = message.replace(/\s+/g, ' ').trim();
+  if (!collapsed) {
+    return subject;
+  }
+
+  const summary =
+    collapsed.length > MAX_DERIVED_SUBJECT_SUMMARY_LENGTH
+      ? `${collapsed.slice(0, MAX_DERIVED_SUBJECT_SUMMARY_LENGTH - 1).trimEnd()}…`
+      : collapsed;
+
+  return { ...subject, summary };
+};
+
+const isInvestigationWorkflowExecution = (execution: {
+  workflowId?: string | null;
+  originManagedWorkflowId?: string | null;
+}): boolean =>
+  INVESTIGATION_WORKFLOW_IDS.has(execution.workflowId ?? '') ||
+  INVESTIGATION_WORKFLOW_IDS.has(execution.originManagedWorkflowId ?? '');
+
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
+  title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
@@ -92,6 +158,7 @@ interface ExecutionInvestigationMetadata {
 const SUBJECT_ID_FIELDS = {
   significant_event: ['event_id', 'significant_event_id'],
   alert: ['alert_id'],
+  manual: ['manual_id'],
 } as const satisfies Record<InvestigationSubjectType, readonly string[]>;
 
 const toSubject = ({
@@ -116,6 +183,7 @@ const toSubject = ({
  */
 const LIST_INVESTIGATION_ITEM_FIELDS = {
   investigation_id: [],
+  title: ['title'],
   status: ['status'],
   created_at: ['created_at'],
   started_at: ['started_at'],
@@ -124,6 +192,8 @@ const LIST_INVESTIGATION_ITEM_FIELDS = {
   concurrency_key: ['concurrency_key'],
   executed_by: ['executed_by'],
   subject: ['subject_type', 'subject_id', 'subject_summary'],
+  summary: ['summary'],
+  impact: ['impact'],
 } as const satisfies Record<
   keyof ListInvestigationItem,
   readonly (keyof InvestigationAttributes)[]
@@ -137,6 +207,7 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
 
 const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
+  title: record.title,
   status: record.status,
   created_at: record.created_at,
   started_at: record.started_at,
@@ -149,21 +220,30 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
     subjectId: record.subject_id,
     subjectSummary: record.subject_summary,
   }),
-});
-
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
-  ...toListInvestigationItem(record),
-  trigger_type: record.trigger_type,
-  error: record.error,
   summary: record.summary,
-  conclusion: record.conclusion,
-  hypotheses: record.hypotheses,
-  recommendations: record.recommendations,
-  blind_spots: record.blind_spots,
-  trigger_feedback: record.trigger_feedback,
-  conversation_id: record.conversation_id,
   impact: record.impact,
 });
+
+const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
+  const recommendations = investigationStateSchema.shape.recommendations.safeParse(
+    record.recommendations
+  );
+  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
+
+  return {
+    ...toListInvestigationItem(record),
+    trigger_type: record.trigger_type,
+    error: record.error,
+    summary: record.summary,
+    conclusion: record.conclusion,
+    hypotheses: record.hypotheses,
+    recommendations: recommendations.success ? recommendations.data : undefined,
+    blind_spots: blindSpots.success ? blindSpots.data : undefined,
+    trigger_feedback: record.trigger_feedback,
+    conversation_id: record.conversation_id,
+    impact: record.impact,
+  };
+};
 
 const parseExecutionInvestigationMetadata = (
   executionContext: Record<string, unknown> | undefined
@@ -177,6 +257,8 @@ const parseExecutionInvestigationMetadata = (
 
   return {
     subject: recoverSubjectFromInput(inputs),
+    // A required workflow input, so the engine has already rejected a run without one.
+    title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
   };
@@ -233,6 +315,7 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
   isAvailable: () => Promise<boolean>;
 }
@@ -244,6 +327,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
   private readonly checkAvailability: () => Promise<boolean>;
 
@@ -254,6 +338,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
     this.checkAvailability = deps.isAvailable;
   }
@@ -302,6 +387,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    title,
     trigger_type,
     message,
     stream_names,
@@ -320,38 +406,55 @@ export class NightshiftInvestigationsClient {
     }
 
     const prepared = this.prepareAgentInput(subject, message, context);
+    const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
 
     const spaceId = this.getSpaceId();
+
+    const workflowId = workflowIdForSubject(subject);
+    const workflow = await this.workflowsManagement.management.getWorkflow(workflowId, spaceId);
+
+    if (!workflow?.definition) {
+      this.logger.error(
+        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
+      );
+      throw new InvestigationUnavailableError('Investigations are not configured in this space');
+    }
+
+    switch (trigger_type) {
+      case 'manual':
+        break;
+      case 'automatic': {
+        const { allowed } = await evaluateInvestigationQuota({
+          callback: this.investigationQuotaCallback,
+          logger: this.logger,
+        });
+        if (!allowed) {
+          throw new InvestigationQuotaDeniedError();
+        }
+        break;
+      }
+      default:
+        assertNever(trigger_type);
+    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install stays because the run
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
-
-    const workflow = await this.workflowsManagement.management.getWorkflow(
-      SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-      spaceId
-    );
-
-    if (!workflow?.definition) {
-      this.logger.error(
-        `Investigation workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" is not installed in space "${spaceId}"`
-      );
-      throw new InvestigationUnavailableError('Investigations are not configured in this space');
-    }
+    await installAgentForSubject(subject)({ agentBuilder: this.agentBuilder, spaceId });
 
     const inputs = {
       message: prepared.message,
+      title,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...prepared.context,
-        source: subject.type,
-        [`${subject.type}_id`]: subject.id,
-        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-        ...(subject.summary ? { summary: subject.summary } : {}),
+        source: resolvedSubject.type,
+        [`${resolvedSubject.type}_id`]: resolvedSubject.id,
+        trigger_type,
+        ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
       },
     };
 
@@ -369,8 +472,9 @@ export class NightshiftInvestigationsClient {
 
     await this.create({
       investigationId: executionId,
-      subject,
-      triggerType: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      subject: resolvedSubject,
+      title,
+      triggerType: trigger_type,
       concurrencyKey: concurrency_key,
     }).catch((error) => {
       this.logger.warn(
@@ -389,11 +493,13 @@ export class NightshiftInvestigationsClient {
   async create({
     investigationId,
     subject,
+    title,
     triggerType,
     concurrencyKey,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
+    title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
   }): Promise<void> {
@@ -404,6 +510,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'pending',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -446,10 +553,7 @@ export class NightshiftInvestigationsClient {
       { includeOutput: false }
     );
 
-    const belongsToInvestigationWorkflow =
-      execution?.workflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID ||
-      execution?.originManagedWorkflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
-    if (!execution || !belongsToInvestigationWorkflow) {
+    if (!execution || !isInvestigationWorkflowExecution(execution)) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
@@ -465,12 +569,12 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
 
-    if (!subject) {
-      throw new InvestigationSubjectMissingError(investigationId);
+    if (!subject || !title) {
+      throw new InvestigationMetadataMissingError(investigationId);
     }
 
     if (concurrencyKey) {
@@ -480,6 +584,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'running',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -639,6 +744,9 @@ export class NightshiftInvestigationsClient {
 
   async list({
     statuses,
+    severities,
+    subject_types,
+    query,
     concurrency_key,
     created_after,
     created_before,
@@ -653,6 +761,9 @@ export class NightshiftInvestigationsClient {
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
     const result = await this.investigationRepository.find({
       statuses,
+      severities,
+      subjectTypes: subject_types,
+      query,
       concurrencyKey: concurrency_key,
       createdAfter: created_after,
       createdBefore: created_before,

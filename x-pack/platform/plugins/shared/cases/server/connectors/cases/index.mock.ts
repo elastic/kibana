@@ -110,8 +110,6 @@ export const groupedAlerts = [
     grouping: { field_name_1: 'field_value_3' },
   },
 ];
-export const internallyManagedAlerts = false;
-
 export const groupingBy = ['host.name', 'dest.ip'];
 export const rule = {
   id: 'rule-test-id',

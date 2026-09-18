@@ -697,7 +697,7 @@ Ensure you have the latest local copy of the Kibana repository.
 
 Install dependencies by running the following commands:
 
-- `yarn kbn bootstrap` to install dependencies.
+- `pnpm kbn bootstrap` to install dependencies.
 - `node scripts/build_kibana_platform_plugins.js` to build plugins.
 
 Move to the `src/platform/packages/shared/kbn-scout` directory to begin development.
@@ -845,6 +845,9 @@ node scripts/scout discover-flaky-tests
 
 # Include PR builds, widen the window, restrict to Jest and FTR
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
+
+# Flaky tests only, leaving consistently failing tests out of the report
+node scripts/scout discover-flaky-tests --classifications flaky
 
 # Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
 node scripts/scout discover-flaky-tests --summaryLimit 25

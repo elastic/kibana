@@ -18,6 +18,8 @@ xpack.features.overrides:
   contextEngine:
     category: "security"
     order: 1103
+  ### Agentic investigations should be moved from Analytics category to the Security one.
+  # agenticInvestigations.category: "security" # TODO: uncomment when agentic investigations plugin is enabled
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

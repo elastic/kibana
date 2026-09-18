@@ -138,6 +138,15 @@ export const useConversationScrollActions = ({
     doSmoothScroll();
   }, [scrollContainer, doSmoothScroll]);
 
+  // Releases the view from the bottom even while pinned there, so the ResizeObserver leaves it
+  // alone as content grows, and offers the scroll button instead.
+  const stopFollowingBottom = useCallback(() => {
+    cancelSmoothScroll();
+    pendingSmoothScrollRef.current = false;
+    stuckToBottomRef.current = false;
+    setShowScrollButton(true);
+  }, [cancelSmoothScroll]);
+
   const onMessageSent = useCallback(() => {
     if (!scrollContainer) return;
     stuckToBottomRef.current = true;
@@ -148,6 +157,7 @@ export const useConversationScrollActions = ({
   return {
     showScrollButton,
     onMessageSent,
+    stopFollowingBottom,
     smoothScrollToBottom,
     stickToBottom,
   };

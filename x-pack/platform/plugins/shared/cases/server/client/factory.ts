@@ -56,6 +56,8 @@ import type { CasesClient } from '.';
 import { createCasesClient } from '.';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { CasesServices, CasesClientSource } from './types';
+import type { ActionSource } from '../../common/types/domain';
+import { getDefaultActionSource } from '../common/get_default_action_source';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
@@ -159,11 +161,13 @@ export class CasesClientFactory {
     scopedClusterClient,
     savedObjectsService,
     clientSource,
+    actionSource,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
     clientSource: CasesClientSource;
+    actionSource?: ActionSource;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -185,6 +189,7 @@ export class CasesClientFactory {
       auditLogger,
       alertsClient,
       auth,
+      actionSource: actionSource ?? getDefaultActionSource(request),
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -317,6 +322,7 @@ export class CasesClientFactory {
     auditLogger,
     alertsClient,
     auth,
+    actionSource,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
@@ -325,6 +331,7 @@ export class CasesClientFactory {
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
     auth: PublicMethodsOf<Authorization>;
+    actionSource?: ActionSource;
   }): CasesServices {
     this.validateInitialization();
 
@@ -402,6 +409,7 @@ export class CasesClientFactory {
         savedObjectsSerializer,
         auditLogger,
         analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+        actionSource,
       }),
       attachmentService,
       licensingService,

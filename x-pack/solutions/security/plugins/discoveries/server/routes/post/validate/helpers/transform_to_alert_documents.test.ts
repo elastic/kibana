@@ -14,8 +14,15 @@ import {
 } from './transform_to_alert_documents';
 import {
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
 } from '@kbn/discoveries/impl/attack_discovery/alert_fields';
+
+/**
+ * An arbitrary producer identity. No production caller passes a
+ * `generationSource` yet — this only exercises the opt-in mechanism.
+ */
+const TEST_GENERATION_SOURCE = 'test-producer';
 
 describe('transformToAlertDocuments', () => {
   it('returns the risk score of only the anonymized alert matching the discovery alert_ids', () => {
@@ -329,5 +336,82 @@ describe('transformToAlertDocuments', () => {
         spaceId: 'default',
       })
     );
+  });
+
+  describe('generation source', () => {
+    const authenticatedUser = {
+      profile_uid: 'profile-1',
+      username: 'user-1',
+    } as unknown as AuthenticatedUser;
+
+    const validateRequestBody: PostValidateRequestBody = {
+      alerts_context_count: 1,
+      anonymized_alerts: [{ metadata: {}, page_content: '_id,a1\nkibana.alert.risk_score,10' }],
+      api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
+      attack_discoveries: [
+        {
+          alert_ids: ['a1'],
+          details_markdown: 'details',
+          entity_summary_markdown: 'entity',
+          mitre_attack_tactics: ['Execution'],
+          summary_markdown: 'summary',
+          timestamp: '2025-12-15T18:39:20.762Z',
+          title: 'title',
+        },
+      ],
+      connector_name: 'Connector 1',
+      enable_field_rendering: true,
+      generation_uuid: 'generation-1',
+      with_replacements: false,
+    };
+
+    const transform = (generationSource?: string) =>
+      transformToAlertDocuments({
+        authenticatedUser,
+        generationSource,
+        now: new Date('2025-12-15T18:39:20.762Z'),
+        validateRequestBody,
+        spaceId: 'default',
+      })[0];
+
+    it(`does NOT set ${ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE} when no generation source is provided`, () => {
+      // the field must be absent, not undefined: `toEqual` ignores undefined
+      // properties, so an absent key is what keeps existing documents unchanged
+      expect(Object.keys(transform())).not.toContain(ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE);
+    });
+
+    it(`sets ${ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE} when a generation source is provided`, () => {
+      expect(transform(TEST_GENERATION_SOURCE)[ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]).toBe(
+        TEST_GENERATION_SOURCE
+      );
+    });
+
+    it('contributes the generation source to the document id', () => {
+      expect(transform(TEST_GENERATION_SOURCE)[ALERT_UUID]).toBe(
+        generateAttackDiscoveryAlertHash({
+          alertIds: ['a1'],
+          attackDiscoveryId: undefined,
+          connectorId: 'connector-1',
+          generationSource: TEST_GENERATION_SOURCE,
+          ownerId: 'user-1',
+          replacements: undefined,
+          spaceId: 'default',
+        })
+      );
+    });
+
+    it('does not collide with the document id of a producer that omits the generation source', () => {
+      expect(transform(TEST_GENERATION_SOURCE)[ALERT_UUID]).not.toBe(transform()[ALERT_UUID]);
+    });
+
+    it('keeps the document id stable across runs of the same producer', () => {
+      expect(transform(TEST_GENERATION_SOURCE)[ALERT_UUID]).toBe(
+        transform(TEST_GENERATION_SOURCE)[ALERT_UUID]
+      );
+    });
+
+    it('gives different producers different document ids', () => {
+      expect(transform('producer-a')[ALERT_UUID]).not.toBe(transform('producer-b')[ALERT_UUID]);
+    });
   });
 });
