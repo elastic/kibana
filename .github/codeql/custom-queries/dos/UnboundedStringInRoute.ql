@@ -83,6 +83,29 @@ DataFlow::MethodCallNode unboundedZodString() {
   )
 }
 
+/* ---------- Intentional reporting / unbounded helpers ---------- */
+
+/** Public helpers whose unbounded validation is explicitly requested by the caller. */
+DataFlow::Node intentionalUnboundedString() {
+  exists(API::Node helpers |
+    helpers = API::moduleImport("@kbn/config-schema").getMember("schema")
+    or
+    helpers = API::moduleImport(["@kbn/config-schema", "@kbn/zod", "@kbn/zod/v4"])
+  |
+    result = helpers.getMember("unboundedString").getACall()
+    or
+    exists(string name |
+      name =
+        [
+          "savedObjectId", "savedObjectType", "savedObjectVersion", "spaceId", "displayName",
+          "description", "searchFilter", "aggregation", "querySortField"
+        ]
+    |
+      result = helpers.getMember(name).getMember("warn").getACall()
+    )
+  )
+}
+
 /* ---------- Schema-construction flow steps ---------- */
 
 /**
@@ -113,7 +136,7 @@ predicate schemaBuildStep(DataFlow::Node child, DataFlow::Node parent) {
       [
         // structural wrappers
         "optional", "nullable", "nullish", "default", "describe", "catch", "brand", "readonly",
-        "refine", "superRefine", "transform", "pipe", "and", "or", "array",
+        "refine", "superRefine", "check", "with", "transform", "pipe", "and", "or", "array",
         // non-length-bounding string refinements and formats
         "min", "length", "nonempty", "trim", "toLowerCase", "toUpperCase", "lowercase",
         "uppercase", "regex", "includes", "startsWith", "endsWith", "email", "url", "uuid",
@@ -255,6 +278,8 @@ module RouteStringConfig implements DataFlow::ConfigSig {
   }
 
   predicate isSink(DataFlow::Node sink) { sink = requestSchemaField() }
+
+  predicate isBarrier(DataFlow::Node node) { node = intentionalUnboundedString() }
 
   predicate isAdditionalFlowStep(DataFlow::Node node1, DataFlow::Node node2) {
     schemaBuildStep(node1, node2)
