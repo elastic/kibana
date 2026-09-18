@@ -5,7 +5,7 @@
     "types": ["jest", "node"]
   },
   "include": ["**/*.ts"],
-  "exclude": ["target/**/*", "**/__fixtures__/**/*"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",

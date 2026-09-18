@@ -8,10 +8,16 @@
  */
 
 // Fixture file for audit.test.ts: exercises property-access consumption.
-// Not a real Scout spec (audit.test.ts reads this as text, never executes
-// it), but it lives under test/scout* so Scout's own ESLint rules apply.
-describe('fixture suite', () => {
-  test('uses dashboard via property access', async ({ pageObjects }) => {
-    await expect(pageObjects.dashboard.goto()).resolves.toBeUndefined();
-  });
-});
+// Not a real Scout spec (audit.test.ts parses this, never executes it), but
+// it is valid TypeScript so the package type check does not need to exclude it.
+interface FakePageObjects {
+  dashboard: { goto(): Promise<void> };
+}
+
+export const usesDashboardViaProperty = async ({
+  pageObjects,
+}: {
+  pageObjects: FakePageObjects;
+}) => {
+  await pageObjects.dashboard.goto();
+};

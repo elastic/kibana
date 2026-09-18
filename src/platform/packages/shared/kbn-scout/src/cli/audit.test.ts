@@ -51,9 +51,25 @@ describe('fileConsumesKey', () => {
     expect(fileConsumesKey('await pageObjects.dashboard.goto();', 'dashboard')).toBe(true);
   });
 
+  it('matches property access on an extended or member fixture', () => {
+    expect(fileConsumesKey('await myPageObjects.dashboard.goto();', 'dashboard')).toBe(true);
+    expect(fileConsumesKey('await this.pageObjects.dashboard.goto();', 'dashboard')).toBe(true);
+  });
+
   it('matches destructuring alongside other keys', () => {
     expect(fileConsumesKey('const { dashboard, lens } = pageObjects;', 'dashboard')).toBe(true);
     expect(fileConsumesKey('const { dashboard, lens } = pageObjects;', 'lens')).toBe(true);
+  });
+
+  it('matches destructuring split across lines', () => {
+    const content = ['const {', '  dashboard,', '  lens,', '} = pageObjects;'].join('\n');
+    expect(fileConsumesKey(content, 'dashboard')).toBe(true);
+    expect(fileConsumesKey(content, 'lens')).toBe(true);
+  });
+
+  it('matches a destructured key that is renamed locally', () => {
+    expect(fileConsumesKey('const { dashboard: dash } = pageObjects;', 'dashboard')).toBe(true);
+    expect(fileConsumesKey('const { dashboard: dash } = pageObjects;', 'dash')).toBe(false);
   });
 
   it('does not match an unrelated key', () => {
@@ -65,14 +81,11 @@ describe('fileConsumesKey', () => {
     expect(fileConsumesKey('await pageObjects.dashboardWidget.goto();', 'dashboard')).toBe(false);
   });
 
-  it('does not match the key inside an unrelated string literal elsewhere in the file', () => {
-    // Regression: JS character classes match newlines, so a destructure
-    // pattern built from `[^{}]`/`[^=]` spans the whole file and treats this
-    // as a consumer because `pageObjects` appears further down. Real example
-    // from global_search's Scout suite.
+  it('does not match the key inside comments or string literals', () => {
     const content = [
+      `// pageObjects.dashboard is documented here but not used`,
+      `const example = 'pageObjects.dashboard';`,
       `await expect(results.filter({ hasText: 'type: dashboard' })).toBeVisible();`,
-      ``,
       `await pageObjects.globalSearch.clickOnOption(0);`,
     ].join('\n');
 
@@ -86,7 +99,6 @@ describe('fileConsumesKey', () => {
       `  await dashboard.clickPanelAction('editPanel');`,
       `}`,
       ``,
-      `// pageObjects referenced later in the file`,
       `export const helper = (pageObjects: PageObjects) => pageObjects;`,
     ].join('\n');
 

@@ -10,6 +10,16 @@
 // Synthetic stand-in for `playwright/page_objects/index.ts`'s
 // `createCorePageObjects`, used only by audit.test.ts to validate
 // `extractPageObjectKeys` without depending on the real file's exact shape.
+// Valid TypeScript so the package type check does not need to exclude it.
+class FakePageObject {}
+const FakeDashboardApp = FakePageObject;
+const FakeLensApp = FakePageObject;
+
+const createLazyPageObject = <T>(PageObjectClass: new () => T, fixtures: unknown): T => {
+  void fixtures;
+  return new PageObjectClass();
+};
+
 export function createCorePageObjects(fixtures: unknown) {
   return {
     dashboard: createLazyPageObject(FakeDashboardApp, fixtures),

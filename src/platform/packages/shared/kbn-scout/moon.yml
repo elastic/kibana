@@ -55,7 +55,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-    - '!**/__fixtures__/**/*'
   jest-config:
     - jest.config.js
 tasks: {}

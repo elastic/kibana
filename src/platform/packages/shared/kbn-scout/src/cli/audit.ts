@@ -12,6 +12,7 @@ import Path from 'path';
 import type { Command } from '@kbn/dev-cli-runner';
 import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
+import ts from 'typescript';
 
 /**
  * Extracts the `PageObjects` fixture keys straight from `createCorePageObjects`'s
@@ -50,29 +51,64 @@ export function extractPageObjectKeysOrThrow(indexTsSource: string, indexPath: s
   return keys;
 }
 
+// `pageObjects`, `myPageObjects`, `this.pageObjects`, `fixtures.pageObjects`
+const isPageObjectsReference = (node: ts.Node): boolean => {
+  if (ts.isIdentifier(node)) return /[Pp]ageObjects$/.test(node.text);
+  if (ts.isPropertyAccessExpression(node)) return /[Pp]ageObjects$/.test(node.name.text);
+  return false;
+};
+
 /**
- * A page object's fixture key is reached two ways in Scout specs/fixtures:
- * property access (`pageObjects.key`) and destructuring
- * (`const { key } = pageObjects`, including other keys alongside it). Both
- * count as a consumer per the placement policy's "Consumer" definition.
+ * Collects every page object fixture key a file reaches, by walking its AST
+ * rather than grepping. Two shapes count as consumption, per the placement
+ * policy's "Consumer" definition:
  *
- * The destructure pattern is deliberately newline-free (`[^{}\n]` / `[^=\n]`
- * rather than `[^{}]` / `[^=]`): JS character classes match newlines, so an
- * unconstrained version spans the whole file and reports the word `dashboard`
- * inside a string literal as a consumer because `pageObjects` appears a few
- * hundred characters later. A destructure split across lines is therefore
- * missed. As of writing there are zero such destructures in the repo (347
- * single-line ones), so this is a theoretical gap, not a measured one.
- * Forwarded `pageObjects` parameters are caught because the callee still
- * reads `pageObjects.<key>`. Type-only `PageObjects['key']` references are
- * not counted.
+ * - property access: `pageObjects.dashboard` (also `myPageObjects.dashboard`,
+ *   `this.pageObjects.dashboard`)
+ * - destructuring: `const { dashboard, lens: aliased } = pageObjects`, on one
+ *   line or many
+ *
+ * Comments and string literals are not code, so `'pageObjects.dashboard'` in
+ * a string is not a consumer. Type-only references (`PageObjects['dashboard']`)
+ * are not counted.
  */
-export function fileConsumesKey(fileContent: string, key: string): boolean {
-  const propertyAccess = new RegExp(`pageObjects\\.${key}\\b`);
-  const destructure = new RegExp(
-    `\\{[^{}\\n]*\\b${key}\\b[^{}\\n]*\\}[^=\\n]*=[^=\\n]*[Pp]ageObjects\\b`
+export function collectConsumedKeys(fileContent: string, fileName = 'file.ts'): Set<string> {
+  const source = ts.createSourceFile(
+    fileName,
+    fileContent,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TSX
   );
-  return propertyAccess.test(fileContent) || destructure.test(fileContent);
+  const keys = new Set<string>();
+
+  const visit = (node: ts.Node) => {
+    if (ts.isPropertyAccessExpression(node) && isPageObjectsReference(node.expression)) {
+      keys.add(node.name.text);
+    }
+
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isObjectBindingPattern(node.name) &&
+      node.initializer &&
+      isPageObjectsReference(node.initializer)
+    ) {
+      for (const element of node.name.elements) {
+        const key = element.propertyName ?? element.name;
+        if (ts.isIdentifier(key)) keys.add(key.text);
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(source);
+  return keys;
+}
+
+/** Whether a file reaches the given fixture key. See {@link collectConsumedKeys}. */
+export function fileConsumesKey(fileContent: string, key: string): boolean {
+  return collectConsumedKeys(fileContent).has(key);
 }
 
 // Consumers live in plugin suites (`test/scout*`) and in the solution Scout
@@ -144,18 +180,13 @@ export function censusPageObjectConsumers(
   scoutTestFiles: string[],
   pageObjectKeys: string[]
 ): PageObjectConsumerCensus[] {
-  const fileContents = new Map<string, string>();
-  const getContent = (file: string) => {
-    let content = fileContents.get(file);
-    if (content === undefined) {
-      content = Fs.readFileSync(file, 'utf8');
-      fileContents.set(file, content);
-    }
-    return content;
-  };
+  const consumedKeysByFile = new Map<string, Set<string>>();
+  for (const file of scoutTestFiles) {
+    consumedKeysByFile.set(file, collectConsumedKeys(Fs.readFileSync(file, 'utf8'), file));
+  }
 
   return pageObjectKeys.map((key) => {
-    const consumingFiles = scoutTestFiles.filter((file) => fileConsumesKey(getContent(file), key));
+    const consumingFiles = scoutTestFiles.filter((file) => consumedKeysByFile.get(file)?.has(key));
 
     const moduleIds = new Set<string>();
     for (const file of consumingFiles) {
@@ -196,10 +227,10 @@ export const auditCmd: Command<void> = {
 
   Page objects are reached via the 'pageObjects' fixture, not via imports, so
   import-graph tools report every page object as unused. This command instead
-  greps each page object's fixture key (property access and destructuring)
-  across every 'test/scout*' directory and every solution Scout package's
-  'src/playwright' in the repo and attributes each consuming file to its
-  owning module.
+  parses every '.ts' file under 'test/scout*' directories and the solution
+  Scout packages' 'src/playwright', collects the fixture keys each file reaches
+  (property access and destructuring), and attributes each consuming file to
+  its owning module.
 
   This is fact-gathering only. It reports counts; it does not decide whether
   an object should move, merge, or stay — see the kbn-scout placement policy

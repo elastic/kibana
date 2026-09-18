@@ -9,12 +9,19 @@
 
 // Fixture file for audit.test.ts: exercises destructuring consumption,
 // including a second key (lens) alongside the first (dashboard). Not a real
-// Scout spec (audit.test.ts reads this as text, never executes it), but it
-// lives under test/scout* so Scout's own ESLint rules apply.
-describe('fixture suite', () => {
-  test('uses dashboard and lens via destructuring', async ({ pageObjects }) => {
-    const { dashboard, lens } = pageObjects;
-    await expect(dashboard.goto()).resolves.toBeUndefined();
-    await expect(lens.goto()).resolves.toBeUndefined();
-  });
-});
+// Scout spec (audit.test.ts parses this, never executes it), but it is valid
+// TypeScript so the package type check does not need to exclude it.
+interface FakePageObjects {
+  dashboard: { goto(): Promise<void> };
+  lens: { goto(): Promise<void> };
+}
+
+export const usesDashboardAndLensViaDestructure = async ({
+  pageObjects,
+}: {
+  pageObjects: FakePageObjects;
+}) => {
+  const { dashboard, lens } = pageObjects;
+  await dashboard.goto();
+  await lens.goto();
+};
