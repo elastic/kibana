@@ -60,11 +60,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
   return {
     search: (request, options, deps) => {
-      if (request.factoryQueryType == null) {
+      const factoryQueryType = request.factoryQueryType;
+      if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
 
-      const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
+      const queryFactory: OsqueryFactory<T> = osqueryFactory[factoryQueryType];
 
       return from(hasOsqueryReadPrivilege(osqueryContext.security, deps.request)).pipe(
         mergeMap((isAuthorized) => {
@@ -96,12 +97,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           }) => {
             // Single decision for hit-level enforceSpaceScope and for any
             // global-agg builder that cannot inherit the top-level query.
-            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(
-              request.factoryQueryType
-            );
+            const matchActionDataSpaceId =
+              ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
 
             const strictRequest = {
-              factoryQueryType: request.factoryQueryType,
+              factoryQueryType,
               kuery: request.kuery,
               ...('pagination' in request ? { pagination: request.pagination } : {}),
               ...('sort' in request ? { sort: request.sort } : {}),
@@ -207,7 +207,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             return searchLegacyIndex$.pipe(
               mergeMap((legacyIndexResponse) => {
                 if (
-                  request.factoryQueryType === OsqueryQueries.actionResults &&
+                  factoryQueryType === OsqueryQueries.actionResults &&
                   (newDataStreamIndexExists || ccsEnabled || cpsActive)
                 ) {
                   const dataStreamDsl = enforceSpaceScope(

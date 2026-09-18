@@ -529,6 +529,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
             agentIds: [],
             sort: { field: '@timestamp', direction: Direction.desc },
             pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+            spaceId: 'my-space',
           } as StrategyRequestType<FactoryQueryTypes>;
         case OsqueryQueries.results:
           return resultsRequest as StrategyRequestType<FactoryQueryTypes>;
@@ -643,8 +644,8 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
       await lastValueFrom(
         provider.search(factoryRequest(OsqueryQueries.actionResults), {} as never, {
-          request: {} as never,
-        })
+          request: {},
+        } as never)
       );
 
       expect(searchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
