@@ -152,11 +152,22 @@ export const seedForensicTimeline = async (params: SeedParams): Promise<void> =>
   }
 };
 
+/**
+ * Removes exactly what `seedForensicTimeline` wrote for one scenario.
+ *
+ * The delete used to fan out across `logs-*` with a bare `prefix: scenarioId`,
+ * which on a shared eval stack could match another scenario whose id starts with
+ * this one (`partial-gap` vs `partial-gap-extended`) and could reach unrelated
+ * log indices — including restricted ones, where the whole teardown fails. Both
+ * halves are scoped now: the two indices this seeder writes, and the id
+ * delimiter that ends the scenario prefix.
+ */
 export const cleanupSeededData = async (esClient: Client, scenarioId: string): Promise<void> => {
   await esClient.deleteByQuery({
-    index: 'logs-*',
+    index: [PROCESS_INDEX, NETWORK_INDEX],
+    ignore_unavailable: true,
     query: {
-      prefix: { _id: scenarioId },
+      prefix: { _id: `${scenarioId}-` },
     },
   });
 };

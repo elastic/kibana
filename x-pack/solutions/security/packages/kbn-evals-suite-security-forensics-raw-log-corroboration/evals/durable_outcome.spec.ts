@@ -118,6 +118,12 @@ evaluate.describe(
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
           input: prompt,
+          // Pin the skill under test, as the sibling L3 composite spec does. This
+          // spec scores the raw-log corroboration worker's DURABILITY, not the
+          // agent's ability to route to it: without the override a run can be
+          // decided by the router before `produce_draft_forensic_report` is ever
+          // called, and routing is already covered by the L0 smoke spec.
+          configurationOverrides: { skillIds: [SKILL_ID] },
         });
 
         const toolCallSteps = getToolCallSteps(response);

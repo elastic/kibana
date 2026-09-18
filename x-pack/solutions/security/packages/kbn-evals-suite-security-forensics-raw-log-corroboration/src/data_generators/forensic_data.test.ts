@@ -147,14 +147,20 @@ describe('seedForensicTimeline', () => {
 });
 
 describe('cleanupSeededData', () => {
-  it('deletes by id prefix so teardown cannot reach a sibling scenario', async () => {
+  it('deletes only the two seeded indices, by scenario prefix plus delimiter', async () => {
+    // Teardown used to fan a delete-by-query across every `logs-*` index with a
+    // bare `prefix: scenarioId`: on a shared eval stack that could match a sibling
+    // scenario whose id merely STARTS with this one, could reach unrelated log
+    // indices, and could fail outright on a restricted index. Both halves are
+    // pinned here.
     const deleteByQuery = jest.fn().mockResolvedValue({ deleted: 4 });
 
     await cleanupSeededData({ deleteByQuery } as unknown as Client, SCENARIO.id);
 
     expect(deleteByQuery).toHaveBeenCalledWith({
-      index: 'logs-*',
-      query: { prefix: { _id: SCENARIO.id } },
+      index: [PROCESS_INDEX, NETWORK_INDEX],
+      ignore_unavailable: true,
+      query: { prefix: { _id: `${SCENARIO.id}-` } },
     });
   });
 });
