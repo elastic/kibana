@@ -246,8 +246,8 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                         label={
                           idx === 0
                             ? i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
-                              defaultMessage: 'Severity level',
-                            })
+                                defaultMessage: 'Severity level',
+                              })
                             : undefined
                         }
                         fullWidth
@@ -269,9 +269,9 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                         label={
                           idx === 0
                             ? i18n.translate(
-                              'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
-                              { defaultMessage: 'Threshold' }
-                            )
+                                'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
+                                { defaultMessage: 'Threshold' }
+                              )
                             : undefined
                         }
                         fullWidth

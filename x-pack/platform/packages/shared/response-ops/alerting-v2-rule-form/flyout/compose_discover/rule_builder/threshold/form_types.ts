@@ -260,8 +260,7 @@ export const SEVERITY_COLUMN = 'severity';
 export const hasReservedSeverityLabel = (
   stats: StatDefinition[],
   evaluations: EvaluationDefinition[]
-): boolean =>
-  [...stats, ...evaluations].some((item) => item.label.trim() === SEVERITY_COLUMN);
+): boolean => [...stats, ...evaluations].some((item) => item.label.trim() === SEVERITY_COLUMN);
 
 export const createDefaultSeverityConfig = (): SeverityConfig => ({
   mode: 'single',
