@@ -91,12 +91,14 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     getViewModeSubject(api) ?? new BehaviorSubject(undefined)
   );
 
-  const showEditButton = useMemo(() => {
-    if (parentViewMode !== 'edit') return false;
-    const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
-    if (!canEditUnifiedSearch) return false;
-    return Boolean(queryString) || Boolean(filters?.length);
-  }, [queryString, filters, parentViewMode, api]);
+  const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
+  const showEditButton = useMemo(
+    () =>
+      canEditUnifiedSearch &&
+      parentViewMode === 'edit' &&
+      (Boolean(queryString) || Boolean(filters?.length)),
+    [canEditUnifiedSearch, queryString, filters, parentViewMode]
+  );
 
   return (
     <EuiPopover
