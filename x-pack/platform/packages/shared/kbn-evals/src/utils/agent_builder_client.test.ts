@@ -228,4 +228,13 @@ describe('createAgentBuilderClient', () => {
     });
     expect(lastRequestBody().configuration_overrides).toEqual({ tools: [] });
   });
+  it('preserves an explicitly empty instructions override', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      configurationOverrides: { instructions: '' },
+    });
+    expect(lastRequestBody().configuration_overrides).toEqual({ instructions: '' });
+  });
 });
