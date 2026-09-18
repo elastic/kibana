@@ -33,5 +33,4 @@ const IOC_TYPE_TO_ESQL_FIELDS: Readonly<Record<string, readonly string[]>> = {
 export const getIocEsqlFields = (type: string): readonly string[] | undefined =>
   IOC_TYPE_TO_ESQL_FIELDS[type.toLowerCase()];
 
-export const ecsFieldForIocType = (type: string): string | undefined =>
-  getIocEsqlFields(type)?.[0];
+export const ecsFieldForIocType = (type: string): string | undefined => getIocEsqlFields(type)?.[0];

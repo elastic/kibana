@@ -83,9 +83,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('Suspicious lateral movement')).toBeInTheDocument();
     expect(screen.getByText('high (0.8)')).toBeInTheDocument();
     expect(screen.getByText('open')).toBeInTheDocument();
-    expect(
-      screen.getByText('watch-1 · lateral-movement-detector · run-1')
-    ).toBeInTheDocument();
+    expect(screen.getByText('watch-1 · lateral-movement-detector · run-1')).toBeInTheDocument();
     expect(screen.getByText('Attacker pivoted via RDP')).toBeInTheDocument();
     expect(screen.getByText('RDP session opened')).toBeInTheDocument();
     expect(screen.getByText('host-1')).toBeInTheDocument();
@@ -181,10 +179,7 @@ describe('SignificantSecurityEventInlineContent', () => {
     );
 
     const link = screen.getByTestId(`alertzeroSignificantSecurityEventAlertLink-${alertId}`);
-    expect(link).toHaveAttribute(
-      'href',
-      expect.stringContaining('/app/security/alerts/redirect/')
-    );
+    expect(link).toHaveAttribute('href', expect.stringContaining('/app/security/alerts/redirect/'));
     expect(link).toHaveAttribute('href', expect.stringContaining(alertId));
     expect(link).toHaveAttribute('href', expect.stringContaining(`index=${alertsIndex}`));
     expect(link.getAttribute('href')).not.toContain('timestamp=');

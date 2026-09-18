@@ -6,6 +6,7 @@
  */
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DISCOVER_LOOKUP_TIME_RANGE } from './constants';
 
 export interface DiscoverLookupTimeRange {
@@ -28,8 +29,12 @@ export const buildDiscoverEsqlUrl = ({
   }
 
   const locator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+  // Locator params are typed as SerializableRecord; from/to time ranges are plain strings.
   return locator?.getRedirectUrl({
     query: { esql },
-    timeRange,
-  });
+    timeRange: {
+      from: timeRange.from,
+      to: timeRange.to,
+    },
+  } as SerializableRecord);
 };

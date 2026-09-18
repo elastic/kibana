@@ -181,9 +181,7 @@ const IndicatorList: React.FC<{
       <ul>
         {indicators.map((indicator, index) => {
           const esql = buildIocLookupEsql({ type: indicator.type, value: indicator.value });
-          const href = esql
-            ? buildDiscoverEsqlUrl({ share: navigation.share, esql })
-            : undefined;
+          const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
           const testSubj = `alertzeroSignificantSecurityEventIocLink-${indicator.type}-${index}`;
           return (
             <li key={`${indicator.type}-${indicator.value}-${index}`}>

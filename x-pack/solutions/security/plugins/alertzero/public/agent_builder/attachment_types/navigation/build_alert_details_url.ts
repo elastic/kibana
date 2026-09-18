@@ -21,7 +21,9 @@ export const buildAlertDetailsPath = ({
   if (timestamp) {
     params.set('timestamp', timestamp);
   }
-  return `${SECURITY_ALERT_DETAILS_REDIRECT_PATH}/${encodeURIComponent(alertId)}?${params.toString()}`;
+  return `${SECURITY_ALERT_DETAILS_REDIRECT_PATH}/${encodeURIComponent(
+    alertId
+  )}?${params.toString()}`;
 };
 
 export const buildAlertDetailsUrl = ({

@@ -14,10 +14,7 @@ import {
   HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID,
 } from './hunt_correlation_inline_content';
 import type { HuntCorrelationAttachment } from './types';
-import {
-  buildIocLookupEsql,
-  buildThreatReportLookupEsql,
-} from '../navigation';
+import { buildIocLookupEsql, buildThreatReportLookupEsql } from '../navigation';
 
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
   ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
@@ -61,9 +58,7 @@ describe('HuntCorrelationInlineContent', () => {
   it('renders the empty state for malformed data', () => {
     render(
       <HuntCorrelationInlineContent
-        {...renderProps(
-          buildAttachment(undefined as unknown as HuntCorrelationAttachment['data'])
-        )}
+        {...renderProps(buildAttachment(undefined as unknown as HuntCorrelationAttachment['data']))}
       />
     );
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
@@ -166,7 +161,9 @@ describe('HuntCorrelationInlineContent', () => {
     );
     expect(iocSetLink).toHaveTextContent(iocSetHashValue);
 
-    expect(screen.queryByTestId('alertzeroHuntCorrelationAnchorLink-actor-0')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertzeroHuntCorrelationAnchorLink-actor-0')
+    ).not.toBeInTheDocument();
     expect(screen.getByText('APT-99')).toBeInTheDocument();
   });
 

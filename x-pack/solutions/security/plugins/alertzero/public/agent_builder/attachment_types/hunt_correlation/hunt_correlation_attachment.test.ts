@@ -71,7 +71,7 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
       const definition = createHuntCorrelationAttachmentDefinition({
         navigation: { ...navigation, share: mockShare },
       });
-      const attachment = { data: baseData } as HuntCorrelationAttachment;
+      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
       const expectedEsql = buildThreatReportsInEsql({
         reportIds: ['report-2', 'report-3', 'report-2'],
       });
@@ -90,7 +90,7 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
 
     it('returns no buttons when share is undefined', () => {
       const definition = createHuntCorrelationAttachmentDefinition({ navigation });
-      const attachment = { data: baseData } as HuntCorrelationAttachment;
+      const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
 
       expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
     });
@@ -101,7 +101,7 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
       });
       const attachment = {
         data: { ...baseData, diamond_scores: [] },
-      } as HuntCorrelationAttachment;
+      } as unknown as HuntCorrelationAttachment;
 
       expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
     });

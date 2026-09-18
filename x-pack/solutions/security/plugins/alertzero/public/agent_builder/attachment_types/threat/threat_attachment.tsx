@@ -12,10 +12,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import {
-  buildDiscoverEsqlUrl,
-  buildThreatReportLookupEsql,
-} from '../navigation';
+import { buildDiscoverEsqlUrl, buildThreatReportLookupEsql } from '../navigation';
 import { isValidThreatAttachmentData } from './types';
 import type { ThreatAttachment } from './types';
 

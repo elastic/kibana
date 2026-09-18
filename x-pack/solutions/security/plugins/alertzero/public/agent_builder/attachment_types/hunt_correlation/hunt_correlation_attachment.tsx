@@ -11,10 +11,7 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import {
-  buildDiscoverEsqlUrl,
-  buildThreatReportsInEsql,
-} from '../navigation';
+import { buildDiscoverEsqlUrl, buildThreatReportsInEsql } from '../navigation';
 import { parseHuntCorrelationData } from './types';
 import type { HuntCorrelationAttachment } from './types';
 
@@ -52,9 +49,7 @@ export const createHuntCorrelationAttachmentDefinition = ({
       return [];
     }
 
-    const reportIds = [
-      ...new Set(parsed.diamondScores.map((score) => score.related_report_id)),
-    ];
+    const reportIds = [...new Set(parsed.diamondScores.map((score) => score.related_report_id))];
     if (reportIds.length === 0) {
       return [];
     }

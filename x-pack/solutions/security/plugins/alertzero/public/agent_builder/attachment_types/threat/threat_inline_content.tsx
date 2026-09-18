@@ -18,6 +18,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { KbnWarningCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
@@ -44,6 +45,7 @@ import type {
 export const THREAT_ATTACHMENT_TEST_ID = 'alertzeroThreatAttachment';
 export const THREAT_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroThreatAttachmentEmpty';
 export const THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID = 'alertzeroThreatAttachmentUnavailable';
+export const THREAT_EXTERNAL_REF_LINK_TEST_ID = 'alertzeroThreatExternalRefLink';
 
 const IOC_VISIBLE_LIMIT = 8;
 
@@ -205,7 +207,12 @@ const renderEnrichedSections = ({
           <ul>
             {externalRefsWithUrl.map((ref, index) => (
               <li key={`${ref.url}-${index}`}>
-                <EuiLink href={ref.url} target="_blank" rel="noopener noreferrer">
+                <EuiLink
+                  href={ref.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-test-subj={THREAT_EXTERNAL_REF_LINK_TEST_ID}
+                >
                   {ref.sourceName || ref.externalId || ref.url}
                 </EuiLink>
               </li>
@@ -305,10 +312,7 @@ const renderEnrichedSections = ({
   if (liveData.diamond?.vertices.length) {
     sections.push(
       <div key="diamond">
-        {sectionHeading(
-          'xpack.alertzero.agentBuilder.attachments.threat.diamond',
-          'Diamond model'
-        )}
+        {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.diamond', 'Diamond model')}
         <EuiBasicTable<ThreatReportDiamondVertex>
           tableCaption={i18n.translate(
             'xpack.alertzero.agentBuilder.attachments.threat.diamondTableCaption',
@@ -334,11 +338,14 @@ const renderEnrichedSections = ({
               name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.summary', {
                 defaultMessage: 'Summary',
               }),
-              render: (summary?: string) => (
-                <span css={clampedSummaryStyles} title={summary}>
-                  {summary}
-                </span>
-              ),
+              render: (summary?: string) =>
+                summary ? (
+                  <EuiToolTip content={summary} display="block" position="left">
+                    <span tabIndex={0} css={clampedSummaryStyles}>
+                      {summary}
+                    </span>
+                  </EuiToolTip>
+                ) : null,
             },
           ]}
         />
@@ -358,7 +365,7 @@ const renderEnrichedSections = ({
   }
 
   if (liveData.evidence) {
-    const evidenceItems: Array<{ title: string; description: React.ReactNode }> = [];
+    const evidenceItems: Array<{ title: string; description: string }> = [];
     if (liveData.evidence.alertHitsTotal != null) {
       evidenceItems.push({
         title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.alertHits', {

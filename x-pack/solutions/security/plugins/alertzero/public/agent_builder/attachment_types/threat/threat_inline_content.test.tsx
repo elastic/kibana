@@ -13,6 +13,7 @@ import {
   ThreatAttachmentInlineContent,
   THREAT_ATTACHMENT_EMPTY_TEST_ID,
   THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID,
+  THREAT_EXTERNAL_REF_LINK_TEST_ID,
 } from './threat_inline_content';
 import { threatAttachmentQueryClient } from './query_client';
 import type { ThreatAttachment } from './types';
@@ -272,9 +273,10 @@ describe('ThreatAttachmentInlineContent', () => {
       expect(screen.getByText('External Title')).toBeInTheDocument();
     });
 
-    const link = screen.getByRole('link', { name: /MITRE ATT&CK/ });
+    const link = screen.getByTestId(THREAT_EXTERNAL_REF_LINK_TEST_ID);
     expect(link).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1078/');
     expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveTextContent('MITRE ATT&CK');
   });
 
   it('shows Alert hits label rather than alert_hits_total= for evidence', async () => {
