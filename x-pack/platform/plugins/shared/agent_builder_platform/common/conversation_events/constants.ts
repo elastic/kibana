@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ConversationsService } from './conversations_service';
-export { createPublicConversationsContract } from './create_public_conversations_contract';
+/** Type discriminator for the built-in text conversation event. */
+export const TEXT_NOTE_EVENT_TYPE = 'text_note';
