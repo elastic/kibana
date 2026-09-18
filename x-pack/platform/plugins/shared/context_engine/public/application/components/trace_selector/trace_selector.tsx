@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { DataStreamField } from './data_stream_field';
@@ -26,43 +26,34 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
     }
   }, [value]);
 
-  const handleModeChange = (id: string) => {
-    if (id === 'elastic_agent' || id === 'index') {
-      setMode(id);
-      onChange(undefined);
-    }
-  };
-
   return (
     <>
       <EuiButtonGroup
         legend={i18n.translate('xpack.contextEngine.traceSelector.toggleLegend', {
           defaultMessage: 'Agent trace source type',
         })}
+        variant="selection"
         type="single"
-        buttonSize="compressed"
+        buttonSize="s"
         idSelected={mode}
-        onChange={handleModeChange}
-        options={[
-          {
-            id: 'elastic_agent',
-            label: i18n.translate('xpack.contextEngine.traceSelector.elasticAgentsToggle', {
-              defaultMessage: 'Elastic agents',
-            }),
-            iconType: 'productAgent',
-            'data-test-subj': 'contextTraceToggle-elastic_agent',
-          },
-          {
-            id: 'index',
-            label: i18n.translate('xpack.contextEngine.traceSelector.genAiLibrariesToggle', {
-              defaultMessage: 'GenAI libraries',
-            }),
-            iconType: 'listBullet',
-            'data-test-subj': 'contextTraceToggle-index',
-          },
-        ]}
+        onChange={(id) => setMode(id as EditableTraceType)}
         data-test-subj="contextTraceToggle"
-      />
+      >
+        <EuiButton
+          id="elastic_agent"
+          iconType="productAgent"
+          data-test-subj="contextTraceToggle-elastic_agent"
+        >
+          {i18n.translate('xpack.contextEngine.traceSelector.elasticAgentsToggle', {
+            defaultMessage: 'Elastic agents',
+          })}
+        </EuiButton>
+        <EuiButton id="index" iconType="listBullet" data-test-subj="contextTraceToggle-index">
+          {i18n.translate('xpack.contextEngine.traceSelector.genAiLibrariesToggle', {
+            defaultMessage: 'GenAI libraries',
+          })}
+        </EuiButton>
+      </EuiButtonGroup>
       <EuiSpacer size="m" />
       {mode === 'elastic_agent' ? (
         <ElasticAgentField value={value} onChange={onChange} />
