@@ -239,21 +239,27 @@ describe('createWorkflowEvidenceEvaluator', () => {
     expect(result.metadata?.agentEsqlRowCounts).toEqual([]);
   });
 
-  // The scope-excluded shape: the agent DID retrieve (97 rows from the alerts
-  // index) but not under the marker the example declares, so no count is
-  // attributable to this fixture. The metadata must name both, otherwise this
-  // `N/A` is indistinguishable from "the agent never retrieved anything".
-  it('names the declared scope and the retrievals excluded for not carrying it', async () => {
+  // The scope-violation shape: the run DID retrieve (97 rows from the alerts
+  // index, plus the 95-row pipeline retrieval the AD call's unscoped query
+  // produced) but under no marker the example declares, so it observed none of
+  // this fixture's population. That scores 0 rather than `N/A`: an `N/A` is
+  // dropped from the aggregate, so ignoring the marker would be the way to avoid
+  // the retrieval assertion instead of the way to fail it. The metadata still
+  // names the scope and both excluded sides, so the 0 is not mistaken for "the
+  // agent never retrieved anything".
+  it('scores 0 when every retrieval was excluded for not carrying the declared scope', async () => {
     const params: Params = {
       input: {} as Params['input'],
       output: baseOutput({
-        retrievedAlertCountSource: 'none',
+        retrievedAlertCount: 0,
+        retrievedAlertCountSource: 'unscoped_retrieval',
         passedAlertCount: 16,
         retrievalEvidence: {
           ...EMPTY_RETRIEVAL_EVIDENCE,
           agentEsqlRowCounts: [97],
           retrievalScope: 'ad-scenario-registry-2026-07',
           unscopedAgentAlertRetrievalRowCounts: [97],
+          unscopedPipelineAlertRetrievalCounts: [95, 95],
         },
       }),
       expected: baseExpected({ expectedRetrievedAlertCount: 95 }),
@@ -262,11 +268,13 @@ describe('createWorkflowEvidenceEvaluator', () => {
 
     const result = await evaluator.evaluate(params);
 
-    expect(result.metadata?.evidenceState).toBe('incomplete');
-    expect(result.label).toBe('N/A');
-    expect(result.score).toBeNull();
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+    expect(result.metadata?.retrievedAlertCountSource).toBe('unscoped_retrieval');
     expect(result.metadata?.retrievalScope).toBe('ad-scenario-registry-2026-07');
     expect(result.metadata?.unscopedAgentAlertRetrievalRowCounts).toEqual([97]);
+    expect(result.metadata?.unscopedPipelineAlertRetrievalCounts).toEqual([95, 95]);
     expect(result.metadata?.agentEsqlRowCounts).toEqual([97]);
   });
 });

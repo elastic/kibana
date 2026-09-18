@@ -65,19 +65,25 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         // Which observable produced the count the comparison above used, so an
         // `N/A` (or a surprise 0) is self-explaining from the score document
         // alone: `none` means no source reported a number, `pipeline_*` means
-        // the product's Alert Retrieval phase did, and `agent_esql_retrieval`
-        // means the count came from the agent's OWN retrieval — the only source
-        // a `provided`-mode run (retrieval skipped by design) can have.
+        // the product's Alert Retrieval phase did, `agent_esql_retrieval` means
+        // the count came from the agent's OWN retrieval — the only source a
+        // `provided`-mode run (retrieval skipped by design) can have — and
+        // `unscoped_retrieval` means a retrieval happened but carried none of
+        // the example's declared scope, i.e. a scored 0 rather than an `N/A`.
         retrievedAlertCountSource: output.workflow.retrievedAlertCountSource ?? 'none',
         alertRetrievalMode: output.workflow.retrievalEvidence?.alertRetrievalMode ?? null,
         agentEsqlRowCounts: output.workflow.retrievalEvidence?.agentEsqlRowCounts ?? [],
-        // The scope the example's retrieval had to carry, and the alerts-index
-        // retrievals it excluded for not carrying it. Both are here so an `N/A`
-        // reads as "the agent retrieved N rows unscoped" (the count is
-        // unattributable to this fixture) instead of "no retrieval happened".
+        // The scope the example's retrieval had to carry, and the retrievals it
+        // excluded for not carrying it — on both sides, the agent's own ES|QL
+        // results and the pipeline counts derived from the query it handed the
+        // AD tool. All three are here so a 0 reads as "the run retrieved N rows
+        // unscoped" (none of it attributable to this fixture) instead of "no
+        // retrieval happened", which is the only case that stays `N/A`.
         retrievalScope: output.workflow.retrievalEvidence?.retrievalScope ?? null,
         unscopedAgentAlertRetrievalRowCounts:
           output.workflow.retrievalEvidence?.unscopedAgentAlertRetrievalRowCounts ?? [],
+        unscopedPipelineAlertRetrievalCounts:
+          output.workflow.retrievalEvidence?.unscopedPipelineAlertRetrievalCounts ?? [],
         stages,
         expectedRetrievedAlertCount,
         expectedPassedAlertCount,

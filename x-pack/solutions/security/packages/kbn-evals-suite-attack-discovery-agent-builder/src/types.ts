@@ -26,9 +26,17 @@ export interface AttackDiscoveryAgentBuilderInput extends Record<string, unknown
    * otherwise be scored as a complete retrieval of the dense fixture without
    * touching a single seeded alert. A retrieval is therefore counted for this
    * example only when its query carries this string
-   * (`extractAgentAlertRetrievalRowCounts` in `evaluate_dataset.ts`); the query
+   * (`extractAgentAlertRetrievalPopulation` in `evaluate_dataset.ts`); the query
    * is the observable that proves the scope, because the AD default query's
    * `KEEP` list returns no marker-bearing field.
+   *
+   * Enforced on BOTH observables: the agent's own ES|QL results and the
+   * `esql_query` the agent hands `security.attack-discovery.run` (the pipeline's
+   * Alert Retrieval phase runs that query). A run whose only alerts retrievals
+   * omit this string observed none of the example's population, so it reports a
+   * retrieved count of 0 — a failed retrieval, scored — rather than `null`
+   * (unobservable, and therefore excluded from the aggregate). `null` is
+   * reserved for a run that retrieved nothing at all.
    *
    * Omitted on examples that do not assert a retrieved population.
    */
@@ -84,15 +92,22 @@ export type AttackDiscoveryAgentBuilderExample = Example<
  * without its provenance, and a future `N/A` is self-explaining.
  *
  * The `pipeline_*` sources are the product pipeline response's Alert Retrieval
- * phase — a RETRIEVED count. `agent_esql_retrieval` is the row count of the
- * agent's OWN ES|QL retrieval (`platform.core.execute_esql` against the alerts
- * index) — the only observable retrieval source in `provided` mode, where the
- * pipeline skips retrieval by design. `none` means nothing reported a number.
+ * phase — a RETRIEVED count. `agent_esql_retrieval` is the observed population
+ * of the agent's OWN ES|QL retrievals (`platform.core.execute_esql` against the
+ * alerts index) — the only observable retrieval source in `provided` mode,
+ * where the pipeline skips retrieval by design.
+ *
+ * `unscoped_retrieval` means a retrieval DID happen but none of it carried the
+ * example's declared scope, so it observed none of this fixture's population:
+ * the count is 0 (a failed retrieval), not `null`. `none` means nothing
+ * retrieved at all — there is no count to report, and the evaluator marks the
+ * evidence incomplete rather than scoring a retrieval that never happened.
  */
 export type RetrievedAlertCountSource =
   | 'pipeline_alert_retrieval'
   | 'pipeline_combined_alerts'
   | 'agent_esql_retrieval'
+  | 'unscoped_retrieval'
   | 'none';
 
 /**
@@ -133,10 +148,18 @@ export interface AttackDiscoveryRetrievalEvidence {
    *  `null` when the example declares no scope. */
   retrievalScope: string | null;
   /** Row counts of the agent's alerts-index retrievals that did NOT carry
-   *  `retrievalScope`, and therefore produced no retrieved count. Non-empty
-   *  means the agent retrieved alerts unscoped: the count is unattributable to
-   *  this fixture, which is a different finding from "no retrieval happened". */
+   *  `retrievalScope`, and therefore contributed no observed population.
+   *  Non-empty means the agent retrieved alerts unscoped: none of what it
+   *  observed is attributable to this fixture, which is a different finding
+   *  from "no retrieval happened" (the count is 0 in the first case, `null` in
+   *  the second). */
   unscopedAgentAlertRetrievalRowCounts: number[];
+  /** Pipeline-derived counts excluded for the same reason: the query the agent
+   *  handed `security.attack-discovery.run` (`params.esql_query`) is what the
+   *  pipeline's Alert Retrieval phase ran, so a pipeline count is admitted only
+   *  when that query carries `retrievalScope`. Non-empty means the pipeline
+   *  reported a retrieval this fixture's marker does not cover. */
+  unscopedPipelineAlertRetrievalCounts: number[];
 }
 
 /** Empty retrieval evidence, for fixtures that do not exercise retrieval. */
@@ -148,6 +171,7 @@ export const EMPTY_RETRIEVAL_EVIDENCE: AttackDiscoveryRetrievalEvidence = {
   agentEsqlRowCounts: [],
   retrievalScope: null,
   unscopedAgentAlertRetrievalRowCounts: [],
+  unscopedPipelineAlertRetrievalCounts: [],
 };
 
 export interface AttackDiscoveryAgentBuilderTaskOutput {

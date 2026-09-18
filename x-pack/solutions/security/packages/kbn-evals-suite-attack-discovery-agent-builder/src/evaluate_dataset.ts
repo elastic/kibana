@@ -114,13 +114,44 @@ export const trackedStageKeys = (
  */
 export const ALERT_INDEX_FAMILY = attackDiscoveryFixtureIndex.replace(/-default$/, '');
 
+/** The `_id` column of an ES|QL result: the alert identity the observed
+ *  population is counted by (see `extractAgentAlertRetrievalPopulation`). */
+const ALERT_ID_COLUMN = '_id';
+
 interface AgentEsqlResult {
   /** The ES|QL text this result came from, as the result reports it (falling
    *  back to the step's own `params.query` when the result carries none). */
   query: string | null;
   /** Rows in `data.values` — the result the agent actually received. */
   rowCount: number;
+  /** The `_id` each row carried, in row order; `null` when the result reported
+   *  no `_id` column, i.e. the query kept no identity for its rows. */
+  alertIds: string[] | null;
 }
+
+/** Index of the `_id` column in `data.columns`, or -1 when the result has none. */
+const getIdColumnIndex = (columns: unknown): number =>
+  Array.isArray(columns)
+    ? columns.findIndex(
+        (column) => getString((column as { name?: unknown } | null)?.name) === ALERT_ID_COLUMN
+      )
+    : -1;
+
+/**
+ * The `_id`s a result's rows carry, or `null` when it reports no `_id` column.
+ * `null` means "these rows' identities are unknown", which is NOT the same as
+ * `[]` ("the result returned no rows") — the two produce different observed
+ * populations in `extractAgentAlertRetrievalPopulation`.
+ */
+const extractResultAlertIds = (columns: unknown, values: unknown[]): string[] | null => {
+  const idColumnIndex = getIdColumnIndex(columns);
+  if (idColumnIndex === -1) return null;
+
+  return values.flatMap((row) => {
+    const id = Array.isArray(row) ? getString(row[idColumnIndex]) : null;
+    return id == null ? [] : [id];
+  });
+};
 
 /** Every `platform.core.execute_esql` result the agent received, in step order. */
 export const collectAgentEsqlResults = (
@@ -136,12 +167,13 @@ export const collectAgentEsqlResults = (
         // (`type: 'query'`) and `results[1]` carries the rows
         // (`type: 'esql_results'`, `data.values`). Only the latter is a result.
         if (entry?.type !== 'esql_results') return [];
-        const data = (entry.data ?? {}) as { query?: unknown; values?: unknown };
+        const data = (entry.data ?? {}) as { query?: unknown; values?: unknown; columns?: unknown };
         if (!Array.isArray(data.values)) return [];
         return [
           {
             query: getString(data.query) ?? getString(params.query),
             rowCount: data.values.length,
+            alertIds: extractResultAlertIds(data.columns, data.values),
           },
         ];
       });
@@ -156,12 +188,17 @@ const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
   result.query?.includes(ALERT_INDEX_FAMILY) === true;
 
 /**
- * Whether the result's query carries the example's retrieval scope. A `null`
- * scope (the example declares none) accepts every query: the check belongs to
- * the EXAMPLE, not to the extraction.
+ * Whether a query carries the example's retrieval scope. A `null` scope (the
+ * example declares none) accepts every query: the check belongs to the EXAMPLE,
+ * not to the observable.
+ *
+ * Both observables are checked with this ONE predicate — the agent's own ES|QL
+ * results and the `esql_query` the agent handed
+ * `security.attack-discovery.run` — so the agent-side and pipeline-side scope
+ * rules cannot drift apart.
  */
-const carriesRetrievalScope = (result: AgentEsqlResult, retrievalScope: string | null): boolean =>
-  retrievalScope == null || result.query?.includes(retrievalScope) === true;
+const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean =>
+  retrievalScope == null || query?.includes(retrievalScope) === true;
 
 /**
  * The agent's alerts-index retrievals, split by whether they carry the
@@ -187,13 +224,13 @@ const carriesRetrievalScope = (result: AgentEsqlResult, retrievalScope: string |
 const classifyAgentAlertRetrievals = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
   retrievalScope: string | null
-): { scoped: number[]; unscoped: number[] } => {
-  const scoped: number[] = [];
-  const unscoped: number[] = [];
+): { scoped: AgentEsqlResult[]; unscoped: AgentEsqlResult[] } => {
+  const scoped: AgentEsqlResult[] = [];
+  const unscoped: AgentEsqlResult[] = [];
 
   for (const result of collectAgentEsqlResults(steps)) {
     if (readsAlertsIndex(result)) {
-      (carriesRetrievalScope(result, retrievalScope) ? scoped : unscoped).push(result.rowCount);
+      (carriesRetrievalScope(result.query, retrievalScope) ? scoped : unscoped).push(result);
     }
   }
 
@@ -201,31 +238,77 @@ const classifyAgentAlertRetrievals = (
 };
 
 /**
- * Row counts of the agent's own retrieval OF THE EXAMPLE'S alert population:
- * the ES|QL results that read the alerts index and carry the example's scope. A
- * run can execute ES|QL for other reasons — measured on golden, two
- * clean-profile reps queried `logs-endpoint.events.process-default` and
- * received 0 rows — and those are not retrievals of the alert population, so
- * they must not produce a count.
+ * The observed population of the example's SCOPED alerts retrievals: the
+ * DISTINCT alert ids they returned, unioned across retrievals. The scored
+ * question is whether the run reached the seeded population, so the union is
+ * the reading to compare against `expectedRetrievedAlertCount`.
+ *
+ * One result's row count is not that population when the retrieval is split:
+ * two correct scoped calls returning 50 and 45 distinct alerts of a 95-alert
+ * fixture have observed all 95, and reading either alone scores the run as a
+ * failure. The recorded ES|QL payload carries `_id` per row, so the identities
+ * are there to union.
+ *
+ * A result that reports no `_id` column cannot be unioned at all — its rows'
+ * identities are unknown — so its row count stands in as that retrieval's own
+ * contribution, which can only undercount. `null` when the example ran no
+ * scoped alerts retrieval (an unscoped-only run observes none of this
+ * fixture's population; see `computeWorkflowAlertCounts` for what that scores).
  */
-export const extractAgentAlertRetrievalRowCounts = (
+export const extractAgentAlertRetrievalPopulation = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
   retrievalScope: string | null = null
-): number[] => classifyAgentAlertRetrievals(steps, retrievalScope).scoped;
+): number | null => {
+  const { scoped } = classifyAgentAlertRetrievals(steps, retrievalScope);
+  if (scoped.length === 0) return null;
+
+  const ids = new Set<string>();
+  let largestIdlessRowCount = 0;
+  for (const result of scoped) {
+    if (result.alertIds === null) {
+      largestIdlessRowCount = Math.max(largestIdlessRowCount, result.rowCount);
+    } else {
+      for (const id of result.alertIds) ids.add(id);
+    }
+  }
+
+  return Math.max(ids.size, largestIdlessRowCount);
+};
 
 /**
  * Row counts of the alerts-index retrievals that did NOT carry the example's
- * scope — the ones `extractAgentAlertRetrievalRowCounts` excludes, and which
- * therefore produced no retrieved count. Persisted as evidence so an `N/A`
- * reads as "the agent retrieved N rows unscoped" rather than "the agent did not
- * retrieve": those are different findings, and only the second is a retrieval
- * failure. Always empty when the example declares no scope, since nothing can
- * then be out of scope.
+ * scope — the ones `extractAgentAlertRetrievalPopulation` excludes, and which
+ * therefore contribute no observed population. Persisted as evidence so a
+ * scored 0 reads as "the agent retrieved N rows unscoped" rather than "the
+ * agent did not retrieve": those are different findings, and only the second
+ * is an absent retrieval rather than a scope violation. Always empty when the
+ * example declares no scope, since nothing can then be out of scope.
  */
 export const extractUnscopedAlertRetrievalRowCounts = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
   retrievalScope: string | null = null
-): number[] => classifyAgentAlertRetrievals(steps, retrievalScope).unscoped;
+): number[] =>
+  classifyAgentAlertRetrievals(steps, retrievalScope).unscoped.map((result) => result.rowCount);
+
+/**
+ * The ES|QL query the agent handed `security.attack-discovery.run`
+ * (`params.esql_query`), when it supplied one. The pipeline's Alert Retrieval
+ * phase runs THAT query, so this is the observable that proves whether a
+ * pipeline-derived count is scoped — the same way the agent's own ES|QL
+ * results prove it for its retrievals. `null` when the call supplied no query
+ * (the tool's own unscoped default query is then what ran).
+ *
+ * The FIRST AD call is the one whose execution the pipeline response is read
+ * for (`findAdToolResult`), so it is the one whose query is returned.
+ */
+export const extractAdToolEsqlQuery = (
+  steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
+): string | null => {
+  const adStep = (steps ?? []).find((step) => step?.tool_id === 'security.attack-discovery.run');
+  const params = (adStep?.params ?? {}) as { esql_query?: unknown };
+
+  return getString(params.esql_query);
+};
 
 /**
  * `alert_retrieval` extraction strategies that are NOT retrievals:
@@ -248,14 +331,17 @@ const resolveRetrievedAlertCountSource = ({
   fromAlertRetrieval,
   fromCombinedAlerts,
   fromAgentRetrieval,
+  onlyUnscopedRetrievals,
 }: {
   fromAlertRetrieval: number | null;
   fromCombinedAlerts: number | null;
   fromAgentRetrieval: number | null;
+  onlyUnscopedRetrievals: boolean;
 }): RetrievedAlertCountSource => {
   if (fromAlertRetrieval != null) return 'pipeline_alert_retrieval';
   if (fromCombinedAlerts != null) return 'pipeline_combined_alerts';
   if (fromAgentRetrieval != null) return 'agent_esql_retrieval';
+  if (onlyUnscopedRetrievals) return 'unscoped_retrieval';
   return 'none';
 };
 
@@ -274,18 +360,53 @@ const resolveRetrievedAlertCountSource = ({
 // has a value we fall back to the agent's own retrieval (`provided` mode
 // skips retrieval by design) and, failing that, leave `retrievedAlertCount`
 // `null` rather than manufacturing it from the passed count.
+//
+// BOTH sides of that fallback answer the same question — how much of THIS
+// fixture's population did the run observe — so both are held to the
+// example's declared scope. The pipeline's Alert Retrieval phase runs the
+// query the agent handed the AD tool (`params.esql_query`), which is
+// observable at the call site, so a pipeline count is admitted only when that
+// query carries `retrievalScope`; the excluded ones come back as
+// `unscopedPipelineAlertRetrievalCounts` for the evidence block.
+//
+// A run that retrieved but observed NONE of the fixture's population — every
+// alerts retrieval it made omitted the declared scope — scores 0, not `null`.
+// The count is defined as "alerts of this fixture observed", so 0 is the
+// truthful reading, and `null` would let a model that ignores the marker take
+// `N/A` (dropped from the aggregate) instead of failing the retrieval the
+// example's question asked for. `null` stays reserved for a run that
+// retrieved nothing at all, where there is no count to report.
 export const computeWorkflowAlertCounts = ({
   pipeline,
   adToolResult,
-  agentAlertRetrievalRowCounts = [],
+  adToolEsqlQuery = null,
+  retrievalScope = null,
+  agentAlertRetrievalPopulation = null,
+  unscopedAgentAlertRetrievalRowCounts = [],
 }: {
   pipeline: AttackDiscoveryPipelineResponse;
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
-  agentAlertRetrievalRowCounts?: number[];
+  /** The query the agent handed the AD tool (`params.esql_query`), when it
+   *  supplied one: the pipeline's own retrieval runs it. */
+  adToolEsqlQuery?: string | null;
+  /** The marker the example's retrievals had to carry; `null` when the example
+   *  declares none, in which case nothing can be out of scope. */
+  retrievalScope?: string | null;
+  /** The population the example's SCOPED retrievals observed, already unioned
+   *  across them (`extractAgentAlertRetrievalPopulation`); `null` when the run
+   *  made no scoped retrieval. */
+  agentAlertRetrievalPopulation?: number | null;
+  /** Row counts of the agent's alerts-index retrievals that did NOT carry the
+   *  scope: non-empty means the run retrieved, but not under this fixture's
+   *  marker. */
+  unscopedAgentAlertRetrievalRowCounts?: number[];
 }): {
   retrievedAlertCount: number | null;
   retrievedAlertCountSource: RetrievedAlertCountSource;
   passedAlertCount: number | null;
+  /** Pipeline counts that were NOT admitted because the AD call's query did not
+   *  carry `retrievalScope`. Diagnostic only — nothing scores them. */
+  unscopedPipelineAlertRetrievalCounts: number[];
 } => {
   const entries = pipeline.alert_retrieval ?? null;
   const retrievalEntries = (entries ?? []).filter(
@@ -301,20 +422,33 @@ export const computeWorkflowAlertCounts = ({
   const fromCombinedAlerts = carriesOnlyNonRetrievalEntries
     ? null
     : getNumber(pipeline.combined_alerts?.alerts_context_count);
-  // The profile asks whether the agent's retrieval reached the seeded
-  // population, so among the agent's own alert retrievals the LARGEST observed
-  // population is the one to compare against `expectedRetrievedAlertCount`.
-  const fromAgentRetrieval =
-    agentAlertRetrievalRowCounts.length > 0 ? Math.max(...agentAlertRetrievalRowCounts) : null;
+
+  const pipelineCountCarriesScope = carriesRetrievalScope(adToolEsqlQuery, retrievalScope);
+  const admittedFromAlertRetrieval = pipelineCountCarriesScope ? fromAlertRetrieval : null;
+  const admittedFromCombinedAlerts = pipelineCountCarriesScope ? fromCombinedAlerts : null;
+  const unscopedPipelineAlertRetrievalCounts = pipelineCountCarriesScope
+    ? []
+    : [fromAlertRetrieval, fromCombinedAlerts].filter((count): count is number => count != null);
+
+  const onlyUnscopedRetrievals =
+    retrievalScope != null &&
+    (unscopedAgentAlertRetrievalRowCounts.length > 0 ||
+      unscopedPipelineAlertRetrievalCounts.length > 0);
 
   return {
-    retrievedAlertCount: fromAlertRetrieval ?? fromCombinedAlerts ?? fromAgentRetrieval,
+    retrievedAlertCount:
+      admittedFromAlertRetrieval ??
+      admittedFromCombinedAlerts ??
+      agentAlertRetrievalPopulation ??
+      (onlyUnscopedRetrievals ? 0 : null),
     retrievedAlertCountSource: resolveRetrievedAlertCountSource({
-      fromAlertRetrieval,
-      fromCombinedAlerts,
-      fromAgentRetrieval,
+      fromAlertRetrieval: admittedFromAlertRetrieval,
+      fromCombinedAlerts: admittedFromCombinedAlerts,
+      fromAgentRetrieval: agentAlertRetrievalPopulation,
+      onlyUnscopedRetrievals,
     }),
     passedAlertCount: adToolResult?.alertsContextCount ?? null,
+    unscopedPipelineAlertRetrievalCounts,
   };
 };
 
@@ -330,11 +464,13 @@ export const extractRetrievalEvidence = ({
   agentEsqlRowCounts = [],
   retrievalScope = null,
   unscopedAgentAlertRetrievalRowCounts = [],
+  unscopedPipelineAlertRetrievalCounts = [],
 }: {
   pipeline?: AttackDiscoveryPipelineResponse | null;
   agentEsqlRowCounts?: number[];
   retrievalScope?: string | null;
   unscopedAgentAlertRetrievalRowCounts?: number[];
+  unscopedPipelineAlertRetrievalCounts?: number[];
 }): AttackDiscoveryRetrievalEvidence => {
   const entries = pipeline?.alert_retrieval;
   const combined = pipeline?.combined_alerts ?? null;
@@ -359,6 +495,7 @@ export const extractRetrievalEvidence = ({
     agentEsqlRowCounts,
     retrievalScope,
     unscopedAgentAlertRetrievalRowCounts,
+    unscopedPipelineAlertRetrievalCounts,
   };
 };
 
@@ -372,23 +509,32 @@ export const buildWorkflow = ({
   pipeline,
   adToolResult,
   agentEsqlRowCounts,
-  agentAlertRetrievalRowCounts,
+  adToolEsqlQuery = null,
+  agentAlertRetrievalPopulation = null,
   retrievalScope = null,
   unscopedAgentAlertRetrievalRowCounts = [],
 }: {
   pipeline: AttackDiscoveryPipelineResponse | null;
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
   agentEsqlRowCounts: number[];
-  agentAlertRetrievalRowCounts: number[];
+  adToolEsqlQuery?: string | null;
+  agentAlertRetrievalPopulation?: number | null;
   retrievalScope?: string | null;
   unscopedAgentAlertRetrievalRowCounts?: number[];
 }): AttackDiscoveryAgentBuilderTaskOutput['workflow'] => {
-  const { retrievedAlertCount, retrievedAlertCountSource, passedAlertCount } =
-    computeWorkflowAlertCounts({
-      pipeline: pipeline ?? {},
-      adToolResult,
-      agentAlertRetrievalRowCounts,
-    });
+  const {
+    retrievedAlertCount,
+    retrievedAlertCountSource,
+    passedAlertCount,
+    unscopedPipelineAlertRetrievalCounts,
+  } = computeWorkflowAlertCounts({
+    pipeline: pipeline ?? {},
+    adToolResult,
+    adToolEsqlQuery,
+    retrievalScope,
+    agentAlertRetrievalPopulation,
+    unscopedAgentAlertRetrievalRowCounts,
+  });
 
   return {
     stages: trackedStages(pipeline?.workflow_executions_tracking),
@@ -403,6 +549,7 @@ export const buildWorkflow = ({
       agentEsqlRowCounts,
       retrievalScope,
       unscopedAgentAlertRetrievalRowCounts,
+      unscopedPipelineAlertRetrievalCounts,
     }),
   };
 };
@@ -412,7 +559,8 @@ const inspectWorkflow = async ({
   executionId,
   adToolResult,
   agentEsqlRowCounts,
-  agentAlertRetrievalRowCounts,
+  adToolEsqlQuery,
+  agentAlertRetrievalPopulation,
   retrievalScope,
   unscopedAgentAlertRetrievalRowCounts,
 }: {
@@ -420,7 +568,8 @@ const inspectWorkflow = async ({
   executionId: string;
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
   agentEsqlRowCounts: number[];
-  agentAlertRetrievalRowCounts: number[];
+  adToolEsqlQuery: string | null;
+  agentAlertRetrievalPopulation: number | null;
   retrievalScope: string | null;
   unscopedAgentAlertRetrievalRowCounts: number[];
 }): Promise<AttackDiscoveryAgentBuilderTaskOutput['workflow']> => {
@@ -443,7 +592,8 @@ const inspectWorkflow = async ({
     pipeline,
     adToolResult,
     agentEsqlRowCounts,
-    agentAlertRetrievalRowCounts,
+    adToolEsqlQuery,
+    agentAlertRetrievalPopulation,
     retrievalScope,
     unscopedAgentAlertRetrievalRowCounts,
   });
@@ -469,10 +619,14 @@ const buildTask =
     // retrieval phase by design, so its response carries no retrieved count).
     // `retrievalScope` is the marker the example's question instructs the agent
     // to retrieve by; a retrieval that does not carry it is not this fixture's
-    // population and produces no count (see `extractAgentAlertRetrievalRowCounts`).
+    // population and produces no count (see `extractAgentAlertRetrievalPopulation`).
+    // The same marker is checked against the query the agent handed the AD tool
+    // (`adToolEsqlQuery`), because the pipeline's own retrieval runs that query
+    // — so both sides of the fallback are held to one scope (Fix 3).
     const retrievalScope = input?.retrievalScope ?? null;
+    const adToolEsqlQuery = extractAdToolEsqlQuery(response.steps);
     const agentEsqlRowCounts = extractAgentEsqlRowCounts(response.steps);
-    const agentAlertRetrievalRowCounts = extractAgentAlertRetrievalRowCounts(
+    const agentAlertRetrievalPopulation = extractAgentAlertRetrievalPopulation(
       response.steps,
       retrievalScope
     );
@@ -487,7 +641,8 @@ const buildTask =
           executionId,
           adToolResult,
           agentEsqlRowCounts,
-          agentAlertRetrievalRowCounts,
+          adToolEsqlQuery,
+          agentAlertRetrievalPopulation,
           retrievalScope,
           unscopedAgentAlertRetrievalRowCounts,
         })
@@ -495,7 +650,8 @@ const buildTask =
           pipeline: null,
           adToolResult,
           agentEsqlRowCounts,
-          agentAlertRetrievalRowCounts,
+          adToolEsqlQuery,
+          agentAlertRetrievalPopulation,
           retrievalScope,
           unscopedAgentAlertRetrievalRowCounts,
         });
