@@ -25,7 +25,9 @@ Type-aware rules are run by [oxlint](https://oxc.rs/docs/guide/usage/linter.html
 
 The `no-floating-promises` scope is expressed as globs relative to each TypeScript project directory. `node scripts/lint_with_types` expands those globs against every project in `TS_PROJECTS` into a repo-root oxlint config (`.oxlintrc.with_types.json`, deleted after the run) so that a file is checked exactly when the project owning it selects it.
 
-Full-repo runs build every TypeScript program concurrently and need tens of GB of memory, which is why CI runs this step on a large agent. Locally, prefer scoping to one project with `--project path/to/tsconfig.json`, which runs in about a second.
+Full-repo runs build every TypeScript program concurrently and need tens of GB of memory, which is why CI runs this step on a large agent. Locally, prefer scoping to one project with `--project path/to/tsconfig.json`, which runs in about a second and lints only the files that project's `include`/`exclude` select, not those owned by nested projects.
+
+`// eslint-disable` comments are not honoured, matching the previous ESLint run's `--no-inline-config`. oxlint offers no equivalent switch for its own `// oxlint-disable` directives, so those do take effect.
 
 ## How do I customize the rules for my plugin?
 

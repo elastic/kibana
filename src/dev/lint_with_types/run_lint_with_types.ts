@@ -46,14 +46,17 @@ export function runLintWithTypes() {
         throw createFailError(`[${projectFilter}] is not a valid tsconfig project`);
       }
 
-      const files = await getRepoRels(REPO_ROOT, ['*.ts', '*.tsx']);
+      const files = [...(await getRepoRels(REPO_ROOT, ['*.ts', '*.tsx']))];
+      // the positional path below limits the walk to the target directory, so the config only
+      // needs to know about the files under it
+      const prefix = target && target.repoRelDir !== '.' ? `${target.repoRelDir}/` : '';
       const config = generateOxlintConfig(
-        projects.map((project) => ({
+        (target ? [target] : projects).map((project) => ({
           repoRelDir: project.repoRelDir,
           include: project.config.include ?? [],
           exclude: project.config.exclude ?? [],
         })),
-        files
+        prefix ? files.filter((file) => file.startsWith(prefix)) : files
       );
       Fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
       log.info(
@@ -70,6 +73,8 @@ export function runLintWithTypes() {
             '--config',
             Path.relative(REPO_ROOT, CONFIG_PATH),
             '--disable-nested-config',
+            // a project may cover no lintable files (e.g. only declaration files), as under ESLint
+            '--no-error-on-unmatched-pattern',
             '--ignore-path',
             '.eslintignore',
             ...(flags.fix ? ['--fix'] : []),
