@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Keep these defaults aligned with core's saved_objects_length_limits.ts.
+// Keep the saved objects related defaults aligned with core's saved_objects_length_limits.ts
 export const STRING_HELPER_DEFAULTS = {
   savedObjectId: { minLength: 1, maxLength: 512 },
   savedObjectType: { minLength: 0, maxLength: 256 },
