@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantEventsPrompt } from './prompt';
+import { significantEventsAgentPrompt, significantEventsPrompt } from './prompt';
 
 describe('significant events system prompt', () => {
   it('keeps the mustache variables the prompt template depends on', () => {
@@ -20,5 +20,12 @@ describe('significant events system prompt', () => {
     // If the prompt stops saying them, prompt and tool disagree.
     expect(significantEventsPrompt).toContain('BUCKET(@timestamp, 1 minute)');
     expect(significantEventsPrompt).toContain('KEEP bucket, metric_value');
+  });
+});
+
+describe('significantEventsAgentPrompt', () => {
+  it('renders all placeholders', () => {
+    expect(significantEventsAgentPrompt).not.toContain('{{{');
+    expect(significantEventsAgentPrompt).not.toContain('}}}');
   });
 });
