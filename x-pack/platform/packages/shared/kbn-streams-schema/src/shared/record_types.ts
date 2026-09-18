@@ -21,16 +21,17 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
+// Handles arbitrarily nested arrays while bounding string length at every level.
+// z.lazy is required because boundedArrayItem references itself for nested arrays.
+const boundedArrayItem: z.ZodType<Primitive | unknown[]> = z.lazy(() =>
+  z.union([primitive, z.array(boundedArrayItem).max(1000)])
+);
+
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z
   .lazy(() =>
     z.record(
       z.string().max(1000),
-      z.union([
-        primitive,
-        z.array(primitive),
-        z.array(z.union([primitive, recursiveRecord])),
-        recursiveRecord,
-      ])
+      z.union([primitive, z.array(boundedArrayItem).max(1000), recursiveRecord])
     )
   )
   .meta({ id: 'RecursiveRecord' });
@@ -39,7 +40,7 @@ export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknow
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
   z.string().max(1000),
-  z.union([primitive, z.array(primitive), z.array(z.union([primitive, recursiveRecord]))])
+  z.union([primitive, z.array(boundedArrayItem).max(1000)])
 );
 
 export const sampleDocument = recursiveRecord;
