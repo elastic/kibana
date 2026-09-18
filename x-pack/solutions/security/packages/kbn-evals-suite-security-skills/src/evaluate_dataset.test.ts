@@ -198,18 +198,29 @@ describe('Skill Invoked evaluator scoping', () => {
     expected: Partial<SecuritySkillsDatasetExpected>
   ): Promise<Awaited<ReturnType<Evaluator['evaluate']>>> => {
     const { stack } = buildStackWithSkillInvoked(skillInvoked);
+    // The dataset parser treats expected_skill and should_not_activate_skill as
+    // mutually exclusive (see security_skills_dataset.ts), so a real example
+    // carries at most one of the two; build the metadata to match whichever
+    // annotation the case under test exercises.
+    const isDistractor = !expected.expectedSkill;
 
     return findEvaluator(stack, 'Skill Invoked (find-security-rules)').evaluate({
       input: { question: 'What is the weather in Berlin?' },
       output: { traceId: VALID_TRACE_ID },
       expected: { reference: 'ref', expected: 'ref', ...expected },
-      metadata: {
-        category: 'distractor',
-        query_intent: 'Out of domain',
-        dataset_split: ['base'],
-        is_distractor: true,
-        shouldNotActivateSkill: 'find-security-rules',
-      },
+      metadata: isDistractor
+        ? {
+            category: 'distractor',
+            query_intent: 'Out of domain',
+            dataset_split: ['base'],
+            is_distractor: true,
+            shouldNotActivateSkill: 'find-security-rules',
+          }
+        : {
+            category: 'find-rules',
+            query_intent: 'Rule Discovery',
+            dataset_split: ['base'],
+          },
     });
   };
 
