@@ -550,11 +550,16 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      // Do not drop recovered alerts from task state unless AAD was persisted
+      // with tracked: false for those same ids.
+      const shouldOptimizeTaskState = this.shouldLogAndScheduleActionsForAlerts();
+      const alerts = alertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
-      alertsToUpdateWithLastScheduledActions =
-        alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      if (shouldOptimizeTaskState) {
+        alertsToUpdateWithLastScheduledActions =
+          alertsClient.getAlertsToUpdateWithLastScheduledActions();
+      }
     }
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {

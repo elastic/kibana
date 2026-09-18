@@ -30,11 +30,13 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
   existingFlattenedRecoveredAlert,
   existingExpandedRecoveredAlert,
+  existingFlattenedActiveAlert,
 } from '../test_fixtures';
 
 describe('buildUpdatedRecoveredAlert', () => {
@@ -86,6 +88,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [VERSION]: '8.8.1',
       [TAGS]: ['rule-', '-tags'],
       [ALERT_CONSECUTIVE_MATCHES]: 0,
+      [ALERT_TRACKED]: true,
     });
   });
 
@@ -138,6 +141,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [VERSION]: '8.8.1',
       [TAGS]: ['rule-', '-tags'],
       [ALERT_CONSECUTIVE_MATCHES]: 0,
+      [ALERT_TRACKED]: true,
     });
   });
 
@@ -212,8 +216,63 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
       [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_STATUS]: 'recovered',
+      [ALERT_TRACKED]: true,
       [ALERT_WORKFLOW_STATUS]: 'open',
       [TAGS]: ['rule-', '-tags'],
     });
+  });
+
+  test('should close source doc if it is still active', () => {
+    expect(
+      buildUpdatedRecoveredAlert<{}>({
+        alert: existingFlattenedActiveAlert,
+        legacyRawAlert: {
+          meta: {
+            flapping: true,
+            flappingHistory: [false, false, true, true],
+            maintenanceWindowIds: [],
+          },
+          state: {
+            start: '2023-03-28T12:27:28.159Z',
+            end: '2023-03-29T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        [ALERT_STATUS]: 'recovered',
+        [ALERT_END]: '2023-03-29T12:27:28.159Z',
+        [ALERT_TIME_RANGE]: {
+          gte: '2023-03-28T12:27:28.159Z',
+          lte: '2023-03-29T12:27:28.159Z',
+        },
+      })
+    );
+  });
+
+  test('should set kibana.alert.tracked to false when not flapping and no state changes', () => {
+    expect(
+      buildUpdatedRecoveredAlert<{}>({
+        alert: existingFlattenedRecoveredAlert,
+        legacyRawAlert: {
+          meta: {
+            flapping: false,
+            flappingHistory: [false, false, false],
+            maintenanceWindowIds: [],
+          },
+          state: {
+            start: '3023-03-27T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        [ALERT_TRACKED]: false,
+      })
+    );
   });
 });

@@ -10,10 +10,14 @@ import { flatMap, get, keys, values } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_END,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
   ALERT_STATUS_RECOVERED,
+  ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -32,6 +36,7 @@ import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
 import type { LegacyAlertsClient } from '../../legacy_alerts_client';
+import { getRecoveredAlertIdsToStopTracking } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
 interface AlertBuilderOpts<
   State extends AlertInstanceState,
@@ -256,41 +261,86 @@ export class AlertBuilder<
   }
 
   private buildRecoveredAlerts(): Array<Alert & AlertData> {
-    const { rawRecoveredAlerts } = this.legacyAlertsClient.getRawAlertInstancesForState();
+    const { rawActiveAlerts, rawRecoveredAlerts } =
+      this.legacyAlertsClient.getRawAlertInstancesForState();
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
+    const trackedRecoveredAlerts =
+      this.legacyAlertsClient.getProcessedAlerts('trackedRecoveredAlerts');
+    // Any recovered alert that optimizeTaskStateForFlapping will drop from task
+    // state must be written tracked: false now. Otherwise the AAD query keeps
+    // returning it and nothing will persist it again.
+    const stopTrackingIds = new Set(
+      getRecoveredAlertIdsToStopTracking(
+        trackedRecoveredAlerts,
+        this.legacyAlertsClient.getMaxAlertLimit()
+      )
+    );
+
+    const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
 
     const recoveredAlertsToIndex = [];
     for (const id of keys(rawRecoveredAlerts)) {
-      const trackedAlert = this.trackedAlerts.getById(id);
+      const uuid = rawRecoveredAlerts[id].meta?.uuid;
+      const trackedAlert = uuid ? this.trackedAlerts.get(uuid) : undefined;
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
+        const alertDoc = recoveredAlerts[id]
+          ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
+              alert: trackedAlert,
+              legacyAlert: recoveredAlerts[id],
+              rule: this.rule,
+              ruleData: this.alertRuleData,
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+            })
+          : buildUpdatedRecoveredAlert<AlertData>({
+              alert: trackedAlert,
+              legacyRawAlert: rawRecoveredAlerts[id],
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              rule: this.rule,
+            });
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
-            ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>(
-                {
-                  alert: trackedAlert,
-                  legacyAlert: recoveredAlerts[id],
-                  rule: this.rule,
-                  ruleData: this.alertRuleData,
-                  runTimestamp: this.runTimestampString,
-                  timestamp: this.currentTime,
-                  payload: this.reportedAlerts[id],
-                  recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
-                  kibanaVersion: this.kibanaVersion,
-                  dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
-                }
-              )
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: trackedAlert,
-                legacyRawAlert: rawRecoveredAlerts[id],
-                runTimestamp: this.runTimestampString,
-                timestamp: this.currentTime,
-                rule: this.rule,
-              })
+          stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
+        );
+      } else {
+        this.logger.error(
+          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
+          this.logTags
         );
       }
     }
+
+    const keepUuids = new Set<string>();
+    for (const raw of values(rawActiveAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    for (const raw of values(rawRecoveredAlerts)) {
+      if (raw.meta?.uuid) {
+        keepUuids.add(raw.meta.uuid);
+      }
+    }
+    for (const delayedAlert of values(delayedAlerts)) {
+      keepUuids.add(delayedAlert.getUuid());
+    }
+    // Tracked AAD docs that are not in this run's working set will never be
+    // rebuilt. Flip them to false so they stop matching the tracked query.
+    // If the source is still active (lost recovery write), close it too so it
+    // is not frozen as a phantom active alert.
+    for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
+      if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
+        continue;
+      }
+      recoveredAlertsToIndex.push(stopTrackingOrphanAlert(alert, this.currentTime));
+    }
+
     return recoveredAlertsToIndex;
   }
 
@@ -367,4 +417,29 @@ export class AlertBuilder<
       get(alert, ALERT_ACTION_GROUP) === undefined
     );
   }
+}
+
+function stopTrackingOrphanAlert<AlertData extends RuleAlertData>(
+  alert: Alert & AlertData,
+  timestamp: string
+): Alert & AlertData {
+  if (get(alert, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
+    return { ...alert, [ALERT_TRACKED]: false };
+  }
+
+  const start = get(alert, ALERT_START) as string | undefined;
+  return {
+    ...alert,
+    [ALERT_TRACKED]: false,
+    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+    [ALERT_END]: timestamp,
+    ...(start
+      ? {
+          [ALERT_TIME_RANGE]: {
+            gte: start,
+            lte: timestamp,
+          },
+        }
+      : {}),
+  };
 }
