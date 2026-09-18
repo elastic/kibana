@@ -597,3 +597,79 @@ describe('assembleTimelineItems', () => {
     expect(nextItems[1]).toMatchObject({ response: { message: 'Hello again' } });
   });
 });
+
+describe('groupTimelineEvents attachment refs', () => {
+  const ref = (attachment_id: string, version: number) => ({ attachment_id, version });
+  const turn = (n: number, refs: Array<{ attachment_id: string; version: number }>) => [
+    createUserMessageEvent({
+      id: `user-${n}`,
+      data: { message: `message ${n}`, attachment_refs: refs },
+    }),
+    createExecutionStartedEvent({
+      id: `started-${n}`,
+      execution_id: `execution-${n}`,
+      trigger_event_id: `user-${n}`,
+    }),
+    createExecutionTerminatedEvent({
+      id: `terminated-${n}`,
+      execution_id: `execution-${n}`,
+      trigger_event_id: `user-${n}`,
+    }),
+  ];
+  const turns = (events: TimelineEvent[]) =>
+    groupTimelineEvents(events, makeEventsById(events)).filter((item) => item.kind === 'agentTurn');
+
+  it('gives each turn the highest version of every attachment referenced so far', () => {
+    const events = [
+      ...turn(1, [ref('a', 1), ref('b', 1)]),
+      ...turn(2, [ref('a', 2)]),
+      ...turn(3, []),
+    ];
+
+    const [first, second, third] = turns(events);
+
+    expect(first).toMatchObject({ attachmentRefs: [ref('a', 1), ref('b', 1)] });
+    expect(second).toMatchObject({ attachmentRefs: [ref('a', 2), ref('b', 1)] });
+    expect(third).toMatchObject({ attachmentRefs: [ref('a', 2), ref('b', 1)] });
+  });
+
+  it("keeps the trigger message's own refs separately", () => {
+    const events = [...turn(1, [ref('a', 1)]), ...turn(2, [ref('b', 1)])];
+
+    const [first, second] = turns(events);
+
+    expect(first).toMatchObject({ triggerAttachmentRefs: [ref('a', 1)] });
+    expect(second).toMatchObject({ triggerAttachmentRefs: [ref('b', 1)] });
+  });
+
+  it('counts refs carried by a prompt response', () => {
+    const events = [
+      ...turn(1, [ref('a', 1)]),
+      createPromptResponseEvent({
+        id: 'prompt-response-1',
+        data: {
+          prompt_requested_event_id: 'prompt-1',
+          responses: {},
+          input: { message: '', attachment_refs: [ref('a', 2)] },
+        },
+      }),
+      createExecutionStartedEvent({
+        id: 'started-2',
+        execution_id: 'execution-2',
+        trigger_event_id: 'prompt-response-1',
+      }),
+    ];
+
+    const [, second] = turns(events);
+
+    expect(second).toMatchObject({ attachmentRefs: [ref('a', 2)] });
+    expect(second).not.toHaveProperty('triggerAttachmentRefs');
+  });
+
+  it('sets nothing when no attachments were referenced', () => {
+    const [only] = turns(turn(1, []));
+
+    expect(only).not.toHaveProperty('attachmentRefs');
+    expect(only).not.toHaveProperty('triggerAttachmentRefs');
+  });
+});

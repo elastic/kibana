@@ -47,7 +47,13 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
               content = <PromptResponseEvent event={item.event} />;
               break;
             case 'agentTurn':
-              content = <AgentTurn item={item} agent={agent} />;
+              content = (
+                <AgentTurn
+                  item={item}
+                  agent={agent}
+                  conversationAttachments={conversationAttachments}
+                />
+              );
               break;
             default:
               content = null;

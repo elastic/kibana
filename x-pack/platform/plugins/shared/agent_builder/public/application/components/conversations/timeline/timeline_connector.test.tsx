@@ -43,7 +43,12 @@ jest.mock('./timeline', () => ({
     <ul>
       {items.map((item) => (
         <li key={item.key} data-test-subj="item">
-          {item.kind}:{item.key}:{item.kind === 'agentTurn' ? item.status : ''}
+          {item.kind}:{item.key}:
+          {item.kind === 'agentTurn'
+            ? item.status
+            : item.kind === 'userMessage'
+            ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
+            : ''}
         </li>
       ))}
     </ul>
@@ -58,18 +63,28 @@ const mockStreamService = new ConversationStreamService({
   getStreamEnded$: () => streamEnded$.asObservable(),
 });
 
+const pendingAttachments = {
+  fallbackAttachments: [{ id: 'a-1', type: 'text', data: { content: 'hello' } }],
+  attachmentRefs: [{ attachment_id: 'a-1', version: 1 }],
+};
+
 const setState = ({
   conversation,
   pendingMessage,
+  withAttachments = false,
 }: {
   conversation?: Conversation;
   pendingMessage?: string;
+  withAttachments?: boolean;
 }) => {
   jest.mocked(useConversationId).mockReturnValue(conversationId);
   jest
     .mocked(useConversation)
     .mockReturnValue({ conversation } as ReturnType<typeof useConversation>);
-  jest.mocked(useStreamRecord).mockReturnValue({ pendingMessage });
+  jest.mocked(useStreamRecord).mockReturnValue({
+    pendingMessage,
+    pendingAttachments: withAttachments ? pendingAttachments : undefined,
+  });
 };
 
 const conversationWith = (events: TimelineEvent[]) =>
@@ -155,6 +170,53 @@ describe('TimelineConnector', () => {
       'userMessage:pending::user_message:',
       'agentTurn:round-1::execution:completed',
     ]);
+  });
+
+  it('shows the staged attachments on the pending message', () => {
+    setState({
+      conversation: conversationWith([]),
+      pendingMessage: 'hello',
+      withAttachments: true,
+    });
+    render(<TimelineConnector />);
+
+    expect(renderedItems()[0]).toBe('userMessage:pending::user_message:a-1');
+  });
+
+  it('keeps the staged attachments on the saved message until its refs are saved', () => {
+    setState({
+      conversation: conversationWith([]),
+      pendingMessage: 'hello',
+      withAttachments: true,
+    });
+    const { rerender } = render(<TimelineConnector />);
+    act(() => {
+      chatEvents$.next(started as ChatEvent);
+    });
+
+    // The early fetch returns the saved message without refs.
+    setState({
+      conversation: conversationWith([savedUserMessage, started]),
+      pendingMessage: 'hello',
+      withAttachments: true,
+    });
+    rerender(<TimelineConnector />);
+    expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:a-1');
+
+    // The completion refetch carries the refs; the local copy is no longer used.
+    setState({
+      conversation: conversationWith([
+        createUserMessageEvent({
+          id: 'round-1::user_message',
+          data: { message: 'hello', attachment_refs: [{ attachment_id: 'saved-1', version: 1 }] },
+        }),
+        started,
+      ]),
+      pendingMessage: 'hello',
+      withAttachments: true,
+    });
+    rerender(<TimelineConnector />);
+    expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:saved-1');
   });
 
   it('observes the live draft for a conversation that has not been fetched yet', () => {

@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
 import { AgentResponse } from './agent_response';
@@ -26,11 +27,15 @@ const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', 
 interface AgentTurnProps {
   item: AgentTurnItem;
   agent?: AgentDefinition | null;
+  conversationAttachments?: VersionedAttachment[];
 }
 
 // `AgentResponse` stays at the same position for running and completed turns so its subtree
 // (expanded steps, streamed text) survives completion and the later swap to the saved item.
-const renderContent = (item: AgentTurnItem): React.ReactNode => {
+const renderContent = (
+  item: AgentTurnItem,
+  conversationAttachments?: VersionedAttachment[]
+): React.ReactNode => {
   if (isCompletedTurn(item)) {
     const completed = executionTerminatedToResponse(item.terminal, item.steps);
     if (!completed) {
@@ -42,6 +47,9 @@ const renderContent = (item: AgentTurnItem): React.ReactNode => {
         response={completed.response}
         isLoading={false}
         executionTerminatedEvent={item.terminal}
+        conversationAttachments={conversationAttachments}
+        attachmentRefs={item.attachmentRefs}
+        triggerAttachmentRefs={item.triggerAttachmentRefs}
       />
     );
   }
@@ -59,11 +67,13 @@ const renderContent = (item: AgentTurnItem): React.ReactNode => {
       steps={item.steps}
       response={{ message: item.response?.message ?? '' }}
       isLoading
+      conversationAttachments={conversationAttachments}
+      attachmentRefs={item.attachmentRefs}
     />
   );
 };
 
-export const AgentTurn: React.FC<AgentTurnProps> = ({ item, agent }) => {
+export const AgentTurn: React.FC<AgentTurnProps> = ({ item, agent, conversationAttachments }) => {
   const { euiTheme } = useEuiTheme();
   const { status, startedAt, origin } = item;
   const isLoading = status === 'running' || status === 'awaiting_prompt';
@@ -72,7 +82,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({ item, agent }) => {
     min-inline-size: ${euiTheme.size.l};
   `;
 
-  const content = renderContent(item);
+  const content = renderContent(item, conversationAttachments);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
