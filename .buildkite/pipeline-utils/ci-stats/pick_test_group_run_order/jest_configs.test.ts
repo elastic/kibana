@@ -34,6 +34,7 @@ import {
   discoverJestIntegrationConfigs,
   discoverJestUnitConfigs,
   expandShardedJestConfigs,
+  filterIgnoredJestConfigs,
   globsForSolutions,
 } from './jest_configs.ts';
 
@@ -71,6 +72,24 @@ describe('expandShardedJestConfigs', () => {
 
   it('returns an empty array when given no input', () => {
     expect(expandShardedJestConfigs([])).toEqual([]);
+  });
+});
+
+describe('filterIgnoredJestConfigs', () => {
+  const configs = [
+    `pkg/a/jest.config.js${SHARD_ANNOTATION_SEP}1/3`,
+    `pkg/a/jest.config.js${SHARD_ANNOTATION_SEP}2/3`,
+    'pkg/b/jest.config.js',
+  ];
+
+  it('can ignore a single shard', () => {
+    expect(
+      filterIgnoredJestConfigs(configs, [`pkg/a/jest.config.js${SHARD_ANNOTATION_SEP}2/3`])
+    ).toEqual([`pkg/a/jest.config.js${SHARD_ANNOTATION_SEP}1/3`, 'pkg/b/jest.config.js']);
+  });
+
+  it('supports glob patterns', () => {
+    expect(filterIgnoredJestConfigs(configs, ['pkg/a/**'])).toEqual(['pkg/b/jest.config.js']);
   });
 });
 

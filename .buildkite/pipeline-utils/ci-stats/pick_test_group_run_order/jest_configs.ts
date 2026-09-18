@@ -8,6 +8,7 @@
  */
 
 import { globbySync } from 'globby';
+import { minimatch } from 'minimatch';
 
 import { filterEmptyJestConfigs } from '../get_tests_from_config.ts';
 import { loadBuildkiteJson } from '../../load_buildkite_json.ts';
@@ -26,24 +27,36 @@ export const SHARD_ANNOTATION_SEP = '||shard=';
  * Discover Jest unit configs honoring LIMIT_SOLUTIONS, the disabled list,
  * the empty-config filter, and the shard map.
  */
-export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): string[] {
+export function discoverJestUnitConfigs(
+  limitSolutions: string[] | undefined,
+  ignorePatterns?: string[]
+): string[] {
   const raw = globJestConfigs(
     ['**/jest.config.js', '**/jest.config.cjs', '!**/__fixtures__/**'],
     limitSolutions
   );
-  return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
+  return filterIgnoredJestConfigs(
+    expandShardedJestConfigs(filterEmptyJestConfigs(raw)),
+    ignorePatterns
+  );
 }
 
 /**
  * Discover Jest integration configs honoring LIMIT_SOLUTIONS, the disabled list,
  * the empty-config filter, and the shard map.
  */
-export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
+export function discoverJestIntegrationConfigs(
+  limitSolutions: string[] | undefined,
+  ignorePatterns?: string[]
+): string[] {
   const raw = globJestConfigs(
     ['**/jest.integration.config.js', '**/jest.integration.config.cjs', '!**/__fixtures__/**'],
     limitSolutions
   );
-  return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
+  return filterIgnoredJestConfigs(
+    expandShardedJestConfigs(filterEmptyJestConfigs(raw)),
+    ignorePatterns
+  );
 }
 
 /**
@@ -69,6 +82,16 @@ export function expandShardedJestConfigs(configs: string[]): string[] {
   }
 
   return expanded;
+}
+
+export function filterIgnoredJestConfigs(
+  configs: string[],
+  ignorePatterns: string[] | undefined
+): string[] {
+  if (!ignorePatterns) return configs;
+  return configs.filter(
+    (config) => !ignorePatterns.some((ignorePattern) => minimatch(config, ignorePattern))
+  );
 }
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {

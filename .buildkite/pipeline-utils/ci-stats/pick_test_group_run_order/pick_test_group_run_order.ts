@@ -71,9 +71,11 @@ export async function pickTestGroupRunOrder() {
   const integrationIncluded = config.limitConfigType.includes('integration');
   const ftrConfigsIncluded = config.limitConfigType.includes('functional');
 
-  let jestUnitConfigs = unitIncluded ? discoverJestUnitConfigs(config.limitSolutions) : [];
+  let jestUnitConfigs = unitIncluded
+    ? discoverJestUnitConfigs(config.limitSolutions, config.jestConfigIgnorePatterns)
+    : [];
   let jestIntegrationConfigs = integrationIncluded
-    ? discoverJestIntegrationConfigs(config.limitSolutions)
+    ? discoverJestIntegrationConfigs(config.limitSolutions, config.jestConfigIgnorePatterns)
     : [];
 
   const ftrManifestEntriesByQueue = Map.groupBy(

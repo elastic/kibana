@@ -55,6 +55,7 @@ export function loadRunOrderConfig() {
 
     limitConfigType: parseLimitConfigType(),
     limitSolutions: parseLimitSolutions(),
+    jestConfigIgnorePatterns: parseCsvEnv('JEST_CONFIG_IGNORE_PATTERNS'),
     ftrConfigPatterns: parseCsvEnv('FTR_CONFIG_PATTERNS'),
     ftrTestChannels: new Set(
       parseCsvEnv('FTR_TEST_CHANNELS')?.map(ftrTestChannel.fromString) || ftrTestChannels.default

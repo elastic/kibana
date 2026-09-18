@@ -53,6 +53,7 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.functionalTooLongMinutes).toBe(MAX_MINUTES.TOO_LONG);
     expect(cfg.limitConfigType).toEqual(['unit', 'integration', 'functional']);
     expect(cfg.limitSolutions).toBeUndefined();
+    expect(cfg.jestConfigIgnorePatterns).toBeUndefined();
     expect(cfg.ftrConfigPatterns).toBeUndefined();
     expect(cfg.functionalMinimumIsolationMin).toBeUndefined();
     expect(cfg.ftrConfigsRetryCount).toBe(RETRIES.FTR);
@@ -64,11 +65,13 @@ describe('loadRunOrderConfig', () => {
 
   it('parses CSV envs and trims whitespace', () => {
     process.env.LIMIT_CONFIG_TYPE = 'unit, integration ';
+    process.env.JEST_CONFIG_IGNORE_PATTERNS = 'a, b||shard=1/2';
     process.env.FTR_CONFIG_PATTERNS = 'a, b,c';
 
     const cfg = loadRunOrderConfig();
 
     expect(cfg.limitConfigType).toEqual(['unit', 'integration']);
+    expect(cfg.jestConfigIgnorePatterns).toEqual(['a', 'b||shard=1/2']);
     expect(cfg.ftrConfigPatterns).toEqual(['a', 'b', 'c']);
   });
 
