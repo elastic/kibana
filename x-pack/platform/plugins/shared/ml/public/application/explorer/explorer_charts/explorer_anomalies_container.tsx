@@ -71,11 +71,13 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
 }) => {
   return (
     <div>
-      <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
-        <EuiFlexItem grow={false}>
-          <SelectSeverityUI severity={severity} onChange={setSeverity} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!previewMode && (
+        <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
+          <EuiFlexItem grow={false}>
+            <SelectSeverityUI severity={severity} onChange={setSeverity} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiSpacer size="m" />
       {Array.isArray(chartsData.seriesToPlot) &&
         chartsData.seriesToPlot.length === 0 &&
