@@ -51,7 +51,9 @@ apiTest.describe(
       });
       if (result.statusCode !== 200 || !result.body.id) {
         throw new Error(
-          `Setup: failed to create investigation (status ${result.statusCode}): ${JSON.stringify(result.body)}`
+          `Setup: failed to create investigation (status ${result.statusCode}): ${JSON.stringify(
+            result.body
+          )}`
         );
       }
       investigationId = result.body.id;
@@ -59,15 +61,13 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient }) => {
       await Promise.allSettled(
-        [investigationId, ...createdEscalationIds]
-          .filter(Boolean)
-          .map((id) =>
-            apiClient
-              .delete(AB_CONVERSATION_BY_ID_PATH(id), {
-                headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-              })
-              .catch(() => {})
-          )
+        [investigationId, ...createdEscalationIds].filter(Boolean).map((id) =>
+          apiClient
+            .delete(AB_CONVERSATION_BY_ID_PATH(id), {
+              headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+            })
+            .catch(() => {})
+        )
       );
     });
 

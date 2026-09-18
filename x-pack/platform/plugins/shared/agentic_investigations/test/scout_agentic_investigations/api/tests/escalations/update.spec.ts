@@ -66,9 +66,9 @@ apiTest.describe(
       });
       if (createResponse.statusCode !== 200 || !createResponse.body.id) {
         throw new Error(
-          `Setup: failed to create escalation (status ${createResponse.statusCode}): ${JSON.stringify(
-            createResponse.body
-          )}`
+          `Setup: failed to create escalation (status ${
+            createResponse.statusCode
+          }): ${JSON.stringify(createResponse.body)}`
         );
       }
       escalationId = createResponse.body.id;
@@ -76,15 +76,13 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient }) => {
       await Promise.allSettled(
-        [investigationId, secondInvestigationId, escalationId]
-          .filter(Boolean)
-          .map((id) =>
-            apiClient
-              .delete(AB_CONVERSATION_BY_ID_PATH(id), {
-                headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-              })
-              .catch(() => {})
-          )
+        [investigationId, secondInvestigationId, escalationId].filter(Boolean).map((id) =>
+          apiClient
+            .delete(AB_CONVERSATION_BY_ID_PATH(id), {
+              headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+            })
+            .catch(() => {})
+        )
       );
     });
 
