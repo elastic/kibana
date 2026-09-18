@@ -25,9 +25,9 @@ import { HOST_ON_LINKED_PROJECT_TOOLTIP, ISOLATE_HOST, UNISOLATE_HOST } from './
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
+import { ISOLATE_HOST_ACTION_ID } from '../../../../constants/action_ids';
 
 export type HostIsolationAction = 'isolateHost' | 'unisolateHost';
-export const ISOLATE_HOST_ACTION_ID = 'isolate-host-action-item';
 
 export interface UseHostIsolationActionProps {
   closePopover: () => void;
