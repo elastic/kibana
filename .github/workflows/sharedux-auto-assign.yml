@@ -1,0 +1,71 @@
+name: SharedUX auto-assign
+
+# Assigns simple PRs that touch @elastic/appex-sharedux-owned files to a team
+# member, round-robin. "Simple" means at most 100 changed lines (additions +
+# deletions) in files whose codeowner resolves to the team; larger PRs, PRs with
+# no team-owned files, drafts, bot PRs, and PRs that already have an assignee
+# are left alone. The next assignee is the team member whose most recent PR
+# assignment is the oldest, so no external state is needed.
+
+on:
+  # pull_request_target runs against the base branch's workflow with a read/write
+  # token and secrets, so it works for fork PRs. Only the base branch's .github
+  # directory is checked out; PR code must never be checked out here.
+  pull_request_target:
+    types: [opened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to evaluate'
+        type: number
+        required: true
+      dry_run:
+        description: 'Log the would-be assignee instead of assigning'
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  assign:
+    name: Assign simple SharedUX PRs round-robin
+    runs-on: ubuntu-latest
+    if: >-
+      github.repository == 'elastic/kibana' &&
+      (github.event_name == 'workflow_dispatch' ||
+        (github.event.pull_request.user.type != 'Bot' &&
+        !github.event.pull_request.draft &&
+        !contains(github.event.pull_request.labels.*.name, 'backport')))
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/CODEOWNERS
+            .github/scripts/codeowners.js
+            .github/scripts/sharedux_auto_assign.js
+          sparse-checkout-cone-mode: false
+      - name: Install matcher dependency
+        run: npm install --no-save --no-package-lock ignore@7.0.5
+      - name: Assign
+        # Advisory automation: any failure (API outage, rate limit, token scope)
+        # is logged and must never fail a contributor's PR.
+        continue-on-error: true
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DRY_RUN: ${{ inputs.dry_run == true }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          # Team membership and search need read:org, and assignments made by a
+          # User account notify the assignee where github-actions would not.
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const shareduxAutoAssign = require('./.github/scripts/sharedux_auto_assign');
+            if (!context.payload.pull_request) {
+              const { data: pull_request } = await github.rest.pulls.get({
+                ...context.repo,
+                pull_number: Number(process.env.PR_NUMBER),
+              });
+              context.payload.pull_request = pull_request;
+            }
+            await shareduxAutoAssign({ github, context, core });

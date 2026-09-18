@@ -35,6 +35,7 @@ jobs:
         with:
           sparse-checkout: |
             .github/CODEOWNERS
+            .github/scripts/codeowners.js
             .github/scripts/flaky_fix_review_reminder.js
           sparse-checkout-cone-mode: false
       - name: Install matcher dependency
