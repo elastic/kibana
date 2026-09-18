@@ -373,7 +373,6 @@ src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
-src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/kbn-ui/storybook-config @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
