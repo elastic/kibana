@@ -11,6 +11,8 @@ import { expect } from '@kbn/scout/api';
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
 import { apiTest, testData } from '../fixtures';
 
+const { VALID_RENDER_BODY } = testData;
+
 /**
  * API coverage for the internal IaC Provisioner render route.
  *
@@ -47,11 +49,7 @@ apiTest.describe(
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
-            integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
-          },
+          body: VALID_RENDER_BODY,
           responseType: 'json',
         });
 
@@ -66,7 +64,24 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+          workflow: 'federated_identity',
+          integrations: VALID_RENDER_BODY.integrations,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 400 when workflow is missing', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
+
+      const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+        body: {
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',
       });
@@ -80,8 +95,7 @@ apiTest.describe(
       const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
-          provider: 'aws',
-          flow: 'cloud_connector',
+          ...VALID_RENDER_BODY,
           integrations: [],
         },
         responseType: 'json',
@@ -98,11 +112,10 @@ apiTest.describe(
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
           body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
+            ...VALID_RENDER_BODY,
             integrations: Array.from({ length: 11 }, (_, i) => ({
               name: `pkg_${i}`,
-              policyTemplates: ['tpl'],
+              policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
             })),
           },
           responseType: 'json',
@@ -119,11 +132,7 @@ apiTest.describe(
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: {
-            provider: 'aws',
-            flow: 'cloud_connector',
-            integrations: [{ name: 'this_package_does_not_exist', policyTemplates: ['whatever'] }],
-          },
+          body: VALID_RENDER_BODY,
           responseType: 'json',
         });
 

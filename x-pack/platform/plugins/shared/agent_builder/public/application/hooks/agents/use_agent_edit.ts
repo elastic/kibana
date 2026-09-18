@@ -52,6 +52,7 @@ const emptyState = (): AgentEditState => ({
     workflow_ids: [],
     post_execution_workflow_ids: [],
     plugin_ids: [],
+    connector_ids: [],
     subagent_ids: [],
   },
 });
