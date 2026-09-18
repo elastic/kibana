@@ -15,7 +15,11 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  ALERT_EPISODE_STATUS,
+  type AlertEpisodeStatus,
+} from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
@@ -40,6 +44,7 @@ export interface AlertEpisodeOverviewListProps {
   triggeredAt: string | undefined;
   durationMs: number | undefined;
   assigneeUid: string | undefined;
+  status: AlertEpisodeStatus | undefined;
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
   userProfile: UserProfileService;
@@ -54,6 +59,7 @@ export const AlertEpisodeOverviewList = ({
   triggeredAt,
   durationMs,
   assigneeUid,
+  status,
   episodeAction,
   groupAction,
   userProfile,
@@ -61,7 +67,7 @@ export const AlertEpisodeOverviewList = ({
 }: AlertEpisodeOverviewListProps) => {
   const { euiTheme } = useEuiTheme();
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+  const isResolved = status === ALERT_EPISODE_STATUS.INACTIVE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
   const tags = groupAction?.tags ?? [];
   // Caller-controlled (data.alert_url from external ingest). Restrict to absolute

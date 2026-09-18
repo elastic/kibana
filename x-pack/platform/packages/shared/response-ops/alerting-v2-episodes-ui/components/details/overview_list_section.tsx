@@ -105,6 +105,7 @@ export const AlertEpisodeOverviewListSection = ({
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}
+      status={episode?.['episode.status']}
       episodeAction={episodeAction}
       groupAction={groupAction}
       userProfile={services.userProfile}

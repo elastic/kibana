@@ -9,7 +9,11 @@ import React from 'react';
 import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisode } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  ALERT_EPISODE_STATUS,
+  type AlertEpisode,
+} from '@kbn/alerting-v2-schemas';
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import type { EpisodeAction } from '../../actions/types';
@@ -395,6 +399,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
   it('shows who resolved the episode in an info block', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
+      status: ALERT_EPISODE_STATUS.INACTIVE,
       groupAction: {
         groupHash: 'gh-1',
         ruleId: 'rule-1',
@@ -412,6 +417,18 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByText('Resolved by')).toBeInTheDocument();
     expect(screen.queryByText('Acknowledged by')).not.toBeInTheDocument();
     expect(screen.getByText('user-resolver')).toBeInTheDocument();
+  });
+
+  it('shows the resolved-by info block when the episode is resolved before group actions load', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      status: ALERT_EPISODE_STATUS.INACTIVE,
+      groupAction: undefined,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByText('Resolved by')).toBeInTheDocument();
   });
 
   describe('assignee header value', () => {

@@ -20,7 +20,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 // We use this instead of FlyoutTemplate.Body.Accordion because the latter omits `hasBorder`
 // and defaults it on, whereas we render subpanels ourselves.
 import { FlyoutAccordion } from '@kbn/flyout-sections';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_header_data';
@@ -238,7 +238,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Header badge data
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+  const isResolved = status === ALERT_EPISODE_STATUS.INACTIVE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
   const tags = groupAction?.tags ?? [];
 
