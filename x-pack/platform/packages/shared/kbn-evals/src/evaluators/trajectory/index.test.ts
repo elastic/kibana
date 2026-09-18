@@ -161,6 +161,8 @@ describe('createTrajectoryEvaluator', () => {
         precision: 0.5,
         exactSequence: false,
         extraTools: ['hack'],
+        // `hack` is not in the golden path, so it is extra — not a duplicate of anything.
+        duplicateTools: [],
       });
     });
 
@@ -174,6 +176,24 @@ describe('createTrajectoryEvaluator', () => {
 
       expect(result.score).toBe(0.5);
       expect(result.metadata).toMatchObject({ duplicateTools: ['search'], extraTools: [] });
+    });
+
+    it('does not call an unexpected tool a duplicate', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['hack', 'hack'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      // A tool the golden path never mentions has an expected count of zero, so comparing
+      // counts alone would report both calls as duplications of a tool that is not in the
+      // sequence at all — and the explanation would read "Duplicate tools: hack" for a tool
+      // called once.
+      expect(result.metadata).toMatchObject({
+        duplicateTools: [],
+        extraTools: ['hack', 'hack'],
+      });
     });
 
     it('does not penalize a shorter actual sequence', async () => {

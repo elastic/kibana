@@ -51,9 +51,10 @@ function extraCallPrecision(actual: string[], golden: string[]): number {
 }
 
 /**
- * Calls an agent made more often than the golden path prescribes. Duplicates are invisible
- * to set-based coverage (`extraTools` only holds tools the golden path never mentions), so
- * they are reported separately.
+ * Calls to a golden-path tool made more often than the golden path prescribes. Duplicates are
+ * invisible to set-based coverage, so they are reported separately — but only for tools the
+ * golden path actually names: a tool it never mentions is already reported once per call in
+ * `extraTools`, and counting it here too would describe a single call as a duplication.
  */
 function findDuplicateTools(actual: string[], golden: string[]): string[] {
   const goldenCounts = new Map<string, number>();
@@ -67,7 +68,7 @@ function findDuplicateTools(actual: string[], golden: string[]): string[] {
   }
 
   return [...actualCounts.entries()]
-    .filter(([tool, count]) => count > (goldenCounts.get(tool) ?? 0))
+    .filter(([tool, count]) => goldenCounts.has(tool) && count > (goldenCounts.get(tool) ?? 0))
     .map(([tool]) => tool);
 }
 
