@@ -19,6 +19,9 @@ import { spaceTest } from '../fixtures';
 
 const SIDEBAR_TEST_SUBJ = '[data-test-subj="discover-sidebar"]';
 
+/** Scanned as a second root: `EuiPopover` portals the panel out of the sidebar. */
+const FIELD_TYPE_FILTER_PANEL_TEST_SUBJ = '[data-test-subj="fieldListFiltersFieldTypeFilterPanel"]';
+
 /** Scan root for the collapsed state, where the sidebar itself is unmounted. */
 const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
 
@@ -48,7 +51,9 @@ spaceTest.describe('Discover sidebar - accessibility', { tag: '@local-stateful-c
       await unifiedFieldList.waitUntilSidebarHasLoaded();
       await unifiedFieldList.openFieldTypeFilter();
 
-      const { violations } = await page.checkA11y({ include: [SIDEBAR_TEST_SUBJ] });
+      const { violations } = await page.checkA11y({
+        include: [SIDEBAR_TEST_SUBJ, FIELD_TYPE_FILTER_PANEL_TEST_SUBJ],
+      });
       expect(violations).toStrictEqual([]);
     }
   );
