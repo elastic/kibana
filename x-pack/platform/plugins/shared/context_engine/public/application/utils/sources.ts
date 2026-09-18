@@ -45,3 +45,6 @@ export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
     label: source.value,
     value: source.value,
   }));
+
+/** Builds the ES|QL query used when an index or data stream is selected as a source. */
+export const createIndexEsqlQuery = (indexName: string): string => `FROM ${indexName}`;

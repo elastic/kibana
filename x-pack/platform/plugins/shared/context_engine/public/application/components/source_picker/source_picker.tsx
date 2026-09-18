@@ -18,13 +18,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { createIndexEsqlQuery } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlTab } from './esql_tab';
+import { IndexTab } from './index_tab';
 import type { SelectedSource } from './types';
 
-type TabId = 'esql' | 'connectors';
+type TabId = 'index' | 'esql' | 'connectors';
 
 interface SourcePickerProps {
   selectedSources: SelectedSource[];
@@ -32,7 +34,7 @@ interface SourcePickerProps {
 }
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
-  const [selectedTab, setSelectedTab] = useState<TabId>('esql');
+  const [selectedTab, setSelectedTab] = useState<TabId>('index');
 
   const hasSelectedConnectorSources = useMemo(
     () => selectedSources.some((source) => source.type === 'connector'),
@@ -67,6 +69,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
   };
 
+  const addIndexSource = (indexName: string) => {
+    addEsqlSource(createIndexEsqlQuery(indexName));
+  };
+
   const toggleConnectorSource = ({
     id,
     name,
@@ -94,6 +100,22 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     <div data-test-subj="contextSourcePicker">
       <EuiTabs data-test-subj="contextSourcePickerTabs">
         <EuiTab
+          isSelected={selectedTab === 'index'}
+          onClick={() => setSelectedTab('index')}
+          prepend={<EuiIcon type="indexOpen" aria-hidden={true} />}
+          append={
+            selectedEsqlCount > 0 ? (
+              <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
+            ) : undefined
+          }
+          data-test-subj="contextSourcePickerTab-index"
+        >
+          <FormattedMessage
+            id="xpack.contextEngine.sourcePicker.tabs.index"
+            defaultMessage="Index"
+          />
+        </EuiTab>
+        <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
           prepend={<EuiIcon type="commandLine" aria-hidden={true} />}
@@ -105,8 +127,8 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           data-test-subj="contextSourcePickerTab-esql"
         >
           <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.esql"
-            defaultMessage="ES|QL"
+            id="xpack.contextEngine.sourcePicker.tabs.advanced"
+            defaultMessage="Advanced"
           />
         </EuiTab>
         <EuiTab
@@ -129,6 +151,9 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
+      {selectedTab === 'index' && (
+        <IndexTab enabled={selectedTab === 'index'} onAdd={addIndexSource} />
+      )}
       {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
       {selectedTab === 'connectors' && (
         <ConnectorsTab
