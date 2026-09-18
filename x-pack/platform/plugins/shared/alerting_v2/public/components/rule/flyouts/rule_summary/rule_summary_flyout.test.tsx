@@ -194,7 +194,18 @@ describe('RuleSummaryFlyout', () => {
         perPage: 1,
         sort: 'startedAt',
         sortOrder: 'desc',
+        enabled: true,
       });
+    });
+
+    it('omits the block and disables the fetch when the user cannot read execution history', () => {
+      mockCanRead.mockImplementation((capability: string) => capability !== 'executionHistory');
+      renderFlyout();
+
+      expect(screen.queryByTestId('ruleSummaryFlyoutLastExecutionBlock')).not.toBeInTheDocument();
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
     });
 
     it('shows a success health dot when the last execution succeeded', () => {

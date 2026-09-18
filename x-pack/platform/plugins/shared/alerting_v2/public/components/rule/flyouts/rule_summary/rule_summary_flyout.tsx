@@ -21,6 +21,7 @@ import { useFetchRuleExecutions } from '../../../../hooks/use_fetch_rule_executi
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
+import { UserCapabilities } from '../../../../services/user_capabilities';
 import { EMPTY_VALUE } from '../../../../utils/rule_display';
 import { RuleSummaryBody } from '../../rule_summary';
 
@@ -71,6 +72,7 @@ export const RuleSummaryFlyout = ({
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
+  const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
   const {
     data: executionsData,
     isLoading: isLoadingLastExecution,
@@ -80,6 +82,7 @@ export const RuleSummaryFlyout = ({
     perPage: 1,
     sort: 'startedAt',
     sortOrder: 'desc',
+    enabled: canReadExecutionHistory,
   });
   const lastExecution = executionsData?.items[0];
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
@@ -96,6 +99,32 @@ export const RuleSummaryFlyout = ({
 
   const { Header, Body, Footer } = FlyoutTemplate;
   const { Badge, InfoBlock } = Header;
+
+  const renderLastExecutionValue = (): React.ReactNode => {
+    if (isLoadingLastExecution) {
+      return <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />;
+    }
+    if (isErrorLastExecution) {
+      return (
+        <EuiHealth color="subdued" data-test-subj="ruleSummaryFlyoutLastExecutionError">
+          {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.unavailable', {
+            defaultMessage: 'Unavailable',
+          })}
+        </EuiHealth>
+      );
+    }
+    if (lastExecution) {
+      return (
+        <EuiHealth
+          color={lastExecution.outcome === 'success' ? 'success' : 'danger'}
+          data-test-subj="ruleSummaryFlyoutLastExecutionStatus"
+        >
+          {LAST_EXECUTION_OUTCOME_LABELS[lastExecution.outcome]}
+        </EuiHealth>
+      );
+    }
+    return EMPTY_VALUE;
+  };
 
   return (
     <>
@@ -141,31 +170,16 @@ export const RuleSummaryFlyout = ({
               />
             )}
           </InfoBlock>
-          <InfoBlock
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
-              defaultMessage: 'Last execution',
-            })}
-            data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
-          >
-            {isLoadingLastExecution ? (
-              <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />
-            ) : isErrorLastExecution ? (
-              <EuiHealth color="subdued" data-test-subj="ruleSummaryFlyoutLastExecutionError">
-                {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.unavailable', {
-                  defaultMessage: 'Unavailable',
-                })}
-              </EuiHealth>
-            ) : lastExecution ? (
-              <EuiHealth
-                color={lastExecution.outcome === 'success' ? 'success' : 'danger'}
-                data-test-subj="ruleSummaryFlyoutLastExecutionStatus"
-              >
-                {LAST_EXECUTION_OUTCOME_LABELS[lastExecution.outcome]}
-              </EuiHealth>
-            ) : (
-              EMPTY_VALUE
-            )}
-          </InfoBlock>
+          {canReadExecutionHistory && (
+            <InfoBlock
+              title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
+                defaultMessage: 'Last execution',
+              })}
+              data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
+            >
+              {renderLastExecutionValue()}
+            </InfoBlock>
+          )}
           <InfoBlock
             title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
               defaultMessage: 'Created by',
