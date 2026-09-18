@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import type { IconColor, IconType } from '@elastic/eui';
 
-export interface BlastRadiusItemProps {
+export interface ActionImpactItemProps {
   item: {
     id: string;
     iconType: IconType;
@@ -26,7 +26,7 @@ export interface BlastRadiusItemProps {
   defaultIconColor?: string;
 }
 
-export const BlastRadiusItem = memo<BlastRadiusItemProps>(({ item, defaultIconColor }) => {
+export const ActionImpactItem = memo<ActionImpactItemProps>(({ item, defaultIconColor }) => {
   const { euiTheme } = useEuiTheme();
   const { iconType, iconColor, text, status } = item;
 
@@ -63,4 +63,4 @@ export const BlastRadiusItem = memo<BlastRadiusItemProps>(({ item, defaultIconCo
   );
 });
 
-BlastRadiusItem.displayName = 'BlastRadiusItem';
+ActionImpactItem.displayName = 'ActionImpactItem';

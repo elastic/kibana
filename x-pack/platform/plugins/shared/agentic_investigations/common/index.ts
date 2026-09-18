@@ -51,6 +51,22 @@ export {
   proposalUserSchema,
 } from './proposals';
 
+export {
+  IMPACT_INDEX_NAME,
+  IMPACT_INTERNAL_URL,
+  IMPACT_ATTACHMENT_TYPE,
+  IMPACT_UI_CAPABILITY_MANAGE,
+  IMPACT_UI_CAPABILITY_SHOW,
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_IDS,
+  MAX_IMPACT_CONVERSATION_IDS,
+  attachImpactRequestSchema,
+  getImpactQuerySchema,
+  impactEntityIdSchema,
+  impactEntityIdsSchema,
+  impactSchema,
+} from './impact';
+
 export type {
   ActionMetadata,
   ApproveProposalRequest,
@@ -76,3 +92,5 @@ export type {
   ProposalUser,
   ProposalWithMetadata,
 } from './proposals';
+
+export type { AttachImpactRequest, GetImpactQuery, Impact } from './impact';

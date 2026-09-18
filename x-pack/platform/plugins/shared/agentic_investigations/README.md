@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage, their API, and their workflow steps, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds one entity, **proposals**. **Investigations** and **incidents** are next, which is why the plugin is an umbrella rather than one plugin per entity.
+Today it holds **proposals** and **impact**. **Investigations** and **incidents** are next, which is why the plugin is an umbrella rather than one plugin per entity.
 
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
@@ -19,13 +19,16 @@ common/
   constants.ts           umbrella: plugin id, API version, route base, workflow owner id
   index.ts               umbrella barrel, re-exports each entity barrel
   proposals/             constants, schemas, step definitions shared with the browser
+  impact/                constants, schemas, step definitions, attachment type id
 server/
   plugin.ts config.ts types.ts
   features.ts            umbrella feature and its privileges
   proposals/             routes, services, step handlers, storage, managed workflows
+  impact/                routes, service, storage, step handlers, Agent Builder attachment
 public/
   plugin.ts index.ts types.ts
   proposals/             browser step definitions for the YAML editor
+  impact/                browser step definitions and flyout attachment UI
 ```
 
 Adding an entity means adding a directory in each of the three, an entity barrel, its privileges in `features.ts`, and a getter on the start contract. It should not require restructuring the umbrella itself.
@@ -39,9 +42,7 @@ One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces picke
 | `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
 | `read`            | `read_proposals`                     | `showProposals`                      |
 
-So `read` can see the queue but cannot decide it. Because there are no sub-feature privileges to withhold, `minimal_all` and `minimal_read` grant the same as `all` and `read`. The feature carries `minimumLicense: 'enterprise'`.
-
-When a second entity lands and needs to be grantable on its own, its capabilities belong in a sub-feature pulled up through `includeIn` rather than in more inline privileges.
+So `read` can see the queue but cannot decide it. **Impact** is a sub-feature pulled up through `includeIn` rather than more inline privileges: `all` includes Impact All (`read_impact`, `manage_impact`, `showImpact`, `manageImpact`) and `read` includes Impact Read. `minimal_all` / `minimal_read` therefore grant proposals without Impact; a role can also grant the Impact sub-feature on its own. The feature carries `minimumLicense: 'enterprise'`.
 
 ### Three questions, three places
 
@@ -62,6 +63,16 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 **The principal differs by surface, and one of them cannot be checked.** An authenticated resume runs the post-gate steps under a clone of the resumer's API key, so the check evaluates the human. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
 
 `hitlExternalResume.enabled` defaults to `true` and `external_resume_service.ts` handles `waitForApproval` explicitly, so this is reachable rather than theoretical. `proposals.checkDecidePrivileges` therefore takes the gate's own `respondedBy` and refuses any principal prefixed `external_resume:` outright, without consulting the privilege service — there is nothing it could usefully ask. The loop re-parks, so an authenticated approver can still decide. Enabling external channels for proposal gates needs the platform to propagate the responder's identity, not just their answer.
+
+## Impact
+
+An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout.
+
+- `entityIds` are opaque ids. Labels from the Entity Store are a follow-up.
+- Writes are **upsert/merge**: attaching more entities unions them onto the existing document rather than appending a new one. That is load-bearing for hydrate-by-conversationId plus `entityIds.includes`.
+- HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactService().listByConversationIds()`.
+- Workflow steps: `investigations.attachImpact` (`manage_impact`, fails the step) and `investigations.getImpact` (`read_impact`, fails if none is attached). Same fail-closed privilege check as proposal steps.
+- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Nothing in this plugin writes the attachment onto a conversation yet — producers persist the Impact document; stamping it onto chat is a follow-up.
 
 ## Proposals
 
@@ -223,6 +234,8 @@ Conditions use a single `and` or a single comparison throughout. Liquid has no o
 | `proposals.getProposal` | read | Fails the step |
 | `proposals.cloneProposal` | manage | Fails the step |
 | `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
+| `investigations.attachImpact` | manage | Fails the step |
+| `investigations.getImpact` | read | Fails the step |
 
 Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
 
@@ -416,4 +429,5 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Only one entity so far.** The directory convention is designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.
+- **Impact attachments are registered, not produced.** The `investigation_impact` type is known to Agent Builder and the flyout, but attach HTTP/steps persist only the Impact document. Until a producer stamps the attachment onto the conversation, the flyout has nothing to render.
+- **Investigations and incidents still do not exist.** The directory convention now holds a second entity (Impact), but those two remain the reason the plugin is an umbrella.

@@ -9,10 +9,12 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
+import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
+import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
@@ -21,8 +23,8 @@ import {
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-    // Named for proposals alone because action proposals move to their own
-    // plugin in a follow-up; until then this feature grants only proposals.
+    // Named for proposals because action proposals move to their own plugin
+    // in a follow-up; Impact is grantable on its own via the sub-feature below.
     name: i18n.translate('xpack.agenticInvestigations.featureName', {
       defaultMessage: 'Proposed Actions',
     }),
@@ -48,5 +50,39 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [PROPOSALS_UI_CAPABILITY_SHOW],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.agenticInvestigations.impactSubFeatureName', {
+          defaultMessage: 'Impact',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'impact_all',
+                name: i18n.translate('xpack.agenticInvestigations.impactSubFeatureAll', {
+                  defaultMessage: 'All',
+                }),
+                includeIn: 'all',
+                api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE],
+              },
+              {
+                id: 'impact_read',
+                name: i18n.translate('xpack.agenticInvestigations.impactSubFeatureRead', {
+                  defaultMessage: 'Read',
+                }),
+                includeIn: 'read',
+                api: [IMPACT_API_PRIVILEGE_READ],
+                savedObject: { all: [], read: [] },
+                ui: [IMPACT_UI_CAPABILITY_SHOW],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

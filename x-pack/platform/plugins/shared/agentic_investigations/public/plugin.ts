@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { registerProposalsPublicStepDefinitions } from './proposals/step_types';
+import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
@@ -22,6 +23,7 @@ export class AgenticInvestigationsPublicPlugin
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
   ): AgenticInvestigationsPublicPluginSetup {
     registerProposalsPublicStepDefinitions(workflowsExtensions);
+    registerImpactPublicStepDefinitions(workflowsExtensions);
     return {};
   }
 
@@ -33,6 +35,9 @@ export class AgenticInvestigationsPublicPlugin
       const agentBuilder = startDeps.agentBuilder;
       void import('./proposals/attachments').then(({ registerProposalAttachmentTypes }) => {
         registerProposalAttachmentTypes(agentBuilder);
+      });
+      void import('./impact/attachments').then(({ registerImpactAttachmentTypes }) => {
+        registerImpactAttachmentTypes(agentBuilder);
       });
     }
     return {};
