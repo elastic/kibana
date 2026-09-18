@@ -645,11 +645,8 @@ describe('AgentBuilderSpanProcessor', () => {
     });
 
     it('hashes kibana.workflows.run_id when real IDs are disabled, like elastic.workflow.execution_id', () => {
-      // Same identifier class as `elastic.workflow.execution_id` above (a
-      // `.workflows-executions` document id), so it must obey the same
-      // `agentBuilder:tracing:includeRealIds` policy ("Include real conversation and workflow
-      // IDs in traces", off by default). Exporting it verbatim under a second attribute name
-      // would re-expose exactly what the setting anonymizes.
+      // Same identifier class as `elastic.workflow.execution_id` above, so it obeys the same
+      // includeRealIds policy: a second attribute name must not re-expose what it anonymizes.
       const hashed = exportWith(
         { includeRealIds: false },
         { [WORKFLOW_RUN_ID_ATTRIBUTE_NAME]: 'workflow-exec-uuid-abc' }
