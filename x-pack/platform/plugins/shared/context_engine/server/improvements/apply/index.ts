@@ -61,9 +61,9 @@ export const applyImprovement = async (
 ): Promise<string> => {
   const { action, payload, target, ai_index_id: aiIndexId } = improvement;
   const now = new Date().toISOString();
-  const getDest = async () => (await aiIndexService.get(aiIndexId)).dest;
+  const getDest = async () => (await aiIndexService.get(aiIndexId, spaceId)).dest;
   const context = { spaceId, request };
-  const sourceContext = { aiIndexService, aiIndexId, actions, request };
+  const sourceContext = { aiIndexService, aiIndexId, spaceId, actions, request };
 
   switch (action) {
     case 'add_ki':

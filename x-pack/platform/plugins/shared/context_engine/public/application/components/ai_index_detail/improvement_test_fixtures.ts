@@ -13,6 +13,7 @@ export const buildImprovement = (overrides: Partial<Improvement> = {}): Improvem
   revision_id: 'rev-1',
   latest: true,
   ai_index_id: 'my-ai-index',
+  space: 'default',
   '@timestamp': '2026-08-20T09:00:00.000Z',
   status: 'suggested',
   suggested_at: '2026-08-20T09:00:00.000Z',

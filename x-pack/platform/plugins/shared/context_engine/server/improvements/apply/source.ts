@@ -24,6 +24,7 @@ import { ApplyImprovementError } from './errors';
 export interface SourceApplyContext {
   aiIndexService: AiIndexService;
   aiIndexId: string;
+  spaceId: string;
   actions: ActionsPluginStart;
   request: KibanaRequest;
 }
@@ -32,12 +33,12 @@ export interface SourceApplyContext {
 const sameSource = (source: AiIndexSource, value: string): boolean => source.value === value;
 
 const writeSources = async (
-  { aiIndexService, aiIndexId, actions, request }: SourceApplyContext,
+  { aiIndexService, aiIndexId, spaceId, actions, request }: SourceApplyContext,
   aiIndex: Awaited<ReturnType<AiIndexService['get']>>,
   sources: AiIndexSource[]
 ): Promise<void> => {
   await validateConnectorSources({ sources, actions, request });
-  await aiIndexService.put(aiIndexId, {
+  await aiIndexService.put(aiIndexId, spaceId, {
     description: aiIndex.description,
     dest: aiIndex.dest,
     automations: aiIndex.automations,
@@ -50,7 +51,7 @@ export const addSource = async (
   context: SourceApplyContext,
   source: AiIndexSource
 ): Promise<string> => {
-  const aiIndex = await context.aiIndexService.get(context.aiIndexId);
+  const aiIndex = await context.aiIndexService.get(context.aiIndexId, context.spaceId);
   const { sources } = aiIndex;
 
   if (sources.some((existing) => sameSource(existing, source.value))) {
@@ -67,7 +68,7 @@ export const editSource = async (
   sourceValue: string,
   source: AiIndexSource
 ): Promise<string> => {
-  const aiIndex = await context.aiIndexService.get(context.aiIndexId);
+  const aiIndex = await context.aiIndexService.get(context.aiIndexId, context.spaceId);
   const { sources } = aiIndex;
 
   if (!sources.some((existing) => sameSource(existing, sourceValue))) {
@@ -92,7 +93,7 @@ export const removeSource = async (
   context: SourceApplyContext,
   sourceValue: string
 ): Promise<string> => {
-  const aiIndex = await context.aiIndexService.get(context.aiIndexId);
+  const aiIndex = await context.aiIndexService.get(context.aiIndexId, context.spaceId);
   const { sources } = aiIndex;
   const remaining = sources.filter((existing) => !sameSource(existing, sourceValue));
 
