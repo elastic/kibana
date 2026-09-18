@@ -166,6 +166,24 @@ export const useEsqlConversionCheck = (
 
     const layers = datasourceState.layers as Record<string, FormBasedLayer>;
 
+    const hasNonStaticReferenceLine = layerIds.some((layerId) => {
+      const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
+      if (layerType !== layerTypes.REFERENCELINE) {
+        return false;
+      }
+      const referenceLineLayer = layers[layerId];
+      return Boolean(
+        referenceLineLayer?.columnOrder?.some(
+          (columnId) => referenceLineLayer.columns[columnId]?.operationType !== 'static_value'
+        )
+      );
+    });
+    if (hasNonStaticReferenceLine) {
+      return getEsqlConversionDisabledSettings(
+        esqlConversionFailureReasonMessages.reference_line_not_supported
+      );
+    }
+
     // Extract column roles from visualization state for semantic ES|QL column naming
     const columnRoles: ColumnRoles = {};
     const visState = state as Record<string, unknown>;

@@ -26,6 +26,7 @@ export type EsqlConversionFailureReason =
   | 'terms_order_by_not_supported'
   | 'saved_to_library_not_supported'
   | 'query_annotations_not_supported'
+  | 'reference_line_not_supported'
   | 'trendline_not_supported'
   | 'unsupported_settings'
   | 'unknown';
@@ -103,6 +104,13 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: Query-based annotations will be supported in an upcoming update.',
+    }
+  ),
+  reference_line_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlReferenceLineTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: Only static value reference lines are supported for conversion.',
     }
   ),
   trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {

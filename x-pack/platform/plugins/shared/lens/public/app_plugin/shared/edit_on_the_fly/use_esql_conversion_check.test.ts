@@ -195,4 +195,50 @@ describe('useEsqlConversionCheck', () => {
       })
     );
   });
+
+  it.each(['average', 'formula'])(
+    'disables conversion when a reference line uses %s instead of a static value',
+    (operationType) => {
+      generateEsqlQueryMock.mockReturnValue(esqlSuccess);
+      mockStoreState = {
+        lens: {
+          datasourceStates: {
+            formBased: {
+              state: {
+                layers: {
+                  layer1: makeFormBasedLayer(),
+                  reference: {
+                    indexPatternId: 'dv1',
+                    columnOrder: ['reference-column'],
+                    columns: {
+                      'reference-column': {
+                        operationType,
+                        label: 'Reference line',
+                        dataType: 'number',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          persistedDoc: undefined,
+        },
+      };
+      const paramsWithReferenceLine = {
+        ...hookParams,
+        layerIds: ['layer1', 'reference'],
+        activeVisualization: {
+          getLayerType: (layerId: string) => (layerId === 'reference' ? 'referenceLine' : 'data'),
+        } as unknown as Visualization,
+      };
+
+      const { result } = renderHook(() =>
+        useEsqlConversionCheck(true, paramsWithReferenceLine, hookServices)
+      );
+
+      expect(result.current.isConvertToEsqlButtonDisabled).toBe(true);
+      expect(convertFormBasedToTextBasedLayer).not.toHaveBeenCalled();
+    }
+  );
 });
