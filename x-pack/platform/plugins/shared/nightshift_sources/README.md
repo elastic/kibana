@@ -1,7 +1,7 @@
 # Nightshift Sources
 
 A **source** is the unit of work every Nightshift engine consumes: a space-scoped saved object
-holding an ES|QL query, materialised as the ES|QL view `$.nightshift.sources.<id>`. Engines
+holding an ES|QL query, materialised as the ES|QL view `$.nightshift.sources.<slug>`. Engines
 (knowledge indicator onboarding, detection, investigation context) query the view, never the
 raw ES|QL, so a source can be edited in one place and every consumer follows.
 
@@ -52,6 +52,11 @@ A source is rows only. On create and update the ES|QL must:
 - not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
   `$.nightshift.*`, `$.*`), or the new view can match itself.
+
+The view name is `$.nightshift.sources.<slug>`. `<slug>` is derived from the title at create
+(`nginx-errors` from "Nginx errors") and never changes, even if the title does. If that name is
+already taken — another source in any space, or an orphaned view — create walks `-2`, `-3`, …
+The saved-object id stays a uuid; it is not in the view name.
 
 Wildcards, several sources and date math are fine. The query is then executed as
 `<esql> | LIMIT 0` as the calling user. A pattern that matches no index yet is accepted, which
@@ -128,7 +133,7 @@ project type in `config/serverless.yml` and back on for Observability Complete i
   boundary is the saved object, not the view name.
 - The saved objects security extension is excluded for this hidden type, so saved-object-level
   audit events are not emitted; HTTP audit events still are.
-- Views show up in the ES|QL editor's source suggestions under their `$.nightshift.sources.<id>` name.
+- Views show up in the ES|QL editor's source suggestions under their `$.nightshift.sources.<slug>` name.
 
 ## Development
 

@@ -49,7 +49,8 @@ const makeAttributes = (
   description: undefined,
   tags: ['nginx'],
   esql: 'FROM logs-nginx-* | WHERE status >= 500',
-  view_name: '$.nightshift.sources.source-1',
+  slug: 'nginx-errors',
+  view_name: '$.nightshift.sources.nginx-errors',
   enabled: true,
   created_by: 'marco',
   created_at: '2026-09-01T00:00:00.000Z',
@@ -74,27 +75,37 @@ const makeSource = (overrides: Partial<NightshiftSource> = {}): NightshiftSource
   ...overrides,
 });
 
+const emptyCatalogFind = {
+  saved_objects: [],
+  total: 0,
+  page: 1,
+  per_page: 1,
+};
+
 const setup = () => {
   const soClient = savedObjectsClientMock.create();
+  const catalogSoClient = savedObjectsClientMock.create();
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
     putView: jest.fn().mockResolvedValue(undefined),
-    getView: jest.fn(),
+    getView: jest.fn().mockResolvedValue(undefined),
     deleteView: jest.fn().mockResolvedValue(undefined),
   };
   const logger = loggingSystemMock.createLogger();
 
   const client = new SourcesClient({
     soClient,
+    catalogSoClient,
     viewsClient,
     dataEsClient,
     logger,
     username: 'marco',
   });
 
+  catalogSoClient.find.mockResolvedValue(emptyCatalogFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger };
+  return { client, soClient, catalogSoClient, viewsClient, dataEsClient, logger };
 };
 
 describe('SourcesClient', () => {
@@ -116,7 +127,7 @@ describe('SourcesClient', () => {
     it('is view_drift when the view query differs beyond formatting', async () => {
       const { client, viewsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: 'FROM logs-nginx-* | WHERE status >= 400',
       });
 
@@ -126,13 +137,13 @@ describe('SourcesClient', () => {
     it('treats formatting-only differences as matching', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: 'from   logs-nginx-*\n| where status>=500',
       });
 
       await expect(client.getHealth(makeSource())).resolves.toBe('ok');
       expect(dataEsClient.esql.query).toHaveBeenCalledWith({
-        query: 'FROM $.nightshift.sources.source-1 | LIMIT 0',
+        query: 'FROM $.nightshift.sources.nginx-errors | LIMIT 0',
         format: 'json',
       });
     });
@@ -140,7 +151,7 @@ describe('SourcesClient', () => {
     it('is ok when the probe hits a pattern with no indices yet', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: makeAttributes().esql,
       });
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
@@ -165,7 +176,7 @@ describe('SourcesClient', () => {
     it('is unresolvable when the view no longer plans against existing indices', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: makeAttributes().esql,
       });
       dataEsClient.esql.query
@@ -182,7 +193,7 @@ describe('SourcesClient', () => {
     it('is ok when the view cannot resolve columns because nothing exists behind it yet', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: makeAttributes().esql,
       });
       dataEsClient.esql.query
@@ -195,7 +206,7 @@ describe('SourcesClient', () => {
     it('is unknown when the probe is forbidden', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: makeAttributes().esql,
       });
       dataEsClient.esql.query.mockRejectedValue(
@@ -208,7 +219,7 @@ describe('SourcesClient', () => {
     it('is unknown when the follow-up source probe fails for a non-verification reason', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
+        name: '$.nightshift.sources.nginx-errors',
         query: makeAttributes().esql,
       });
       dataEsClient.esql.query
@@ -233,7 +244,8 @@ describe('SourcesClient', () => {
         query: 'FROM logs-nginx-* | WHERE status >= 500\n| LIMIT 0',
         format: 'json',
       });
-      expect(source.view_name).toBe(`$.nightshift.sources.${source.id}`);
+      expect(source.slug).toBe('nginx-errors');
+      expect(source.view_name).toBe('$.nightshift.sources.nginx-errors');
       expect(source.enabled).toBe(true);
       expect(source.created_by).toBe('marco');
       expect(source.esql_updated_at).toBe(source.created_at);
@@ -246,6 +258,63 @@ describe('SourcesClient', () => {
         source.view_name,
         'FROM logs-nginx-* | WHERE status >= 500'
       );
+    });
+
+    it('looks up the view name across every space before writing', async () => {
+      const { client, catalogSoClient } = setup();
+
+      await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+      });
+
+      expect(catalogSoClient.find).toHaveBeenCalledWith({
+        type: NIGHTSHIFT_SOURCE_SO_TYPE,
+        perPage: 1,
+        namespaces: ['*'],
+        filter: 'nightshift-source.attributes.view_name: "$.nightshift.sources.nginx-errors"',
+      });
+    });
+
+    it('appends -2 when the catalog already has that view name', async () => {
+      const { client, catalogSoClient, viewsClient } = setup();
+      catalogSoClient.find
+        .mockResolvedValueOnce({
+          ...emptyCatalogFind,
+          total: 1,
+          saved_objects: [makeSavedObject()],
+        })
+        .mockResolvedValueOnce(emptyCatalogFind);
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+      });
+
+      expect(source.slug).toBe('nginx-errors-2');
+      expect(source.view_name).toBe('$.nightshift.sources.nginx-errors-2');
+      expect(viewsClient.putView).toHaveBeenCalledWith(
+        '$.nightshift.sources.nginx-errors-2',
+        'FROM logs-*'
+      );
+    });
+
+    it('appends -2 when an orphaned view already uses that name', async () => {
+      const { client, viewsClient } = setup();
+      viewsClient.getView
+        .mockResolvedValueOnce({ name: '$.nightshift.sources.nginx-errors', query: 'FROM logs-*' })
+        .mockResolvedValueOnce(undefined);
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+      });
+
+      expect(source.slug).toBe('nginx-errors-2');
+      expect(source.view_name).toBe('$.nightshift.sources.nginx-errors-2');
     });
 
     it('rejects a blank title before touching saved objects or ES', async () => {
@@ -508,6 +577,20 @@ describe('SourcesClient', () => {
       );
     });
 
+    it('keeps slug and view_name when the title changes', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const updated = await client.update('source-1', {
+        title: 'renamed',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+      });
+
+      expect(updated.slug).toBe('nginx-errors');
+      expect(updated.view_name).toBe('$.nightshift.sources.nginx-errors');
+    });
+
     it('always re-puts the view so PUT doubles as repair', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -519,7 +602,7 @@ describe('SourcesClient', () => {
       });
 
       expect(viewsClient.putView).toHaveBeenCalledWith(
-        '$.nightshift.sources.source-1',
+        '$.nightshift.sources.nginx-errors',
         makeAttributes().esql
       );
     });
@@ -650,7 +733,7 @@ describe('SourcesClient', () => {
       await client.delete('source-1');
 
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
-      expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.source-1');
+      expect(viewsClient.deleteView).toHaveBeenCalledWith('$.nightshift.sources.nginx-errors');
       expect(callOrder).toEqual(['view', 'so']);
     });
 

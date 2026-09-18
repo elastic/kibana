@@ -65,12 +65,15 @@ apiTest.describe(
         const created = await createSource(apiClient, manager.cookieHeader, body);
         expect(created).toHaveStatusCode(200);
         const { source } = created.body;
-        const viewName = getNightshiftSourceViewName(source.id);
+        const viewName = getNightshiftSourceViewName(source.slug);
         expect(source).toMatchObject({
           ...body,
+          slug: source.slug,
           view_name: viewName,
           enabled: true,
         });
+        expect(viewName).toBe(`$.nightshift.sources.${source.slug}`);
+        expect(source.slug).not.toBe(source.id);
         expect(source.esql_updated_at).toBe(source.created_at);
 
         expect(await readView(esClient, viewName)).toStrictEqual({
@@ -127,6 +130,29 @@ apiTest.describe(
     );
 
     apiTest(
+      'allocates a different slug when the view name is already taken',
+      async ({ apiClient }) => {
+        const title = `${TITLE_PREFIX}-${suffix}-dup`;
+        const first = await createSource(apiClient, manager.cookieHeader, {
+          title,
+          esql: `FROM ${index}`,
+        });
+        expect(first).toHaveStatusCode(200);
+        const second = await createSource(apiClient, manager.cookieHeader, {
+          title,
+          esql: `FROM ${index}`,
+        });
+        expect(second).toHaveStatusCode(200);
+        expect(second.body.source.view_name).toBe(`${first.body.source.view_name}-2`);
+        expect(second.body.source.slug).toBe(`${first.body.source.slug}-2`);
+        expect(second.body.source.id).not.toBe(first.body.source.id);
+
+        await deleteSource(apiClient, manager.cookieHeader, first.body.source.id);
+        await deleteSource(apiClient, manager.cookieHeader, second.body.source.id);
+      }
+    );
+
+    apiTest(
       'bumps esql_updated_at only when the query changes',
       async ({ apiClient, esClient }) => {
         const body = {
@@ -145,6 +171,8 @@ apiTest.describe(
         });
         expect(renamed).toHaveStatusCode(200);
         expect(renamed.body.source.title).toBe(`${body.title}-renamed`);
+        expect(renamed.body.source.slug).toBe(source.slug);
+        expect(renamed.body.source.view_name).toBe(source.view_name);
         expect(renamed.body.source.esql_updated_at).toBe(source.esql_updated_at);
         expect(renamed.body.source.updated_at).not.toBe(source.updated_at);
 

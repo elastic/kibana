@@ -44,6 +44,7 @@ const createSourcesClient = (
     includedHiddenTypes: [NIGHTSHIFT_SOURCE_SO_TYPE],
     excludedExtensions: [SECURITY_EXTENSION_ID],
   });
+  const catalogSoClient = core.savedObjects.createInternalRepository([NIGHTSHIFT_SOURCE_SO_TYPE]);
 
   // Views live in the origin project. Validation and health probes read the data behind a
   // source, which under CPS may live in linked projects, so they route across all of them.
@@ -55,6 +56,7 @@ const createSourcesClient = (
 
   return new SourcesClient({
     soClient,
+    catalogSoClient,
     viewsClient: new EsqlViewsClient(viewsEsClient),
     dataEsClient,
     logger,

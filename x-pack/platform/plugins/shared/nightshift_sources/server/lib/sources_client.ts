@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   createSourceRequestSchema,
   getNightshiftSourceViewName,
+  getSourceSlugCandidate,
   hasMultipleSourceIndices,
   updateSourceRequestSchema,
   type CreateSourceRequest,
@@ -39,8 +45,12 @@ const FULL_UPDATE = { mergeAttributes: false } as const;
 
 export type SourceViewsClient = Pick<EsqlViewsClient, 'putView' | 'getView' | 'deleteView'>;
 
+const MAX_SLUG_ALLOCATION_ATTEMPTS = 100;
+
 interface SourcesClientDependencies {
   soClient: SavedObjectsClientContract;
+  /** Unscoped: view names are cluster-global, so uniqueness cannot stay in the request space. */
+  catalogSoClient: Pick<ISavedObjectsRepository, 'find'>;
   viewsClient: SourceViewsClient;
   dataEsClient: ElasticsearchClient;
   logger: Logger;
@@ -83,11 +93,13 @@ export class SourcesClient {
     validateSourceQuery(parsed.esql);
     await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
 
+    const slug = await this.allocateSlug(parsed.title);
     const id = uuidv4();
     const now = new Date().toISOString();
     const attributes: NightshiftSourceAttributes = {
       ...parsed,
-      view_name: getNightshiftSourceViewName(id),
+      slug,
+      view_name: getNightshiftSourceViewName(slug),
       enabled: true,
       created_by: username,
       created_at: now,
@@ -282,6 +294,33 @@ export class SourcesClient {
       logger.info(`Could not probe sources of ${source.id}: ${error}`);
       return 'unknown';
     }
+  }
+
+  /**
+   * Slug is immutable after create. Walk `title-slug`, `title-slug-2`, … until neither a
+   * live/orphaned view nor a catalog row in any space already uses that name.
+   */
+  private async allocateSlug(title: string): Promise<string> {
+    for (let attempt = 1; attempt <= MAX_SLUG_ALLOCATION_ATTEMPTS; attempt++) {
+      const slug = getSourceSlugCandidate(title, attempt);
+      if (!(await this.isViewNameTaken(getNightshiftSourceViewName(slug)))) {
+        return slug;
+      }
+    }
+    throw badRequest('Could not allocate a unique source view name');
+  }
+
+  private async isViewNameTaken(viewName: string): Promise<boolean> {
+    const existing = await this.deps.catalogSoClient.find<NightshiftSourceAttributes>({
+      type: NIGHTSHIFT_SOURCE_SO_TYPE,
+      perPage: 1,
+      namespaces: ['*'],
+      filter: `${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.view_name: "${escapeKuery(viewName)}"`,
+    });
+    if (existing.total > 0) {
+      return true;
+    }
+    return Boolean(await this.deps.viewsClient.getView(viewName));
   }
 
   private async getSavedObject(id: string) {

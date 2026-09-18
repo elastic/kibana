@@ -15,7 +15,7 @@ const NIGHTSHIFT_SOURCE_VIEW_NAMESPACE = NIGHTSHIFT_SOURCE_VIEW_PREFIX.slice(0, 
 const NIGHTSHIFT_SOURCE_VIEW_EXAMPLE = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}x`;
 
 /**
- * ES `simpleMatch`: `*` is multi-segment, so `$.nightshift.*` hits `$.nightshift.sources.<id>`.
+ * ES `simpleMatch`: `*` is multi-segment, so `$.nightshift.*` hits `$.nightshift.sources.<slug>`.
  * Index wildcards (`*`, `logs-*`) never enter the `$.` namespace; leave those alone.
  */
 const isNightshiftSourceViewPattern = (name: string): boolean => {
