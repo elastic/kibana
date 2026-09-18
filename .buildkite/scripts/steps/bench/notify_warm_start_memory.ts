@@ -225,7 +225,7 @@ async function main() {
   console.log('PR comment posted successfully');
 }
 
-if (require.main === module) {
+if (import.meta.main) {
   main().catch((error) => {
     console.error('Failed to report warm-start memory results:', error);
     process.exit(1);
