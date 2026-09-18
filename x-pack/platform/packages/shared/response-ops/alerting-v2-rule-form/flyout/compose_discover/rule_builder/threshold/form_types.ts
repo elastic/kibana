@@ -249,6 +249,20 @@ export const isMultiSeveritySupported = (comparator: Comparator): boolean =>
 export const isAscendingComparator = (comparator: Comparator): boolean =>
   comparator === Comparator.GT || comparator === Comparator.GTE;
 
+/** The generated severity EVAL always emits this column name; the executor reads it. */
+export const SEVERITY_COLUMN = 'severity';
+
+/**
+ * Whether a stat or evaluation is named `severity`, which would collide with the generated
+ * severity column (the generated `EVAL severity` would silently override the user's). When true,
+ * severity is not configurable, so {@link reconcileSeverity} clears any existing config.
+ */
+export const hasReservedSeverityLabel = (
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): boolean =>
+  [...stats, ...evaluations].some((item) => item.label.trim() === SEVERITY_COLUMN);
+
 export const createDefaultSeverityConfig = (): SeverityConfig => ({
   mode: 'single',
   singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL,
@@ -275,15 +289,16 @@ export const nextSeverityLevel = (levels: SeverityLevel[]): AlertEventSeverity =
 };
 
 /**
- * Drop or downgrade severity config that is no longer applicable to the current
- * conditions: severity is cleared for multiple conditions, and multi mode falls
- * back to single mode when the comparator is range-based.
+ * Drop or downgrade severity config that is no longer applicable: severity is cleared for
+ * multiple conditions or when a stat/evaluation is named `severity` (it would collide with the
+ * generated column), and multi mode falls back to single mode when the comparator is range-based.
  */
 export const reconcileSeverity = (
   severity: SeverityConfig | undefined,
-  alertConditions: AlertCondition[]
+  alertConditions: AlertCondition[],
+  hasReservedLabel = false
 ): SeverityConfig | undefined => {
-  if (!severity || !isSeveritySupported(alertConditions)) return undefined;
+  if (!severity || !isSeveritySupported(alertConditions) || hasReservedLabel) return undefined;
   const [condition] = alertConditions;
   if (severity.mode === 'multi' && !isMultiSeveritySupported(condition.comparator)) {
     return { ...severity, mode: 'single' };

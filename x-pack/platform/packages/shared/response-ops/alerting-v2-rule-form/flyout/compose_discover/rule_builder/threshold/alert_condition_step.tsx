@@ -61,6 +61,7 @@ import {
   getAvailableMetricLabels,
   reconcileSeverity,
   isSeveritySupported,
+  hasReservedSeverityLabel,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
@@ -239,6 +240,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        // Renaming a stat to `severity` collides with the generated column, so severity clears.
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          updatedConditions,
+          hasReservedSeverityLabel(next, thresholdValues.evaluations)
+        ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
         }),
@@ -338,6 +345,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        // Renaming an evaluation to `severity` collides with the generated column, so it clears.
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          updatedConditions,
+          hasReservedSeverityLabel(thresholdValues.stats, next)
+        ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
         }),
@@ -451,6 +464,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   );
 
   const severitySupported = isSeveritySupported(thresholdValues.alertConditions);
+  // A stat/evaluation named `severity` collides with the generated column, so severity is not
+  // configurable until it is renamed.
+  const severityLabelConflict = hasReservedSeverityLabel(
+    thresholdValues.stats,
+    thresholdValues.evaluations
+  );
 
   return (
     <>
@@ -985,13 +1004,32 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-              {severitySupported && (
-                <SeveritySection
-                  severity={thresholdValues.severity}
-                  alertConditions={thresholdValues.alertConditions}
-                  onChange={updateSeverity}
-                />
-              )}
+              {severitySupported &&
+                (severityLabelConflict ? (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    <EuiCallOut
+                      announceOnMount
+                      size="s"
+                      color="primary"
+                      iconType="info"
+                      title={i18n.translate(
+                        'xpack.alertingV2.ruleBuilder.severity.reservedLabelNotice',
+                        {
+                          defaultMessage:
+                            'Severity is not configurable while a stat or evaluation is named "severity". Rename it to configure severity.',
+                        }
+                      )}
+                      data-test-subj="ruleBuilderSeverityReservedLabelCallout"
+                    />
+                  </>
+                ) : (
+                  <SeveritySection
+                    severity={thresholdValues.severity}
+                    alertConditions={thresholdValues.alertConditions}
+                    onChange={updateSeverity}
+                  />
+                ))}
             </EuiPanel>
             <EuiSpacer size="s" />
           </React.Fragment>

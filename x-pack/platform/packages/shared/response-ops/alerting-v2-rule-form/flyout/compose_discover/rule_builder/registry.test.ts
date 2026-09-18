@@ -103,4 +103,16 @@ describe('threshold builder validate', () => {
 
     expect(validate!(STATE, values)).toBe(false);
   });
+
+  it('is invalid when a stat is named severity while severity is configured', () => {
+    const values = makeValues({
+      stats: [{ id: 's1', label: 'severity', aggregation: Aggregation.COUNT }],
+      alertConditions: [
+        { id: 'cond-1', metric: 'severity', comparator: Comparator.GT, threshold: [100] },
+      ],
+      severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
 });

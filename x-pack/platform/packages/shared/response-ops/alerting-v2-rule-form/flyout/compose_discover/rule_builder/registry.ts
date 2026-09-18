@@ -14,6 +14,7 @@ import {
   generateId,
   getAvailableMetricLabels,
   getSeverityValidationError,
+  hasReservedSeverityLabel,
   reconcileAlertConditionMetrics,
 } from './threshold/form_types';
 import { getInvalidExpressionReferences } from './threshold/validate_metric_references';
@@ -46,6 +47,12 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
 
   // Severity only applies to a single alert condition, whose comparator and threshold it uses.
   if (getSeverityValidationError(values.severity, values.alertConditions[0]) !== null) {
+    return false;
+  }
+
+  // A stat/evaluation named `severity` would collide with the generated severity column.
+  // The UI clears severity in this case; this guards against externally-crafted queries.
+  if (values.severity && hasReservedSeverityLabel(values.stats, values.evaluations)) {
     return false;
   }
 

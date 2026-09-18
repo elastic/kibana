@@ -12,6 +12,7 @@ import {
   Comparator,
   compareSeverity,
   getSeverityValidationError,
+  hasReservedSeverityLabel,
   sortLevelsBySeverity,
   nextSeverityLevel,
   nextSeverityThreshold,
@@ -405,6 +406,39 @@ describe('severity helpers', () => {
           cond(Comparator.LT, [500])
         )
       ).toBe('threshold_order');
+    });
+  });
+
+  describe('hasReservedSeverityLabel', () => {
+    it('is true when a stat is named severity', () => {
+      expect(
+        hasReservedSeverityLabel([{ id: 's1', label: 'severity', aggregation: Aggregation.COUNT }], [])
+      ).toBe(true);
+    });
+
+    it('is true when an evaluation is named severity', () => {
+      expect(
+        hasReservedSeverityLabel(
+          [{ id: 's1', label: 'count', aggregation: Aggregation.COUNT }],
+          [{ id: 'e1', label: 'severity', expression: 'count / 2' }]
+        )
+      ).toBe(true);
+    });
+
+    it('is false when no stat/eval is named severity', () => {
+      expect(
+        hasReservedSeverityLabel([{ id: 's1', label: 'count', aggregation: Aggregation.COUNT }], [])
+      ).toBe(false);
+    });
+  });
+
+  describe('reconcileSeverity with a reserved label', () => {
+    it('clears severity when a stat/eval is named severity', () => {
+      const severity: SeverityConfig = { mode: 'single', singleLevelSeverity: 'high', levels: [] };
+      const conditions = [condition(Comparator.GT)];
+      expect(reconcileSeverity(severity, conditions, true)).toBeUndefined();
+      // Without the reserved label it is preserved.
+      expect(reconcileSeverity(severity, conditions, false)).toBe(severity);
     });
   });
 });

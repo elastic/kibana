@@ -1108,6 +1108,51 @@ describe('RuleBuilderAlertConditionStep', () => {
       expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
     });
 
+    it('shows the reserved-label notice and hides the severity config when a stat is named severity', () => {
+      const builderState = makeBuilderState({
+        stats: [{ id: 'stat-1', label: 'severity', aggregation: Aggregation.COUNT }],
+        alertConditions: [
+          { id: 'cond-1', metric: 'severity', comparator: Comparator.GT, threshold: [100] },
+        ],
+        severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('ruleBuilderSeverityReservedLabelCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
+    });
+
+    it('clears severity when a stat is renamed to severity', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+        target: { value: 'severity' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.stats[0].label).toBe('severity');
+      expect(next.severity).toBeUndefined();
+    });
+
     it('enables single severity from the step UI', () => {
       const onBuilderStateChange = jest.fn();
       render(
