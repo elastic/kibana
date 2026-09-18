@@ -660,7 +660,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'validation: should reject a query.base that no longer composes with the stored recovery segment',
+    'validation: should reject a recovery segment that does not compose with the stored query.base',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
@@ -672,20 +672,17 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
           },
         })
       );
+      // The segment passes the body schema on its own; only composing it with
+      // the stored base reveals that it does not parse.
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
-        body: {
-          query: {
-            base: 'FROM logs-* | STATS total = COUNT(*) BY host.name',
-            breach: { segment: 'WHERE total >= 10' },
-          },
-        },
+        body: { recovery: { strategy: 'condition', segment: 'WHERE' } },
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
       // The rejected update must not have persisted.
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.query.base).toBe('FROM logs-* | STATS count = COUNT(*) BY host.name');
+      expect(stored.recovery).toStrictEqual({ strategy: 'condition', segment: 'WHERE count < 5' });
     }
   );
 
