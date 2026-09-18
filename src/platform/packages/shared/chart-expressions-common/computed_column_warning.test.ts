@@ -76,6 +76,31 @@ describe('isFilterableColumnSet', () => {
 
     expect(isFilterableColumnSet([filterableColumn, nonFilterableColumn])).toBe(false);
   });
+
+  describe('blank ES|QL text field values', () => {
+    const textColumn = buildColumn({ meta: { type: 'string', esType: 'text' } });
+    const keywordColumn = buildColumn({ meta: { type: 'string', esType: 'keyword' } });
+
+    it('is false for a text column with a null value', () => {
+      expect(isFilterableColumnSet([textColumn], [null])).toBe(false);
+    });
+
+    it('is false for a text column with an empty string value', () => {
+      expect(isFilterableColumnSet([textColumn], [''])).toBe(false);
+    });
+
+    it('is true for a text column with a non-blank value', () => {
+      expect(isFilterableColumnSet([textColumn], ['hello'])).toBe(true);
+    });
+
+    it('is true for a keyword column with a blank value', () => {
+      expect(isFilterableColumnSet([keywordColumn], [null])).toBe(true);
+    });
+
+    it('is true when no values are provided, even for a text column', () => {
+      expect(isFilterableColumnSet([textColumn])).toBe(true);
+    });
+  });
 });
 
 describe('getFilterDrilldownWarningMessage', () => {
