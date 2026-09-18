@@ -199,7 +199,7 @@ export const AutomationsPanel = ({
         <>
           {automations.length === 0 && !isEditing ? (
             <EuiEmptyPrompt
-              iconType="indexRuntime"
+              iconType="tableSparkles"
               titleSize="xs"
               data-test-subj="contextAiIndexAutomationsEmpty"
               title={
