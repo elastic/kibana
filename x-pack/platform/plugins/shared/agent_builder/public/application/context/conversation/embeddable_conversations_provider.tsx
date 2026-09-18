@@ -24,6 +24,7 @@ import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
+import { storageKeys } from '../../storage_keys';
 import { AppLeaveContext } from '../app_leave_context';
 import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
 import { RedirectLoading } from '../../components/redirects/redirect_loading';
@@ -100,6 +101,15 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }),
     [coreStart, services.startDependencies]
   );
+
+  // Seed last-conversation storage before the persist hook reads it, matching
+  // `openChat({ conversationId })` which writes the key before the embeddable mounts.
+  if (!contextProps.newConversation && contextProps.conversationId) {
+    window?.localStorage?.setItem(
+      storageKeys.getLastConversationKey(contextProps.sessionTag, contextProps.agentId),
+      JSON.stringify(contextProps.conversationId)
+    );
+  }
 
   const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({
     sessionTag: currentProps.sessionTag,

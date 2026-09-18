@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -118,14 +119,23 @@ export const getVerdictLabel = (verdict: string | undefined): string =>
 export const AttackDiscoveryVerdictInlineContent = ({
   attachment,
 }: AttachmentRenderProps<AttackDiscoveryVerdictAttachment>) => {
+  const { euiTheme } = useEuiTheme();
   const rationaleMarkdown = attachment.data?.rationale_markdown;
   const summaryMarkdown = attachment.data?.summary_markdown ?? '';
 
   return (
-    <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID}>
+    <div
+      css={css`
+        min-width: 0;
+        overflow-wrap: anywhere;
+        padding: ${euiTheme.size.m};
+      `}
+      data-markdown-wrap="true"
+      data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID}
+    >
       <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
-          disableActions={false}
+          disableActions={true}
           markdown={summaryMarkdown}
           scopeId={ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID}
         />
@@ -139,7 +149,7 @@ export const AttackDiscoveryVerdictInlineContent = ({
           <EuiSpacer size="s" />
           <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID}>
             <AttackDiscoveryMarkdownFormatter
-              disableActions={false}
+              disableActions={true}
               markdown={rationaleMarkdown}
               scopeId={ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID}
             />

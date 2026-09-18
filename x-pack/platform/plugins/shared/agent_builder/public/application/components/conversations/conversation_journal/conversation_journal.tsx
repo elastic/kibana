@@ -57,6 +57,42 @@ const flattenVersionedAttachment = (
   };
 };
 
+const TEXT_ATTACHMENT_TYPE = 'text';
+const ATTACK_DISCOVERY_VERDICT_TYPE = 'security.attack_discovery.verdict';
+
+const getTextContent = (attachment: UnknownAttachment): string | undefined => {
+  const { content } = attachment.data as { content?: unknown };
+  return typeof content === 'string' ? content : undefined;
+};
+
+/**
+ * Desk-test conversations stored the analysis verdict as a `text` attachment.
+ * Re-shape it so the Security verdict renderer can show field chips instead of
+ * a raw code block.
+ */
+const adaptLegacyAttackDiscoveryText = (attachment: UnknownAttachment): UnknownAttachment => {
+  if (attachment.type !== TEXT_ATTACHMENT_TYPE) {
+    return attachment;
+  }
+
+  const content = getTextContent(attachment);
+  if (content == null || !/^# Analysis verdict:/i.test(content)) {
+    return attachment;
+  }
+
+  const verdictMatch = content.match(/^# Analysis verdict:\s*(\S+)/i);
+  const summaryMarkdown = content.replace(/^# Analysis verdict:[^\n]*\n*/i, '').trim();
+
+  return {
+    ...attachment,
+    data: {
+      summary_markdown: summaryMarkdown,
+      verdict: verdictMatch?.[1]?.toLowerCase(),
+    },
+    type: ATTACK_DISCOVERY_VERDICT_TYPE,
+  };
+};
+
 const JournalNote = ({ event }: { event: UserMessageEvent }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -81,7 +117,8 @@ const JournalNote = ({ event }: { event: UserMessageEvent }) => {
 
 /**
  * Renders trigger_mode:never journal notes and inline attachments that live on
- * conversation.events rather than rounds. Desk-test only (PR4); do not fold into PR1–PR3.
+ * conversation.events rather than rounds. Conversations that predate events still
+ * show their attachments. Desk-test only (PR4); do not fold into PR1–PR3.
  */
 export const ConversationJournal: React.FC = () => {
   const { conversation } = useConversation();
@@ -97,7 +134,12 @@ export const ConversationJournal: React.FC = () => {
   }, [conversation?.attachments]);
 
   const items = conversation?.events ?? [];
-  if (items.length === 0 || !conversationId) {
+  const hasAttachmentEvents = items.some(isAttachmentAdded);
+  const leftoverAttachments = hasAttachmentEvents
+    ? []
+    : [...attachmentsById.values()].filter((attachment) => !attachment.hidden);
+
+  if (!conversationId || (items.length === 0 && leftoverAttachments.length === 0)) {
     return null;
   }
 
@@ -138,6 +180,26 @@ export const ConversationJournal: React.FC = () => {
         }
 
         return [];
+      })}
+      {leftoverAttachments.map((attachment) => {
+        const adapted = adaptLegacyAttackDiscoveryText(attachment);
+        const canRenderAdapted =
+          adapted.type === attachment.type ||
+          attachmentsService.getAttachmentUiDefinition?.(adapted.type) != null;
+        const resolved = canRenderAdapted ? adapted : attachment;
+
+        return (
+          <EuiFlexItem grow={false} key={attachment.id}>
+            <div data-test-subj="agentBuilderJournalAttachment">
+              <InlineAttachmentWithActions
+                attachment={resolved}
+                attachmentsService={attachmentsService}
+                conversationId={conversationId}
+                isSidebar={false}
+              />
+            </div>
+          </EuiFlexItem>
+        );
       })}
     </EuiFlexGroup>
   );

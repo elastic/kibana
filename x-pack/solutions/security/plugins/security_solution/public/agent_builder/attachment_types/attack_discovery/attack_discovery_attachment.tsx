@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   AttachmentRenderProps,
@@ -63,16 +64,25 @@ const DETAILS_TITLE = i18n.translate(
 export const AttackDiscoveryInlineContent = ({
   attachment,
 }: AttachmentRenderProps<AttackDiscoveryAttachment>) => {
+  const { euiTheme } = useEuiTheme();
   const alertIds = attachment.data?.alert_ids;
   const detailsMarkdown = attachment.data?.details_markdown ?? '';
   const summaryMarkdown = attachment.data?.summary_markdown ?? '';
 
   return (
-    <div data-test-subj={ATTACK_DISCOVERY_INLINE_CONTENT_TEST_ID}>
+    <div
+      css={css`
+        min-width: 0;
+        overflow-wrap: anywhere;
+        padding: ${euiTheme.size.m};
+      `}
+      data-markdown-wrap="true"
+      data-test-subj={ATTACK_DISCOVERY_INLINE_CONTENT_TEST_ID}
+    >
       <div data-test-subj={ATTACK_DISCOVERY_INLINE_SUMMARY_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
           alertIds={alertIds}
-          disableActions={false}
+          disableActions={true}
           markdown={summaryMarkdown}
           scopeId={ATTACK_DISCOVERY_INLINE_SCOPE_ID}
         />
@@ -85,7 +95,7 @@ export const AttackDiscoveryInlineContent = ({
       <div data-test-subj={ATTACK_DISCOVERY_INLINE_DETAILS_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
           alertIds={alertIds}
-          disableActions={false}
+          disableActions={true}
           markdown={detailsMarkdown}
           scopeId={ATTACK_DISCOVERY_INLINE_SCOPE_ID}
         />
