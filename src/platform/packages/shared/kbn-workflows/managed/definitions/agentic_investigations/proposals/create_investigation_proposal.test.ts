@@ -503,6 +503,11 @@ describe('create-investigation-proposal workflow', () => {
       expect(String(adopt?.with?.current_proposal_id)).toContain(
         'steps.resolve_live_head.output.proposalId'
       );
+      // The input travels with the id: resolving the head but keeping the
+      // trigger's input would approve one revision and execute another's.
+      expect(String(adopt?.with?.action_input)).toContain(
+        'steps.resolve_live_head.output.actionInput'
+      );
     });
 
     it('adopts before any write, so the decision lands on the current revision', () => {
@@ -559,6 +564,17 @@ describe('create-investigation-proposal workflow', () => {
       // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
       expect(settings['workflow-id']).toContain('variables.action_workflow_id');
       expect(Object.keys(settings.inputs ?? {})).toEqual(['actionInput']);
+    });
+
+    it('executes the live revision input, not the trigger input a revision may have corrected', () => {
+      // The trigger value is captured before the gate is parked, so a revision
+      // that corrected the parameters would otherwise be approved and then
+      // ignored: the analyst approves one input and the action runs another.
+      const execute = findStep(workflow.steps, 'execute_action');
+      const settings = execute?.with as { inputs?: Record<string, unknown> };
+
+      expect(String(settings.inputs?.actionInput)).toContain('variables.action_input');
+      expect(String(settings.inputs?.actionInput)).not.toContain('inputs.actionInput');
     });
 
     it('records the execution outcome after the action', () => {

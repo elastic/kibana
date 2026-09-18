@@ -853,6 +853,13 @@ export class ProposalsService {
     revision: number;
     status: ProposalStatus;
     decision: ProposalDecision | undefined;
+    /**
+     * The live revision's action input, so a caller that resolves the head
+     * before executing can run the parameters the analyst actually approved.
+     * A revision that corrected `actionInput` would otherwise leave the
+     * original's stale parameters in whatever the caller captured earlier.
+     */
+    actionInput: Record<string, unknown> | undefined;
   }> {
     const { proposal } = await this.load(id, spaceId);
 
@@ -889,6 +896,7 @@ export class ProposalsService {
         revision: proposal.revision ?? 1,
         status: proposal.status,
         decision: proposal.decision,
+        actionInput: proposal.actionInput,
       };
     }
 
@@ -898,6 +906,7 @@ export class ProposalsService {
       revision: source.revision ?? 1,
       status: source.status,
       decision: source.decision,
+      actionInput: source.actionInput,
     };
   }
 
@@ -916,6 +925,7 @@ export class ProposalsService {
     revision: number;
     status: ProposalStatus;
     decision: ProposalDecision | undefined;
+    actionInput: Record<string, unknown> | undefined;
   }> {
     let current = start;
 
@@ -931,6 +941,7 @@ export class ProposalsService {
       revision: current.revision ?? 1,
       status: current.status,
       decision: current.decision,
+      actionInput: current.actionInput,
     };
   }
 

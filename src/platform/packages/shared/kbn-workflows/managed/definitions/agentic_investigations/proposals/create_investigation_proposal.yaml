@@ -178,6 +178,10 @@ steps:
       expires_epoch: "${{ steps.create_proposal.output.expiresAt | date: '%s' | plus: 0 }}"
       has_deadline: '${{ steps.create_proposal.output.expiresAt != blank }}'
       action_workflow_id: '{{ inputs.actionWorkflowId }}'
+      # The trigger's input, until the gate answers: a revision appended while
+      # the gate was parked may have corrected it, and `adopt_live_head` below
+      # replaces this with the live revision's own value.
+      action_input: '${{ inputs.actionInput }}'
       decided_by: ''
       # `autoApprove` is only meaningful for an action proposal: autonomy
       # governs whether an action may run without a human, and a non-action
@@ -353,6 +357,10 @@ steps:
             type: data.set
             with:
               current_proposal_id: '{{ steps.resolve_live_head.output.proposalId }}'
+              # The revision's own input, not the trigger's. An analyst who
+              # approved a corrected revision approved those parameters, and
+              # `execute_action` below runs whatever this holds.
+              action_input: '${{ steps.resolve_live_head.output.actionInput }}'
 
       # The clock is re-read after the gate, not only before it. The deadline
       # check at the top of the iteration was evaluated before the park, which
@@ -512,7 +520,12 @@ steps:
               inputs:
                 # Every action workflow takes one `actionInput` object, so this
                 # workflow never needs to know an action's parameter names.
-                actionInput: '${{ inputs.actionInput }}'
+                #
+                # Read from variables, not from `inputs`: a revision may have
+                # corrected the input while the gate was parked, and the trigger
+                # value would then execute parameters the analyst never
+                # approved. `adopt_live_head` keeps this in step with the head.
+                actionInput: '${{ variables.action_input }}'
 
           - name: handle_action_success
             type: if

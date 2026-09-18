@@ -24,6 +24,12 @@ export const getLatestRevisionStepOutputSchema = z.object({
   revision: z.number().int().min(1),
   status: proposalStatusSchema,
   decision: proposalDecisionSchema.optional(),
+  actionInput: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe(
+      'The live revision action input. Resolve this before executing the action: a revision may have corrected the parameters, and the trigger input a caller captured at creation is then stale.'
+    ),
 });
 
 /**

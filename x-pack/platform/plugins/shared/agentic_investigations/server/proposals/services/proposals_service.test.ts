@@ -1464,6 +1464,7 @@ describe('ProposalsService', () => {
         revision: 1,
         status: 'pending',
         decision: undefined,
+        actionInput: { name: 'Suspicious PowerShell' },
       });
     });
 
@@ -1471,17 +1472,47 @@ describe('ProposalsService', () => {
       // The document keyed by the id in storage.search's hit determines the
       // "live" answer, independent of which id in the chain was asked about —
       // this is what makes the query O(1) instead of a supersededBy walk.
+      const rootDocument = baseDocument({
+        rootProposalId: 'proposal-1',
+        supersededBy: 'proposal-2',
+      });
       const liveDocument = baseDocument({
         rootProposalId: 'proposal-1',
         supersedes: 'proposal-1',
         revision: 2,
         status: 'pending',
+        // Deliberately different from the root's: a caller that resolves the
+        // head in order to execute the action has to run these parameters, and
+        // returning the asked-about row's input would run the ones the analyst
+        // revised away.
+        actionInput: { name: 'Revised PowerShell' },
       });
-      const storage = createStorage(
-        baseDocument({ rootProposalId: 'proposal-1', supersededBy: 'proposal-2' })
-      );
-      storage.search.mockResolvedValue({
-        hits: { hits: [searchHit(liveDocument, 'proposal-2')], total: { value: 1 } },
+      const storage = createStorage(rootDocument);
+      // Dispatch on the query, not on call order, so the asked-about row and
+      // the chain's head are genuinely different documents here: `load` reads
+      // the superseded root by id while the root-term query answers with the
+      // live head. Answering both with the head would let a read of the wrong
+      // document pass unnoticed.
+      storage.search.mockImplementation(async (request: { query?: unknown }) => {
+        const filter =
+          (
+            request.query as
+              | {
+                  bool?: {
+                    filter?: Array<{ term?: Record<string, unknown>; ids?: { values: string[] } }>;
+                  };
+                }
+              | undefined
+          )?.bool?.filter ?? [];
+        const asksForRoot = filter.some((clause) => clause.term?.rootProposalId !== undefined);
+        const askedForId = filter.find((clause) => clause.ids !== undefined)?.ids?.values[0];
+
+        if (asksForRoot) {
+          return { hits: { hits: [searchHit(liveDocument, 'proposal-2')], total: { value: 1 } } };
+        }
+        return askedForId === 'proposal-2'
+          ? { hits: { hits: [searchHit(liveDocument, 'proposal-2')], total: { value: 1 } } }
+          : { hits: { hits: [searchHit(rootDocument, 'proposal-1')], total: { value: 1 } } };
       });
       const { service } = createService(storage);
 
@@ -1492,6 +1523,7 @@ describe('ProposalsService', () => {
         revision: 2,
         status: 'pending',
         decision: undefined,
+        actionInput: { name: 'Revised PowerShell' },
       });
       expect(storage.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1525,14 +1557,20 @@ describe('ProposalsService', () => {
         revision: 1,
         status: 'pending',
         decision: undefined,
+        actionInput: { name: 'Suspicious PowerShell' },
       });
     });
 
     it('follows supersededBy pointers for a chain written before rootProposalId existed', async () => {
-      // No `rootProposalId` on either row: the term query below cannot find
-      // this chain, so the pointer walk is the only way to the live head.
+      // No `rootProposalId` on either row: the term query cannot find this
+      // chain, so the pointer walk is the only way to the live head.
       const legacyRoot = baseDocument({ supersededBy: 'proposal-2' });
-      const live = baseDocument({ supersedes: 'proposal-1', revision: 2, status: 'pending' });
+      const live = baseDocument({
+        supersedes: 'proposal-1',
+        revision: 2,
+        status: 'pending',
+        actionInput: { name: 'Revised PowerShell' },
+      });
       const storage = createStorage(legacyRoot);
       // Dispatch on the query, not on call order. The chain query filters on
       // `rootProposalId`, which a legacy row does not carry, so it answers
@@ -1568,6 +1606,7 @@ describe('ProposalsService', () => {
         revision: 2,
         status: 'pending',
         decision: undefined,
+        actionInput: { name: 'Revised PowerShell' },
       });
       // The successor is reached by following its pointer, not by the root
       // term — a chain query for this row would be an empty answer.

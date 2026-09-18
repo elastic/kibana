@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
@@ -186,17 +188,25 @@ apiTest.describe(
     apiTest(
       'does not revise a proposal from another space',
       async ({ apiClient, esClient, kbnClient, samlAuth }) => {
-        const SPACE_A = 'agentic-investigations-space-a';
-        const SPACE_B = 'agentic-investigations-space-b';
-        for (const spaceId of [SPACE_A, SPACE_B]) {
-          await kbnClient.request({
-            method: 'POST',
-            path: '/api/spaces/space',
-            body: { id: spaceId, name: spaceId, disabledFeatures: [] },
-          });
-        }
+        // Unique per run. Fixed ids collide with the Spaces an interrupted run
+        // left behind, and the create below then fails with a duplicate before
+        // a single assertion has run.
+        const SPACE_A = `agentic-investigations-a-${randomUUID()}`;
+        const SPACE_B = `agentic-investigations-b-${randomUUID()}`;
+        const created: string[] = [];
 
         try {
+          for (const spaceId of [SPACE_A, SPACE_B]) {
+            await kbnClient.request({
+              method: 'POST',
+              path: '/api/spaces/space',
+              body: { id: spaceId, name: spaceId, disabledFeatures: [] },
+            });
+            // Recorded per iteration, so a failure creating SPACE_B still leaves
+            // SPACE_A in the list the `finally` cleans up.
+            created.push(spaceId);
+          }
+
           // `PROPOSALS_MANAGE_ROLE` is scoped to `spaces: ['*']`, so this user
           // is genuinely authorized in both spaces — the rejection below can
           // only come from the document's own space, not from privileges.
