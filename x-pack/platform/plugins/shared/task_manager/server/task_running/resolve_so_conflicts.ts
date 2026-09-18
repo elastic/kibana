@@ -9,7 +9,12 @@ import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import pRetry, { type Options as PRetryOptions } from 'p-retry';
-import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from '../task';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  PartialConcreteTaskInstance,
+  RruleSchedule,
+} from '../task';
 import type { Updatable } from './task_runner';
 
 /** Total attempts = 1 initial + (MAX_ATTEMPTS - 1) retries */
@@ -100,6 +105,7 @@ async function resolveTaskDocumentConflictsOnce({
   originalTask,
   bufferedTaskStore,
   logger,
+  getRunAtForSchedule,
   attempt,
   maxAttempts,
   label,
@@ -128,17 +134,21 @@ async function resolveTaskDocumentConflictsOnce({
     );
   }
 
+  const scheduleChanged = !isEqual(originalTask.schedule, currentTask.schedule);
+  const runAtChanged = originalTask.runAt.valueOf() !== currentTask.runAt.valueOf();
+
   const updatedTask: PartialConcreteTaskInstance = {
     ...currentTask,
     ...partialTask,
     version: currentTask.version,
     // use the current task's schedule if it has changed from original
-    ...(!isEqual(originalTask.schedule, currentTask.schedule)
-      ? { schedule: currentTask.schedule }
-      : {}),
+    ...(scheduleChanged ? { schedule: currentTask.schedule } : {}),
     // use the current task's runAt if it has changed from original
-    ...(originalTask.runAt.valueOf() !== currentTask.runAt.valueOf()
-      ? { runAt: currentTask.runAt }
+    ...(runAtChanged ? { runAt: currentTask.runAt } : {}),
+    // otherwise, if only the schedule changed, the runner's next runAt was derived from the stale
+    // schedule, so recompute it from the current one
+    ...(!runAtChanged && scheduleChanged && getRunAtForSchedule && currentTask.schedule
+      ? { runAt: getRunAtForSchedule(currentTask.schedule) }
       : {}),
   };
 
@@ -155,6 +165,8 @@ interface ResolveTaskDocumentConflictsOpts {
   originalTask: ConcreteTaskInstance;
   bufferedTaskStore: Updatable;
   logger: Logger;
+  /** Provided when `partialTask.runAt` was derived from the schedule rather than returned by the task runner. */
+  getRunAtForSchedule?: (schedule: IntervalSchedule | RruleSchedule) => Date;
   pRetryOptions?: PRetryOptions;
 }
 

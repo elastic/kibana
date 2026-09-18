@@ -7,7 +7,12 @@
 
 import { mockLogger } from '../test_utils';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
-import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from '../task';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  PartialConcreteTaskInstance,
+  RruleSchedule,
+} from '../task';
 import { TaskStatus } from '../task';
 import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { Updatable } from './task_runner';
@@ -54,13 +59,14 @@ describe('resolveTaskDocumentConflicts', () => {
     };
   });
 
-  const resolve = () =>
+  const resolve = (getRunAtForSchedule?: (schedule: IntervalSchedule | RruleSchedule) => Date) =>
     resolveTaskDocumentConflicts({
       taskId: originalTask.id,
       partialTask,
       originalTask,
       bufferedTaskStore: store,
       logger,
+      getRunAtForSchedule,
       pRetryOptions: { minTimeout: 0, factor: 1 },
     });
 
@@ -116,6 +122,77 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.partialUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         schedule: { interval: '5m' },
+        version: 'WzIsMV0=',
+      }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('recomputes runAt from the current schedule when only the schedule changed while the task was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      schedule: { interval: '5m' },
+      startedAt: originalTask.startedAt,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+    const recomputedRunAt = new Date('2020-01-01T00:05:00.000Z');
+    const getRunAtForSchedule = jest.fn().mockReturnValue(recomputedRunAt);
+
+    await resolve(getRunAtForSchedule);
+
+    expect(getRunAtForSchedule).toHaveBeenCalledWith({ interval: '5m' });
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '5m' },
+        runAt: recomputedRunAt,
+        version: 'WzIsMV0=',
+      }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('keeps the runAt returned by the task runner when the schedule changed while the task was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      schedule: { interval: '5m' },
+      startedAt: originalTask.startedAt,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+
+    // no getRunAtForSchedule: the runner returned its own runAt
+    await resolve();
+
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '5m' },
+        runAt: partialTask.runAt,
+        version: 'WzIsMV0=',
+      }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('prefers the current runAt over recomputing it when both runAt and schedule changed while the task was running', async () => {
+    const currentRunAt = new Date('2020-01-01T00:10:00.000Z');
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      schedule: { interval: '5m' },
+      runAt: currentRunAt,
+      startedAt: originalTask.startedAt,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+    const getRunAtForSchedule = jest.fn();
+
+    await resolve(getRunAtForSchedule);
+
+    expect(getRunAtForSchedule).not.toHaveBeenCalled();
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '5m' },
+        runAt: currentRunAt,
         version: 'WzIsMV0=',
       }),
       { validate: false, doc: currentTask }

@@ -683,6 +683,9 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     let shouldTaskBeDisabled = false;
+    // Set when the next runAt is derived from the schedule (not returned by the task runner), so the
+    // conflict resolver can recompute it if the schedule was changed externally during the run.
+    let getRunAtForSchedule: ((schedule: IntervalSchedule | RruleSchedule) => Date) | undefined;
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -714,18 +717,21 @@ export class TaskManagerRunner implements TaskRunner {
           const updatedTaskSchedule = scheduleChangedDuringRun
             ? this.instance.task.schedule
             : reschedule ?? this.instance.task.schedule;
+          const nextRunAtForSchedule = (schedule?: IntervalSchedule | RruleSchedule) =>
+            getNextRunAt(
+              {
+                runAt: this.instance.task.runAt,
+                startedAt: this.instance.task.startedAt,
+                schedule,
+              },
+              this.getPollInterval(),
+              this.logger
+            );
+          if (!runAt) {
+            getRunAtForSchedule = nextRunAtForSchedule;
+          }
           return asOk({
-            runAt:
-              runAt ||
-              getNextRunAt(
-                {
-                  runAt: this.instance.task.runAt,
-                  startedAt: this.instance.task.startedAt,
-                  schedule: updatedTaskSchedule,
-                },
-                this.getPollInterval(),
-                this.logger
-              ),
+            runAt: runAt || nextRunAtForSchedule(updatedTaskSchedule),
             state,
             schedule: updatedTaskSchedule,
             attempts,
@@ -819,6 +825,7 @@ export class TaskManagerRunner implements TaskRunner {
               originalTask,
               bufferedTaskStore: this.bufferedTaskStore,
               logger: this.logger,
+              getRunAtForSchedule,
             });
           } else {
             throw error;

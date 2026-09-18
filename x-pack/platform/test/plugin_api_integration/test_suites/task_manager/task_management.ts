@@ -1928,25 +1928,26 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should bulk update schedules for a running task and have the update survive completion when includeRunningTasks is true', async () => {
-      const longRunningTask = await scheduleTask(supertest, {
-        taskType: 'sampleLongRunningRecurringTask',
+      const releaseEvent = 'releaseRunningTaskWithUpdatedSchedule';
+      const runningTask = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
         schedule: { interval: '1h' },
-        params: {},
+        params: { waitForEvent: releaseEvent },
       });
 
-      await runTaskSoon({ id: longRunningTask.id });
+      await runTaskSoon({ id: runningTask.id });
 
       // ensure task is running and capture when this execution was due
       let dueRunAt: string;
       await retry.try(async () => {
-        const task = await currentTask(longRunningTask.id);
+        const task = await currentTask(runningTask.id);
 
         expect(task.status).to.be('running');
         dueRunAt = task.runAt;
       });
 
       await retry.try(async () => {
-        const updates = await bulkUpdateSchedules([longRunningTask.id], { interval: '3h' }, true);
+        const updates = await bulkUpdateSchedules([runningTask.id], { interval: '3h' }, true);
 
         expect(updates.tasks.length).to.be(1);
         expect(updates.errors.length).to.be(0);
@@ -1954,16 +1955,22 @@ export default function ({ getService }: FtrProviderContext) {
 
       // the running task's schedule is updated in place while it is still running, runAt is untouched
       await retry.try(async () => {
-        const task = await currentTask(longRunningTask.id);
+        const task = await currentTask(runningTask.id);
 
         expect(task.status).to.be('running');
         expect(task.schedule).to.eql({ interval: '3h' });
         expect(task.runAt).to.be(dueRunAt);
       });
 
+      // the task writes its history doc right before it starts waiting for the release event
+      await retry.try(async () => {
+        expect((await historyDocs(runningTask.id)).length).to.eql(1);
+      });
+      await releaseTasksWaitingForEventToComplete(releaseEvent);
+
       // once the run finishes, the next runAt is one 3h interval from this run's due time
-      await retry.tryForTime(150000, async () => {
-        const task = await currentTask(longRunningTask.id);
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
 
         expect(task.status).to.be('idle');
         expect(task.schedule).to.eql({ interval: '3h' });

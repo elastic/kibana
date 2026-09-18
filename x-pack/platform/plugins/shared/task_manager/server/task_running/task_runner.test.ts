@@ -3543,6 +3543,62 @@ describe('TaskManagerRunner', () => {
       );
     });
 
+    test('recomputes runAt from the updated schedule when resolving a version conflict caused by a schedule-only change', async () => {
+      const id = 'conflict-schedule-only';
+      const runAt = new Date();
+      const { runner, store, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1h' },
+          runAt,
+          startedAt: new Date(),
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      // bulkUpdateSchedules with includeRunningTasks changed only the schedule, runAt is untouched
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      // the runner's runAt was derived from the stale 1h schedule
+      expect(store.partialUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ runAt: new Date(runAt.getTime() + 60 * 60 * 1000) }),
+        expect.anything()
+      );
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
+        { validate: false, doc: currentTask }
+      );
+    });
+
     test('resolves a version_conflict_engine_exception when updating a recurring task', async () => {
       const id = 'conflict-engine';
       const startedAt = new Date();
