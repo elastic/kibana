@@ -178,12 +178,14 @@ describe('InvestigationOutput', () => {
     expect(finalResults).not.toHaveTextContent('95%');
   });
 
-  it('honours the emphasis and inline code the agent wrote, without showing the markers', () => {
+  it('renders non-interactive inline markdown in titles', async () => {
+    const user = userEvent.setup();
     const stateWithMarkdown: InvestigationState = {
       ...finalState,
       recommendations: [
         {
-          title: '**Block the attacker IPs** at the firewall via `hosts.deny`',
+          title:
+            '**Block the attacker IPs** at the firewall via `hosts.deny` and [runbook](https://example.com)',
           confidence: 0.9,
         },
       ],
@@ -195,11 +197,21 @@ describe('InvestigationOutput', () => {
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
 
     const finalResults = screen.getByTestId('investigationOutputFinalResults');
-    expect(finalResults).toHaveTextContent('Block the attacker IPs at the firewall via hosts.deny');
+    expect(finalResults).toHaveTextContent(
+      'Block the attacker IPs at the firewall via hosts.deny and runbook'
+    );
     expect(finalResults).not.toHaveTextContent('**');
+    expect(screen.getByText('Block the attacker IPs').tagName).toBe('STRONG');
+    expect(screen.getByText('hosts.deny').tagName).toBe('CODE');
+    expect(screen.queryByRole('link', { name: 'runbook' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Block the attacker IPs/ })
+    ).not.toBeInTheDocument();
     expect(finalResults).toHaveTextContent('No apm-* indices');
 
-    fireEvent.click(screen.getByRole('button', { name: /No apm/ }));
+    const blindSpotButton = screen.getByRole('button', { name: /No apm/ });
+    expect(blindSpotButton.querySelector('a, div, p, button')).toBeNull();
+    await user.click(blindSpotButton);
 
     expect(finalResults).toHaveTextContent('Needed for tracing.');
   });
@@ -215,16 +227,22 @@ describe('InvestigationOutput', () => {
 
     const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
     expect(blindSpots.textContent?.match(/No GeoIP enrichment/g)).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: gap })).not.toBeInTheDocument();
   });
 
-  it('opens recommendation details with a click and blind-spot details from a collapsed accordion', () => {
+  it('opens recommendation details with a click and blind-spot details from a collapsed accordion', async () => {
+    const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
     const recommendations = screen.getByTestId('investigationOutputRecommendations');
     expect(recommendations).toHaveTextContent(
       'Roll back the deployment that introduced the regression'
     );
-    fireEvent.click(screen.getByText('Roll back the deployment that introduced the regression'));
+    const action = screen.getByRole('button', {
+      name: /Roll back the deployment that introduced the regression/,
+    });
+    expect(action.querySelector('a, div, p, button')).toBeNull();
+    await user.click(action);
     expect(screen.getByRole('dialog')).toHaveTextContent(
       'kubectl rollout undo deployment/checkout-service'
     );
@@ -234,10 +252,10 @@ describe('InvestigationOutput', () => {
 
     const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
     expect(blindSpots).toHaveTextContent('No profiling data available');
-    const firstBlindSpot = screen.getByText('No profiling data available').closest('button');
+    const firstBlindSpot = screen.getByRole('button', { name: /No profiling data available/ });
     expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'false');
 
-    fireEvent.click(firstBlindSpot!);
+    await user.click(firstBlindSpot);
 
     expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'true');
     expect(blindSpots).toHaveTextContent(
@@ -250,20 +268,47 @@ describe('InvestigationOutput', () => {
     const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
-    const action = screen
-      .getByText('Roll back the deployment that introduced the regression')
-      .closest('button')!;
+    const action = screen.getByRole('button', {
+      name: /Roll back the deployment that introduced the regression/,
+    });
     action.focus();
     await user.keyboard('{Enter}');
 
-    expect(screen.getByRole('dialog')).toHaveTextContent(
-      'Roll back the deployment that introduced the regression'
-    );
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('Roll back the deployment that introduced the regression');
 
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    fireEvent.keyDown(dialog, { key: 'Escape' });
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(action).toHaveFocus();
+  });
+
+  it('does not retain recommendation details after the recommendations change', async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderWithI18n(
+      <InvestigationOutput status="complete" state={finalState} />
+    );
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Roll back the deployment that introduced the regression/,
+      })
+    );
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <InvestigationOutput
+          status="complete"
+          state={{
+            ...finalState,
+            recommendations: [{ title: 'Inspect the new investigation', confidence: 0.8 }],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('renders the conclusion on its own when no recommendations or blind spots were reported', () => {
