@@ -25,7 +25,12 @@ export const recursiveRecord: z.ZodType<RecursiveRecord> = z
   .lazy(() =>
     z.record(
       z.string().max(1000),
-      z.union([primitive, z.array(primitive), z.array(z.union([primitive, recursiveRecord])), recursiveRecord])
+      z.union([
+        primitive,
+        z.array(primitive),
+        z.array(z.union([primitive, recursiveRecord])),
+        recursiveRecord,
+      ])
     )
   )
   .meta({ id: 'RecursiveRecord' });
