@@ -47,7 +47,7 @@ export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_V2_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
-      defaultMessage: 'Alerting V2',
+      defaultMessage: 'Alerting V2: Experimental Features',
     }),
     type: 'boolean',
     value: false,
