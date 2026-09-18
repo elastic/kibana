@@ -50,7 +50,7 @@ exports[`HeaderPage it renders 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <h1
-                class="euiTitle css-1tgxtfm-Header-euiTitle-l e1mvi39w1"
+                class="euiTitle css-5v94va-Header-euiTitle-l e1mvi39w1"
                 data-test-subj="header-page-title"
               >
                 <span

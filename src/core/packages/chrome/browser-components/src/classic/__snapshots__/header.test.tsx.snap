@@ -26,7 +26,7 @@ exports[`Header renders 1`] = `
             role="status"
           />
           <a
-            class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
+            class="euiButton euiSkipLink emotion-euiButtonDisplay-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
             data-test-subj="skipToMainButton"
             href="#"
             rel="noreferrer"
@@ -114,7 +114,7 @@ exports[`Header renders 1`] = `
                       aria-label="Help menu"
                       class="css-2ijv7t-headerButtonBaseStyles-squareStyles-headerButtonBorderedStyles-HeaderActionButton"
                       data-test-subj="chromeNextGlobalHeaderHelpButton"
-                      style="--header-btn-border: #485975; --header-btn-hover: rgba(255,255,255, 0.08); --header-btn-focus: #61A2FF; border-radius: 4px;"
+                      style="--header-btn-border: #485975; --header-btn-hover: rgba(255,255,255, 0.08); --header-btn-focus: #61A2FF; border-radius: 8px;"
                       type="button"
                     >
                       <span

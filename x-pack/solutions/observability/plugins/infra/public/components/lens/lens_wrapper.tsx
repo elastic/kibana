@@ -94,7 +94,7 @@ export const LensWrapper = ({
         position: relative;
         height: 100%;
         .echMetric {
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.panel};
           pointer-events: none;
         }
       `}

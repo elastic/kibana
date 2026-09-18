@@ -277,6 +277,11 @@ describe('TransactionActionMenu ', () => {
   it('matches the snapshot', async () => {
     const { container } = await renderTransaction(Transactions.transactionWithAllData);
 
+    //  wait for it to settle as EuiPopover applies euiPopover-isOpen via requestAnimationFrame
+    await waitFor(() => {
+      expect(container.querySelector('.euiPopover')).toHaveClass('euiPopover-isOpen');
+    });
+
     expect(container).toMatchSnapshot();
   });
 

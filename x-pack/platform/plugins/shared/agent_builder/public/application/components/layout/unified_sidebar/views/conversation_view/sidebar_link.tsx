@@ -40,7 +40,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
     text-decoration: none;
     color: inherit;
     padding: 6px ${euiTheme.size.s};
-    border-radius: ${euiTheme.border.radius.medium};
+    border-radius: ${euiTheme.border.radius.control};
 
     &:hover {
       background-color: ${euiTheme.colors.backgroundBaseSubdued};
