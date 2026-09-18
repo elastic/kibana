@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
-export const installAgentOptimizeWorkflow = async ({
+export const installSandboxMaterializeWorkspaceWorkflow = async ({
   client,
 }: {
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
-  await client.install(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, {
+  await client.install(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };

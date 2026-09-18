@@ -8,9 +8,12 @@
  */
 
 import { parse } from 'yaml';
-import { NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW, NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID } from '.';
+import {
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+} from '.';
 
-const workflow = parse(NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW.yaml) as {
+const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) as {
   name: string;
   steps: Array<{
     name: string;
@@ -25,11 +28,13 @@ const workflow = parse(NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW.yaml) as {
   }>;
 };
 
-describe('nightshift sandbox hydrate workflow', () => {
-  it('obtains one sandbox then hydrates cortex and memory in parallel with that id', () => {
-    expect(NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW.id).toBe(NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID);
-    expect(NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW.version).toBe(3);
-    expect(workflow.name).toBe('Nightshift Sandbox Hydrate');
+describe('nightshift sandbox materialize workspace workflow', () => {
+  it('obtains one sandbox then materializes cortex and memory in parallel with that id', () => {
+    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
+      NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID
+    );
+    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(1);
+    expect(workflow.name).toBe('Nightshift Sandbox Materialize Workspace');
     expect(workflow.steps).toEqual([
       expect.objectContaining({
         name: 'obtain_sandbox',
@@ -38,7 +43,7 @@ describe('nightshift sandbox hydrate workflow', () => {
         with: { conversation_id: '{{ inputs.conversation_id }}' },
       }),
       expect.objectContaining({
-        name: 'hydrate_workspaces',
+        name: 'materialize_workspaces',
         type: 'parallel',
         mode: 'fail-fast',
         if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}',
