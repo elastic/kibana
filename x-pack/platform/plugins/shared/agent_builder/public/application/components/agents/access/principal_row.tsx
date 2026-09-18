@@ -158,7 +158,6 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                   panelStyle: { minWidth: 280 },
                   anchorPosition: 'downRight',
                 }}
-                data-test-subj={`agentBuilderAclRoleSelect-${entry.type}-${testSubjectSuffix}`}
               />
             </EuiFlexItem>
 
@@ -170,7 +169,6 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                   aria-label={accessFlyoutRemoveAriaLabel}
                   onClick={onRemove}
                   isDisabled={isDisabled}
-                  data-test-subj={`agentBuilderAclRemove-${entry.type}-${testSubjectSuffix}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>
