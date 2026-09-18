@@ -100,15 +100,15 @@ Check the test against these best practices — the ones flaky tests most often 
 - **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`): driving setup/teardown through the UI is slower and flakier.
 - **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`): confirm the action produced the expected result and the UI has rendered before continuing.
 - **Wait for complex UI to finish rendering** (`docs/extend/testing/ui-best-practices#wait-for-complex-components-to-fully-render`).
-- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`): if a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guardrails below).
+- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`): if a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guidelines below).
 - **Expect a shared test environment** (`docs/extend/testing/scout-best-practices#expect-a-shared-test-environment`): tests can't assume a clean deployment — other suites leave objects behind, and Cloud ships preinstalled content (Fleet dashboards, prebuilt detection rules, preconfigured connectors). Assertions over lists must tolerate entries the test didn't create: narrow queries to the test's own data, address objects by identity (not position), assert containment (not totality), and never assert that data is absent cluster-wide (empty prompts, "no data" redirects).
 - **Don't leak state into the next suite** (`docs/extend/testing/scout-best-practices#dont-leak-state-into-the-next-suite`): whatever a suite creates or changes is still there for the suites that run after it on the same servers. Namespace resource names per run, use a suite-unique time window for fixed-timestamp data, tear down the underlying resource (not just the saved object tracking it), and revert behavior-changing state (settings, feature flags, index templates).
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/testing/scout-best-practices.md`, the UI best practices in `docs/extend/testing/ui-best-practices.md`, and the API best practices in `docs/extend/testing/api-best-practices.md`.
 
-### Fix guardrails
+### Fix guidelines
 
-Any fix you recommend must stay within the shared fix guardrails at `.github/workflows/shared/flaky-test-fix-guardrails.md` — the single source of truth for fix anti-patterns, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
+Any fix you recommend should follow the shared fix guidelines at `.github/workflows/shared/flaky-test-fix-guidelines.md` — the single source of truth for how to think about a durable fix, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
 
 ### Investigation pitfalls
 

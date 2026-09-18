@@ -420,7 +420,7 @@ Use the PR itself as the state store — there is no separate state file or hidd
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | `flaky-fix-check:started`      | A flaky test runner check has been triggered; verification is in progress.                                           |
 | `flaky-fix-check:passed`       | The targeted test held across the run(s); the fix is confirmed.                                                      |
-| `flaky-fix-check:failed`       | The targeted test still failed after the run budget (the fix did not hold), or the patch violates the Fix guardrails and no compliant revision could be derived. |
+| `flaky-fix-check:failed`       | The targeted test still failed after the run budget (the fix did not hold), or the patch departs from the Fix guidelines without justification and no revision that follows them could be derived. |
 | `flaky-fix-check:inconclusive` | The run budget was exhausted without a clear verdict (e.g. only unrelated failures, or the failure couldn't be attributed). |
 | `flaky-fix-check:skipped`      | The flaky test runner isn't used — either it can't verify this fix (Jest-only change, or no FTR/Scout config) or the fix is deterministic, so the required CI pass is sufficient signal. |
 
@@ -555,7 +555,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-3. **Screen the patch against the Fix guardrails.** Check `pr-diff.txt` against the [Fix guardrails](#fix-guardrails) before spending any runs: a guardrail-violating fix — e.g. a retry or error-tolerance loop anywhere (test, framework, or application code), or a framework internal newly exposed to enable the fix — must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Derive a compliant fix, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot derive a compliant fix, add `flaky-fix-check:failed`, post a failed comment naming the violated guardrail, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+3. **Screen the patch against the Fix guidelines.** Check `pr-diff.txt` against the [Fix guidelines](#fix-guidelines) before spending any runs. The items under **Keep the test honest** are the gate: a patch that reduces coverage, weakens or bends an assertion (or the product) just to pass, swallows errors so a flaky step passes, or widens a framework package's public surface must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. A justified departure from the rest of the guidelines is fine. Derive a revision that follows the guidelines, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot, add `flaky-fix-check:failed`, post a failed comment naming the guideline it departs from, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
 
 4. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, complete [Release-note and backport labels](#release-note-and-backport-labels), post one skipped comment (see [Update comment](#update-comment)) whose visible summary names which gate the fix missed and the labels applied, with the skip and label reasoning in the collapsed sections, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 
@@ -643,6 +643,6 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not post a `/flaky` comment in response to a results comment you have already acted on (check for a later `/flaky` comment or a terminal label).
 
-## Fix guardrails
+## Fix guidelines
 
-{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
+{{#import .github/workflows/shared/flaky-test-fix-guidelines.md}}
