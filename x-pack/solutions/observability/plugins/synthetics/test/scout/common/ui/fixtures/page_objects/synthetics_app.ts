@@ -38,6 +38,10 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('createConnectorButton');
   }
 
+  async navigateToPrivateLocations() {
+    await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/private-locations'));
+  }
+
   async navigateToParamsSettings() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/params'));
     await this.page.testSubj.waitForSelector('syntheticsParamsTable-loaded');
@@ -340,7 +344,7 @@ export class SyntheticsAppPage {
     agentPolicy: string;
     tags?: string[];
   }) {
-    await this.page.click('button:has-text("Create location")');
+    await this.page.testSubj.click('addPrivateLocationButton');
     await this.page.testSubj.fill('syntheticsLocationFormFieldText', name);
     await this.page.click('[aria-label="Select agent policy"]');
     await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);
