@@ -37,7 +37,9 @@ Kibana-native scenario definitions for multi-stage attack chains. All seeding is
 | `linux-curl` | `web-prod-07` | nginx exploit → curl pipe bash → cron → SUID bash |
 | `wmi-lateral` | `wks-karen-06` | rundll32 → certutil → WMI subscription → remote schtasks |
 
-- **Seed label:** `ad-scenario-registry-2026-07`
+- **Seed label:** `ad-scenario-registry-2026-07` — the prefix of the per-run marker each
+  seeding run stamps (`<label>-<suffix>`) on the documents it writes, on its retrieval
+  scope and on its cleanup predicate, so two concurrent runs never reach each other's fixture.
 - One provided-alerts eval per chain; rubric/criteria are chain-specific.
 
 ### Full profile (out of scope for this package)
