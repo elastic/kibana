@@ -1236,6 +1236,43 @@ describe('Both modes', () => {
 
         expect(await screen.findByTestId(popoverId('Dashboards'))).toBeInTheDocument();
       });
+
+      /**
+       * GIVEN a primary item has hover `popoverSections`
+       * WHEN I hover it
+       * THEN list rows render through EuiTextTruncate (fullText)
+       * AND they do not use the native title tooltip
+       */
+      it('should middle-truncate hover list row titles', async () => {
+        const recentsNav = {
+          primaryItems: [
+            {
+              id: 'dashboards',
+              label: 'Dashboards',
+              iconType: 'dashboardApp',
+              href: '/dashboards',
+              popoverSections: [
+                {
+                  id: 'recentlyViewed',
+                  label: 'Recently viewed',
+                  items: [{ id: 'dash-1', label: 'One', href: '/dashboards/1' }],
+                },
+              ],
+            },
+          ],
+          footerItems: [],
+        };
+
+        render(<TestComponent items={recentsNav} />);
+
+        await user.hover(screen.getByTestId(primaryItemId('dashboards')));
+        flushPopoverTimers();
+
+        const row = await screen.findByTestId(popoverItemId('dash-1'));
+
+        expect(within(row).getByTestId('fullText')).toHaveTextContent('One');
+        expect(within(row).queryByTitle('One')).not.toBeInTheDocument();
+      });
     });
 
     describe('Hover-only lists in More', () => {

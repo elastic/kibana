@@ -209,6 +209,92 @@ export const WithLongSecondaryMenuTitle: StoryObj<PropsAndArgs> = {
   render: (args) => <ControlledNavigation {...args} />,
 };
 
+const truncatedActiveId = 'ecommerce-revenue-dashboard';
+
+export const WithLongPopoverListTitles: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Long Popover List Titles',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    // Truncated id is in `sections` so the row is EuiButton (semiBold remounts EuiTextTruncate). Collapse keeps the hover popover.
+    isCollapsed: true,
+    activeItemId: truncatedActiveId,
+    items: {
+      primaryItems: [
+        {
+          id: 'dashboards',
+          label: 'Dashboards',
+          iconType: 'dashboardApp',
+          href: '/dashboards',
+          popoverSections: [
+            {
+              id: 'recentlyViewed',
+              label: 'Recently viewed',
+              items: [
+                {
+                  id: truncatedActiveId,
+                  label: '[eCommerce] Revenue Dashboard',
+                  href: '/dashboards/revenue-dashboard',
+                },
+                {
+                  id: 'ecommerce-revenue-analytics',
+                  label: '[eCommerce] Revenue Analytics',
+                  href: '/dashboards/revenue-analytics',
+                },
+                {
+                  id: 'short-logs',
+                  label: 'Logs',
+                  href: '/dashboards/logs',
+                },
+              ],
+            },
+            {
+              id: 'conversations',
+              label: 'Recent conversations',
+              items: [
+                {
+                  id: 'conv-latency',
+                  label: 'Why is checkout latency spiking for the acme production cluster?',
+                  href: '/agent/latency',
+                },
+                {
+                  id: 'conv-errors',
+                  label: 'Summarize the last week of error logs for the billing service',
+                  href: '/agent/errors',
+                },
+              ],
+            },
+          ],
+          sections: [
+            {
+              id: 'active-anchor',
+              items: [
+                {
+                  id: truncatedActiveId,
+                  label: '[eCommerce] Revenue Dashboard',
+                  href: '/dashboards/revenue-dashboard',
+                },
+              ],
+            },
+          ],
+        },
+        customTitleItem,
+      ],
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS.slice(0, 2),
+      overflowItems: [],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
 export const WithinLayout: StoryObj<PropsAndArgs> = {
   name: 'Navigation within Layout',
   render: (args) => <Layout {...args} />,
