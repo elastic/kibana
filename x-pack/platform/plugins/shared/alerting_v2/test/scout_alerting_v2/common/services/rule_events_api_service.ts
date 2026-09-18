@@ -22,6 +22,8 @@ export interface RuleEventFilter {
   status?: AlertEventStatus;
   type?: AlertEventType;
   episodeStatus?: AlertEpisodeStatus;
+  /** Max events to return; defaults to 100. */
+  size?: number;
 }
 
 export interface RuleEventsCleanUpFilter {
@@ -71,7 +73,7 @@ export const getRuleEventsApiService = ({
         index: ALERT_EVENTS_DATA_STREAM,
         query: { bool: { filter: must } },
         sort: [{ '@timestamp': 'asc' }],
-        size: 100,
+        size: filter.size ?? 100,
       });
       return result.hits.hits.map((hit) => hit._source as AlertEvent);
     });

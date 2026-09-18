@@ -8,9 +8,10 @@
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
+import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 6;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 7;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -76,15 +77,20 @@ export const alertEventSchema = z.object({
 });
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
+/**
+ * Write shape: `@timestamp` is set by the data stream's ingest pipeline at index time.
+ * Only the public alert events API sets it, when the caller supplies a timestamp.
+ */
+export type AlertEventDocument = Omit<AlertEvent, '@timestamp'> & { '@timestamp'?: string };
 export type AlertEventStatus = z.infer<typeof alertEventStatusSchema>;
 export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
 export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 export type AlertEventSeverity = z.infer<typeof alertEventSeveritySchema>;
 
-export const buildRuleEventDocument = (params: AlertEvent): AlertEvent => {
+export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDocument => {
   const { scheduled_timestamp, episode, severity, ...required } = params;
 
-  const doc: AlertEvent = { ...required };
+  const doc: AlertEventDocument = { ...required };
 
   if (scheduled_timestamp !== undefined) {
     doc.scheduled_timestamp = scheduled_timestamp;
@@ -111,4 +117,5 @@ export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
+  ingestPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
 });

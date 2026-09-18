@@ -13,6 +13,7 @@ If you change stored document shape, retention behavior, or ES|QL views, this fo
 | Area | Files |
 | --- | --- |
 | Datastream definitions | `datastreams/alert_events.ts`, `datastreams/alert_actions.ts` |
+| Ingest timestamp pipeline | `datastreams/ingest_timestamp_pipeline.ts` |
 | Datastream registration | `datastreams/register.ts` |
 | ES\|QL view definitions | `esql_views/` |
 | Startup initialization | `register_resources.ts` |
@@ -65,6 +66,7 @@ Notes:
 | Strict mappings | Both data streams use `dynamic: false`. Only declared fields are indexed. |
 | Runtime schema alignment | Zod schemas mirror the intended application-level document shape. |
 | Versioned evolution | Datastream resources carry a version; bump it when template changes require rollover. |
+| ES-owned `@timestamp` | Each stream has a versioned ingest pipeline wired as `index.final_pipeline` that sets `@timestamp` from `_ingest.timestamp` when the document does not carry one. Writers omit `@timestamp`; only the public alert events API passes a caller-supplied value through. |
 | Backward compatibility | Existing fields may not be removed, renamed, or have incompatible type changes. |
 
 ## The two core streams
@@ -77,7 +79,7 @@ This stream is the durable history of rule evaluation.
 
 | Field | ES type | Notes |
 | --- | --- | --- |
-| `@timestamp` | `date` | When the document was written. |
+| `@timestamp` | `date` | When the document was indexed; set by ES via the final pipeline. |
 | `scheduled_timestamp` | `date` | When the rule run was scheduled. |
 | `rule.id` | `keyword` | Rule identifier. |
 | `rule.version` | `long` | Rule version at execution time. |
@@ -111,7 +113,7 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 
 | Field | ES type | Notes |
 | --- | --- | --- |
-| `@timestamp` | `date` | Action time. |
+| `@timestamp` | `date` | Action time; stamped by ES via the final pipeline. |
 | `last_series_event_timestamp` | `date` | Timestamp of the related series event. |
 | `expiry` | `date` | Optional expiry for temporary actions such as snooze. |
 | `actor` | `keyword` | Who performed the action. |

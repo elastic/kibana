@@ -259,14 +259,12 @@ export class DispatcherService implements DispatcherServiceContract {
     });
 
     try {
-      const escapeNow = new Date();
       await this.storageService.bulkIndexDocs({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: blockingEpisodes.map((episode) =>
           toAction({
             episode,
             actionType: 'unmatched',
-            now: escapeNow,
             reason: 'watermark-stuck escape hatch; episode force-recorded as unmatched',
             spaceId: episode.space_id,
           })

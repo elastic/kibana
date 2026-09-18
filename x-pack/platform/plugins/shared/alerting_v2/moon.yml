@@ -121,6 +121,7 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-user-profile-browser'
   - '@kbn/workflows-ui'
   - '@kbn/core-spaces-common'

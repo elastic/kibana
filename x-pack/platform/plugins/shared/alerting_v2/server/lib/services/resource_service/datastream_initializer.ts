@@ -10,6 +10,7 @@ import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import type { IResourceInitializer } from './resource_manager';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -32,6 +33,9 @@ export class DatastreamInitializer implements IResourceInitializer {
   ) {}
 
   public async initialize(): Promise<void> {
+    // The template references the pipeline, so it must exist first.
+    await this.installIngestPipeline();
+
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
@@ -46,6 +50,7 @@ export class DatastreamInitializer implements IResourceInitializer {
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           'index.lifecycle.prefer_ilm': false,
+          'index.final_pipeline': this.resourceDefinition.ingestPipeline.id,
         },
         _meta: {
           managed: true,
@@ -68,7 +73,62 @@ export class DatastreamInitializer implements IResourceInitializer {
       this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
     }
 
+    await this.updateExistingIndicesFinalPipeline();
     await this.updateExistingIndicesReplicaSettings();
+  }
+
+  /**
+   * Installs or upgrades the ingest pipeline, gated on the deployed `version` the same way
+   * `@kbn/data-streams` gates index template upgrades.
+   */
+  private async installIngestPipeline(): Promise<void> {
+    const { id, version, processors } = this.resourceDefinition.ingestPipeline;
+
+    const deployedVersion = await this.getDeployedPipelineVersion(id);
+    if (deployedVersion !== undefined && deployedVersion >= version) {
+      this.logger.debug(`Ingest pipeline ${id} v${deployedVersion} already applied and updated.`);
+      return;
+    }
+
+    const { acknowledged } = await this.esClient.ingest.putPipeline({
+      id,
+      version,
+      processors,
+      _meta: { managed: true },
+    });
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(`install ingest pipeline ${id} v${version}`);
+    }
+  }
+
+  private async getDeployedPipelineVersion(id: string): Promise<number | undefined> {
+    try {
+      const response = await this.esClient.ingest.getPipeline({ id });
+      return response[id]?.version;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Applies `index.final_pipeline` to existing backing indices. Producers do not set
+   * `@timestamp`, so a backing index without the pipeline would reject every write; unlike
+   * the replica patch this failure must block initialization.
+   */
+  private async updateExistingIndicesFinalPipeline(): Promise<void> {
+    const { dataStreamName, ingestPipeline } = this.resourceDefinition;
+    const { acknowledged } = await this.esClient.indices.putSettings({
+      index: dataStreamName,
+      settings: { 'index.final_pipeline': ingestPipeline.id },
+    });
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(
+        `apply index.final_pipeline to existing ${dataStreamName} indices`
+      );
+    }
   }
 
   /**

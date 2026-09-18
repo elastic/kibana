@@ -181,4 +181,24 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     );
   });
+
+  it('leaves @timestamp unset when the caller does not supply one', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'ts-fp' });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).not.toHaveProperty('@timestamp');
+    expect(docs[0]).toHaveProperty('scheduled_timestamp', expect.any(String));
+  });
+
+  it('passes a caller-supplied timestamp through as @timestamp and scheduled_timestamp', async () => {
+    const { client, storageService } = createClient([]);
+    const timestamp = '2026-07-29T12:00:00.000Z';
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'ts-fp', timestamp });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toMatchObject({ '@timestamp': timestamp, scheduled_timestamp: timestamp });
+  });
 });

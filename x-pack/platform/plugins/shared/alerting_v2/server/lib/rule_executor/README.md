@@ -98,7 +98,7 @@ Each run starts with Task Manager task params:
 3. streams state through the ordered steps
 4. halts early on domain reasons when appropriate
 
-`.rule-events` writes are append-only and issued with `refresh: false`, so there is **no** end-of-run refresh: a run never reads back its own freshly written events. Documents become searchable via Elasticsearch's periodic `refresh_interval`. Downstream state resolution (director, dispatcher) instead relies on `LAST(status, @timestamp)` over previously persisted events, so the last-written event for a group wins once it is visible. This is what lets the absence-based classification defer to stream end without depending on within-run read-after-write visibility.
+`.rule-events` writes are append-only and issued with `refresh: false`, so there is **no** end-of-run refresh: a run never reads back its own freshly written events. Documents become searchable via Elasticsearch's periodic `refresh_interval`. The executor does not set `@timestamp`: the data stream's `index.final_pipeline` set's it with `_ingest.timestamp` when the document is indexed, so the timestamp is never older than one refresh interval when it becomes searchable. Downstream state resolution (director, dispatcher) instead relies on `LAST(status, @timestamp)` over previously persisted events, so the last-written event for a group wins once it is visible. This is what lets the absence-based classification defer to stream end without depending on within-run read-after-write visibility.
 
 ## Rule configuration
 

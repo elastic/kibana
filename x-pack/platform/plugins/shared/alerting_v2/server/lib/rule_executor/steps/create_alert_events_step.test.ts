@@ -68,7 +68,6 @@ describe('CreateAlertEventsStep', () => {
     expect(result.state.alertEventsBatch).toHaveLength(2);
 
     expect(result.state.alertEventsBatch?.[0]).toEqual({
-      '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
       group_hash: expect.any(String),
@@ -80,7 +79,6 @@ describe('CreateAlertEventsStep', () => {
     });
 
     expect(result.state.alertEventsBatch?.[1]).toEqual({
-      '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
       group_hash: expect.any(String),
