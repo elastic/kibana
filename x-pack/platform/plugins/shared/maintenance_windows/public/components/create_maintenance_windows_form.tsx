@@ -208,7 +208,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         // Always send scope so an explicit "no scope" ({}) reaches the server instead of
         // triggering the server default { alerting: null } which suppresses all v1 alerts.
         scope,
-        scopedQuery: v1Payload ?? null,
         ...(showMultipleSolutionsWarning || v1Payload ? { categoryIds: null } : {}),
       } as Parameters<typeof createMaintenanceWindow>[0];
 
