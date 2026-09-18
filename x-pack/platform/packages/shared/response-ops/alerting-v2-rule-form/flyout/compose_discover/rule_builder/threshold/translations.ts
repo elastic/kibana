@@ -165,9 +165,7 @@ export const SEVERITY_VALIDATION_ERRORS: Record<SeverityValidationError, string>
  * source and its remediation (rename a stat/evaluation label; remove or change a group-by field);
  * falls back to listing all sources when more than one collides at once.
  */
-export const SEVERITY_RESERVED_LABEL_NOTICE = (
-  sources: ReservedSeverityLabelSource[]
-): string => {
+export const SEVERITY_RESERVED_LABEL_NOTICE = (sources: ReservedSeverityLabelSource[]): string => {
   if (sources.length === 1) {
     if (sources[0] === 'stat') {
       return i18n.translate('xpack.alertingV2.ruleBuilder.severity.reservedLabelNotice.stat', {
