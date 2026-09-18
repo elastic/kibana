@@ -486,7 +486,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default('approved') }}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
         else:
           # TODO: replace with ai.conversation.message.add once kibana#291688 merges
@@ -507,7 +507,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default('dismissed') }}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
 
   # ---------------------------------------------------------------------------
   # 9. No-FP branch: close the Investigation immediately (D31, D41).
