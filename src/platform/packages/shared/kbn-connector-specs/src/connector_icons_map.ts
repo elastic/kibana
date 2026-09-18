@@ -394,4 +394,12 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
 ]);
