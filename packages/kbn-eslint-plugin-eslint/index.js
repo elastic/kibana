@@ -34,6 +34,7 @@ module.exports = {
     scout_no_core_settings_in_space_test: require('./rules/scout_no_core_settings_in_space_test'),
     scout_expect_import: require('./rules/scout_expect_import'),
     scout_no_deprecated_tags: require('./rules/scout_no_deprecated_tags'),
+    scout_prefer_both_arch_tags: require('./rules/scout_prefer_both_arch_tags'),
     scout_no_cross_boundary_imports: require('./rules/scout_no_cross_boundary_imports'),
     scout_no_at_in_test_titles: require('./rules/scout_no_at_in_test_titles'),
     scout_no_locators: require('./rules/scout_no_locators'),
