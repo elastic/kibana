@@ -116,8 +116,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -3906,14 +3904,14 @@ importers:
         specifier: 2.0.0
         version: 2.0.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
-        specifier: 3.4.7
-        version: 3.4.7
+        specifier: 4.4.5
+        version: 4.4.5
       '@loaders.gl/json':
-        specifier: 3.4.7
-        version: 3.4.7
+        specifier: 4.4.5
+        version: 4.4.5(@loaders.gl/core@4.4.5)
       '@loaders.gl/shapefile':
-        specifier: 3.4.7
-        version: 3.4.7
+        specifier: 4.4.5
+        version: 4.4.5(@loaders.gl/core@4.4.5)
       '@mapbox/geojson-rewind':
         specifier: 0.5.2
         version: 0.5.2
@@ -4579,13 +4577,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -12228,26 +12226,44 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@loaders.gl/core@3.4.7':
-    resolution: {integrity: sha512-iKyOKtUTYsgmIaXFmkaV1bc4h36TiHoKzc4xrolU4eSw9BQzR3UATEx/356sUI8g90uQe1SosAcKAUgAvFqgGg==}
+  '@loaders.gl/core@4.4.5':
+    resolution: {integrity: sha512-hlpE200MinDAyU0kMjEM4yk+0TDxiB9nT+GcwOCrXc7buE0e0YwTn+Ynz2Q85dwDKvJZw3kNHTTBGvQwq9533A==}
 
-  '@loaders.gl/gis@3.4.7':
-    resolution: {integrity: sha512-mHZiike8c8zVp6ninNTHBZ/bEioHeKszXyRJqD+i+PBPkQNbQayItt+G6JNEgagdxqIHdgmDwjJZWQ8cvWbjBg==}
+  '@loaders.gl/geoarrow@4.4.5':
+    resolution: {integrity: sha512-uUWp+5nZxQe6Sv/o36R6jcmCCNhguY0VhjougyMoH6FWqF6iJHrOnwx5UdEtvkw/zV9mHabs05Hv91dBvhfljQ==}
+    peerDependencies:
+      '@loaders.gl/core': ~4.4.0
 
-  '@loaders.gl/json@3.4.7':
-    resolution: {integrity: sha512-m5tvmf53I3zlUkbQxt9B4bHgYn9cMBsru2/TgQypNl++jxOQcWAy6lYqpCucAMoBZ0V9exEnrxOeaELsYTByEg==}
+  '@loaders.gl/gis@4.4.5':
+    resolution: {integrity: sha512-r3klnZ6jjzaEZlUSCmGufPbH1pQpM5PCcGS70zLlGIFbpJPo80gaXDtZDVOSQvpWmqY8u8d7/6moAsogVoymzA==}
+    peerDependencies:
+      '@loaders.gl/core': ~4.4.0
 
-  '@loaders.gl/loader-utils@3.4.7':
-    resolution: {integrity: sha512-nu7g3LHbq+MaeDf0LLMhMex+hQdriRNcM1TFD6hNi7jjQAPbKGcXZ1aBybuLvT3DGU/TK0o88ekUkkmrSpx83A==}
+  '@loaders.gl/json@4.4.5':
+    resolution: {integrity: sha512-M4ZU6mz5jhDnNdtQeOhYrk9Nlm0BxwJWl+I6B+mh8GXdybEaS1XumpcfSpkwT1yKOC8l2dm9SFkcCneYkBA3GQ==}
+    peerDependencies:
+      '@loaders.gl/core': ~4.4.0
 
-  '@loaders.gl/schema@3.4.7':
-    resolution: {integrity: sha512-w429HMLt/NTtREbC2zFO2Fy36cOdQfYE2Ztjo9MJyv+takmZiVzwCRfYrAjOPFWcTLVwcbTkAF2r55+IyNGNeA==}
+  '@loaders.gl/loader-utils@4.4.5':
+    resolution: {integrity: sha512-c4h2RUMEru+hbfvgZEIy5cLQKyQka2TPQZW/2Wy+yIPr3FU7RKwfp+vLwIfir6Xkdn2zniWyWretZwE02aY/Ug==}
 
-  '@loaders.gl/shapefile@3.4.7':
-    resolution: {integrity: sha512-HdE3IWjdj8b+iq/yC8WcRhlR2JYSf5LBms0ZrNKOg8MD6Xfh+xfbY3GSK3XnPhs2PC/gfBIkriFRM5VksuJATg==}
+  '@loaders.gl/schema-utils@4.4.5':
+    resolution: {integrity: sha512-vi6AROLWvoLIN609tVmchwotTaHK5rHv8SWjoVUWLhPCXmIc9npz0rCl7NJScCgr7UjYifZG1rWOnrAxaYTlyA==}
+    peerDependencies:
+      '@loaders.gl/core': ~4.4.0
 
-  '@loaders.gl/worker-utils@3.4.7':
-    resolution: {integrity: sha512-qMO4MWvIe9iCFhXbRcDhJEwhhw21KIh26Ehqtw3RGfHurOMRTC16jsAsGAJ+P65PZErpdg11QFS1p/dIEHp4fA==}
+  '@loaders.gl/schema@4.4.5':
+    resolution: {integrity: sha512-q2XNquegw+hX+ZEshacKYL/+FKBUIS5FHA+2Ft3JWmcNiR6umGnYCdXQhDcFCqAm8Ks87fMCV+z/zTloxaIZgQ==}
+
+  '@loaders.gl/shapefile@4.4.5':
+    resolution: {integrity: sha512-vV9GnySY/OH16Dbu31xCiML3LB+kBLYQ2/LIfY1bKd8MYseLhCBgvwcaI/yCdAYmW4W/JX+hMgSqwn5KeJyu5g==}
+    peerDependencies:
+      '@loaders.gl/core': ~4.4.0
+
+  '@loaders.gl/worker-utils@4.4.5':
+    resolution: {integrity: sha512-ZQDoM6f/HpZ3Lzj6vjtPHXSvi+cUK0QG7yJz+MKWAokmeWa98WMZwswS8zkn/qNkY95rLcxh66N4Sl96+7hqAQ==}
+    peerDependencies:
+      '@loaders.gl/core': ~4.4.0
 
   '@mapbox/extent@0.4.0':
     resolution: {integrity: sha512-MSoKw3qPceGuupn04sdaJrFeLKvcSETVLZCGS8JA9x6zXQL3FWiKaIXYIZEDXd5jpXpWlRxinCZIN49yRy0C9A==}
@@ -12312,17 +12328,17 @@ packages:
     resolution: {integrity: sha512-IGJtuBbaGzOUgODdBRg66p8stnwj9iDXkgbYKoYcNiiQmaez5WVRfXm4b03MCDwmZyX93csbfHFWEJJYHnn5oA==}
     hasBin: true
 
-  '@math.gl/core@3.6.3':
-    resolution: {integrity: sha512-jBABmDkj5uuuE0dTDmwwss7Cup5ZwQ6Qb7h1pgvtkEutTrhkcv8SuItQNXmF45494yIHeoGue08NlyeY6wxq2A==}
+  '@math.gl/core@4.1.0':
+    resolution: {integrity: sha512-FrdHBCVG3QdrworwrUSzXIaK+/9OCRLscxI2OUy6sLOHyHgBMyfnEGs99/m3KNvs+95BsnQLWklVfpKfQzfwKA==}
 
-  '@math.gl/polygon@3.6.3':
-    resolution: {integrity: sha512-FivQ1ZnYcAss1wVifOkHP/ZnlfQy1IL/769uzNtiHxwUbW0kZG3yyOZ9I7fwyzR5Hvqt3ErJKHjSYZr0uVlz5g==}
+  '@math.gl/polygon@4.1.0':
+    resolution: {integrity: sha512-YA/9PzaCRHbIP5/0E9uTYrqe+jsYTQoqoDWhf6/b0Ixz8bPZBaGDEafLg3z7ffBomZLacUty9U3TlPjqMtzPjA==}
 
-  '@math.gl/proj4@3.6.3':
-    resolution: {integrity: sha512-8VC3noTBiLD45VzsOVBb9nniKC+e27n5NWdzwKNOBUiXgl5HtRwNessoUYY0GccABz0OP41wbyfSzukLVAyphw==}
+  '@math.gl/proj4@4.1.0':
+    resolution: {integrity: sha512-9rnYWkfyV/lql5+sOvdUnh+x8M0HxMAOJUo6NgC3+NFnNjflGYvmLUANQ11R/viui9r1urVIHxou0Hfn72hwTw==}
 
-  '@math.gl/types@3.6.3':
-    resolution: {integrity: sha512-3uWLVXHY3jQxsXCr/UCNPSc2BG0hNUljhmOBt9l+lNFDp7zHgm0cK2Tw4kj2XfkJy4TgwZTBGwRDQgWEbLbdTA==}
+  '@math.gl/types@4.1.0':
+    resolution: {integrity: sha512-clYZdHcmRvMzVK5fjeDkQlHUzXQSNdZ7s4xOqC3nJPgz4C/TZkUecTo9YS4PruZqtDda/ag4erndP0MIn40dGA==}
 
   '@mdx-js/react@3.1.1':
     resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
@@ -23286,12 +23302,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -29465,47 +29485,72 @@ snapshots:
   '@lmdb/lmdb-win32-x64@3.5.6':
     optional: true
 
-  '@loaders.gl/core@3.4.7':
+  '@loaders.gl/core@4.4.5':
     dependencies:
-      '@babel/runtime': 7.29.7
-      '@loaders.gl/loader-utils': 3.4.7
-      '@loaders.gl/worker-utils': 3.4.7
+      '@loaders.gl/loader-utils': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/schema': 4.4.5
+      '@loaders.gl/schema-utils': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/worker-utils': 4.4.5(@loaders.gl/core@4.4.5)
       '@probe.gl/log': 4.1.2
 
-  '@loaders.gl/gis@3.4.7':
+  '@loaders.gl/geoarrow@4.4.5(@loaders.gl/core@4.4.5)':
     dependencies:
-      '@loaders.gl/loader-utils': 3.4.7
-      '@loaders.gl/schema': 3.4.7
+      '@loaders.gl/core': 4.4.5
+      '@math.gl/polygon': 4.1.0
+      apache-arrow: 21.2.0
+
+  '@loaders.gl/gis@4.4.5(@loaders.gl/core@4.4.5)':
+    dependencies:
+      '@loaders.gl/core': 4.4.5
+      '@loaders.gl/geoarrow': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/loader-utils': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/schema': 4.4.5
+      '@loaders.gl/schema-utils': 4.4.5(@loaders.gl/core@4.4.5)
       '@mapbox/vector-tile': 1.3.1
-      '@math.gl/polygon': 3.6.3
+      '@math.gl/polygon': 4.1.0
       pbf: 3.2.1
 
-  '@loaders.gl/json@3.4.7':
+  '@loaders.gl/json@4.4.5(@loaders.gl/core@4.4.5)':
     dependencies:
-      '@loaders.gl/gis': 3.4.7
-      '@loaders.gl/loader-utils': 3.4.7
-      '@loaders.gl/schema': 3.4.7
+      '@loaders.gl/core': 4.4.5
+      '@loaders.gl/gis': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/loader-utils': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/schema': 4.4.5
+      '@loaders.gl/schema-utils': 4.4.5(@loaders.gl/core@4.4.5)
 
-  '@loaders.gl/loader-utils@3.4.7':
+  '@loaders.gl/loader-utils@4.4.5(@loaders.gl/core@4.4.5)':
     dependencies:
-      '@babel/runtime': 7.29.7
-      '@loaders.gl/worker-utils': 3.4.7
+      '@loaders.gl/schema': 4.4.5
+      '@loaders.gl/worker-utils': 4.4.5(@loaders.gl/core@4.4.5)
+      '@probe.gl/log': 4.1.2
       '@probe.gl/stats': 4.1.2
+    transitivePeerDependencies:
+      - '@loaders.gl/core'
 
-  '@loaders.gl/schema@3.4.7':
+  '@loaders.gl/schema-utils@4.4.5(@loaders.gl/core@4.4.5)':
+    dependencies:
+      '@loaders.gl/core': 4.4.5
+      '@loaders.gl/schema': 4.4.5
+      '@math.gl/types': 4.1.0
+      '@types/geojson': 7946.0.10
+      apache-arrow: 21.2.0
+
+  '@loaders.gl/schema@4.4.5':
     dependencies:
       '@types/geojson': 7946.0.10
+      apache-arrow: 21.2.0
 
-  '@loaders.gl/shapefile@3.4.7':
+  '@loaders.gl/shapefile@4.4.5(@loaders.gl/core@4.4.5)':
     dependencies:
-      '@loaders.gl/gis': 3.4.7
-      '@loaders.gl/loader-utils': 3.4.7
-      '@loaders.gl/schema': 3.4.7
-      '@math.gl/proj4': 3.6.3
+      '@loaders.gl/core': 4.4.5
+      '@loaders.gl/gis': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/loader-utils': 4.4.5(@loaders.gl/core@4.4.5)
+      '@loaders.gl/schema': 4.4.5
+      '@math.gl/proj4': 4.1.0
 
-  '@loaders.gl/worker-utils@3.4.7':
+  '@loaders.gl/worker-utils@4.4.5(@loaders.gl/core@4.4.5)':
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@loaders.gl/core': 4.4.5
 
   '@mapbox/extent@0.4.0': {}
 
@@ -29576,24 +29621,21 @@ snapshots:
       rw: 1.3.3
       tinyqueue: 3.0.0
 
-  '@math.gl/core@3.6.3':
+  '@math.gl/core@4.1.0':
     dependencies:
-      '@babel/runtime': 7.29.7
-      '@math.gl/types': 3.6.3
-      gl-matrix: 3.4.4
+      '@math.gl/types': 4.1.0
 
-  '@math.gl/polygon@3.6.3':
+  '@math.gl/polygon@4.1.0':
     dependencies:
-      '@math.gl/core': 3.6.3
+      '@math.gl/core': 4.1.0
 
-  '@math.gl/proj4@3.6.3':
+  '@math.gl/proj4@4.1.0':
     dependencies:
-      '@babel/runtime': 7.29.7
-      '@math.gl/core': 3.6.3
+      '@math.gl/core': 4.1.0
       '@types/proj4': 2.19.0
       proj4: 2.6.2
 
-  '@math.gl/types@3.6.3': {}
+  '@math.gl/types@4.1.0': {}
 
   '@mdx-js/react@3.1.1(@types/react@18.2.79)(react@18.2.0)':
     dependencies:
@@ -31002,7 +31044,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -42452,17 +42494,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
