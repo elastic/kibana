@@ -33,7 +33,8 @@ export const buildEventLookupEsql = ({
   eventId: string;
 }): string => {
   const escapedEventId = escapeEsqlString(eventId);
-  return `FROM ${quoteEsqlIdentifier(index)} | WHERE event.id == "${escapedEventId}" OR _id == "${escapedEventId}"`;
+  // `_id` is only available after METADATA _id (otherwise Discover reports Unknown column [_id]).
+  return `FROM ${quoteEsqlIdentifier(index)} METADATA _id | WHERE event.id == "${escapedEventId}" OR _id == "${escapedEventId}"`;
 };
 
 export const buildAlertLookupEsql = ({
@@ -44,12 +45,12 @@ export const buildAlertLookupEsql = ({
   alertId: string;
 }): string => {
   const escapedAlertId = escapeEsqlString(alertId);
-  return `FROM ${quoteEsqlIdentifier(getAlertsIndex(spaceId))} | WHERE kibana.alert.uuid == "${escapedAlertId}" OR _id == "${escapedAlertId}"`;
+  return `FROM ${quoteEsqlIdentifier(getAlertsIndex(spaceId))} METADATA _id | WHERE kibana.alert.uuid == "${escapedAlertId}" OR _id == "${escapedAlertId}"`;
 };
 
 export const buildThreatReportLookupEsql = ({ reportId }: { reportId: string }): string => {
   const escapedReportId = escapeEsqlString(reportId);
-  return `FROM ${quoteEsqlIdentifier(THREAT_REPORTS_INDEX_PATTERN)} | WHERE _id == "${escapedReportId}"`;
+  return `FROM ${quoteEsqlIdentifier(THREAT_REPORTS_INDEX_PATTERN)} METADATA _id | WHERE _id == "${escapedReportId}"`;
 };
 
 export const buildThreatReportsInEsql = ({
@@ -63,7 +64,7 @@ export const buildThreatReportsInEsql = ({
   }
 
   const quotedIds = uniqueReportIds.map((reportId) => `"${escapeEsqlString(reportId)}"`).join(', ');
-  return `FROM ${quoteEsqlIdentifier(THREAT_REPORTS_INDEX_PATTERN)} | WHERE _id IN (${quotedIds})`;
+  return `FROM ${quoteEsqlIdentifier(THREAT_REPORTS_INDEX_PATTERN)} METADATA _id | WHERE _id IN (${quotedIds})`;
 };
 
 export const buildIocLookupEsql = ({

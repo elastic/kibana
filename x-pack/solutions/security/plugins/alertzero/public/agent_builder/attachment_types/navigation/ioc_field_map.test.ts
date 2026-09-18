@@ -42,6 +42,13 @@ describe('ioc_field_map', () => {
     expect(ecsFieldForIocType('file-hash')).toBe('file.hash.sha256');
   });
 
+  it('maps email-addr and email to user.email fields used in logs', () => {
+    const emailFields = ['user.email', 'user.target.email'];
+    expect(getIocEsqlFields('email-addr')).toEqual(emailFields);
+    expect(getIocEsqlFields('email')).toEqual(emailFields);
+    expect(ecsFieldForIocType('email-addr')).toBe('user.email');
+  });
+
   it('returns undefined for unknown IOC types', () => {
     expect(getIocEsqlFields('unknown')).toBeUndefined();
     expect(ecsFieldForIocType('unknown')).toBeUndefined();
