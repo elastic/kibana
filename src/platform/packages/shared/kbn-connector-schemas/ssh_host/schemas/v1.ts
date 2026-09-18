@@ -14,6 +14,7 @@ export const ConfigSchema = lazySchema(() =>
     .object({
       host: z.string().min(1).max(253),
       authType: z.enum(['privateKey', 'password']).default('privateKey'),
+      skipHostKeyVerification: z.boolean().default(false),
     })
     .strict()
 );

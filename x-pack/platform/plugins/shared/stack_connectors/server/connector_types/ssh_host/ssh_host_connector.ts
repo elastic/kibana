@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { exec } from 'child_process';
+import { createHash } from 'crypto';
+import { execFile } from 'child_process';
 import { closeSync, existsSync, openSync, readFileSync, unlinkSync, writeSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { promisify } from 'util';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { AUTH_TYPE, SUB_ACTION } from '@kbn/connector-schemas/ssh_host';
@@ -26,16 +26,26 @@ import {
   UploadFileParamsSchema,
 } from '@kbn/connector-schemas/ssh_host';
 
-const execPromise = promisify(exec);
-
+const MAX_BUFFER_BYTES = 100 * 1024 * 1024;
 const DEFAULT_SSH_PORT = 22;
 
+interface CommandTarget {
+  bin: string;
+  prefixArgs: string[];
+}
+
 interface ResolvedCredentials {
-  sshPrefix: string;
-  scpPrefix: string;
-  authOpts: string[];
+  ssh: CommandTarget;
+  scp: CommandTarget;
+  authArgs: string[];
   env: NodeJS.ProcessEnv;
   cleanup: () => void;
+}
+
+interface ExecFileResult {
+  stdout: string;
+  stderr: string;
+  code: number;
 }
 
 const parseHost = (host: string): { hostname: string; port: number } => {
@@ -48,6 +58,36 @@ const parseHost = (host: string): { hostname: string; port: number } => {
   }
   return { hostname: host.slice(0, lastColon), port };
 };
+
+const runExecFile = (
+  bin: string,
+  args: string[],
+  env: NodeJS.ProcessEnv
+): Promise<ExecFileResult> =>
+  new Promise((resolve, reject) => {
+    execFile(bin, args, { env, maxBuffer: MAX_BUFFER_BYTES }, (error, stdout, stderr) => {
+      if (!error) {
+        resolve({ stdout: stdout.trim(), stderr: stderr.trim(), code: 0 });
+        return;
+      }
+
+      if (error.code === 'ENOENT') {
+        reject(new Error(`${bin} is not installed on the Kibana host`));
+        return;
+      }
+
+      if (typeof error.code === 'number') {
+        resolve({
+          stdout: (error.stdout ?? stdout).toString().trim(),
+          stderr: (error.stderr ?? stderr).toString().trim(),
+          code: error.code,
+        });
+        return;
+      }
+
+      reject(error);
+    });
+  });
 
 export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {
@@ -81,24 +121,20 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
     const tempDownloadPath = join(tmpdir(), `ssh_host_download_${Date.now()}`);
-    const { scpPrefix, authOpts, env, cleanup } = await this.resolveCredentials();
+    const { scp, authArgs, env, cleanup } = await this.resolveCredentials();
 
-    const scpOpts = [
-      ...authOpts,
-      '-o StrictHostKeyChecking=no',
-      '-o UserKnownHostsFile=/dev/null',
-      '-o ConnectTimeout=10',
-      '-o ControlMaster=auto',
-      `-o ControlPath="${this.getControlPath()}"`,
-      '-o ControlPersist=10s',
-      `-P ${port}`,
+    const args = [
+      ...scp.prefixArgs,
+      ...this.getTransportArgs('-P', port, authArgs),
+      `${username}@${hostname}:${remotePath}`,
+      tempDownloadPath,
     ];
 
-    const scpTarget = `${username}@${hostname}:"${remotePath}" "${tempDownloadPath}"`;
-    const scpCommand = `${scpPrefix} ${scpOpts.join(' ')} ${scpTarget}`;
-
     try {
-      await execPromise(scpCommand, { env });
+      const { stderr, code } = await runExecFile(scp.bin, args, env);
+      if (code !== 0) {
+        throw new Error(stderr || `scp exited with code ${code}`);
+      }
       return { content: readFileSync(tempDownloadPath).toString('base64'), encoding: 'base64' };
     } finally {
       cleanup();
@@ -131,9 +167,9 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
         }
 
         return {
-          sshPrefix: 'sshpass -e ssh',
-          scpPrefix: 'sshpass -e scp',
-          authOpts: ['-o PasswordAuthentication=yes'],
+          ssh: { bin: 'sshpass', prefixArgs: ['-e', 'ssh'] },
+          scp: { bin: 'sshpass', prefixArgs: ['-e', 'scp'] },
+          authArgs: ['-o', 'PasswordAuthentication=yes'],
           env: { ...process.env, SSHPASS: password },
           cleanup: () => {},
         };
@@ -157,9 +193,9 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
         closeSync(fd);
 
         return {
-          sshPrefix: 'ssh',
-          scpPrefix: 'scp',
-          authOpts: [`-i "${tempKeyPath}"`, '-o PasswordAuthentication=no'],
+          ssh: { bin: 'ssh', prefixArgs: [] },
+          scp: { bin: 'scp', prefixArgs: [] },
+          authArgs: ['-i', tempKeyPath, '-o', 'PasswordAuthentication=no'],
           env: process.env,
           cleanup: () => {
             if (existsSync(tempKeyPath)) unlinkSync(tempKeyPath);
@@ -178,55 +214,58 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
 
-    // Base64-encode the script so bash variables ($PID, $STATE, etc.) are not expanded
-    // by the local shell when it processes the double-quoted SSH argument.
+    // One argv to ssh. The remote shell decodes the payload and runs it with bash.
     const encodedScript = Buffer.from(script).toString('base64');
     const remoteCmd = `printf '%s' '${encodedScript}' | openssl base64 -d -A | bash`;
 
-    const { sshPrefix, authOpts, env, cleanup } = await this.resolveCredentials();
-
-    const sshOpts = [
-      ...authOpts,
-      '-o StrictHostKeyChecking=no',
-      '-o UserKnownHostsFile=/dev/null',
-      '-o ConnectTimeout=10',
-      '-o ControlMaster=auto',
-      `-o ControlPath="${this.getControlPath()}"`,
-      '-o ControlPersist=10s',
-      `-p ${port}`,
+    const { ssh, authArgs, env, cleanup } = await this.resolveCredentials();
+    const args = [
+      ...ssh.prefixArgs,
+      ...this.getTransportArgs('-p', port, authArgs),
+      `${username}@${hostname}`,
+      remoteCmd,
     ];
 
-    const command = `${sshPrefix} ${sshOpts.join(' ')} ${username}@${hostname} "${remoteCmd}"`;
-
     try {
-      const { stdout, stderr } = await execPromise(command, {
-        env,
-        maxBuffer: 100 * 1024 * 1024,
-      });
-      return {
-        stdout: stdout.replace(command, '').trim(),
-        stderr: stderr.replace(command, '').trim(),
-        code: 0,
-      };
-    } catch (error) {
-      const isChildProcessError =
-        error instanceof Error && 'stdout' in error && 'stderr' in error && 'code' in error;
-      if (
-        isChildProcessError &&
-        typeof error.stdout === 'string' &&
-        typeof error.stderr === 'string' &&
-        typeof error.code === 'number'
-      ) {
-        return {
-          stdout: error.stdout.replace(command, '').trim(),
-          stderr: error.stderr.replace(command, '').trim(),
-          code: error.code,
-        };
-      }
-      throw error;
+      return await runExecFile(ssh.bin, args, env);
     } finally {
       cleanup();
     }
+  }
+
+  private getTransportArgs(portFlag: '-p' | '-P', port: number, authArgs: string[]): string[] {
+    return [
+      ...authArgs,
+      ...this.getHostKeyArgs(),
+      '-o',
+      'ConnectTimeout=10',
+      '-o',
+      'ControlMaster=auto',
+      '-o',
+      `ControlPath=${this.getControlPath()}`,
+      '-o',
+      'ControlPersist=10s',
+      portFlag,
+      String(port),
+    ];
+  }
+
+  private getHostKeyArgs(): string[] {
+    if (this.config.skipHostKeyVerification) {
+      return ['-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
+    }
+
+    return [
+      '-o',
+      'StrictHostKeyChecking=accept-new',
+      '-o',
+      `UserKnownHostsFile=${this.getKnownHostsPath()}`,
+    ];
+  }
+
+  private getKnownHostsPath(): string {
+    const id = createHash('sha256').update(this.connector.id).digest('hex').slice(0, 16);
+    return join(tmpdir(), `kbn_ssh_kh_${id}`);
   }
 
   private getControlPath(): string {

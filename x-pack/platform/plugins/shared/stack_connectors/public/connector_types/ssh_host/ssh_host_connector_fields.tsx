@@ -13,6 +13,7 @@ import {
   PasswordField,
   TextAreaField,
   CardRadioGroupField,
+  ToggleField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
@@ -167,6 +168,33 @@ const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFi
           defaultValue: AUTH_TYPE.PrivateKey,
         }}
         componentProps={{ options: authOptions }}
+      />
+      <EuiSpacer size="m" />
+      <UseField
+        path="config.skipHostKeyVerification"
+        component={ToggleField}
+        config={{
+          defaultValue: false,
+          label: i18n.translate(
+            'xpack.stackConnectors.components.sshHost.skipHostKeyVerificationLabel',
+            {
+              defaultMessage: 'Skip host key verification',
+            }
+          ),
+          helpText: i18n.translate(
+            'xpack.stackConnectors.components.sshHost.skipHostKeyVerificationHelp',
+            {
+              defaultMessage:
+                'Insecure. Disables SSH host key checks. Use only for lab hosts that change keys often.',
+            }
+          ),
+        }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'sshHostSkipHostKeyVerification',
+          },
+        }}
       />
     </>
   );
