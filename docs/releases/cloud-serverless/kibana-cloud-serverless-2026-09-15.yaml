@@ -173,9 +173,9 @@ entries:
   - https://github.com/elastic/kibana/pull/290457
 - file:
     name: 289314.yaml
-    checksum: a435c2200525b35fc4e662fae1ec3983209f832f
+    checksum: 94f67df7b0a24b2ce1f3b4c977721bece78d951e
   type: feature
-  title: Wire Classic/v2 heading tabs on both Rules pages
+  title: Show Rules v1 and v2 in the same page view
   products:
   - product: cloud-serverless
   - product: kibana
@@ -268,9 +268,9 @@ entries:
   - https://github.com/elastic/kibana/pull/290140
 - file:
     name: 289635.yaml
-    checksum: 00329a57f3c18acbe39f3a4db89775c07b386219
+    checksum: 318e5e5d55d2e9c112a9ba5ffebe37ffa9468bd2
   type: feature
-  title: Add post-execution workflow hook
+  title: Add post-execution workflow hook for agent execution completion
   products:
   - product: cloud-serverless
   - product: kibana
