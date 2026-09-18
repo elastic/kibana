@@ -13,7 +13,7 @@ import {
   getAd2ScenarioAlertIds,
   listAd2ScenarioKeys,
 } from './registry';
-import type { Ad2ScenarioDefinition, Ad2SeedProfile } from './types';
+import type { Ad2ScenarioDefinition, Ad2ScenarioStep, Ad2SeedPlan, Ad2SeedProfile } from './types';
 
 const fixedBaseTime = new Date('2026-07-01T00:00:00.000Z');
 
@@ -50,6 +50,17 @@ const countAlertsPerScenario = (
 
 const isBackgroundScenarioKey = (scenarioKey: string): boolean =>
   AD2_DENSE_BACKGROUND_TEMPLATES.some((template) => scenarioKey.startsWith(`${template.key}-`));
+
+/**
+ * The steps of one side of the dense split — background noise, or the four
+ * reference chains — read through the resolver the datasets use, the same way
+ * `scenarioKeyByAlertId` does: whatever the fixture emits, the discriminator
+ * checks below have to see it.
+ */
+const denseStepsBySide = (dense: Ad2SeedPlan, background: boolean): Ad2ScenarioStep[] =>
+  dense.scenarioKeys
+    .filter((scenarioKey) => isBackgroundScenarioKey(scenarioKey) === background)
+    .flatMap((scenarioKey) => getAd2Scenario(scenarioKey, 'dense')?.steps ?? []);
 
 const backgroundOccurrences = (templateKey: string): Ad2ScenarioDefinition[] =>
   listAd2ScenarioKeys('dense')
@@ -167,29 +178,126 @@ describe('AD2 scenario registry (dense profile)', () => {
     );
   });
 
-  it('keeps background severity low enough to be noise', () => {
+  it('does not let severity separate target from noise', () => {
     const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
-    const backgroundKeys = dense.scenarioKeys.filter(isBackgroundScenarioKey);
-    const steps = backgroundKeys.flatMap((key) => getAd2Scenario(key, 'dense')?.steps ?? []);
+    const backgroundSteps = denseStepsBySide(dense, true);
+    const targetSteps = denseStepsBySide(dense, false);
 
-    expect(steps.length).toBeGreaterThan(0);
+    // Non-vacuity: "no separation" means nothing if either side is empty, and an
+    // empty background would satisfy the overlap below.
+    expect(backgroundSteps.length).toBeGreaterThan(0);
+    expect(targetSteps.length).toBeGreaterThan(0);
 
-    // Anything background carrying a high/critical severity is a recall target
-    // the reference does not contain, so the Rubric scores a model that
-    // surfaces it as a false positive.
-    for (const backgroundStep of steps) {
-      expect(['low', 'medium']).toContain(backgroundStep.severity);
+    // THE leak this replaces: `severity IN ('high', 'critical')` returned
+    // exactly the four reference chains — every target step was high|critical
+    // and every background step low|medium — so a model could drop the whole
+    // background on one field of the alert it reads and regroup the remainder by
+    // host. A severity the targets use and the background does not is that key
+    // again, so no severity may be exclusive to the targets.
+    const backgroundSeverities = new Set(backgroundSteps.map((step) => step.severity));
+    for (const targetSeverity of new Set(targetSteps.map((step) => step.severity))) {
+      expect(backgroundSeverities).toContain(targetSeverity);
     }
+  });
 
-    // The two patterns flagged as campaign-shaped are unambiguously benign:
-    // low severity, and an observable owned by the occurrence itself.
+  it('does not let the risk score separate target from noise either', () => {
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const backgroundRiskScores = denseStepsBySide(dense, true).map((step) => step.riskScore);
+    const targetRiskScores = denseStepsBySide(dense, false).map((step) => step.riskScore);
+
+    expect(backgroundRiskScores.length).toBeGreaterThan(0);
+    expect(targetRiskScores.length).toBeGreaterThan(0);
+
+    // `kibana.alert.risk_score` is written into every seeded alert
+    // (`build_documents.ts`), the evaluator's own default query SORTs on it, and
+    // the two sides were disjoint there as well (targets 72-96, background
+    // 18-47) — the same answer key in a second field. A background maximum
+    // merely ABOVE the target minimum is not enough: `risk_score >= 90` then
+    // still returned one alert per target HOST, and grouping each of those
+    // hosts' alerts recovers the four chains exactly.
+    //
+    // So the invariant is per target value, not "some background step sits
+    // inside the band": for EVERY risk score a target step carries, some
+    // background step scores at least as high — which is what leaves no
+    // threshold that keeps a target host's alerts and drops the noise.
+    for (const targetRiskScore of targetRiskScores) {
+      expect(backgroundRiskScores.some((riskScore) => riskScore >= targetRiskScore)).toBe(true);
+    }
+  });
+
+  it('keeps every escalated background step benign on its own fields', () => {
+    // A background step is only allowed to be high|critical when its own fields
+    // carry the benign reading: without one it is a recall target the reference
+    // does not contain, and the Criteria evaluator then scores a model that read
+    // the alert correctly as a false positive. So the escalation is not a
+    // severity value to copy onto another template — the marker below is the
+    // observable `bg-vendor-update`'s comment names, and escalating anything
+    // else means putting the wording in that template's fields and extending
+    // this table first.
+    const escalatedMarkerByTemplate: Record<string, string> = {
+      'bg-vendor-update': 'vendor-signed',
+    };
+
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const escalatedTemplateKeys = new Set(
+      dense.scenarioKeys
+        .filter(isBackgroundScenarioKey)
+        .filter((scenarioKey) =>
+          (getAd2Scenario(scenarioKey, 'dense')?.steps ?? []).some(
+            (step) => step.severity === 'high' || step.severity === 'critical'
+          )
+        )
+        .map((scenarioKey) => scenarioKey.replace(/-\d+$/, ''))
+    );
+
+    // Non-vacuity: the escalation is what breaks the severity key, so it has to
+    // exist for this test to be about anything.
+    expect(escalatedTemplateKeys.size).toBeGreaterThan(0);
+    expect([...escalatedTemplateKeys].sort()).toEqual(
+      Object.keys(escalatedMarkerByTemplate).sort()
+    );
+
+    for (const [templateKey, marker] of Object.entries(escalatedMarkerByTemplate)) {
+      const occurrences = backgroundOccurrences(templateKey);
+      expect(occurrences.length).toBeGreaterThan(0);
+
+      for (const scenario of occurrences) {
+        const escalatedSteps = scenario.steps.filter(
+          (step) => step.severity === 'high' || step.severity === 'critical'
+        );
+        expect(escalatedSteps.length).toBeGreaterThan(0);
+
+        for (const backgroundStep of escalatedSteps) {
+          // Text proxy on the alert's own observable fields (rule name, message,
+          // command line, file/network context), the same shape as the
+          // non-actionable check above: the reading has to be in the document
+          // the model reads, not only in this file's comments.
+          const observables = `${backgroundStep.ruleName} ${backgroundStep.message} ${
+            backgroundStep.commandLine ?? ''
+          } ${backgroundStep.context ?? ''}`;
+          expect(observables.toLowerCase()).toContain(marker);
+        }
+      }
+    }
+  });
+
+  it('keeps the two de-campaigned patterns low severity and occurrence-owned', () => {
+    // The two patterns flagged as campaign-shaped stay benign the way they were
+    // fixed: low severity, and an observable owned by the occurrence itself
+    // rather than shared across hosts. Raising either would re-open the finding
+    // that fixed them, so the escalation above happens in its own template.
     for (const templateKey of ['bg-dns-telemetry', 'bg-macos-mdm']) {
-      const templateSteps = backgroundOccurrences(templateKey).flatMap(
-        (scenario) => scenario.steps
-      );
-      expect(templateSteps.length).toBeGreaterThan(0);
-      for (const templateStep of templateSteps) {
-        expect(templateStep.severity).toBe('low');
+      const occurrences = backgroundOccurrences(templateKey);
+      expect(occurrences.length).toBeGreaterThan(0);
+
+      for (const scenario of occurrences) {
+        expect(scenario.steps.length).toBeGreaterThan(0);
+        for (const templateStep of scenario.steps) {
+          expect(templateStep.severity).toBe('low');
+          expect(`${templateStep.context ?? ''}${templateStep.commandLine ?? ''}`).toContain(
+            scenario.host
+          );
+        }
       }
     }
   });

@@ -86,11 +86,14 @@ const occurrenceHost = (base: string, occurrence: number): string => {
 };
 
 /**
- * Background chains: plausible, lower severity, and NOT part of the four target
- * chains. Exported because the dense-profile tests assert each emitted chain
- * against its TEMPLATE length — a check drawn from the emitted definition cannot
- * detect truncation, since a builder that trims `steps` shrinks both sides in
- * lockstep.
+ * Background chains: plausible, non-actionable, and NOT part of the four target
+ * chains. Severity and risk score do not separate them from those chains either
+ * — see `bg-vendor-update` below — so the population cannot be solved by
+ * filtering on a field of the alert rather than reading it.
+ *
+ * Exported because the dense-profile tests assert each emitted chain against its
+ * TEMPLATE length — a check drawn from the emitted definition cannot detect
+ * truncation, since a builder that trims `steps` shrinks both sides in lockstep.
  */
 export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
   {
@@ -237,6 +240,59 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
         `~/Library/LaunchAgents/com.contoso.mdm.${host}.plist`
       ),
     ],
+  },
+  {
+    key: 'bg-vendor-update',
+    title: 'Signed vendor agent update installed by the management agent',
+    host: 'wks-finance-31',
+    os: 'windows',
+    user: 'finance.lee',
+    stepsFor: ({ host }) => {
+      // The one background chain that is NOT low/medium, and the reason the
+      // dense population can no longer be solved by `severity IN ('high',
+      // 'critical')`: it carries the severities the four reference chains use,
+      // so no severity predicate drops the noise while keeping the targets.
+      //
+      // Escalating severity is only fair because the benign reading is in the
+      // occurrence's OWN fields — `management agent` and `vendor-signed` in the
+      // message, the package under the management agent's own update directory,
+      // device-scoped by host — the same pattern `bg-macos-mdm` uses at low
+      // severity. A high/critical background step WITHOUT such a reading is a
+      // recall target the reference does not contain, so a model that reads it
+      // correctly still scores as a false positive; that is why the severity is
+      // raised only here and only with these observables.
+      //
+      // The risk scores are the RULE's own score, not a verdict on this
+      // occurrence: a rule that fires on driver package installation is scored
+      // at the top of the range whether or not the package is signed. That is
+      // exactly why the field cannot discriminate, so this chain reaches the
+      // top of the target band (96) rather than sitting below it — a background
+      // maximum under the target minimum leaves `risk_score >= T` as a working
+      // answer key for some T.
+      const driverPackage = `C:\\ProgramData\\contoso-mdm\\updates\\${host}-driver.msi`;
+      return [
+        step(
+          'Suspicious Driver Package Installation',
+          'critical',
+          96,
+          `The management agent installed a vendor-signed driver update on ${host}`,
+          'msiexec.exe',
+          `msiexec.exe /i ${driverPackage} /qn`,
+          'file',
+          driverPackage
+        ),
+        step(
+          'Suspicious Process Started by Installer',
+          'high',
+          79,
+          `The vendor-signed installer started the managed agent service on ${host} to finish the update`,
+          'contoso-agent.exe',
+          `contoso-agent.exe --apply-update --device ${host}`,
+          'process',
+          null
+        ),
+      ];
+    },
   },
 ];
 
