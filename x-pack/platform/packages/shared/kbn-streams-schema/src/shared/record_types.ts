@@ -21,38 +21,37 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-const MAX_ARRAY_NESTING_DEPTH = 5;
+// Maximum combined nesting depth for arrays and records. Both consume from the
+// same budget so alternating {a:[{a:[...]}]} patterns cannot bypass the limit.
+const MAX_NESTING_DEPTH = 10;
 
-// Build a fixed-depth bounded-array schema at module load time to prevent
-// stack-overflow DoS on deeply nested inputs. z.lazy() defers the
-// recursiveRecord reference to parse time (avoiding initialization-order
-// issues). Real document samples rarely exceed depth 3.
-function buildBoundedArray(depth: number): z.ZodType<unknown[]> {
+// Build a fixed-depth schema DAG at module load time. Each level reuses the
+// same inner schema for both the array and record branches, so the total number
+// of schema objects is O(MAX_NESTING_DEPTH) — no exponential blowup. At
+// depth 0 only primitives are accepted, preventing unbounded Zod recursion.
+function buildBoundedValue(depth: number): z.ZodType<unknown> {
   if (depth === 0) {
-    return z.array(z.union([primitive, z.lazy(() => recursiveRecord)])).max(1000);
+    return primitive as z.ZodType<unknown>;
   }
-  return z.array(
-    z.union([primitive, z.lazy(() => recursiveRecord), buildBoundedArray(depth - 1)])
-  ).max(1000);
+  const inner = buildBoundedValue(depth - 1);
+  return z.union([
+    primitive,
+    z.array(inner).max(1000),
+    z.record(z.string().max(1000), inner),
+  ]) as z.ZodType<unknown>;
 }
 
-const boundedNestedArray = buildBoundedArray(MAX_ARRAY_NESTING_DEPTH);
+const boundedValue = buildBoundedValue(MAX_NESTING_DEPTH);
 
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z
-  .lazy(() =>
-    z.record(
-      z.string().max(1000),
-      z.union([primitive, boundedNestedArray, recursiveRecord])
-    )
-  )
-  .meta({ id: 'RecursiveRecord' });
+  .record(z.string().max(1000), boundedValue)
+  .meta({ id: 'RecursiveRecord' }) as unknown as z.ZodType<RecursiveRecord>;
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
-export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
-  z.string().max(1000),
-  z.union([primitive, boundedNestedArray])
-);
+export const flattenRecord: z.ZodType<FlattenRecord> = z
+  .record(z.string().max(1000), boundedValue)
+  .meta({ id: 'FlattenRecord' }) as unknown as z.ZodType<FlattenRecord>;
 
 export const sampleDocument = recursiveRecord;
 
