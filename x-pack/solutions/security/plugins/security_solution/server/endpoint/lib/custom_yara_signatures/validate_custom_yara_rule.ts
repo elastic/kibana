@@ -14,7 +14,7 @@ import {
   MetaScanTypeValue,
   MetaOsValue,
 } from '../../../../common/endpoint/types';
-import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
+import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from './constants';
 
 const hasDuplicateValues = (values: string[]): boolean => new Set(values).size !== values.length;
 
@@ -51,7 +51,6 @@ export const validateCustomYaraRule = async (
   const textLines = ruleText.split('\n');
 
   for (const rule of result.rules) {
-    validateRuleIdentifierLength(rule, textLines, result);
     validateMetaFieldsOfInterestForDuplication(rule, textLines, result);
     validateMetaArchField(rule, textLines, result);
     validateMetaScanTypeField(rule, textLines, result);
@@ -94,23 +93,6 @@ const findFirstOccurrenceLineNumberAfterLineNumber = (
   );
 
   return lineIndex + 1;
-};
-
-const validateRuleIdentifierLength = (
-  rule: YaraCompiledRule,
-  textLines: string[],
-  result: YaraValidateResult
-) => {
-  if (rule.identifier.length > MAXIMUM_RULE_IDENTIFIER_LENGTH) {
-    const lineNumber = getRuleIdentifierLineNumber(textLines, rule.identifier);
-
-    result.errorCount++;
-    result.errors.push({
-      message: `Too long rule identifier "${rule.identifier}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`,
-      line: lineNumber,
-      severity: 'error',
-    });
-  }
 };
 
 const validateMetaFieldsOfInterestForDuplication = (
