@@ -9,15 +9,17 @@ import { createSignificantSecurityEventAttachmentDefinition } from './significan
 import type { SignificantSecurityEventAttachment } from './types';
 
 describe('createSignificantSecurityEventAttachmentDefinition', () => {
+  const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+
   describe('getLabel', () => {
     it('returns the default label when no attachmentLabel is set', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition();
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const attachment = { data: { title: 'x' } } as SignificantSecurityEventAttachment;
       expect(definition.getLabel(attachment)).toBe('Significant Security Event');
     });
 
     it('returns the attachmentLabel override when present', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition();
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       const attachment = {
         data: { title: 'x', attachmentLabel: 'Custom label' },
       } as SignificantSecurityEventAttachment;
@@ -27,14 +29,14 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
 
   describe('getIcon', () => {
     it('returns the flag icon', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition();
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       expect(definition.getIcon?.()).toBe('flag');
     });
   });
 
   describe('renderInlineContent', () => {
     it('is defined', () => {
-      const definition = createSignificantSecurityEventAttachmentDefinition();
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
       expect(definition.renderInlineContent).toBeDefined();
     });
   });

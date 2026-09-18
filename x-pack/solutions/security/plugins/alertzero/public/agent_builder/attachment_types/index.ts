@@ -8,6 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
+import type { AttachmentNavigationDeps } from './navigation';
 
 /**
  * Registers the `security.threat` attachment UI definition. Uses a dynamic `import()` with its
@@ -16,7 +17,13 @@ import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
  */
 export const registerThreatAttachmentUI = async (
   attachments: AttachmentServiceStartContract,
-  http: HttpStart
+  {
+    http,
+    navigation,
+  }: {
+    http: HttpStart;
+    navigation: AttachmentNavigationDeps;
+  }
 ): Promise<void> => {
   const { createThreatAttachmentDefinition } = await import(
     /* webpackChunkName: "alertzero_threat_attachment" */
@@ -24,13 +31,18 @@ export const registerThreatAttachmentUI = async (
   );
   attachments.addAttachmentType(
     ALERTZERO_ATTACHMENT_TYPES.threat,
-    createThreatAttachmentDefinition({ http })
+    createThreatAttachmentDefinition({ http, navigation })
   );
 };
 
 /** Registers the `security.significant_security_event` attachment UI definition. */
 export const registerSignificantSecurityEventAttachmentUI = async (
-  attachments: AttachmentServiceStartContract
+  attachments: AttachmentServiceStartContract,
+  {
+    navigation,
+  }: {
+    navigation: AttachmentNavigationDeps;
+  }
 ): Promise<void> => {
   const { createSignificantSecurityEventAttachmentDefinition } = await import(
     /* webpackChunkName: "alertzero_sse_attachment" */
@@ -38,13 +50,18 @@ export const registerSignificantSecurityEventAttachmentUI = async (
   );
   attachments.addAttachmentType(
     ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent,
-    createSignificantSecurityEventAttachmentDefinition()
+    createSignificantSecurityEventAttachmentDefinition({ navigation })
   );
 };
 
 /** Registers the `security.hunt_correlation` attachment UI definition. */
 export const registerHuntCorrelationAttachmentUI = async (
-  attachments: AttachmentServiceStartContract
+  attachments: AttachmentServiceStartContract,
+  {
+    navigation,
+  }: {
+    navigation: AttachmentNavigationDeps;
+  }
 ): Promise<void> => {
   const { createHuntCorrelationAttachmentDefinition } = await import(
     /* webpackChunkName: "alertzero_hunt_correlation_attachment" */
@@ -52,18 +69,24 @@ export const registerHuntCorrelationAttachmentUI = async (
   );
   attachments.addAttachmentType(
     ALERTZERO_ATTACHMENT_TYPES.huntCorrelation,
-    createHuntCorrelationAttachmentDefinition()
+    createHuntCorrelationAttachmentDefinition({ navigation })
   );
 };
 
 /** Registers all Hunt Watch attachment UI definitions with the Agent Builder attachments service. */
 export const registerAlertZeroAttachmentTypesUI = async (
   attachments: AttachmentServiceStartContract,
-  http: HttpStart
+  {
+    http,
+    navigation,
+  }: {
+    http: HttpStart;
+    navigation: AttachmentNavigationDeps;
+  }
 ): Promise<void> => {
   await Promise.all([
-    registerThreatAttachmentUI(attachments, http),
-    registerSignificantSecurityEventAttachmentUI(attachments),
-    registerHuntCorrelationAttachmentUI(attachments),
+    registerThreatAttachmentUI(attachments, { http, navigation }),
+    registerSignificantSecurityEventAttachmentUI(attachments, { navigation }),
+    registerHuntCorrelationAttachmentUI(attachments, { navigation }),
   ]);
 };

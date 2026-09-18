@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
 import type { SignificantSecurityEventAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.label', {
@@ -24,16 +25,19 @@ const LazySignificantSecurityEventInlineContent = React.lazy(() =>
 
 /**
  * Builds the `security.significant_security_event` `AttachmentUIDefinition`. Unlike the threat
- * attachment, this payload is static (no live fetch) so the factory takes no arguments — kept as
- * a factory anyway to mirror the sibling types' registration shape in `attachment_types/index.ts`.
+ * attachment, this payload is static (no live fetch) so the factory takes no http — kept as a
+ * factory to mirror the sibling types' registration shape in `attachment_types/index.ts`.
  */
-export const createSignificantSecurityEventAttachmentDefinition =
-  (): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
-    getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
-    getIcon: () => 'flag',
-    renderInlineContent: (props) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
-        <LazySignificantSecurityEventInlineContent {...props} />
-      </React.Suspense>
-    ),
-  });
+export const createSignificantSecurityEventAttachmentDefinition = ({
+  navigation,
+}: {
+  navigation: AttachmentNavigationDeps;
+}): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
+  getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
+  getIcon: () => 'flag',
+  renderInlineContent: (props) => (
+    <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
+      <LazySignificantSecurityEventInlineContent {...props} navigation={navigation} />
+    </React.Suspense>
+  ),
+});

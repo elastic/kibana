@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
 import type { HuntCorrelationAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -27,13 +28,16 @@ const LazyHuntCorrelationInlineContent = React.lazy(() =>
  * Builds the `security.hunt_correlation` `AttachmentUIDefinition`. Static payload (no live
  * fetch), kept as a factory to mirror the sibling types' registration shape.
  */
-export const createHuntCorrelationAttachmentDefinition =
-  (): AttachmentUIDefinition<HuntCorrelationAttachment> => ({
-    getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
-    getIcon: () => 'link',
-    renderInlineContent: (props) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
-        <LazyHuntCorrelationInlineContent {...props} />
-      </React.Suspense>
-    ),
-  });
+export const createHuntCorrelationAttachmentDefinition = ({
+  navigation,
+}: {
+  navigation: AttachmentNavigationDeps;
+}): AttachmentUIDefinition<HuntCorrelationAttachment> => ({
+  getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
+  getIcon: () => 'link',
+  renderInlineContent: (props) => (
+    <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
+      <LazyHuntCorrelationInlineContent {...props} navigation={navigation} />
+    </React.Suspense>
+  ),
+});

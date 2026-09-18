@@ -11,16 +11,17 @@ import type { ThreatAttachment } from './types';
 
 describe('createThreatAttachmentDefinition', () => {
   const http = {} as HttpStart;
+  const navigation = { spaceId: 'default', prependPath: (path: string) => path };
 
   describe('getLabel', () => {
     it('returns the default label when no attachmentLabel is set', () => {
-      const definition = createThreatAttachmentDefinition({ http });
+      const definition = createThreatAttachmentDefinition({ http, navigation });
       const attachment = { data: { report_id: 'r-1' } } as ThreatAttachment;
       expect(definition.getLabel(attachment)).toBe('Threat Report');
     });
 
     it('returns the attachmentLabel override when present', () => {
-      const definition = createThreatAttachmentDefinition({ http });
+      const definition = createThreatAttachmentDefinition({ http, navigation });
       const attachment = {
         data: { report_id: 'r-1', attachmentLabel: 'Custom label' },
       } as ThreatAttachment;
@@ -30,14 +31,14 @@ describe('createThreatAttachmentDefinition', () => {
 
   describe('getIcon', () => {
     it('returns the warning icon', () => {
-      const definition = createThreatAttachmentDefinition({ http });
+      const definition = createThreatAttachmentDefinition({ http, navigation });
       expect(definition.getIcon?.()).toBe('warning');
     });
   });
 
   describe('renderInlineContent', () => {
     it('is defined', () => {
-      const definition = createThreatAttachmentDefinition({ http });
+      const definition = createThreatAttachmentDefinition({ http, navigation });
       expect(definition.renderInlineContent).toBeDefined();
     });
   });

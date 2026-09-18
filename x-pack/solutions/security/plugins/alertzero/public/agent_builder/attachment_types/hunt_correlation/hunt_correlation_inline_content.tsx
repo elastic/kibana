@@ -10,8 +10,14 @@ import { css } from '@emotion/react';
 import { EuiBadge, EuiBasicTable, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
 import { parseHuntCorrelationData } from './types';
 import type { DiamondScore, HuntCorrelationAttachment } from './types';
+
+export interface HuntCorrelationInlineContentProps
+  extends AttachmentRenderProps<HuntCorrelationAttachment> {
+  navigation: AttachmentNavigationDeps;
+}
 
 export const HUNT_CORRELATION_ATTACHMENT_TEST_ID = 'alertzeroHuntCorrelationAttachment';
 export const HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroHuntCorrelationAttachmentEmpty';
@@ -20,9 +26,9 @@ const cellStyles = css`
   overflow-wrap: anywhere;
 `;
 
-export const HuntCorrelationInlineContent: React.FC<
-  AttachmentRenderProps<HuntCorrelationAttachment>
-> = ({ attachment }) => {
+export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContentProps> = ({
+  attachment,
+}) => {
   const parsed = parseHuntCorrelationData(attachment?.data);
 
   if (!parsed) {

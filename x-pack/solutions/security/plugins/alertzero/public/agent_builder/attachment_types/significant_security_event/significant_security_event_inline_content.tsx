@@ -17,8 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
 import { parseSignificantSecurityEventData } from './types';
 import type { SignificantSecurityEventAttachment, TimelineEntry } from './types';
+
+export interface SignificantSecurityEventInlineContentProps
+  extends AttachmentRenderProps<SignificantSecurityEventAttachment> {
+  navigation: AttachmentNavigationDeps;
+}
 
 export const SSE_ATTACHMENT_TEST_ID = 'alertzeroSignificantSecurityEventAttachment';
 export const SSE_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroSignificantSecurityEventAttachmentEmpty';
@@ -35,7 +41,7 @@ const SEVERITY_COLOR_MAP: Record<string, string> = {
 };
 
 export const SignificantSecurityEventInlineContent: React.FC<
-  AttachmentRenderProps<SignificantSecurityEventAttachment>
+  SignificantSecurityEventInlineContentProps
 > = ({ attachment }) => {
   const parsed = parseSignificantSecurityEventData(attachment?.data);
 

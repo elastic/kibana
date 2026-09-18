@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
 import { THREAT_REPORT_API_PATH, THREAT_REPORT_API_VERSION } from './threat_report_api';
 import { threatAttachmentQueryClient } from './query_client';
 import { isValidThreatAttachmentData } from './types';
@@ -347,6 +348,7 @@ const renderEnrichedSections = (liveData?: ThreatReportLiveData): React.ReactNod
 export interface ThreatAttachmentInlineContentProps
   extends AttachmentRenderProps<ThreatAttachment> {
   http: HttpStart;
+  navigation: AttachmentNavigationDeps;
 }
 
 const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContentProps> = ({

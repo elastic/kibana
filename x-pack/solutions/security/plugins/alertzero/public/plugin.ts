@@ -110,12 +110,25 @@ export class AlertZeroPublicPlugin
       },
     });
 
-    registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, core.http).catch(
-      (error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to register AlertZero attachment UI definitions', error);
-      }
-    );
+    const registerAttachments = async () => {
+      const spaceId =
+        (await startDeps.spaces?.getActiveSpace().then((space) => space.id).catch(() => undefined)) ??
+        'default';
+
+      await registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
+        http: core.http,
+        navigation: {
+          share: startDeps.share,
+          spaceId,
+          prependPath: (path) => core.http.basePath.prepend(path),
+        },
+      });
+    };
+
+    registerAttachments().catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to register AlertZero attachment UI definitions', error);
+    });
 
     return {};
   }

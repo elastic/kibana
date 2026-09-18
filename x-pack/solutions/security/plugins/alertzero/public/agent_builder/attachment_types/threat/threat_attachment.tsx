@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentNavigationDeps } from '../navigation';
 import type { ThreatAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.label', {
@@ -33,14 +34,16 @@ const LazyThreatAttachmentInlineContent = React.lazy(() =>
  */
 export const createThreatAttachmentDefinition = ({
   http,
+  navigation,
 }: {
   http: HttpStart;
+  navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<ThreatAttachment> => ({
   getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
   getIcon: () => 'warning',
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={2} />}>
-      <LazyThreatAttachmentInlineContent {...props} http={http} />
+      <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />
     </React.Suspense>
   ),
 });

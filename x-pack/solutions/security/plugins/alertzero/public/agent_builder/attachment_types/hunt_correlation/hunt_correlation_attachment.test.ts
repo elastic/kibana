@@ -9,15 +9,17 @@ import { createHuntCorrelationAttachmentDefinition } from './hunt_correlation_at
 import type { HuntCorrelationAttachment } from './types';
 
 describe('createHuntCorrelationAttachmentDefinition', () => {
+  const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+
   describe('getLabel', () => {
     it('returns the default label when no attachmentLabel is set', () => {
-      const definition = createHuntCorrelationAttachmentDefinition();
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
       const attachment = { data: { anchors: [] } } as unknown as HuntCorrelationAttachment;
       expect(definition.getLabel(attachment)).toBe('Hunt Correlation');
     });
 
     it('returns the attachmentLabel override when present', () => {
-      const definition = createHuntCorrelationAttachmentDefinition();
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
       const attachment = {
         data: { anchors: [], attachmentLabel: 'Custom label' },
       } as unknown as HuntCorrelationAttachment;
@@ -27,14 +29,14 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
 
   describe('getIcon', () => {
     it('returns the link icon', () => {
-      const definition = createHuntCorrelationAttachmentDefinition();
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
       expect(definition.getIcon?.()).toBe('link');
     });
   });
 
   describe('renderInlineContent', () => {
     it('is defined', () => {
-      const definition = createHuntCorrelationAttachmentDefinition();
+      const definition = createHuntCorrelationAttachmentDefinition({ navigation });
       expect(definition.renderInlineContent).toBeDefined();
     });
   });
