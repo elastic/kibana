@@ -116,4 +116,20 @@ describe('useEpisodesBulkActions', () => {
     const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
     expect(resolvedIds).not.toContain('classic-ep');
   });
+
+  it('filters out actions that define renderMenuItem', () => {
+    const standardAction = stubAction({ id: 'STANDARD' });
+    const menuOnlyAction = stubAction({ id: 'MENU_ONLY', renderMenuItem: jest.fn() });
+
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({
+        actions: [standardAction, menuOnlyAction],
+        episodesData: [],
+        onSuccess: jest.fn(),
+      })
+    );
+
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].key).toBe('STANDARD');
+  });
 });

@@ -3,11 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "public/**/*.ts",
-    "public/**/*.tsx",
-    "test/scout/**/*"
-  ],
+  "include": ["public/**/*.ts", "public/**/*.tsx", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -20,7 +16,9 @@
     "@kbn/app-header",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/triggers-actions-ui-plugin/test/scout/common/ui"
+    "@kbn/observability-plugin",
+    "@kbn/triggers-actions-ui-plugin/test/scout/common/ui",
+    "@kbn/alerting-v2-episodes-ui"
   ],
   "exclude": ["target/**/*"]
 }

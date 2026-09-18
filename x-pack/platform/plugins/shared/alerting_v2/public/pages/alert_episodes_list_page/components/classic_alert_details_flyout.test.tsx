@@ -117,4 +117,32 @@ describe('ClassicAlertDetailsFlyout', () => {
       expect(screen.getByTestId('classicAlertEpisodeDetailsError')).toBeInTheDocument();
     });
   });
+
+  it('renders EpisodeFooterActionMenu when actions are provided', async () => {
+    const mockAction = {
+      id: 'test-action',
+      order: 1,
+      displayName: 'Test Action',
+      iconType: 'star',
+      isCompatible: jest.fn(() => true),
+      execute: jest.fn(async () => {}),
+    };
+
+    mockFetchClassicAlertById.mockResolvedValue({
+      _index: '.internal.alerts-observability.apm.alerts-default-000001',
+      _id: 'alert-1',
+      'kibana.alert.uuid': 'alert-1',
+      'kibana.alert.status': 'active',
+      'kibana.alert.rule.name': 'CPU usage',
+      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+    });
+
+    renderFlyout({ actions: [mockAction] });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
+  });
 });

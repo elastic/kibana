@@ -10,7 +10,7 @@
     "browser": true,
     "server": false,
     "requiredPlugins": ["alertingVTwo", "triggersActionsUi"],
-    "optionalPlugins": [],
-    "requiredBundles": ["alertingVTwo"]
-  }
+    "optionalPlugins": ["nightshiftInvestigations", "observability"],
+    "requiredBundles": ["alertingVTwo"],
+  },
 }

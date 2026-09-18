@@ -25,18 +25,20 @@ export const useEpisodesBulkActions = ({
   useMemo(() => {
     const allEpisodes = episodesData ?? [];
 
-    return actions.map((action) => ({
-      key: action.id,
-      label: action.displayName,
-      icon: action.iconType,
-      isAvailable: ({ selectedDocIds }) =>
-        action.isCompatible({
-          episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
-        }),
-      onClick: ({ selectedDocIds }) =>
-        action.execute({
-          episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
-          onSuccess,
-        }),
-    }));
+    return actions
+      .filter((action) => !action.renderMenuItem)
+      .map((action) => ({
+        key: action.id,
+        label: action.displayName,
+        icon: action.iconType,
+        isAvailable: ({ selectedDocIds }) =>
+          action.isCompatible({
+            episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
+          }),
+        onClick: ({ selectedDocIds }) =>
+          action.execute({
+            episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
+            onSuccess,
+          }),
+      }));
   }, [actions, episodesData, onSuccess]);
