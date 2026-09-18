@@ -34,10 +34,12 @@ describe('createGenerateConfigPrompt', () => {
     expect(text).not.toContain('No column information is available');
   });
 
-  it('lists an empty columns block when execute returned no columns', () => {
+  it('falls back to query-text inference when execute returned no columns', () => {
     const text = systemText([]);
-    expect(text).toContain('<columns>');
-    expect(text).not.toContain('No column information is available');
+    expect(text).toContain(
+      'No column information is available; infer fields from the ES|QL query: FROM logs-* | STATS count = COUNT(*) BY status'
+    );
+    expect(text).not.toContain('<columns>');
   });
 
   it('falls back to query-text inference when columns were never executed', () => {

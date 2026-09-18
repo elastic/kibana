@@ -42,11 +42,9 @@ describe('formatColumnsBlock', () => {
     );
   });
 
-  it('lists an empty columns block when execute returned no columns', () => {
+  it('falls back to the query text when execute returned no columns', () => {
     expect(formatColumnsBlock([], QUERY)).toBe(
-      `Bind only these executed result columns, using their exact names:
-<columns>
-</columns>`
+      `No column information is available; infer fields from the ES|QL query: ${QUERY}`
     );
   });
 
