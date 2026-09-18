@@ -6,7 +6,12 @@
  */
 
 import type { SerializedErrorCause, SerializedExecutionError } from '@kbn/agent-builder-common';
-import { AgentBuilderErrorCode, isAgentBuilderError } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  createAgentBuilderError,
+  isAgentBuilderError,
+  type AgentBuilderError,
+} from '@kbn/agent-builder-common';
 
 /**
  * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
@@ -74,7 +79,8 @@ const serializeCause = (cause: unknown): SerializedErrorCause => {
   };
 };
 
-const getHttpStatusFromError = (error: unknown): number | undefined => {
+/** A validated 4xx/5xx status carried by a Boom-style error or a plain `statusCode` field. */
+export const getHttpStatusFromError = (error: unknown): number | undefined => {
   if (typeof error !== 'object' || error === null) return undefined;
   const { output, statusCode } = error as {
     output?: { statusCode?: unknown };
@@ -89,4 +95,33 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
   return typeof candidate === 'number' && candidate >= 400 && candidate < 600
     ? candidate
     : undefined;
+};
+
+/**
+ * Rebuilds an `AgentBuilderError` from its serialized form, including the `cause` chain, so that
+ * re-serializing it (e.g. a follower surfacing an execution document's error) loses nothing.
+ */
+export const deserializeExecutionError = (
+  serialized: SerializedExecutionError
+): AgentBuilderError<AgentBuilderErrorCode> => {
+  const error = createAgentBuilderError(serialized.code, serialized.message, serialized.meta);
+  const causes = serialized.causes ?? [];
+  let cause: (Error & { code?: string }) | undefined;
+  for (const link of [...causes].reverse()) {
+    const next: Error & { code?: string; cause?: unknown } = new Error(link.message);
+    if (link.name) {
+      next.name = link.name;
+    }
+    if (link.code) {
+      next.code = link.code;
+    }
+    if (cause) {
+      next.cause = cause;
+    }
+    cause = next;
+  }
+  if (cause) {
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
 };

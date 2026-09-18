@@ -275,6 +275,30 @@ describe('followExecution$', () => {
     expect(result.events).toEqual([]);
   });
 
+  it('rebuilds the execution error with its cause chain on failed', async () => {
+    const executionClient = createMockExecutionClient();
+    executionClient.peek.mockResolvedValueOnce({
+      status: ExecutionStatus.failed,
+      eventCount: 0,
+      error: {
+        code: AgentBuilderErrorCode.internalError,
+        message: 'Error executing agent',
+        causes: [{ name: 'Error', message: 'Error calling connector', code: 'connector_error' }],
+      } as never,
+    });
+    executionClient.readEvents.mockResolvedValue(readEventsResult([], ExecutionStatus.failed));
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+    await jest.advanceTimersByTimeAsync(
+      constants.FOLLOW_TERMINAL_READ_MAX_RETRIES * constants.FOLLOW_TERMINAL_READ_RETRY_DELAY_MS
+    );
+    const result = await promise;
+
+    const cause = (result.error as Error & { cause?: Error & { code?: string } }).cause;
+    expect(cause?.message).toBe('Error calling connector');
+    expect(cause?.code).toBe('connector_error');
+  });
+
   describe('terminal timeline events on failed / aborted', () => {
     it('failed: the terminal read in the same poll is yielded and no drain read follows', async () => {
       const executionClient = createMockExecutionClient();

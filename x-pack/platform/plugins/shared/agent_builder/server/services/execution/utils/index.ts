@@ -7,7 +7,7 @@
 
 export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 export { generateTitle } from './generate_title';
-export { handleCancellation } from './handle_cancellation';
+export { handleCancellation, createAbortedError } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
@@ -22,7 +22,11 @@ export {
   type PersistExecutionInterruptionParams,
 } from './conversations';
 export { convertErrors, toClientError } from './convert_errors';
-export { serializeExecutionError } from './serialize_execution_error';
+export {
+  serializeExecutionError,
+  deserializeExecutionError,
+  getHttpStatusFromError,
+} from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
 export { executionStartedEvents$ } from './execution_started';
 export {

@@ -10,6 +10,7 @@ import { AgentBuilderErrorCode, createBadRequestError } from '@kbn/agent-builder
 import {
   MAX_SERIALIZED_CAUSES,
   MAX_SERIALIZED_CAUSE_MESSAGE_LENGTH,
+  deserializeExecutionError,
   serializeExecutionError,
 } from './serialize_execution_error';
 
@@ -110,5 +111,31 @@ describe('serializeExecutionError', () => {
 
   it('omits causes when there are none', () => {
     expect(serializeExecutionError(new Error('boom'))).not.toHaveProperty('causes');
+  });
+
+  describe('deserializeExecutionError', () => {
+    it('round-trips code, message, meta and the cause chain', () => {
+      const serialized = {
+        code: AgentBuilderErrorCode.internalError,
+        message: 'Error executing agent',
+        meta: { statusCode: 500, traceId: 't1' },
+        causes: [
+          { name: 'Error', message: 'Error calling connector' },
+          { name: 'Error', message: 'ECONNREFUSED', code: 'ECONNREFUSED' },
+        ],
+      };
+
+      const error = deserializeExecutionError(serialized);
+
+      expect(error.code).toBe(AgentBuilderErrorCode.internalError);
+      expect(error.message).toBe('Error executing agent');
+      expect(error.meta).toEqual({ statusCode: 500, traceId: 't1' });
+      expect(serializeExecutionError(error)).toEqual(serialized);
+    });
+
+    it('works without causes', () => {
+      const serialized = { code: AgentBuilderErrorCode.badRequest, message: 'bad', meta: {} };
+      expect(serializeExecutionError(deserializeExecutionError(serialized))).toEqual(serialized);
+    });
   });
 });
