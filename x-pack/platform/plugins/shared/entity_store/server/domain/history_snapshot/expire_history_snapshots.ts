@@ -8,13 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import moment from 'moment';
 import { getErrorMessage } from '../../../common';
-import { deleteIndex } from '../../infra/elasticsearch';
-import { hasCollidingNeutralNamespaceAssets } from '../asset_manager/migrate_legacy_security_assets';
-import {
-  getHistorySnapshotIndexPattern,
-  getLegacySecurityHistorySnapshotIndexPattern,
-  parseHistorySnapshotIndexDate,
-} from '../asset_manager/history_snapshot_index';
+import { parseHistorySnapshotIndexDate } from '../asset_manager/history_snapshot_index';
+import { resolveHistorySnapshotIndexPatterns } from '../asset_manager/resolve_entity_store_indices';
 
 export const MAX_EXPIRED_HISTORY_SNAPSHOTS_PER_RUN = 50;
 
@@ -66,67 +61,46 @@ export async function deleteExpiredHistorySnapshots({
   abortSignal,
   now = new Date(),
   maxDeletes = MAX_EXPIRED_HISTORY_SNAPSHOTS_PER_RUN,
-}: DeleteExpiredHistorySnapshotsParams): Promise<DeleteExpiredHistorySnapshotsResult> {
+}: DeleteExpiredHistorySnapshotsParams): Promise<void> {
   if (abortSignal?.aborted) {
-    return { deleted: [] };
+    return;
   }
 
   try {
-    const colliding = await hasCollidingNeutralNamespaceAssets(esClient, namespace);
-    const patterns = [
-      getHistorySnapshotIndexPattern(namespace),
-      ...(colliding ? [] : [getLegacySecurityHistorySnapshotIndexPattern(namespace)]),
-    ];
+    const patterns = await resolveHistorySnapshotIndexPatterns(esClient, namespace);
 
-    const indexNames = await resolveHistorySnapshotIndexNames(esClient, patterns, abortSignal);
-    const expired = selectExpiredHistorySnapshotIndices(indexNames, retentionDays, now).slice(
+    const resolvedPerPattern = await Promise.all(
+      patterns.map(async (pattern) => {
+        const { indices } = await esClient.indices.resolveIndex(
+          {
+            name: pattern,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          },
+          { signal: abortSignal }
+        );
+        return indices.map((index) => index.name);
+      })
+    );
+
+    const indices = resolvedPerPattern.flat();
+    const expired = selectExpiredHistorySnapshotIndices(indices, retentionDays, now).slice(
       0,
       maxDeletes
     );
 
     const deleted: string[] = [];
-    for (const indexName of expired) {
-      if (abortSignal?.aborted) {
-        break;
-      }
-      try {
-        await deleteIndex(esClient, indexName, { signal: abortSignal });
-        deleted.push(indexName);
-      } catch (err) {
-        logger.error(
-          `failed to delete expired history snapshot index ${indexName}: ${getErrorMessage(err)}`
-        );
-      }
+    if (expired.length > 0) {
+      const limit = pLimit(BATCH_CONCURRENCY_LIMIT);
+      await Promise.all(
+        chunkByUrlLength(indices).map((chunk) =>
+          limit(() =>
+            esClient.indices.delete({ index: chunk }, { signal: abortSignal, ignore: [404] })
+          )
+        )
+      );
     }
-
-    if (deleted.length > 0) {
-      logger.debug(`deleted expired history snapshot indices: ${deleted.join(', ')}`);
-    }
-
-    return { deleted };
   } catch (err) {
     logger.error(`history snapshot retention cleanup failed: ${getErrorMessage(err)}`);
-    return { deleted: [] };
   }
-}
-
-async function resolveHistorySnapshotIndexNames(
-  esClient: ElasticsearchClient,
-  patterns: string[],
-  abortSignal?: AbortSignal
-): Promise<string[]> {
-  const resolvedNames = await Promise.all(
-    patterns.map(async (pattern) => {
-      try {
-        const resolved = await esClient.indices.resolveIndex(
-          { name: pattern },
-          { signal: abortSignal }
-        );
-        return resolved.indices.map((index) => index.name);
-      } catch {
-        return [];
-      }
-    })
-  );
-  return [...new Set(resolvedNames.flat())];
 }

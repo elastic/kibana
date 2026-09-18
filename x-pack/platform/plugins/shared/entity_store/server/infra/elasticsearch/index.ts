@@ -46,11 +46,8 @@ export const createIndex = async (
   }
 };
 
-export const deleteIndex = (
-  esClient: EsClient,
-  index: IndexName,
-  { signal }: { signal?: AbortSignal } = {}
-) => esClient.indices.delete({ index }, { ignore: [404], signal });
+export const deleteIndex = (esClient: EsClient, index: IndexName) =>
+  esClient.indices.delete({ index }, { ignore: [404] });
 
 export const putComponentTemplate = async (
   esClient: EsClient,
