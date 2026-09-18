@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import {
   getFieldNameForTopNType,
   groupStackFrameMetadataByStackTrace,
@@ -16,7 +17,7 @@ import {
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
-import { getRoutePaths, INDEX_EVENTS, MAX_KUERY_LENGTH } from '../../common';
+import { getEventsIndex, getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import type { TopNResponse } from '../../common/topn';
 import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
@@ -25,6 +26,7 @@ import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
+import { resolveSchema, schemaQueryParam } from './profiling_schema';
 import { createCommonFilter } from './query';
 import { searchStackTraces } from './search_stacktraces';
 
@@ -38,6 +40,7 @@ export async function topNElasticSearchQuery({
   kuery,
   showErrorFrames,
   preFilterShardSize,
+  schema: profilingSchema,
 }: {
   client: ProfilingESClient;
   logger: Logger;
@@ -48,6 +51,7 @@ export async function topNElasticSearchQuery({
   kuery: string;
   showErrorFrames: boolean;
   preFilterShardSize?: number;
+  schema: ProfilingSchema;
 }): Promise<TopNResponse> {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -57,7 +61,7 @@ export async function topNElasticSearchQuery({
   const eventsIndex = await findDownsampledIndex({
     logger,
     client,
-    index: INDEX_EVENTS,
+    index: getEventsIndex(profilingSchema),
     filter,
     sampleSize: targetSampleSize,
   });
@@ -145,6 +149,7 @@ export async function topNElasticSearchQuery({
         sampleSize: targetSampleSize,
         durationSeconds: totalSeconds,
         showErrorFrames,
+        schema: profilingSchema,
       });
     }
   );
@@ -189,11 +194,13 @@ export function queryTopNCommon({
           timeFrom: schema.number(),
           timeTo: schema.number(),
           kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
+          schema: schemaQueryParam,
         }),
       },
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery } = request.query;
+      const profilingSchema = resolveSchema(request.query.schema, dependencies.esCapabilities);
       const [client, core] = await Promise.all([getClient(context), context.core]);
 
       const showErrorFrames = await core.uiSettings.client.get<boolean>(profilingShowErrorFrames);
@@ -210,6 +217,7 @@ export function queryTopNCommon({
             kuery,
             showErrorFrames,
             preFilterShardSize: isServerless ? undefined : 1,
+            schema: profilingSchema,
           }),
         });
       } catch (error) {

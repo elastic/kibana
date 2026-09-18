@@ -59,4 +59,11 @@ describe('Using down-sampled indexes', () => {
       ).toEqual(t.expected);
     }
   });
+
+  test('getSampledTraceEventsIndex keeps the OTel data stream suffix', () => {
+    expect(getSampledTraceEventsIndex('profiling-events-all.otel-*', 20000, 20000, 6)).toEqual({
+      name: 'profiling-events-5pow06.otel-*',
+      sampleRate: 1 / 5 ** 6,
+    });
+  });
 });

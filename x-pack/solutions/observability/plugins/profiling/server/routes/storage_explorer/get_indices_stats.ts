@@ -15,8 +15,10 @@ export const symbolsIndices = [
   'profiling-returnpads-private',
 ];
 
+export const ecsEventsIndices = ['profiling-events-*', '-profiling-events-*.otel-*'];
+
 export const stacktracesIndices = [
-  'profiling-events-*',
+  ...ecsEventsIndices,
   'profiling-metrics',
   'profiling-stacktraces',
   'profiling-executables',
@@ -24,7 +26,7 @@ export const stacktracesIndices = [
 ];
 
 export const allIndices = [
-  'profiling-events-*',
+  ...ecsEventsIndices,
   'profiling-metrics',
   'profiling-stacktraces',
   'profiling-sq-executables',

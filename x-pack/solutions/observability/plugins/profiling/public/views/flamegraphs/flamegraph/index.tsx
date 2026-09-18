@@ -21,7 +21,7 @@ import { AsyncStatus } from '../../../hooks/use_async';
 export function FlameGraphView() {
   const {
     query,
-    query: { rangeFrom, rangeTo, kuery, searchText },
+    query: { rangeFrom, rangeTo, kuery, searchText, schema },
   } = useProfilingParams('/flamegraphs/flamegraph');
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -41,9 +41,10 @@ export function FlameGraphView() {
         timeTo: new Date(timeRange.end).getTime(),
         kuery,
         showErrorFrames,
+        schema,
       });
     },
-    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames, schema]
   );
 
   const { data } = state;

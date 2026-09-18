@@ -47,6 +47,8 @@ export function StackTraces({
         timeFrom: rangeFromSec,
         timeTo: rangeToSec,
         kuery,
+        // embeddables have no schema selector yet
+        schema: 'ecs',
       }).then(groupSamplesByCategory);
     },
     [fetchTopN, type, rangeFromSec, rangeToSec, kuery]

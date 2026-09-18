@@ -27,7 +27,7 @@ export function PrimaryAndComparisonSearchBar() {
   const {
     path,
     query,
-    query: { comparisonKuery, comparisonRangeFrom, comparisonRangeTo },
+    query: { comparisonKuery, comparisonRangeFrom, comparisonRangeTo, schema },
   } = useAnyOfProfilingParams('/flamegraphs/differential', '/functions/differential');
 
   const { refresh } = useTimeRangeContext();
@@ -135,6 +135,7 @@ export function PrimaryAndComparisonSearchBar() {
           kuery={comparisonKuery}
           rangeFrom={comparisonRangeFrom}
           rangeTo={comparisonRangeTo}
+          schema={schema}
           showSubmitButton={false}
           onQuerySubmit={(next) => {
             navigate({

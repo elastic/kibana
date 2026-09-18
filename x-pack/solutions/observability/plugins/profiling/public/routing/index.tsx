@@ -24,7 +24,7 @@ import {
 } from '../../common/storage_explorer';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
-import { AddDataTabs, AddDataView } from '../views/add_data_view';
+import { AddDataSection, AddDataTabs, AddDataView } from '../views/add_data_view';
 import { DeleteDataView } from '../views/delete_data_view';
 import { FlameGraphsView } from '../views/flamegraphs';
 import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
@@ -43,7 +43,7 @@ const routes = {
     element: (
       <RouteBreadcrumb
         title={i18n.translate('xpack.profiling.breadcrumb.profiling', {
-          defaultMessage: 'Universal Profiling',
+          defaultMessage: 'Profiling',
         })}
         href="/"
       >
@@ -76,6 +76,10 @@ const routes = {
         ),
         params: t.type({
           query: t.type({
+            section: t.union([
+              t.literal(AddDataSection.UniversalProfiling),
+              t.literal(AddDataSection.OpenTelemetry),
+            ]),
             selectedTab: t.union([
               t.literal(AddDataTabs.Binary),
               t.literal(AddDataTabs.Deb),
@@ -89,6 +93,7 @@ const routes = {
         }),
         defaults: {
           query: {
+            section: AddDataSection.UniversalProfiling,
             selectedTab: AddDataTabs.Kubernetes,
           },
         },
@@ -346,11 +351,13 @@ const routes = {
             rangeFrom: t.string,
             rangeTo: t.string,
             kuery: t.string,
+            schema: t.union([t.literal('ecs'), t.literal('otel')]),
           }),
         }),
         defaults: {
           query: {
             kuery: '',
+            schema: 'ecs',
           },
         },
       },
