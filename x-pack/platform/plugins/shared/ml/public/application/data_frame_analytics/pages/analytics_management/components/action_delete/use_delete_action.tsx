@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -26,11 +26,25 @@ import type {
 } from '../analytics_list/common';
 import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
-import { deleteActionNameText, DeleteActionName } from './delete_action_name';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
 import { getDestinationIndex } from '../../../../common/get_destination_index';
 
 const DF_ANALYTICS_JOB_TYPE: JobType = 'data-frame-analytics';
+
+export const deleteActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.deleteActionNameText',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+const jobRunningText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.deleteActionDisabledToolTipContent',
+  {
+    defaultMessage: 'Stop the data frame analytics job in order to delete it.',
+  }
+);
 
 type DataFrameAnalyticsListRowEssentials = Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>;
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
@@ -157,15 +171,18 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: (i: DataFrameAnalyticsListRow) => (
-        <DeleteActionName
-          isDisabled={isDataFrameAnalyticsRunning(i.stats.state) || !canDeleteDataFrameAnalytics}
-          item={i}
-        />
-      ),
+      name: deleteActionNameText,
       enabled: (i: DataFrameAnalyticsListRow) =>
         !isDataFrameAnalyticsRunning(i.stats.state) && canDeleteDataFrameAnalytics,
-      description: deleteActionNameText,
+      description: (i: DataFrameAnalyticsListRow) => {
+        if (isDataFrameAnalyticsRunning(i.stats.state)) {
+          return jobRunningText;
+        }
+
+        return canDeleteDataFrameAnalytics
+          ? deleteActionNameText
+          : createPermissionFailureMessage('canStartStopDataFrameAnalytics');
+      },
       icon: 'trash',
       type: 'icon',
       onClick: (i: DataFrameAnalyticsListRow) => openDeleteJobCheckModal(i),
