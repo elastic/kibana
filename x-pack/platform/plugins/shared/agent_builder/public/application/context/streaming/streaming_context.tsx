@@ -117,6 +117,10 @@ export const StreamingProvider = ({
 
   const cancelStream = useCallback(
     (conversationId: string) => {
+      setActiveStreams((prev) => {
+        const current = prev.get(conversationId);
+        return current ? new Map(prev).set(conversationId, { ...current, cancelling: true }) : prev;
+      });
       sendCancel(conversationId);
       resumeCancel(conversationId);
     },

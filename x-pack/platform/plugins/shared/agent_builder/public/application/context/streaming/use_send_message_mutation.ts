@@ -34,6 +34,7 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
+import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
@@ -138,9 +139,7 @@ export const useSendMessageMutation = ({
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useSendMessageMutation` is called exactly once — by  the `StreamingProvider`.
-  const controllersRef = useRef<Map<string, { controller: AbortController; executionId: string }>>(
-    new Map()
-  );
+  const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -162,7 +161,8 @@ export const useSendMessageMutation = ({
       }
       const controller = new AbortController();
       const executionId = uuidv4();
-      controllersRef.current.set(vars.conversationId, { controller, executionId });
+      const handle: StreamHandle = { controller, executionId, abortRequested: false };
+      controllersRef.current.set(vars.conversationId, handle);
 
       if (!vars.message) {
         throw new Error('Message is required');
@@ -217,11 +217,10 @@ export const useSendMessageMutation = ({
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
-          isAborted: () => controller.signal.aborted,
+          isAborted: () => isStreamCancelled(handle),
         }).catch(() => {});
 
-        // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
-        if (!controller.signal.aborted) {
+        if (!isStreamCancelled(handle)) {
           vars.resetAttachments?.();
         }
         clearActiveStream(vars.conversationId);
@@ -247,10 +246,9 @@ export const useSendMessageMutation = ({
 
   const cancel = useCallback(
     (conversationId: string) => {
-      const entry = controllersRef.current.get(conversationId);
-      if (entry) {
-        chatService.abort(entry.executionId).catch(() => {});
-        entry.controller.abort();
+      const handle = controllersRef.current.get(conversationId);
+      if (handle) {
+        requestAbort(handle, chatService);
       }
     },
     [chatService]

@@ -19,7 +19,7 @@ import { queryKeys } from '../../query_keys';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 
 const mockResume = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue(undefined);
+const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
 const mockGet = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_service', () => ({

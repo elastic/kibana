@@ -17,7 +17,6 @@ interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting?: boolean;
-  resetToPendingMessage: () => void;
 }
 
 const labels = {
@@ -33,9 +32,8 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   onSubmit,
   isSubmitDisabled,
   isSubmitting = false,
-  resetToPendingMessage,
 }) => {
-  const { canCancel, cancel } = useConversationStream();
+  const { canCancel, cancel, isCancelling } = useConversationStream();
   const { euiTheme } = useEuiTheme();
 
   const cancelButtonStyles = css`
@@ -51,10 +49,9 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
         size="s"
         color="text"
         css={cancelButtonStyles}
-        onClick={() => {
-          cancel();
-          resetToPendingMessage();
-        }}
+        isLoading={isCancelling}
+        disabled={isCancelling}
+        onClick={cancel}
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.pageContent,
           action: AGENT_BUILDER_UI_EBT.action.conversation.CANCEL,

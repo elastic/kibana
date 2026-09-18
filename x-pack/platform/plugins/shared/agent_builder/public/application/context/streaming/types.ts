@@ -11,6 +11,8 @@ export type StreamType = 'send' | 'resume';
 
 export interface ActiveStream {
   type: StreamType;
+  /** Stop was pressed; the server is winding the run down. */
+  cancelling?: boolean;
 }
 
 export interface StreamRecord {

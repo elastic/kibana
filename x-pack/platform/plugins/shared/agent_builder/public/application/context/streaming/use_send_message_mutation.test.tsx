@@ -17,12 +17,13 @@ import { ConversationStreamService } from '../../../services/events/conversation
 import { propagateEvents } from '../../../services/chat/propagate_events';
 import { createExecutionStartedEvent } from '../../components/conversations/timeline/items/execution_started.factory';
 import { createExecutionTerminatedEvent } from '../../components/conversations/timeline/items/execution_terminated_event.factory';
+import { createExecutionAbortedEvent } from '../../components/conversations/timeline/items/execution_aborted_event.factory';
 import { createUserMessageEvent } from '../../components/conversations/timeline/items/user_message_event.factory';
 import { queryKeys } from '../../query_keys';
 import { useSendMessageMutation } from './use_send_message_mutation';
 
 const mockChat = jest.fn();
-const mockAbort = jest.fn().mockResolvedValue(undefined);
+const mockAbort = jest.fn().mockResolvedValue({ acknowledged: true, terminal_persisted: true });
 const mockGet = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_service', () => ({
@@ -52,6 +53,10 @@ const terminated = createExecutionTerminatedEvent({
   trigger_event_id: 'round-1::user_message',
 });
 const savedUserMessage = createUserMessageEvent({ id: 'round-1::user_message' });
+const aborted = createExecutionAbortedEvent({
+  execution_id: 'round-1::execution',
+  trigger_event_id: 'round-1::user_message',
+});
 
 const savedConversation = (events: Conversation['events']) =>
   ({ id: conversationId, rounds: [], events } as unknown as Conversation);
@@ -151,6 +156,49 @@ describe('useSendMessageMutation', () => {
     act(() => streamToCompletion(source));
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+  });
+
+  it('Stop asks the server to abort and keeps the fetch open while the run winds down', async () => {
+    const { bindings, source, result, conversationStreamService } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, aborted]));
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    const { signal, executionId } = mockChat.mock.calls[0][0];
+
+    act(() => {
+      source.next(started as ChatEvent);
+      result.current.cancel(conversationId);
+    });
+
+    await waitFor(() => expect(mockAbort).toHaveBeenCalledWith(executionId));
+    expect(signal.aborted).toBe(false);
+
+    act(() => {
+      source.next(aborted as ChatEvent);
+      source.error(new Error('Converse request was aborted'));
+    });
+
+    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
+  });
+
+  it('drops the fetch when the server could not record the aborted terminal', async () => {
+    mockAbort.mockResolvedValueOnce({ acknowledged: false, terminal_persisted: false });
+    const { source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage]));
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    const { signal } = mockChat.mock.calls[0][0];
+
+    act(() => {
+      source.next(started as ChatEvent);
+      result.current.cancel(conversationId);
+    });
+
+    await waitFor(() => expect(signal.aborted).toBe(true));
   });
 
   it('ends a stream that errors like a completed one: refetch, then release', async () => {

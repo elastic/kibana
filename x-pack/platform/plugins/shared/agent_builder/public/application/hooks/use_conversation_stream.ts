@@ -115,6 +115,7 @@ export const useConversationStream = () => {
       isResuming,
       pendingMessage: record.pendingMessage,
       canCancel: isMyStreamActive,
+      isCancelling: Boolean(myStream?.cancelling),
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
       // spinner semantics) and goes false during HITL pause.
@@ -128,6 +129,7 @@ export const useConversationStream = () => {
       isResuming,
       record.pendingMessage,
       isMyStreamActive,
+      myStream?.cancelling,
     ]
   );
 };

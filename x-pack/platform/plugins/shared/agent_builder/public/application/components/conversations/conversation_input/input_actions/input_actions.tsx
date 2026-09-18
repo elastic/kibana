@@ -27,7 +27,6 @@ interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting: boolean;
-  resetToPendingMessage: () => void;
   showTriggerModeToggle: boolean;
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
@@ -37,7 +36,6 @@ export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   isSubmitting,
-  resetToPendingMessage,
   showTriggerModeToggle,
   triggerMode,
   onTriggerModeChange,
@@ -73,7 +71,6 @@ export const InputActions: React.FC<InputActionsProps> = ({
               onSubmit={onSubmit}
               isSubmitDisabled={isSubmitDisabled}
               isSubmitting={isSubmitting}
-              resetToPendingMessage={resetToPendingMessage}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
