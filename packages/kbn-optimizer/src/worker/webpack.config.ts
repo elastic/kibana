@@ -33,7 +33,6 @@ import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
 const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
-const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
 export function getWebpackConfig(
   bundle: Bundle,
@@ -41,6 +40,7 @@ export function getWebpackConfig(
   worker: WorkerConfig
 ) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
+  const dllManifest = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
   const commonConfig: webpack.Configuration = {
     context: bundle.contextDir,
@@ -120,11 +120,11 @@ export function getWebpackConfig(
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
-      new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
+      new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(dllManifest)),
       new BundleMetricsPlugin(bundle),
       new webpack.DllReferencePlugin({
         context: worker.repoRoot,
-        manifest: DLL_MANIFEST,
+        manifest: dllManifest,
       }),
       ...((worker.profileWebpack
         ? [
