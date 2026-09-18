@@ -22,6 +22,8 @@ import type {
 } from '../../server';
 import type { deserializeEsqlControls } from '../../common/session/control_panels';
 
+export const DISCOVER_SESSION_HTTP_ERROR_NAME = 'DiscoverSessionHttpError';
+
 export interface DiscoverSessionClient {
   create: (data: DiscoverSessionRequestData) => Promise<DiscoverSessionApiResponse>;
   get: (id: string) => Promise<DiscoverSessionGetResult>;
@@ -106,9 +108,13 @@ const requestWithReadableError = async <T>(
       throw getNotFoundError();
     }
 
-    const message = getResponseErrorMessage(error);
-    if (message) {
-      throw new Error(message, { cause: error });
+    if (isHttpFetchError(error)) {
+      const message = getResponseErrorMessage(error) || error.message;
+      // Redux preserves a string code when serializing an error, but not its HTTP response.
+      throw Object.assign(new Error(message, { cause: error }), {
+        name: DISCOVER_SESSION_HTTP_ERROR_NAME,
+        code: error.response?.status.toString(),
+      });
     }
 
     throw error;
