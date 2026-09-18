@@ -60,6 +60,7 @@ import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_ti
 import { useEpisodeAssignees } from './use_episode_assignees';
 import { EpisodeActionsMenu } from './episode_actions_menu';
 import { createEditV1AssigneeAction } from './edit_v1_assignee_action';
+import { createEditV1TagsAction } from './edit_v1_tags_action';
 import { EpisodeWorkflowsPanel } from './episode_workflows_panel';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
@@ -235,20 +236,28 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   // Reuse v1's preset tag vocabulary so v1 and v2 share the same tags (the flyout also still fetches
   // ES suggestions and allows new ones).
   const [presetAlertTags] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
-  const editTagsAction = useMemo(
-    () =>
-      createEditTagsAction({
-        http: services.http,
-        overlays: services.overlays,
-        notifications: services.notifications,
-        rendering: services.rendering,
-        expressions: services.expressions,
-        spaces: services.spaces,
-        queryClient,
-        presetTags: presetAlertTags ?? [],
-      }),
-    [services, queryClient, presetAlertTags]
-  );
+  const editTagsAction = useMemo(() => {
+    const action = createEditTagsAction({
+      http: services.http,
+      overlays: services.overlays,
+      notifications: services.notifications,
+      rendering: services.rendering,
+      expressions: services.expressions,
+      spaces: services.spaces,
+      queryClient,
+      presetTags: presetAlertTags ?? [],
+    });
+    // v1 (classic) rows use the Security tags editor (editV1TagsAction) instead — this v2 action
+    // posts to `.alert-actions`, which doesn't apply to a v1 alert. Hide it on those rows.
+    return {
+      ...action,
+      isCompatible: (ctx: { episodes: AlertEpisode[] }) =>
+        action.isCompatible(ctx) &&
+        ctx.episodes.every(
+          (ep) => (ep as unknown as Record<string, unknown>).source_kind !== 'v1'
+        ),
+    };
+  }, [services, queryClient, presetAlertTags]);
 
   // Assignees (episode-scoped): the factory opens the RnA assignee picker, then posts an `assign`
   // action. Needs userProfile + docLinks (for the user picker) on top of the shared deps.
@@ -402,6 +411,9 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   // through the Security detection-engine assignees API instead. It's gated to v1 rows, where the v2
   // assignee action is hidden (those rows carry `supports_actions: false` from the unified view).
   const editV1AssigneeAction = useMemo(() => createEditV1AssigneeAction(), []);
+  // Same idea as editV1AssigneeAction, for tags: v1 rows edit `kibana.alert.workflow_tags` through
+  // the Security detection-engine API; gated to v1 rows, where the v2 tags action is hidden.
+  const editV1TagsAction = useMemo(() => createEditV1TagsAction(), []);
 
   // Everything the per-row "…" (More actions) menu offers — v2 mutations plus add-to-case, ordered
   // by `order`. Mirrors the v1 alerts table's per-row take-action menu.
@@ -409,6 +421,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     () => [
       ...statusActions,
       editTagsAction,
+      editV1TagsAction,
       editAssigneeAction,
       editV1AssigneeAction,
       ...addToCaseActions,
@@ -417,6 +430,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [
       statusActions,
       editTagsAction,
+      editV1TagsAction,
       editAssigneeAction,
       editV1AssigneeAction,
       addToCaseActions,
