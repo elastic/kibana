@@ -6,26 +6,19 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useGetCase } from '../../containers/use_get_case';
-import * as i18n from './translations';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { DoesNotExist } from './does_not_exist';
+// TODO: Replace CaseViewLoading with a proper skeleton placeholder
+import { CaseViewLoading } from './case_view_loading';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
 import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
 import { useCasePageViewEbt } from './use_case_page_view_ebt';
-
-export const CaseViewLoading = () => (
-  <EuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+import * as i18n from './translations';
 
 export const CaseView = React.memo(({ timelineIntegration, refreshRef }: CaseViewProps) => {
   const { spaces: spacesApi } = useKibana().services;
@@ -33,7 +26,7 @@ export const CaseView = React.memo(({ timelineIntegration, refreshRef }: CaseVie
   const { basePath } = useCasesContext();
   useCasePageViewEbt();
 
-  const { data, isLoading, isError, refetch } = useGetCase(caseId);
+  const { data, isLoading, isError } = useGetCase(caseId);
 
   useEffect(() => {
     if (spacesApi && data?.outcome === 'aliasMatch' && data.aliasTargetId != null) {
@@ -47,10 +40,7 @@ export const CaseView = React.memo(({ timelineIntegration, refreshRef }: CaseVie
   }, [basePath, data, spacesApi]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
-    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     if (data && spacesApi && data.outcome === 'conflict' && data.aliasTargetId != null) {
-      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
-      // callout with a warning for the user, and provide a way for them to navigate to the other object.
       const otherObjectPath = `${basePath}${generateCaseViewPath({
         detailName: data.aliasTargetId,
       })}${window.location.search}${window.location.hash}`;
@@ -72,12 +62,11 @@ export const CaseView = React.memo(({ timelineIntegration, refreshRef }: CaseVie
   ) : data ? (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       {getLegacyUrlConflictCallout()}
-      <CaseViewPage caseData={data.case} fetchCase={refetch} refreshRef={refreshRef} />
+      <CaseViewPage caseData={data.case} refreshRef={refreshRef} />
     </CasesTimelineIntegrationProvider>
   ) : null;
 });
 
-CaseViewLoading.displayName = 'CaseViewLoading';
 CaseView.displayName = 'CaseView';
 
 // eslint-disable-next-line import/no-default-export

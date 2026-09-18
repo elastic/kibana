@@ -82,7 +82,7 @@ export function createNavigationTree({
         link: 'agent_builder',
       },
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       {
