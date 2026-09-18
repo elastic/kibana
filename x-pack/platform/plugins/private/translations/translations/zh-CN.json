@@ -7000,7 +7000,6 @@
     "management.settings.badge.readOnly.text": "只读",
     "management.settings.badge.readOnly.tooltip": "无法保存高级设置",
     "management.settings.categoryNames.accessibilityLabel": "辅助功能",
-    "management.settings.categoryNames.alertingV2Label": "Alerting V2",
     "management.settings.categoryNames.autocompleteLabel": "自动完成",
     "management.settings.categoryNames.bannerLabel": "横幅广告",
     "management.settings.categoryNames.devToolsLabel": "开发者工具",

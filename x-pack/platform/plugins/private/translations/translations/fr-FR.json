@@ -6979,7 +6979,6 @@
     "management.settings.badge.readOnly.text": "Lecture seule",
     "management.settings.badge.readOnly.tooltip": "Impossible d’enregistrer les paramètres avancés",
     "management.settings.categoryNames.accessibilityLabel": "Accessibilité",
-    "management.settings.categoryNames.alertingV2Label": "Alerting V2",
     "management.settings.categoryNames.autocompleteLabel": "Saisie semi-automatique",
     "management.settings.categoryNames.bannerLabel": "Bannière",
     "management.settings.categoryNames.devToolsLabel": "Outils de développeur",

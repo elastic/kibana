@@ -6997,7 +6997,6 @@
     "management.settings.badge.readOnly.text": "読み取り専用",
     "management.settings.badge.readOnly.tooltip": "高度な設定を保存できません",
     "management.settings.categoryNames.accessibilityLabel": "アクセシビリティ",
-    "management.settings.categoryNames.alertingV2Label": "Alerting V2",
     "management.settings.categoryNames.autocompleteLabel": "自動入力",
     "management.settings.categoryNames.bannerLabel": "バナー",
     "management.settings.categoryNames.devToolsLabel": "開発者ツール",

@@ -6978,7 +6978,6 @@
     "management.settings.badge.readOnly.text": "Lesezugriff",
     "management.settings.badge.readOnly.tooltip": "Erweiterte Einstellungen können nicht gespeichert werden",
     "management.settings.categoryNames.accessibilityLabel": "Zugänglichkeit",
-    "management.settings.categoryNames.alertingV2Label": "Alerting V2",
     "management.settings.categoryNames.autocompleteLabel": "Autovervollständigung",
     "management.settings.categoryNames.bannerLabel": "Banner",
     "management.settings.categoryNames.devToolsLabel": "Entwickler-Tools",
