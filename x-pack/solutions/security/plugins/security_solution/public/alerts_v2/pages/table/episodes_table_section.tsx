@@ -34,11 +34,11 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import {
   createAckAction,
-  createUnackAction,
-  createResolveAction,
-  createUnresolveAction,
-  createEditTagsAction,
   createEditAssigneeAction,
+  createEditTagsAction,
+  createResolveAction,
+  createUnackAction,
+  createUnresolveAction,
   type EpisodeAction,
 } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
@@ -59,6 +59,7 @@ import { NetworkIpCell } from './network_ip_cell';
 import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_timeline';
 import { useEpisodeAssignees } from './use_episode_assignees';
 import { EpisodeActionsMenu } from './episode_actions_menu';
+import { createEditV1AssigneeAction } from './edit_v1_assignee_action';
 import { EpisodeWorkflowsPanel } from './episode_workflows_panel';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
@@ -126,9 +127,12 @@ const ADD_TO_EXISTING_CASE_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.addToExistingCase',
   { defaultMessage: 'Add to existing case' }
 );
-const ADD_TO_CHAT_LABEL = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.addToChat', {
-  defaultMessage: 'Add to chat',
-});
+const ADD_TO_CHAT_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.addToChat',
+  {
+    defaultMessage: 'Add to chat',
+  }
+);
 const ADD_TO_CHAT_PROMPT =
   'Help me triage the attached alert episode: assess it, review its status and context, and recommend next steps. Respond in markdown.';
 
@@ -394,6 +398,11 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     buildEpisodeCaseAttachments,
   ]);
 
+  // v1 (classic) alerts can't use the v2 `.alert-actions` assignee flow; this action edits assignees
+  // through the Security detection-engine assignees API instead. It's gated to v1 rows, where the v2
+  // assignee action is hidden (those rows carry `supports_actions: false` from the unified view).
+  const editV1AssigneeAction = useMemo(() => createEditV1AssigneeAction(), []);
+
   // Everything the per-row "…" (More actions) menu offers — v2 mutations plus add-to-case, ordered
   // by `order`. Mirrors the v1 alerts table's per-row take-action menu.
   const episodeActions = useMemo(
@@ -401,10 +410,18 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
       ...statusActions,
       editTagsAction,
       editAssigneeAction,
+      editV1AssigneeAction,
       ...addToCaseActions,
       ...addToChatActions,
     ],
-    [statusActions, editTagsAction, editAssigneeAction, addToCaseActions, addToChatActions]
+    [
+      statusActions,
+      editTagsAction,
+      editAssigneeAction,
+      editV1AssigneeAction,
+      addToCaseActions,
+      addToChatActions,
+    ]
   );
 
   // Side-fetch the current assignee per visible episode (the view doesn't carry it).
@@ -464,7 +481,9 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
       // side-fetched map, keyed by episode.id. The cell resolves the uid → user profile itself.
       assignees: ({ row }) => (
         <AlertEpisodeAssigneeCell
-          assigneeUid={assigneesByEpisode.get(String(row.flattened['episode.id'] ?? '')) ?? undefined}
+          assigneeUid={
+            assigneesByEpisode.get(String(row.flattened['episode.id'] ?? '')) ?? undefined
+          }
           userProfile={services.userProfile}
         />
       ),
@@ -489,9 +508,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             onSuccess={refetchAll}
             renderRunWorkflowPanel={
               canRunWorkflow
-                ? (closePopover) => (
-                    <EpisodeWorkflowsPanel record={record} onClose={closePopover} />
-                  )
+                ? (closePopover) => <EpisodeWorkflowsPanel record={record} onClose={closePopover} />
                 : undefined
             }
           />
