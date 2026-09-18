@@ -79,6 +79,7 @@ function parseDatesInput(dates: unknown[]): string[] {
         z
           .string()
           .nonempty()
+          .max(100)
           .refine((val) => val.trim() !== '', 'No empty strings allowed'),
         z.number(),
       ])
