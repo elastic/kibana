@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RecommendedAction } from '../../types';
 
 export const DETAILS_FLYOUT_LABELS = Object.freeze({
   ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.ariaLabel', {
@@ -23,20 +22,16 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Timeline',
     }),
   },
-  header: {
-    since: (time: string) =>
-      i18n.translate('xpack.alertzero.detailsFlyout.header.since', {
-        defaultMessage: 'Since {time} ',
-        values: { time },
-      }),
-    flyoutMenu: {
-      share: i18n.translate('xpack.alertzero.detailsFlyout.header.flyoutMenuAriaLabel', {
-        defaultMessage: 'Share',
-      }),
-      close: i18n.translate('xpack.alertzero.detailsFlyout.header.closeButtonAriaLabel', {
-        defaultMessage: 'Close',
-      }),
-    },
+  flyoutMenu: {
+    share: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.share', {
+      defaultMessage: 'Copy link',
+    }),
+    shareCopied: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.shareCopied', {
+      defaultMessage: 'Link copied',
+    }),
+    close: i18n.translate('xpack.alertzero.detailsFlyout.flyoutMenu.close', {
+      defaultMessage: 'Close',
+    }),
   },
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
@@ -95,20 +90,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Attachments will appear here.',
     }),
   },
-  recommendedAction: {
-    contain: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.contain', {
-      defaultMessage: 'Contain',
-    }),
-    escalate: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.escalate', {
-      defaultMessage: 'Escalate',
-    }),
-    investigate: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.investigate', {
-      defaultMessage: 'Investigate',
-    }),
-    tune: i18n.translate('xpack.alertzero.detailsFlyout.recommendedAction.tune', {
-      defaultMessage: 'Tune',
-    }),
-  } satisfies Record<RecommendedAction, string>,
   actions: {
     openChat: i18n.translate('xpack.alertzero.detailsFlyout.actions.openChat', {
       defaultMessage: 'Open in chat',

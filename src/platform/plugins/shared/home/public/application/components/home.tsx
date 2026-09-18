@@ -33,7 +33,7 @@ export interface HomeProps {
   solutions: FeatureCatalogueSolution[];
   localStorage: Storage;
   urlBasePath: string;
-  hasUserDataView: () => Promise<boolean>;
+  hasDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
 }
 
@@ -93,9 +93,9 @@ export class Home extends Component<HomeProps, State> {
         }
       }, 10000);
 
-      const hasUserIndexPattern = await this.props.hasUserDataView();
+      const hasDataView = await this.props.hasDataView();
 
-      this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
+      this.endLoading({ isNewKibanaInstance: !hasDataView });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.

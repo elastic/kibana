@@ -72,6 +72,11 @@ export class EisModelsPage {
   readonly confirmDeleteRegionPolicyCancelButton: Locator;
   readonly confirmDeleteRegionPolicyAcknowledge: Locator;
 
+  readonly displayOptionsButton: Locator;
+  readonly displayOptionsApplyButton: Locator;
+  readonly endOfLifeModelsShowButton: Locator;
+  readonly outsideRegionPreferencesShowButton: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
@@ -168,6 +173,15 @@ export class EisModelsPage {
     this.confirmDeleteRegionPolicyCancelButton = this.confirmDeleteRegionPolicyModal.locator(
       '[data-test-subj="confirmModalCancelButton"]'
     );
+
+    this.displayOptionsButton = this.page.testSubj.locator('eisDisplayOptionsButton');
+    this.displayOptionsApplyButton = this.page.testSubj.locator('eisDisplayOptionsApplyButton');
+    this.endOfLifeModelsShowButton = this.page.testSubj.locator(
+      'eisDisplayOptionsEndOfLifeModelsShow'
+    );
+    this.outsideRegionPreferencesShowButton = this.page.testSubj.locator(
+      'eisDisplayOptionsOutsideRegionPreferencesShow'
+    );
   }
 
   // --- Navigation ---
@@ -191,6 +205,18 @@ export class EisModelsPage {
 
   public async clearSearch() {
     await this.search('');
+  }
+
+  public async showEndOfLifeModels() {
+    await this.displayOptionsButton.click();
+    await this.endOfLifeModelsShowButton.click();
+    await this.displayOptionsApplyButton.click();
+  }
+
+  public async showModelsOutsideRegionPreferences() {
+    await this.displayOptionsButton.click();
+    await this.outsideRegionPreferencesShowButton.click();
+    await this.displayOptionsApplyButton.click();
   }
 
   // --- Parameterized Locators ---
