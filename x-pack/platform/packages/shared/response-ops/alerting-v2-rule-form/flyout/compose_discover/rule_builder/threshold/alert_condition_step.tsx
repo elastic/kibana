@@ -211,7 +211,11 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         severity: reconcileSeverity(
           thresholdValues.severity,
           thresholdValues.alertConditions,
-          hasReservedSeverityLabel(thresholdValues.stats, thresholdValues.evaluations, groupByFields)
+          hasReservedSeverityLabel(
+            thresholdValues.stats,
+            thresholdValues.evaluations,
+            groupByFields
+          )
         ),
       });
     },
@@ -586,9 +590,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           options={allFields.map((name) => ({ label: name }))}
           selectedOptions={thresholdValues.groupByFields.map((f) => ({ label: f }))}
           onChange={(opts) => updateGroupByFields(opts.map((o) => o.label))}
-          onCreateOption={(val) =>
-            updateGroupByFields([...thresholdValues.groupByFields, val])
-          }
+          onCreateOption={(val) => updateGroupByFields([...thresholdValues.groupByFields, val])}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.groupByPlaceholder', {
             defaultMessage: 'Add group-by fields',
           })}
