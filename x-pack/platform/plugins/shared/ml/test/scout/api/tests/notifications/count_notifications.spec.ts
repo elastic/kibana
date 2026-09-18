@@ -45,19 +45,27 @@ apiTest.describe('GET notifications count', { tag: '@local-stateful-classic' }, 
       const { cookieHeader } = await samlAuth.asMlPoweruser();
       const jobId = `fq_job_count_${Date.now()}`;
 
+      const getCount = async () => {
+        const res = await apiClient.get(
+          `internal/ml/notifications/count?lastCheckedAt=${testStart}`,
+          { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
+        );
+        expect(res).toHaveStatusCode(200);
+        return res.body;
+      };
+
+      // The endpoint counts every notification visible in the space, including system-level
+      // ones that carry no job filter, so compare against a baseline taken just before the
+      // job is created rather than assuming this suite is the only source of notifications.
+      const before = await getCount();
+
       await apiServices.ml.savedObjects.init();
       await apiServices.ml.anomalyDetection.createViaKibana(getADFqSingleMetricJobConfig(jobId));
       await apiServices.ml.notifications.waitForToIndex(jobId, testStart);
 
-      const res = await apiClient.get(
-        `internal/ml/notifications/count?lastCheckedAt=${testStart}`,
-        { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
-      );
+      const after = await getCount();
 
-      expect(res).toHaveStatusCode(200);
-      // The endpoint counts every notification visible in the space, including system-level
-      // ones that carry no job filter, so only a lower bound can be asserted here.
-      expect(res.body.info).toBeGreaterThanOrEqual(1);
+      expect(after.info).toBeGreaterThanOrEqual(before.info + 1);
     }
   );
 
