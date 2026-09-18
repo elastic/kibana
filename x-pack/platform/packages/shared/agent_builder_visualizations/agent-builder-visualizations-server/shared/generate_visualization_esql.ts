@@ -15,7 +15,7 @@ import { buildEsqlAdditionalInstructions } from './esql_instructions';
 import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
-interface GeneratedVisualizationEsql {
+export interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
   /** Result columns from the validation run, when `generateEsql` executed the query. */
@@ -24,7 +24,7 @@ interface GeneratedVisualizationEsql {
   error?: string;
 }
 
-interface GenerateVisualizationEsqlParams {
+export interface GenerateVisualizationEsqlParams {
   nlQuery: string;
   index: string | undefined;
   /**
@@ -56,7 +56,10 @@ interface GenerateVisualizationEsqlParams {
  * different data and keeps them otherwise. Returns the request unchanged when
  * there are no existing queries.
  */
-const buildEsqlEditContext = (nlQuery: string, existingQueries: readonly string[] = []): string => {
+export const buildEsqlEditContext = (
+  nlQuery: string,
+  existingQueries: readonly string[] = []
+): string => {
   if (existingQueries.length === 0) {
     return nlQuery;
   }
