@@ -27,7 +27,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
-import { getGroupingFieldsFromSource } from '../utils/episode_grouping_data';
+import { isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
@@ -39,55 +39,27 @@ import * as i18n from './translations';
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 /** Characters of the rule id shown when a rule has no name to display. */
 const SHORT_RULE_ID_LENGTH = 7;
 
 const getEpisodeGroupingFromRow = (
   row: CellRendererProps['row'],
   ruleGroupingFields: readonly string[] = []
-): { groupingFields: string[]; groupingData: Record<string, unknown> } => {
-  const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
-  const sourceGrouping = isPlainObject(row.flattened.source_grouping)
-    ? row.flattened.source_grouping
-    : undefined;
-  const groupingFields =
-    ruleGroupingFields.length > 0
-      ? [...ruleGroupingFields]
-      : getGroupingFieldsFromSource(sourceGrouping);
-  // `episode_data` can be a name-only object (`{ rule_name }`) on unresolved rows.
-  // Keep `source_grouping` values underneath so classic grouping tags still resolve.
-  const groupingData = { ...(sourceGrouping ?? {}), ...episodeData };
-  return { groupingFields, groupingData };
-};
+): { groupingFields: readonly string[]; groupingData: Record<string, unknown> } => {
+  const episode = row.flattened as unknown as AlertEpisode;
 
-const EpisodeRuleGroupingTags = ({
-  fields,
-  data,
-  dataView,
-}: {
-  fields: readonly string[];
-  data: Record<string, unknown>;
-  dataView?: DataView;
-}) => {
-  if (fields.length === 0) {
-    return null;
+  if (isSourceEpisode(episode)) {
+    const sourceGrouping = episode.source_grouping ?? {};
+    return {
+      groupingFields: Object.keys(sourceGrouping),
+      groupingData: sourceGrouping,
+    };
   }
 
-  return (
-    <>
-      {' '}
-      <AlertingEpisodeGroupingTags
-        inline
-        fields={fields}
-        data={data}
-        dataView={dataView}
-        data-test-subj="episodeRuleCellGroupingTags"
-      />
-    </>
-  );
+  return {
+    groupingFields: ruleGroupingFields,
+    groupingData: parseEpisodeDataJson(episode.episode_data),
+  };
 };
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
@@ -233,11 +205,18 @@ export const EpisodeRuleCell = ({
       return (
         <span data-test-subj="episodeRuleCell">
           <span css={nameCss}>{displayName}</span>
-          <EpisodeRuleGroupingTags
-            fields={groupingFields}
-            data={groupingData}
-            dataView={ruleId ? sourceDataViewsByRule?.get(ruleId) : undefined}
-          />
+          {groupingFields.length > 0 ? (
+            <>
+              {' '}
+              <AlertingEpisodeGroupingTags
+                inline
+                fields={groupingFields}
+                data={groupingData}
+                dataView={ruleId ? sourceDataViewsByRule?.get(ruleId) : undefined}
+                data-test-subj="episodeRuleCellGroupingTags"
+              />
+            </>
+          ) : null}
         </span>
       );
     }
@@ -309,8 +288,6 @@ export const EpisodeRuleCell = ({
     );
   }
 
-  // Classic alerts always have `episode_data: null`. If the resolved rule still has v2
-  // grouping.fields, keep those field names but read values from `source_grouping`.
   const { groupingFields, groupingData } = getEpisodeGroupingFromRow(
     row,
     rule.grouping?.fields ?? []
@@ -327,11 +304,18 @@ export const EpisodeRuleCell = ({
       <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
-      <EpisodeRuleGroupingTags
-        fields={groupingFields}
-        data={groupingData}
-        dataView={sourceDataViewsByRule?.get(ruleId)}
-      />
+      {groupingFields.length > 0 ? (
+        <>
+          {' '}
+          <AlertingEpisodeGroupingTags
+            inline
+            fields={groupingFields}
+            data={groupingData}
+            dataView={sourceDataViewsByRule?.get(ruleId)}
+            data-test-subj="episodeRuleCellGroupingTags"
+          />
+        </>
+      ) : null}
       {showQuery && rule.query ? (
         <>
           <br />

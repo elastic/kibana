@@ -70,6 +70,8 @@ beforeEach(() => {
 });
 
 describe('EpisodeAssigneePanel', () => {
+  const user = userEvent.setup({ delay: null });
+
   it('disables Apply until the selection differs from the current assignee', async () => {
     mockBulkGet.mockResolvedValue([mockJoana]);
     mockSuggest.mockResolvedValue([mockJoana, mockAnt]);
@@ -79,8 +81,7 @@ describe('EpisodeAssigneePanel', () => {
       expect(screen.getByTestId('alertingV2EditEpisodeAssigneeApply')).toBeDisabled();
     });
 
-    await userEvent.type(screen.getByPlaceholderText('Search users'), 'ant');
-    await userEvent.click(await findUserOption(mockAnt.user.email!));
+    await user.click(await findUserOption(mockAnt.user.email!));
 
     await waitFor(() => {
       expect(screen.getByTestId('alertingV2EditEpisodeAssigneeApply')).toBeEnabled();
@@ -91,13 +92,13 @@ describe('EpisodeAssigneePanel', () => {
     mockSuggest.mockResolvedValue([mockJoana, mockAnt]);
     const { onApply } = renderPanel();
 
-    await userEvent.click(await findUserOption(mockJoana.user.email!));
+    await user.click(await findUserOption(mockJoana.user.email!));
     // Selecting a different user before applying must not fan out extra writes.
-    await userEvent.click(await findUserOption(mockAnt.user.email!));
+    await user.click(await findUserOption(mockAnt.user.email!));
 
     expect(onApply).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
+    await user.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
 
     expect(onApply).toHaveBeenCalledTimes(1);
     expect(onApply).toHaveBeenCalledWith(mockAnt.uid);
@@ -107,8 +108,8 @@ describe('EpisodeAssigneePanel', () => {
     mockBulkGet.mockResolvedValue([mockJoana]);
     const { onApply } = renderPanel({ assigneeUid: mockJoana.uid });
 
-    await userEvent.click(await findUserOption(mockJoana.user.email!));
-    await userEvent.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
+    await user.click(await findUserOption(mockJoana.user.email!));
+    await user.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
 
     expect(onApply).toHaveBeenCalledWith(null);
   });
@@ -120,7 +121,7 @@ describe('EpisodeAssigneePanel', () => {
       expect(screen.getByTestId('alertingV2EditEpisodeAssigneeApply')).toBeEnabled();
     });
 
-    await userEvent.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
+    await user.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
 
     expect(onApply).toHaveBeenCalledWith(null);
   });
@@ -147,17 +148,17 @@ describe('EpisodeAssigneePanel', () => {
     );
     const { onApply } = renderPanel();
 
-    await userEvent.type(screen.getByPlaceholderText('Search users'), 'ant');
-    await userEvent.click(await findUserOption(mockAnt.user.email!));
+    await user.type(screen.getByPlaceholderText('Search users'), 'ant');
+    await user.click(await findUserOption(mockAnt.user.email!));
 
     // Narrow the search to something the pending selection cannot match.
-    await userEvent.clear(screen.getByPlaceholderText('Search users'));
-    await userEvent.type(screen.getByPlaceholderText('Search users'), 'zzz');
+    await user.clear(screen.getByPlaceholderText('Search users'));
+    await user.type(screen.getByPlaceholderText('Search users'), 'zzz');
 
     const pinned = await findUserOption(mockAnt.user.email!);
     expect(pinned).toHaveAttribute('aria-selected', 'true');
 
-    await userEvent.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
+    await user.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
     expect(onApply).toHaveBeenCalledWith(mockAnt.uid);
   });
 
@@ -170,8 +171,8 @@ describe('EpisodeAssigneePanel', () => {
     const currentOption = await findUserOption(mockJoana.user.email!);
     expect(currentOption).toBeInTheDocument();
 
-    await userEvent.click(currentOption);
-    await userEvent.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
+    await user.click(currentOption);
+    await user.click(screen.getByTestId('alertingV2EditEpisodeAssigneeApply'));
 
     expect(onApply).toHaveBeenCalledWith(null);
   });

@@ -23,6 +23,7 @@ import {
   ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { flattenObject } from '@kbn/object-utils';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../../utils/histogram_utils';
@@ -145,6 +146,7 @@ export const mapClassicAlertToEpisode = (
       : 0;
 
   const workflowTags = asStringArray(source[ALERT_WORKFLOW_TAGS]);
+  const grouping = source[ALERT_GROUPING];
 
   const actionContext: ClassicAlertActionContext = {
     index,
@@ -174,7 +176,7 @@ export const mapClassicAlertToEpisode = (
     supports_actions: false,
     supports_timeline: false,
     source_action_context: actionContext,
-    source_grouping: source[ALERT_GROUPING],
+    source_grouping: grouping ? flattenObject(grouping) : undefined,
   };
 };
 

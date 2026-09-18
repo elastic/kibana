@@ -155,7 +155,21 @@ describe('mapClassicAlertToEpisode', () => {
     );
 
     expect(episode.source_grouping).toEqual({
-      host: { name: 'web-01' },
+      'host.name': 'web-01',
+      'service.name': 'api',
+    });
+  });
+
+  it('omits empty nested grouping objects from source_grouping', () => {
+    const episode = mapClassicAlertToEpisode(
+      {
+        ...baseSource,
+        'kibana.alert.grouping': { host: {}, 'service.name': 'api' },
+      },
+      TEST_INDEX
+    );
+
+    expect(episode.source_grouping).toEqual({
       'service.name': 'api',
     });
   });

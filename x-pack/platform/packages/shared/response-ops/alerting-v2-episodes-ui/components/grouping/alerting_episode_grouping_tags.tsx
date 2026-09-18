@@ -46,6 +46,9 @@ const groupingTagCss = css`
  * growing the line, which top and bottom aligned boxes only do when they do not fit.
  */
 const inlineGroupingTagsCss = css`
+  /* Keep a gap before the data grid's line-clamp ellipsis; a trailing space would collapse. */
+  padding-inline-end: 0.35em;
+
   > * {
     display: inline-flex;
     align-items: center;

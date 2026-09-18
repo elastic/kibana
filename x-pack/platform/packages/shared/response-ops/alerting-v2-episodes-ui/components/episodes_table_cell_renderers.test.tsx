@@ -356,7 +356,8 @@ describe('EpisodeRuleCell', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
       'rule.name': 'Classic CPU Rule',
-      source_grouping: { host: { name: 'web-01' } },
+      source_id: 'classic-alerts',
+      source_grouping: { 'host.name': 'web-01' },
     });
     render(
       <EpisodeRuleCell
@@ -377,8 +378,9 @@ describe('EpisodeRuleCell', () => {
   it('renders source_grouping tags next to data.rule_name when the rule SO is missing', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
-      source_grouping: { host: { name: 'web-01' } },
+      source_grouping: { 'host.name': 'web-01' },
     });
     render(
       <EpisodeRuleCell
@@ -527,9 +529,10 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
   });
 
-  it('does not render grouping tags when source_grouping is null', () => {
+  it('does not render grouping tags when source_grouping is missing on a source row', () => {
     const row = makeRow({
       'rule.id': 'r1',
+      source_id: 'classic-alerts',
       source_grouping: null,
     });
     render(
@@ -544,29 +547,29 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
   });
 
-  it('falls back to source_grouping tags when the rule has no grouping.fields', () => {
+  it('reads grouping from source_grouping for a source row', () => {
     const row = makeRow({
       'rule.id': 'r1',
-      source_grouping: { host: { name: 'server-1' } },
+      source_id: 'classic-alerts',
+      source_grouping: { 'host.name': 'from-source' },
     });
     render(
       <EpisodeRuleCell
         {...ruleCellProps}
         row={row}
-        rulesCache={{ r1: makeRule('My Rule') }}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
         isLoadingRules={false}
         rowHeight={2}
       />
     );
-    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
-    expect(screen.getByText('server-1')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: from-source')).toBeInTheDocument();
+    expect(screen.getByText('from-source')).toBeInTheDocument();
   });
 
-  it('prefers rule grouping.fields and episode_data over source_grouping', () => {
+  it('reads grouping from episode_data for a native row', () => {
     const row = makeRow({
       'rule.id': 'r1',
       episode_data: JSON.stringify({ host: { name: 'from-episode' } }),
-      source_grouping: { host: { name: 'from-source' } },
     });
     render(
       <EpisodeRuleCell
@@ -579,23 +582,6 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByLabelText('host.name: from-episode')).toBeInTheDocument();
     expect(screen.queryByLabelText('host.name: from-source')).not.toBeInTheDocument();
-  });
-
-  it('uses source_grouping values when the rule has grouping.fields but episode_data is empty', () => {
-    const row = makeRow({
-      'rule.id': 'r1',
-      source_grouping: { host: { name: 'from-source' } },
-    });
-    render(
-      <EpisodeRuleCell
-        {...ruleCellProps}
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByLabelText('host.name: from-source')).toBeInTheDocument();
   });
 
   it('does not render grouping tags when all grouping values are empty', () => {
