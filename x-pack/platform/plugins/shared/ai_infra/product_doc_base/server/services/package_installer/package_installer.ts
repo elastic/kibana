@@ -208,7 +208,7 @@ export class PackageInstaller {
     const { inferenceId, forceUpdate } = params;
     const [repositoryVersions, installStatuses] = await Promise.all([
       fetchArtifactVersions(this.getArtifactRepositoryOptions()),
-      this.productDocClient.getInstallationStatus({ inferenceId }),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const toUpdate: ProductName[] = [];
     Object.entries(installStatuses).forEach(([productName, productState]) => {
