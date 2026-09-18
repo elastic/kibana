@@ -13,6 +13,7 @@ import {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW,
 } from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from '../agentic_investigations';
 
 interface YamlStep {
@@ -39,6 +40,17 @@ const inputsOf = (step: YamlStep | undefined) =>
   (step?.with?.inputs ?? {}) as Record<string, unknown>;
 const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 const emit = stepByName('emit_result')?.with as Record<string, string>;
+const flagOf = (step: string, key: string) =>
+  String((stepByName(step)?.with as Record<string, string>)[key]);
+
+const evaluate = (expression: string, context: Record<string, unknown>): unknown => {
+  const trimmed = expression.trim();
+  return createWorkflowLiquidEngine().evalValueSync(trimmed.slice(3, -2).trim(), context);
+};
+
+const draftContext = (structured: Record<string, unknown>) => ({
+  steps: { draft_creation: { output: { structured_output: structured } } },
+});
 
 describe('Detection Rule Creation worker', () => {
   describe('proposal gate', () => {
@@ -79,13 +91,47 @@ describe('Detection Rule Creation worker', () => {
 
     // A draft with an empty query or no attachment is not reviewable; proposing it
     // would ask the analyst to approve nothing.
-    it('proposes only a draft with a query and an attachment', () => {
-      const ready = String((stepByName('draft_ready')?.with as Record<string, string>).ok);
-      expect(ready).toContain("rule.query != ''");
-      expect(ready).toContain('attachment_id != null');
-      for (const name of ['preview_creation', 'attach_draft', 'propose_creation']) {
+    it('previews and attaches only a draft with a query and an attachment', () => {
+      const ready = flagOf('draft_ready', 'ok');
+      expect(
+        evaluate(ready, draftContext({ attachment_id: 'a1', rule: { query: 'FROM x' } }))
+      ).toBe(true);
+      expect(evaluate(ready, draftContext({ attachment_id: 'a1', rule: { query: '' } }))).toBe(
+        false
+      );
+      expect(evaluate(ready, draftContext({ attachment_id: '', rule: { query: 'FROM x' } }))).toBe(
+        false
+      );
+      expect(evaluate(ready, draftContext({ rule: { query: 'FROM x' } }))).toBe(false);
+      for (const name of ['preview_creation', 'attach_draft']) {
         expect(stepByName(name)?.if).toContain('steps.draft_ready.output.ok == true');
       }
+    });
+
+    // A model that built nothing still fills every required field with placeholders,
+    // and a draft that fails its preview would fail the create action inside the gate,
+    // which re-parks a fresh proposal on every attempt. The preview is the guard.
+    it('proposes creation only after a successful preview', () => {
+      const previewed = flagOf('draft_previewed', 'ok');
+      expect(previewed).toContain('steps.draft_ready.output.ok == true');
+      expect(previewed).toContain('steps.preview_creation.output.succeeded == true');
+      expect(previewed).toContain('steps.preview_creation.output.is_aborted == false');
+      expect(stepByName('propose_creation')?.if).toContain(
+        'steps.draft_previewed.output.ok == true'
+      );
+    });
+
+    // Without a decision the caller keeps the indicator pending and redrafts the same
+    // gap on every sweep.
+    it('reports an undraftable gap through the gate so it still reaches a decision', () => {
+      const report = stepByName('report_undraftable');
+      expect(report?.type).toBe('workflow.execute');
+      expect(report?.with?.['workflow-id']).toBe(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.id);
+      expect(report?.if).toContain('steps.draft_previewed.output.ok != true');
+      const inputs = inputsOf(report);
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs.category).toBe('investigate');
+      expect(report).not.toHaveProperty('on-failure');
     });
 
     // The worker parks in WAITING_FOR_CHILD while the gate holds the decision for up to
@@ -127,9 +173,12 @@ describe('Detection Rule Creation worker', () => {
   describe('outputs', () => {
     it('derives created and reviewed from the gate, so an expired gate reads as neither', () => {
       expect(emit.created).toContain("steps.propose_creation.output.status == 'succeeded'");
-      expect(emit.reviewed).toContain("steps.propose_creation.output.decision == 'approved'");
-      expect(emit.reviewed).toContain("steps.propose_creation.output.decision == 'dismissed'");
-      expect(emit.decision).toBe('{{ steps.propose_creation.output.decision }}');
+      for (const step of ['propose_creation', 'report_undraftable']) {
+        expect(emit.reviewed).toContain(`steps.${step}.output.decision == 'approved'`);
+        expect(emit.reviewed).toContain(`steps.${step}.output.decision == 'dismissed'`);
+      }
+      expect(emit.decision).toContain('steps.propose_creation.output.decision');
+      expect(emit.decision).toContain('steps.report_undraftable.output.decision');
     });
 
     it('declares every output the coverage review reads', () => {

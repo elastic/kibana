@@ -69,7 +69,10 @@ steps:
         Confidence: {{ inputs.confidence }}
 
         Echo the tool's returned rule fields under "rule" and the attachment
-        metadata alongside it. Never return id or rule_id.
+        metadata alongside it. Never return id or rule_id. If the tool did not
+        return a rule, for example because the data source does not exist, do
+        not invent one: return empty strings for every rule field and for
+        attachment_id, and say why in one sentence.
       schema:
         type: object
         additionalProperties: false
@@ -132,15 +135,17 @@ steps:
           - attachment_id
 
   # A draft with an empty query or no attachment is not reviewable, so nothing below
-  # runs for it and `reviewed` stays false: the caller keeps the gap open. Step `if`
-  # cannot group with parentheses, so the compound test lives here as a flag.
+  # runs for it. A model that built nothing can still fill the fields with
+  # placeholders; the preview below is what catches those. Step `if` cannot group
+  # with parentheses, so the compound test lives here as a flag.
   - name: draft_ready
     type: data.set
     with:
       ok: >-
         ${{ steps.draft_creation.output.structured_output.rule.query != null
           and steps.draft_creation.output.structured_output.rule.query != ''
-          and steps.draft_creation.output.structured_output.attachment_id != null }}
+          and steps.draft_creation.output.structured_output.attachment_id != null
+          and steps.draft_creation.output.structured_output.attachment_id != '' }}
 
   - name: preview_creation
     type: workflow.execute
@@ -164,6 +169,19 @@ steps:
           tags: "${{ steps.draft_creation.output.structured_output.rule.tags }}"
           invocationCount: "${{ inputs.preview_invocation_count }}"
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+
+  # The preview is the only execution the draft gets before an analyst is asked
+  # to approve it, and the one check a placeholder draft cannot pass. A draft
+  # that errors, times out or aborts there would fail the create action inside
+  # the gate, which then re-parks a fresh proposal on every attempt; it is
+  # reported instead.
+  - name: draft_previewed
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.draft_ready.output.ok == true
+          and steps.preview_creation.output.succeeded == true
+          and steps.preview_creation.output.is_aborted == false }}
 
   # The draft lives as an attachment in the agent's own conversation, which stays
   # opaque to the analyst. Copy it by value onto the investigation so the rule the
@@ -192,7 +210,7 @@ steps:
   # investigation, so it also decides when it closes.
   - name: propose_creation
     type: workflow.execute
-    if: "${{ steps.draft_ready.output.ok == true }}"
+    if: "${{ steps.draft_previewed.output.ok == true }}"
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -226,6 +244,42 @@ steps:
         # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
         autoApprove: false
 
+  # A gap the agent could not turn into an executable rule still needs a decision,
+  # or the caller keeps it pending and redrafts it on every sweep. Same gate
+  # without an action: acknowledging or dismissing is the whole lifecycle.
+  - name: report_undraftable
+    type: workflow.execute
+    if: "${{ steps.draft_previewed.output.ok != true }}"
+    with:
+      workflow-id: system-create-investigation-proposal
+      inputs:
+        conversationId: "{{ inputs.investigation_id }}"
+        comment: |-
+          **No rule could be drafted for this gap**
+
+          {% if steps.draft_ready.output.ok != true %}The agent did not produce a rule draft, usually because the data source the gap describes is not ingested here.{% else %}The drafted rule failed its preview run, so it was not proposed for creation.{% endif %}
+
+          **Detection gap**
+          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
+          {% endif %}{{ inputs.gap_description }}
+          {% if steps.draft_ready.output.ok == true %}
+          **Draft:** {{ steps.draft_creation.output.structured_output.rule.name }}
+
+          ```esql
+          {{ steps.draft_creation.output.structured_output.rule.query }}
+          ```
+          {% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          **Preview errors**
+          {{ steps.preview_creation.output.error_text }}
+          {% endif %}
+          **Drafting attempt:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
+
+          **On approval**
+          Nothing is applied automatically; approving acknowledges that this gap needs a hand-written rule or its data source first. Dismiss if it should not get a rule.
+        category: investigate
+        impact: low
+        confidence: low
+
   - name: emit_result
     type: workflow.output
     status: completed
@@ -236,10 +290,12 @@ steps:
       # rule by name would only add a read that can fail and make the caller propose a
       # duplicate.
       created: "${{ steps.propose_creation.output.status == 'succeeded' }}"
-      # A decision either way. An expired gate is neither, and a draft that never
-      # reached the gate was reviewed by nobody; both leave the caller's gap open.
+      # A decision either way, on the rule or on the report that no rule could be
+      # drafted. An expired gate is neither and leaves the caller's gap open.
       reviewed: >-
         ${{ steps.propose_creation.output.decision == 'approved'
-          or steps.propose_creation.output.decision == 'dismissed' }}
-      decision: "{{ steps.propose_creation.output.decision }}"
+          or steps.propose_creation.output.decision == 'dismissed'
+          or steps.report_undraftable.output.decision == 'approved'
+          or steps.report_undraftable.output.decision == 'dismissed' }}
+      decision: "{{ steps.propose_creation.output.decision | default: steps.report_undraftable.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"

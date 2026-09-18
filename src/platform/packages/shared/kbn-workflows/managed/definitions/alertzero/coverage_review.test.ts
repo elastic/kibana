@@ -615,6 +615,13 @@ describe('Detection Coverage review', () => {
           steps: { propose_creation: { output: { decision: 'dismissed' } } },
         })
       ).toBe(true);
+      // A dismissed "no rule could be drafted" report is a decision too; without it the
+      // indicator would be redrafted on every sweep.
+      expect(
+        evaluateExpression(creationEmit?.reviewed ?? '', {
+          steps: { report_undraftable: { output: { decision: 'dismissed' } } },
+        })
+      ).toBe(true);
       // An expired gate carries no decision and must leave the indicator pending.
       expect(
         evaluateExpression(creationEmit?.reviewed ?? '', {
