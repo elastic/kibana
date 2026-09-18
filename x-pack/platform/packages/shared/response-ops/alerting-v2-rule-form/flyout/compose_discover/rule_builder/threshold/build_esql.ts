@@ -205,9 +205,9 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
     }
   }
 
-  // WHERE (alert conditions). Severity only applies to a single condition; the
-  // lowest severity level threshold is synced to the condition in the form, so
-  // the WHERE is always built straight from the alert conditions.
+  // WHERE (alert conditions). Severity only applies to a single condition and is a pure
+  // enrichment layer (its band thresholds are independent of the condition), so the WHERE is
+  // always built straight from the alert conditions.
   const validConditions = values.alertConditions.filter((c) => c.metric && c.threshold.length > 0);
   const singleCondition = validConditions.length === 1 ? validConditions[0] : undefined;
   const severityEvalRhs =
