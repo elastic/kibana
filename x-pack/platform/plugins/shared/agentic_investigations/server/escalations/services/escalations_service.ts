@@ -26,8 +26,13 @@ import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATION_LINKED_INVESTIGATIONS,
 } from '../../../common/escalations/constants';
-import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
+import {
+  InvalidLinkedInvestigationError,
+  NotAnEscalationError,
+  TooManyLinkedInvestigationsError,
+} from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
 // Scopes list results to escalations and hides closed ones. Uses `metadata.status` (the
@@ -134,6 +139,10 @@ export class EscalationsService {
       const prev = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
       const toAdd = body.linked_investigations;
       const union = [...prev, ...toAdd.filter((id) => !prev.includes(id))];
+
+      if (union.length > MAX_ESCALATION_LINKED_INVESTIGATIONS) {
+        throw new TooManyLinkedInvestigationsError(union.length, MAX_ESCALATION_LINKED_INVESTIGATIONS);
+      }
 
       const { conversation } = await client.patchMetadata(escalationId, {
         [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union,

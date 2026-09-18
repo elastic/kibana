@@ -22,6 +22,7 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
     let investigationId: string;
+    const createdEscalationIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, esClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
@@ -34,9 +35,10 @@ apiTest.describe(
         document: {
           template_id: INVESTIGATION_TEMPLATE_ID,
           title: 'Scout test investigation',
-          agent_id: 'default',
+          agent_id: 'elastic-ai-agent',
           space_id: 'default',
           '@timestamp': new Date().toISOString(),
+          rounds: [],
           metadata: {
             status: 'open',
             severity: 'high',
@@ -50,9 +52,11 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      if (investigationId) {
-        await esClient.delete({ index: INVESTIGATION_INDEX, id: investigationId }).catch(() => {});
-      }
+      await Promise.allSettled(
+        [investigationId, ...createdEscalationIds]
+          .filter(Boolean)
+          .map((id) => esClient.delete({ index: INVESTIGATION_INDEX, id }).catch(() => {}))
+      );
     });
 
     apiTest('creates a public escalation and returns 200', async ({ apiClient }) => {
@@ -68,6 +72,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.template_id).toBe(ESCALATION_TEMPLATE_ID);
       expect(response.body.title).toBe('Scout test investigation');
+      if (response.body.id) createdEscalationIds.push(response.body.id);
     });
 
     apiTest(
@@ -86,6 +91,7 @@ apiTest.describe(
         const { metadata } = response.body;
         expect(metadata.severity).toBe('high');
         expect(metadata.summary).toBe('Suspicious PowerShell');
+        if (response.body.id) createdEscalationIds.push(response.body.id);
       }
     );
 
@@ -103,6 +109,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.metadata?.workflow_execution_id).toBeUndefined();
+        if (response.body.id) createdEscalationIds.push(response.body.id);
       }
     );
 
@@ -120,6 +127,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.metadata.status).toBe('open');
+        if (response.body.id) createdEscalationIds.push(response.body.id);
       }
     );
 
@@ -135,6 +143,7 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.metadata.linked_investigations).toStrictEqual([investigationId]);
+      if (response.body.id) createdEscalationIds.push(response.body.id);
     });
 
     apiTest('returns 400 when public + collaborators is provided', async ({ apiClient }) => {
@@ -175,9 +184,10 @@ apiTest.describe(
           document: {
             template_id: ESCALATION_TEMPLATE_ID,
             title: 'Wrong template',
-            agent_id: 'default',
+            agent_id: 'elastic-ai-agent',
             space_id: 'default',
             '@timestamp': new Date().toISOString(),
+            rounds: [],
             metadata: { status: 'open' },
             access_control: { access_mode: 'public' },
           },

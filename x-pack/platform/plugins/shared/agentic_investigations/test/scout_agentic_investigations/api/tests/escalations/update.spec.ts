@@ -39,9 +39,10 @@ apiTest.describe(
           document: {
             template_id: INVESTIGATION_TEMPLATE_ID,
             title: 'Scout update test investigation',
-            agent_id: 'default',
+            agent_id: 'elastic-ai-agent',
             space_id: 'default',
             '@timestamp': new Date().toISOString(),
+            rounds: [],
             metadata: { status: 'open', severity: 'high' },
             access_control: { access_mode: 'public' },
           },
@@ -52,9 +53,10 @@ apiTest.describe(
           document: {
             template_id: INVESTIGATION_TEMPLATE_ID,
             title: 'Scout second investigation',
-            agent_id: 'default',
+            agent_id: 'elastic-ai-agent',
             space_id: 'default',
             '@timestamp': new Date().toISOString(),
+            rounds: [],
             metadata: { status: 'open' },
             access_control: { access_mode: 'public' },
           },
@@ -69,6 +71,11 @@ apiTest.describe(
         body: { linked_investigation_id: investigationId, visibility: 'public' },
         responseType: 'json',
       });
+      if (createResponse.status !== 200 || !createResponse.body.id) {
+        throw new Error(
+          `Setup: failed to create escalation (status ${createResponse.status}): ${JSON.stringify(createResponse.body)}`
+        );
+      }
       escalationId = createResponse.body.id;
     });
 
@@ -107,7 +114,13 @@ apiTest.describe(
     apiTest(
       'deduplicates — patching the same id twice produces no duplicate',
       async ({ apiClient }) => {
-        // Patch secondInvestigationId again (it was appended in the previous test)
+        // First append secondInvestigationId, then append it again and verify no duplicate.
+        await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: { linked_investigations: [secondInvestigationId] },
+          responseType: 'json',
+        });
+
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: { linked_investigations: [secondInvestigationId] },

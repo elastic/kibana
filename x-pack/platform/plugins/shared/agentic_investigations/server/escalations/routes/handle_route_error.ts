@@ -7,7 +7,11 @@
 
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
-import { InvalidLinkedInvestigationError, NotAnEscalationError } from '../services/errors';
+import {
+  InvalidLinkedInvestigationError,
+  NotAnEscalationError,
+  TooManyLinkedInvestigationsError,
+} from '../services/errors';
 
 /**
  * Maps service errors to HTTP responses for escalation routes.
@@ -30,6 +34,10 @@ export const handleEscalationRouteError = (
   logger: Logger
 ) => {
   if (error instanceof InvalidLinkedInvestigationError) {
+    return response.badRequest({ body: { message: error.message } });
+  }
+
+  if (error instanceof TooManyLinkedInvestigationsError) {
     return response.badRequest({ body: { message: error.message } });
   }
 
