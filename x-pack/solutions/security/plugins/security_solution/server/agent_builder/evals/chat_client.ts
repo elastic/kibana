@@ -57,6 +57,17 @@ export class AiSocEvalChatClient {
   ) {}
 
   async converse({ messages, conversationId, agentId }: ConverseParams): Promise<ConverseResponse> {
+    const lastMessage = messages[messages.length - 1];
+
+    // The converse API takes a single `input`, taken from the last message. An empty
+    // array is a caller bug, so fail fast instead of letting the undefined access below
+    // retry against p-retry's backoff and resurface as an opaque internal-error response.
+    if (!lastMessage) {
+      throw new Error(
+        'AiSocEvalChatClient.converse requires at least one message: the last message is used as the converse API input.'
+      );
+    }
+
     const callConverseApi = async (): Promise<ConverseResponse> => {
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
@@ -65,7 +76,7 @@ export class AiSocEvalChatClient {
           agent_id: agentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
-          input: messages[messages.length - 1].message,
+          input: lastMessage.message,
         }),
       });
 
