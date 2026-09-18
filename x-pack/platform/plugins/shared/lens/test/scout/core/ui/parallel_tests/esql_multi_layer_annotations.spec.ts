@@ -221,9 +221,22 @@ spaceTest.describe(
           from: `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           to: `${REFERENCE_LINE_DIMENSION} > lns-empty-dimension`,
         });
-        await expect(
-          lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION)
-        ).toHaveCount(2);
+        const duplicatedReferenceLineTriggers =
+          lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION);
+        await expect(duplicatedReferenceLineTriggers).toHaveText([
+          'Static value: 1000',
+          'Static value: 1000 [1]',
+        ]);
+        await lens.dimensions.openDimensionEditor(
+          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
+          2,
+          1
+        );
+        await expect(page.testSubj.locator('lnsXY_fill_below')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        await lens.closeDimensionEditor();
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
         // Adding a value via the empty dimension button routes the new static value
