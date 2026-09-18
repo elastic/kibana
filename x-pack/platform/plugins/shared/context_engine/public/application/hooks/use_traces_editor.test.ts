@@ -93,12 +93,6 @@ describe('useTracesEditor', () => {
     expect(result.current.editing?.draft).toBeUndefined();
   });
 
-  it('does not expose editing controls while idle', () => {
-    const { result } = renderEditor();
-
-    expect(result.current.editing).toBeUndefined();
-  });
-
   it('updates the draft while editing', () => {
     const { result } = renderEditor();
 

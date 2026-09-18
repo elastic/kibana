@@ -5,47 +5,19 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useReducer } from 'react';
+import { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type { EditableAiIndexTrace } from '../components/trace_selector';
 import { useSaveAiIndexTraces } from './use_save_ai_index_traces';
 
-/** The draft only exists while editing, so it cannot outlive an edit session. */
-type TracesEditorState =
-  | { status: 'idle' }
-  | { status: 'editing'; draft: EditableAiIndexTrace | undefined };
+type Draft = EditableAiIndexTrace | undefined;
 
-type TracesEditorAction =
-  | { type: 'editStarted'; draft: EditableAiIndexTrace | undefined }
-  | { type: 'editStopped' }
-  | { type: 'draftChanged'; draft: EditableAiIndexTrace | undefined };
-
-const IDLE: TracesEditorState = { status: 'idle' };
-
-const toEditableTrace = (
-  aiIndex: GetAiIndexResponse | undefined
-): EditableAiIndexTrace | undefined => {
+const toEditableTrace = (aiIndex: GetAiIndexResponse | undefined): Draft => {
   const trace = aiIndex?.traces[0];
-  if (trace?.type === 'elastic_agent' || trace?.type === 'index') {
-    return { type: trace.type, value: trace.value };
+  if (!trace || trace.type === 'esql') {
+    return undefined;
   }
-  return undefined;
-};
-
-const reducer = (state: TracesEditorState, action: TracesEditorAction): TracesEditorState => {
-  switch (action.type) {
-    case 'editStarted':
-      return { status: 'editing', draft: action.draft };
-    case 'editStopped':
-      return IDLE;
-    case 'draftChanged':
-      if (state.status !== 'editing') {
-        return state;
-      }
-      return { status: 'editing', draft: action.draft };
-    default:
-      return state;
-  }
+  return { type: trace.type, value: trace.value };
 };
 
 interface UseTracesEditorParams {
@@ -54,18 +26,16 @@ interface UseTracesEditorParams {
 }
 
 export interface TracesEditorEditingControls {
-  draft: EditableAiIndexTrace | undefined;
-  setDraft: (draft: EditableAiIndexTrace | undefined) => void;
+  draft: Draft;
+  setDraft: (draft: Draft) => void;
   isSaving: boolean;
   save: () => Promise<void>;
   cancel: () => void;
 }
 
 export interface UseTracesEditorResult {
-  /** The persisted trace shown in read-only mode. */
-  currentTrace: EditableAiIndexTrace | undefined;
+  currentTrace: Draft;
   startEditing: () => void;
-  /** Present only while editing. */
   editing: TracesEditorEditingControls | undefined;
 }
 
@@ -73,43 +43,30 @@ export const useTracesEditor = ({
   aiIndex,
   onSaved,
 }: UseTracesEditorParams): UseTracesEditorResult => {
-  const [state, dispatch] = useReducer(reducer, IDLE);
+  const [session, setSession] = useState<{ draft: Draft }>();
   const { saveTraces, isSaving } = useSaveAiIndexTraces();
+  const currentTrace = toEditableTrace(aiIndex);
 
-  const currentTrace = useMemo(() => toEditableTrace(aiIndex), [aiIndex]);
+  const startEditing = () => setSession({ draft: currentTrace });
+  const cancel = () => setSession(undefined);
+  const setDraft = (draft: Draft) => {
+    setSession((current) => (current ? { draft } : current));
+  };
 
-  const startEditing = useCallback(
-    () => dispatch({ type: 'editStarted', draft: currentTrace }),
-    [currentTrace]
-  );
-
-  const cancel = useCallback(() => dispatch({ type: 'editStopped' }), []);
-
-  const setDraft = useCallback(
-    (nextDraft: EditableAiIndexTrace | undefined) =>
-      dispatch({ type: 'draftChanged', draft: nextDraft }),
-    []
-  );
-
-  const save = useCallback(async () => {
-    if (state.status !== 'editing' || !aiIndex) {
+  const save = async () => {
+    if (!session || !aiIndex) {
       return;
     }
-    const saved = await saveTraces(aiIndex, state.draft);
+    const saved = await saveTraces(aiIndex, session.draft);
     if (saved) {
-      dispatch({ type: 'editStopped' });
+      setSession(undefined);
       onSaved();
     }
-  }, [aiIndex, onSaved, saveTraces, state]);
-
-  const editing =
-    state.status === 'editing'
-      ? { draft: state.draft, setDraft, isSaving, save, cancel }
-      : undefined;
+  };
 
   return {
     currentTrace,
     startEditing,
-    editing,
+    editing: session ? { draft: session.draft, setDraft, isSaving, save, cancel } : undefined,
   };
 };
