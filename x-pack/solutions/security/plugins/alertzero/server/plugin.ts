@@ -211,7 +211,6 @@ export class AlertZeroPlugin
         agentTypes: [agentType],
       },
       {
-        alertTriageWorkerEnabled: this.config.featureFlags.alertTriageWorkerEnabled,
         getAttachmentService:
           plugins.securitySolution?.getAlertAnalysisWorkflowRuleAttachmentService.bind(
             plugins.securitySolution

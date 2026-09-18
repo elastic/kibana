@@ -46,7 +46,6 @@ interface AlertTriageAttachmentService {
 }
 
 interface AlertTriageOpts {
-  alertTriageWorkerEnabled: boolean;
   getAttachmentService?: (
     request: KibanaRequest,
     workflowId: string
@@ -107,7 +106,7 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: AlertTriageOpts = { alertTriageWorkerEnabled: false }
+    private readonly alertTriageOpts: AlertTriageOpts = {}
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -250,9 +249,7 @@ export class WorkersService {
         if (!status.installed) return { outcome: 'unavailable' };
       }
 
-      const isAlertTriageEnabled =
-        workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID &&
-        this.alertTriageOpts.alertTriageWorkerEnabled;
+      const isAlertTriageEnabled = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 
       const isAlertTriageWorker =
         isAlertTriageEnabled && this.alertTriageOpts.getAttachmentService != null;
