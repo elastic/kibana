@@ -94,10 +94,12 @@ outputs:
     type: string
   - name: schedule_interval
     type: string
-  # The Attack Discovery generation id, not this workflow's execution id. It keys
-  # the AD generations API and lands on every persisted discovery as
+  # The Attack Discovery generation ids, not this workflow's execution id. Each
+  # keys the AD generations API and lands on that batch's persisted discoveries as
   # `kibana.alert.rule.execution.uuid`, so a run can be traced to what it produced.
-  - name: execution_uuid
+  # Plural because generation is batched: one id per delivered batch, comma
+  # separated. `type: string` for the same reason as the counts above.
+  - name: execution_uuids
     type: string
 consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
@@ -106,34 +108,33 @@ consts:
   # `attack_discoveries` omitted, `null` (validation failed), or `[]` (genuine zero).
   no_discoveries: []
 steps:
-  # Reuses the existing generation engine unchanged (#19276 AC2): the run step is
-  # the composite retrieve -> generate -> validate -> persist pipeline. Alert
-  # batching (https://github.com/elastic/security-team/issues/18967) will replace
-  # this call site later, so nothing here is designed around it.
+  # Batched generation (https://github.com/elastic/security-team/issues/18967),
+  # the call site #19276 reserved for it.
   #
-  # `mode: sync` because the fan-out below needs the discoveries inline. Sync mode
-  # awaits the pipeline to completion and applies no soft deadline, so generation
-  # finishes inside this step and the run occupies its one per-space concurrency
-  # slot for as long as that takes — up to the 35m timeout below.
+  # Synchronous (`workflow.execute`, not `executeAsync`): the fan-out below needs
+  # the discoveries inline, and child failure must propagate. Holds the one
+  # per-space concurrency slot for the whole child.
   #
-  # No `on-failure`: the default propagation is what #19276 requires — when
-  # generation fails after its own built-in retries, this run fails and hands off
-  # nothing. Adding `continue: true` would fan out over a partial result.
+  # A failed batch is a gap, not a run failure — the child runs `mode: settled`.
+  # A failed CHILD still fails the run, which is why there is no `on-failure`
+  # here: `continue: true` would fan out over a partial result.
   - name: run_generation
-    type: security.attack-discovery.run
-    # 35m = the 30m pipeline budget + 5m. The pipeline enforces its own 30m budget
-    # internally (DEFAULT_PIPELINE_TIMEOUT_MS / getRemainingBudgetMs in
-    # kbn-discoveries run_manual_orchestration: ADR-008's gate 10m + generation 10m
-    # + validation 5m, shared across phases on one wall clock). This timeout must
-    # stay ABOVE it so the pipeline's own budget wins the race and fails with an
-    # attributed PipelineStepError, rather than the engine killing the step with an
-    # opaque TimeoutError while generation keeps running in the background.
+    type: workflow.execute
+    # Bounds N pipelines, not one. No literal covers the worst case (100 batches
+    # at `concurrency: max 2` x 30m branch-timeout is ~50 waves); 4h is sized for
+    # a realistic 24h lookback while still bounding a wedged child. A single stuck
+    # batch is attributed by the child's per-branch timeout, not by this.
+    #
     # Must stay a literal: the engine hands `timeout` to the duration parser
     # unrendered (elastic/kibana#290258).
-    timeout: '35m'
+    timeout: '4h'
     with:
-      connector_id: "{{ inputs.connector_id }}"
-      mode: sync
+      workflow-id: system-security-attack-discovery-batched-generation
+      inputs:
+        # `batch_size` and `lookback` are left at the child's defaults. Surfacing
+        # them as Worker settings means threading new values through the Worker
+        # settings template, and is tracked separately.
+        connector_id: "{{ inputs.connector_id }}"
 
   # The fan-out list, resolved once so the batches, the parallel step, and the
   # summary agree on it. `| default: consts.no_discoveries` normalizes the three
@@ -156,11 +157,15 @@ steps:
     type: console
     if: "${{ steps.resolve_fanout.output.attack_count == 0 }}"
     with:
+      # Batch counts, not a single `status`: the child emits none, and they
+      # separate a quiet run from one where batches failed.
       message: >-
         Attack Discovery generation produced no attacks
-        (alerts analyzed: {{ steps.run_generation.output.alerts_context_count }},
-        status: {{ steps.run_generation.output.status }}). Skipping the per-attack
-        fan-out.
+        (alerts analyzed: {{ steps.run_generation.output.alerts_analyzed }},
+        batches: {{ steps.run_generation.output.batches_succeeded }}/{{
+        steps.run_generation.output.batches_total }} succeeded, {{
+        steps.run_generation.output.batches_failed }} failed). Skipping the
+        per-attack fan-out.
 
   # Failed-review count starts at 0 so an empty generation and the first batch
   # both have a number to add to. Each batch writes the running total back here.
@@ -217,15 +222,18 @@ steps:
               workflow-id: system-security-attack-discovery-review
               inputs:
                 # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
-                # stringifies. The run step returns the persist handover, so
-                # `alert_ids` holds DETECTION alert ids. There is no persisted Attack
-                # Discovery `_id` to pass yet. #19022 / #19214 will use it once the
-                # run step returns persist-projected discoveries with document ids
-                # in-context. Do not forward `foreach.item.id`: that optional field
-                # is the LLM UUID, not the document id.
-                title: "{{ foreach.item.title }}"
-                alert_ids: "${{ foreach.item.alert_ids }}"
-                summary_markdown: "{{ foreach.item.summary_markdown }}"
+                # stringifies. `alert_ids` holds DETECTION alert ids; there is no
+                # persisted Attack Discovery `_id` to pass yet (#19022 / #19214).
+                #
+                # Bracket access: these are persisted alert `_source` documents whose
+                # discovery fields are FLAT dotted keys, so `foreach.item.title`
+                # silently resolves to empty.
+                #
+                # Anonymized fields, not `*_with_replacements` — de-anonymizing
+                # reviews is a behaviour change owned by #19022 / #19211.
+                title: '{{ foreach.item["kibana.alert.attack_discovery.title"] }}'
+                alert_ids: '${{ foreach.item["kibana.alert.attack_discovery.alert_ids"] }}'
+                summary_markdown: '{{ foreach.item["kibana.alert.attack_discovery.summary_markdown"] }}'
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's autonomy enum.
                 autonomy: "${{ inputs.autonomy }}"
@@ -252,6 +260,6 @@ steps:
       attacks_generated: "{{ steps.resolve_fanout.output.attack_count }}"
       reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
       reviews_failed: "{{ variables.reviews_failed }}"
-      alerts_analyzed: "{{ steps.run_generation.output.alerts_context_count | default: 0 }}"
+      alerts_analyzed: "{{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
       schedule_interval: "{{ inputs.schedule_interval }}"
-      execution_uuid: "{{ steps.run_generation.output.execution_uuid }}"
+      execution_uuids: "{{ steps.run_generation.output.execution_uuids | join: ',' }}"
