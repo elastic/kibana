@@ -446,10 +446,8 @@ export const parseThresholdEsql = (
   if (!statsResult) return null;
   idx++;
 
-  // Optional EVAL commands (the trailing `EVAL severity = ...` is parsed separately below)
   const evaluations: EvaluationDefinition[] = [];
   while (idx < commands.length && commands[idx].name === 'eval') {
-    if (isSeverityEval(commands[idx])) break;
     const ev = parseEvalCommand(commands[idx]);
     if (!ev) return null;
     evaluations.push(ev);

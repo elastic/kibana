@@ -1013,6 +1013,26 @@ describe('severity round-trip', () => {
       levels: [],
     });
   });
+
+  it('treats a user evaluation literally named "severity" as an evaluation, not severity config', () => {
+    // Regression: the generated severity EVAL is only ever the last command in the query. A user
+    // evaluation named exactly `severity` (which appears earlier) must round-trip as an evaluation
+    // instead of breaking the parse and forcing the raw ES|QL fallback.
+    const original = makeValues({
+      evaluations: [{ id: 'e1', label: 'severity', expression: 'count / 2' }],
+      alertConditions: [
+        { id: 'c1', metric: 'severity', comparator: Comparator.GT, threshold: [5] },
+      ],
+    });
+
+    const query = buildThresholdEsql(original);
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.evaluations).toHaveLength(1);
+    expect(parsed!.evaluations[0].label).toBe('severity');
+    expect(parsed!.severity).toBeUndefined();
+  });
 });
 
 describe('parseDiscoverQueryForBuilder', () => {
