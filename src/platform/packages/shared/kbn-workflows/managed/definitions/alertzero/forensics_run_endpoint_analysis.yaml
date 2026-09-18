@@ -195,25 +195,24 @@ steps:
                   `workflowId`. Do not invent workflow ids and do not recommend an action that is not in the
                   catalog. If the catalog is empty, set propose=false and return an empty `recommendedActions` list.
                 - If this reconstruction justifies containment, recommend specific containment actions in
-                  `recommendedActions` from that catalog. Each action requires endpoint_ids taken from Elastic
-                  Defend agent.id on involved hosts. Recommend only what you can tie to the timeline and
-                  indicators you returned.
+                  `recommendedActions` from that catalog. Recommend only what you can tie to the timeline
+                  and indicators you returned.
+
+                Each catalog entry carries an `inputSchema`: the JSON Schema of the inputs that action
+                accepts. Set `actionInput` to an object satisfying that entry's `inputSchema`. It is the
+                contract — read it per action rather than assuming a shape from the action's description,
+                from another entry, or from what an action required previously. Fill every property it
+                marks required, and take the values only from the evidence: Elastic Defend `agent.id`
+                for endpoint ids, telemetry pids and entity_ids for process selectors.
 
                 Rules
                 - Pick the most specific catalog action the evidence supports. Prefer kill/suspend when a process
                   entity_id or pid is present; isolate when only the host is known.
-                - If no Elastic Defend endpoint_id is present, or required extra fields are missing, set
-                  propose=false. Do not guess ids, pids, paths, or commands.
+                - If the evidence cannot fill what an entry's `inputSchema` requires, drop that action. Set
+                  propose=false when that leaves nothing. Never guess an id, pid, path, or command that is
+                  not in the evidence.
                 - Cite hosts, process/path, tactics, and why this action now in rationale.
-
-                For each recommended action set actionInput to the shape that action's catalog description implies:
-                - Host isolation → { "endpoint_ids": [agentId] }
-                - Kill or suspend process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
-                  or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
-                agentId must come from Elastic Defend agent.id in the telemetry.
-                For process actions include pid when present in telemetry, otherwise entity_id.
-                Never guess pids, entity_ids, or agent IDs that are not in the evidence.
-                Optionally add a short comment (one sentence) explaining why you chose this action.
+                - Optionally add a short comment (one sentence) explaining why you chose this action.
 
               schema:
                 type: object
@@ -392,8 +391,6 @@ steps:
                         - actionId
                         - actionInput
                       properties:
-                        agentId:
-                          type: string
                         actionId:
                           type: string
                           maxLength: 256
@@ -404,29 +401,21 @@ steps:
                           type: string
                           maxLength: 500
                           description: One sentence explaining why this action is justified.
+                        # Deliberately unconstrained. Each action publishes its own input contract as
+                        # `inputSchema` on its catalog entry, which is known only once the model has
+                        # called `security.alertzero.actions.list` — this schema is fixed before the turn
+                        # begins, so it cannot be the contract. Restating one would pin the union of
+                        # today's Defend actions onto every future one, and a required `endpoint_ids`
+                        # here would make an action that takes none impossible to propose at all. The
+                        # real schemas also carry bounds and a pid/entity_id `oneOf` that a restatement
+                        # kept drifting from. `assertActionInputValid` rejects an input the action could
+                        # not accept when the proposal is created, so the contract is enforced where it
+                        # is actually known rather than guessed at here.
                         actionInput:
                           type: object
+                          additionalProperties: true
                           description: >
-                            Input for the catalog action. Host isolation → { endpoint_ids }.
-                            Kill or suspend process → { endpoint_ids, parameters: { pid } or { entity_id } }.
-                          required:
-                            - endpoint_ids
-                          properties:
-                            endpoint_ids:
-                              type: array
-                              items:
-                                type: string
-                              description: Elastic Defend agent IDs (agent.id) from the evidence.
-                            parameters:
-                              type: object
-                              description: Required for kill/suspend — exactly one of pid or entity_id.
-                              properties:
-                                pid:
-                                  type: number
-                                  description: Process ID from endpoint telemetry.
-                                entity_id:
-                                  type: string
-                                  description: Elastic Defend process entity_id from endpoint telemetry.
+                            Input for the catalog action, shaped to satisfy that entry's `inputSchema`.
 
           # Timeline and IoCs are investigation attachments. The forensic agent run is
           # ephemeral (no conversation), so the ES|QL transcript never lands on the

@@ -174,6 +174,57 @@ describe('Endpoint analysis run', () => {
     });
   });
 
+  // Each action publishes its own input contract as `inputSchema` on its catalog
+  // entry, which the model only sees once it has called the catalog — after this
+  // schema is fixed. So the contract cannot live here, and a copy of it would pin
+  // today's Defend actions onto every future one while drifting from bounds this
+  // cannot express. `assertActionInputValid` rejects a bad input at proposal time.
+  describe('containment proposals', () => {
+    const schema = stepByName('forensic_analysis')?.with?.schema as {
+      properties?: {
+        recommendedActions?: {
+          items?: {
+            required?: string[];
+            properties?: Record<string, Record<string, unknown>>;
+          };
+        };
+      };
+    };
+    const recommendation = schema?.properties?.recommendedActions?.items;
+
+    it('leaves the action input shape to the catalog instead of restating it', () => {
+      const actionInput = recommendation?.properties?.actionInput;
+      expect(actionInput?.type).toBe('object');
+      expect(actionInput?.additionalProperties).toBe(true);
+      // A restated shape is exactly what must not come back: `required: [endpoint_ids]`
+      // would make an action that takes none impossible to propose.
+      expect(actionInput?.properties).toBeUndefined();
+      expect(actionInput?.required).toBeUndefined();
+    });
+
+    // Only `actionId`, `comment` and `actionInput` are read when the proposal is
+    // dispatched, so a field the workflow never passes on is one the model spends
+    // tokens filling for nothing.
+    it('asks only for the fields the proposal dispatch passes on', () => {
+      expect(Object.keys(recommendation?.properties ?? {}).sort()).toEqual([
+        'actionId',
+        'actionInput',
+        'comment',
+      ]);
+      expect(recommendation?.required).toEqual(['actionId', 'actionInput']);
+    });
+
+    // Naming a process selector is fine — that is which action to pick, and the
+    // provenance of a value. Spelling out the object the action receives is the
+    // restatement, and `endpoint_ids` / `agentId` were how it was written.
+    it('points the agent at each entry inputSchema rather than a fixed shape', () => {
+      const message = stepByName('forensic_analysis')?.with?.message as string;
+      expect(message).toContain('inputSchema');
+      expect(message).not.toContain('endpoint_ids');
+      expect(message).not.toContain('agentId');
+    });
+  });
+
   // A malformed indicator stays `pending` unless something retires it, and the sweep
   // selects on exactly that, so leaving it would re-dispatch it every minute for the
   // whole lookback window. These three tests are what keep that loop closed.
