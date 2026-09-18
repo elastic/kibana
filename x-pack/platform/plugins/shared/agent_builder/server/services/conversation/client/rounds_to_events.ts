@@ -21,15 +21,38 @@ import {
   ROUND_DERIVED_EVENT_ID_SUFFIXES,
   TimelineEventType,
   TimelineTriggerType,
-  executionStartedEventId,
   executionTerminatedEventId,
   parseExecutionId,
-  promptResponseEventId,
   resumeExecutionId,
-  roundDerivedEventIds,
   roundStepEventId,
 } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
+
+const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.execution,
+];
+
+const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
+// A resume writes a `prompt_response` event `${roundId}::prompt_response::${k}`. It is round-derived
+// (regenerated/preserved with its round), so it must not be treated as an additive event.
+const PROMPT_RESPONSE_EVENT_ID_PATTERN = /::prompt_response::\d+$/;
+
+/** True when `id` was produced by {@link roundToEvents} or the resume append path. */
+export const isRoundDerivedEventId = (id: string): boolean =>
+  ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix)) ||
+  STEP_EVENT_ID_PATTERN.test(id) ||
+  PROMPT_RESPONSE_EVENT_ID_PATTERN.test(id);
+
+/** Round-derived event ids for a given round, keyed for readability. */
+const roundDerivedEventIds = (roundId: string) => ({
+  userMessage: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  executionStarted: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
+  executionTerminated: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`,
+  execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
+});
 
 /** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
@@ -189,6 +212,14 @@ export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventA
   id: conversation.agent_id,
 });
 
+/** The `execution_started` event id for an execution index (0 = the initial run). */
+export const executionStartedEventId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted
+      }`;
+
 /**
  * The index of the next execution to append to a round. Counts distinct executions already stored
  * for the round on `conversation.events`. Returns 0 when the round has no prior executions.
@@ -205,6 +236,10 @@ export const nextResumeIndex = (
   );
   return roundExecutionIds.size;
 };
+
+/** The `prompt_response` link event id written for the k-th resume of a round. */
+export const promptResponseEventId = (roundId: string, executionIndex: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.promptResponse}::${executionIndex}`;
 
 /** Records a human answering a paused round, resuming a specific run. */
 export const promptResponseEvent = ({

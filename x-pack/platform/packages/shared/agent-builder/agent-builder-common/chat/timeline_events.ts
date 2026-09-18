@@ -358,41 +358,13 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   promptResponse: '::prompt_response',
 } as const;
 
-const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
-  ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage,
-  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted,
-  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated,
-  ROUND_DERIVED_EVENT_ID_SUFFIXES.execution,
-];
-
-const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
-// A resume writes a `prompt_response` event `${roundId}::prompt_response::${k}`. It is round-derived
-// (regenerated/preserved with its round), so it must not be treated as an additive event.
-const PROMPT_RESPONSE_EVENT_ID_PATTERN = /::prompt_response::\d+$/;
-
-/** True when `id` was produced by the round-derived events projection or the resume append path. */
-export const isRoundDerivedEventId = (id: string): boolean =>
-  ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix)) ||
-  STEP_EVENT_ID_PATTERN.test(id) ||
-  PROMPT_RESPONSE_EVENT_ID_PATTERN.test(id);
-
-/** Round-derived event ids for a given round, keyed for readability. */
-export const roundDerivedEventIds = (roundId: string) => ({
-  userMessage: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
-  executionStarted: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
-  executionTerminated: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`,
-  execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
-});
+/** ID for a step event. */
+export const roundStepEventId = (roundId: string, sequence: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
 
 /** Builds an execution id for a resume appended to a round without rewriting its initial run. */
 export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
-
-/** The execution id for an execution index (0 = the initial run). */
-export const executionId = (roundId: string, executionIndex: number): string =>
-  executionIndex === 0
-    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`
-    : resumeExecutionId(roundId, executionIndex);
 
 /** Parses initial and resume execution ids, returning undefined for unrelated ids. */
 export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
@@ -403,14 +375,6 @@ export const parseExecutionId = (id: string): { roundId: string; index: number }
   return { roundId: match[1], index: Number(match[2] ?? 0) };
 };
 
-/** The `execution_started` event id for an execution index (0 = the initial run). */
-export const executionStartedEventId = (roundId: string, executionIndex: number): string =>
-  executionIndex === 0
-    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`
-    : `${resumeExecutionId(roundId, executionIndex)}${
-        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted
-      }`;
-
 /** The `execution_terminated` event id for an execution index (0 = the initial run). */
 export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>
   executionIndex === 0
@@ -418,29 +382,6 @@ export const executionTerminatedEventId = (roundId: string, executionIndex: numb
     : `${resumeExecutionId(roundId, executionIndex)}${
         ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated
       }`;
-
-/** ID for a step event of the initial run. */
-export const roundStepEventId = (roundId: string, sequence: number): string =>
-  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
-
-/**
- * ID for a step event of any execution. Step ids are not uniform: the initial run numbers steps
- * off the round id, a resume numbers them off its own execution id.
- */
-export const executionStepEventId = (
-  roundId: string,
-  executionIndex: number,
-  sequence: number
-): string =>
-  executionIndex === 0
-    ? roundStepEventId(roundId, sequence)
-    : `${resumeExecutionId(roundId, executionIndex)}${
-        ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix
-      }${sequence}`;
-
-/** The `prompt_response` link event id written for the k-th resume of a round. */
-export const promptResponseEventId = (roundId: string, executionIndex: number): string =>
-  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.promptResponse}::${executionIndex}`;
 
 /**
  * Type names that are not covered by a `TimelineEventType` member but would still

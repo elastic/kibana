@@ -17,7 +17,6 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
-  isRoundDerivedEventId,
   parseExecutionId,
   resumeExecutionId,
 } from '@kbn/agent-builder-common';
@@ -25,6 +24,7 @@ import {
   executionStartedEvent,
   nextResumeIndex,
   resumeExecutionStartedEvent,
+  isRoundDerivedEventId,
   roundsToEvents,
   userMessageEvent,
 } from './rounds_to_events';

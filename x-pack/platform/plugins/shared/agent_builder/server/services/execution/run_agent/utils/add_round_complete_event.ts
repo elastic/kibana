@@ -51,7 +51,7 @@ import {
   isUserQuestionAskedEvent,
   isUserQuestionAnsweredEvent,
   createAskUserQuestionStep,
-  roundDerivedEventIds,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -117,7 +117,7 @@ const buildAttachmentEvents = ({
   agentId: string;
   createdAt: string;
 }) => {
-  const executionId = roundDerivedEventIds(round.id).execution;
+  const executionId = `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`;
   return [
     ...attachmentChangesToEvents(chatInputChanges, {
       source: 'chat_input',

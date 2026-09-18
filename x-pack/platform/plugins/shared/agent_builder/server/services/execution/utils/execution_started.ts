@@ -13,14 +13,11 @@ import type {
   Conversation,
   ExecutionStartedEvent,
 } from '@kbn/agent-builder-common';
-import {
-  isEventsNativeVersion,
-  isRoundStartedEvent,
-  promptResponseEventId,
-} from '@kbn/agent-builder-common';
+import { isEventsNativeVersion, isRoundStartedEvent } from '@kbn/agent-builder-common';
 import {
   executionStartedEvent,
   nextResumeIndex,
+  promptResponseEventId,
   resumeExecutionStartedEvent,
 } from '../../conversation/client/rounds_to_events';
 
