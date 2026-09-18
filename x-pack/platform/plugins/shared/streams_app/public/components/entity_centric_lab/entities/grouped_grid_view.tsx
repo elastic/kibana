@@ -289,9 +289,9 @@ const flattenColor = (foreground: string, background: string): string => {
   return `#${toHexByte(r)}${toHexByte(g)}${toHexByte(b)}`;
 };
 
-/** Opaque hex equivalent of a severity tile tone (tone over the page). */
+/** Opaque colour for a severity tile tone. */
 const solidToneColor = (tone: MetricTone, euiTheme: EuiThemeComputed): string =>
-  flattenColor(toneColor(tone, euiTheme), euiTheme.colors.emptyShade);
+  toneColor(tone, euiTheme);
 
 /**
  * Default Steps rules for a numeric metric: one threshold per severity
@@ -517,11 +517,8 @@ const MetricTile = ({
           as its neighbours. A \`clip-path\` clips \`border\`/\`box-shadow\`, so
           the stroke is drawn by growing a dark-grey hexagon outward to the
           full slot (overriding the ${HEX_GAP_SCALE} gap scale) and laying
-          the fill back on top at the normal gap size via \`::after\`. Tones
-          are semi-transparent (see \`toneColor\`), so the fill is painted
-          over an opaque \`emptyShade\` backing — otherwise it would
-          composite over the dark-grey ring and read as a darker colour.
-          The dark grey only shows in the surrounding gap.
+          the fill back on top at the normal gap size via \`::after\`.
+          The dark ring only shows in the surrounding gap.
         */
         transform: scale(1);
         background-color: ${euiTheme.colors.darkShade};
@@ -531,8 +528,7 @@ const MetricTile = ({
           inset: 0;
           transform: scale(${HEX_GAP_SCALE});
           clip-path: ${HEX_CLIP_PATH};
-          background-color: ${euiTheme.colors.emptyShade};
-          background-image: linear-gradient(${fill}, ${fill});
+          background-color: ${fill};
           pointer-events: none;
         }
       `
@@ -655,9 +651,9 @@ const MetricTileTooltip = ({
         width: 224,
         padding: '8px 12px',
         borderRadius: euiTheme.border.radius.medium,
-        background: '#1d2a3a',
-        color: '#ffffff',
-        boxShadow: '0 4px 12px rgba(29, 42, 58, 0.4)',
+        background: euiTheme.components.tooltipBackground,
+        color: euiTheme.colors.textGhost,
+        boxShadow: `0 4px 12px ${euiTheme.colors.shadow}40`,
         fontSize: 12,
         lineHeight: 1.4,
       }}
@@ -674,7 +670,7 @@ const MetricTileTooltip = ({
           {line.label} {line.value}
         </div>
       ))}
-      <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.15)', margin: '6px 0' }} />
+      <div style={{ height: 1, background: `${euiTheme.colors.textGhost}26`, margin: '6px 0' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span
           aria-hidden
@@ -682,14 +678,7 @@ const MetricTileTooltip = ({
             width: 8,
             height: 8,
             borderRadius: 2,
-            // `toneColor` is semi-transparent, so on the dark tooltip it would
-            // composite to a different shade than the tiles (which sit on the
-            // light page). Layer the tone (or the palette colour) over the
-            // same light base the tiles use so the swatch reads identically
-            // to its square.
-            background: `linear-gradient(${fillColor ?? toneColor(reading.tone, euiTheme)}, ${
-              fillColor ?? toneColor(reading.tone, euiTheme)
-            }), ${euiTheme.colors.emptyShade}`,
+            background: fillColor ?? toneColor(reading.tone, euiTheme),
             display: 'inline-block',
             flexShrink: 0,
           }}
@@ -843,6 +832,10 @@ const BucketTileRow = ({
       }
       const rank = TONE_RANK[a.reading.tone] - TONE_RANK[b.reading.tone];
       if (rank !== 0) return rank * flip;
+      // Within the same tone, sort by active alert count (most first).
+      const aAlerts = a.entity.alerts?.active ?? 0;
+      const bAlerts = b.entity.alerts?.active ?? 0;
+      if (aAlerts !== bAlerts) return (bAlerts - aAlerts) * flip;
       return a.entity.name.localeCompare(b.entity.name);
     });
     return withReadings;

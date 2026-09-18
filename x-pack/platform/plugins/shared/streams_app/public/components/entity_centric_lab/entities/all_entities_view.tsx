@@ -33,6 +33,7 @@ import {
   EuiTourStep,
   EuiEmptyPrompt,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -442,27 +443,28 @@ const computeAlertsBadge = (
   entity: Entity | undefined
 ): { label: string; color: string } | undefined => {
   if (!entity) return undefined;
-  // Derive the active alert count from entity health to stay coherent
-  // with the flyout's Alerts tab (which uses the same health-based logic
-  // in `alertsByHealth` inside `kind_templates.ts`).
-  const health = entity.health;
-  if (health === 'unhealthy') {
-    return { label: '5 active alerts', color: 'danger' };
+  if (!entity.alerts) {
+    return { label: 'No alert set up', color: 'hollow' };
   }
-  if (health === 'atRisk') {
-    return { label: '1 active alert', color: 'danger' };
+  const { active } = entity.alerts;
+  if (active > 0) {
+    return {
+      label: `${active} active alert${active === 1 ? '' : 's'}`,
+      color: 'danger',
+    };
   }
   return { label: '0 active alerts', color: 'success' };
 };
 
-const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) =>
-  createPortal(
+const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) => {
+  const { euiTheme } = useEuiTheme();
+  return createPortal(
     <div
       css={css`
         position: fixed;
         inset: 0;
         z-index: 100000;
-        background: #fff;
+        background: ${euiTheme.colors.backgroundBasePlain};
         overflow-y: auto;
       `}
     >
@@ -491,6 +493,7 @@ const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) =>
     </div>,
     document.body
   );
+};
 
 const MoreActionsMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -2268,6 +2271,7 @@ const AllEntitiesViewInner = ({
             }
             hideHealthBadge={isPhase1}
             alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
+            alertsActiveCount={isPhase1 ? selectedEntity?.alerts?.active : undefined}
             hideAiSummary={isPhase1}
             hideOwnership={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
@@ -2289,6 +2293,7 @@ const AllEntitiesViewInner = ({
               minimalTabs={isInfraShortTerm}
               hideHealthBadge={isPhase1}
               alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
+              alertsActiveCount={isPhase1 ? childEntity?.alerts?.active : undefined}
               hideAiSummary={isPhase1}
               hideOwnership={isPhase1}
               hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}

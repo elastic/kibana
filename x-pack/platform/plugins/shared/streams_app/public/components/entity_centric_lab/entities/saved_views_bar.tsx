@@ -678,7 +678,7 @@ const rowLabelCss = css`
 const rowCss = css`
   padding: 0 8px;
   &:hover {
-    background-color: var(--eui-color-lightest-shade, #f7f8fc);
+    background-color: var(--eui-color-lightest-shade);
   }
 `;
 

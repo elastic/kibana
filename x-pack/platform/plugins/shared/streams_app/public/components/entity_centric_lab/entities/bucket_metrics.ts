@@ -30,7 +30,6 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { transparentize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 // ---------------------------------------------------------------------------
@@ -73,24 +72,22 @@ export const TONE_LABEL: Record<MetricTone, string> = {
   }),
 };
 
-export const toneColor = (tone: MetricTone, euiTheme: EuiThemeComputed): string => {
+export const toneColor = (tone: MetricTone, _euiTheme: EuiThemeComputed): string => {
   switch (tone) {
     case 'good':
-      return transparentize(euiTheme.colors.severity.success, 0.45);
+      return '#88E3C3'; // green40
     case 'warning':
-      return transparentize(euiTheme.colors.severity.warning, 0.55);
+      return '#FCD883'; // yellow30
     case 'danger':
-      return transparentize(euiTheme.colors.severity.danger, 0.55);
+      return '#FFB5AD'; // red40
     case 'accent':
-      return transparentize(euiTheme.colors.accent, 0.55);
+      return '#D1BAFC'; // purple40
     case 'neutral':
-      return transparentize(euiTheme.colors.lightShade, 0.4);
+      return '#D6DDEA'; // blueGrey25
     case 'subdued':
-      return transparentize(euiTheme.colors.darkShade, 0.7);
+      return '#77E5E0'; // teal40
     case 'info':
-      // EUI's primary blue is the canonical "info" colour; lightened
-      // to match the saturation of the other severity tones.
-      return transparentize(euiTheme.colors.primary, 0.55);
+      return '#A3CBFF'; // blue40
   }
 };
 

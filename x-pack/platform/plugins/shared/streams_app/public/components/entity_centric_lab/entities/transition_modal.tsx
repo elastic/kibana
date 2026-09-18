@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -75,6 +76,7 @@ interface TransitionModalProps {
 }
 
 const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <div
       css={css`
@@ -159,7 +161,7 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
               css={css`
                 width: 100%;
                 border-radius: 6px;
-                border: 1px solid rgba(0, 0, 0, 0.1);
+                border: 1px solid ${euiTheme.colors.borderBaseSubdued};
               `}
             />
           </EuiFlexItem>
@@ -197,6 +199,7 @@ interface OldExperiencePageProps {
 }
 
 export const OldExperiencePage = ({ onSwitch }: OldExperiencePageProps) => {
+  const { euiTheme } = useEuiTheme();
   const [showModal, setShowModal] = useState(true);
 
   const handleSwitch = () => {
@@ -211,7 +214,7 @@ export const OldExperiencePage = ({ onSwitch }: OldExperiencePageProps) => {
         inset: 0;
         z-index: 100000;
         overflow: hidden;
-        background: #fff;
+        background: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
       <img
@@ -230,7 +233,7 @@ export const OldExperiencePage = ({ onSwitch }: OldExperiencePageProps) => {
           css={css`
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: ${euiTheme.colors.backgroundBaseInteractiveOverlay};
           `}
         />
       ) : null}

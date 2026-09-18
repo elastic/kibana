@@ -20,7 +20,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  transparentize,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiThemeComputed,
@@ -293,22 +292,18 @@ const SummarySubheader = ({ children }: { children: React.ReactNode }) => {
 
 const GOLDEN_SIGNAL_TILE_HEIGHT = 132;
 
-// Soften the saturated severity palette into pastel backgrounds suitable for
-// large filled tiles -- the hue stays recognisable while the value/chrome on
-// top of the tile (delta, sparkline, big number) stays legible.
-const GOLDEN_SIGNAL_TILE_ALPHA = 0.35;
-
+// Muted severity colours from the EUI primitive *40/*30 palette scale.
 const goldenSignalTileBackground = (
   level: GoldenSignalLevel,
-  euiTheme: EuiThemeComputed
+  _euiTheme: EuiThemeComputed
 ): string => {
   switch (level) {
     case 'warning':
-      return transparentize(euiTheme.colors.severity.warning, GOLDEN_SIGNAL_TILE_ALPHA);
+      return '#FCD883'; // yellow30
     case 'danger':
-      return transparentize(euiTheme.colors.severity.danger, GOLDEN_SIGNAL_TILE_ALPHA);
+      return '#FFB5AD'; // red40
     case 'success':
-      return transparentize(euiTheme.colors.severity.success, GOLDEN_SIGNAL_TILE_ALPHA);
+      return '#88E3C3'; // green40
   }
 };
 

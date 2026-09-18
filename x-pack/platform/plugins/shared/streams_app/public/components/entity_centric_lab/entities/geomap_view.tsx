@@ -130,10 +130,8 @@ const polygonToPath = (coordinates: Position[][]): string =>
 
 const LAND_PATHS: readonly string[] = (worldLandPolygons as Position[][][]).map(polygonToPath);
 
-// Flat land fill sampled from the reference map — a light warm gray.
-// Hard-coded (rather than an EUI token) because no theme colour reads as
-// "map land"; kept subtle so the health donuts stay the focus.
-const LAND_FILL = '#e0e0d8';
+// Land fill is resolved per-theme inside the rendering component so
+// the map background stays visible in both light and dark mode.
 
 // ---------------------------------------------------------------------------
 // Aggregation
@@ -450,11 +448,9 @@ const DonutTooltip = ({ hover, euiTheme }: { hover: HoverState; euiTheme: EuiThe
         maxWidth: 240,
         padding: '8px 12px',
         borderRadius: euiTheme.border.radius.medium,
-        // Fixed dark surface (matches the donut drop-shadow colour) so the
-        // card reads the same in light or dark theme, like EuiToolTip.
-        background: '#1d2a3a',
-        color: '#ffffff',
-        boxShadow: '0 4px 12px rgba(29, 42, 58, 0.4)',
+        background: euiTheme.colors.backgroundFilledText,
+        color: euiTheme.colors.textGhost,
+        boxShadow: `0 4px 12px ${euiTheme.colors.shadow}40`,
         fontSize: 12,
         lineHeight: 1.4,
       }}
@@ -470,7 +466,7 @@ const DonutTooltip = ({ hover, euiTheme }: { hover: HoverState; euiTheme: EuiThe
       <div
         style={{
           height: 1,
-          background: 'rgba(255, 255, 255, 0.15)',
+          background: `${euiTheme.colors.textGhost}26`,
           margin: '0 0 6px',
         }}
       />
@@ -593,7 +589,7 @@ const GeomapPanel = ({
                 dx="0"
                 dy="1"
                 stdDeviation="1.6"
-                floodColor="#1d2a3a"
+                floodColor={euiTheme.colors.shadow}
                 floodOpacity="0.35"
               />
             </filter>
@@ -603,7 +599,7 @@ const GeomapPanel = ({
             attention. */}
           <g>
             {LAND_PATHS.map((path, index) => (
-              <path key={index} d={path} fill={LAND_FILL} />
+              <path key={index} d={path} fill={euiTheme.colors.backgroundBaseSubdued} />
             ))}
           </g>
           {buckets.map((bucket) => (

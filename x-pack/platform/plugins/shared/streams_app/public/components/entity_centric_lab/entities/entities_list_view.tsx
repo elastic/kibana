@@ -226,6 +226,7 @@ const EntityNameLink = ({
       data-test-subj={`entityCentricLabEntityRow-${entity.id}`}
       onClick={() => onSelectEntity(entity.name)}
     >
+      <EuiIcon type="expand" size="s" style={{ marginRight: 4 }} />
       {displayName}
     </EuiLink>
   );

@@ -174,6 +174,13 @@ interface EntityFlyoutProps {
    * the position normally occupied by the health badge.
    */
   readonly alertsBadge?: { label: string; color: string };
+  /**
+   * Optional override for the Alerts tab counter badge. When provided,
+   * this count is used instead of `tabsData.alerts.activeCount` so the
+   * tab badge matches the header badge (which reads from the entity's
+   * actual `alerts.active` field).
+   */
+  readonly alertsActiveCount?: number;
   /** When true the AI-generated summary is hidden from the Overview tab (Phase 1). */
   readonly hideAiSummary?: boolean;
   /** When true the Ownership section is hidden from the Overview tab (Phase 1). */
@@ -271,6 +278,7 @@ export const EntityFlyout = ({
   onExpand,
   hideHealthBadge = false,
   alertsBadge,
+  alertsActiveCount,
   hideAiSummary = false,
   hideOwnership = false,
   hiddenTabIds,
@@ -624,8 +632,10 @@ export const EntityFlyout = ({
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.alerts', {
           defaultMessage: 'Alerts',
         }),
-        appendBadge:
-          tabsData.alerts.activeCount > 0 ? tabsData.alerts.activeCount : undefined,
+        appendBadge: (() => {
+          const count = alertsActiveCount ?? tabsData.alerts.activeCount;
+          return count > 0 ? count : undefined;
+        })(),
       },
       // Relationships (the topology map) only surfaces in the long-term
       // entity-centric scenario — filtered out below when `minimalTabs` is set.
@@ -679,7 +689,7 @@ export const EntityFlyout = ({
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces, minimalTabs]);
+  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, alertsActiveCount, minimalTabs]);
 
   // Phase-1 exclusion: drop tabs the caller explicitly hides.
   const visibleTabs = useMemo(
