@@ -12,11 +12,11 @@ interface TruncateMessageResult {
 }
 
 export const truncateMessage = (message: string, maxLength: number): TruncateMessageResult => {
-  const characters = Array.from(message);
+  const characters = Array.from(message.trim());
   const originalLength = characters.length;
 
   if (originalLength <= maxLength) {
-    return { originalLength, truncated: false, value: message };
+    return { originalLength, truncated: false, value: characters.join('') };
   }
 
   return {
