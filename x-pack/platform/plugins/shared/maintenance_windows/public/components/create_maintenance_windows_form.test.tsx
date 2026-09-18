@@ -288,7 +288,7 @@ describe('CreateMaintenanceWindowForm', () => {
         expect(createMutate).toHaveBeenCalledTimes(1);
         expect(createMutate.mock.calls[0][0]).toMatchObject({
           title: 'My window',
-          scopedQuery: null,
+          scope: {},
         });
       });
       expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
