@@ -10,6 +10,7 @@ import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import type { IResourceInitializer } from './resource_manager';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -96,7 +97,7 @@ export class DatastreamInitializer implements IResourceInitializer {
       _meta: { managed: true },
     });
     if (!acknowledged) {
-      throw new Error(`Ingest pipeline ${id} v${version} install was not acknowledged.`);
+      throw new EsUnacknowledgedError(`install ingest pipeline ${id} v${version}`);
     }
   }
 
@@ -124,8 +125,8 @@ export class DatastreamInitializer implements IResourceInitializer {
       settings: { 'index.final_pipeline': ingestPipeline.id },
     });
     if (!acknowledged) {
-      throw new Error(
-        `Applying index.final_pipeline to existing ${dataStreamName} indices was not acknowledged.`
+      throw new EsUnacknowledgedError(
+        `apply index.final_pipeline to existing ${dataStreamName} indices`
       );
     }
   }

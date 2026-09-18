@@ -11,6 +11,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import { DatastreamInitializer } from './datastream_initializer';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -109,11 +110,11 @@ describe('DatastreamInitializer', () => {
       expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
     });
 
-    it('fails initialization when the pipeline install is not acknowledged', async () => {
+    it('fails initialization with a retryable error when the pipeline install is not acknowledged', async () => {
       esClient.ingest.putPipeline.mockResolvedValue({ acknowledged: false });
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
-      await expect(initializer.initialize()).rejects.toThrow(/not acknowledged/);
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
       expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     });
 
@@ -150,13 +151,13 @@ describe('DatastreamInitializer', () => {
       await expect(initializer.initialize()).rejects.toThrow();
     });
 
-    it('fails initialization when applying index.final_pipeline to existing indices is not acknowledged', async () => {
+    it('fails initialization with a retryable error when applying index.final_pipeline to existing indices is not acknowledged', async () => {
       esClient.indices.putSettings.mockImplementation(async ({ settings }) => ({
         acknowledged: !(settings && 'index.final_pipeline' in settings),
       }));
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
-      await expect(initializer.initialize()).rejects.toThrow(/not acknowledged/);
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
     });
   });
 

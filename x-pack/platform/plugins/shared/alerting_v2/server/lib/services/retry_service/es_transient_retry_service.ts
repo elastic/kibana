@@ -8,13 +8,17 @@
 import { RetryService } from '@kbn/response-ops-retry-service';
 import { errors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
+import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
 /**
  * Retry service that retries transient Elasticsearch errors: connection/timeout
- * failures and retryable response status codes.
+ * failures, retryable response status codes, and unacknowledged cluster-state mutations.
  */
 export class EsTransientRetryService extends RetryService {
   protected isRetryableError(error: Error): boolean {
+    if (error instanceof EsUnacknowledgedError) {
+      return true;
+    }
     return error instanceof errors.ElasticsearchClientError && isRetryableEsClientError(error);
   }
 }

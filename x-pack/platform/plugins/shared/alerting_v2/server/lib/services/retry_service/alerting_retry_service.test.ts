@@ -9,6 +9,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AlertingRetryService } from './alerting_retry_service';
+import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
 describe('AlertingRetryService', () => {
   const logger = loggingSystemMock.createLogger();
@@ -68,6 +69,22 @@ describe('AlertingRetryService', () => {
     await assertion;
 
     expect(callback).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries unacknowledged cluster-state mutations and eventually succeeds', async () => {
+    const service = new AlertingRetryService(logger);
+
+    const callback = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(new EsUnacknowledgedError('put pipeline'))
+      .mockResolvedValueOnce('ok');
+
+    const promise = service.retry(callback);
+    const assertion = expect(promise).resolves.toBe('ok');
+    await flushTimers();
+    await assertion;
+
+    expect(callback).toHaveBeenCalledTimes(2);
   });
 
   it('does not retry non-transient ES errors (e.g. 500)', async () => {
