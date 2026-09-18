@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  collapseLegacyRuleShape,
-  dropLegacyRuleShape,
-  toApiQuery,
-  toApiStateTransition,
-} from './legacy_rule_shape';
+import { collapseLegacyRuleShape, toApiQuery, toApiStateTransition } from './legacy_rule_shape';
 
 const COMPOSED_BASE = 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name';
 const STANDALONE_QUERY = 'FROM logs-* | STATS errors = COUNT(*) BY host.name';
@@ -239,53 +234,5 @@ describe('toApiStateTransition', () => {
 
   it('maps flat-only scalars to undefined, since they gate nothing', () => {
     expect(toApiStateTransition({ pending_count: 3 })).toBeUndefined();
-  });
-});
-
-describe('dropLegacyRuleShape', () => {
-  it('leaves an already collapsed rule untouched', () => {
-    const rule = {
-      kind: 'alert',
-      query: { base: COMPOSED_BASE, breach: { segment: 'WHERE avg_cpu > 0.9' } },
-      recovery: { strategy: 'no_breach' },
-      no_data: { strategy: 'ignore' },
-      state_transition: { pending: { count: 3 } },
-    };
-
-    expect(dropLegacyRuleShape(rule)).toEqual(rule);
-  });
-
-  it('strips every pre-collapse key from a migrated rule', () => {
-    expect(
-      dropLegacyRuleShape({
-        kind: 'alert',
-        metadata: { name: 'My rule' },
-        query: {
-          base: STANDALONE_QUERY,
-          format: 'standalone',
-          breach: { query: STANDALONE_QUERY },
-          recovery: { query: 'FROM logs-* | WHERE errors == 0' },
-          no_data: { query: 'FROM heartbeat-* | STATS beats = COUNT(*) BY host.name' },
-        },
-        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE errors == 0' },
-        no_data: { strategy: 'keep_last' },
-        recovery_strategy: 'query',
-        no_data_strategy: 'last_known_status',
-        state_transition: { pending_count: 3, pending: { count: 3 } },
-      })
-    ).toEqual({
-      kind: 'alert',
-      metadata: { name: 'My rule' },
-      query: { base: STANDALONE_QUERY },
-      recovery: { strategy: 'query', query: 'FROM logs-* | WHERE errors == 0' },
-      no_data: { strategy: 'keep_last' },
-      state_transition: { pending: { count: 3 } },
-    });
-  });
-
-  it('drops a state_transition left with no phases', () => {
-    expect(dropLegacyRuleShape({ kind: 'alert', state_transition: { pending_count: 3 } })).toEqual({
-      kind: 'alert',
-    });
   });
 });

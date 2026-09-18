@@ -8,13 +8,13 @@
 import type {
   NoData,
   Query,
+  ReadableQuery,
   Recovery,
   RuleKind,
   StateTransition,
   StateTransitionOperator,
-} from './rule_data_schema';
-import { hasBreachCondition, type ReadableQuery } from './rule_data_schema';
-import { composeEsqlQuery } from './validation';
+} from '@kbn/alerting-v2-schemas';
+import { composeEsqlQuery, hasBreachCondition } from '@kbn/alerting-v2-schemas';
 
 /** The pre-collapse `query`, which encoded the same rule two different ways. */
 export type LegacyQuery =
@@ -148,10 +148,6 @@ const toStateTransition = (
  * Maps a stored rule from the two-format `query` plus flat strategy fields onto
  * the single `query` shape with `recovery` / `no_data` objects.
  *
- * Lives here rather than in a plugin because the rule saved object and the v1
- * plugin's rule template saved object both embed this shape and must migrate
- * identically.
- *
  * Signal rules have no episodes, so their strategies are dropped rather than
  * translated.
  */
@@ -192,52 +188,3 @@ export const toApiStateTransition = (
         ...(stateTransition.pending ? { pending: stateTransition.pending } : {}),
         ...(stateTransition.recovering ? { recovering: stateTransition.recovering } : {}),
       });
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const dropLegacyQueryKeys = ({
-  format,
-  recovery,
-  no_data: noData,
-  breach,
-  ...rest
-}: Record<string, unknown>): Record<string, unknown> => ({
-  ...rest,
-  ...(isRecord(breach) && typeof breach.segment === 'string' && breach.segment.trim()
-    ? { breach: { segment: breach.segment } }
-    : {}),
-});
-
-const keepStateTransitionPhases = ({
-  pending,
-  recovering,
-}: Record<string, unknown>): Record<string, unknown> | undefined =>
-  omitEmpty({
-    ...(pending ? { pending } : {}),
-    ...(recovering ? { recovering } : {}),
-  });
-
-/**
- * Strips the pre-collapse keys that the collapse migration leaves on disk for
- * the rollback window, for callers holding an unvalidated rule.
- *
- * Every read path validates against a `.strict()` schema, so echoing them back
- * would fail validation and break round-trip updates. Delete once the model
- * version that removes them from disk ships.
- */
-export const dropLegacyRuleShape = ({
-  recovery_strategy: recoveryStrategy,
-  no_data_strategy: noDataStrategy,
-  query,
-  state_transition: stateTransition,
-  ...rest
-}: Record<string, unknown>): Record<string, unknown> => {
-  const phases = isRecord(stateTransition) ? keepStateTransitionPhases(stateTransition) : undefined;
-
-  return {
-    ...rest,
-    ...(isRecord(query) ? { query: dropLegacyQueryKeys(query) } : {}),
-    ...(phases ? { state_transition: phases } : {}),
-  };
-};

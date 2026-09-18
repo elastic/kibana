@@ -15,7 +15,6 @@
     "@kbn/core",
     "@kbn/lock-manager",
     "@kbn/actions-plugin",
-    "@kbn/alerting-v2-schemas",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",

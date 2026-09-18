@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { collapseLegacyRuleShape } from '@kbn/alerting-v2-schemas';
 import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 import type {
   RuleSavedObjectAttributes,
   RuleSavedObjectAttributesV3,
 } from '../schemas/rule_saved_object_attributes';
+import { collapseLegacyRuleShape } from '../legacy_rule_shape';
 
 /**
  * Adds the collapsed `query`, the `recovery` / `no_data` objects and the nested

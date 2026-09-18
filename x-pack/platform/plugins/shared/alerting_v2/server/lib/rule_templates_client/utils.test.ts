@@ -107,24 +107,5 @@ describe('rule templates client utils', () => {
         })
       ).toThrow();
     });
-
-    // The collapse migration is additive, so a migrated template carries the
-    // pre-collapse keys until the model version that removes them from disk.
-    it('strips the pre-collapse keys a migrated template still carries', () => {
-      const { rule } = validTemplateAttributes;
-
-      expect(
-        transformRuleTemplateSoAttributesToApiResponse('template-1', {
-          engine: 'v2',
-          rule: {
-            ...rule,
-            recovery_strategy: 'no_breach',
-            no_data_strategy: 'last_known_status',
-            query: { ...rule.query, format: 'composed' },
-            state_transition: { ...rule.state_transition, pending_count: 3 },
-          },
-        })
-      ).toEqual({ id: 'template-1', ...validTemplateAttributes });
-    });
   });
 });

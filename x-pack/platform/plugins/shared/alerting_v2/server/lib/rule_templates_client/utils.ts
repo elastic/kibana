@@ -6,7 +6,6 @@
  */
 
 import {
-  dropLegacyRuleShape,
   ruleTemplateDataSchema,
   type FindRuleTemplatesSortField,
   type RuleTemplateResponse,
@@ -48,29 +47,10 @@ export const mapSortField = (sortField?: FindRuleTemplatesSortField): string => 
   return sortFieldMap[sortField ?? 'name'];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-/**
- * The embedded `rule` is an opaque bag on disk, so the pre-collapse keys the
- * template migration left behind for rollback are stripped before the `.strict()`
- * schema sees them.
- */
-const dropLegacyEmbeddedRule = (attributes: unknown): unknown => {
-  if (!isRecord(attributes) || !isRecord(attributes.rule)) {
-    return attributes;
-  }
-
-  return {
-    ...attributes,
-    rule: dropLegacyRuleShape(attributes.rule),
-  };
-};
-
 export const transformRuleTemplateSoAttributesToApiResponse = (
   id: string,
   attributes: unknown
 ): RuleTemplateResponse => ({
   id,
-  ...ruleTemplateDataSchema.parse(dropLegacyEmbeddedRule(attributes)),
+  ...ruleTemplateDataSchema.parse(attributes),
 });
