@@ -41,3 +41,14 @@ export const isInferenceEndpointDefinition = (
 /** Actions `actionTypeId` to report for a connector; inference endpoints surface as `.inference`. */
 export const getConnectorActionTypeId = (connector: EvalConnector): string =>
   isInferenceEndpointDefinition(connector) ? '.inference' : connector.actionTypeId;
+
+export const getInferenceEndpointId = (connector: EvalConnector): string | undefined => {
+  if (isInferenceEndpointDefinition(connector)) {
+    return connector.inferenceId;
+  }
+  if (connector.actionTypeId === '.inference') {
+    const inferenceId = connector.config?.inferenceId;
+    return typeof inferenceId === 'string' ? inferenceId : undefined;
+  }
+  return undefined;
+};

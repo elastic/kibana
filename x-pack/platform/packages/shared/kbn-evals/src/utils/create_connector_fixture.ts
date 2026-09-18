@@ -16,6 +16,7 @@ import { getStatusCode } from './retry_utils';
 import { createStackConnectorFixture } from './create_stack_connector_fixture';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
 import { isInferenceEndpointDefinition, type EvalConnector } from './eval_connector';
+import { inferenceEndpointExists } from './inference_endpoint_api';
 
 /**
  * Inference connectors may return 400 (not 409) when the backing inference endpoint
@@ -60,16 +61,6 @@ export async function createConnectorFixture({
   log: ToolingLog;
   use: (connector: EvalConnector) => Promise<void>;
 }) {
-  async function inferenceEndpointExists(inferenceId: string): Promise<boolean> {
-    const res = (await fetch({
-      path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
-      method: 'GET',
-      headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
-    })) as { isEndpointExists?: boolean };
-
-    return res?.isEndpointExists === true;
-  }
-
   async function waitForInferenceEndpoint(
     inferenceId: string,
     connectorDisplayId: string
@@ -80,7 +71,7 @@ export async function createConnectorFixture({
       async () => {
         let exists: boolean;
         try {
-          exists = await inferenceEndpointExists(inferenceId);
+          exists = await inferenceEndpointExists({ fetch, inferenceId });
         } catch (error) {
           const status = getStatusCode(error);
           if (status === 400 || status === 401 || status === 403) {
@@ -105,7 +96,7 @@ export async function createConnectorFixture({
     inferenceId: string,
     body: InferenceEndpointRequestBody
   ) {
-    if (await inferenceEndpointExists(inferenceId)) {
+    if (await inferenceEndpointExists({ fetch, inferenceId })) {
       return;
     }
     log.info(`Creating inference endpoint ${inferenceId}`);

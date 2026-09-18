@@ -192,12 +192,14 @@ export {
 } from './src/utils/inference_endpoint_definition';
 export {
   getConnectorActionTypeId,
+  getInferenceEndpointId,
   isInferenceEndpointDefinition,
   toStackConnectorDefinition,
   type EvalConnector,
   type StackConnectorDefinition,
 } from './src/utils/eval_connector';
 export { buildModelFromConnector } from './src/utils/build_model_from_connector';
+export { inferenceEndpointExists } from './src/utils/inference_endpoint_api';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

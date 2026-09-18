@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import type { EvalConnector } from '@kbn/evals';
+import { getInferenceEndpointId, inferenceEndpointExists, type EvalConnector } from '@kbn/evals';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -33,15 +33,25 @@ export const ensureJudgeConnectorAccessible = async ({
   connector: EvalConnector;
   log: ToolingLog;
 }): Promise<void> => {
-  log.info(`Verifying AI connector: ${connector.name} (${connector.id})`);
+  const inferenceId = getInferenceEndpointId(connector);
+  if (!inferenceId) {
+    throw new Error(
+      `AI connector "${connector.name}" (${connector.id}) is not an inference endpoint. This suite only supports inference endpoints`
+    );
+  }
+
+  log.info(
+    `Verifying inference endpoint ${inferenceId} for AI connector: ${connector.name} (${connector.id})`
+  );
   try {
-    await fetch(`/api/actions/connector/${encodeURIComponent(connector.id)}`, { method: 'GET' });
+    const exists = await inferenceEndpointExists({ fetch, inferenceId });
+    if (!exists) {
+      throw new Error(`inference endpoint ${inferenceId} does not exist`);
+    }
     log.info('AI connector is accessible — proceeding with eval run');
   } catch (err) {
     throw new Error(
-      `AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
-        `Ensure it is configured and enabled in Stack Management > Connectors ` +
-        `before running this eval suite. ` +
+      `Inference endpoint [${inferenceId}] for AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
         `Original error: ${err instanceof Error ? err.message : String(err)}`
     );
   }
