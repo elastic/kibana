@@ -8,7 +8,7 @@
  */
 
 import { readFile } from 'fs/promises';
-import { loadAll as yamlLoadAll } from 'js-yaml';
+import { parseAllDocuments } from 'yaml';
 import { PrecommitCheck } from './precommit_check';
 
 export class YamlLintCheck extends PrecommitCheck {
@@ -30,9 +30,7 @@ export class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlLoadAll(content, {
-          filename: file.getRelativePath(),
-        });
+        parseAllDocuments(content);
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }
