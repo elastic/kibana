@@ -16,6 +16,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { Worker, WorkerRunState } from '@kbn/alertzero-common';
+import { useCanWriteAlertZero } from '../../../hooks/use_can_write_alertzero';
 import { useUpdateWorker, useWorkers } from '../../../hooks/use_workers_api';
 import { formatRelativeTime } from '../components/format_relative_time';
 import { WatchBadges } from '../components/watch_badges';
@@ -61,6 +62,7 @@ const LastRunCell: React.FC<{ lastRun: string | null; state: WorkerRunState }> =
 export const WorkersTable: React.FC = () => {
   const { data, isLoading, error } = useWorkers();
   const { mutate: updateWorker } = useUpdateWorker();
+  const canWrite = useCanWriteAlertZero();
 
   const columns = useMemo<Array<EuiBasicTableColumn<Worker>>>(
     () => [
@@ -124,7 +126,7 @@ export const WorkersTable: React.FC = () => {
             checked={enabled}
             showLabel={false}
             label={i18n.enableWorkerAriaLabel(i18n.workerName(worker.id, worker.name))}
-            disabled={worker.state === 'unavailable'}
+            disabled={!canWrite || worker.state === 'unavailable'}
             data-test-subj={`alertZeroWorkerToggle-${worker.id}`}
             onChange={(event) =>
               updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
@@ -133,7 +135,7 @@ export const WorkersTable: React.FC = () => {
         ),
       },
     ],
-    [updateWorker]
+    [canWrite, updateWorker]
   );
 
   return (

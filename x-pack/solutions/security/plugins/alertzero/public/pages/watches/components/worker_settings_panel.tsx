@@ -30,6 +30,8 @@ interface WorkerSettingsPanelProps {
   settingsLocked: boolean;
   /** A Watch save is in flight; controls are locked so edits cannot slip into a draft about to be cleared. */
   isSaving: boolean;
+  /** False for read-only AlertZero roles; settings stay visible but cannot be changed. */
+  canWrite: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
 }
@@ -46,11 +48,12 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
   error,
   settingsLocked,
   isSaving,
+  canWrite,
   onEnabledChange,
   onSettingsChange,
 }) => {
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
-  const controlsDisabled = settingsLocked || isSaving;
+  const controlsDisabled = settingsLocked || isSaving || !canWrite;
 
   return (
     <SettingsSection

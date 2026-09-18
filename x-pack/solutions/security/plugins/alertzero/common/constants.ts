@@ -28,9 +28,16 @@ export const ALERTZERO_API_PRIVILEGE_READ = 'alertzero_read' as const;
 
 /**
  * API privilege for AlertZero internal routes that mutate state. Only granted by the `all` feature
- * privilege. This route-level check is the authorization boundary for managed settings installs.
+ * privilege. Settings writes (autonomy, schedule, extras) are authorized by this privilege alone.
+ * Enable/disable also requires Workflows `update` and `managed:update` (see the worker PATCH route).
  */
 export const ALERTZERO_API_PRIVILEGE_WRITE = 'alertzero_write' as const;
+
+/** API privilege to create or link incidents. Granted by `alertzero:all` and the `manage_incidents` sub-feature. */
+export const ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS = 'manage_incidents' as const;
+
+/** UI capability paired with {@link ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS}. */
+export const ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS = 'manageIncidents' as const;
 
 /** Owner id registered for all AlertZero managed workflow definitions. */
 export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;

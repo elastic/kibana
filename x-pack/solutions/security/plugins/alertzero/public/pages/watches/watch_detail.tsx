@@ -18,6 +18,7 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
@@ -30,6 +31,7 @@ import * as settingsI18n from './settings_translations';
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
+  const canWrite = useCanWriteAlertZero();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
     data: workersData,
@@ -115,39 +117,41 @@ export const WatchDetailPage: React.FC = () => {
   return (
     <WatchesSectionLayout active={watchId} title={watch.name}>
       <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-            {saveBlockedByInvalidDraft ? (
+        {canWrite ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              {saveBlockedByInvalidDraft ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
+                    <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
-                <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
-                  <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
-                </EuiText>
+                <EuiButtonEmpty
+                  onClick={onDiscard}
+                  disabled={!isDirty || isSaving}
+                  data-test-subj="alertZeroWatchSettingsDiscard"
+                >
+                  {settingsI18n.DISCARD_WATCH_SETTINGS}
+                </EuiButtonEmpty>
               </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onDiscard}
-                disabled={!isDirty || isSaving}
-                data-test-subj="alertZeroWatchSettingsDiscard"
-              >
-                {settingsI18n.DISCARD_WATCH_SETTINGS}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onSave}
-                // A failed reload leaves stale Workers in the cache; do not write against them
-                // until Retry in the load-error prompt has succeeded.
-                disabled={!isDirty || isSaving || Boolean(workersError)}
-                isLoading={isSaving}
-                data-test-subj="alertZeroWatchSettingsSave"
-              >
-                {settingsI18n.SAVE_WATCH_SETTINGS}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={onSave}
+                  // A failed reload leaves stale Workers in the cache; do not write against them
+                  // until Retry in the load-error prompt has succeeded.
+                  disabled={!isDirty || isSaving || Boolean(workersError)}
+                  isLoading={isSaving}
+                  data-test-subj="alertZeroWatchSettingsSave"
+                >
+                  {settingsI18n.SAVE_WATCH_SETTINGS}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
 
         {intro ? (
           <EuiFlexItem grow={false}>
@@ -188,6 +192,7 @@ export const WatchDetailPage: React.FC = () => {
                         error={draft.error}
                         settingsLocked={worker.state === 'unavailable'}
                         isSaving={isSaving}
+                        canWrite={canWrite}
                         onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
                         onSettingsChange={(patch) => updateSettings(worker, patch)}
                       />

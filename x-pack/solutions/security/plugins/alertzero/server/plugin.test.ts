@@ -9,7 +9,12 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertZeroConfig } from './config';
-import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
+import {
+  ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS,
+  ALERTZERO_API_PRIVILEGE_READ,
+  ALERTZERO_API_PRIVILEGE_WRITE,
+  ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS,
+} from '../common/constants';
 import { AlertZeroPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerOwner } from './managed_workflows/register_owner';
@@ -118,8 +123,26 @@ describe('AlertZeroPlugin feature-flag gating', () => {
               ]),
               ui: expect.arrayContaining(['write']),
             }),
-            read: expect.objectContaining({ api: [ALERTZERO_API_PRIVILEGE_READ] }),
+            read: expect.objectContaining({
+              api: [ALERTZERO_API_PRIVILEGE_READ],
+            }),
           }),
+          subFeatures: expect.arrayContaining([
+            expect.objectContaining({
+              privilegeGroups: expect.arrayContaining([
+                expect.objectContaining({
+                  privileges: expect.arrayContaining([
+                    expect.objectContaining({
+                      id: 'manage_incidents',
+                      includeIn: 'all',
+                      api: [ALERTZERO_API_PRIVILEGE_MANAGE_INCIDENTS],
+                      ui: [ALERTZERO_UI_CAPABILITY_MANAGE_INCIDENTS],
+                    }),
+                  ]),
+                }),
+              ]),
+            }),
+          ]),
         })
       );
       expect(registerRoutes).toHaveBeenCalled();

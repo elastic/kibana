@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
+import type { KibanaRequest } from '@kbn/core/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -20,6 +22,11 @@ import type { RouteDependencies } from '../register_routes';
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
 });
+
+const hasManagedWorkflowUpdatePrivilege = (request: KibanaRequest): boolean =>
+  WorkflowsManagementOperationPrivileges.updateManaged.every(
+    (privilege) => request.authzResult?.[privilege] === true
+  );
 
 export const registerUpdateWorkerRoute = ({
   router,
@@ -34,6 +41,7 @@ export const registerUpdateWorkerRoute = ({
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
+          extendedPrivileges: [...WorkflowsManagementOperationPrivileges.updateManaged],
         },
       },
       summary: 'Update a AlertZero worker and its settings',
@@ -50,6 +58,17 @@ export const registerUpdateWorkerRoute = ({
       },
       async (_context, request, response) => {
         try {
+          if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerEnableForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Enabling or disabling a worker requires update access to managed workflows',
+                }),
+              },
+            });
+          }
+
           const { workerId } = request.params;
           const result = await getWorkersService().update(
             workerId,
