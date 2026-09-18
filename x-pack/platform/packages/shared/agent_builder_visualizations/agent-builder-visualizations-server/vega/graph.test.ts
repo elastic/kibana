@@ -15,9 +15,6 @@ import { createVegaGraph } from './graph';
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
-}));
-
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
   buildTimeRangeParams: jest.fn(() => undefined),
 }));
 
@@ -39,6 +36,10 @@ const asCodeBlock = (spec: object) => '```json\n' + JSON.stringify(spec) + '\n``
 
 const GENERATED_ESQL = 'FROM logs-* | STATS count = COUNT() BY status';
 const PROVIDED_ESQL = 'FROM metrics-* | STATS avg = AVG(value) BY host';
+const EXECUTED_COLUMNS = [
+  { name: 'count', type: 'long' as const },
+  { name: 'status', type: 'keyword' as const },
+];
 
 describe('createVegaGraph', () => {
   const events = {} as ToolEventEmitter;
@@ -239,10 +240,42 @@ describe('createVegaGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: PROVIDED_ESQL })
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false })
     );
     const spec = JSON.parse(state.spec!);
     expect(spec.data.url.query).toBe(PROVIDED_ESQL);
+  });
+
+  it('binds executed columns from a provided query into the authoring prompt', async () => {
+    mockedExecuteEsql.mockResolvedValue({
+      columns: EXECUTED_COLUMNS,
+      values: [],
+    } as Awaited<ReturnType<typeof executeEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run({ esqlQuery: PROVIDED_ESQL });
+
+    const prompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(prompt).toContain('Bind only these executed result columns, using their exact names');
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
+    expect(prompt).not.toContain('No column information is available');
+  });
+
+  it('binds generateEsql result columns into the authoring prompt', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      query: GENERATED_ESQL,
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run();
+
+    const prompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(prompt).toContain('Bind only these executed result columns, using their exact names');
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
   });
 
   it('escapes dotted field references produced by the model', async () => {

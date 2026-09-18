@@ -5,16 +5,17 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { resolveEsqlForAuthoring } from '../shared/resolve_esql_for_authoring';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
-  GENERATE_ESQL_NODE,
+  RESOLVE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
   MAX_RETRY_ATTEMPTS,
@@ -61,7 +62,7 @@ const validateConfigForChartType = (
   config: unknown
 ): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
 
-export interface EsqlDataSourceCarrier {
+interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
 }
 
@@ -108,6 +109,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   // internal
   esqlQuery: Annotation<string>(),
+  columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
@@ -129,13 +131,14 @@ export const createVisualizationGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Node: Generate ES|QL query
-  const generateESQLNode = async (state: VisualizationState) => {
-    logger.debug('Generating ES|QL query for visualization');
-
+  // Resolve the ES|QL query and its result columns. A query may reference
+  // time-picker params (?_tstart/?_tend); bind a default range so it runs
+  // server-side. Kibana binds the live range at render time.
+  const resolveEsqlNode = async (state: VisualizationState) => {
     let action: GenerateEsqlAction;
     try {
-      const generated = await generateVisualizationEsql({
+      const resolved = await resolveEsqlForAuthoring({
+        providedQuery: state.esqlQuery,
         nlQuery: state.nlQuery,
         // On edit, seed generation with the existing per-layer queries so a
         // query-changing edit can modify them instead of being stuck with the
@@ -148,18 +151,18 @@ export const createVisualizationGraph = async (
         esClient,
       });
 
-      if (!generated.query) {
+      if ('error' in resolved) {
         action = {
           type: 'generate_esql',
           success: false,
-          error: generated.error ?? 'No queries generated',
+          error: resolved.error,
         };
       } else {
-        logger.debug(`Generated ES|QL query: ${generated.query}`);
         action = {
           type: 'generate_esql',
           success: true,
-          query: generated.query,
+          query: resolved.query,
+          columns: resolved.columns,
         };
       }
     } catch (error) {
@@ -173,6 +176,8 @@ export const createVisualizationGraph = async (
     }
 
     return {
+      esqlQuery: action.query ?? state.esqlQuery,
+      columns: action.columns,
       actions: [action],
     };
   };
@@ -190,6 +195,7 @@ export const createVisualizationGraph = async (
       .filter((action) => action.success && action.query)
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
+    const columns = lastGenerateEsqlAction?.columns ?? state.columns;
 
     // Build context from previous actions for retry attempts
     const previousActionContext = state.actions
@@ -217,6 +223,7 @@ export const createVisualizationGraph = async (
     const prompt = createGenerateConfigPrompt({
       nlQuery: state.nlQuery,
       esqlQuery,
+      columns,
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
@@ -374,44 +381,27 @@ export const createVisualizationGraph = async (
   };
 
   // Router: A config authored without a query can never validate (data_source
-  // is pinned from the generated query), so when ES|QL generation failed route
+  // is pinned from the resolved query), so when ES|QL resolution failed route
   // straight to finalize with the ES|QL error instead of burning config
   // generation retries.
-  const afterGenerateEsqlRouter = (state: VisualizationState): string => {
+  const afterResolveEsqlRouter = (state: VisualizationState): string => {
     const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
     if (!lastGenerateEsqlAction?.success) {
-      logger.warn('ES|QL generation failed; finalizing without generating a config');
+      logger.warn('ES|QL resolution failed; finalizing without generating a config');
       return 'finalize';
     }
     return GENERATE_CONFIG_NODE;
   };
 
-  // Router: Use an explicit ES|QL query when provided, otherwise generate one.
-  // Existing config is still valuable because generateESQLNode includes the
-  // prior query as context when regenerating edits.
-  const shouldGenerateESQLRouter = (state: VisualizationState): string => {
-    if (state.esqlQuery) {
-      logger.debug('Using provided ES|QL query');
-      return GENERATE_CONFIG_NODE;
-    }
-
-    logger.debug('No ES|QL query provided, generating ES|QL query');
-    return GENERATE_ESQL_NODE;
-  };
-
   // Build and compile the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
-    .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(RESOLVE_ESQL_NODE, resolveEsqlNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
     .addNode('finalize', finalizeNode)
-    // Add edges
-    .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
-    })
-    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+    .addEdge('__start__', RESOLVE_ESQL_NODE)
+    .addConditionalEdges(RESOLVE_ESQL_NODE, afterResolveEsqlRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       finalize: 'finalize',
     })

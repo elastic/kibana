@@ -18,11 +18,7 @@ import { validateQueryTarget } from './validate_query_target';
 export interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
-  /**
-   * Result columns from the validation run, when `generateEsql` executed the
-   * query and returned rows. Callers that author around the result schema (Vega)
-   * can reuse these instead of executing the query again.
-   */
+  /** Result columns from the validation run, when `generateEsql` executed the query. */
   columns?: EsqlEsqlColumnInfo[];
   /** Populated when no usable query could be resolved. */
   error?: string;
@@ -58,8 +54,7 @@ export interface GenerateVisualizationEsqlParams {
  * Fold the ES|QL queries from an artifact being edited into the natural-language
  * request as context, so the generator modifies them when the edit needs
  * different data and keeps them otherwise. Returns the request unchanged when
- * there are no existing queries. Shared by the Lens and Vega engines so edits
- * are seeded the same way.
+ * there are no existing queries.
  */
 export const buildEsqlEditContext = (
   nlQuery: string,
@@ -85,22 +80,12 @@ const buildFallbackContext = (failedQuery: string | undefined, error: string): s
     : `A previous attempt with a smaller model failed to produce a query (error: ${error}).`;
 
 /**
- * Reject a query that reads from an index other than the one the caller grounded it
- * against. `generateEsql` reports only syntax and execution problems, and neither catches
- * a hallucinated wildcard source — it validates and executes cleanly against nothing.
- *
- * Only checkable when the caller passed an explicit `index`: an auto-discovered target is
- * resolved inside `generateEsql` and never surfaces here.
- */
-const findTargetError = (query: string | undefined, index: string | undefined) =>
-  query && index ? validateQueryTarget({ query, target: index }) : undefined;
-
-/**
  * Resolve a visualization-ready ES|QL query, shared by the Lens and Vega
  * engines so both generate queries the same way.
  *
- * `generateEsql` validates and executes candidate queries in a bounded retry
- * loop, so a returned `query` is one that actually runs. A query is treated as
+ * `generateEsql` validates with `execute: 'schema'` (probe LIMIT 1, keep
+ * all-null columns) in a bounded retry loop, so a returned `query` is one that
+ * actually runs and `columns` come from that probe. A query is treated as
  * failed when none was produced or the loop still reported an execution error,
  * ensuring an unrunnable query never reaches config/spec authoring. On edits,
  * `existingQueries` seed the request so a query-changing edit is not blocked.
@@ -136,7 +121,13 @@ export const generateVisualizationEsql = async ({
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
-  const responseError = response.error ?? findTargetError(response.query, index);
+  // generateEsql does not catch a hallucinated wildcard source; only checkable
+  // when the caller passed an explicit index (auto-discovered targets never surface here).
+  const responseError =
+    response.error ??
+    (response.query && index
+      ? validateQueryTarget({ query: response.query, target: index })
+      : undefined);
 
   if (response.query && !responseError) {
     return { query: response.query, columns: response.results?.columns };
@@ -155,7 +146,11 @@ export const generateVisualizationEsql = async ({
     maxRetries: 1,
     additionalContext: buildFallbackContext(response.query, error),
   });
-  const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
+  const fallbackError =
+    fallbackResponse.error ??
+    (fallbackResponse.query && index
+      ? validateQueryTarget({ query: fallbackResponse.query, target: index })
+      : undefined);
 
   if (!fallbackResponse.query || fallbackError) {
     return { error: fallbackError ?? 'No queries generated' };

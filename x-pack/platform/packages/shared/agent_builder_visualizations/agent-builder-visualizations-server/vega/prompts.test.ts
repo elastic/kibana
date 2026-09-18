@@ -5,23 +5,74 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
+
+const ESQL_QUERY = 'FROM logs-* | STATS count = COUNT(*) BY status';
+const ESQL_QUERY_JSON = JSON.stringify(ESQL_QUERY);
 
 const systemText = (nlQuery: string): string => {
   const [system] = createAuthorVegaSpecPrompt({ nlQuery, esqlQuery: 'FROM logs-*' });
   return String((system as [string, string])[1]);
 };
 
-describe('createAuthorVegaSpecPrompt', () => {
-  it('binds the provided ES|QL query into the prompt', () => {
-    const [system] = createAuthorVegaSpecPrompt({
-      nlQuery: 'a bar chart of counts by status',
-      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY status',
-    });
-    const text = String((system as [string, string])[1]);
+const promptSystemText = (columns?: EsqlEsqlColumnInfo[]): string => {
+  const [system] = createAuthorVegaSpecPrompt({
+    nlQuery: 'a bar chart of counts by status',
+    esqlQuery: ESQL_QUERY,
+    columns,
+  });
+  return String((system as [string, string])[1]);
+};
 
-    expect(text).toContain('FROM logs-* | STATS count = COUNT(*) BY status');
+const dataSourceRulesSection = (text: string): string => {
+  const start = text.indexOf('DATA SOURCE RULES:');
+  const end = text.indexOf('\nENCODING TYPES:');
+  if (start === -1 || end === -1) {
+    throw new Error('DATA SOURCE RULES section not found');
+  }
+  return text.slice(start, end).trimEnd();
+};
+
+const expectedDataSourceRules = (rule3: string): string =>
+  `DATA SOURCE RULES:
+1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": ${ESQL_QUERY_JSON} } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
+2. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
+3. ${rule3}`;
+
+describe('createAuthorVegaSpecPrompt', () => {
+  it('lists executed ES|QL columns as the only bindable names', () => {
+    expect(
+      dataSourceRulesSection(
+        promptSystemText([
+          { name: 'count', type: 'long' },
+          { name: 'status', type: 'keyword' },
+        ])
+      )
+    ).toBe(
+      expectedDataSourceRules(`Bind only these executed result columns, using their exact names:
+<columns>
+- "count" (long)
+- "status" (keyword)
+</columns>`)
+    );
+  });
+
+  it('falls back to query-text inference when execute returned no columns', () => {
+    expect(dataSourceRulesSection(promptSystemText([]))).toBe(
+      expectedDataSourceRules(
+        `No column information is available; infer fields from the ES|QL query: ${ESQL_QUERY}`
+      )
+    );
+  });
+
+  it('falls back to query-text inference when columns were never executed', () => {
+    expect(dataSourceRulesSection(promptSystemText())).toBe(
+      expectedDataSourceRules(
+        `No column information is available; infer fields from the ES|QL query: ${ESQL_QUERY}`
+      )
+    );
   });
 
   it('instructs Vega-Lite only (never raw Vega)', () => {
