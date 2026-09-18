@@ -8792,8 +8792,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations: {}
 
-  x-pack/solutions/observability/packages/kbn-evals-suite-significant-events: {}
-
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-streams: {}
@@ -9156,8 +9154,6 @@ importers:
 
   x-pack/platform/plugins/shared/ml/evals: {}
 
-  x-pack/solutions/observability/plugins/nightshift_investigations: {}
-
   x-pack/platform/plugins/shared/notification_center: {}
 
   x-pack/platform/plugins/shared/notifications: {}
@@ -9185,10 +9181,6 @@ importers:
   x-pack/platform/plugins/shared/security: {}
 
   x-pack/platform/plugins/shared/serverless: {}
-
-  x-pack/solutions/observability/plugins/significant_events: {}
-
-  x-pack/solutions/observability/plugins/significant_events_app: {}
 
   x-pack/platform/plugins/shared/slo_shared: {}
 
@@ -9300,6 +9292,8 @@ importers:
 
   x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai: {}
 
+  x-pack/solutions/observability/packages/kbn-evals-suite-significant-events: {}
+
   x-pack/solutions/observability/packages/kbn-genai-cli: {}
 
   x-pack/solutions/observability/packages/kbn-observability-schema: {}
@@ -9334,6 +9328,8 @@ importers:
 
   x-pack/solutions/observability/plugins/nightshift: {}
 
+  x-pack/solutions/observability/plugins/nightshift_investigations: {}
+
   x-pack/solutions/observability/plugins/observability: {}
 
   x-pack/solutions/observability/plugins/observability_agent_builder: {}
@@ -9353,6 +9349,10 @@ importers:
   x-pack/solutions/observability/plugins/profiling_data_access: {}
 
   x-pack/solutions/observability/plugins/serverless_observability: {}
+
+  x-pack/solutions/observability/plugins/significant_events: {}
+
+  x-pack/solutions/observability/plugins/significant_events_app: {}
 
   x-pack/solutions/observability/plugins/slo: {}
 
