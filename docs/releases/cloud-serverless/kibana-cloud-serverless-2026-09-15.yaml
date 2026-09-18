@@ -10,7 +10,7 @@ hide-features:
 entries:
 - file:
     name: 289580.yaml
-    checksum: d33f9de9b45f25ffd0a9e49f698e0cc5b3f4330f
+    checksum: 525f12fd622611f136f023effc6659c55f9ea320
   type: bug-fix
   title: Fix `elasticsearch.index.exist` connector output
   products:
@@ -33,8 +33,8 @@ entries:
   - https://github.com/elastic/kibana/issues/286579
 - file:
     name: 277103.yaml
-    checksum: 1a52d91a19a1c3d64d030452b267249e51af569d
-  type: feature
+    checksum: b18903a45261e32cf58324f0d0ff37cbfd45346e
+  type: enhancement
   title: Add support for undo and redo in {{kib}} dashboards
   products:
   - product: cloud-serverless
@@ -63,7 +63,7 @@ entries:
   - https://github.com/elastic/kibana/issues/288661
 - file:
     name: 287736.yaml
-    checksum: d8891352cb8c81ae99871eae9a108a739ecd5e3e
+    checksum: a48320b0b02e7df503cc527f6e0bb2bdc02be200
   type: enhancement
   title: Update Infrastructure Hosts page to use shared app header
   products:
@@ -76,7 +76,7 @@ entries:
   - https://github.com/elastic/kibana/issues/287801
 - file:
     name: 289342.yaml
-    checksum: f953260725698a594570dcb03d4cc75813ee7d4d
+    checksum: c059ee339ab2347576acf479b9b46ae112b59c76
   type: bug-fix
   title: Fix fake modal appearing when saving a dashboard for the first time
   products:
@@ -104,7 +104,7 @@ entries:
   - https://github.com/elastic/kibana/issues/289381
 - file:
     name: 290314.yaml
-    checksum: 5c0ad235ab57834002cadf549d5caccd85cbfe25
+    checksum: 303a8815323df69bfeb75fdef8dc9892a13188bf
   type: bug-fix
   title: Increase expression length limit
   products:
@@ -118,7 +118,7 @@ entries:
   - https://github.com/elastic/kibana/issues/290311
 - file:
     name: 289532.yaml
-    checksum: 13ff5724658b6705e3bad12343da452ddf960a51
+    checksum: c45396ed4fad8cb30d7ac2a611963a129c743254
   type: enhancement
   title: Add live validation and completions to ES|QL rule sandbox editor
   products:
@@ -129,7 +129,7 @@ entries:
   - https://github.com/elastic/kibana/pull/289532
 - file:
     name: 287890.yaml
-    checksum: 9a6d1efaa6e99a7bf285c86bd88ef3487f070922
+    checksum: bb75fe9e98fc664c8ed8797d4913582bea40bfb9
   type: enhancement
   title: Add out-of-the-box SID, GUID, and UPN entity resolution rules
   products:
@@ -153,7 +153,7 @@ entries:
   - https://github.com/elastic/kibana/issues/288121
 - file:
     name: 290115.yaml
-    checksum: 71bd9dd474690c1ba48096e56b6b525f23893738
+    checksum: 48d51a3f7db50f9d1665eeb5afb95abb8fb2ce42
   type: bug-fix
   title: Disable isolate host action for unsupported Endpoint versions
   products:
@@ -185,8 +185,8 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/289314
   issues:
-  - '# PRIVATE: https://github.com/elastic/rna-program/issues/962'
-  - '# PRIVATE: https://github.com/elastic/rna-program/issues/964'
+  - https://github.com/elastic/rna-program/issues/962
+  - https://github.com/elastic/rna-program/issues/964
 - file:
     name: 282149.yaml
     checksum: 47cb56a5313aebeea0aba053d5cb1f2988d3a403
@@ -199,7 +199,7 @@ entries:
   - https://github.com/elastic/kibana/pull/282149
 - file:
     name: 290363.yaml
-    checksum: 14dc1d8f280b0d361772159d3b30b4a8625f9ac2
+    checksum: 6819e08acca80a0ebd7817ac7768e6649d700171
   type: bug-fix
   title: Fix Go to URL drilldown not replacing template values in the link name
   products:
@@ -211,19 +211,6 @@ entries:
   - https://github.com/elastic/kibana/pull/290363
   issues:
   - https://github.com/elastic/kibana/issues/264746
-- file:
-    name: 289881.yaml
-    checksum: 4daa12805f02184f7b9a6c43635e65dfd3b7b9ff
-  type: enhancement
-  title: Removes the deprecated `platform.core.cases.attachments` tool
-  products:
-  - product: cloud-serverless
-  - product: kibana
-  description: Agents/Skills should instead be using `platform.core.cases.get_attachments` and `platform.core.cases.manage_attachments`
-  areas:
-  - AI and machine Learning
-  prs:
-  - https://github.com/elastic/kibana/pull/289881
 - file:
     name: 290244.yaml
     checksum: 8d5dd7189583cce73dd37f59b0699aabdff5761e
@@ -260,8 +247,28 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/286913
 - file:
+    name: 289361.yaml
+    checksum: 40b57c0e2399f1211f6b0b3fc78914977fdd9571
+  type: bug-fix
+  title: Extract reusable KI query validation
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/289361
+- file:
+    name: 290140.yaml
+    checksum: 61602411a77f50a6d08aef4a0a13d78cfbc3b167
+  type: enhancement
+  title: Strip tools from alert analysis classification agent
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290140
+- file:
     name: 289635.yaml
-    checksum: 5263fef703160b76a59a3535f8debddd88b5c7fa
+    checksum: 00329a57f3c18acbe39f3a4db89775c07b386219
   type: feature
   title: Add post-execution workflow hook
   products:
@@ -272,7 +279,7 @@ entries:
   - https://github.com/elastic/kibana/pull/289635
 - file:
     name: 289506.yaml
-    checksum: 9936e2308681bb05af41cd0f12db64d705f70b6a
+    checksum: 803eb6c6c22934bdc0c7b80762b55137a8664c97
   type: feature
   title: Render custom panels inside the AI Assistant conversation
   products:
@@ -285,7 +292,7 @@ entries:
   - https://github.com/elastic/kibana/pull/289506
 - file:
     name: 286173.yaml
-    checksum: d86141247a0c524cde0ed40240e868f59e5e576f
+    checksum: fcf223735a8ebe9150c9429f31d42896752c0e3e
   type: enhancement
   title: Show a sparkline chart in the change point summary column
   products:
@@ -309,21 +316,8 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/289906
 - file:
-    name: 289707.yaml
-    checksum: 9ca997422a66110a946325f47be501621bf2863b
-  type: deprecation
-  title: Retire the casesRedesign feature flag
-  products:
-  - product: cloud-serverless
-  - product: kibana
-  description: The internal `xpack.cases.casesRedesign.list`, `xpack.cases.casesRedesign.details`, and `xpack.cases.casesRedesign.settings` settings have been removed. The redesigned Cases UI they gated is now the only implementation. Kibana still starts if these settings are present, logging a deprecation warning; remove them from `kibana.yml` to clear it.
-  areas:
-  - Alerting and reporting
-  prs:
-  - https://github.com/elastic/kibana/pull/289707
-- file:
     name: 290219.yaml
-    checksum: 03fac149691b0f0edc04dc6721dcc63e51fc3e6f
+    checksum: e95c90b22ff4ddd8727b8122c728151b5c392467
   type: enhancement
   title: Add custom panels from chat directly to dashboards
   products:
@@ -336,7 +330,7 @@ entries:
   - https://github.com/elastic/kibana/pull/290219
 - file:
     name: 289541.yaml
-    checksum: 88a2478e6de15b13fd69240d93c66f14dc524782
+    checksum: b5be46803211b2243ee0885fa8237330236ad50a
   type: enhancement
   title: Refine dashboard panels with chat preview
   products:
@@ -349,7 +343,7 @@ entries:
   - https://github.com/elastic/kibana/pull/289541
 - file:
     name: 220097.yaml
-    checksum: 3e05e0ee27fdb6e44b709416ded9fd227a77da37
+    checksum: c94029bd91fb56672ab33e2c8fd2c932f47740ce
   type: bug-fix
   title: Fix focus on pinned and unpinned cells in doc viewer table
   products:
@@ -362,7 +356,7 @@ entries:
   - https://github.com/elastic/kibana/pull/220097
 - file:
     name: 290259.yaml
-    checksum: eed0946b32639a562311bfb38259fe5578843abe
+    checksum: e31913b0146504cf33bae7afea56111135ed3ef9
   type: bug-fix
   title: Fix `STATS BY` when grouping by a previously aggregated field
   products:
@@ -387,9 +381,9 @@ entries:
   - https://github.com/elastic/kibana/pull/289428
 - file:
     name: 286231.yaml
-    checksum: b1a847444d34264acc900dff6ece57480e679d84
+    checksum: 729f17a801389d466f411bc4a1a851caeb64c05e
   type: enhancement
-  title: Replace pagination with a single, scrollable list in the Table tab in {{kib}} 
+  title: Replace pagination with a single, scrollable list in the Table tab in {{kib}}
   products:
   - product: cloud-serverless
   - product: kibana
@@ -403,7 +397,7 @@ entries:
   - https://github.com/elastic/kibana/issues/286137
 - file:
     name: 287729.yaml
-    checksum: 72ee35b8357880511cde2be22015f4f632e83c5e
+    checksum: 57a89f0c5d48948a0f7903bdf3c1934760df64c3
   type: breaking-change
   title: Change `actions` case attachments to return `security.endpoint` shape
   products:
@@ -418,7 +412,7 @@ entries:
   - https://github.com/elastic/kibana/pull/287729
 - file:
     name: 290279.yaml
-    checksum: 6bab0b6f898091e363d0bfcd74b0b5745940f6e9
+    checksum: 8d05ea1d00be7867c3b34177b9ea5bcac689f1bb
   type: bug-fix
   title: Register project routing on Observability alert details page
   products:
@@ -440,7 +434,7 @@ entries:
   - https://github.com/elastic/kibana/pull/287744
 - file:
     name: 275716.yaml
-    checksum: b22adef55368d8d88e657c0b02ea292b3b0b0e9d
+    checksum: 5a1c0c80b92f06815ce7f8f2bd6880dd820a010c
   type: breaking-change
   title: Enforce size limits on Detection Engine rule response action payloads
   products:
@@ -453,7 +447,7 @@ entries:
   - https://github.com/elastic/kibana/pull/275716
 - file:
     name: 289432.yaml
-    checksum: fccbb28ec45309b72df3e487b01ad862d365153c
+    checksum: 52d79e854e4c9595c5ce785444516acdc2b2969e
   type: enhancement
   title: Update Infrastructure Settings page to use shared app header
   products:
