@@ -1281,10 +1281,6 @@ describe('ProposalsService', () => {
     });
 
     it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
-      // `createdAt`/`expiresAt` inherit unchanged across a revision (issue
-      // #19289), so a revision created in the lag between a deadline passing
-      // and the workflow settling the record to `expired` would be born
-      // already past a deadline it can never be decided against.
       const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
       const { service } = createService(storage);
 
