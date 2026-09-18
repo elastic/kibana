@@ -1,6 +1,7 @@
 {
   "name": "kibana",
   "description": "Kibana is a browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "bb-probe": true,
   "keywords": [
     "kibana",
     "elasticsearch",
@@ -134,6 +135,7 @@
     "redux-thunk-v2/redux": "npm:redux@4.2.1"
   },
   "dependencies": {
+    "is-odd": "3.0.1",
     "@a2a-js/sdk": "0.3.4",
     "@ai-sdk/langchain": "1.0.190",
     "@apidevtools/json-schema-ref-parser": "15.3.6",
