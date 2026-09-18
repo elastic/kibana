@@ -21,7 +21,11 @@ import { entityStoreQueryTool } from '../entity_store_query_tool';
  * that unit tests do not cover (e.g. multiple sequential calls,
  * realistic ES response shapes, multi-action case workflows).
  *
- * Run with: yarn test:jest_integration --config x-pack/solutions/security/plugins/security_solution/server/jest.integration.config.js server/agent_builder/tools/__integration__/soc_tools.integration.test.ts
+ * Note: the directory is `__integration__`, not `integration_tests`, so these tests are
+ * collected by the agent_builder jest config. The integration config only matches test
+ * files that live under an `integration_tests` directory.
+ *
+ * Run with: yarn test:jest --config x-pack/solutions/security/plugins/security_solution/server/agent_builder/jest.config.js --runTestsByPath server/agent_builder/tools/__integration__/soc_tools.integration.test.ts
  */
 
 describe('SOC Tools Integration', () => {
@@ -118,13 +122,22 @@ describe('SOC Tools Integration', () => {
       );
       expect(result.results[0].data.matches).toHaveLength(3);
 
-      // Verify matches come from different sources
-      const providers = (result.results[0].data.matches as Array<Record<string, unknown>>).map(
-        (m) => m.provider
-      );
-      expect(providers).toContain('AbuseCH');
-      expect(providers).toContain('AlienVault OTX');
-      expect(providers).toContain('Anomali');
+      // Matches are raw ES `_source` documents spread by the tool, so the provider is
+      // nested at `threat.indicator.provider`, not at the top level of the match.
+      const matches = result.results[0].data.matches as Array<{
+        index?: string;
+        threat?: { indicator?: { provider?: string } };
+      }>;
+      expect(matches.map((m) => m.threat?.indicator?.provider)).toEqual([
+        'AbuseCH',
+        'AlienVault OTX',
+        'Anomali',
+      ]);
+      expect(matches.map((m) => m.index)).toEqual([
+        '.ds-logs-ti_abusech-default',
+        '.ds-logs-ti_otx-default',
+        '.ds-logs-ti_anomali-default',
+      ]);
     });
 
     it('handles sequential lookups for IP then domain in the same investigation', async () => {
@@ -412,7 +425,7 @@ describe('SOC Tools Integration', () => {
             },
           ],
         },
-      } as any);
+      } as never);
       mockCasesClient.attachments.bulkCreate.mockResolvedValue({});
 
       const result = (await tool.handler(
