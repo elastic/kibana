@@ -73,6 +73,11 @@ jest.mock('./metadata_section', () => ({
     </div>
   )),
 }));
+jest.mock('../assignee_cell', () => ({
+  AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
+    <div data-test-subj="alertingV2EpisodeAssigneeCell">{assigneeUid ?? 'No assignee'}</div>
+  ),
+}));
 
 const mockUseEpisodeDetailsHeaderData = jest.mocked(useEpisodeDetailsHeaderData);
 const mockFlyoutAccordion = jest.mocked(FlyoutAccordion);
@@ -334,6 +339,83 @@ describe('AlertEpisodeDetailsFlyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutSeverity')).not.toBeInTheDocument();
+  });
+
+  it('links to an absolute HTTP(S) source URL from an info block', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episode: {
+        ...mockEpisode,
+        episode_data: JSON.stringify({ alert_url: 'https://monitoring.example/alerts/1' }),
+      } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByText('Source')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutAlertUrl')).toHaveAttribute(
+      'href',
+      'https://monitoring.example/alerts/1'
+    );
+  });
+
+  it.each([
+    ['java', 'script:alert(document.domain)'].join(''),
+    'data:text/html,<script>alert(1)</script>',
+  ])('does not link to an unsafe source URL: %s', (alertUrl) => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episode: {
+        ...mockEpisode,
+        episode_data: JSON.stringify({ alert_url: alertUrl }),
+      } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutAlertUrl')).not.toBeInTheDocument();
+  });
+
+  it('shows who acknowledged the episode in an info block', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episodeAction: {
+        episodeId: 'ep-1',
+        ruleId: 'rule-1',
+        groupHash: 'gh-1',
+        lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
+        lastAssigneeUid: null,
+        lastAckActor: 'user-acker',
+      },
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByText('Acknowledged by')).toBeInTheDocument();
+    expect(screen.queryByText('Resolved by')).not.toBeInTheDocument();
+    expect(screen.getByText('user-acker')).toBeInTheDocument();
+  });
+
+  it('shows who resolved the episode in an info block', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      groupAction: {
+        groupHash: 'gh-1',
+        ruleId: 'rule-1',
+        lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+        lastDeactivateActor: 'user-resolver',
+        lastSnoozeAction: null,
+        snoozeExpiry: null,
+        tags: [],
+        lastSnoozeActor: null,
+      },
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByText('Resolved by')).toBeInTheDocument();
+    expect(screen.queryByText('Acknowledged by')).not.toBeInTheDocument();
+    expect(screen.getByText('user-resolver')).toBeInTheDocument();
   });
 
   describe('assignee header value', () => {

@@ -7,8 +7,16 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiFlexGroup, EuiPanel, EuiSkeletonTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiLink,
+  EuiPanel,
+  EuiSkeletonTitle,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css, Global } from '@emotion/react';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 // We use this instead of FlyoutTemplate.Body.Accordion because the latter omits `hasBorder`
 // and defaults it on, whereas we render subpanels ourselves.
@@ -240,6 +248,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Header badge data
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
+  const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
   const tags = groupAction?.tags ?? [];
 
@@ -259,6 +268,12 @@ export const AlertEpisodeDetailsFlyout = ({
   // Info block values
   const durationMs = episode?.duration;
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
+  const episodeData = parseEpisodeDataJson(episode?.episode_data);
+  const rawAlertUrl =
+    typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
+      ? episodeData.alert_url
+      : undefined;
+  const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
   // The edit assignee action owns its own picker popover, so the header can host it
   // directly instead of routing through the modal that `execute` opens.
@@ -371,6 +386,37 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_DURATION}>
             {durationMs != null ? formatMetadataListDuration(durationMs) : EMPTY_VALUE}
           </FlyoutTemplate.Header.InfoBlock>
+
+          {alertUrl && (
+            <FlyoutTemplate.Header.InfoBlock title={i18n.METADATA_LIST_SOURCE_URL_LABEL}>
+              <EuiLink
+                href={alertUrl}
+                target="_blank"
+                external
+                data-test-subj="alertingV2EpisodeFlyoutAlertUrl"
+              >
+                {i18n.METADATA_LIST_SOURCE_URL_LINK}
+              </EuiLink>
+            </FlyoutTemplate.Header.InfoBlock>
+          )}
+
+          {isAcked && (
+            <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_ACKNOWLEDGED_BY}>
+              <AlertEpisodeAssigneeCell
+                assigneeUid={episodeAction?.lastAckActor}
+                userProfile={services.userProfile}
+              />
+            </FlyoutTemplate.Header.InfoBlock>
+          )}
+
+          {isResolved && (
+            <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_RESOLVED_BY}>
+              <AlertEpisodeAssigneeCell
+                assigneeUid={groupAction?.lastDeactivateActor}
+                userProfile={services.userProfile}
+              />
+            </FlyoutTemplate.Header.InfoBlock>
+          )}
         </FlyoutTemplate.Header>
 
         <FlyoutTemplate.Body>
