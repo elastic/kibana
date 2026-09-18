@@ -310,39 +310,37 @@ export const SourceRuleSummaryFlyout = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                isOpen={isActionsOpen}
-                closePopover={closeActions}
-                anchorPosition="upRight"
-                panelPaddingSize="none"
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.sourceRuleSummaryFlyout.takeActionAriaLabel',
-                  { defaultMessage: 'Rule actions' }
-                )}
-                button={<TakeActionButton onClick={toggleActions} />}
-              >
-                <EuiContextMenuPanel
-                  items={[
-                    ...(ruleDetailsHref
-                      ? [
-                          <EuiContextMenuItem
-                            key="viewDetails"
-                            icon="eye"
-                            href={ruleDetailsHref}
-                            data-test-subj="sourceRuleSummaryFlyoutViewDetailsAction"
-                          >
-                            <FormattedMessage
-                              id="xpack.alertingV2.sourceRuleSummaryFlyout.viewDetails"
-                              defaultMessage="View details"
-                            />
-                          </EuiContextMenuItem>,
-                        ]
-                      : []),
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
+            {ruleDetailsHref && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  isOpen={isActionsOpen}
+                  closePopover={closeActions}
+                  anchorPosition="upRight"
+                  panelPaddingSize="none"
+                  aria-label={i18n.translate(
+                    'xpack.alertingV2.sourceRuleSummaryFlyout.takeActionAriaLabel',
+                    { defaultMessage: 'Rule actions' }
+                  )}
+                  button={<TakeActionButton onClick={toggleActions} />}
+                >
+                  <EuiContextMenuPanel
+                    items={[
+                      <EuiContextMenuItem
+                        key="viewDetails"
+                        icon="eye"
+                        href={ruleDetailsHref}
+                        data-test-subj="sourceRuleSummaryFlyoutViewDetailsAction"
+                      >
+                        <FormattedMessage
+                          id="xpack.alertingV2.sourceRuleSummaryFlyout.viewDetails"
+                          defaultMessage="View details"
+                        />
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlyoutFooter>

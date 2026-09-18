@@ -73,5 +73,6 @@ export const createClassicEpisodeSource = ({
 
   actionExtensions: classicActionExtensions,
 
+  // TODO: Update to observability rule details route once obs navigation changes land.
   getRuleDetailsHref: (ruleId) => `${triggersActionsRoute}${getRuleDetailsRoute(ruleId)}`,
 });

@@ -73,16 +73,12 @@ export const resolveClassicRules = async ({
     return [];
   }
 
-  try {
-    const response = await http.post<ClassicFindRulesResponse>(CLASSIC_RULES_FIND_API_PATH, {
-      body: JSON.stringify({
-        filter: buildClassicRuleIdsFilter(ids),
-        per_page: ids.length,
-        page: 1,
-      }),
-    });
-    return response.data.map(adaptClassicRule);
-  } catch {
-    return [];
-  }
+  const response = await http.post<ClassicFindRulesResponse>(CLASSIC_RULES_FIND_API_PATH, {
+    body: JSON.stringify({
+      filter: buildClassicRuleIdsFilter(ids),
+      per_page: ids.length,
+      page: 1,
+    }),
+  });
+  return response.data.map(adaptClassicRule);
 };

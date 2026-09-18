@@ -33,6 +33,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
+import { isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -255,13 +256,8 @@ export const EpisodeRuleCell = ({
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
-  const sourceRuleInfo =
-    row.flattened.supports_actions === false
-      ? {
-          category: (row.flattened.source_action_context as { ruleCategory?: string } | undefined)
-            ?.ruleCategory,
-        }
-      : undefined;
+  const episode = row.flattened as unknown as AlertEpisode;
+  const sourceRuleInfo = isSourceEpisode(episode) ? { category: episode.rule_category } : undefined;
   const nameLinkProps = onRuleNameClick
     ? getRouterLinkProps({
         href: detailsHref,

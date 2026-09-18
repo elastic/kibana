@@ -145,14 +145,10 @@ describe('SourceRuleSummaryFlyout', () => {
     );
   });
 
-  it('does not render View details menu item when href is null', () => {
+  it('does not render Take action button when href is null', () => {
     renderFlyout({ ruleDetailsHref: null });
 
-    fireEvent.click(screen.getByTestId('mockTakeActionButton'));
-
-    expect(
-      screen.queryByTestId('sourceRuleSummaryFlyoutViewDetailsAction')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockTakeActionButton')).not.toBeInTheDocument();
   });
 
   it('calls onClose when the close icon is clicked', () => {

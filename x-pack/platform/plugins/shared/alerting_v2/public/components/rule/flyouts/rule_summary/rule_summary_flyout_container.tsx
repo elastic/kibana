@@ -61,6 +61,7 @@ export const RuleSummaryFlyoutContainer = ({
     rule: sourceRule,
     ruleDetailsHref: sourceRuleDetailsHref,
     isLoading: isLoadingSourceRule,
+    isError: isSourceRuleError,
   } = useResolveSourceRule({
     ruleId: isSourceRule ? ruleId : undefined,
     http,
@@ -82,7 +83,7 @@ export const RuleSummaryFlyoutContainer = ({
     );
   }
 
-  if (isSourceRule || isError || !rule) {
+  if (isSourceRule || isSourceRuleError || isError || !rule) {
     return (
       <EntityNotFoundFlyout
         title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {

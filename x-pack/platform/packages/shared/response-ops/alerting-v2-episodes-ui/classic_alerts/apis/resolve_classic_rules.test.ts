@@ -68,11 +68,12 @@ describe('resolveClassicRules', () => {
     ]);
   });
 
-  it('returns an empty array when the classic find API fails', async () => {
-    mockHttp.post.mockRejectedValueOnce(new Error('classic unavailable'));
+  it('propagates errors when the classic find API fails', async () => {
+    const error = new Error('Request failed');
+    mockHttp.post.mockRejectedValueOnce(error);
 
     await expect(
       resolveClassicRules({ ids: ['classic-rule'], services: { http: mockHttp } })
-    ).resolves.toEqual([]);
+    ).rejects.toThrow(error);
   });
 });

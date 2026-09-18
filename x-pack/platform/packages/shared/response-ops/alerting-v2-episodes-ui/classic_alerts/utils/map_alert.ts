@@ -102,7 +102,6 @@ export interface ClassicAlertActionContext {
   readonly alertUuid: string;
   readonly instanceId: string | undefined;
   readonly ruleId: string;
-  readonly ruleCategory: string | undefined;
   readonly workflowStatus: string | undefined;
   readonly workflowTags: string[];
 }
@@ -152,7 +151,6 @@ export const mapClassicAlertToEpisode = (
     alertUuid: uuid,
     instanceId: source[ALERT_INSTANCE_ID],
     ruleId: source[ALERT_RULE_UUID] ?? '',
-    ruleCategory: source[ALERT_RULE_CATEGORY],
     workflowStatus: source[ALERT_WORKFLOW_STATUS],
     workflowTags,
   };
@@ -173,6 +171,7 @@ export const mapClassicAlertToEpisode = (
     last_ack_action: source[ALERT_WORKFLOW_STATUS] === 'acknowledged' ? 'ack' : null,
     episode_data: null,
     severity: normalizeV1Severity(source[ALERT_SEVERITY]),
+    rule_category: source[ALERT_RULE_CATEGORY],
     supports_actions: false,
     supports_timeline: false,
     source_action_context: actionContext,

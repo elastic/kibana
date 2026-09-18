@@ -65,6 +65,7 @@ describe('mapClassicAlertToEpisode', () => {
       triggered_at: '2024-01-01T00:00:00.000Z',
       last_tags: ['tag-a', 'tag-b'],
       severity: 'critical',
+      rule_category: 'Test',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -85,7 +86,6 @@ describe('mapClassicAlertToEpisode', () => {
       alertUuid: 'alert-uuid-1',
       instanceId: 'instance-1',
       ruleId: 'rule-uuid-1',
-      ruleCategory: 'Test',
       workflowStatus: 'open',
       workflowTags: ['tag-a', 'tag-b'],
     });

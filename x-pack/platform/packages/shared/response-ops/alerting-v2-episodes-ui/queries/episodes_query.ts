@@ -41,6 +41,11 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   'rule.name'?: string;
   /**
+   * Human-readable rule type name from the alert document (e.g. "Custom threshold").
+   * Only set for classic alert rows; v2 episodes never set this.
+   */
+  rule_category?: string;
+  /**
    * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
    * from the v2 pipeline. Stamped on classic rows by the list fetch (and by
    * `fetchEpisodesFromSource`).
@@ -57,6 +62,9 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   is_muted?: boolean;
 }
+
+/** Whether the episode originated from an `EpisodeDataSource` (e.g. classic alerts). */
+export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>

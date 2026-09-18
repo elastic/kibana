@@ -505,6 +505,7 @@ describe('EpisodeRuleCell', () => {
   it('renders classic rule via rules cache when resolved by classic fallback', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -526,6 +527,7 @@ describe('EpisodeRuleCell', () => {
     } as unknown as Rule;
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       supports_actions: false,
       supports_timeline: false,
     });
