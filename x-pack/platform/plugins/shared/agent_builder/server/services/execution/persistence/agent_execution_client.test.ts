@@ -78,10 +78,10 @@ describe('AgentExecutionClient', () => {
         abort_reason: null,
       });
       expect(script.source).toContain('if (params.abort_reason != null)');
-      // aborted must survive both a later `failed` and a later `completed`
-      expect(script.source).toContain("ctx._source.status == 'aborted'");
-      expect(script.source).toContain("params.status == 'failed'");
-      expect(script.source).toContain("params.status == 'completed'");
+      // aborted must survive any later status (failed, completed, and a late running)
+      expect(script.source).toContain(
+        "ctx._source.status == 'aborted' && params.status != 'aborted'"
+      );
       expect(script.source).toContain('if (params.error != null)');
     });
 

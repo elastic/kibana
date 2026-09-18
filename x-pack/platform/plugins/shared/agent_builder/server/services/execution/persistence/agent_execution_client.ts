@@ -201,9 +201,11 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     status: ExecutionStatus,
     { error, abortReason }: UpdateExecutionStatusOptions = {}
   ): Promise<void> {
-    // `aborted` is sticky: once an abort was requested the execution reports it, and neither a
-    // later `failed` (the graph erroring inside the abort-detection window) nor `completed` (the
-    // graph finishing inside it) may overwrite it. The error, when given, is still recorded.
+    // `aborted` is sticky: once an abort was requested the execution reports it. Neither a later
+    // `failed` / `completed` (the graph ending inside the abort-detection window) nor a later
+    // `running` (the abort landing between a handler's status read and its write) may overwrite
+    // it — otherwise the abort monitor would see `running` and never cancel. The error, when
+    // given, is still recorded.
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
@@ -211,8 +213,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       script: {
         lang: 'painless',
         source: `
-          boolean keepAborted = ctx._source.status == 'aborted'
-            && (params.status == 'failed' || params.status == 'completed');
+          boolean keepAborted = ctx._source.status == 'aborted' && params.status != 'aborted';
           if (!keepAborted) { ctx._source.status = params.status; }
           if (params.error != null) { ctx._source.error = params.error; }
           if (params.abort_reason != null) { ctx._source.abort_reason = params.abort_reason; }
