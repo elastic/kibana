@@ -14,3 +14,5 @@ export const COMMON_UNSAFE_HEADERS = {
   ...COMMON_HEADERS,
   'kbn-xsrf': 'some-xsrf-token',
 };
+
+export { apiTest, TEST_USERNAME } from './ephemeral_token';

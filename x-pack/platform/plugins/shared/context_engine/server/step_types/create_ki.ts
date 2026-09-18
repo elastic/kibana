@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   assertWritableDest,
+  kiWriterFromContext,
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -47,28 +48,29 @@ export const getCreateKiStepDefinition = ({
           );
           setManaged(managed);
           assertWritableDest(aiIndexId, dest);
-          if (kiId !== undefined && dest.type === 'data_stream') {
-            throw new ExecutionError({
-              type: 'ValidationError',
-              message: `Cannot create KI '${kiId}' in AI index '${aiIndexId}': the data stream backing store '${dest.value}' generates document ids`,
-              details: { aiIndexId, kiId, destValue: dest.value },
-            });
-          }
           const esClient = context.contextManager.getScopedEsClient();
 
-          const response = await esClient.index(
+          const id = kiId ?? uuidv4();
+          const now = new Date().toISOString();
+          const writer = kiWriterFromContext(context.contextManager.getContext());
+          await esClient.index(
             {
               index: dest.value,
-              ...(kiId !== undefined && { id: kiId }),
-              document: { '@timestamp': new Date().toISOString(), ...ki },
+              document: {
+                '@timestamp': now,
+                ...ki,
+                id,
+                updated_at: now,
+                governance: { provenance: { created_by: writer, updated_by: writer } },
+              },
               // Data streams only accept `create`; `wait_for` makes the KI visible to later steps.
-              ...(dest.type === 'data_stream' && { op_type: 'create' as const }),
+              ...(dest.type === 'data_stream' ? { op_type: 'create' as const } : { id }),
               refresh: 'wait_for',
             },
             { signal: context.abortSignal }
           );
 
-          return { output: { id: response._id } };
+          return { output: { id } };
         },
       });
     },

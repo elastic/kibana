@@ -39,5 +39,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-server",
     "@kbn/charts-theme",
+    "@kbn/i18n-react",
   ]
 }
