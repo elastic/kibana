@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
-
-export interface ActionImpactItemStatus {
-  label: string;
-  /** @default 'check' */
-  iconType?: IconType;
-  /** @default 'success' */
-  color?: 'success' | 'warning' | 'danger';
+/** Thrown when attach or list inputs violate a documented ceiling. */
+export class ImpactInvalidRequestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ImpactInvalidRequestError';
+  }
 }

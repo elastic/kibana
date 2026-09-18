@@ -62,7 +62,7 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `watch_id`         fabricated `''`; no equivalent on a proposal.
  * - `watch_execution_id` fabricated `''`; no equivalent.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  `undefined`; BlastRadius self-hides (returns null) with no surfaces.
+ * - `affectedSurface`  `undefined`; Impact self-hides (returns null) with no surfaces.
  * - `assignee`         `null`; `decidedBy` is the decider, not an owner.
  * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
  *                      `'succeeded'`, …) are not investigation statuses, and mapping them
@@ -117,6 +117,6 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     primaryActionLabel: proposal.action?.name,
     assignee: null,
     events: [],
-    // affectedSurface left undefined → BlastRadius self-hides (returns null).
+    // affectedSurface left undefined → Impact self-hides (returns null).
   };
 };

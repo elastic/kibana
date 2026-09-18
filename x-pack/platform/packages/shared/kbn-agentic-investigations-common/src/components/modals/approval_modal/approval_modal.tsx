@@ -62,7 +62,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           title={title}
           tone={tone}
           iconType={recommendedActionIconProps.type}
-          blastRadius={{
+          actionImpact={{
             variant: 'description',
             description: selectedRecommendedActionConversation?.summary ?? '',
           }}

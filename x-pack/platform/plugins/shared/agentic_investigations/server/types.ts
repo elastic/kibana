@@ -14,6 +14,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { ImpactService } from './impact/services/impact_service';
 import type { ProposalsService } from './proposals/services/proposals_service';
 
 export interface AgenticInvestigationsSetupDependencies {
@@ -41,6 +42,7 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
+  getImpactService: () => ImpactService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

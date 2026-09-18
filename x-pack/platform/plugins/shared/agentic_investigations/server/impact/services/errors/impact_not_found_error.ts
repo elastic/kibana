@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
-
-export interface ActionImpactItemStatus {
-  label: string;
-  /** @default 'check' */
-  iconType?: IconType;
-  /** @default 'success' */
-  color?: 'success' | 'warning' | 'danger';
+export class ImpactNotFoundError extends Error {
+  constructor(conversationId: string) {
+    super(`Impact for conversation ${conversationId} was not found`);
+    this.name = 'ImpactNotFoundError';
+  }
 }

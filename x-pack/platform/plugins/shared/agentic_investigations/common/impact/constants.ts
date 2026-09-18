@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
+
+/**
+ * The `.kibana-` prefix is deliberate: `.kibana*` is already granted to the
+ * `kibana_system` role, so this index needs no Elasticsearch-side system index
+ * registration. Each entity this plugin owns gets its own index.
+ */
+export const IMPACT_INDEX_NAME = '.kibana-investigation-impact' as const;
+
+export const IMPACT_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/impact` as const;
+
+export const IMPACT_UI_CAPABILITY_SHOW = 'showImpact' as const;
+export const IMPACT_UI_CAPABILITY_MANAGE = 'manageImpact' as const;
+
+/** Ceiling on `listByConversationIds` so a caller cannot ask for an unbounded terms query. */
+export const MAX_IMPACT_CONVERSATION_IDS = 1000;
+
+/** Opaque entity ids (users, hosts, services). Hydrated labels are a follow-up. */
+export const MAX_ENTITY_ID_LENGTH = 256;
+export const MAX_ENTITY_IDS = 100;

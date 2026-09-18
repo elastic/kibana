@@ -16,6 +16,9 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
 import { registerFeatures } from './features';
+import { registerImpactRoutes } from './impact/routes/register_routes';
+import { ImpactService } from './impact/services/impact_service';
+import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
 import { registerRoutes } from './proposals/routes/register_routes';
 import { ProposalsService } from './proposals/services/proposals_service';
@@ -46,6 +49,7 @@ export class AgenticInvestigationsPlugin
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private impactService?: ImpactService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -91,10 +95,20 @@ export class AgenticInvestigationsPlugin
       }),
     });
 
+    const router = coreSetup.http.createRouter();
+
     registerRoutes({
-      router: coreSetup.http.createRouter(),
+      router,
       logger: this.logger,
       getProposalsService: () => this.requireProposalsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      resolveUser: (request) => this.requireUserResolver()(request),
+    });
+
+    registerImpactRoutes({
+      router,
+      logger: this.logger,
+      getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
     });
@@ -126,6 +140,13 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
+    this.impactService = new ImpactService({
+      storage: createImpactStorageClient({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      }),
+    });
+
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
@@ -139,6 +160,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getImpactService: () => this.requireImpactService(),
     };
   }
 
@@ -158,6 +180,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.proposalsService;
+  }
+
+  private requireImpactService(): ImpactService {
+    if (!this.impactService) {
+      throw new Error(
+        'Impact service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.impactService;
   }
 
   private getSpaceId(request: KibanaRequest): string {
