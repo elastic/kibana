@@ -89,6 +89,7 @@ export const buildPolicyChangeAssessment = (
   return {
     policy,
     proposed: normalize(prepared.proposedConfig),
+    proposedConfig: prepared.proposedConfig,
     fields: getFieldRegistry(),
     requestedOperations: operations,
     changes: prepared.explicitChanges.map((change) =>

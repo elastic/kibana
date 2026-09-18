@@ -138,6 +138,7 @@ const createDto = (overrides: AssessmentFixture = {}): AssessPolicyChangeDto => 
     assessment: {
       policy: { snapshot: { identity: policy } } as AssessPolicyChangeDto['assessment']['policy'],
       proposed: {} as AssessPolicyChangeDto['assessment']['proposed'],
+      proposedConfig: {} as AssessPolicyChangeDto['assessment']['proposedConfig'],
       fields: [],
       requestedOperations,
       changes,
