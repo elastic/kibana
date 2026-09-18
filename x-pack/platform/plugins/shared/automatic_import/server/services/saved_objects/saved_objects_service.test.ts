@@ -114,12 +114,33 @@ describe('AutomaticImportSavedObjectService', () => {
       expect(close).toHaveBeenCalled();
     });
 
-    it('returns an empty array when the integrations index does not exist yet', async () => {
-      clientMock.createPointInTimeFinder.mockImplementation(() => {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError();
-      });
+    it('rethrows a Saved Objects 404 from the finder so a missing PIT does not look like an empty catalog', async () => {
+      const close = jest.fn().mockResolvedValue(undefined);
+      clientMock.createPointInTimeFinder.mockReturnValue({
+        find: () => ({
+          [Symbol.asyncIterator]: () => ({
+            next: () => Promise.reject(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+          }),
+        }),
+        close,
+      } as unknown as ReturnType<SavedObjectsClient['createPointInTimeFinder']>);
 
-      await expect(service.getAllIntegrationNames()).resolves.toEqual([]);
+      await expect(service.getAllIntegrationNames()).rejects.toThrow('Not Found');
+      expect(close).toHaveBeenCalled();
+    });
+
+    it('rethrows a Saved Objects 404 from close()', async () => {
+      const close = jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      clientMock.createPointInTimeFinder.mockReturnValue({
+        find: async function* find() {
+          yield { saved_objects: [integration('nginx', 'Nginx')] };
+        },
+        close,
+      } as unknown as ReturnType<SavedObjectsClient['createPointInTimeFinder']>);
+
+      await expect(service.getAllIntegrationNames()).rejects.toThrow('Not Found');
     });
   });
 });

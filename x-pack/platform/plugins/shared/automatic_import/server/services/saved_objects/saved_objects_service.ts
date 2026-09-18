@@ -234,10 +234,6 @@ export class AutomaticImportSavedObjectService {
 
       return names;
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        this.logger.debug('No integrations index found, returning empty array');
-        return [];
-      }
       this.logger.error(`Failed to get all integration names: ${error}`);
       throw error;
     }
