@@ -1017,7 +1017,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                         'xpack.alertingV2.ruleBuilder.severity.reservedLabelNotice',
                         {
                           defaultMessage:
-                            'Severity is not configurable while a stat or evaluation is named "severity". Rename it to configure severity.',
+                            'Severity levels are not configurable while a stat or evaluation is named "severity". Rename it to enable them.',
                         }
                       )}
                       data-test-subj="ruleBuilderSeverityReservedLabelCallout"
