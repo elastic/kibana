@@ -32,6 +32,7 @@ import type { ResolvedWorkflowAttachmentOrigin } from './validate_origin';
 import {
   parseSelectedAlertPairs,
   parseSelectedDocumentPairs,
+  rejectDocumentIdSelections,
   validateOrigin,
 } from './validate_origin';
 
@@ -183,6 +184,7 @@ export class CasesWorkflowRunService {
     // before any case fetch, so the validated sets equal what processing later uses.
     const selectedAlerts = parseSelectedAlertPairs(body.inputs);
     const selectedDocuments = parseSelectedDocumentPairs(body.inputs);
+    rejectDocumentIdSelections(body.inputs);
     let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
     let resolvedAttachmentOrigin: ResolvedWorkflowAttachmentOrigin | undefined;
     // Observable inputs (observableIds / observableTypeKeys) are server-owned and stripped before
@@ -299,9 +301,9 @@ export class CasesWorkflowRunService {
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
     //
-    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
-    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
-    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
+    // eventOverrides injects the server-owned caseIds into `event` *after* trigger preprocessing
+    // runs. Preprocessing replaces the whole `event` object with the alert-event shape, so
+    // pre-merging caseIds into event (before the call) would silently drop them on alert runs.
     const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
