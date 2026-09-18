@@ -22,6 +22,7 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { isTextBasedAttributes, LENS_LAYER_TYPES } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
@@ -351,7 +352,7 @@ export function LayerPanel(props: LayerPanelProps) {
     isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 
   const updateLayerQuery = useCallback(
-    async (newQuery: AggregateQuery, columns: DatatableColumn[]) => {
+    async (newQuery: AggregateQuery, columns: DatatableColumn[], dataView: DataView) => {
       const layer = textBasedDatasourceState?.layers?.[layerId];
       if (!textBasedDatasourceState || !layer) {
         return;
@@ -375,17 +376,39 @@ export function LayerPanel(props: LayerPanelProps) {
         );
       }
 
+      const dataViewSpec = dataView.toSpec();
+      const index = dataViewSpec.id ?? dataViewSpec.title;
+      const updatedLayers = {
+        ...textBasedDatasourceState.layers,
+        [layerId]: {
+          ...layer,
+          index,
+          timeField: dataViewSpec.timeFieldName,
+          query: newQuery,
+          columns: reconciledColumns,
+          errors: undefined,
+        },
+      };
+      const referencedIndexIds = new Set(
+        Object.values(updatedLayers).map(({ index: currentIndex }) => currentIndex)
+      );
+      const indexPatternRefs = dataViewSpec.id
+        ? [
+            ...(textBasedDatasourceState.indexPatternRefs ?? []).filter(
+              ({ id }) => id !== dataViewSpec.id && referencedIndexIds.has(id)
+            ),
+            {
+              id: dataViewSpec.id,
+              title: dataViewSpec.title ?? '',
+              timeField: dataViewSpec.timeFieldName,
+            },
+          ]
+        : textBasedDatasourceState.indexPatternRefs;
+
       updateDatasource(datasourceId, {
         ...textBasedDatasourceState,
-        layers: {
-          ...textBasedDatasourceState.layers,
-          [layerId]: {
-            ...layer,
-            query: newQuery,
-            columns: reconciledColumns,
-            errors: undefined,
-          },
-        },
+        indexPatternRefs,
+        layers: updatedLayers,
       });
     },
     [allAccessors, datasourceId, layerId, textBasedDatasourceState, updateDatasource]

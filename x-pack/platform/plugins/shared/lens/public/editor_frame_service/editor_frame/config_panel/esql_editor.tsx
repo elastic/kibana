@@ -21,6 +21,7 @@ import { mapVariableToColumn } from '@kbn/esql-utils';
 import { type ESQLControlVariable, type ESQLQueryStats } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { useObservable } from '@kbn/use-observable';
@@ -49,6 +50,7 @@ export type ESQLEditorProps = Simplify<
     onLayerQuerySubmit?: (
       query: AggregateQuery,
       columns: DatatableColumn[],
+      dataView: DataView,
       abortController?: AbortController
     ) => Promise<void>;
   } & Pick<
@@ -202,7 +204,7 @@ export function ESQLEditor({
           // Commit the grid and fieldlist cache only after the layer accepted the
           // query; otherwise a rejected query (e.g. missing-dimension validation)
           // would leave them showing results the layer state does not reflect.
-          await onLayerQuerySubmit(q, columns, abortController);
+          await onLayerQuerySubmit(q, columns, gridAttrs.dataView, abortController);
           addColumnsToCache(q, columns);
           setDataGridAttrs({ ...gridAttrs, columns });
           prevQuery.current = q;

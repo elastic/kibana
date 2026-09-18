@@ -12,6 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   renderWithReduxStore,
   mockVisualizationMap,
@@ -30,6 +31,7 @@ let capturedOnSubmit:
   | undefined;
 // Capture the query the editor currently displays, to assert seeding/reset behavior.
 let capturedQuery: AggregateQuery | undefined;
+const mockDataView = {} as DataView;
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: (props: {
@@ -137,9 +139,11 @@ describe('ESQLEditor', () => {
     getSuggestionsMock.mockClear();
     getSuggestionsMock.mockResolvedValue(undefined);
     getGridAttrsMock.mockClear();
-    getGridAttrsMock.mockResolvedValue({ columns: [], rows: [] } as unknown as Awaited<
-      ReturnType<typeof getGridAttrs>
-    >);
+    getGridAttrsMock.mockResolvedValue({
+      columns: [],
+      rows: [],
+      dataView: mockDataView,
+    } as unknown as Awaited<ReturnType<typeof getGridAttrs>>);
     addColumnsToCacheMock.mockClear();
     useFetchContextMock.mockReturnValue({ esqlVariables: [], isApproximate: false });
   });
@@ -211,6 +215,7 @@ describe('ESQLEditor', () => {
       getGridAttrsMock.mockResolvedValue({
         columns,
         rows: [],
+        dataView: mockDataView,
       } as unknown as Awaited<ReturnType<typeof getGridAttrs>>);
       useFetchContextMock.mockReturnValue({
         esqlVariables: [{ key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS }],
@@ -225,6 +230,7 @@ describe('ESQLEditor', () => {
       expect(onLayerQuerySubmit).toHaveBeenCalledWith(
         variableQuery,
         [{ ...columns[0], variable: 'field' }, columns[1]],
+        mockDataView,
         expect.any(AbortController)
       );
     });

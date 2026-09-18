@@ -16,6 +16,7 @@ import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { generateId } from '../../../id_generator';
 import {
@@ -1214,7 +1215,7 @@ describe('LayerPanel', () => {
       const updateDatasource = jest.fn();
       const textBasedState = {
         layers: {
-          first: { columns: [], query: firstQuery },
+          first: { index: 'index-a', columns: [], query: firstQuery },
           second: {
             columns: [
               {
@@ -1228,7 +1229,7 @@ describe('LayerPanel', () => {
             query: secondQuery,
           },
         },
-        indexPatternRefs: [],
+        indexPatternRefs: [{ id: 'index-a', title: 'index-a', timeField: '@timestamp' }],
       };
 
       renderLayerPanel({
@@ -1272,14 +1273,24 @@ describe('LayerPanel', () => {
         })
       );
 
-      await act(async () => editorProps?.onLayerQuerySubmit?.(newSecondQuery, queryColumns));
+      await act(async () =>
+        editorProps?.onLayerQuerySubmit?.(newSecondQuery, queryColumns, {
+          toSpec: () => ({ id: 'index-b', title: 'index-b', timeFieldName: '@timestamp' }),
+        } as DataView)
+      );
 
       expect(updateDatasource).toHaveBeenCalledWith('textBased', {
         ...textBasedState,
+        indexPatternRefs: [
+          { id: 'index-a', title: 'index-a', timeField: '@timestamp' },
+          { id: 'index-b', title: 'index-b', timeField: '@timestamp' },
+        ],
         layers: {
           first: textBasedState.layers.first,
           second: {
             ...textBasedState.layers.second,
+            index: 'index-b',
+            timeField: '@timestamp',
             query: newSecondQuery,
             columns: [
               {
@@ -1305,6 +1316,107 @@ describe('LayerPanel', () => {
         editorProps?.onLayerQuerySubmit?.(incompatibleQuery, incompatibleColumns)
       ).rejects.toThrow('does not contain compatible fields');
       expect(updateDatasource).not.toHaveBeenCalled();
+    });
+
+    it('updates the selected layer source metadata when its query changes data views', async () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      const firstQuery = { esql: 'FROM first-index | LIMIT 10' };
+      const secondQuery = { esql: 'FROM old-index | STATS COUNT(*)' };
+      const newSecondQuery = { esql: 'FROM new-index | STATS COUNT(*)' };
+      const queryColumns: DatatableColumn[] = [
+        { id: 'COUNT(*)', name: 'COUNT(*)', meta: { type: 'number' } },
+      ];
+      const newDataView = {
+        id: 'new-index-id',
+        title: 'new-index',
+        timeFieldName: 'event.ingested',
+        toSpec: () => ({
+          id: 'new-index-id',
+          title: 'new-index',
+          timeFieldName: 'event.ingested',
+        }),
+      } as DataView;
+      const updateDatasource = jest.fn();
+      const textBasedState = {
+        layers: {
+          first: { index: 'first-index-id', columns: [], query: firstQuery },
+          second: {
+            index: 'old-index-id',
+            timeField: '@timestamp',
+            columns: [
+              {
+                columnId: 'second-metric',
+                fieldName: 'COUNT(*)',
+                meta: { type: 'number' as const },
+              },
+            ],
+            query: secondQuery,
+          },
+        },
+        indexPatternRefs: [
+          { id: 'first-index-id', title: 'first-index' },
+          { id: 'old-index-id', title: 'old-index', timeField: '@timestamp' },
+        ],
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'second',
+          isOnlyLayer: false,
+          dimensionGroups: [
+            {
+              groupId: 'metric',
+              groupLabel: 'Metric',
+              accessors: [{ columnId: 'second-metric' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'metric',
+            },
+          ],
+          updateDatasource,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              first: mockTextBasedDatasource.publicAPIMock,
+              second: mockTextBasedDatasource.publicAPIMock,
+            },
+          },
+          attributes: makeTextBasedAttributes(textBasedState.layers),
+        },
+        preloadedState: {
+          query: firstQuery,
+          datasourceStates: {
+            textBased: { isLoading: false, state: textBasedState },
+          },
+        },
+      });
+
+      const onLayerQuerySubmit = jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0].onLayerQuerySubmit;
+      expect(onLayerQuerySubmit).toBeDefined();
+      await act(async () => {
+        await Reflect.apply(onLayerQuerySubmit!, undefined, [
+          newSecondQuery,
+          queryColumns,
+          newDataView,
+        ]);
+      });
+
+      expect(updateDatasource).toHaveBeenCalledWith(
+        'textBased',
+        expect.objectContaining({
+          indexPatternRefs: [
+            { id: 'first-index-id', title: 'first-index' },
+            { id: 'new-index-id', title: 'new-index', timeField: 'event.ingested' },
+          ],
+          layers: expect.objectContaining({
+            second: expect.objectContaining({
+              index: 'new-index-id',
+              timeField: 'event.ingested',
+              query: newSecondQuery,
+            }),
+          }),
+        })
+      );
     });
 
     // Regression test for duplicate-field columns: a previous reconcile can leave
@@ -1396,7 +1508,11 @@ describe('LayerPanel', () => {
         { id: bucketField, name: bucketField, meta: { type: 'date' } },
       ];
 
-      await act(async () => editorProps?.onLayerQuerySubmit?.(newQuery, queryColumns));
+      await act(async () =>
+        editorProps?.onLayerQuerySubmit?.(newQuery, queryColumns, {
+          toSpec: () => ({ id: 'index-b', title: 'index-b', timeFieldName: '@timestamp' }),
+        } as DataView)
+      );
 
       expect(updateDatasource).toHaveBeenCalledTimes(1);
       const nextColumns = updateDatasource.mock.calls[0][1].layers.second.columns;

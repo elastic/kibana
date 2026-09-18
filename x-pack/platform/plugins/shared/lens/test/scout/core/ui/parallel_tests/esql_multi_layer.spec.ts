@@ -413,6 +413,77 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
   );
 
   spaceTest(
+    'keeps the new source time field after changing a secondary layer query',
+    async ({ kbnClient, page, pageObjects, scoutSpace }) => {
+      const indexName = 'logstash-2015.09.22';
+      const { dashboard, lens } = pageObjects;
+      await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      await addDataLayer(page);
+
+      const newSourceQuery =
+        `FROM ${indexName} ` +
+        '| WHERE utc_time >= ?_tstart AND utc_time <= ?_tend ' +
+        '| STATS COUNT(*) BY utc_time = BUCKET(utc_time, 75, ?_tstart, ?_tend)';
+      await lens.workspace.submitEsqlQuery(newSourceQuery);
+      await lens.dimensions.setTextBasedDimensionField(X_DIMENSION, 'utc_time', 1);
+      await lens.dimensions.setTextBasedDimensionField(Y_DIMENSION, 'COUNT(*)', 1);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      await applyLensInlineEditorAndWaitClosed({ lens });
+      await dashboard.saveChangesToExistingDashboard();
+
+      interface PersistedLayer {
+        index?: string;
+        timeField?: string;
+        query?: { esql: string };
+      }
+      interface PersistedTextBasedState {
+        layers: Record<string, PersistedLayer>;
+        indexPatternRefs?: Array<{ id: string; title: string; timeField?: string }>;
+      }
+      const getPersistedTextBasedState = async (): Promise<PersistedTextBasedState> => {
+        const { attributes } = await kbnClient.savedObjects.get<{ panelsJSON: string }>({
+          type: 'dashboard',
+          id: dashboardId,
+          space: scoutSpace.id,
+        });
+        const panels = JSON.parse(attributes.panelsJSON) as Array<{
+          panelIndex: string;
+          embeddableConfig: {
+            attributes: {
+              state: {
+                datasourceStates: { textBased: PersistedTextBasedState };
+              };
+            };
+          };
+        }>;
+        const panel = panels.find(
+          ({ panelIndex }) => panelIndex === testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA
+        );
+        return (
+          panel?.embeddableConfig.attributes.state.datasourceStates.textBased ?? { layers: {} }
+        );
+      };
+
+      await expect
+        .poll(async () => Object.keys((await getPersistedTextBasedState()).layers).length)
+        .toBe(2);
+      const textBasedState = await getPersistedTextBasedState();
+      const editedLayer = Object.values(textBasedState.layers).find(
+        ({ query }) => query?.esql === newSourceQuery
+      );
+      const editedLayerIndexRef = textBasedState.indexPatternRefs?.find(
+        ({ title }) => title === indexName
+      );
+      expect(editedLayerIndexRef).toMatchObject({ timeField: 'utc_time' });
+      expect(editedLayer).toMatchObject({
+        index: editedLayerIndexRef?.id,
+        timeField: 'utc_time',
+      });
+    }
+  );
+
+  spaceTest(
     'rejects invalid or incompatible queries on one layer',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
