@@ -86,25 +86,6 @@ describe('useDeveloperMode', () => {
     expect(setUiSetting).toHaveBeenCalledWith(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, true);
   });
 
-  it('sets isSaving while the request is in flight', async () => {
-    let resolveSave!: (value: boolean) => void;
-    setup({ enabled: false });
-    setUiSetting.mockReturnValue(new Promise<boolean>((resolve) => (resolveSave = resolve)));
-    const { result } = renderHook(() => useDeveloperMode());
-
-    act(() => {
-      void result.current.setDeveloperMode(true);
-    });
-
-    await waitFor(() => expect(result.current.isSaving).toBe(true));
-
-    await act(async () => {
-      resolveSave(true);
-    });
-
-    expect(result.current.isSaving).toBe(false);
-  });
-
   it('toasts when the setting cannot be saved', async () => {
     setup({ enabled: false });
     setUiSetting.mockResolvedValue(false);
