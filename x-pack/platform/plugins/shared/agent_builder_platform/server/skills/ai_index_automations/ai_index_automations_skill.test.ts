@@ -8,7 +8,49 @@
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import { aiIndexAutomationsSkill } from './ai_index_automations_skill';
+import {
+  KI_SHAPES_REFERENCE_NAME,
+  STRATEGY_CATALOG_REFERENCE_NAME,
+} from '../context_engine_shared';
+import {
+  aiIndexAutomationsSkill,
+  DOCUMENT_TEMPLATE_NAME,
+  INDEX_METADATA_TEMPLATE_NAME,
+  TARGETED_KI_WRITER_TEMPLATE_NAME,
+  UNIT_PROFILE_TEMPLATE_NAME,
+} from './ai_index_automations_skill';
+
+const TEMPLATE_NAMES: readonly string[] = [
+  INDEX_METADATA_TEMPLATE_NAME,
+  UNIT_PROFILE_TEMPLATE_NAME,
+  DOCUMENT_TEMPLATE_NAME,
+  TARGETED_KI_WRITER_TEMPLATE_NAME,
+];
+
+const templates = () =>
+  (aiIndexAutomationsSkill.referencedContent ?? []).filter(({ name }) =>
+    TEMPLATE_NAMES.includes(name)
+  );
+
+// Splits a template into its `ai.prompt` step blocks: from the step's `- name:` line to the next
+// sibling `- name:` at the same indentation, so a rule about every prompt can be checked per step.
+const aiPromptBlocks = (yaml: string): string[] => {
+  const lines = yaml.split('\n');
+  const blocks: string[] = [];
+  for (let index = 0; index < lines.length; index++) {
+    const nameMatch = lines[index].match(/^(\s*)- name: /);
+    if (!nameMatch || !/^\s*type: ai\.prompt\s*$/.test(lines[index + 1] ?? '')) {
+      continue;
+    }
+    const indent = nameMatch[1];
+    let end = index + 1;
+    while (end < lines.length && !lines[end].startsWith(`${indent}- name: `)) {
+      end++;
+    }
+    blocks.push(lines.slice(index, end).join('\n'));
+  }
+  return blocks;
+};
 
 describe('aiIndexAutomationsSkill', () => {
   it('registers with stable id, name, and context-engine base path', () => {
@@ -30,18 +72,21 @@ describe('aiIndexAutomationsSkill', () => {
     expect(aiIndexAutomationsSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries one workflow template per strategy that ships with one', () => {
+  it('carries one workflow template per strategy that ships with one, plus the shared references', () => {
     const names = (aiIndexAutomationsSkill.referencedContent ?? []).map(({ name }) => name);
 
     expect(names).toEqual([
       'index-metadata-template',
-      'entity-profile-template',
+      'unit-profile-template',
       'document-template',
+      'targeted-ki-writer',
+      KI_SHAPES_REFERENCE_NAME,
+      STRATEGY_CATALOG_REFERENCE_NAME,
     ]);
   });
 
   it('ships each template as a complete workflow rather than a fragment', () => {
-    for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
+    for (const reference of templates()) {
       expect(reference.relativePath).toBe('.');
       // A template is only a starting point if it runs: it needs the sink, the gate that guards
       // it, and the `consts` block that is the whole of the adaptation.
@@ -54,9 +99,52 @@ describe('aiIndexAutomationsSkill', () => {
   });
 
   it('pins no connector in any template, so ai.prompt resolves the default at run time', () => {
-    for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
+    for (const reference of templates()) {
       expect(reference.content).not.toContain('connector-id');
     }
+  });
+
+  it('retries every ai.prompt, since a transient model failure otherwise costs the unit', () => {
+    const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
+
+    expect(blocks.length).toBeGreaterThan(0);
+    for (const block of blocks) {
+      expect(block).toMatch(/on-failure:\n\s+retry:\n\s+max-attempts: 3/);
+      expect(block).toMatch(/strategy: exponential/);
+      expect(block).toMatch(/jitter: true/);
+    }
+  });
+
+  it('pages the unit template on a cursor and skips units whose source has not changed', () => {
+    const unitTemplate = templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME);
+
+    expect(unitTemplate?.content).toContain('type: while');
+    expect(unitTemplate?.content).toMatch(/variables\.cursor/);
+    expect(unitTemplate?.content).toMatch(/\| last \| first/);
+    expect(unitTemplate?.content).toContain('type: loop.continue');
+    expect(unitTemplate?.content).toContain('source_updated_at');
+    // The three strategy answers as consts.
+    for (const constName of [
+      'unit_index:',
+      'unit_key:',
+      'freshness_field:',
+      'catalog_index:',
+      'discovery_filter:',
+      'batch_size:',
+    ]) {
+      expect(unitTemplate?.content).toContain(constName);
+    }
+  });
+
+  it('writes targeted KIs without a model call, from consts, with provenance keys', () => {
+    const writer = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
+
+    expect(writer?.content).not.toContain('ai.prompt');
+    expect(writer?.content).toContain('type: constraint');
+    for (const key of ['trace_ids:', 'conversation_id:', 'error_text:', 'source_index:']) {
+      expect(writer?.content).toContain(key);
+    }
+    expect(writer?.content).toMatch(/ki: "\$\{\{ foreach\.item\.ki \}\}"/);
   });
 
   it('mentions every referencedContent entry by name in the skill content', () => {
@@ -166,7 +254,44 @@ describe('aiIndexAutomationsSkill', () => {
     it('names each template where its strategy is described, so the brief can cite one', () => {
       expect(content).toMatch(/Index\/Table Metadata.*\n?.*`index-metadata-template`/);
       expect(content).toMatch(/Bottom-Up.*\n?.*`document-template`/);
-      expect(content).toMatch(/Cumulative \/ Wiki-style.*\n?.*`entity-profile-template`/);
+      expect(content).toMatch(/Cumulative \/ Wiki-style.*\n?.*`unit-profile-template`/);
+      expect(content).toMatch(/Targeted KIs.*\n?.*`targeted-ki-writer`/);
+      expect(content).not.toContain('entity-profile-template');
+    });
+
+    it('describes the unit template as the three strategy answers written into consts', () => {
+      expect(content).toMatch(/`unit_index` and `unit_key` are the unit/);
+      expect(content).toMatch(/how units are found and refreshed/);
+      expect(content).toMatch(
+        /`loop\.continue` past the unit when its `freshness_field` has\s+not moved/
+      );
+    });
+
+    it('has the brief carry the three strategy answers and the counted findings', () => {
+      expect(content).toMatch(/\*\*as its three answers\*\*/);
+      expect(content).toMatch(/\*\*the counted findings\*\*/);
+      expect(content).toMatch(/what is not in the brief is not in the KI/i);
+    });
+
+    it('requires retry on every ai.prompt and says why', () => {
+      expect(content).toMatch(/\*\*Retry every `ai\.prompt`\*\*/);
+      expect(content).toMatch(/three attempts, exponential delay and\s+jitter/);
+    });
+
+    it('points at the shared references for the shape and the catalog instead of restating them', () => {
+      expect(content).toContain(`\`${KI_SHAPES_REFERENCE_NAME}\``);
+      expect(content).toContain(`\`${STRATEGY_CATALOG_REFERENCE_NAME}\``);
+      expect(content).not.toMatch(/\| `title` \| text \+ semantic \|/);
+    });
+
+    it('documents while, variables and loop.continue, which the unit template depends on', () => {
+      expect(content).toMatch(/\*\*A `while` pages through a corpus/);
+      expect(content).toMatch(/readable as `variables\.<key>`/);
+      expect(content).toMatch(/\*\*`loop\.continue` skips the rest of an iteration\*\*/);
+    });
+
+    it('never reruns a failed call unchanged', () => {
+      expect(content).toMatch(/Never rerun a\s+failed call unchanged/);
     });
 
     it('points the strategies without a template at the one to start from', () => {
@@ -251,7 +376,9 @@ describe('aiIndexAutomationsSkill', () => {
         '`elasticsearch.request`',
         '`ai.prompt`',
         '`foreach`',
+        '`while`',
         '`if`',
+        '`loop.continue`',
         '`data.set`',
         '`console`',
       ]) {
@@ -266,14 +393,16 @@ describe('aiIndexAutomationsSkill', () => {
         'elasticsearch.request',
         'ai.prompt',
         'foreach',
+        'while',
         'if',
+        'loop.continue',
         'data.set',
         'console',
         'context-engine.createKi',
         'context-engine.verifyKi',
       ];
 
-      for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
+      for (const reference of templates()) {
         // Anchored on the `- name:` above it, so the `type:` keys inside an ai.prompt output
         // schema are not mistaken for step types.
         const used = [...reference.content.matchAll(/- name: [^\n]+\n\s*type: ([\w.-]+)/g)].map(
@@ -341,7 +470,9 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('points the pilot bound at the consts the templates already expose', () => {
-      expect(content).toMatch(/`max_entities`, `max_documents`, `corpus_filter`/);
+      expect(content).toMatch(
+        /`max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size`/
+      );
     });
 
     it('saves the piloted definition rather than a regenerated one', () => {
@@ -422,11 +553,11 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('documents every Liquid filter the templates depend on', () => {
-      const templates = (aiIndexAutomationsSkill.referencedContent ?? [])
+      const templateYaml = templates()
         .map(({ content: yaml }) => yaml)
         .join('\n');
       const used = new Set(
-        [...templates.matchAll(/\|\s*([a-z_]+)\s*(?::|\}\})/g)].map(([, filter]) => filter)
+        [...templateYaml.matchAll(/\|\s*([a-z_]+)\s*(?::|\}\}|\|)/g)].map(([, filter]) => filter)
       );
 
       expect(used.size).toBeGreaterThan(0);

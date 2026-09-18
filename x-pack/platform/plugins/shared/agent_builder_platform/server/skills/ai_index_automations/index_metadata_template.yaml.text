@@ -69,6 +69,14 @@ steps:
 
   - name: generate_index_profile
     type: ai.prompt
+    # Transient connector errors, rate limits and structured-output parse failures are retried; a
+    # prompt that can never satisfy its schema still fails every attempt.
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+        jitter: true
     with:
       prompt: |
         You are documenting an Elasticsearch index for an AI Context Engine knowledge base.

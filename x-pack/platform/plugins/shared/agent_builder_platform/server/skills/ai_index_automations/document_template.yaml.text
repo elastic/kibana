@@ -83,6 +83,14 @@ steps:
 
       - name: summarize_document
         type: ai.prompt
+        # Transient connector errors, rate limits and structured-output parse failures are
+        # retried; a prompt that can never satisfy its schema still fails every attempt.
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
+            jitter: true
         with:
           systemPrompt: |
             You summarise source documents for a retrieval index. Ground every statement in the
