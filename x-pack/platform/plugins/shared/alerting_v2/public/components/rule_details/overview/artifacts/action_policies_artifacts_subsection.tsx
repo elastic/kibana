@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertingLocators } from '../../../../application/locator_context';
-import { useRule } from '../../rule_context';
 import { useLinkedActionPolicies } from './use_linked_action_policies';
+import type { RuleSummarySectionProps } from '../../../rule/types';
 
 const openLinkLabel = i18n.translate(
   'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.openLink',
@@ -63,8 +63,7 @@ const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
   </EuiFlexGroup>
 );
 
-export const ActionPoliciesArtifactsSubsection: React.FC = () => {
-  const rule = useRule();
+export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const { actionPolicyLocators } = useAlertingLocators();
   const {
     totalCount,
