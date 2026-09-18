@@ -118,6 +118,17 @@ export const PaginatedOverviewStatusCodec = t.intersection([
     total: t.number,
     page: t.number,
     perPage: t.number,
+    // Complete (unpaginated) monitor id sets per status bucket — `upConfigs`/
+    // `downConfigs`/etc above are sliced to just the current page here, same
+    // as `configs`, so a consumer that needs "every monitor id currently up
+    // (or down/pending/stale)" — e.g. to scope another query to the active
+    // `statusFilter` — can't get it from those. Mirrors `allIds`, which
+    // already does this for the (status-independent) location/tag/schedule
+    // filters.
+    upIds: t.array(t.string),
+    downIds: t.array(t.string),
+    pendingIds: t.array(t.string),
+    staleIds: t.array(t.string),
   }),
 ]);
 

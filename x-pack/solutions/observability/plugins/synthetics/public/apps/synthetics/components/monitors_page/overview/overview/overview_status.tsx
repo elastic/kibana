@@ -17,13 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
-import { useGetUrlParams } from '../../../../hooks/use_url_params';
+import { useGetUrlParams, useUrlParams } from '../../../../hooks/use_url_params';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
-import { PLUGIN } from '../../../../../../../common/constants/plugin';
 
 function title(t?: number) {
   return t ?? '-';
@@ -105,7 +103,7 @@ export function OverviewStatus({
   extraStats?: MonitorStatProps[];
 }) {
   const { statusFilter } = useGetUrlParams();
-  const { application } = useKibana().services;
+  const [, updateUrlParams] = useUrlParams();
   const { euiTheme } = useEuiTheme();
 
   const { status, error: statusError, loading } = useOverviewStatusState();
@@ -188,15 +186,20 @@ export function OverviewStatus({
     }
   }, [status, statusFilter]);
 
+  // `updateUrlParams` merges into the existing URL params (like `QuickFilters`
+  // already does), rather than replacing them — a `navigateToApp({ path })`
+  // call here would otherwise discard every other active filter and the
+  // brushed/date-picker range. Clicking the already-selected status clears it,
+  // matching `QuickFilters`' toggle behavior.
   const getOnClickStat = useCallback(
     (statusFilterName: string) => {
       return () => {
-        application?.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-          path: `?statusFilter=${statusFilterName}`,
+        updateUrlParams({
+          statusFilter: statusFilter !== statusFilterName ? statusFilterName : undefined,
         });
       };
     },
-    [application]
+    [statusFilter, updateUrlParams]
   );
 
   const monitorStatData = useMemo(() => {

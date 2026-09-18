@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityDataViews } from '@kbn/exploratory-view-plugin/public';
@@ -23,9 +24,21 @@ import { useMonitorFilters } from './use_monitor_filters';
 
 // A single value's KQL clause, e.g. `field: ("a" or "b")`.
 const kqlValuesClause = (field: string, values: Array<string | number>): string => {
-  const quoted = values.map((v) => `"${String(v).replace(/"/g, '\\"')}"`);
+  const quoted = values.map((v) => `"${escapeQuotes(String(v))}"`);
   return quoted.length === 1 ? `${field}: ${quoted[0]}` : `${field}: (${quoted.join(' or ')})`;
 };
+
+// The search box's free-text query already scopes the ping/error series (via
+// `useMonitorQueryFilters`'s DSL `dslFilters`, which doesn't reach annotation
+// layers — they default to `ignoreGlobalFilters: true`) and the monitor grid,
+// but nothing scoped the alert markers to it. Alert docs don't carry the full
+// multi-field set `getQueryFilters` searches on the ping index (e.g. `hosts`,
+// `urls`), so this matches on `monitor.name` alone rather than risk a KQL
+// clause referencing a field that doesn't exist on this data view. Left
+// unquoted (with `escapeKuery`, not `escapeQuotes`) so the `*` wildcards
+// still work as substring matches — a quoted KQL literal treats `*` as a
+// literal character rather than a wildcard.
+const kqlSearchClause = (query: string): string => `monitor.name: *${escapeKuery(query)}*`;
 
 /**
  * Vertical markers for alert start times, drawn on top of the "Pings over
@@ -36,7 +49,7 @@ const kqlValuesClause = (field: string, values: Array<string | number>): string 
 export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefined {
   const { dataViews } = useKibana<ClientPluginsStart>().services;
   const { euiTheme } = useEuiTheme();
-  const { locations } = useGetUrlParams();
+  const { locations, query } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
 
   const { data: alertsDataView } = useFetcher(async () => {
@@ -52,9 +65,10 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       kqlValuesClause('kibana.alert.status', ['active', 'recovered']),
       ...alertsFilters.map((filter) => kqlValuesClause(filter.field, filter.values ?? [])),
       ...(locations?.length ? [kqlValuesClause('observer.geo.name', locations)] : []),
+      ...(query ? [kqlSearchClause(query)] : []),
     ];
     return clauses.join(' and ');
-  }, [alertsFilters, locations]);
+  }, [alertsFilters, locations, query]);
 
   return useMemo(() => {
     if (!alertsDataView) {
