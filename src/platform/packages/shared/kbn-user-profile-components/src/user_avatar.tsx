@@ -16,7 +16,6 @@ import type { UserProfile, UserProfileUserInfo } from '@kbn/core-user-profile-co
 
 import type { UserProfileAvatarData } from './types';
 import {
-  getUserAvatarColor,
   getUserAvatarInitials,
   getUserDisplayLabel,
   USER_AVATAR_MAX_INITIALS,
@@ -75,7 +74,7 @@ export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, .
       name={displayLabel}
       initials={getUserAvatarInitials(user, avatar)}
       initialsLength={USER_AVATAR_MAX_INITIALS}
-      color={getUserAvatarColor(user, avatar)}
+      color={euiTheme.colors.backgroundFilledText}
       {...rest}
     />
   );

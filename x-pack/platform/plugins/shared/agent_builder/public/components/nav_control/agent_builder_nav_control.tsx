@@ -5,8 +5,14 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiShowFor, EuiToolTip, EuiWindowEvent, type EuiToolTipRef } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiShowFor,
+  EuiToolTip,
+  EuiWindowEvent,
+  type EuiToolTipRef,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -104,25 +110,27 @@ export function AgentBuilderNavControl() {
   const showTooltip = !isSidebarOpen && tooltipVisible;
   const variant = isSidebarOpen ? 'accent' : 'base';
   const textButton = (
-    <AiButton
+    <EuiButton
       buttonRef={buttonRef}
-      variant={variant}
       size="s"
+      color="text"
       iconType="productAgent"
+      fill={isSidebarOpen}
       onClick={handleClick}
       data-test-subj="AgentBuilderNavControlButton"
       onMouseLeave={() => setTooltipVisible(true)}
       onBlur={() => setTooltipVisible(true)}
     >
       <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
-    </AiButton>
+    </EuiButton>
   );
   const iconButton = (
-    <AiButton
-      buttonRef={buttonRef}
-      iconOnly
-      variant={variant}
+    // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
+    <EuiButtonIcon
+      color="text"
+      display={isSidebarOpen ? 'fill' : 'base'}
       size="s"
+      buttonRef={buttonRef}
       iconType="productAgent"
       onClick={handleClick}
       aria-label={buttonLabel}
