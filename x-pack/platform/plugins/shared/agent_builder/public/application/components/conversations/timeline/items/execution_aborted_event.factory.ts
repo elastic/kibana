@@ -21,7 +21,8 @@ export const createExecutionAbortedEvent = (
   execution_id: 'execution-1',
   trigger_event_id: 'event-1',
   data: {
-    aborted_by: { type: EventActorType.user, id: 'user-1', username: 'petr' },
+    aborted_by: { source: 'api', actor: { id: 'user-1', username: 'petr' } },
+    time_to_last_token: 600,
   },
   ...overrides,
 });

@@ -26,6 +26,7 @@ export const createExecutionFailedEvent = (
       code: AgentBuilderErrorCode.agentExecutionError,
       message: 'The agent encountered an unexpected error and could not complete the run.',
     },
+    time_to_last_token: 600,
   },
   ...overrides,
 });
