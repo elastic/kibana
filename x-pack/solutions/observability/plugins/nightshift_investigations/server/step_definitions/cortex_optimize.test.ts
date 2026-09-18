@@ -21,6 +21,12 @@ describe('cortexOptimizeStepDefinition', () => {
   const getInference = jest.fn();
   const getSearchInferenceEndpoints = jest.fn();
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getScopedEsClient.mockReturnValue(esClient);
+    getFakeRequest.mockReturnValue(request);
+  });
+
   const createContext = (input: { prompt: string; response: string; agent_id?: string }) =>
     ({
       input,
@@ -66,5 +72,24 @@ describe('cortexOptimizeStepDefinition', () => {
       getSearchInferenceEndpoints,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
+  });
+
+  it('skips when the cortex flag is off', async () => {
+    const definition = cortexOptimizeStepDefinition({
+      getInference,
+      getSearchInferenceEndpoints,
+      logger: loggerMock.create(),
+      isEnabled: () => false,
+    });
+
+    const result = await definition.handler(
+      createContext({
+        prompt: 'why is checkout slow?',
+        response: 'Redis evictions.',
+      })
+    );
+
+    expect(runCortexOptimize).not.toHaveBeenCalled();
+    expect(result).toEqual({ output: { status: 'ok', skipped: true } });
   });
 });

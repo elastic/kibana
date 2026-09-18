@@ -1,0 +1,56 @@
+version: '1'
+name: Nightshift Sandbox Hydrate
+description: >
+  Pre-execution workflow that allocates the investigator sandbox once, then
+  materializes Cortex and Semantic Memory into that same workspace. Writers run
+  as parallel branches so they share the sandbox_id from obtain rather than each
+  triggering GetContainer.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - cortex
+  - semantic-memory
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The user message for this round, forwarded by the agent's beforeAgent hook.
+        conversation_id:
+          type: string
+          description: Conversation id that namespaces the sandbox. Absent for standalone runs.
+      additionalProperties: false
+
+steps:
+  - name: obtain_sandbox
+    type: nightshift.obtainSandbox
+    # `${{ }}` must render a boolean. A bare conversation id becomes a KQL string
+    # and evaluateCondition treats it as a field query, which skips the step.
+    if: '${{ inputs.conversation_id != null }}'
+    timeout: 45s
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+  - name: hydrate_workspaces
+    type: parallel
+    if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
+    mode: fail-fast
+    timeout: 45s
+    branch-timeout: 45s
+    branches:
+      - name: cortex
+        steps:
+          - name: hydrate_cortex
+            type: nightshift.cortexHydrate
+            with:
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+      - name: memory
+        steps:
+          - name: memory_materialize_to_sandbox
+            type: nightshift.memoryMaterializeToSandbox
+            with:
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              prompt: '{{ inputs.prompt }}'

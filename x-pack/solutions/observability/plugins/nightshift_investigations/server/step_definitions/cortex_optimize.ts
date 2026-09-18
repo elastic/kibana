@@ -26,10 +26,12 @@ export const cortexOptimizeStepDefinition = ({
   getInference,
   getSearchInferenceEndpoints,
   logger,
+  isEnabled,
 }: {
   getInference: () => InferenceServerStart | undefined;
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
+  isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.cortexOptimize',
@@ -37,7 +39,8 @@ export const cortexOptimizeStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Proposes Cortex wiki edits from a completed investigation round and writes them ' +
-      'to the Context Engine AI index.',
+      'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
+      'the optimizer currently reads the transcript, not the sandbox files.',
     inputSchema: z.object({
       prompt: z
         .string()
@@ -48,11 +51,21 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_ROUND_TEXT_LENGTH)
         .describe("The assistant's final response for the round."),
       agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
+      sandbox_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
+      skipped: z.boolean().optional(),
     }),
     handler: async (context) => {
+      if (isEnabled && !isEnabled()) {
+        return { output: { status: 'ok' as const, skipped: true } };
+      }
+
       await withTimeout(
         (signal) =>
           runCortexOptimize({

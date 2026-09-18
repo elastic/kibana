@@ -31,6 +31,12 @@ const page = (id: string, title: string): MemoryPage => ({
   },
 });
 
+const createSession = () => ({
+  mkdirs: jest.fn().mockResolvedValue([true]),
+  writeFiles: jest.fn().mockResolvedValue([]),
+  readFiles: jest.fn(),
+});
+
 describe('materializeMemory', () => {
   const candidates = [
     page('memory_a', 'Alpha'),
@@ -53,14 +59,10 @@ describe('materializeMemory', () => {
 
   it('writes only the ranked top-K files, not the full catalog', async () => {
     const store = createStore(candidates);
-    const apiClient = {
-      mkdirs: jest.fn().mockResolvedValue([true]),
-      writeFiles: jest.fn().mockResolvedValue([]),
-    };
+    const session = createSession();
 
     const ids = await materializeMemory({
-      apiClient: apiClient as never,
-      conversationId: 'conv-1',
+      session: session as never,
       store,
       logger: loggerMock.create(),
       keepCount: 2,
@@ -69,21 +71,17 @@ describe('materializeMemory', () => {
 
     expect(store.retrieve).toHaveBeenCalledWith({ query: undefined, size: 20 });
     expect(ids).toHaveLength(2);
-    const pageWrite = apiClient.writeFiles.mock.calls[0];
-    expect(pageWrite[1]).toHaveLength(2);
-    expect(pageWrite[1].every((file: { path: string }) => file.path.endsWith('.md'))).toBe(true);
+    const pageWrite = session.writeFiles.mock.calls[0][0];
+    expect(pageWrite).toHaveLength(2);
+    expect(pageWrite.every((file: { path: string }) => file.path.endsWith('.md'))).toBe(true);
   });
 
   it('browse path reorders with Thompson samples', async () => {
     const store = createStore(candidates);
-    const apiClient = {
-      mkdirs: jest.fn().mockResolvedValue([true]),
-      writeFiles: jest.fn().mockResolvedValue([]),
-    };
+    const session = createSession();
 
     const ids = await materializeMemory({
-      apiClient: apiClient as never,
-      conversationId: 'conv-1',
+      session: session as never,
       store,
       logger: loggerMock.create(),
       sampleBeta: jest
@@ -99,14 +97,10 @@ describe('materializeMemory', () => {
   it('search path keeps Elasticsearch hit order and does not sample', async () => {
     const store = createStore(candidates);
     const sampleBeta = jest.fn(() => 0.99);
-    const apiClient = {
-      mkdirs: jest.fn().mockResolvedValue([true]),
-      writeFiles: jest.fn().mockResolvedValue([]),
-    };
+    const session = createSession();
 
     const ids = await materializeMemory({
-      apiClient: apiClient as never,
-      conversationId: 'conv-1',
+      session: session as never,
       store,
       logger: loggerMock.create(),
       query: 'checkout lag',
@@ -120,19 +114,15 @@ describe('materializeMemory', () => {
 
   it('writes a recalled-id sidecar for the optimizer', async () => {
     const store = createStore(candidates.slice(0, 1));
-    const apiClient = {
-      mkdirs: jest.fn().mockResolvedValue([true]),
-      writeFiles: jest.fn().mockResolvedValue([]),
-    };
+    const session = createSession();
 
     await materializeMemory({
-      apiClient: apiClient as never,
-      conversationId: 'conv-1',
+      session: session as never,
       store,
       logger: loggerMock.create(),
     });
 
-    const sidecar = apiClient.writeFiles.mock.calls[1][1].find(
+    const sidecar = session.writeFiles.mock.calls[1][0].find(
       (file: { path: string }) => file.path === '/workspace/memories/.recalled.json'
     );
     expect(JSON.parse(sidecar.content.toString('utf8'))).toEqual({ ids: ['memory_a'] });
@@ -153,19 +143,18 @@ describe('parseRecalledSidecar', () => {
 describe('readRecalledIds', () => {
   it('returns an empty list when the sidecar cannot be read', async () => {
     const ids = await readRecalledIds({
-      apiClient: {
+      session: {
         readFiles: jest
           .fn()
           .mockResolvedValue([{ path: '/workspace/memories/.recalled.json', success: false }]),
       } as never,
-      conversationId: 'conv-1',
     });
     expect(ids).toEqual([]);
   });
 
   it('parses the sidecar written by hydrate', async () => {
     const ids = await readRecalledIds({
-      apiClient: {
+      session: {
         readFiles: jest.fn().mockResolvedValue([
           {
             path: '/workspace/memories/.recalled.json',
@@ -174,7 +163,6 @@ describe('readRecalledIds', () => {
           },
         ]),
       } as never,
-      conversationId: 'conv-1',
     });
     expect(ids).toEqual(['memory_a']);
   });

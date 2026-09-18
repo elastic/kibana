@@ -10,14 +10,14 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
-import { hydrateCortexWorkspace } from '../cortex/register_cortex';
+import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
-const HYDRATE_TIMEOUT_MS = 45_000;
+const MATERIALIZE_TIMEOUT_MS = 45_000;
 
-export const cortexHydrateStepDefinition = ({
+export const memoryMaterializeToSandboxStepDefinition = ({
   getSandboxStart,
   logger,
   isEnabled,
@@ -27,11 +27,11 @@ export const cortexHydrateStepDefinition = ({
   isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
-    id: 'nightshift.cortexHydrate',
-    label: 'Hydrate Nightshift Cortex into Sandbox',
+    id: 'nightshift.memoryMaterializeToSandbox',
+    label: 'Materialize Nightshift Semantic Memory to Sandbox',
     category: StepCategory.Ai,
     description:
-      'Writes the current Cortex wiki into /workspace/cortex for the sandbox obtained ' +
+      'Writes ranked Semantic Memory pages into /workspace/memories for the sandbox obtained ' +
       'earlier in this workflow. Does not allocate; uses sandbox_id as-is.',
     inputSchema: z.object({
       sandbox_id: z
@@ -39,13 +39,18 @@ export const cortexHydrateStepDefinition = ({
         .min(1)
         .max(1024)
         .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+      prompt: z
+        .string()
+        .max(65_536)
+        .optional()
+        .describe('The user message for this round, used as a memory search query when present.'),
     }),
     outputSchema: z.object({
-      sandbox_id: z.string().describe('Sandbox that was hydrated.'),
+      sandbox_id: z.string().describe('Sandbox that received the memory pages.'),
       skipped: z.boolean().optional(),
     }),
     handler: async (context) => {
-      const { sandbox_id: sandboxId } = context.input;
+      const { sandbox_id: sandboxId, prompt } = context.input;
       const { spaceId } = context.contextManager.getContext().workflow;
 
       if (isEnabled && !isEnabled()) {
@@ -68,15 +73,16 @@ export const cortexHydrateStepDefinition = ({
 
       await withTimeout(
         (signal) =>
-          hydrateCortexWorkspace({
+          hydrateMemoryWorkspace({
             session,
             esClient: context.contextManager.getScopedEsClient(),
             spaceId,
+            query: prompt,
             signal,
             logger,
           }),
-        HYDRATE_TIMEOUT_MS,
-        `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        MATERIALIZE_TIMEOUT_MS,
+        `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
       );
 
       return { output: { sandbox_id: sandboxId } };
