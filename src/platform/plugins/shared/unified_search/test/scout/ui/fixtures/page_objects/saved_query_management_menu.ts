@@ -121,11 +121,39 @@ export class SavedQueryManagementMenu {
     await expect(this.loadButton).toBeVisible();
   }
 
-  async saveNewQuery(name: string, options: SaveQueryOptions = {}): Promise<void> {
+  /**
+   * Opens the save-query form and leaves it open. Split out of
+   * {@link saveNewQuery} so callers can inspect the form between steps; the
+   * "Save query" item is disabled until the live query differs from the loaded
+   * one, so submit a query before calling this.
+   */
+  async openSaveQueryForm(): Promise<void> {
     await this.open();
     // dispatchEvent instead of click — see openPopover for the EUI panel-slide rationale.
     await this.saveButton.dispatchEvent('click');
     await this.page.testSubj.locator('saveQueryForm').waitFor({ state: 'visible' });
+  }
+
+  /** Fills the open save-query form without submitting it. */
+  async fillSaveQueryForm(
+    title: string | null,
+    { includeFilters = true, includeTimeFilter = false }: SaveQueryOptions = {}
+  ): Promise<void> {
+    if (title) {
+      await this.page.testSubj.locator('saveQueryFormTitle').fill(title);
+    }
+    await this.toggleSwitchTo('saveQueryFormIncludeFiltersOption', includeFilters);
+    await this.toggleSwitchTo('saveQueryFormIncludeTimeFilterOption', includeTimeFilter);
+  }
+
+  /** Submits the open save-query form and waits for it to close. */
+  async confirmSaveQueryForm(): Promise<void> {
+    await this.page.testSubj.locator('savedQueryFormSaveButton').click();
+    await this.page.testSubj.locator('saveQueryForm').waitFor({ state: 'hidden' });
+  }
+
+  async saveNewQuery(name: string, options: SaveQueryOptions = {}): Promise<void> {
+    await this.openSaveQueryForm();
     await this.submitSaveQueryForm(name, options);
   }
 
@@ -259,15 +287,10 @@ export class SavedQueryManagementMenu {
 
   private async submitSaveQueryForm(
     title: string | null,
-    { includeFilters = true, includeTimeFilter = false }: SaveQueryOptions
+    options: SaveQueryOptions
   ): Promise<void> {
-    if (title) {
-      await this.page.testSubj.locator('saveQueryFormTitle').fill(title);
-    }
-    await this.toggleSwitchTo('saveQueryFormIncludeFiltersOption', includeFilters);
-    await this.toggleSwitchTo('saveQueryFormIncludeTimeFilterOption', includeTimeFilter);
-    await this.page.testSubj.locator('savedQueryFormSaveButton').click();
-    await this.page.testSubj.locator('saveQueryForm').waitFor({ state: 'hidden' });
+    await this.fillSaveQueryForm(title, options);
+    await this.confirmSaveQueryForm();
   }
 
   private async toggleSwitchTo(testSubj: string, desired: boolean): Promise<void> {
