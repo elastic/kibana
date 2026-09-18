@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import type { Configuration } from '@rspack/core';
+import type { Configuration, RspackPluginInstance } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { Jsonc, parseKbnImportReq } from '@kbn/repo-packages';
@@ -264,6 +264,7 @@ export async function createExternalPluginConfig(
       new rspack.ProgressPlugin({
         prefix: `plugin:${pluginId}`,
       }),
+      createWatchManifestPlugin(manifest.path),
     ],
 
     stats: {
@@ -347,6 +348,23 @@ export function createCrossPluginExternals(
 
     const bundleId = `plugin/${remote.pluginId}/${parsed.target}`;
     return callback(undefined, `__kbnBundles__.get('${bundleId}')`);
+  };
+}
+
+/**
+ * Register the plugin manifest as a watched file dependency so callers running
+ * `compiler.watch()` are notified when it changes. The allowed cross-plugin
+ * imports are captured once per config and rspack's incremental make does not
+ * re-factorize a previously failed import, so the caller must restart the
+ * compiler on manifest changes (see the kbn-plugin-helpers `optimize` task).
+ */
+export function createWatchManifestPlugin(manifestPath: string): RspackPluginInstance {
+  return {
+    apply(compiler) {
+      compiler.hooks.thisCompilation.tap('ExternalPluginManifest', (compilation) => {
+        compilation.fileDependencies.add(manifestPath);
+      });
+    },
   };
 }
 

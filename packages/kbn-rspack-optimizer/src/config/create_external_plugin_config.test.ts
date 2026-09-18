@@ -10,9 +10,11 @@
 import Path from 'path';
 import Fs from 'fs';
 import Os from 'os';
+import type { Compiler, Compilation } from '@rspack/core';
 import {
   createCrossPluginExternals,
   createPluginWrapper,
+  createWatchManifestPlugin,
   readPluginManifest,
 } from './create_external_plugin_config';
 
@@ -125,6 +127,29 @@ describe('createCrossPluginExternals', () => {
     });
     expect(err).toBeUndefined();
     expect(result).toBeUndefined();
+  });
+});
+
+describe('createWatchManifestPlugin', () => {
+  it('registers the manifest as a file dependency of every compilation', () => {
+    const manifestPath = '/plugins/my_plugin/kibana.json';
+    let onCompilation: ((compilation: Compilation) => void) | undefined;
+    const compiler = {
+      hooks: {
+        thisCompilation: {
+          tap: (_name: string, fn: (compilation: Compilation) => void) => {
+            onCompilation = fn;
+          },
+        },
+      },
+    } as unknown as Compiler;
+
+    createWatchManifestPlugin(manifestPath).apply(compiler);
+
+    const fileDependencies = new Set<string>();
+    onCompilation!({ fileDependencies } as unknown as Compilation);
+
+    expect(fileDependencies.has(manifestPath)).toBe(true);
   });
 });
 

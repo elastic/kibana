@@ -67,4 +67,4 @@ export type { ThemeTag } from './types';
 // Consumers needing the `rspack` runtime must use this re-export (pure-ESM
 // packages cannot be loaded by Jest's CJS registry — see rspack_runtime.ts).
 export { rspack } from './rspack_runtime';
-export type { Configuration, Stats, Compiler, RspackPluginInstance } from '@rspack/core';
+export type { Configuration, Stats, Compiler, Watching, RspackPluginInstance } from '@rspack/core';
