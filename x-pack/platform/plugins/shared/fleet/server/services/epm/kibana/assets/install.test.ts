@@ -338,10 +338,15 @@ describe('installKibanaSavedObjects', () => {
       },
     };
 
+    const chosenDestId = 'dest-chosen-uuid';
     mockImporter.import.mockResolvedValueOnce(createImportResponse([ambiguousError]));
-    // resolveImportErrors returns the space-scoped UUID as the id (as the SO framework would)
+    // resolveImportErrors returns the space-scoped UUID as id and the chosen object as
+    // destinationId — exactly what the real importer produces for ambiguous_conflict resolution.
     mockImporter.resolveImportErrors.mockResolvedValueOnce(
-      createImportResponse([], [{ id: spaceScopedId, type: rewrittenAsset.type, meta: {} }])
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: rewrittenAsset.type, meta: {}, destinationId: chosenDestId }]
+      )
     );
 
     const result = await installKibanaSavedObjects({
@@ -350,10 +355,12 @@ describe('installKibanaSavedObjects', () => {
       kibanaAssets: [rewrittenAsset],
     });
 
-    // After normalization the result id must be the archive id, not the space-scoped UUID
+    // After normalization: id = archive id, destinationId = the importer-chosen object (not
+    // the space-scoped UUID). Previously the code always set destinationId = spaceScopedId,
+    // losing the real chosen destination.
     expect(result).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: archiveId, destinationId: spaceScopedId }),
+        expect.objectContaining({ id: archiveId, destinationId: chosenDestId }),
       ])
     );
   });

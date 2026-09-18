@@ -63,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
    * Two orphans sharing the same originId trigger the ambiguous_conflict error on the
    * next import; the fix deletes them before the import runs.
    */
-  const injectOrphanedTag = async (soId: string, spaceId = 'default') => {
+  const injectOrphanedTag = async (soId: string, spaceId = 'default', managed = true) => {
     await es.index({
       index: '.kibana',
       // No namespace prefix — multiple-isolated types use 'tag:{id}' for all spaces.
@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         originId: TAG_ARCHIVE_ID,
         // Space membership for multiple-isolated types is encoded in the namespaces array.
         namespaces: [spaceId],
-        managed: false,
+        managed,
         references: [],
         updated_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
@@ -107,7 +107,7 @@ export default function (providerContext: FtrProviderContext) {
    * Note: dashboard SOs use `indexPattern: ANALYTICS_SAVED_OBJECT_INDEX`, so they live
    * in `.kibana_analytics`, not `.kibana`.
    */
-  const injectOrphanedDashboard = async (soId: string, spaceId = 'default') => {
+  const injectOrphanedDashboard = async (soId: string, spaceId = 'default', managed = true) => {
     await es.index({
       index: '.kibana_analytics',
       id: `dashboard:${soId}`,
@@ -126,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
         },
         originId: DASHBOARD_ARCHIVE_ID,
         namespaces: [spaceId],
-        managed: false,
+        managed,
         references: [],
         updated_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
@@ -203,6 +203,17 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage().expect(200);
 
         expect(await orphanExists('fleet-orphan-test-1')).to.be(false);
+      });
+
+      it('does not delete a user-copied tag SO (managed=false) that shares the same originId', async () => {
+        // A user copy of a package tag preserves originId but is managed=false.
+        // The cleanup must not delete it — only Fleet-managed (managed=true) orphans are eligible.
+        await injectOrphanedTag('fleet-orphan-user-copy-1', 'default', false);
+
+        await installPackage().expect(200);
+
+        expect(await orphanExists('fleet-orphan-user-copy-1')).to.be(true);
+        await deleteOrphanedTag('fleet-orphan-user-copy-1');
       });
     });
 
@@ -349,6 +360,17 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage(DASHBOARD_SPACE).expect(200);
 
         expect(await dashboardOrphanExists('fleet-orphan-dash-1')).to.be(false);
+      });
+
+      it('does not delete a user-copied dashboard SO (managed=false) that shares the same originId', async () => {
+        // A dashboard copied to a space via "Copy to spaces" preserves originId but is
+        // managed=false. The cleanup must only remove Fleet-managed (managed=true) orphans.
+        await injectOrphanedDashboard('fleet-orphan-dash-user-copy-1', DASHBOARD_SPACE, false);
+
+        await installPackage(DASHBOARD_SPACE).expect(200);
+
+        expect(await dashboardOrphanExists('fleet-orphan-dash-user-copy-1')).to.be(true);
+        await deleteOrphanedDashboard('fleet-orphan-dash-user-copy-1');
       });
     });
   });

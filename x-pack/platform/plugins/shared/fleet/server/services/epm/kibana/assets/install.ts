@@ -395,7 +395,12 @@ export async function deleteOrphanedMultipleIsolatedAssets({
             // A genuine orphan always has a UUID id with originId pointing to one of the
             // archive asset ids. An object whose raw _id matches an asset id (no originId)
             // is a legitimately shared package/user object and must not be deleted.
+            // Require managed=true: user-copied dashboards preserve their originId when
+            // copied across spaces, so an untracked user copy looks identical to an orphan.
+            // Fleet always writes its objects with managed=true, so this guard reliably
+            // distinguishes Fleet orphans from user copies.
             if (
+              foundObj.managed === true &&
               foundObj.originId !== undefined &&
               batchIdSet.has(foundObj.originId) &&
               !trackedIds.has(foundObj.id)
@@ -769,9 +774,10 @@ async function installKibanaSavedObjectsChunk({
   }
 
   // ambiguous_conflict means the SO importer found 2+ existing copies sharing the same
-  // originId. Orphan cleanup (deleteOrphanedMultipleIsolatedAssets) normally prevents this,
-  // but if any slipped through (e.g. created outside Fleet's control), resolve by picking
-  // the most-recently-updated destination rather than aborting the whole install.
+  // originId. Orphan cleanup (deleteOrphanedMultipleIsolatedAssets) normally prevents this
+  // by removing untracked managed copies before the import runs. Any remaining conflict
+  // therefore involves Fleet-managed objects (managed=true guards the cleanup), so picking
+  // the most-recently-updated destination is safe and avoids aborting the whole install.
   // destinationIds picked during ambiguous-conflict resolution, keyed by "type:id".
   // Must be forwarded to the missing-references retry map so that checkOriginConflicts
   // skips the origin search for these objects and does not re-raise ambiguous_conflict.
@@ -875,7 +881,10 @@ function normalizeResolveResults(
   for (const r of results) {
     const originId = toBeSavedObjects.find((so) => so.id === r.id && so.type === r.type)?.originId;
     if (originId) {
-      r.destinationId = r.id;
+      // Preserve the importer-provided destinationId when present (e.g. the chosen object
+      // from ambiguous_conflict resolution). Fall back to the input id only when the importer
+      // did not supply a remapping (plain overwrite case).
+      r.destinationId = r.destinationId ?? r.id;
       r.id = originId;
     }
   }
