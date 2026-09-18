@@ -49,7 +49,8 @@ A source is rows only. On create and update the ES|QL must:
 - start with `FROM` or `TS`;
 - contain nothing but `WHERE` after the source command (this also rejects subqueries);
 - not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
-- not reference a remote cluster (`cluster:index`), because views cannot target remote indices.
+- not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
+- not `FROM` a Nightshift source view (`$.nightshift.sources.*`), or the new view can match itself.
 
 Wildcards, several sources and date math are fine. The query is then executed as
 `<esql> | LIMIT 0` as the calling user. A pattern that matches no index yet is accepted, which
@@ -73,7 +74,8 @@ fetch views; engines query `FROM <view>` and will fail at query time if the view
 
 `enabled` is a catalog-wide flag: a disabled source should produce nothing new anywhere in
 Nightshift. This plugin only stores the flag. Engines read it (and `esql_updated_at`, which
-moves only when the normalized query changes) and reconcile their own state: disable rules,
+moves only when the normalized query changes, and is monotonic so two edits in the same
+millisecond still advance the cursor) and reconcile their own state: disable rules,
 cancel onboarding, skip the source when picking candidates, re-onboard after a query change.
 The plugin cannot call engines directly without reintroducing the dependency cycle it exists to
 avoid; a lifecycle listener registry on the setup contract is the planned follow-up if the

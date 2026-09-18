@@ -270,6 +270,17 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
+    it('rejects a Nightshift source view before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM $.nightshift.sources.*' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('accepts a concrete index that does not exist yet', async () => {
       const { client, dataEsClient } = setup();
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
@@ -368,6 +379,22 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
+    it('rejects a Nightshift source view without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM $.nightshift.sources.abc',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('rejects an unresolvable field without writing', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -405,6 +432,32 @@ describe('SourcesClient', () => {
         esql: 'FROM logs-nginx-* | WHERE status >= 400',
       });
       expect(queryChange.esql_updated_at).not.toBe('2026-09-01T00:00:00.000Z');
+    });
+
+    it('moves esql_updated_at forward when the clock does not', async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
+      try {
+        const { client, soClient } = setup();
+        soClient.get.mockResolvedValue(makeSavedObject());
+
+        const sameMs = await client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-nginx-* | WHERE status >= 400',
+        });
+        expect(sameMs.esql_updated_at).toBe('2026-09-01T00:00:00.001Z');
+
+        jest.setSystemTime(new Date('2026-08-01T00:00:00.000Z'));
+        const behind = await client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-nginx-* | WHERE status >= 300',
+        });
+        expect(behind.esql_updated_at).toBe('2026-09-01T00:00:00.001Z');
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('replaces the stored attributes instead of merging, so a dropped description is removed', async () => {

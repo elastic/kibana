@@ -6,15 +6,19 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
+import { NIGHTSHIFT_SOURCE_VIEW_PREFIX } from './view_name';
 
 const SOURCE_COMMANDS = new Set(['from', 'ts']);
 const ALLOWED_PROCESSING_COMMANDS = new Set(['where']);
+// Drop the trailing `.` so `$.nightshift.sources` and `$.nightshift.sources*` match too.
+const NIGHTSHIFT_SOURCE_VIEW_NAMESPACE = NIGHTSHIFT_SOURCE_VIEW_PREFIX.slice(0, -1);
 
 /**
  * Validates that an ES|QL query is a valid Nightshift source: `FROM` or `TS` (time-series),
  * optionally narrowed by `WHERE`. Anything that reshapes rows belongs to the engines reading
- * the view. `METADATA` is rejected because ES|QL returns nulls for it through a view, and
- * remote-cluster prefixes because views cannot reference remote indices.
+ * the view. `METADATA` is rejected because ES|QL returns nulls for it through a view,
+ * remote-cluster prefixes because views cannot reference remote indices, and Nightshift source
+ * views because a source cannot `FROM` itself or another source.
  *
  * Returns `undefined` when valid, or an error message string when invalid.
  * Browser-safe: does not depend on any server-only module.
@@ -53,6 +57,18 @@ export const validateSourceQuery = (esql: string): string | undefined => {
   );
   if (remoteSource) {
     return `Remote cluster references are not allowed in a source query (found "${remoteSource.name}")`;
+  }
+
+  const nightshiftView = Walker.find(
+    root,
+    (node) =>
+      node.type === 'source' &&
+      node.sourceType === 'index' &&
+      typeof node.name === 'string' &&
+      node.name.toLowerCase().startsWith(NIGHTSHIFT_SOURCE_VIEW_NAMESPACE)
+  );
+  if (nightshiftView) {
+    return `Nightshift source views cannot be used as a source (found "${nightshiftView.name}")`;
   }
 
   return undefined;

@@ -62,6 +62,18 @@ const parseSourceWrite = <T>(schema: z.ZodType<T>, input: unknown): T => {
   return parsed.data;
 };
 
+/** Engines treat this as a cursor: it must move forward when the query changes. */
+const nextEsqlUpdatedAt = (previous: string, now: string): string => {
+  if (now > previous) {
+    return now;
+  }
+  const previousMs = Date.parse(previous);
+  if (Number.isNaN(previousMs)) {
+    return now;
+  }
+  return new Date(previousMs + 1).toISOString();
+};
+
 export class SourcesClient {
   constructor(private readonly deps: SourcesClientDependencies) {}
 
@@ -120,7 +132,9 @@ export class SourcesClient {
       tags: parsed.tags,
       esql: parsed.esql,
       updated_at: now,
-      esql_updated_at: esqlChanged ? now : previous.esql_updated_at,
+      esql_updated_at: esqlChanged
+        ? nextEsqlUpdatedAt(previous.esql_updated_at, now)
+        : previous.esql_updated_at,
     };
 
     const updated = await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, {

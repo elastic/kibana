@@ -25,6 +25,7 @@ describe('validateSourceQuery', () => {
       'TS metrics-*',
       'TS metrics-* | WHERE host.name == "a"',
       'FROM <logs-{now/d}>',
+      'FROM $.logs.nginx',
     ])('%s', (esql) => {
       expect(validateSourceQuery(esql)).toBeUndefined();
     });
@@ -73,6 +74,18 @@ describe('validateSourceQuery', () => {
     it('a remote cluster prefix', () => {
       expectRejected('FROM remote:logs-*', 'Remote cluster references are not allowed');
       expectRejected('FROM logs-*, remote:logs-* | WHERE x > 1', 'found "remote:logs-*"');
+    });
+
+    it('a Nightshift source view', () => {
+      expectRejected(
+        'FROM $.nightshift.sources.*',
+        'Nightshift source views cannot be used as a source'
+      );
+      expectRejected('FROM $.nightshift.sources.abc', 'found "$.nightshift.sources.abc"');
+      expectRejected(
+        'FROM logs-*, $.nightshift.sources.foo | WHERE status >= 500',
+        'found "$.nightshift.sources.foo"'
+      );
     });
   });
 });
