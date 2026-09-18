@@ -16,11 +16,17 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isDangerousStatus } from '@kbn/workflows';
+import { isDangerousStatus, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  useRunWorkflow,
+  useTestWorkflow,
+  useWorkflowsApi,
+  useWorkflowsCapabilities,
+} from '@kbn/workflows-ui';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { buildReplayInputsFromExecutionContext } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 
 interface ExecutionTakeActionSplitButtonProps {
@@ -32,8 +38,13 @@ interface ExecutionTakeActionSplitButtonProps {
 export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSplitButtonProps>(
   ({ execution, failedStepId, onOpenFailedStepInEditor }) => {
     const { notifications, application } = useKibana().services;
-    const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
+    const { canExecuteWorkflow, canUpdateWorkflow, canCancelWorkflowExecution } =
+      useWorkflowsCapabilities();
     const { mutateAsync: runWorkflow, isLoading: isRerunning } = useRunWorkflow();
+    const { mutateAsync: testWorkflow, isLoading: isTesting } = useTestWorkflow();
+    const isRerunPending = isRerunning || isTesting;
+    const api = useWorkflowsApi();
+    const telemetry = useTelemetry();
     const { href: executionHref } = useNavigateToExecution({
       workflowId: execution.workflowId ?? '',
       executionId: execution.id,
@@ -41,14 +52,22 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const isFailed = isDangerousStatus(execution.status);
+    const isTerminal = isTerminalStatus(execution.status);
+    const isCancelDisabled =
+      isTerminal || Boolean(execution.finishedAt) || !canCancelWorkflowExecution;
 
     const handleRerun = useCallback(async () => {
-      if (!canExecuteWorkflow || !execution.workflowId) return;
+      if (!canExecuteWorkflow || !execution.workflowId || isRerunPending) return;
+      const inputs = buildReplayInputsFromExecutionContext(execution.context);
       try {
-        await runWorkflow({
-          id: execution.workflowId,
-          inputs: buildReplayInputsFromExecutionContext(execution.context),
-        });
+        if (execution.isTestRun) {
+          await testWorkflow({ workflowId: execution.workflowId, inputs });
+        } else {
+          await runWorkflow({
+            id: execution.workflowId,
+            inputs,
+          });
+        }
         notifications.toasts.addSuccess(
           i18n.translate('workflows.executionFlyout.takeAction.reRunSuccess', {
             defaultMessage: 'Re-ran execution',
@@ -65,9 +84,62 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     }, [
       canExecuteWorkflow,
       execution.context,
+      execution.isTestRun,
       execution.workflowId,
+      isRerunPending,
       notifications.toasts,
       runWorkflow,
+      testWorkflow,
+    ]);
+
+    const handleCancel = useCallback(async () => {
+      setIsMenuOpen(false);
+      if (isCancelDisabled) {
+        return;
+      }
+
+      const timeToCancellation = execution.startedAt
+        ? Date.now() - new Date(execution.startedAt).getTime()
+        : undefined;
+
+      try {
+        await api.cancelExecution(execution.id);
+        notifications.toasts.addSuccess(
+          i18n.translate('workflows.executionFlyout.takeAction.cancelSuccess', {
+            defaultMessage: 'Execution cancelled',
+          }),
+          { toastLifeTimeMs: 3000 }
+        );
+        telemetry.reportWorkflowRunCancelled({
+          workflowExecutionId: execution.id,
+          workflowId: execution.workflowId,
+          timeToCancellation,
+          origin: 'workflow_detail',
+          error: undefined,
+        });
+      } catch (err) {
+        const errorObj = err instanceof Error ? err : new Error(String(err));
+        notifications.toasts.addError(errorObj, {
+          title: i18n.translate('workflows.executionFlyout.takeAction.cancelError', {
+            defaultMessage: 'Error cancelling execution',
+          }),
+        });
+        telemetry.reportWorkflowRunCancelled({
+          workflowExecutionId: execution.id,
+          workflowId: execution.workflowId,
+          timeToCancellation,
+          origin: 'workflow_detail',
+          error: errorObj,
+        });
+      }
+    }, [
+      api,
+      execution.id,
+      execution.startedAt,
+      execution.workflowId,
+      isCancelDisabled,
+      notifications.toasts,
+      telemetry,
     ]);
 
     const handleEditWorkflow = useCallback(() => {
@@ -102,6 +174,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
           <EuiContextMenuItem
             key="rerun"
             icon="refresh"
+            disabled={isRerunPending}
             onClick={() => {
               setIsMenuOpen(false);
               void handleRerun();
@@ -114,6 +187,21 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
           </EuiContextMenuItem>
         );
       }
+      items.push(
+        <EuiContextMenuItem
+          key="cancel"
+          icon="cross"
+          disabled={isCancelDisabled}
+          onClick={() => {
+            void handleCancel();
+          }}
+          data-test-subj="workflowExecutionFlyoutCancelExecution"
+        >
+          {i18n.translate('workflows.executionFlyout.takeAction.cancelExecution', {
+            defaultMessage: 'Cancel execution',
+          })}
+        </EuiContextMenuItem>
+      );
       if (isFailed && failedStepId && onOpenFailedStepInEditor && canUpdateWorkflow) {
         items.push(
           <EuiContextMenuItem
@@ -160,11 +248,14 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
       canExecuteWorkflow,
       canUpdateWorkflow,
       failedStepId,
+      handleCancel,
       handleCopyLink,
       handleEditWorkflow,
       handleOpenFailedStep,
       handleRerun,
+      isCancelDisabled,
       isFailed,
+      isRerunPending,
       onOpenFailedStepInEditor,
     ]);
 
@@ -185,8 +276,8 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
           <EuiSplitButton size="s" fill data-test-subj="workflowExecutionFlyoutTakeAction">
             <EuiSplitButton.ActionPrimary
               onClick={() => void handleRerun()}
-              isLoading={isRerunning}
-              isDisabled={!canExecuteWorkflow}
+              isLoading={isRerunPending}
+              isDisabled={!canExecuteWorkflow || isRerunPending}
             >
               {i18n.translate('workflows.executionFlyout.takeAction.reRun', {
                 defaultMessage: 'Re-run',

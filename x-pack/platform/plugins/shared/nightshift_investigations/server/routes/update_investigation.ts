@@ -10,6 +10,7 @@ import {
   MAX_HYPOTHESES,
   MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
   investigationHypothesisSchema,
   investigationImpactSchema,
   investigationStateSchema,
@@ -33,6 +34,7 @@ const orAbsent = <T extends z.ZodType>(schema: T) =>
 
 const updateInvestigationBodySchema = z.object({
   status: z.enum(UPDATABLE_INVESTIGATION_STATUSES),
+  title: orAbsent(z.string().max(MAX_TITLE_LENGTH)),
   error: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   summary: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   conclusion: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
