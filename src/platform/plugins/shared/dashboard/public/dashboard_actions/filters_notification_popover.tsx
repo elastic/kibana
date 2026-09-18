@@ -165,7 +165,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
               {esqlStatements.map((statement, i) => (
                 <EuiFlexItem key={i}>
                   <EuiCodeBlock
-                    language="esql"
+                    aria-label={`${dashboardFilterNotificationActionStrings.getEsqlTitle()}: ${statement}`}
                     paddingSize="s"
                     aria-labelledby={`${dashboardFilterNotificationActionStrings.getEsqlTitle()}: ${statement}`}
                     tabIndex={0}
