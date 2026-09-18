@@ -361,9 +361,29 @@ export async function ensureCleanUpTaskScheduled(server: SyntheticsServerSetup) 
   );
 }
 
+const runCleanUpTaskSoon = async (server: SyntheticsServerSetup) => {
+  const { pluginsStart } = server;
+
+  await ensureCleanUpTaskScheduled(server);
+
+  const result = await pluginsStart.taskManager.runSoon(SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID);
+
+  // A conflict resolves rather than throws, and reporting success on one would
+  // leave the caller waiting on a run that was never rescheduled.
+  if (result?.conflict) {
+    throw new Error(
+      `Task ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID} could not be scheduled to run now due to a conflict.`
+    );
+  }
+};
+
 /**
  * Runs cleanup now on an operator's request, clearing the state that would
  * otherwise make the run skip the leftover scan or refuse to recreate.
+ *
+ * Only for the explicit cleanup route. Automatic callers must use
+ * {@link scheduleCleanUpTask}, or routine traffic would keep resetting the
+ * daily scan throttle and the recreate budget.
  */
 export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServerSetup) {
   const { pluginsStart } = server;
@@ -380,20 +400,13 @@ export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServer
     })
   );
 
-  const result = await pluginsStart.taskManager.runSoon(SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID);
-
-  // A conflict resolves rather than throws, and reporting success on one would
-  // leave the caller waiting on a run that was never rescheduled.
-  if (result?.conflict) {
-    throw new Error(
-      `Task ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID} could not be scheduled to run now due to a conflict.`
-    );
-  }
+  await runCleanUpTaskSoon(server);
 }
 
+/** Fire-and-forget path for Test Now cleanup: runs the task, resets no state. */
 export const scheduleCleanUpTask = async (server: SyntheticsServerSetup) => {
   try {
-    await triggerCleanUpPackagePoliciesTask(server);
+    await runCleanUpTaskSoon(server);
   } catch (e) {
     server.logger?.error(e);
     server.logger?.error(

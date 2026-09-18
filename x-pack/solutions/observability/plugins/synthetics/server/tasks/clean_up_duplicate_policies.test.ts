@@ -332,6 +332,28 @@ describe('deleteDuplicatePackagePolicies', () => {
     );
   });
 
+  test('surfaces bumps that failed while compensating for a thrown batch', async () => {
+    const deleteMock = jest.fn().mockImplementation((_so, _es, batch: string[]) => {
+      if (batch.includes('p-1')) {
+        return Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])));
+      }
+      return Promise.reject(new Error('fleet unavailable'));
+    });
+    const bumpRevisionMock = jest.fn().mockRejectedValue(new Error('deployment failed'));
+    const { serverSetup } = makeServerSetup({ deleteMock, bumpRevisionMock });
+    const soClient = {} as SavedObjectsClientContract;
+    const esClient = {} as ElasticsearchClient;
+
+    const total = DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50;
+    const packages = Array.from({ length: total }, (_, i) => `p-${i + 1}`);
+
+    // the ids still need a bump, so they must reach the caller rather than be
+    // swallowed by the rethrow
+    await expect(
+      deleteDuplicatePackagePolicies(packages, soClient, esClient, serverSetup)
+    ).rejects.toMatchObject({ failedAgentPolicyIds: ['agent-a'] });
+  });
+
   test('treats a missing delete result list as zero deletes', async () => {
     const deleteMock = jest.fn().mockResolvedValue(undefined);
     const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });

@@ -740,6 +740,18 @@ describe('clean_up_package_policies_task', () => {
     );
   });
 
+  it('scheduleCleanUpTask runs the task without clearing leftover scan state', async () => {
+    await scheduleCleanUpTask(mockServerSetup);
+
+    expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID })
+    );
+    expect(mockTaskManagerStart.runSoon).toHaveBeenCalledWith(SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID);
+    // Test Now creates call this on every run; resetting here would defeat the
+    // daily leftover-scan throttle and revive an exhausted recreate loop.
+    expect(mockTaskManagerStart.bulkUpdateState).not.toHaveBeenCalled();
+  });
+
   it('scheduleCleanUpTask swallows scheduling errors', async () => {
     mockTaskManagerStart.runSoon.mockRejectedValue(new Error('already running'));
 

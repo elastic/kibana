@@ -992,6 +992,36 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.performCleanupSync).toBe(true);
     });
 
+    it('returns agent policies still needing a bump when a later delete batch throws', async () => {
+      const extras = Array.from(
+        { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50 },
+        (_, i) => `extra-${i}`
+      );
+      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
+        (async function* () {
+          yield ['monitor1-loc1', ...extras];
+        })()
+      );
+      mockFleet.packagePolicyService.delete.mockImplementation(
+        async (_so: unknown, _es: unknown, ids: string[]) => {
+          if (ids.includes('extra-0')) {
+            return ids.map((id) => ({ id, success: true, policy_ids: ['agent-a'] }));
+          }
+          throw new Error('fleet unavailable');
+        }
+      );
+      mockFleet.agentPolicyService.bumpRevision.mockRejectedValue(new Error('deployment failed'));
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(result.failedAgentPolicyIds).toEqual(['agent-a']);
+      expect(result.attemptedAgentPolicyIds).toEqual(['agent-a']);
+    });
+
     it('should handle errors gracefully and return performCleanupSync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
       const result = await cleanUpDuplicatedPackagePolicies(

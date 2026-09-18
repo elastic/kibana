@@ -183,6 +183,14 @@ export async function cleanUpDuplicatedPackagePolicies(
     }
     return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   } catch (e) {
+    // A delete that threw mid-way still bumped what it had; keep those ids so the
+    // task persists and retries the ones whose bump also failed.
+    if (Array.isArray(e?.failedAgentPolicyIds)) {
+      failedAgentPolicyIds = e.failedAgentPolicyIds;
+    }
+    if (Array.isArray(e?.attemptedAgentPolicyIds)) {
+      attemptedAgentPolicyIds = e.attemptedAgentPolicyIds;
+    }
     taskState.maxCleanUpRetries -= 1;
     if (taskState.maxCleanUpRetries <= 0) {
       logger.warn(
@@ -251,9 +259,10 @@ export async function deleteDuplicatePackagePolicies(
     }
   } catch (e) {
     // Earlier batches are already deleted with no revision bump, so their agents
-    // still run the removed integrations. Bump what was collected before failing.
-    await bumpAgentPolicyRevisions([...agentPolicyIds], serverSetup);
-    throw e;
+    // still run the removed integrations. Bump what was collected before failing,
+    // and carry any still-failing ids on the error so the task can retry them.
+    const failedAgentPolicyIds = await bumpAgentPolicyRevisions([...agentPolicyIds], serverSetup);
+    throw Object.assign(e, { failedAgentPolicyIds, attemptedAgentPolicyIds: [...agentPolicyIds] });
   }
 
   const attemptedAgentPolicyIds = [...agentPolicyIds];
