@@ -1339,7 +1339,16 @@ export const seedThreatIntelForPacks = async ({
     // RSS stays current-only so workflow ingest does not replay the historic archive.
     const reportItems = buildPackRssCurrentReportItems({ endMs });
     reportItemCount += reportItems.length;
-    const url = buildPackRssDataUrl({ scenario, reportItems });
+    // #291836 moved feed-URL resolution out of the sources index and into the
+    // code-authoritative CATALOG_SOURCE_URLS map, keyed by source id (not by any
+    // per-document field). The `.kibana-threat-intel-sources` mapping is `dynamic:
+    // strict` with no `config` property, so a document carrying `config: { url }`
+    // throws on index() and aborts the whole seeding call before historic reports
+    // are ever written. `buildPackRssDataUrl`'s `data:` URL still exists for the
+    // rss adapter to decode locally, but it cannot be persisted on the source
+    // document anymore — it is threaded through some other test-only path if a
+    // future scenario needs it; for now the fixture just stops writing it.
+    buildPackRssDataUrl({ scenario, reportItems });
     await esClient.index({
       index: THREAT_INTEL_SOURCES_INDEX,
       id: scenario.sourceId,
@@ -1348,7 +1357,6 @@ export const seedThreatIntelForPacks = async ({
         adapter_type: 'rss',
         name: scenario.name,
         enabled: true,
-        config: { url },
         tags: scenario.tags,
         space_id: spaceId,
         created_at: sourceTimestamp,
