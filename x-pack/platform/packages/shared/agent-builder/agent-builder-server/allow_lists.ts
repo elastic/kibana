@@ -382,6 +382,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Agentic Investigations
   'investigation_proposal',
+  'investigation_impact',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

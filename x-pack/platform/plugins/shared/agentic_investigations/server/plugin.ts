@@ -25,8 +25,11 @@ import { ProposalsService } from './proposals/services/proposals_service';
 import { createProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
+import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
 import { registerProposalAttachment } from './proposals/attachments';
+import { registerImpactAttachment } from './impact/attachments';
 import { registerStepDefinitions } from './proposals/step_types';
+import { registerImpactStepDefinitions } from './impact/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import type {
   AgenticInvestigationsPluginSetup,
@@ -73,6 +76,7 @@ export class AgenticInvestigationsPlugin
 
     if (agentBuilder) {
       registerProposalAttachment(agentBuilder);
+      registerImpactAttachment(agentBuilder);
     }
 
     // Declares ownership of this plugin's managed workflows. Without it the
@@ -90,6 +94,16 @@ export class AgenticInvestigationsPlugin
       // the authorization service is resolved per call rather than captured
       // here — `security.authz` does not exist yet.
       privileges: createProposalPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      }),
+    });
+
+    registerImpactStepDefinitions({
+      workflowsExtensions,
+      getImpactService: () => this.requireImpactService(),
+      resolveUser: (request) => this.requireUserResolver()(request),
+      privileges: createImpactPrivilegesChecker({
         getSecurity: async () => (await coreSetup.getStartServices())[1].security,
         logger: this.logger,
       }),

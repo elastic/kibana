@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { IMPACT_ATTACHMENT_TYPE } from './attachment';
+
 export {
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,

@@ -19,15 +19,16 @@ common/
   constants.ts           umbrella: plugin id, API version, route base, workflow owner id
   index.ts               umbrella barrel, re-exports each entity barrel
   proposals/             constants, schemas, step definitions shared with the browser
-  impact/                constants and schemas
+  impact/                constants, schemas, step definitions, attachment type id
 server/
   plugin.ts config.ts types.ts
   features.ts            umbrella feature and its privileges
   proposals/             routes, services, step handlers, storage, managed workflows
-  impact/                routes, service, storage
+  impact/                routes, service, storage, step handlers, Agent Builder attachment
 public/
   plugin.ts index.ts types.ts
   proposals/             browser step definitions for the YAML editor
+  impact/                browser step definitions and flyout attachment UI
 ```
 
 Adding an entity means adding a directory in each of the three, an entity barrel, its privileges in `features.ts`, and a getter on the start contract. It should not require restructuring the umbrella itself.
@@ -70,6 +71,8 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - `entityIds` are opaque ids. Labels from the Entity Store are a follow-up.
 - Writes are **upsert/merge**: attaching more entities unions them onto the existing document rather than appending a new one. That is load-bearing for hydrate-by-conversationId plus `entityIds.includes`.
 - HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactService().listByConversationIds()`.
+- Workflow steps: `investigations.attachImpact` (`manage_impact`, fails the step) and `investigations.getImpact` (`read_impact`, fails if none is attached). Same fail-closed privilege check as proposal steps.
+- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Nothing in this plugin writes the attachment onto a conversation yet — producers persist the Impact document; stamping it onto chat is a follow-up.
 
 ## Proposals
 
@@ -231,6 +234,8 @@ Conditions use a single `and` or a single comparison throughout. Liquid has no o
 | `proposals.getProposal` | read | Fails the step |
 | `proposals.cloneProposal` | manage | Fails the step |
 | `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
+| `investigations.attachImpact` | manage | Fails the step |
+| `investigations.getImpact` | read | Fails the step |
 
 Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
 
@@ -424,5 +429,5 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Impact has no workflow steps or Agent Builder attachment yet.** The index, service, and HTTP surface land first so AlertZero can hydrate `entityIds` in-process; `investigations.attachImpact` / `investigations.getImpact` and `investigation_impact` follow.
+- **Impact attachments are registered, not produced.** The `investigation_impact` type is known to Agent Builder and the flyout, but attach HTTP/steps persist only the Impact document. Until a producer stamps the attachment onto the conversation, the flyout has nothing to render.
 - **Investigations and incidents still do not exist.** The directory convention now holds a second entity (Impact), but those two remain the reason the plugin is an umbrella.

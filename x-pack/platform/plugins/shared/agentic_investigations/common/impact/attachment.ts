@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { ImpactNotFoundError } from './impact_not_found_error';
-export { ImpactInvalidRequestError } from './impact_invalid_request_error';
-export { ImpactForbiddenError } from './impact_forbidden_error';
+/** Attachment type identifier registered with Agent Builder. */
+export const IMPACT_ATTACHMENT_TYPE = 'investigation_impact' as const;

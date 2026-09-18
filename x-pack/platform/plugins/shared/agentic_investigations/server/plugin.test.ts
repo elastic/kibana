@@ -16,6 +16,7 @@ import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
+import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import {
   CheckDecidePrivilegesStepId,
   CloneProposalStepId,
@@ -179,6 +180,8 @@ describe('AgenticInvestigationsPlugin', () => {
         CheckDecidePrivilegesStepId,
         GetProposalStepId,
         CloneProposalStepId,
+        AttachImpactStepId,
+        GetImpactStepId,
       ]);
     });
 

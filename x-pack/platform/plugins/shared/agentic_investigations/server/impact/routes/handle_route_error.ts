@@ -6,7 +6,11 @@
  */
 
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
-import { ImpactInvalidRequestError, ImpactNotFoundError } from '../services/errors';
+import {
+  ImpactForbiddenError,
+  ImpactInvalidRequestError,
+  ImpactNotFoundError,
+} from '../services/errors';
 
 export const handleRouteError = (
   error: unknown,
@@ -15,6 +19,9 @@ export const handleRouteError = (
 ) => {
   if (error instanceof ImpactNotFoundError) {
     return response.notFound({ body: { message: error.message } });
+  }
+  if (error instanceof ImpactForbiddenError) {
+    return response.forbidden({ body: { message: error.message } });
   }
   if (error instanceof ImpactInvalidRequestError) {
     return response.badRequest({ body: { message: error.message } });
