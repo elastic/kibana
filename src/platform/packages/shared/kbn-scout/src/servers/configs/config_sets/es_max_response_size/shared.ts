@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-(() => {
-  // npm_config_user_agent looks like `pnpm/11.27.0 npm/? node/v24 ...` for pnpm,
-  // `npm/10 ...` for npm, `yarn/1.22 ...` for yarn classic.
-  const userAgent = process.env.npm_config_user_agent || '';
+/**
+ * Kibana is started with a small `elasticsearch.maxResponseSize` so that a handful of large documents
+ * is enough to make a detection rule search response exceed the limit
+ * (`security_solution/test/scout_es_max_response_size`).
+ */
+export const ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES = 10 * 1024 * 1024;
 
-  if (userAgent.startsWith('npm/') || userAgent.startsWith('yarn/')) {
-    throw new Error(`Use pnpm instead, see Kibana's contributing guidelines`);
-  }
-})();
+export const esMaxResponseSizeServerArgs = [
+  `--elasticsearch.maxResponseSize=${ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES}b`,
+];
