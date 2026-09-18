@@ -46,28 +46,31 @@ describe('AD2 scenario registry (clean profile)', () => {
     expect(plan.alerts.length).toBeGreaterThan(0);
   });
 
-  it('uses deterministic scenario-registry ids and labels', () => {
+  it('writes the ids the resolver hands the reference discoveries', () => {
     const plan = buildAd2SeedPlan({
       profile: 'clean',
       scenarioKey: 'encoded-powershell',
       baseTime: fixedBaseTime,
     });
+    const resolvedIds = [...getAd2ScenarioAlertIds('encoded-powershell')];
 
     expect(plan.alerts).toHaveLength(4);
-    expect(plan.alerts[0]?.id).toBe('ad-scenario-encoded-powershell-alert-1');
+    expect(plan.alerts.map((alert) => alert.id)).toEqual(resolvedIds);
     expect(plan.alerts[0]?.source).toMatchObject({
-      labels: {
-        ad_portable_seed: 'ad-scenario-registry-2026-07',
-        ad_test_scenario: 'encoded-powershell',
-      },
+      labels: { ad_portable_seed: 'ad-scenario-registry-2026-07' },
       host: { name: 'wks-alice-01' },
     });
-    expect(getAd2ScenarioAlertIds('encoded-powershell')).toEqual([
-      'ad-scenario-encoded-powershell-alert-1',
-      'ad-scenario-encoded-powershell-alert-2',
-      'ad-scenario-encoded-powershell-alert-3',
-      'ad-scenario-encoded-powershell-alert-4',
-    ]);
+
+    // Opaque: an id (or a per-document label) naming the chain is the same
+    // target/noise discriminator a model could read the four real chains out of
+    // the dense population by. See `ids.ts`.
+    const rule = plan.alerts[0]?.source.rule as { id: string };
+    for (const id of [plan.alerts[0]?.id, rule.id]) {
+      expect(id).not.toContain('encoded-powershell');
+    }
+    expect('ad_test_scenario' in (plan.alerts[0]?.source.labels as Record<string, unknown>)).toBe(
+      false
+    );
   });
 
   it('emits network and file raw events for multi-stage chains', () => {

@@ -11,7 +11,7 @@ import {
   type Ad2CleanScenarioKey,
 } from './clean_scenarios';
 import { AD2_DENSE_SCENARIO_KEYS, AD2_DENSE_SCENARIOS } from './dense_scenarios';
-import { AD2_SCENARIO_ID_PREFIX } from './constants';
+import { ad2ScenarioAlertId } from './ids';
 import { buildScenarioDocuments } from './build_documents';
 import type { Ad2ScenarioDefinition, Ad2SeedPlan, Ad2SeedProfile } from './types';
 
@@ -58,6 +58,11 @@ export const buildAd2SeedPlan = ({
   return { profile, scenarioKeys, alerts, rawEvents };
 };
 
+/**
+ * The reference `alertIds` the datasets attach and the Rubric evaluator scores
+ * against. It resolves through the same function the seeder writes ids with, so
+ * the reference cannot drift from the population.
+ */
 export const getAd2ScenarioAlertIds = (
   scenarioKey: string,
   profile: Ad2SeedProfile = 'clean'
@@ -66,7 +71,5 @@ export const getAd2ScenarioAlertIds = (
   if (!scenario) {
     return [];
   }
-  return scenario.steps.map(
-    (_, index) => `${AD2_SCENARIO_ID_PREFIX}${scenarioKey}-alert-${index + 1}`
-  );
+  return scenario.steps.map((_, index) => ad2ScenarioAlertId(scenarioKey, index + 1));
 };

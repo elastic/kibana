@@ -41,14 +41,49 @@ const step = (
   context,
 });
 
+/** One expansion of a background template. */
+interface BackgroundOccurrence {
+  /** 1-based: the Nth time this template is expanded. */
+  readonly occurrence: number;
+  readonly host: string;
+}
+
 interface BackgroundTemplate {
   readonly key: string;
   readonly title: string;
+  /** The FIRST occurrence's host; later ones increment its trailing number. */
   readonly host: string;
   readonly os: Ad2ScenarioOs;
   readonly user: string;
-  readonly steps: readonly Ad2ScenarioStep[];
+  /**
+   * Builds one occurrence's chain from that occurrence's own coordinates.
+   *
+   * The observables have to be occurrence-local. Repeating one indicator across
+   * every occurrence — the same DNS zone, the same plist name, the same source
+   * address — is campaign-shaped: the aggregate reads as a single actor across
+   * many hosts, so a model that correlates it is reading the fixture correctly
+   * and still scores as a false positive, because the dense ground truth is the
+   * four clean chains alone. Chain LENGTH is occurrence-independent, which the
+   * dense-profile tests pin.
+   */
+  readonly stepsFor: (occurrence: BackgroundOccurrence) => readonly Ad2ScenarioStep[];
 }
+
+/**
+ * `wks-sales-22` -> `wks-sales-23`, `mbp-design-08` -> `mbp-design-09`, ...
+ *
+ * Each occurrence gets its own plausible host rather than a `-r2` suffix, which
+ * would announce to anyone reading the index that the chain is a repeat of an
+ * earlier one.
+ */
+const occurrenceHost = (base: string, occurrence: number): string => {
+  const match = /^(.*?)(\d+)$/.exec(base);
+  if (!match) {
+    return `${base}-${occurrence}`;
+  }
+  const [, prefix, digits] = match;
+  return `${prefix}${String(Number(digits) + occurrence - 1).padStart(digits.length, '0')}`;
+};
 
 /**
  * Background chains: plausible, lower severity, and NOT part of the four target
@@ -64,35 +99,41 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     host: 'srv-rdp-11',
     os: 'windows',
     user: 'svc.rdp',
-    steps: [
-      step(
-        'Multiple Failed Logon Attempts',
-        'medium',
-        47,
-        'Twelve failed RDP logons from a single source in five minutes',
-        'svchost.exe',
-        null,
-        'network',
-        '10.14.9.77'
-      ),
-      // The failure burst is CONTAINED by a control, not escalated into a
-      // successful logon. A `Successful Logon After Repeated Failures` step here
-      // reads as a brute-force compromise chain, and the dense ground truth
-      // holds only the four clean chains — so the Rubric, which scores alertId
-      // overlap with that reference, would penalize a model for correctly
-      // surfacing it. Background activity has to be non-actionable for
-      // "precision against noise" to mean anything.
-      step(
-        'Account Lockout Policy Triggered',
-        'low',
-        21,
-        'The source address was locked out by policy after the failure burst',
-        'svchost.exe',
-        null,
-        'network',
-        '10.14.9.77'
-      ),
-    ],
+    stepsFor: ({ host, occurrence }) => {
+      // One source address per occurrence, from the documentation range: one
+      // address failing against a dozen servers is a campaign, a dozen
+      // unrelated addresses each failing against one server is a Tuesday.
+      const source = `198.51.100.${10 + occurrence}`;
+      return [
+        step(
+          'Multiple Failed Logon Attempts',
+          'medium',
+          47,
+          `Twelve failed RDP logons to ${host} from a single source in five minutes`,
+          'svchost.exe',
+          null,
+          'network',
+          source
+        ),
+        // The failure burst is CONTAINED by a control, not escalated into a
+        // successful logon. A `Successful Logon After Repeated Failures` step
+        // here reads as a brute-force compromise chain, and the dense ground
+        // truth holds only the four clean chains — so the Rubric, which scores
+        // alertId overlap with that reference, would penalize a model for
+        // correctly surfacing it. Background activity has to be non-actionable
+        // for "precision against noise" to mean anything.
+        step(
+          'Account Lockout Policy Triggered',
+          'low',
+          21,
+          `The source address was locked out by policy after the failure burst on ${host}`,
+          'svchost.exe',
+          null,
+          'network',
+          source
+        ),
+      ];
+    },
   },
   {
     key: 'bg-admin-share',
@@ -100,35 +141,35 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     host: 'srv-files-02',
     os: 'windows',
     user: 'helpdesk.tom',
-    steps: [
+    stepsFor: ({ host }) => [
       step(
         'Administrative Share Enumeration',
         'low',
         33,
-        'net view enumerated administrative shares',
+        `Helpdesk tooling listed the shares published by ${host}`,
         'net.exe',
-        'net view \\\\srv-files-02',
+        `net view \\\\${host}`,
         'process',
-        null
+        `net view \\\\${host}`
       ),
     ],
   },
   {
     key: 'bg-proc-tooling',
-    title: 'Diagnostic tooling staged but not executed',
+    title: 'Diagnostic archive staged but not executed',
     host: 'wks-dev-15',
     os: 'windows',
     user: 'dev.priya',
-    steps: [
+    stepsFor: ({ host }) => [
       step(
-        'Known Diagnostic Tool Filename Written',
-        'medium',
-        58,
-        'A diagnostic dump utility was written to a developer workstation',
+        'Diagnostic Archive Written to Disk',
+        'low',
+        24,
+        `A support bundle was written on ${host} for an open vendor case`,
         'explorer.exe',
         null,
         'file',
-        'diagnostic-dump.exe'
+        `C:\\ProgramData\\support\\${host}-diagnostic.zip`
       ),
     ],
   },
@@ -138,54 +179,62 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     host: 'web-stage-03',
     os: 'linux',
     user: 'deploy',
-    steps: [
+    stepsFor: ({ host }) => [
       step(
         'Cron Entry Modified Outside Change Window',
         'low',
-        29,
-        'A crontab entry was added by the deploy user',
+        26,
+        `The deploy user added a recurring entry for the ${host} sync job`,
         'crontab',
-        'crontab -l | { cat; echo "*/5 * * * * /opt/app/sync.sh"; } | crontab -',
+        `crontab -l | { cat; echo "*/5 * * * * /opt/${host}/sync.sh"; } | crontab -`,
         'file',
-        '/var/spool/cron/crontabs/deploy'
+        `/opt/${host}/sync.sh`
       ),
     ],
   },
   {
-    key: 'bg-dns-tunnel-suspect',
-    title: 'High-entropy DNS queries',
+    key: 'bg-dns-telemetry',
+    title: 'Per-device telemetry DNS lookups',
     host: 'wks-sales-22',
     os: 'windows',
     user: 'sales.mo',
-    steps: [
+    stepsFor: ({ host }) => [
+      // Each device resolves its OWN telemetry endpoint. The previous version
+      // pointed every occurrence at one zone (`a7f3k2.metrics.example-cdn.net`)
+      // with a high-entropy name, which is sustained tunnelling to a single
+      // zone across a dozen hosts — a legitimate campaign-level discovery that
+      // the reference does not contain.
       step(
-        'High Entropy DNS Query Volume',
-        'medium',
-        55,
-        'Sustained high-entropy subdomain queries to a single zone',
+        'DNS Query to Newly Observed Domain',
+        'low',
+        18,
+        `${host} resolved its own telemetry endpoint, an expected analytics lookup`,
         'chrome.exe',
         null,
         'network',
-        'a7f3k2.metrics.example-cdn.net'
+        `${host}.metrics.example.net`
       ),
     ],
   },
   {
-    key: 'bg-macos-launchagent',
-    title: 'Unsigned LaunchAgent persistence',
+    key: 'bg-macos-mdm',
+    title: 'Signed vendor agent LaunchAgent plist',
     host: 'mbp-design-08',
     os: 'macos',
     user: 'design.ana',
-    steps: [
+    stepsFor: ({ host }) => [
+      // A signed, vendor-owned agent writing a device-scoped plist, instead of
+      // the same unsigned `com.example.updater.plist` on every machine, which
+      // reads as one persistence campaign across a dozen Macs.
       step(
-        'Unsigned LaunchAgent Created',
-        'medium',
-        49,
-        'An unsigned plist was written to a user LaunchAgents directory',
-        'bash',
-        'cp /tmp/updater.plist ~/LaunchAgents/com.example.updater.plist',
+        'LaunchAgent Plist Written',
+        'low',
+        22,
+        `A signed vendor agent wrote the device-scoped LaunchAgent plist on ${host}`,
+        'Installer',
+        'installer -pkg /Library/Application Support/contoso-mdm/agent.pkg -target /',
         'file',
-        'com.example.updater.plist'
+        `~/Library/LaunchAgents/com.contoso.mdm.${host}.plist`
       ),
     ],
   },
@@ -229,23 +278,26 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
       templateIndex++
     ) {
       const template = AD2_DENSE_BACKGROUND_TEMPLATES[templateIndex];
+      const occurrence = round + 1;
+      const host = occurrenceHost(template.host, occurrence);
+      const steps = template.stepsFor({ occurrence, host });
 
       // Truncate at a chain boundary rather than emitting a partial chain.
-      if (template.steps.length <= budget) {
-        const key = `${template.key}-${round + 1}`;
+      if (steps.length <= budget) {
+        const key = `${template.key}-${occurrence}`;
         out[key] = {
           key,
-          title: `${template.title} (${round + 1})`,
-          host: round === 0 ? template.host : `${template.host}-r${round + 1}`,
+          title: template.title,
+          host,
           os: template.os,
           user: template.user,
           // Spread across the window so they do not all share one timestamp.
           startHoursAgo: 1 + ((templateIndex * 7 + round) % 20),
           raw: false,
-          steps: template.steps,
+          steps,
         };
 
-        budget -= template.steps.length;
+        budget -= steps.length;
         placedThisRound = true;
       }
 

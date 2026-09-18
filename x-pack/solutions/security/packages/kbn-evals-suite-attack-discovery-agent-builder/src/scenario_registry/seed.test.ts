@@ -10,8 +10,10 @@ import type { HttpHandler } from '@kbn/core/public';
 import { AD2_DENSE_TARGET_ALERTS } from './dense_scenarios';
 import { seedAd2ScenarioProfile } from './seed';
 
+// Shape of a seeded id (`ids.ts`): the digest of the fixture coordinates, so
+// the mocked failure names no scenario.
 const REJECTED_DOCUMENT = {
-  id: 'ad-scenario-bg-rdp-bruteforce-1-alert-2',
+  id: 'ad-scenario-alert-3f7c19ab02d84e51',
   reason: 'failed to parse field [kibana.alert.rule.name]',
 };
 
