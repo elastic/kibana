@@ -77,6 +77,11 @@ export type CreateMonitorPayLoad = MonitorFields & {
 export class AddEditMonitorAPI {
   routeContext: RouteContext;
   allPrivateLocations?: PrivateLocationAttributes[];
+  // Same namespace set can appear on many bulk-update ids; share the SO lookup.
+  private readonly privateLocationsByNamespaces = new Map<
+    string,
+    Promise<PrivateLocationAttributes[]>
+  >();
   constructor(routeContext: RouteContext) {
     this.routeContext = routeContext;
   }
@@ -253,31 +258,13 @@ export class AddEditMonitorAPI {
 
       const prevPrivateLocations = prevLocations.filter((loc) => !loc.isServiceManaged);
       if (prevPrivateLocations.length > 0) {
-        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
-        const namespacesForLookup = [
-          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
-        ].filter(Boolean);
-        const internalClient =
-          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
-          internalClient,
-          namespacesForLookup
-        );
+        await this.resolvePrivateLocations(monitor[ConfigKey.KIBANA_SPACES] ?? []);
       }
     } else {
       const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 
       if (monitorLocations.privateLocations.length > 0) {
-        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
-        const namespacesForLookup = [
-          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
-        ].filter(Boolean);
-        const internalClient =
-          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
-          internalClient,
-          namespacesForLookup
-        );
+        await this.resolvePrivateLocations(monitor[ConfigKey.KIBANA_SPACES] ?? []);
       } else {
         this.allPrivateLocations = [];
       }
@@ -298,6 +285,21 @@ export class AddEditMonitorAPI {
       [ConfigKey.MAINTENANCE_WINDOWS]:
         resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
+  }
+
+  private async resolvePrivateLocations(monitorSpaces: string[]): Promise<void> {
+    const namespacesForLookup = [...new Set([this.routeContext.spaceId, ...monitorSpaces])].filter(
+      Boolean
+    );
+    const key = [...namespacesForLookup].sort().join(',');
+    let cached = this.privateLocationsByNamespaces.get(key);
+    if (!cached) {
+      const internalClient =
+        this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+      cached = getPrivateLocationsForNamespaces(internalClient, namespacesForLookup);
+      this.privateLocationsByNamespaces.set(key, cached);
+    }
+    this.allPrivateLocations = await cached;
   }
 
   async validateUniqueMonitorName(name: string, id?: string) {
