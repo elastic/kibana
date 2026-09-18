@@ -25,4 +25,8 @@ describe('getMonitorsHealthRoute', () => {
   it('accepts a non-empty monitorIds array within the cap', () => {
     expect(() => bodySchema.parse({ monitorIds: ['monitor-id-1'] })).not.toThrow();
   });
+
+  it('rejects unknown keys', () => {
+    expect(bodySchema.safeParse({ monitorIds: ['monitor-id-1'], extra: true }).success).toBe(false);
+  });
 });

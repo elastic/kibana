@@ -14,7 +14,7 @@ export const syncParamsSettingsParamsRoute: SyntheticsRestApiRouteFactory = () =
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS_SETTINGS,
   validate: {
-    body: z.object({
+    body: z.strictObject({
       enable: z.boolean(),
     }),
   },

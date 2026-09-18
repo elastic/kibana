@@ -34,7 +34,7 @@ export const EditPrivateLocationSchema = z.strictObject({
   isAgentSharding: z.boolean().optional(),
 });
 
-const EditPrivateLocationQuery = z.object({
+const EditPrivateLocationQuery = z.strictObject({
   locationId: routeId,
 });
 

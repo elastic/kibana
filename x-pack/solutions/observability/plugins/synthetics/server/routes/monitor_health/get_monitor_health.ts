@@ -15,7 +15,7 @@ export const getMonitorsHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_HEALTH,
   writeAccess: false,
   validate: {
-    body: z.object({
+    body: z.strictObject({
       monitorIds: z.array(routeId).min(1).max(MAX_MONITOR_FANOUT_SIZE),
     }),
   },

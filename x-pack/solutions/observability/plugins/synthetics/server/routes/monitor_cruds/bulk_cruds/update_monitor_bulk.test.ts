@@ -96,6 +96,20 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ).not.toThrow();
     });
 
+    it('rejects unknown keys on the body and each update entry', () => {
+      expect(
+        bodySchema.safeParse({
+          updates: [{ id: 'monitor-id-1', attributes: { enabled: false } }],
+          dry_run: true,
+        }).success
+      ).toBe(false);
+      expect(
+        bodySchema.safeParse({
+          updates: [{ id: 'monitor-id-1', attributes: { enabled: false }, extra: true }],
+        }).success
+      ).toBe(false);
+    });
+
     it('allows unknown keys inside attributes — looseObject keeps extras', () => {
       expect(() =>
         bodySchema.parse({

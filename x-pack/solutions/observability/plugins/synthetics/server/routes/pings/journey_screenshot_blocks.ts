@@ -15,7 +15,7 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
   method: 'POST',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
-    body: z.object({
+    body: z.strictObject({
       hashes: z.array(routeId).max(1000),
       remoteName: z.string().max(256).optional(),
     }),

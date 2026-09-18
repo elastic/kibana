@@ -117,7 +117,7 @@ export const OverviewStatusSchema = z.strictObject({
 
 export type OverviewStatusQuery = z.infer<typeof OverviewStatusSchema>;
 
-export const OverviewStatusStaleBodySchema = z.object({
+export const OverviewStatusStaleBodySchema = z.strictObject({
   monitorQueryIds: z
     .array(z.string().max(MAX_MONITOR_QUERY_ID_LENGTH))
     .min(1)

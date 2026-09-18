@@ -42,7 +42,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       projectName: routeId,
     }),
     // Monitor field codecs stay in the project formatter (Phase 4b).
-    body: z.object({
+    body: z.strictObject({
       monitors: z.array(z.unknown()).max(MAX_BROWSER_MONITORS + MAX_LIGHTWEIGHT_MONITORS),
     }),
   },

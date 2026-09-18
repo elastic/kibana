@@ -52,10 +52,10 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: z.object({
+      body: z.strictObject({
         updates: z
           .array(
-            z.object({
+            z.strictObject({
               id: routeId,
               attributes: z.looseObject({}).default({}),
             })

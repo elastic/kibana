@@ -22,7 +22,7 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: z.object({
+      body: z.strictObject({
         ids: z.array(routeId).min(1).max(MAX_MONITOR_BULK_SIZE),
       }),
     },

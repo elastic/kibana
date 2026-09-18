@@ -25,7 +25,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: z.object({
+      body: z.strictObject({
         ids: z.array(routeId).max(MAX_PARAM_BULK_SIZE),
       }),
     },

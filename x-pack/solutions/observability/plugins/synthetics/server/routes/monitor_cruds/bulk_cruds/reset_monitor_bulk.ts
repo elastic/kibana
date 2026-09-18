@@ -15,7 +15,7 @@ export const resetSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory = ()
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET,
   validate: {
-    body: z.object({
+    body: z.strictObject({
       ids: z.array(routeId).min(1).max(MAX_MONITOR_BATCH_SIZE),
     }),
   },

@@ -25,7 +25,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
     body: asRouteSchema(
-      z.object({
+      z.strictObject({
         monitors: z
           .array(routeId)
           .max(MAX_MONITOR_BATCH_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BATCH_SIZE) }),

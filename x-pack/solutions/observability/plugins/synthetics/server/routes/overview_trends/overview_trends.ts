@@ -65,7 +65,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {
     body: z
       .array(
-        z.object({
+        z.strictObject({
           configId: routeId,
           locationIds: z.array(z.string().max(MAX_ROUTE_ID_LENGTH)).max(100),
           schedule: z.string().max(MAX_ROUTE_STRING_LENGTH),
