@@ -175,7 +175,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:index_management' },
                     { link: 'management:data_federation' },
-                    { link: 'management:esqlViews' },
+                    { link: 'management:esql_views' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },

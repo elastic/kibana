@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID } from '../common';
+import { ESQL_VIEWS_CAPABILITIES, MANAGEMENT_APP_ID, PLUGIN_ID } from '../common';
 import { EsqlViewsServerPlugin } from './plugin';
 
 describe('EsqlViewsServerPlugin', () => {
@@ -20,7 +20,7 @@ describe('EsqlViewsServerPlugin', () => {
     expect(features.registerElasticsearchFeature).toHaveBeenCalledWith({
       id: PLUGIN_ID,
       management: {
-        data: [PLUGIN_ID],
+        data: [MANAGEMENT_APP_ID],
       },
       privileges: [
         {

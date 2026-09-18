@@ -7,40 +7,40 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID } from '../common';
+import { ESQL_VIEWS_CAPABILITIES, MANAGEMENT_APP_ID, PLUGIN_ID } from '../common';
 
 interface SetupDependencies {
   features: FeaturesPluginSetup;
 }
 
-const ALL_VIEWS_PATTERN = '*';
+const ALL_INDICES_PATTERN = '*';
 
 export class EsqlViewsServerPlugin implements Plugin<void, void, SetupDependencies> {
   public setup(_core: CoreSetup, { features }: SetupDependencies): void {
     features.registerElasticsearchFeature({
       id: PLUGIN_ID,
       management: {
-        data: [PLUGIN_ID],
+        data: [MANAGEMENT_APP_ID],
       },
       privileges: [
         {
           requiredClusterPrivileges: [],
           requiredIndexPrivileges: {
-            [ALL_VIEWS_PATTERN]: ['read_view_metadata'],
+            [ALL_INDICES_PATTERN]: ['read_view_metadata'],
           },
           ui: [ESQL_VIEWS_CAPABILITIES.read],
         },
         {
           requiredClusterPrivileges: [],
           requiredIndexPrivileges: {
-            [ALL_VIEWS_PATTERN]: ['read_view_metadata', 'create_view'],
+            [ALL_INDICES_PATTERN]: ['read_view_metadata', 'create_view'],
           },
           ui: [ESQL_VIEWS_CAPABILITIES.create, ESQL_VIEWS_CAPABILITIES.edit],
         },
         {
           requiredClusterPrivileges: [],
           requiredIndexPrivileges: {
-            [ALL_VIEWS_PATTERN]: ['read_view_metadata', 'delete_view'],
+            [ALL_INDICES_PATTERN]: ['read_view_metadata', 'delete_view'],
           },
           ui: [ESQL_VIEWS_CAPABILITIES.delete],
         },

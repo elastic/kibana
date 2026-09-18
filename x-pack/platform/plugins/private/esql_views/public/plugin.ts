@@ -7,7 +7,7 @@
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 
 interface EsqlViewsPublicConfig {
   managementUi: {
@@ -33,7 +33,7 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies> {
     }
 
     management.sections.section.data.registerApp({
-      id: PLUGIN_ID,
+      id: MANAGEMENT_APP_ID,
       title: PLUGIN_NAME,
       order: 2.1,
       keywords: ['esql', 'views'],

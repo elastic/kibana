@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'esqlViews';
-export const PLUGIN_NAME = i18n.translate('esqlViews.pluginName', {
+export const MANAGEMENT_APP_ID = 'esql_views';
+export const PLUGIN_NAME = i18n.translate('xpack.esqlViews.pluginName', {
   defaultMessage: 'ES|QL Views',
 });
 

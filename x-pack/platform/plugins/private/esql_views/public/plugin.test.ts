@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import { EsqlViewsPlugin } from './plugin';
 
 const createPlugin = (enabled: boolean) =>
@@ -36,7 +36,7 @@ describe('EsqlViewsPlugin', () => {
     createPlugin(true).setup(core, { management });
 
     expect(management.sections.section.data.registerApp).toHaveBeenCalledWith({
-      id: PLUGIN_ID,
+      id: MANAGEMENT_APP_ID,
       title: PLUGIN_NAME,
       order: 2.1,
       keywords: ['esql', 'views'],

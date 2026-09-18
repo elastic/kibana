@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { PLUGIN_NAME } from '../common';
 
-const description = i18n.translate('esqlViews.managementPage.description', {
+const description = i18n.translate('xpack.esqlViews.managementPage.description', {
   defaultMessage: 'Create and manage ES|QL views.',
 });
 

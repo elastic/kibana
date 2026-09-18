@@ -137,7 +137,7 @@ export const createAiNavigationTree = (
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           children: [
             { link: 'management:index_management' },
-            { link: 'management:esqlViews' },
+            { link: 'management:esql_views' },
             { link: 'management:transform' },
             { link: 'management:data_quality' },
           ],
