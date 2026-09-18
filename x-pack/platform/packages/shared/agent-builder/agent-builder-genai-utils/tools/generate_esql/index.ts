@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { generateEsql, type GenerateEsqlResponse, GenerateEsqlNoDataError } from './nl_to_esql';
+export {
+  generateEsql,
+  type GenerateEsqlResponse,
+  type GenerateEsqlExecute,
+  GenerateEsqlNoDataError,
+} from './nl_to_esql';
 export { generateEsqlCompletion, type GenerateEsqlCompletionResponse } from './esql_completion';
 export { getDefaultEsqlCacheKey, setDefaultEsqlCacheKey } from './cache_key';

@@ -20,13 +20,16 @@ jest.mock('../utils/resources', () => ({
 jest.mock('../utils/esql', () => ({
   ...jest.requireActual('../utils/esql'),
   validateEsqlQuery: jest.fn().mockResolvedValue(null),
+  executeEsql: jest.fn(),
 }));
 
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
+import { executeEsql } from '../utils/esql';
 
 const mockResolveResource = resolveResourceForEsqlWithSamplingStats as jest.MockedFn<
   typeof resolveResourceForEsqlWithSamplingStats
 >;
+const mockedExecuteEsql = jest.mocked(executeEsql);
 
 const ESQL_QUERY = 'FROM logs-test | LIMIT 10';
 const GENERATE_RESPONSE = `\`\`\`esql\n${ESQL_QUERY}\n\`\`\``;
@@ -67,7 +70,7 @@ const buildGraph = (chatModel: ReturnType<typeof createMockModel>['chatModel']) 
 const BASE_INPUT = {
   nlQuery: 'count log lines',
   target: 'logs-test',
-  executeQuery: false,
+  execute: 'none' as const,
   maxRetries: 0,
   timeRange: { from: 'now-24h', to: 'now' },
   actions: [],
@@ -104,5 +107,68 @@ describe('createNlToEsqlGraph — requestDocumentation node', () => {
     await graph.invoke({ ...BASE_INPUT, actions: [] }, { recursionLimit: 25 });
 
     expect(docModelInvoke).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('createNlToEsqlGraph — execute_query node', () => {
+  beforeEach(() => {
+    mockResolveResource.mockResolvedValue(fakeResource);
+    mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('none execute does not call executeEsql', async () => {
+    const { chatModel } = createMockModel();
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke(BASE_INPUT, { recursionLimit: 25 });
+
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
+  });
+
+  it('data execute runs the query without a schema cap and returns rows', async () => {
+    const { chatModel } = createMockModel();
+    const graph = buildGraph(chatModel);
+    const results = {
+      columns: [{ name: 'count', type: 'long' as const }],
+      values: [[42]],
+    };
+    mockedExecuteEsql.mockResolvedValue(results);
+
+    const outState = await graph.invoke(
+      { ...BASE_INPUT, execute: 'data', maxRetries: 1 },
+      { recursionLimit: 25 }
+    );
+
+    const call = mockedExecuteEsql.mock.calls[0][0];
+    expect(call.limit).toBeUndefined();
+    expect(call.dropNullColumns).toBeUndefined();
+    expect(outState.results).toEqual(results);
+  });
+
+  it('schema execute uses limit 1 and keeps null columns without rewriting the stored query', async () => {
+    const { chatModel } = createMockModel();
+    const graph = buildGraph(chatModel);
+    mockedExecuteEsql.mockResolvedValue({
+      columns: [{ name: 'count', type: 'long' }],
+      values: [[42]],
+    });
+
+    const outState = await graph.invoke(
+      { ...BASE_INPUT, execute: 'schema', maxRetries: 1 },
+      { recursionLimit: 25 }
+    );
+
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1, dropNullColumns: false })
+    );
+    expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('FROM logs-test');
+    expect(outState.results).toEqual({
+      columns: [{ name: 'count', type: 'long' }],
+      values: [],
+    });
   });
 });

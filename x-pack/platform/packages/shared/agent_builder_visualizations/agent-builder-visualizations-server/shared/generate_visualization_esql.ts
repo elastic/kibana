@@ -131,6 +131,7 @@ export const generateVisualizationEsql = async ({
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,
+    execute: 'schema' as const,
     ...(timeRange ? { timeRange } : {}),
   };
 

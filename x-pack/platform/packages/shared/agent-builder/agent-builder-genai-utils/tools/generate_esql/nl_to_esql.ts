@@ -44,7 +44,8 @@ export interface GenerateEsqlResponse {
   answer?: string;
   /**
    * Results from executing the query.
-   * Available if `executeQuery` was true and if a successful query was executed.
+   * Available when {@link GenerateEsqlOptions.execute} is `'data'` or `'schema'`
+   * and the query ran successfully. When `'schema'`, `values` is empty.
    */
   results?: EsqlResponse;
   /**
@@ -67,6 +68,8 @@ export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   events?: ToolEventEmitter;
 };
 
+export type GenerateEsqlExecute = 'none' | 'schema' | 'data';
+
 export interface GenerateEsqlOptions {
   /**
    * The natural language query to generate ES|QL from
@@ -85,13 +88,19 @@ export interface GenerateEsqlOptions {
    */
   additionalInstructions?: string;
   /**
-   * If true, will attempt to execute the query and will return the results.
-   * Defaults to `true`
+   * How to run the generated query.
+   * - `'data'` (default): execute and return rows — search and other callers that
+   *   need the result set.
+   * - `'schema'`: execute only to validate and collect column names (`LIMIT 1`,
+   *   keep all-null columns). Does not change the generated query text. `results.values`
+   *   is empty. Use this when rows are not the product (e.g. visualization authoring).
+   * - `'none'`: do not execute; AST-validate only.
    */
-  executeQuery?: boolean;
+  execute?: GenerateEsqlExecute;
   /**
    * Maximum number of retries if the query fails (execute or AST validation).
-   * When `executeQuery` is true: retries after execution errors; when false: retries after AST validation errors.
+   * When `execute` is `'data'` or `'schema'`: retries after execution errors;
+   * when `'none'`: retries after AST validation errors.
    * Defaults to `3`
    * */
   maxRetries?: number;
@@ -125,7 +134,7 @@ export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
 export const generateEsql = async ({
   nlQuery,
   index,
-  executeQuery = true,
+  execute = 'data',
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
@@ -220,7 +229,7 @@ export const generateEsql = async ({
           {
             nlQuery,
             target: selectedTarget,
-            executeQuery,
+            execute,
             maxRetries,
             additionalInstructions,
             additionalContext,
