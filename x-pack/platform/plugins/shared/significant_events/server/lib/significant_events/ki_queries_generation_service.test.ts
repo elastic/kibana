@@ -45,7 +45,6 @@ const makeDeps = (
   inferenceClient: {} as InferenceClient,
   kiClient: {} as never,
   esClient: {} as never,
-  dataStreams: {} as never,
   streamDataEsClient: {} as never,
   featureFlags: {} as never,
   searchInferenceEndpoints: undefined,

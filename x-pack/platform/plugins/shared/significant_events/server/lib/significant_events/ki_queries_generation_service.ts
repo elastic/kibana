@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
@@ -45,12 +44,11 @@ export interface GenerateKIQueriesDependencies {
   inferenceClient: InferenceClient;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
-  dataStreams: DataStreamsStart;
   /**
-   * Client used to validate generated ES|QL against the stream's data, always routed across every
-   * CPS-linked project. Separate from `esClient` because the stream can resolve to a remote
-   * CPS-connected project, while `esClient` reads the plugin's own (origin-only) indices.
-   */
+    * Client used to validate generated ES|QL against the stream's data, always routed across every
+    * CPS-linked project. Separate from `esClient` because the stream can resolve to a remote
+    * CPS-connected project, while `esClient` reads the plugin's own (origin-only) indices.
+    */
   streamDataEsClient: ElasticsearchClient;
   featureFlags: FeatureFlagsStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
@@ -77,7 +75,6 @@ export async function generateKIQueries(
     inferenceClient,
     kiClient,
     esClient,
-    dataStreams,
     streamDataEsClient,
     featureFlags,
     searchInferenceEndpoints,
