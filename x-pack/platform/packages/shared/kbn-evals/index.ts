@@ -156,18 +156,23 @@ export {
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
+  getEffectiveK,
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
-  createRagEvaluators,
-} from './src/evaluators/rag';
+  createHitRateAtKEvaluator,
+  createMrrAtKEvaluator,
+  createNdcgAtKEvaluator,
+  createMapAtKEvaluator,
+  createIrEvaluators,
+} from './src/evaluators/ir';
 export type {
   GroundTruth,
-  RagEvaluatorConfig,
+  IrEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
   RetrievedDoc,
-} from './src/evaluators/rag/types';
+} from './src/evaluators/ir/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';

@@ -203,7 +203,7 @@ export const isTTY = (): boolean => Boolean(process.stdin.isTTY);
  * including auth credentials when available.
  * Handles both dot-notation (`elasticsearch.hosts: ...`) and nested YAML
  * (`elasticsearch:\n  hosts: ...`).
- * If no credentials are found, defaults to `elastic:changeme` (yarn es snapshot default).
+ * If no credentials are found, defaults to `elastic:changeme` (pnpm es snapshot default).
  */
 export const readLocalEsUrl = (repoRoot: string): string | undefined => {
   const configPath = Path.join(repoRoot, KIBANA_DEV_YML);

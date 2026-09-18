@@ -14,7 +14,7 @@
  */
 
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -37,7 +37,7 @@ export const WORKERS_SEED: WatchWorkerSeed[] = [
     watchIds: [
       SYSTEM_SECURITY_WATCH_FLOOR_ID,
       SYSTEM_SECURITY_WATCH_OFFICER_ID,
-      SYSTEM_SECURITY_WATCH_DARK_ID,
+      SYSTEM_SECURITY_WATCH_HUNT_ID,
       SYSTEM_SECURITY_WATCH_DEEP_ID,
     ],
     lastRunSecondsAgo: 4 * MINUTE,
@@ -66,7 +66,7 @@ export const WORKERS_SEED: WatchWorkerSeed[] = [
     id: 'attack-discovery-continuation',
     watchIds: [
       SYSTEM_SECURITY_WATCH_FLOOR_ID,
-      SYSTEM_SECURITY_WATCH_DARK_ID,
+      SYSTEM_SECURITY_WATCH_HUNT_ID,
       SYSTEM_SECURITY_WATCH_DEEP_ID,
     ],
     lastRunSecondsAgo: 31 * MINUTE,
@@ -75,7 +75,7 @@ export const WORKERS_SEED: WatchWorkerSeed[] = [
   },
   {
     id: 'containment',
-    watchIds: [SYSTEM_SECURITY_WATCH_DARK_ID],
+    watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
     lastRunSecondsAgo: 2 * HOUR,
     enabled: true,
     state: 'ok',

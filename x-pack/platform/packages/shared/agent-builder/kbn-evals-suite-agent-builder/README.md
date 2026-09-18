@@ -111,14 +111,16 @@ EVAL_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x
 # Run only selected evaluators
 SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
-# Override RAG evaluator K value (takes priority over config)
-RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+# Override IR evaluator K value (takes priority over config)
+IR_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
-# Run RAG evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
-SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+# Run IR evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
+# This suite registers Precision, Recall, F1 and HitRate only. MRR, NDCG and MAP are omitted because
+# multi-hop search concatenates results from several tool calls in call order, not by relevance rank.
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,HitRate@K,Factuality" IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
-# Override RAG evaluator K value (supports comma-separated values for multi-K evaluation)
-RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+# Override IR evaluator K value (supports comma-separated values for multi-K evaluation)
+IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVAL_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts

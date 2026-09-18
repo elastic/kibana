@@ -263,11 +263,20 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 { kis, sampleLogs, sampleDocs },
               ])
             );
+            const readOnlyDataStreamClient = {
+              create: () =>
+                Promise.reject(new Error('Memory writes are not supported in this eval')),
+            };
 
             // Exercise the same grounding tools that production query generation
             // wires in, so the eval covers the memory + prior-SigEvents code paths.
             const memoryTools = createMemoryDiscoveryTools({
-              memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+              memoryService: new MemoryServiceImpl({
+                logger: logger.get('memory'),
+                esClient,
+                dataStreamClient: readOnlyDataStreamClient,
+                historyDataStreamClient: readOnlyDataStreamClient,
+              }),
             });
 
             const executeAgentBuilderTool = async (
