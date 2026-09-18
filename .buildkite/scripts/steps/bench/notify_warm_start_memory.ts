@@ -8,7 +8,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname } from 'path';
+import { basename, dirname } from 'path';
 import parseArgs from 'minimist';
 import { BuildkiteClient, upsertComment } from '#pipeline-utils';
 
@@ -225,7 +225,10 @@ async function main() {
   console.log('PR comment posted successfully');
 }
 
-if (import.meta.main) {
+// Filename check instead of `import.meta.main`: the `.buildkite` Jest suite
+// still runs as CommonJS, where `import.meta` is a syntax error, and this
+// module is imported by its test.
+if (basename(process.argv[1] ?? '') === 'notify_warm_start_memory.ts') {
   main().catch((error) => {
     console.error('Failed to report warm-start memory results:', error);
     process.exit(1);
