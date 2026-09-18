@@ -19,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   const privilegeTestPkgName = 'preflight_authz_test';
   const privilegeTestPkgVersion = '1.0.0';
@@ -55,21 +56,22 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      // Poll until the process-wide upload rate-limit (10 s) has expired.
-      // The probe uses a deliberately invalid zip so it fails before the
-      // setLastUploadInstallCache() call — each probe leaves the rate-limit
-      // slot unchanged. A 429 means the window is still open; any other status
-      // means it has cleared and we can proceed.
+      // Wait until the process-wide upload rate-limit (10 s) has expired.
+      // The probe uses a deliberately invalid zip so it always fails before
+      // setLastUploadInstallCache() is reached — each probe leaves the slot
+      // unchanged. retry.tryForTime throws on 429 and succeeds on any other
+      // status, so the before() hook unblocks as soon as the window clears.
       const probe = Buffer.from('not-a-zip');
-      for (let i = 0; i < 15; i++) {
+      await retry.tryForTime(15_000, async () => {
         const { status } = await supertest
           .post('/api/fleet/epm/packages')
           .set('kbn-xsrf', 'xxxx')
           .type('application/zip')
           .send(probe);
-        if (status !== 429) break;
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+        if (status === 429) {
+          throw new Error('Upload rate limit still active');
+        }
+      });
     });
 
     afterEach(async () => {
