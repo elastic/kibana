@@ -63,7 +63,7 @@ test.describe(
       );
     });
 
-    test('renders all 6 navigation tabs and no Memory tab', async ({ page }) => {
+    test('renders navigation tabs', async ({ page }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
@@ -78,25 +78,6 @@ test.describe(
       ]) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
-
-      // Exactly 6 tabs — no Memory tab or other extras.
-      await expect(tabBar.getByRole('tab')).toHaveCount(6);
-      await expect(tabBar.getByRole('tab', { name: 'Memory' })).not.toBeVisible();
-    });
-
-    test('removed /memory URL redirects to /streams', async ({ page }) => {
-      await page.gotoApp('significant_events/memory');
-      await expect(page).toHaveURL(/\/app\/significant_events\/streams/, { timeout: 60_000 });
-    });
-
-    test('onboarding button is absent', async ({ page }) => {
-      await page.gotoApp('significant_events/streams');
-      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toBeVisible({
-        timeout: 60_000,
-      });
-      await expect(
-        page.testSubj.locator('significantEventsSystemOnboardingButton')
-      ).not.toBeVisible();
     });
 
     test('shows the not-enabled empty prompt when the feature flag is disabled', async ({

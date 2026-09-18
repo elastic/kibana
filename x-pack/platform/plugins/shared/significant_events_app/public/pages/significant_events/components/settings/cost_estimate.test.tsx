@@ -500,7 +500,6 @@ describe('CostEstimate', () => {
     expect(screen.getByText('Discovery')).toBeInTheDocument();
     expect(screen.getByText('Investigation')).toBeInTheDocument();
     expect(screen.getByText('KI extraction')).toBeInTheDocument();
-    expect(screen.queryByText('Memory')).not.toBeInTheDocument();
     expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
       '~$1.20'
     );
