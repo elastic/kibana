@@ -627,6 +627,94 @@ describe('checkUploadPackageAssetPrivileges', () => {
     expect(result).toEqual(['space-x']);
   });
 
+  it('checks privileges when archive has no gated types but existing install has security_rule refs (gated-to-benign removal)', async () => {
+    // A Fleet-only caller uploads a benign replacement that omits security_rule assets.
+    // cleanUpUnusedKibanaAssetsStep would delete the existing security-rule SOs.
+    // Preflight must still require rules-all here.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'old-rule', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {},
+      },
+    });
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      mockSavedObjectsClient
+    );
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
+    );
+    expect(result).toEqual([mockSpaceId]);
+  });
+
+  it('throws FleetUnauthorizedError when caller lacks privileges to remove gated types', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(false, ['api:rules-all']);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'old-rule', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {},
+      },
+    });
+
+    await expect(
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        mockSavedObjectsClient
+      )
+    ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('skips privilege check when archive and existing install both have no gated types', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'my-dashboard', type: 'dashboard', version: 1 }],
+        additional_spaces_installed_kibana: {},
+      },
+    });
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      mockSavedObjectsClient
+    );
+
+    expect(result).toEqual([]);
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
+
   it('checks only the request space for a streaming package even when installed in additional spaces', async () => {
     // security_detection_engine uses streaming install (installKibanaAssetsWithStreaming),
     // which writes only to the request Space regardless of primary/additional.

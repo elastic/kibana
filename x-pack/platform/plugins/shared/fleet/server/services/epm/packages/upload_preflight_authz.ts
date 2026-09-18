@@ -10,7 +10,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import { KibanaAssetType } from '../../../types';
+import { KibanaAssetType, KibanaSavedObjectType } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { getPathParts } from '../archive';
@@ -21,6 +21,13 @@ import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './install';
 const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.securityRule,
   KibanaAssetType.securityAIPrompt,
+]);
+
+// Maps the saved-object type stored in installed_kibana refs back to the KibanaAssetType used
+// for privilege decisions. Used to detect gated types being removed by a replacement upload.
+const SO_TYPE_TO_ASSET_TYPE = new Map<KibanaSavedObjectType, KibanaAssetType>([
+  [KibanaSavedObjectType.securityRule, KibanaAssetType.securityRule],
+  [KibanaSavedObjectType.securityAIPrompt, KibanaAssetType.securityAIPrompt],
 ]);
 
 const ASSET_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string[]>> = {
@@ -105,6 +112,17 @@ export function buildRequiredActions(
   return [...privilegeNames].map((name) => security.authz.actions.api.get(name));
 }
 
+function detectGatedTypesInExistingInstall(
+  installation: Awaited<ReturnType<typeof getInstallationObject>>
+): Set<KibanaAssetType> {
+  const found = new Set<KibanaAssetType>();
+  for (const ref of installation?.attributes?.installed_kibana ?? []) {
+    const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type as KibanaSavedObjectType);
+    if (assetType) found.add(assetType);
+  }
+  return found;
+}
+
 export async function checkUploadPackageAssetPrivileges(
   request: KibanaRequest,
   archiveBuffer: Buffer,
@@ -122,13 +140,30 @@ export async function checkUploadPackageAssetPrivileges(
     );
   }
 
-  if (signals.gatedTypesFound.size === 0 && !signals.hasMlSecurityRules) {
-    // No gated asset types found; return empty set so callers skip propagation capping.
+  // Load the existing installation before the early-return check. This is needed both
+  // to detect gated types being *removed* by the new archive (a Fleet-only caller must
+  // not strip security_rule/security_ai_prompt SOs via cleanUpUnusedKibanaAssetsStep)
+  // and to determine destination Spaces for the privilege check.
+  const installation = signals.pkgName
+    ? await getInstallationObject({
+        savedObjectsClient,
+        pkgName: signals.pkgName,
+        failOnUnexpectedError: true,
+      })
+    : undefined;
+
+  // Union gated types from the new archive with gated types present in the existing
+  // install so that removing privileged assets requires the same authz as adding them.
+  const gatedTypesFromExisting = detectGatedTypesInExistingInstall(installation);
+  const effectiveGatedTypes = new Set([...signals.gatedTypesFound, ...gatedTypesFromExisting]);
+
+  if (effectiveGatedTypes.size === 0 && !signals.hasMlSecurityRules) {
+    // No gated asset types in archive or existing install; skip privilege check.
     return [];
   }
 
   // Preflight authz requires the security plugin. Kibana deployments with security
-  // disabled have no authz model to mirror, so uploads containing gated asset types
+  // disabled have no authz model to mirror, so uploads affecting gated asset types
   // are blocked in that configuration.
   const security = appContextService.getSecurity();
   if (!security) {
@@ -137,20 +172,7 @@ export async function checkUploadPackageAssetPrivileges(
     );
   }
 
-  const actions = buildRequiredActions(signals, security);
-
-  // Determine which Spaces will actually receive Kibana assets, mirroring the logic in
-  // installKibanaAssetsAndReferencesMultispace:
-  //   • First install or additional-space install: assets go only to the request Space.
-  //   • Upgrade from the primary Space: assets fan out to every installed Space.
-  // Only check privileges in the Spaces that will actually be written.
-  const installation = signals.pkgName
-    ? await getInstallationObject({
-        savedObjectsClient,
-        pkgName: signals.pkgName,
-        failOnUnexpectedError: true,
-      })
-    : undefined;
+  const actions = buildRequiredActions({ ...signals, gatedTypesFound: effectiveGatedTypes }, security);
 
   const effectivePrimarySpace =
     installation?.attributes?.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
