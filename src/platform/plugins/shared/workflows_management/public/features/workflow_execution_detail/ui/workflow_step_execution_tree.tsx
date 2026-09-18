@@ -57,7 +57,6 @@ import {
   type IterationPinKind,
   planIterationCollapse,
 } from '../lib/iteration_pins';
-import { mergeDefinitionStepsIntoTree } from '../lib/merge_definition_steps_into_tree';
 import { normalizeStepAi, stepAiToTokenUsage } from '../lib/normalize_step_ai';
 import { parseWorkflowDurationMs } from '../lib/parse_workflow_duration';
 import { rollupTokenUsage, type TokenRollupNode, tokenRollupToUsage } from '../lib/token_rollup';
@@ -1273,7 +1272,6 @@ export const WorkflowStepExecutionTree = ({
       execution.status,
       execution.triggeredBy
     );
-    stepExecutionsTree = mergeDefinitionStepsIntoTree(stepExecutionsTree, definition);
 
     const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
       stepExecutionsTree,
