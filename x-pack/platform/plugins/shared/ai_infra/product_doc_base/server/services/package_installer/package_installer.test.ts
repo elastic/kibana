@@ -31,6 +31,7 @@ import {
   getSecurityLabsArtifactName,
   getSecurityLabsIndexName,
   DocumentationProduct,
+  ResourceTypes,
 } from '@kbn/product-doc-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -522,19 +523,15 @@ describe('PackageInstaller', () => {
 
   describe('wasUninstalledSince', () => {
     const since = new Date('2026-09-17T10:00:00.000Z');
-
-    beforeEach(() => {
-      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
-        status: 'uninstalled',
-      });
-    });
+    const productDocs = { inferenceId: '.elser', since, resourceType: ResourceTypes.productDoc };
+    const openApiSpec = { inferenceId: '.elser', since, resourceType: ResourceTypes.openapiSpec };
 
     it('propagates status read failures instead of reporting an uninstall', async () => {
       productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
 
-      await expect(
-        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
-      ).rejects.toThrow('es unavailable');
+      await expect(packageInstaller.wasUninstalledSince(productDocs)).rejects.toThrow(
+        'es unavailable'
+      );
     });
 
     it('returns true when a product was uninstalled after the given time', async () => {
@@ -543,34 +540,40 @@ describe('PackageInstaller', () => {
         security: { status: 'uninstalled', updatedAt: '2026-09-17T10:01:00.000Z' },
       } as never);
 
-      await expect(
-        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
-      ).resolves.toBe(true);
+      await expect(packageInstaller.wasUninstalledSince(productDocs)).resolves.toBe(true);
     });
 
-    it('returns true when the OpenAPI spec was uninstalled after the given time', async () => {
+    it('ignores an OpenAPI-only uninstall when checking product documentation', async () => {
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
-        kibana: { status: 'installed', version: '8.15', updatedAt: '2026-09-17T09:00:00.000Z' },
+        kibana: { status: 'installed', version: '8.15', updatedAt: '2026-09-17T10:05:00.000Z' },
       } as never);
       productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
         status: 'uninstalled',
         updatedAt: '2026-09-17T10:02:00.000Z',
       });
 
-      await expect(
-        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
-      ).resolves.toBe(true);
+      await expect(packageInstaller.wasUninstalledSince(productDocs)).resolves.toBe(false);
+      expect(productDocClient.getOpenapiSpecInstallationStatus).not.toHaveBeenCalled();
+    });
+
+    it('returns true when the OpenAPI spec was uninstalled after the given time', async () => {
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+        updatedAt: '2026-09-17T10:02:00.000Z',
+      });
+
+      await expect(packageInstaller.wasUninstalledSince(openApiSpec)).resolves.toBe(true);
+      expect(productDocClient.getInstallationStatusOrThrow).not.toHaveBeenCalled();
     });
 
     it('propagates OpenAPI spec status read failures', async () => {
-      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({} as never);
       productDocClient.getOpenapiSpecInstallationStatus.mockRejectedValue(
         new Error('es unavailable')
       );
 
-      await expect(
-        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
-      ).rejects.toThrow('es unavailable');
+      await expect(packageInstaller.wasUninstalledSince(openApiSpec)).rejects.toThrow(
+        'es unavailable'
+      );
     });
 
     it('returns false when the uninstall predates the given time or products have no status', async () => {
@@ -580,9 +583,7 @@ describe('PackageInstaller', () => {
         elasticsearch: { status: 'installing', updatedAt: '2026-09-17T10:05:00.000Z' },
       } as never);
 
-      await expect(
-        packageInstaller.wasUninstalledSince({ inferenceId: '.elser', since })
-      ).resolves.toBe(false);
+      await expect(packageInstaller.wasUninstalledSince(productDocs)).resolves.toBe(false);
     });
   });
 

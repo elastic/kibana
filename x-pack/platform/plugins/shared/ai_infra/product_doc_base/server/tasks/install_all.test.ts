@@ -9,7 +9,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isUnrecoverableError, type RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
-import { DocumentationProduct } from '@kbn/product-doc-common';
+import { DocumentationProduct, ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
   registerInstallAllTaskDefinition,
@@ -115,6 +115,7 @@ describe('InstallAll task', () => {
     expect(wasUninstalledSince).toHaveBeenCalledWith({
       inferenceId: '.elser',
       since: new Date(newRequest),
+      resourceType: ResourceTypes.productDoc,
     });
     expect(result).toEqual({
       state: {
@@ -139,12 +140,14 @@ describe('InstallAll task', () => {
     expect(result).toEqual({ state: {} });
   });
 
-  it('checks for an uninstall newer than the request before every product', async () => {
+  it('checks for a product documentation uninstall newer than the request before every product', async () => {
     await runTask(continuation({ remaining: ['security'] }));
 
+    // Only product documentation counts: an OpenAPI-only uninstall must not cancel this install
     expect(wasUninstalledSince).toHaveBeenCalledWith({
       inferenceId: '.elser',
       since: new Date(requestedAt),
+      resourceType: ResourceTypes.productDoc,
     });
   });
 

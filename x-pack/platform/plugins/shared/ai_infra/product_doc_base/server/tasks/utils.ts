@@ -110,8 +110,8 @@ export const runTaskUnderInstallLock = async ({
  * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
  * item is kept and the run is deferred instead of failing an attempt. The lock is released between
  * items and does not order operations, so `isSuperseded` is checked under the lock before every item:
- * when a newer request (an uninstall) took effect since this task was scheduled, the task stops
- * instead of recreating the documentation. A failing item is retried with exponential backoff up to
+ * when a newer request (an uninstall of that item's resource) took effect since this task was
+ * requested, the task stops instead of recreating the documentation. A failing item is retried with exponential backoff up to
  * `MAX_INSTALL_ITEM_RETRIES` times, after which the task fails without further Task Manager retries.
  */
 export const runInstallChunk = async <T extends string>({
@@ -130,7 +130,7 @@ export const runInstallChunk = async <T extends string>({
   items: T[];
   attempts?: number;
   install: (item: T) => Promise<unknown>;
-  isSuperseded: () => Promise<boolean>;
+  isSuperseded: (item: T) => Promise<boolean>;
   metadata?: Record<string, unknown>;
 }) => {
   const [item, ...rest] = items;
@@ -142,7 +142,7 @@ export const runInstallChunk = async <T extends string>({
   const acquired = await tryWithInstallLock({
     lockManager,
     run: async () => {
-      superseded = await isSuperseded();
+      superseded = await isSuperseded(item);
       if (superseded) {
         return;
       }

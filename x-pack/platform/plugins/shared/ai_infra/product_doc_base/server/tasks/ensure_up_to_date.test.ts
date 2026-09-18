@@ -9,6 +9,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
   registerEnsureUpToDateTaskDefinition,
@@ -166,14 +167,28 @@ describe('EnsureUpToDate task', () => {
     });
   });
 
-  it('stops when an uninstall was requested after this update, including the OpenAPI spec', async () => {
+  it('stops the OpenAPI item when the OpenAPI spec was uninstalled after this update was requested', async () => {
     wasUninstalledSince.mockResolvedValue(true);
 
     const result = await runTask(continuation({ remaining: ['openapi'] }));
 
-    expect(wasUninstalledSince).toHaveBeenCalledWith({ inferenceId: '.elser', since });
+    expect(wasUninstalledSince).toHaveBeenCalledWith({
+      inferenceId: '.elser',
+      since,
+      resourceType: ResourceTypes.openapiSpec,
+    });
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
+  });
+
+  it('checks product items against product documentation uninstalls only', async () => {
+    await runTask(continuation({ remaining: ['security', 'openapi'] }));
+
+    expect(wasUninstalledSince).toHaveBeenCalledWith({
+      inferenceId: '.elser',
+      since,
+      resourceType: ResourceTypes.productDoc,
+    });
   });
 
   it('retries the OpenAPI spec item with backoff instead of failing the run', async () => {

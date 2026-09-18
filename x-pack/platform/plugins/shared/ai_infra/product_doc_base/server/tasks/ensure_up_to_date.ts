@@ -10,6 +10,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import {
@@ -67,8 +68,16 @@ export const registerEnsureUpToDateTaskDefinition = ({
               requestedAt,
               items,
               attempts,
-              isSuperseded: () =>
-                packageInstaller.wasUninstalledSince({ inferenceId, since: new Date(requestedAt) }),
+              // An item is superseded by a later uninstall of its own resource only
+              isSuperseded: (item) =>
+                packageInstaller.wasUninstalledSince({
+                  inferenceId,
+                  since: new Date(requestedAt),
+                  resourceType:
+                    item === OPENAPI_SPEC_ITEM
+                      ? ResourceTypes.openapiSpec
+                      : ResourceTypes.productDoc,
+                }),
               // Each item re-checks under the lock whether it still needs updating, so two update
               // tasks for the same inference ID (e.g. ordinary and forced) do not install it twice
               install: async (item) => {

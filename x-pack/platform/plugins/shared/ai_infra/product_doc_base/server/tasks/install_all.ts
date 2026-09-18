@@ -11,7 +11,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
-import { DocumentationProduct } from '@kbn/product-doc-common';
+import { DocumentationProduct, ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
   isTaskCurrentlyRunningError,
@@ -57,8 +57,13 @@ export const registerInstallAllTaskDefinition = ({
               attempts,
               install: (productName) =>
                 packageInstaller.installProduct({ productName, inferenceId }),
+              // Only a product documentation uninstall supersedes this task, not an OpenAPI-only one
               isSuperseded: () =>
-                packageInstaller.wasUninstalledSince({ inferenceId, since: new Date(requestedAt) }),
+                packageInstaller.wasUninstalledSince({
+                  inferenceId,
+                  since: new Date(requestedAt),
+                  resourceType: ResourceTypes.productDoc,
+                }),
               metadata: { taskType: INSTALL_ALL_TASK_TYPE, inferenceId },
             });
           },

@@ -315,17 +315,21 @@ export class PackageInstaller {
   }
 
   /**
-   * Whether a product or the OpenAPI spec of this inference ID was uninstalled after `since`, meaning an
-   * uninstall request superseded the task that started at `since`. Status read failures are propagated
-   * so that they are not mistaken for an uninstall.
+   * Whether the given resource (product documentation or the OpenAPI spec) of this inference ID was
+   * uninstalled after `since`, meaning an uninstall request superseded the task that started at `since`.
+   * Status read failures are propagated so that they are not mistaken for an uninstall.
    */
-  async wasUninstalledSince(params: { inferenceId: string; since: Date }): Promise<boolean> {
-    const { inferenceId, since } = params;
-    const [installStatuses, openApiStatus] = await Promise.all([
-      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
-      this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
-    ]);
-    return [...Object.values(installStatuses), openApiStatus].some(
+  async wasUninstalledSince(params: {
+    inferenceId: string;
+    since: Date;
+    resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec;
+  }): Promise<boolean> {
+    const { inferenceId, since, resourceType } = params;
+    const statuses =
+      resourceType === ResourceTypes.openapiSpec
+        ? [await this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId })]
+        : Object.values(await this.productDocClient.getInstallationStatusOrThrow({ inferenceId }));
+    return statuses.some(
       ({ status, updatedAt }) =>
         (status === 'uninstalled' || status === 'uninstalling') &&
         updatedAt !== undefined &&
