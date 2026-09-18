@@ -61,8 +61,8 @@ steps:
   # produces duplicates the analyst then has to reconcile.
   - name: coverage_check
     type: ai.agent
-    # Keep in sync with ALERTZERO_TRIAGE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    connector-id-by-feature: alertzero_triage
+    # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_fast
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
     plugin-id: alertzero_detection_coverage
     aggregate-by: alertzero_parent

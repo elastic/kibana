@@ -52,7 +52,7 @@ describe('resolveDefaultConnectorId', () => {
 
     it('returns the connector configured for the feature', async () => {
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -65,7 +65,7 @@ describe('resolveDefaultConnectorId', () => {
 
     it('passes the request to getForFeature', async () => {
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -73,7 +73,7 @@ describe('resolveDefaultConnectorId', () => {
         uiSettingsClient: mockUiSettingsClient,
       });
 
-      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_generation', mockRequest, {
+      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_reasoning', mockRequest, {
         onlyReturnConfigured: true,
       });
     });
@@ -82,7 +82,7 @@ describe('resolveDefaultConnectorId', () => {
     // order, so a configured default must not win over an operator's tier choice.
     it('takes precedence over genAiSettings:defaultAIConnector', async () => {
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -106,7 +106,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue(undefined);
 
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -121,7 +121,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue(undefined);
 
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -134,7 +134,7 @@ describe('resolveDefaultConnectorId', () => {
 
     it('falls through when the searchInferenceEndpoints plugin is unavailable', async () => {
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -148,7 +148,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue({ taskType: 'text_embedding' });
 
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -163,7 +163,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue({ taskType: 'text_embedding' });
 
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -172,7 +172,7 @@ describe('resolveDefaultConnectorId', () => {
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Ignoring feature_id alertzero_generation: task type is text_embedding, not chat_completion'
+        'Ignoring feature_id alertzero_reasoning: task type is text_embedding, not chat_completion'
       );
     });
 
@@ -181,7 +181,7 @@ describe('resolveDefaultConnectorId', () => {
       mockGetForFeature.mockResolvedValue({ endpoints: [] });
 
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_generation',
+        featureId: 'alertzero_reasoning',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,

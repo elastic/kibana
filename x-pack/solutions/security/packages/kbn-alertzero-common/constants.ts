@@ -222,12 +222,19 @@ export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
  * Discovery generates and then investigates, three `workflow.execute` hops apart — and a step
  * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
  * `workflow.execute` inputs. A new Worker usually costs no new tier.
+ *
+ * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
+ * same fast model that gates an alert also enriches a threat report. Other Security features are
+ * expected to pin to these rather than register per-feature rows of their own.
  */
 export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
-export const ALERTZERO_TRIAGE_INFERENCE_FEATURE_ID = 'alertzero_triage' as const;
-export const ALERTZERO_GENERATION_INFERENCE_FEATURE_ID = 'alertzero_generation' as const;
-export const ALERTZERO_INVESTIGATION_INFERENCE_FEATURE_ID = 'alertzero_investigation' as const;
-export const ALERTZERO_SUMMARIZATION_INFERENCE_FEATURE_ID = 'alertzero_summarization' as const;
+/** Low latency, high volume, lightweight judgment. */
+export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
+/** Deeper single-shot thinking on a self-contained task. */
+export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
+/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
+export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
 
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;

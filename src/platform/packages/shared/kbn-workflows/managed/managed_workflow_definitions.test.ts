@@ -173,7 +173,7 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '4:a4494787'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '5:74170b32'],
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '3:17a26220'],
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -236,16 +236,11 @@ const AGGREGATE_BY = 'aggregate-by';
 /** Mirrors ALERTZERO_INFERENCE_PARENT_FEATURE_ID; @kbn/alertzero-common is not a dependency here. */
 const ALERTZERO_ROLLUP_ID = 'alertzero_parent';
 /**
- * Mirrors the four ALERTZERO_*_INFERENCE_FEATURE_IDs, for the same reason as the rollup id above.
+ * Mirrors the three ALERTZERO_*_INFERENCE_FEATURE_IDs, for the same reason as the rollup id above.
  * Matching the exact set matters: an unregistered id resolves to the deployment default at runtime
  * exactly as an absent one does, so accepting any string would let a typo through the guard.
  */
-const ALERTZERO_TIER_IDS = new Set([
-  'alertzero_triage',
-  'alertzero_generation',
-  'alertzero_investigation',
-  'alertzero_summarization',
-]);
+const ALERTZERO_TIER_IDS = new Set(['alertzero_fast', 'alertzero_reasoning', 'alertzero_agentic']);
 
 /**
  * Collects steps of a given type from anywhere in a parsed workflow, walking the whole tree rather
