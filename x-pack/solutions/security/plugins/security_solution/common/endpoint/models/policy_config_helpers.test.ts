@@ -544,6 +544,22 @@ describe('Policy Config helpers', () => {
       expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);
     });
 
+    it('keeps an explicitly disabled custom_yara_signatures while dropping enabled and absent ones', () => {
+      const policy = policyFactory();
+      policy.windows.memory_protection.custom_yara_signatures = false;
+      delete policy.mac.memory_protection.custom_yara_signatures;
+      (policy.linux as { advanced?: unknown }).advanced = {
+        memory_protection: { user_yara_rescan_interval_seconds: 3600 },
+      };
+
+      const result = removeCustomYaraSignatures(policy);
+
+      expect(result.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(result.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.linux.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.linux.advanced).not.toHaveProperty('memory_protection');
+    });
+
     it('also removes the Enterprise-gated advanced rescan interval on all OSes', () => {
       const policy = policyFactory();
       for (const os of ['windows', 'mac', 'linux'] as const) {

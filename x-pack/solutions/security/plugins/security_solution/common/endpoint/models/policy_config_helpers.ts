@@ -540,42 +540,41 @@ export const removeCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig)
   linux: removeYaraAdvancedSettingsForOs(policy.linux),
 });
 
+const removeEnabledCustomYaraSignaturesForOs = <
+  T extends { memory_protection: { custom_yara_signatures?: boolean } }
+>(
+  osPolicy: T
+): T => {
+  if (osPolicy.memory_protection.custom_yara_signatures === false) {
+    return osPolicy;
+  }
+
+  const { custom_yara_signatures: customYaraSignatures, ...memoryProtection } =
+    osPolicy.memory_protection;
+
+  return { ...osPolicy, memory_protection: memoryProtection } as T;
+};
+
 /**
- * Returns a copy of the passed `PolicyConfig` with custom_yara_signatures removed
- * from Windows, Mac, and Linux memory protection, along with the Enterprise-gated
- * custom YARA advanced settings.
+ * Returns a copy of the passed `PolicyConfig` with custom YARA signatures sanitized for a
+ * deployment where the feature is gated off, along with the Enterprise-gated custom YARA
+ * advanced settings.
  *
- * Writing an explicit `false` while the feature flag is off would destroy the
- * "never set" signal, making the future `??=` backfill a no-op and leaving
- * existing customers permanently opted out.
+ * The field is deleted rather than set to `false`, because an explicit `false` would destroy the
+ * "never set" signal, making the future `??=` backfill a no-op and leaving existing customers
+ * permanently opted out. An existing `false` is kept for the same reason in reverse: it records a
+ * deliberate opt-out, so dropping it would let the backfill turn the feature back on.
  *
  * @param policy
- * @returns PolicyConfig without custom_yara_signatures
+ * @returns PolicyConfig with no enabled custom_yara_signatures
  */
-export const removeCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig => {
-  const { custom_yara_signatures: windowsCustomYaraSignatures, ...windowsMemoryProtection } =
-    policy.windows.memory_protection;
-  const { custom_yara_signatures: macCustomYaraSignatures, ...macMemoryProtection } =
-    policy.mac.memory_protection;
-  const { custom_yara_signatures: linuxCustomYaraSignatures, ...linuxMemoryProtection } =
-    policy.linux.memory_protection;
-
-  return removeCustomYaraSignaturesAdvancedSettings({
+export const removeCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig =>
+  removeCustomYaraSignaturesAdvancedSettings({
     ...policy,
-    windows: {
-      ...policy.windows,
-      memory_protection: windowsMemoryProtection,
-    },
-    mac: {
-      ...policy.mac,
-      memory_protection: macMemoryProtection,
-    },
-    linux: {
-      ...policy.linux,
-      memory_protection: linuxMemoryProtection,
-    },
+    windows: removeEnabledCustomYaraSignaturesForOs(policy.windows),
+    mac: removeEnabledCustomYaraSignaturesForOs(policy.mac),
+    linux: removeEnabledCustomYaraSignaturesForOs(policy.linux),
   });
-};
 
 export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): PolicyConfig => {
   if (value === false) {
