@@ -7,17 +7,7 @@
 
 import { createHash } from 'crypto';
 import { execFile } from 'child_process';
-import {
-  closeSync,
-  existsSync,
-  mkdtempSync,
-  openSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  unlinkSync,
-  writeSync,
-} from 'fs';
+import { closeSync, mkdtempSync, openSync, readFileSync, rmSync, statSync, writeSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
@@ -59,7 +49,28 @@ interface ExecFileResult {
   code: number;
 }
 
-const parseHost = (host: string): { hostname: string; port: number } => {
+export const parseHost = (host: string): { hostname: string; port: number } => {
+  if (host.startsWith('[')) {
+    const close = host.indexOf(']');
+    if (close === -1) {
+      return { hostname: host, port: DEFAULT_SSH_PORT };
+    }
+    const hostname = host.slice(1, close);
+    const rest = host.slice(close + 1);
+    if (rest.startsWith(':')) {
+      const port = parseInt(rest.slice(1), 10);
+      if (port >= 1 && port <= 65535) {
+        return { hostname, port };
+      }
+    }
+    return { hostname, port: DEFAULT_SSH_PORT };
+  }
+
+  // Unbracketed IPv6 contains more than one colon — host only, port 22.
+  if ((host.match(/:/g) ?? []).length > 1) {
+    return { hostname: host, port: DEFAULT_SSH_PORT };
+  }
+
   const lastColon = host.lastIndexOf(':');
   if (lastColon === -1) return { hostname: host, port: DEFAULT_SSH_PORT };
   const portStr = host.slice(lastColon + 1);
@@ -68,6 +79,13 @@ const parseHost = (host: string): { hostname: string; port: number } => {
     return { hostname: host, port: DEFAULT_SSH_PORT };
   }
   return { hostname: host.slice(0, lastColon), port };
+};
+
+const sshDestination = (username: string, hostname: string): string => `${username}@${hostname}`;
+
+const scpDestination = (username: string, hostname: string, remotePath: string): string => {
+  const host = hostname.includes(':') ? `[${hostname}]` : hostname;
+  return `${username}@${host}:${remotePath}`;
 };
 
 const runExecFile = (
@@ -83,7 +101,11 @@ const runExecFile = (
       }
 
       if (error.code === 'ENOENT') {
-        reject(new Error(`${bin} is not installed on the Kibana host`));
+        reject(
+          new Error(
+            `${bin} is not installed on the Kibana host. The SSH Host connector requires ssh, scp, and (for password auth) sshpass.`
+          )
+        );
         return;
       }
 
@@ -140,7 +162,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const args = [
       ...scp.prefixArgs,
       ...this.getTransportArgs('-P', port, authArgs),
-      `${username}@${hostname}:${remotePath}`,
+      scpDestination(username, hostname, remotePath),
       tempDownloadPath,
     ];
 
@@ -184,7 +206,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
           [
             ...ssh.prefixArgs,
             ...this.getTransportArgs('-p', port, authArgs),
-            `${username}@${hostname}`,
+            sshDestination(username, hostname),
             `mkdir -p -- ${JSON.stringify(remoteDir)}`,
           ],
           env
@@ -200,7 +222,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
           ...scp.prefixArgs,
           ...this.getTransportArgs('-P', port, authArgs),
           localPath,
-          `${username}@${hostname}:${remotePath}`,
+          scpDestination(username, hostname, remotePath),
         ],
         env
       );
@@ -240,10 +262,8 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
           throw new Error('SSH private key is required for key-based authentication');
         }
 
-        const tempKeyPath = join(
-          tmpdir(),
-          `ssh_host_key_${Date.now()}_${Math.random().toString(36).slice(2)}`
-        );
+        const tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_key_'));
+        const tempKeyPath = join(tempDir, 'id');
         // Strip \r so CRLF-pasted keys don't corrupt OpenSSH parsing; ensure trailing newline.
         const keyContent = `${sshPrivateKey.replace(/\r/g, '').trimEnd()}\n`;
         // Write with restricted permissions (writeFileSync is ESLint-restricted)
@@ -257,7 +277,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
           authArgs: ['-i', tempKeyPath, '-o', 'PasswordAuthentication=no'],
           env: process.env,
           cleanup: () => {
-            if (existsSync(tempKeyPath)) unlinkSync(tempKeyPath);
+            rmSync(tempDir, { recursive: true, force: true });
           },
         };
       }
@@ -281,7 +301,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const args = [
       ...ssh.prefixArgs,
       ...this.getTransportArgs('-p', port, authArgs),
-      `${username}@${hostname}`,
+      sshDestination(username, hostname),
       remoteCmd,
     ];
 
@@ -330,7 +350,11 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   private getControlPath(): string {
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
-    const safeId = `${username}_${hostname}_${port}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-    return join(tmpdir(), `kbn_cm_${safeId}`);
+    const id = createHash('sha256')
+      .update(`${username}\0${hostname}\0${port}`)
+      .digest('hex')
+      .slice(0, 12);
+    // OpenSSH ControlPath is capped around 104 chars; keep this under /tmp.
+    return join('/tmp', `kbn_cm_${id}`);
   }
 }

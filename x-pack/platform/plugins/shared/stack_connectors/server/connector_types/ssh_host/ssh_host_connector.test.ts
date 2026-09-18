@@ -11,7 +11,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AUTH_TYPE, CONNECTOR_ID } from '@kbn/connector-schemas/ssh_host';
-import { SshHostConnector } from './ssh_host_connector';
+import { parseHost, SshHostConnector } from './ssh_host_connector';
 
 jest.mock('child_process', () => {
   const actual = jest.requireActual('child_process');
@@ -115,6 +115,22 @@ describe('SshHostConnector', () => {
       expect(args).toContain('alice@example.com');
     });
 
+    it('treats unbracketed IPv6 as host with port 22', async () => {
+      await createConnector({ host: '::1' }).exec({ script: 'true' });
+
+      const args = mockedExecFile.mock.calls[0][1] as string[];
+      expect(args).toContain('alice@::1');
+      expect(args[args.indexOf('-p') + 1]).toBe('22');
+    });
+
+    it('parses [ipv6]:port for ssh', async () => {
+      await createConnector({ host: '[2001:db8::1]:2222' }).exec({ script: 'true' });
+
+      const args = mockedExecFile.mock.calls[0][1] as string[];
+      expect(args).toContain('alice@2001:db8::1');
+      expect(args[args.indexOf('-p') + 1]).toBe('2222');
+    });
+
     it('uses sshpass argv for password auth', async () => {
       const connector = createConnector({
         authType: AUTH_TYPE.Password,
@@ -144,6 +160,58 @@ describe('SshHostConnector', () => {
       const result = await createConnector().exec({ script: 'false' });
       expect(result).toEqual({ stdout: 'out', stderr: 'err', code: 7 });
     });
+
+    it('names the missing binary on ENOENT', async () => {
+      mockedExecFile.mockImplementation((bin, args, options, callback) => {
+        const cb = typeof options === 'function' ? options : callback;
+        const error = Object.assign(new Error(`spawn ${bin} ENOENT`), { code: 'ENOENT' });
+        cb?.(error, '', '');
+        return {} as ReturnType<typeof execFile>;
+      });
+
+      await expect(createConnector().exec({ script: 'true' })).rejects.toThrow(
+        /ssh is not installed on the Kibana host/
+      );
+
+      await expect(
+        createConnector({
+          authType: AUTH_TYPE.Password,
+          password: 'secret',
+          sshPrivateKey: null,
+        }).exec({ script: 'true' })
+      ).rejects.toThrow(/sshpass is not installed on the Kibana host/);
+    });
+
+    it('uses a short hashed ControlPath', async () => {
+      await createConnector({
+        username: 'a'.repeat(256),
+        host: `${'b'.repeat(200)}.example.com:22`,
+      }).exec({ script: 'true' });
+
+      const args = mockedExecFile.mock.calls[0][1] as string[];
+      const controlPath = args.find((arg) => arg.startsWith('ControlPath='));
+      expect(controlPath).toMatch(/^ControlPath=\/tmp\/kbn_cm_[a-f0-9]{12}$/);
+      expect(controlPath!.length).toBeLessThan(40);
+    });
+
+    it('writes the private key under mkdtemp', async () => {
+      await createConnector().exec({ script: 'true' });
+
+      const args = mockedExecFile.mock.calls[0][1] as string[];
+      const keyPath = args[args.indexOf('-i') + 1];
+      expect(keyPath).toMatch(/ssh_host_key_/);
+      expect(keyPath).toMatch(/\/id$/);
+    });
+  });
+
+  describe('parseHost', () => {
+    it('parses hostname, hostname:port, IPv6, and [IPv6]:port', () => {
+      expect(parseHost('example.com')).toEqual({ hostname: 'example.com', port: 22 });
+      expect(parseHost('example.com:2222')).toEqual({ hostname: 'example.com', port: 2222 });
+      expect(parseHost('::1')).toEqual({ hostname: '::1', port: 22 });
+      expect(parseHost('[2001:db8::1]')).toEqual({ hostname: '2001:db8::1', port: 22 });
+      expect(parseHost('[2001:db8::1]:2222')).toEqual({ hostname: '2001:db8::1', port: 2222 });
+    });
   });
 
   describe('downloadFile', () => {
@@ -170,6 +238,21 @@ describe('SshHostConnector', () => {
       expect(bin).toBe('scp');
       expect(args).toContain('alice@example.com:/var/log/app.log"; id; echo "');
       expect((args as string[]).some((arg) => arg.includes(':"/'))).toBe(false);
+    });
+
+    it('brackets IPv6 in the scp destination', async () => {
+      mockedExecFile.mockImplementation((bin, args, options, callback) => {
+        const cb = typeof options === 'function' ? options : callback;
+        const localPath = (args as string[])[(args as string[]).length - 1];
+        writeFileSync(localPath, 'hello');
+        cb?.(null, '', '');
+        return {} as ReturnType<typeof execFile>;
+      });
+
+      await createConnector({ host: '::1' }).downloadFile({ remotePath: '/tmp/a' });
+
+      const args = mockedExecFile.mock.calls[0][1] as string[];
+      expect(args).toContain('alice@[::1]:/tmp/a');
     });
 
     it('rejects files larger than maxBytes', async () => {
