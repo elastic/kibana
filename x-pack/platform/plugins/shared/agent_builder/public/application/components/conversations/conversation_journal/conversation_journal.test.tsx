@@ -29,8 +29,20 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 jest.mock(
   '../conversation_rounds/round_response/attachments/inline_attachment_with_actions',
   () => ({
-    InlineAttachmentWithActions: ({ attachment }: { attachment: { id: string } }) => (
-      <div data-test-subj={`inline-${attachment.id}`}>{attachment.id}</div>
+    InlineAttachmentWithActions: ({
+      attachment,
+    }: {
+      attachment: {
+        data?: { summary_markdown?: string; verdict?: string };
+        id: string;
+        type: string;
+      };
+    }) => (
+      <div data-test-subj={`inline-${attachment.id}`}>
+        {attachment.type}
+        {attachment.data?.verdict != null ? `:${attachment.data.verdict}` : ''}
+        {attachment.data?.summary_markdown != null ? `:${attachment.data.summary_markdown}` : ''}
+      </div>
     ),
   })
 );
@@ -130,9 +142,84 @@ describe('ConversationJournal', () => {
     expect(screen.getByTestId('inline-attack-discovery')).toBeInTheDocument();
   });
 
-  it('renders nothing when the conversation has no events', () => {
+  it('renders conversation attachments when there are no attachment_added events', () => {
     useConversationMock.mockReturnValue({
       conversation: makeConversation({ events: [] }),
+    } as ReturnType<typeof useConversation>);
+
+    render(<ConversationJournal />);
+
+    expect(screen.getByTestId('inline-attack-discovery')).toBeInTheDocument();
+  });
+
+  it('renders leftover analysis-verdict text attachments through the verdict renderer', () => {
+    useAgentBuilderServicesMock.mockReturnValue({
+      attachmentsService: {
+        getAttachmentUiDefinition: (type: string) =>
+          type === 'security.attack_discovery.verdict' ? {} : undefined,
+      },
+    } as ReturnType<typeof useAgentBuilderServices>);
+    useConversationMock.mockReturnValue({
+      conversation: makeConversation({
+        attachments: [
+          {
+            current_version: 1,
+            id: 'analysis-verdict',
+            type: 'text',
+            versions: [
+              {
+                content_hash: 'h-verdict',
+                created_at: '2026-09-18T00:03:00.000Z',
+                data: {
+                  content:
+                    '# Analysis verdict: inconclusive\n\nOneNote from {{ source.ip 77.75.230.128 }}.',
+                },
+                version: 1,
+              },
+            ],
+          },
+        ],
+        events: [],
+      }),
+    } as ReturnType<typeof useConversation>);
+
+    render(<ConversationJournal />);
+
+    expect(screen.getByTestId('inline-analysis-verdict')).toHaveTextContent(
+      'security.attack_discovery.verdict:inconclusive:OneNote from {{ source.ip 77.75.230.128 }}.'
+    );
+  });
+
+  it('leaves leftover text attachments unchanged when they are not analysis verdicts', () => {
+    useConversationMock.mockReturnValue({
+      conversation: makeConversation({
+        attachments: [
+          {
+            current_version: 1,
+            id: 'notes',
+            type: 'text',
+            versions: [
+              {
+                content_hash: 'h-notes',
+                created_at: '2026-09-18T00:03:00.000Z',
+                data: { content: 'Just a note' },
+                version: 1,
+              },
+            ],
+          },
+        ],
+        events: [],
+      }),
+    } as ReturnType<typeof useConversation>);
+
+    render(<ConversationJournal />);
+
+    expect(screen.getByTestId('inline-notes')).toHaveTextContent('text');
+  });
+
+  it('renders nothing when the conversation has no events and no attachments', () => {
+    useConversationMock.mockReturnValue({
+      conversation: makeConversation({ attachments: [], events: [] }),
     } as ReturnType<typeof useConversation>);
 
     const { container } = render(<ConversationJournal />);

@@ -10,6 +10,7 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { AttackDiscoveryMarkdownParser } from './attack_discovery_markdown_parser';
@@ -50,6 +51,10 @@ const AttackDiscoveryMarkdownFormatterComponent: React.FC<Props> = ({
     <MarkdownFormatterContext.Provider value={contextValue}>
       <EuiMarkdownFormat
         color="subdued"
+        css={css`
+          min-width: 0;
+          overflow-wrap: anywhere;
+        `}
         data-test-subj="attackDiscoveryMarkdownFormatter"
         parsingPluginList={attackDiscoveryParsingPluginList}
         processingPluginList={attackDiscoveryProcessingPluginList}

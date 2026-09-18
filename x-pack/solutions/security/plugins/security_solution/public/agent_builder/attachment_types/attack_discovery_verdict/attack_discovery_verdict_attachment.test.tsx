@@ -15,6 +15,7 @@ import type {
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import {
+  ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID,
   ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID,
   ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID,
   ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID,
@@ -185,6 +186,13 @@ describe('AttackDiscoveryVerdictInlineContent', () => {
       renderInline(defaultData);
     });
 
+    it('keeps inline markdown inside a padded wrapping container', () => {
+      expect(screen.getByTestId(ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID)).toHaveAttribute(
+        'data-markdown-wrap',
+        'true'
+      );
+    });
+
     it('renders the summary markdown through the Attack Discovery formatter', () => {
       expect(mockFormatter.mock.calls[0][0].markdown).toBe(defaultData.summary_markdown);
     });
@@ -214,8 +222,8 @@ describe('AttackDiscoveryVerdictInlineContent', () => {
     it.each([
       ['summary', 0],
       ['rationale', 1],
-    ])('keeps field pills enabled on the %s formatter', (_, index) => {
-      expect(mockFormatter.mock.calls[index][0].disableActions).toBe(false);
+    ])('disables field-pill actions on the %s formatter', (_, index) => {
+      expect(mockFormatter.mock.calls[index][0].disableActions).toBe(true);
     });
   });
 
