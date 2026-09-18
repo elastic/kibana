@@ -230,30 +230,41 @@ steps:
         {% endif %}
       check_line: "**Coverage check:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
 
-  # One route per verdict. A verdict the actions cannot honour (unknown rule,
-  # missing prebuilt version, a verdict outside the enum) routes to `report` so
-  # the analyst learns what happened instead of the run ending silently. The
-  # switch below matches on this string, so the compound tests live here.
-  - name: route_verdict
+  # Body shared by the three report proposals below: what the check found, where
+  # to look, and that approving applies nothing.
+  - name: compose_report
     type: data.set
     with:
-      route: >-
-        {% if steps.coverage_check.output.structured_output.verdict == 'covered_disabled' and steps.resolve_rule.output.id != null %}enable{% elsif steps.coverage_check.output.structured_output.verdict == 'prebuilt_available' and steps.coverage_check.output.structured_output.rule_id != '' and steps.coverage_check.output.structured_output.prebuilt_version > 0 %}install{% elsif steps.coverage_check.output.structured_output.verdict == 'covered_enabled' %}confirm{% elsif steps.coverage_check.output.structured_output.verdict == 'no_coverage' %}create{% else %}report{% endif %}
+      body: |-
+        **Verdict:** {{ steps.coverage_check.output.structured_output.verdict }}
+        {{ steps.compose_evidence.output.rule_line }}
+        {{ steps.compose_evidence.output.investigation_line }}
 
+        {{ steps.compose_evidence.output.gap_block }}
+
+        {% if steps.coverage_check.output.structured_output.rationale != null and steps.coverage_check.output.structured_output.rationale != '' %}**Rationale**
+        {{ steps.coverage_check.output.structured_output.rationale }}
+        {% endif %}
+        {{ steps.compose_evidence.output.check_line }}
+
+        **On approval**
+        Nothing is applied automatically; approving acknowledges the follow-up.
+
+  # One case per verdict. A missing or unknown verdict matches no case and goes to
+  # the default, never to rule creation. Inside a case the investigation exists
+  # (its create step has no on-failure), so no step re-checks it.
+  #
   # The proposal gate records the recommendation on the investigation, parks on
   # the analyst's decision for up to 72h, and on approval runs the action as the
   # approver. When nobody answers the gate settles the proposal as `expired` and
   # completes without a decision: the indicator stays pending for the next sweep
-  # and the investigation stays open because nobody decided. No on-failure: a
-  # gate that fails outright fails this run before `mark_processed`.
-  # Exactly one branch runs. Inside a branch the route already holds and the
-  # investigation exists (its create step has no on-failure), so the steps carry
-  # no guards of their own.
+  # and the investigation stays open because nobody decided. No proposal has an
+  # on-failure: a gate that fails outright fails this run before `mark_processed`.
   - name: handle_verdict
     type: switch
-    expression: "{{ steps.route_verdict.output.route }}"
+    expression: "{{ steps.coverage_check.output.structured_output.verdict }}"
     cases:
-      - match: create
+      - match: no_coverage
         steps:
           - name: run_rule_creation
             type: workflow.execute
@@ -267,10 +278,13 @@ steps:
                 evidence: "{{ steps.gap.output.evidence }}"
                 preview_invocation_count: "${{ inputs.preview_invocation_count }}"
 
-      - match: enable
+      - match: covered_disabled
         steps:
+          # The enable action addresses the saved object, so it needs the uuid the
+          # lookup above resolved.
           - name: propose_enable
             type: workflow.execute
+            if: "${{ steps.resolve_rule.output.id != null }}"
             with:
               workflow-id: system-create-investigation-proposal
               inputs:
@@ -299,10 +313,39 @@ steps:
                 # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.
                 autoApprove: false
 
-      - match: install
+          # Nothing to enable when the lookup found no saved object; the analyst has to
+          # find the rule by hand.
+          - name: report_unresolved_rule
+            type: workflow.execute
+            if: "${{ steps.resolve_rule.output.id == null }}"
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Coverage check needs a manual follow-up**
+
+                  The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.
+
+                  {{ steps.compose_report.output.body }}
+                category: investigate
+                impact: low
+                confidence: low
+
+      - match: prebuilt_available
         steps:
+          # The install action needs both handles. Step `if` cannot group with
+          # parentheses, so the test lives here and is read below as a flag.
+          - name: install_target
+            type: data.set
+            with:
+              ready: >-
+                ${{ steps.coverage_check.output.structured_output.rule_id != ''
+                  and steps.coverage_check.output.structured_output.prebuilt_version > 0 }}
+
           - name: propose_install
             type: workflow.execute
+            if: "${{ steps.install_target.output.ready == true }}"
             with:
               workflow-id: system-create-investigation-proposal
               inputs:
@@ -331,10 +374,28 @@ steps:
                 confidence: medium
                 autoApprove: false
 
-      # Same gate without an action: approval is the analyst's judgement that the
-      # enabled rule fully addresses the gap, so approval is the whole lifecycle.
-      - match: confirm
+          - name: report_missing_version
+            type: workflow.execute
+            if: "${{ steps.install_target.output.ready != true }}"
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Coverage check needs a manual follow-up**
+
+                  The check matched a prebuilt rule, but did not report a rule id and version to install.
+
+                  {{ steps.compose_report.output.body }}
+                category: investigate
+                impact: low
+                confidence: low
+
+      - match: covered_enabled
         steps:
+          # Same gate without an action: approval is the analyst's judgement that the
+          # enabled rule fully addresses the gap, so approval is the whole lifecycle.
+          # With no action to inherit a category from, the queue bucket is named here.
           - name: propose_confirm
             type: workflow.execute
             with:
@@ -364,9 +425,9 @@ steps:
                 confidence: medium
 
     default:
-      # Only a check that produced a verdict is reported; without one nobody is
-      # asked and `emit_result` carries `check_error`.
-      - name: propose_report
+      # Unknown verdicts only. A check that produced no verdict asked nobody; the
+      # investigation was not opened and `emit_result` carries `check_error`.
+      - name: report_unknown_verdict
         type: workflow.execute
         if: >-
           ${{ steps.coverage_check.output.structured_output.verdict != null
@@ -378,25 +439,12 @@ steps:
             comment: |-
               **Coverage check needs a manual follow-up**
 
-              {% if steps.coverage_check.output.structured_output.verdict == 'covered_disabled' %}The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.{% elsif steps.coverage_check.output.structured_output.verdict == 'prebuilt_available' %}The check matched a prebuilt rule, but did not report a rule id and version to install.{% else %}The coverage check returned an unexpected verdict and no automated action was taken.{% endif %}
+              The coverage check returned an unexpected verdict and no automated action was taken.
 
-              **Verdict:** {{ steps.coverage_check.output.structured_output.verdict }}
-              {{ steps.compose_evidence.output.rule_line }}
-              {{ steps.compose_evidence.output.investigation_line }}
-
-              {{ steps.compose_evidence.output.gap_block }}
-
-              {% if steps.coverage_check.output.structured_output.rationale != null and steps.coverage_check.output.structured_output.rationale != '' %}**Rationale**
-              {{ steps.coverage_check.output.structured_output.rationale }}
-              {% endif %}
-              {{ steps.compose_evidence.output.check_line }}
-
-              **On approval**
-              Nothing is applied automatically; approving acknowledges the follow-up.
+              {{ steps.compose_report.output.body }}
             category: investigate
             impact: low
             confidence: low
-
 
   # The gate reports its outcome on two axes: `decision` is what the analyst
   # concluded (`approved` / `dismissed`, absent until someone decides) and
@@ -414,12 +462,16 @@ steps:
         ${{ steps.propose_enable.output.status == 'succeeded'
           or steps.propose_install.output.status == 'succeeded'
           or steps.propose_confirm.output.decision == 'approved'
-          or steps.propose_report.output.decision == 'approved' }}
+          or steps.report_unresolved_rule.output.decision == 'approved'
+          or steps.report_missing_version.output.decision == 'approved'
+          or steps.report_unknown_verdict.output.decision == 'approved' }}
       dismissed: >-
         ${{ steps.propose_enable.output.decision == 'dismissed'
           or steps.propose_install.output.decision == 'dismissed'
           or steps.propose_confirm.output.decision == 'dismissed'
-          or steps.propose_report.output.decision == 'dismissed' }}
+          or steps.report_unresolved_rule.output.decision == 'dismissed'
+          or steps.report_missing_version.output.decision == 'dismissed'
+          or steps.report_unknown_verdict.output.decision == 'dismissed' }}
 
   # The action ran inside the gate, so its result is not visible here; re-read the
   # rule to learn what actually landed. The enable path reads by the uuid resolved
@@ -463,7 +515,7 @@ steps:
   - name: attach_installed_rule
     type: ai.attachment.add
     if: >-
-      ${{ steps.route_verdict.output.route == 'install'
+      ${{ steps.propose_install.output.status == 'succeeded'
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
@@ -489,7 +541,7 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        verdict: "{% if steps.route_verdict.output.route == 'enable' %}Analyst approved enabling the existing rule.{% elsif steps.route_verdict.output.route == 'install' %}Analyst approved installing the prebuilt rule.{% elsif steps.route_verdict.output.route == 'confirm' %}Analyst confirmed the enabled rule covers the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
+        verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
     on-failure:
       continue: true
 
