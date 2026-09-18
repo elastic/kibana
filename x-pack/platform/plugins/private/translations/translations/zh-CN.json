@@ -50513,7 +50513,6 @@
     "xpack.serverlessVectordb.nav.dataManagement": "数据管理",
     "xpack.serverlessVectordb.nav.developerTools": "开发者工具",
     "xpack.serverlessVectordb.nav.ingest.indices.title": "索引与数据流",
-    "xpack.serverlessVectordb.nav.ingest.pipelines.title": "采集",
     "xpack.serverlessVectordb.nav.mngt.access": "访问",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "告警和洞见",
     "xpack.serverlessVectordb.nav.mngt.content": "内容",
