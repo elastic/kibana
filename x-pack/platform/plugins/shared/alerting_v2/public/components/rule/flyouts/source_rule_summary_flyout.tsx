@@ -34,19 +34,18 @@ import {
   TagsOverflowBadgeRow,
   getTagsOverflowLimits,
 } from '@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row';
-import { EMPTY_VALUE } from '@kbn/alerting-v2-episodes-ui/constants';
+import { EMPTY_VALUE } from '../../../utils/rule_display';
 import { TakeActionButton } from '../../action_policy/details_flyout/take_action_button';
 import { RuleDetailsTable } from '../rule_details_table';
 
 const FLYOUT_TITLE_ID = 'sourceRuleSummaryFlyoutTitle';
 
-const extractGroupBy = (value: string | string[] | undefined): string | undefined => {
-  if (typeof value === 'string' && value.length > 0) return value;
-  if (Array.isArray(value)) {
-    const strings = value.filter((v): v is string => typeof v === 'string' && v.length > 0);
-    return strings.length > 0 ? strings.join(', ') : undefined;
-  }
-  return undefined;
+const getGroupByFields = (params: Record<string, unknown> | undefined): string | undefined => {
+  const value = params?.termField ?? params?.groupBy;
+  const fields = (Array.isArray(value) ? value : [value]).filter(
+    (v): v is string => typeof v === 'string' && v.length > 0
+  );
+  return fields.length > 0 ? fields.join(', ') : undefined;
 };
 
 const { overflowSize: TAGS_OVERFLOW_SIZE, maxVisible: TAGS_MAX_VISIBLE_ON_OVERFLOW } =
@@ -63,7 +62,7 @@ const buildConditionItems = (
   ruleCategory: string | undefined
 ): DetailItem[] => {
   const { schedule, rule_type_id: ruleTypeId, params } = rule;
-  const groupBy = extractGroupBy(params?.groupBy as string | string[] | undefined);
+  const groupBy = getGroupByFields(params);
 
   const items: DetailItem[] = [];
 

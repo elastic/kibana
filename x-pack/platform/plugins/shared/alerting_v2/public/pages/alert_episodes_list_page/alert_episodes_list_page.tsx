@@ -406,8 +406,13 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
-    [rulesLocators]
+    (ruleId: string, isSourceRule?: boolean) => {
+      if (isSourceRule) {
+        return additionalDataSource?.getRuleDetailsHref?.(ruleId) ?? '';
+      }
+      return rulesLocators.getRedirectUrl({ ruleId });
+    },
+    [rulesLocators, additionalDataSource]
   );
   const getEpisodeDetailsHref = useCallback(
     (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),

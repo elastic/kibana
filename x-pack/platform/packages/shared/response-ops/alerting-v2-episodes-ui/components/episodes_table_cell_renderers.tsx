@@ -130,7 +130,7 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
   isLoadingRules: boolean;
   rowHeight: number;
   /** Builds the href of the rule details page for a rule id. */
-  getRuleDetailsHref: (ruleId: string) => string;
+  getRuleDetailsHref: (ruleId: string, isSourceRule?: boolean) => string;
   /**
    * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
    * instead of navigating to it. Modified and non-left clicks still follow the link.
@@ -254,10 +254,10 @@ export const EpisodeRuleCell = ({
   const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
   const groupingFields = rule.grouping?.fields ?? [];
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
-  const detailsHref = getRuleDetailsHref(ruleId);
-  // The href stays on the link either way, so opening the rule page in a new tab keeps working.
   const episode = row.flattened as unknown as AlertEpisode;
   const sourceRuleInfo = isSourceEpisode(episode) ? { category: episode.rule_category } : undefined;
+  // The href stays on the link either way, so opening the rule page in a new tab keeps working.
+  const detailsHref = getRuleDetailsHref(ruleId, !!sourceRuleInfo);
   const nameLinkProps = onRuleNameClick
     ? getRouterLinkProps({
         href: detailsHref,
