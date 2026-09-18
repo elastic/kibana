@@ -8,8 +8,7 @@
  */
 
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
-import { separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
-import type { FallbackLane, ForeachGroup, GraphEdge, NodeRef } from '@kbn/workflows';
+import type { ForeachGroup, GraphEdge, NodeRef } from '@kbn/workflows';
 
 /**
  * Two pure post-dagre passes that enforce lane declaration order.
@@ -41,17 +40,10 @@ type MutableNodes = Map<string, { x: number; y: number; width: number; height: n
  *
  * "Exclusive" = reachable from this head AND NOT reachable from any sibling
  * head. Shared join nodes belong to no lane.
- *
- * For fallback forks only: pass the `failureHead` of the owner. Any node
- * shared between the fallback lane and the spine lane is assigned to the
- * **spine** lane (asymmetric exclusion). A `continue` rejoin means the lane
- * feeds the spine rather than branching beside it (root cause 3). Gate it on
- * `failureHead !== undefined` so if/switch/parallel are unaffected.
  */
 const buildLaneSets = (
   forkHeads: readonly string[],
-  graphEdges: readonly GraphEdge[],
-  failureHead?: string
+  graphEdges: readonly GraphEdge[]
 ): Map<string, Set<string>> | null => {
   if (forkHeads.length < 2) return null;
 
@@ -78,32 +70,6 @@ const buildLaneSets = (
   };
 
   const perHeadReachable = new Map(forkHeads.map((h) => [h, reachable(h)]));
-
-  if (failureHead !== undefined) {
-    // Asymmetric exclusion for fallback forks.
-    // Spine lane = reach(spine). Failure lane = reach(failure) \ reach(spine).
-    const spineReach = new Set<string>();
-    for (const [h, reach] of perHeadReachable) {
-      if (h !== failureHead) {
-        for (const n of reach) spineReach.add(n);
-      }
-    }
-    const result = new Map<string, Set<string>>();
-    for (const head of forkHeads) {
-      if (head === failureHead) {
-        const failureReach = perHeadReachable.get(head)!;
-        const exclusive = new Set<string>();
-        for (const n of failureReach) {
-          if (!spineReach.has(n)) exclusive.add(n);
-        }
-        result.set(head, exclusive);
-      } else {
-        // Spine: claim its full reachable set (including shared nodes).
-        result.set(head, new Set(perHeadReachable.get(head)!));
-      }
-    }
-    return result;
-  }
 
   // Symmetric exclusion for if/switch/parallel forks.
   const result = new Map<string, Set<string>>();
@@ -251,23 +217,26 @@ const enforceForkLaneOrderForGraph = (
   containerInnerIds: ReadonlyMap<string, ReadonlySet<string>>,
   nodeSep: number
 ): void => {
+  // Exclude failure and rejoin edges: lane nodes no longer participate in the
+  // spine dagre run, so a fallback owner has exactly one spine successor and
+  // must not be treated as a fork. Rejoin edges point lane→spine but are
+  // tagged on the spine graph; including them would inflate the head count of
+  // the join target.
+  const spineEdges = graphEdges.filter((e) => !e.isFailure && !e.isRejoin);
+
   // Group out-edges by source, preserving declaration order.
-  // Track which targets are failure heads for asymmetric exclusion.
   const outEdges = new Map<string, string[]>(); // source → targets in order
-  const failureTargets = new Set<string>();
-  for (const e of graphEdges) {
+  for (const e of spineEdges) {
     if (!mutableNodes.has(e.source)) continue;
     if (!outEdges.has(e.source)) outEdges.set(e.source, []);
     outEdges.get(e.source)!.push(e.target);
-    if (e.isFailure) failureTargets.add(e.target);
   }
 
   // Process each fork in declaration order.
   for (const [, heads] of outEdges) {
     if (heads.length < 2) continue;
 
-    const failureHead = heads.find((h) => failureTargets.has(h));
-    const laneSets = buildLaneSets(heads, graphEdges, failureHead);
+    const laneSets = buildLaneSets(heads, spineEdges);
     if (!laneSets) continue;
 
     // Filter to heads with measurable lanes (non-empty exclusive set).
@@ -442,159 +411,6 @@ export const enforceTriggerLaneOrder = (
   // have points: [] from dagre. No edge translation needed.
 
   return { nodes: resultNodes, edges: [...edges] };
-};
-
-// ── Lane order check helper ──────────────────────────────────────────────────
-
-/**
- * Returns true if any fork's heads are not in edge-list declaration order
- * from left to right on the cross axis.
- *
- * Used as the accept/reject predicate for speculative anchoring.
- */
-const hasLaneOrderViolation = (
-  nodeById: ReadonlyMap<string, DagPositionedNode>,
-  graphEdges: readonly GraphEdge[],
-  crossAxis: 'x' | 'y'
-): boolean => {
-  const outEdges = new Map<string, string[]>();
-  for (const e of graphEdges) {
-    if (!nodeById.has(e.source)) continue;
-    if (!outEdges.has(e.source)) outEdges.set(e.source, []);
-    outEdges.get(e.source)!.push(e.target);
-  }
-  for (const [, heads] of outEdges) {
-    if (heads.length < 2) continue;
-    let prevCross = -Infinity;
-    for (const h of heads) {
-      const n = nodeById.get(h);
-      if (!n) continue;
-      const cross = n[crossAxis];
-      if (cross < prevCross - 0.001) return true; // out of order
-      prevCross = cross;
-    }
-  }
-  return false;
-};
-
-// ── Speculative anchoring (Step 3) ──────────────────────────────────────────
-
-/**
- * For each fallback lane, try to translate the owner node onto the spine
- * column (centre-aligned with its non-failure successor). Propagates the
- * translation up any "straight run" of predecessor nodes that each have exactly
- * one total successor so they visually belong to the same column.
- *
- * Speculative per-owner rollback: a snapshot is taken before each anchor
- * attempt. After anchoring and re-running the overlap repair pass, the result
- * is accepted only if lane order is still valid — otherwise the snapshot is
- * restored. 10 rollbacks were observed across 587 owners in the 400-workflow
- * corpus; the others accepted cleanly.
- *
- * Must run AFTER the repair pass — if anchoring runs before repair, the repair
- * re-spaces ranks independently and destroys the alignment.
- */
-export const anchorFallbackOwnersSpeculative = (
-  nodes: DagPositionedNode[],
-  graphEdges: readonly GraphEdge[],
-  fallbackLanes: readonly FallbackLane[],
-  crossAxis: 'x' | 'y',
-  nodeSep: number,
-  groupInnerIds: ReadonlyMap<string, ReadonlySet<string>>
-): void => {
-  if (fallbackLanes.length === 0) return;
-
-  // Pre-build adjacency maps from the graph edges.
-  const nonFailureSuccessors = new Map<string, string[]>();
-  const allSuccessors = new Map<string, string[]>();
-  const allPredecessors = new Map<string, string[]>();
-  for (const e of graphEdges) {
-    if (!allSuccessors.has(e.source)) allSuccessors.set(e.source, []);
-    allSuccessors.get(e.source)!.push(e.target);
-    if (!allPredecessors.has(e.target)) allPredecessors.set(e.target, []);
-    allPredecessors.get(e.target)!.push(e.source);
-    if (!e.isFailure) {
-      if (!nonFailureSuccessors.has(e.source)) nonFailureSuccessors.set(e.source, []);
-      nonFailureSuccessors.get(e.source)!.push(e.target);
-    }
-  }
-
-  // Fast id → index map (updated after each mutation).
-  const nodeIdx = new Map(nodes.map((n, i) => [n.id, i]));
-  const nodeById = new Map(nodes.map((n) => [n.id, n]));
-
-  const refreshMaps = () => {
-    for (let i = 0; i < nodes.length; i++) {
-      nodeIdx.set(nodes[i].id, i);
-      nodeById.set(nodes[i].id, nodes[i]);
-    }
-  };
-
-  for (const { owner } of fallbackLanes) {
-    const ownerNode = nodeById.get(owner);
-    if (!ownerNode) continue;
-
-    // Owner must have exactly one non-failure successor (the spine continuation).
-    const spineSuccs = nonFailureSuccessors.get(owner) ?? [];
-    if (spineSuccs.length !== 1) continue;
-    const spineHead = spineSuccs[0];
-    const spineNode = nodeById.get(spineHead);
-    if (!spineNode) continue;
-
-    // Delta to align owner's cross-axis centre with the spine head's centre.
-    const ownerCentre =
-      crossAxis === 'x'
-        ? ownerNode.x + ownerNode.width / 2
-        : ownerNode.y + ownerNode.height / 2;
-    const spineCentre =
-      crossAxis === 'x'
-        ? spineNode.x + spineNode.width / 2
-        : spineNode.y + spineNode.height / 2;
-    const delta = spineCentre - ownerCentre;
-    if (Math.abs(delta) < 0.001) continue;
-
-    // Walk the straight run above the owner.
-    // A predecessor is in the run if it has exactly one total successor (this
-    // step is its only outgoing edge) and exactly one predecessor (so it is
-    // not a merge node that feeds into multiple branches).
-    const runIds: string[] = [owner];
-    let cur = owner;
-    for (;;) {
-      const preds = allPredecessors.get(cur) ?? [];
-      if (preds.length !== 1) break;
-      const pred = preds[0];
-      if ((allSuccessors.get(pred) ?? []).length !== 1) break;
-      runIds.push(pred);
-      cur = pred;
-    }
-
-    // Snapshot (replace the relevant array slice).
-    const snapshot = nodes.map((n) => n);
-
-    // Apply translation to the straight run.
-    const dx = crossAxis === 'x' ? delta : 0;
-    const dy = crossAxis === 'y' ? delta : 0;
-    for (const id of runIds) {
-      const i = nodeIdx.get(id);
-      if (i === undefined) continue;
-      const n = nodes[i];
-      nodes[i] = { ...n, x: n.x + dx, y: n.y + dy };
-    }
-    refreshMaps();
-
-    // Re-run the repair pass.
-    separatePositionedOverlapsInPlace(nodes, crossAxis, nodeSep, groupInnerIds);
-    refreshMaps();
-
-    // Accept only if lane order is still valid.
-    if (hasLaneOrderViolation(nodeById, graphEdges, crossAxis)) {
-      // Revert.
-      for (let i = 0; i < nodes.length; i++) {
-        nodes[i] = snapshot[i];
-      }
-      refreshMaps();
-    }
-  }
 };
 
 // ── Edge-point reconciliation (Step 4) ──────────────────────────────────────

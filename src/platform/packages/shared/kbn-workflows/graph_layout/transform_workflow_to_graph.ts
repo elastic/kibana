@@ -103,7 +103,7 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     bypassLaneNodes,
     nodeRefs,
     fallbackLanes,
-  } = transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids);
+  } = transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
   // Boundary 1: concatenate all failure edges after all structural edges so
   // the outer graph's edge list keeps [structural, failure] order (plan step 6).
   return {
@@ -116,10 +116,18 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
   };
 }
 
+interface LevelContext {
+  /** The `foreachGroup` node id whose dagre sub-graph we are inside, or `undefined` for the root graph. */
+  readonly graphId?: string;
+  /** Number of `on-failure.fallback` boundaries crossed within `graphId`. Resets to 0 at each graph boundary. */
+  readonly fallbackDepth: number;
+}
+
 function transformInternal(
   triggers: WorkflowYaml['triggers'],
   steps: Step[],
-  ids: IdAllocator
+  ids: IdAllocator,
+  ctx: LevelContext
 ): InternalTransformResult {
   const nodes: PreLayoutNode[] = [];
   const bypassLaneNodes: PreLayoutBypassLaneNode[] = [];
@@ -160,6 +168,9 @@ function transformInternal(
   // step's own id; for `if`/`parallel` it's the leaves of every branch so
   // sibling-after-the-if joins both branches together.
   let prevExitIds: string[] = [];
+  // Tracks which source ids are lane leaves added via `hasContinuePath` so the
+  // fan-in loop can tag those edges `isRejoin: true`.
+  const rejoinSourceIds = new Set<string>();
 
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
@@ -174,7 +185,12 @@ function transformInternal(
       // Connect from each exit point of the previous sibling.
       const sources = dedupeIds(prevExitIds);
       for (const sourceId of sources) {
-        edges.push({ id: `${sourceId}:${id}`, source: sourceId, target: id });
+        edges.push({
+          id: `${sourceId}:${id}`,
+          source: sourceId,
+          target: id,
+          ...(rejoinSourceIds.has(sourceId) ? { isRejoin: true } : {}),
+        });
       }
     }
 
@@ -215,7 +231,7 @@ function transformInternal(
       visitStepChildSlots(step, (slot, children) => {
         if (slot.kind === 'steps') childSteps = children;
       });
-      const inner = transformInternal([], childSteps, ids);
+      const inner = transformInternal([], childSteps, ids, { graphId: id, fallbackDepth: 0 });
       Object.assign(nodeRefs, inner.nodeRefs);
       // inner.bypassLaneNodes stay on the group only — do NOT hoist them to the
       // top-level list. The layout pipeline feeds group bypass nodes separately
@@ -260,7 +276,7 @@ function transformInternal(
       const branchExits: string[] = [];
 
       if (hasThen) {
-        const inner = transformInternal([], thenSteps, ids);
+        const inner = transformInternal([], thenSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -298,7 +314,7 @@ function transformInternal(
       }
 
       if (hasElse) {
-        const inner = transformInternal([], elseSteps, ids);
+        const inner = transformInternal([], elseSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -348,7 +364,7 @@ function transformInternal(
           branchExits.push(id);
           return;
         }
-        const inner = transformInternal([], branch.steps, ids);
+        const inner = transformInternal([], branch.steps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -385,7 +401,7 @@ function transformInternal(
           branchExits.push(id);
           return;
         }
-        const inner = transformInternal([], caseItem.steps as Step[], ids);
+        const inner = transformInternal([], caseItem.steps as Step[], ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -408,7 +424,7 @@ function transformInternal(
 
       // Rule 2 — `default` branch, labeled 'default'.
       if (hasDefault) {
-        const inner = transformInternal([], defaultSteps as Step[], ids);
+        const inner = transformInternal([], defaultSteps as Step[], ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -447,7 +463,7 @@ function transformInternal(
     } else if (step.type === 'merge') {
       const mergeStep = step as MergeStep;
       const childSteps = (mergeStep.steps as Step[]) ?? [];
-      const inner = transformInternal([], childSteps, ids);
+      const inner = transformInternal([], childSteps, ids, ctx);
       Object.assign(nodeRefs, inner.nodeRefs);
       nodes.push(...inner.nodes);
       bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -473,18 +489,31 @@ function transformInternal(
     });
 
     if (fallbackSteps.length > 0) {
-      const inner = transformInternal([], fallbackSteps, ids);
+      const inner = transformInternal([], fallbackSteps, ids, {
+        graphId: ctx.graphId,
+        fallbackDepth: ctx.fallbackDepth + 1,
+      });
       Object.assign(nodeRefs, inner.nodeRefs);
 
-      // Stamp fallbackOf on every node in the lane, including nodes inside
-      // nested foreach groups, so the minimap and renderers can identify them.
+      // Stamp fallbackOf on every non-trigger node in the lane (step and
+      // foreachGroup containers). Stamping foreachGroup containers lets the
+      // layout engine place the container in the lane's gutter; its inner nodes
+      // remain in the container's own dagre graph and are not stamped here.
       // Only stamp where unset so the innermost owner wins in nested fallbacks.
+      // Collect the ids of stamped nodes — these are exactly the lane's node set
+      // (exclusive by construction: nested-lane nodes are already stamped).
+      const laneNodes: string[] = [];
       for (const n of inner.nodes) {
-        if (n.type === 'step') {
+        if (n.type !== 'trigger') {
           const d = n.data as { fallbackOf?: string };
-          if (d.fallbackOf === undefined) d.fallbackOf = id;
+          if (d.fallbackOf === undefined) {
+            d.fallbackOf = id;
+            laneNodes.push(n.id);
+          }
         }
       }
+      // Stamp foreachGroup inner nodes for minimap tinting — but do NOT add
+      // them to laneNodes (they belong to the container's own dagre graph).
       for (const g of inner.foreachGroups) {
         for (const n of g.innerNodes) {
           if (n.type === 'step') {
@@ -504,7 +533,14 @@ function transformInternal(
       const headId = inner.nodes[0]?.id;
       if (headId) {
         const laneLeaves = inner.leafIds;
-        fallbackLanes.push({ owner: id, head: headId, leaves: laneLeaves });
+        fallbackLanes.push({
+          owner: id,
+          head: headId,
+          leaves: laneLeaves,
+          nodes: laneNodes,
+          depth: ctx.fallbackDepth,
+          graphId: ctx.graphId,
+        });
 
         // Shape 2: continue → rejoin. Add fallback leaves to exitIds so the
         // existing fan-in loop emits rejoin edges automatically on the NEXT
@@ -516,6 +552,11 @@ function transformInternal(
           typeof onFailure?.continue === 'string' || onFailure?.continue === true;
         if (hasContinuePath) {
           exitIds = dedupeIds([...exitIds, ...laneLeaves]);
+          // Record these as rejoin sources so the fan-in loop on the NEXT
+          // sibling step tags those edges `isRejoin: true`.
+          for (const leafId of laneLeaves) {
+            rejoinSourceIds.add(leafId);
+          }
         }
 
         // Defer the failure edge — append after all spine/branch edges.

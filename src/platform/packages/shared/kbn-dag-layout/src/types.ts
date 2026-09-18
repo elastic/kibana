@@ -38,6 +38,13 @@ export interface DagPositionedNode {
   readonly y: number;
   readonly width: number;
   readonly height: number;
+  /**
+   * True when the node was placed in a reserved side lane. Cross-axis
+   * position-mutating passes (e.g. `separatePositionedOverlapsInPlace`)
+   * must treat these nodes as immovable so the lane's guaranteed clearance
+   * from the spine is preserved. Absent for spine nodes.
+   */
+  readonly crossPinned?: boolean;
 }
 
 export interface DagPositionedEdge {
@@ -49,6 +56,37 @@ export interface DagPositionedEdge {
 }
 
 export type DagLayoutDirection = 'TB' | 'LR';
+
+/**
+ * A node set placed as a reserved side lane in the +cross margin instead of
+ * by dagre. The owner's main-axis band is kept clear on the spine, the lane
+ * head is levelled with the owner, and the lane sits nodeSep past the spine's
+ * cross extent within that band. Lane sets must be pairwise disjoint.
+ */
+export interface DagReservedLane {
+  /** Node ids forming this lane. Must all be present in the input node array. */
+  readonly nodeIds: readonly string[];
+  /**
+   * Nesting depth. Orders placement and guarantees a lane is further out than
+   * the lane containing its owner. NOT a global column index — two lanes at
+   * the same depth can have different inner edges (local hugging, D5).
+   */
+  readonly depth: number;
+  /** The spine node this lane's head is levelled with on the main axis. */
+  readonly ownerId: string;
+}
+
+/**
+ * Placed geometry of one reserved lane, returned by `dagLayout` so callers
+ * can re-hug a lane after a post-dagre packing pass that widens the spine.
+ */
+export interface DagReservedLanePlacement {
+  readonly ownerId: string;
+  readonly crossStart: number;
+  readonly crossEnd: number;
+  readonly mainStart: number;
+  readonly mainEnd: number;
+}
 
 export interface DagLayoutOptions {
   /** Default 'TB'. */
@@ -74,13 +112,14 @@ export interface DagLayoutOptions {
   /** Padding around inner content of a compound node. Defaults to all zeros. */
   compoundPadding?: Partial<{ top: number; right: number; bottom: number; left: number }>;
   /**
-   * Edge ids that participate in dagre ranking and routing but are excluded from
-   * cross-axis alignment. The barycenter pass (`alignDagreCrossAxisInPlace`)
-   * treats nodes connected only by ignored edges as having fewer alignment
-   * successors, preventing an asymmetric fork from jogging the main spine.
+   * Node sets to place in the +cross margin as reserved side lanes, instead of
+   * through dagre. Lane nodes are excluded from the spine dagre run; their
+   * heads are levelled with their owners; the spine below each owner is pushed
+   * to clear the lane's full main extent.
    *
-   * Ignored edges are still visible to `separateRankOverlapsInPlace`, so the
-   * overlap-prevention guarantee is preserved. Defaults to empty (no effect).
+   * Each lane's node ids must be present in the input `nodes` array of the
+   * graph that hosts the lane (`ownerId`'s graph). Lane sets must be pairwise
+   * disjoint. Defaults to empty (no reserved lanes).
    */
-  alignmentIgnoredEdges?: readonly string[];
+  reservedLanes?: readonly DagReservedLane[];
 }

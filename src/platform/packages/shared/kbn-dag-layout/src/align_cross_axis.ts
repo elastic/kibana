@@ -339,7 +339,12 @@ interface PavaBlock {
   sum: number;
   count: number;
   value: number;
+  /** If set, this block is pinned: its value is fixed and free neighbours clamp against it. */
+  pinnedValue?: number;
 }
+
+/** Private sentinel thrown when two pinned blocks merge — triggers a pin-relaxation retry. */
+const PIN_CONFLICT = Symbol('PIN_CONFLICT');
 
 /**
  * Resolve overlaps among a set of same-rank node centers on the cross axis,
@@ -354,15 +359,27 @@ interface PavaBlock {
  * the arrangement expands symmetrically around its own centre of mass rather than
  * drifting to one side.
  *
+ * When `pinned` is provided, pinned indices are treated as immovable (infinite
+ * weight): free nodes between two pins pack tight against their nearest pin;
+ * free runs at either end pack tight against the single bounding pin. This
+ * minimises `Σ_{i free} (x_i − c_i)²` subject to both gap constraints and
+ * pin constraints.
+ *
+ * The "spreads symmetrically" property applies only to pin-free runs; near a pin
+ * the free nodes are asymmetrically offset toward the pin, which is the intended
+ * behaviour.
+ *
  * @param centers Current cross-axis centers, sorted ascending.
  * @param widths Cross-axis extent of each node (index-aligned with `centers`).
  * @param nodeSep Desired gap between node borders once an overlap is resolved.
+ * @param pinned Optional array of booleans (index-aligned). `true` = immovable.
  * @returns New centers, or the original `centers` reference when nothing overlaps.
  */
 const resolveCrossAxisOverlaps = (
   centers: number[],
   widths: number[],
-  nodeSep: number
+  nodeSep: number,
+  pinned?: readonly boolean[]
 ): number[] => {
   const n = centers.length;
   if (n < 2) return centers;
@@ -386,32 +403,62 @@ const resolveCrossAxisOverlaps = (
   for (let i = 1; i < n; i++) prefix[i] = prefix[i - 1] + targetGap(i - 1);
   const shifted = centers.map((c, i) => c - prefix[i]);
 
-  const blocks: PavaBlock[] = [];
-  for (const value of shifted) {
-    let current: PavaBlock = { sum: value, count: 1, value };
-    while (blocks.length > 0 && blocks[blocks.length - 1].value > current.value) {
-      const prev = blocks.pop() as PavaBlock;
-      const sum = prev.sum + current.sum;
-      const count = prev.count + current.count;
-      current = { sum, count, value: sum / count };
-    }
-    blocks.push(current);
-  }
+  // Build the active pin set. If a pair of pins conflict (infeasible gap),
+  // demote the later one and retry — at most n retries, each O(n).
+  const activePins = new Set(pinned ? pinned.map((p, i) => (p ? i : -1)).filter((i) => i >= 0) : []);
 
-  const resolved = new Array<number>(n);
-  let idx = 0;
-  for (const block of blocks) {
-    for (let k = 0; k < block.count; k++) {
-      resolved[idx] = block.value + prefix[idx];
-      idx++;
+  const runPava = (): number[] | typeof PIN_CONFLICT => {
+    const blocks: PavaBlock[] = [];
+    for (let i = 0; i < n; i++) {
+      const value = shifted[i];
+      const isPinned = activePins.has(i);
+      let current: PavaBlock = isPinned
+        ? { sum: value, count: 1, value, pinnedValue: value }
+        : { sum: value, count: 1, value };
+
+      while (blocks.length > 0 && blocks[blocks.length - 1].value > current.value) {
+        const prev = blocks.pop()!;
+        if (prev.pinnedValue !== undefined && current.pinnedValue !== undefined) {
+          // Two pinned blocks must merge but cannot — infeasible.
+          return PIN_CONFLICT;
+        }
+        const pinnedValue = prev.pinnedValue ?? current.pinnedValue;
+        const sum = prev.sum + current.sum;
+        const count = prev.count + current.count;
+        current = { sum, count, value: pinnedValue ?? sum / count, pinnedValue };
+      }
+      blocks.push(current);
     }
+
+    const resolved = new Array<number>(n);
+    let idx = 0;
+    for (const block of blocks) {
+      for (let k = 0; k < block.count; k++) {
+        resolved[idx] = block.value + prefix[idx];
+        idx++;
+      }
+    }
+    return resolved;
+  };
+
+  // Retry with demoted pins if two pinned blocks conflict.
+  let result = runPava();
+  const demotedPins: number[] = [];
+  while (result === PIN_CONFLICT && activePins.size > 0) {
+    // Demote the most recently added pin (highest index in the conflict).
+    const lastPin = Math.max(...activePins);
+    activePins.delete(lastPin);
+    demotedPins.push(lastPin);
+    result = runPava();
   }
-  return resolved;
+  // `result` is always a valid number[] once all conflicting pins are demoted.
+  return result as number[];
 };
 
 /**
- * Restore dagre's non-overlap guarantee after the barycenter pass. The barycenter
- * recentring only edits the cross axis and can pull a wide subtree's head across
+ * Restore dagre's non-overlap guarantee after the barycenter pass and after any
+ * post-dagre cross-axis passes. The barycenter recentring only edits the cross
+ * axis and can pull a wide subtree's head across
  * its rank until it overlaps a sibling; it never changes the main-axis (rank)
  * coordinate, so grouping by main-axis centre and separating within each rank on
  * the cross axis is sufficient. No-op when nothing overlaps.
@@ -551,14 +598,19 @@ const SEPARATE_OVERLAPS_MAX_ITERS = 10;
  *   when the group moves. The inner sweep then resolves overlaps within each
  *   group body independently. Pass an empty map when there are no groups.
  */
+/**
+ * @returns `{ relaxedPinIds }` — node ids whose `crossPinned` flag was demoted
+ *   during infeasibility relaxation. Empty when all pins held. Callers that
+ *   assert `relaxedPinIds.length === 0` catch infeasibility early rather than
+ *   discovering it as a visual anomaly.
+ */
 export const separatePositionedOverlapsInPlace = (
   nodes: DagPositionedNode[],
   crossAxis: CrossAxis,
   nodeSep: number,
   groupInnerIds: ReadonlyMap<string, ReadonlySet<string>> = new Map()
-): void => {
-  if (nodes.length < 2) return;
-
+): { relaxedPinIds: string[] } => {
+  if (nodes.length < 2) return { relaxedPinIds: [] };
   // Build index: node id → array index.
   const idxById = new Map(nodes.map((n, i) => [n.id, i]));
 
@@ -599,8 +651,16 @@ export const separatePositionedOverlapsInPlace = (
     if (present.length > 0) groupInnerLists.set(gid, present);
   }
 
-  /** Run one PAVA sweep over the given node id list. Returns true if any node moved. */
-  const runSweep = (nodeIds: readonly string[]): boolean => {
+  // Track pins that were demoted due to infeasibility (relaxedPinIds collected here).
+  const relaxedPinNodeIds: string[] = [];
+
+  /**
+   * Run one PAVA sweep over the given node id list. Outer sweep passes
+   * `crossPinned` from node data; inner group sweeps pass no pins (inner
+   * coordinates are a private dagre region that should stay repairable).
+   * Returns true if any node moved.
+   */
+  const runSweep = (nodeIds: readonly string[], useOuterPins: boolean): boolean => {
     if (nodeIds.length < 2) return false;
     let anyMoved = false;
 
@@ -621,8 +681,29 @@ export const separatePositionedOverlapsInPlace = (
       // PAVA expects box-center positions.
       const centers = active.map((id) => crossOf(id) + crossSpanOf(id) / 2);
       const widths = active.map(crossSpanOf);
-      const resolved = resolveCrossAxisOverlaps(centers, widths, nodeSep);
+
+      // Build pin mask from crossPinned (outer sweep only).
+      let pinned: boolean[] | undefined;
+      if (useOuterPins) {
+        const maskCandidates = active.map((id) => {
+          const idx = idxById.get(id);
+          return idx !== undefined && (nodes[idx].crossPinned === true);
+        });
+        if (maskCandidates.some(Boolean)) pinned = maskCandidates;
+      }
+
+      const resolved = resolveCrossAxisOverlaps(centers, widths, nodeSep, pinned);
       if (resolved === centers) continue; // no change — all centers already valid.
+
+      // Collect any relaxed pins (when resolveCrossAxisOverlaps demoted pins,
+      // a pinned node's center in `resolved` differs from its center in `centers`).
+      if (pinned) {
+        for (let i = 0; i < active.length; i++) {
+          if (pinned[i] && Math.abs(resolved[i] - centers[i]) > 0.001) {
+            relaxedPinNodeIds.push(active[i]);
+          }
+        }
+      }
 
       for (let i = 0; i < active.length; i++) {
         const newCross = resolved[i] - widths[i] / 2; // center → left edge
@@ -646,9 +727,9 @@ export const separatePositionedOverlapsInPlace = (
 
   // Iterate outer + inner sweeps to stability.
   for (let iter = 0; iter < SEPARATE_OVERLAPS_MAX_ITERS; iter++) {
-    let anyMoved = runSweep(outerNodeIds);
+    let anyMoved = runSweep(outerNodeIds, true);
     for (const innerIds of groupInnerLists.values()) {
-      if (runSweep(innerIds)) anyMoved = true;
+      if (runSweep(innerIds, false)) anyMoved = true;
     }
     if (!anyMoved) break;
   }
@@ -666,4 +747,6 @@ export const separatePositionedOverlapsInPlace = (
       nodes[i] = { ...n, y: newCross };
     }
   }
+
+  return { relaxedPinIds: relaxedPinNodeIds };
 };

@@ -15,6 +15,8 @@ export type {
   DagPositionedEdge,
   DagLayoutDirection,
   DagLayoutOptions,
+  DagReservedLane,
+  DagReservedLanePlacement,
 } from './src/types';
 export { dagLayout } from './src/dag_layout';
 export { resolveShiftedEdgePoints } from './src/apply_dagre';

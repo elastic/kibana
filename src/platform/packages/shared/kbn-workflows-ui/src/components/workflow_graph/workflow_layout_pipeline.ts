@@ -11,7 +11,6 @@ import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 import {
-  anchorFallbackOwnersSpeculative,
   enforceForkLaneOrder,
   enforceTriggerLaneOrder,
   reconcileEdgePoints,
@@ -75,17 +74,41 @@ export const computeWorkflowLayout = (
     innerEdges: g.innerEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
   }));
 
+  // Assert the seam: every lane node id exists in its host graph's node set, and
+  // no node id appears in two lanes. Both catch the graph-boundary asymmetry early.
+  if (process.env.NODE_ENV !== 'production') {
+    const rootNodeIdSet = new Set(dagNodes.map((n) => n.id));
+    const groupNodeSets = new Map(dagGroups.map((g) => [g.id, new Set(g.innerNodes.map((n) => n.id))]));
+    const allClaimedIds = new Set<string>();
+    for (const lane of transformed.fallbackLanes) {
+      for (const nodeId of lane.nodes) {
+        if (allClaimedIds.has(nodeId)) {
+          throw new Error(`reservedLane invariant: node "${nodeId}" appears in two lanes`);
+        }
+        allClaimedIds.add(nodeId);
+        const hostSet = lane.graphId ? groupNodeSets.get(lane.graphId) : rootNodeIdSet;
+        if (!hostSet?.has(nodeId)) {
+          throw new Error(
+            `reservedLane invariant: node "${nodeId}" not in host graph "${lane.graphId ?? 'root'}"`
+          );
+        }
+      }
+    }
+  }
+
   const laid = dagLayout(dagNodes, dagEdges, dagGroups, {
     direction,
     nodeSep: WORKFLOW_NODE_SEP,
     rankSep: WORKFLOW_RANK_SEP,
     compoundPadding: WORKFLOW_COMPOUND_PADDING,
-    // Exclude failure edges from cross-axis alignment so the owner node stays
-    // in the spine column rather than drifting to the midpoint of spine + lane.
-    // The edges still participate in dagre ranking and routing, and
-    // separateRankOverlapsInPlace still runs on the full graph — the
-    // non-overlap guarantee is preserved (ADR-0009).
-    alignmentIgnoredEdges: edges.filter((e) => e.isFailure).map((e) => e.id),
+    // Lane nodes are excluded from dagre entirely; their placement is in the
+    // +cross margin via reservedLanes. The owner has exactly one spine successor,
+    // so handleSingleChild fires → spine is structurally straight (ADR-0012).
+    reservedLanes: transformed.fallbackLanes.map((l) => ({
+      nodeIds: l.nodes,
+      depth: l.depth,
+      ownerId: l.owner,
+    })),
   });
 
   // Snapshot cross-axis centres immediately after dagLayout, before any
@@ -121,8 +144,10 @@ export const computeWorkflowLayout = (
   // Post-dagre pass 3: order-preserving overlap repair.
   // Packing is fork-local and can leave nested-fork nodes overlapping nodes
   // outside the fork's own lanes. PAVA is order-preserving (never swaps two
-  // nodes), so it cannot undo the lane ordering from passes 1–2. On raw
-  // dagLayout output this is a verified no-op (0/400 shapes in the corpus).
+  // nodes), so it cannot undo the lane ordering from passes 1–2. Lane nodes
+  // are tagged `crossPinned: true` by dagLayout — PAVA treats them as immovable
+  // anchors so packing cannot narrow the reserved margin. On raw dagLayout
+  // output this is expected to be a no-op (verify with the seeded corpus).
   const groupInnerIds = new Map<string, Set<string>>(
     transformed.foreachGroups.map((g) => [
       g.id,
@@ -137,23 +162,12 @@ export const computeWorkflowLayout = (
   const repairedNodes = [...triggeredNodes];
   separatePositionedOverlapsInPlace(repairedNodes, crossAxis, WORKFLOW_NODE_SEP, groupInnerIds);
 
-  // Post-dagre pass 4: speculative anchoring of each fallback owner onto its
-  // spine column. Runs AFTER the repair pass — running before repair causes the
-  // repair to re-space ranks independently, destroying alignment (measured:
-  // 2.0% vs 74.1% owner straightness). Per-owner rollback protects lane order.
-  anchorFallbackOwnersSpeculative(
-    repairedNodes,
-    transformed.edges,
-    transformed.fallbackLanes,
-    crossAxis,
-    WORKFLOW_NODE_SEP,
-    groupInnerIds
-  );
-
-  // Post-dagre pass 5: reconcile edge waypoints.
+  // Post-dagre pass 4: reconcile edge waypoints.
   // Translate-or-clear based on how much each endpoint moved since dagLayout.
-  // Single pass, covers all prior position mutations. Preserves reference
-  // equality for React Flow's memo when points are unchanged.
+  // NOTE: dagLayout now moves spine nodes on the main axis (spine push for
+  // reserved lanes — see ADR-0012). That push happens INSIDE dagLayout, before
+  // the snapshot, so the snapshot already captures post-push positions and this
+  // pass compares cross-axis deltas only, as before.
   const finalEdges = reconcileEdgePoints(
     triggeredEdges,
     repairedNodes,
