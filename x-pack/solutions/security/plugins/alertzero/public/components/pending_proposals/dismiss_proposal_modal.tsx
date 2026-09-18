@@ -33,7 +33,7 @@ export const DismissProposalModal: React.FC<DismissProposalModalProps> = ({
   return (
     <BaseActionModal
       type="dismiss"
-      title={i18n.DISMISS_MODAL_TITLE}
+      title={i18n.CLOSE_INVESTIGATION_MODAL_TITLE}
       recordId={proposalId}
       rationalePlaceholder={i18n.DISMISS_RATIONALE_PLACEHOLDER}
       onClose={onClose}

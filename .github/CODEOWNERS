@@ -2668,6 +2668,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/mongodb/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/mysql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/okta/** @elastic/workflows-eng
@@ -3836,8 +3837,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/reviewer-scout.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
 /.libra/specialists/scout.md @elastic/appex-qa
-/.github/workflows/label-scout-prs.yml @elastic/appex-qa
-/.github/labeler-scout.yml @elastic/appex-qa
 
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
