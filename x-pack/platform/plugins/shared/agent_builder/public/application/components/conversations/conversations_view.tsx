@@ -21,6 +21,8 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     display: flex;
     flex-direction: column;
     height: var(--kbn-application--content-height);
+    min-height: 0;
+    overflow: hidden;
     ${conversationBackgroundStyles(euiTheme)}
   `;
 
@@ -35,6 +37,7 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const contentStyles = css`
     width: 100%;
     flex: 1;
+    min-height: 0;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
     justify-content: center;

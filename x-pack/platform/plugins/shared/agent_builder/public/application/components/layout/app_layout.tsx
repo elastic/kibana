@@ -140,10 +140,13 @@ const AgentWorkspaceAppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     }
   `;
 
+  // Keep overflow hidden so overscroll in the conversation does not drag the
+  // fixed chat header; only the conversation's own scroll region should move.
   const contentWrapperStyles = css`
     position: relative;
     height: 100%;
-    overflow: auto;
+    min-height: 0;
+    overflow: hidden;
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 

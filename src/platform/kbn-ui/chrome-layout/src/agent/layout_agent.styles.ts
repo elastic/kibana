@@ -9,7 +9,6 @@
 
 import { css } from '@emotion/react';
 import {
-  euiOverflowScroll,
   euiShadow,
   highContrastModeStyles,
   type UseEuiTheme,
@@ -67,10 +66,9 @@ const scrollContainer: EmotionFn = (useEuiTheme) => css`
   flex-grow: 1;
   min-width: 0;
   min-height: 0;
-
-  @media screen {
-    ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
-  }
+  // Agent Builder owns its own scroll region. Keep this shell from scrolling so
+  // overscroll does not drag the conversation header out of view.
+  overflow: hidden;
 
   &:focus-visible {
     outline: ${useEuiTheme.euiTheme.focus.width} solid ${useEuiTheme.euiTheme.focus.color};
