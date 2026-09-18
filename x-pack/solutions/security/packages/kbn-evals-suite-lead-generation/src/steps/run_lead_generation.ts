@@ -7,28 +7,33 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { LeadGenerationClient } from '../clients/lead_generation_client';
-import type { LeadGenerationTaskInput, LeadGenerationTaskOutput } from '../types';
+import type { LeadGenerationTaskOutput } from '../types';
 
 export const runLeadGeneration = async ({
   leadGenerationClient,
   connectorId,
-  input,
   log,
 }: {
   leadGenerationClient: LeadGenerationClient;
   connectorId: string;
-  input: LeadGenerationTaskInput;
   log: ToolingLog;
 }): Promise<LeadGenerationTaskOutput> => {
   try {
     const { leads, executionUuid } = await leadGenerationClient.generateAndWait({
       connectorId,
-      maxLeads: input.maxLeads,
     });
 
     log.info(
       `[runLeadGeneration] Pipeline complete — ${leads.length} lead(s) generated (executionUuid=${executionUuid})`
     );
+
+    if (leads.length === 0) {
+      log.warning(
+        '[runLeadGeneration] No leads were generated — this likely means the entity store had no ' +
+          'qualifying entities. Evaluators score this "ok_no_leads" (still passing), but it validates ' +
+          'that the pipeline ran, not that lead quality is good.'
+      );
+    }
 
     return {
       leads,
