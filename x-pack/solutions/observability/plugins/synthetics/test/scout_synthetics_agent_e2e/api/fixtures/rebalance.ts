@@ -70,8 +70,9 @@ export const createHttpMonitors = async (
       name: `${namePrefix}-${i}-${agentStack.runId}`,
       schedule: HTTP_SCHEDULE,
     });
-    expect(res.body).toMatchObject({ id: expect.any(String) });
-    ids.push((res.body as { id: string }).id);
+    const id = (res.body as { id?: unknown }).id;
+    expect(typeof id).toBe('string');
+    ids.push(id as string);
   }
   return ids;
 };
