@@ -32,6 +32,12 @@ export interface InvestigationActionModalsProps {
    */
   onConfirmApproval?: (investigation: Investigation) => void;
   /**
+   * Commits the assignee update. Receives the chosen assignee and rationale, performs
+   * the API call, and closes when done. Supplied by the solution layer which owns the
+   * mutation hook; when absent the modal closes immediately without writing.
+   */
+  onAssignSubmit?: (assignee: string, rationale: string) => void;
+  /**
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
    * what the modal renders and what local state it owns, not just what confirming does.
@@ -53,6 +59,7 @@ export const InvestigationActionModals = ({
   onCloseAction,
   onCloseApproval,
   onConfirmApproval,
+  onAssignSubmit,
   renderDismissModal,
 }: InvestigationActionModalsProps) => (
   <>
@@ -71,8 +78,7 @@ export const InvestigationActionModals = ({
         recordId={recordId}
         initialAssignee={initialAssignee}
         onClose={onCloseAction}
-        // TODO: use assign action API call hook
-        onAssign={onCloseAction}
+        onAssign={onAssignSubmit ?? onCloseAction}
       />
     ) : null}
 
