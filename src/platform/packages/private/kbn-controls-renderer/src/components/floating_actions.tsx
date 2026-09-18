@@ -165,7 +165,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       className={classNames(hasLockedHoverActions ? 'lockHoverActions' : null)}
     >
       {children}
-      {floatingActions.length > 0 && (
+      {floatingActions.length > 0 && viewMode !== 'preview' && (
         <div
           data-test-subj={`hover-actions-${uuid}`}
           key={`presentationUtil__floatingActions__${uuid}`}
