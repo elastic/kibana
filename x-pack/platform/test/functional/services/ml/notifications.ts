@@ -17,6 +17,7 @@ export function NotificationsProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   return {
     async assertNotificationIndicatorExist(expectExist = true) {
@@ -39,9 +40,19 @@ export function NotificationsProvider(
         '.euiFilterGroup > *:nth-child(2) .euiFilterButton'
       );
       await filterButton.click();
-      const optionElements = await find.allByCssSelector('li[role="option"].euiSelectableListItem');
-      const optionTexts = await Promise.all(
-        optionElements.map(async (element) => await element.getVisibleText())
+      let optionTexts: string[] = [];
+      await retry.waitForWithTimeout(
+        'notification type filter options to render',
+        5000,
+        async () => {
+          const optionElements = await find.allByCssSelector(
+            'li[role="option"].euiSelectableListItem'
+          );
+          optionTexts = await Promise.all(
+            optionElements.map(async (element) => await element.getVisibleText())
+          );
+          return optionTexts.length > 0 && optionTexts.every((text) => text.trim().length > 0);
+        }
       );
 
       return optionTexts;

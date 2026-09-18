@@ -5159,8 +5159,8 @@ importers:
         specifier: 1.1.13
         version: 1.1.13
       chromedriver:
-        specifier: 152.0.2
-        version: 152.0.2(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+        specifier: 152.0.3
+        version: 152.0.3(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       clean-webpack-plugin:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.96.1)
@@ -14148,8 +14148,8 @@ packages:
     resolution: {integrity: sha512-9e/zx1jw7B4CO+c/RXoCsfg/x1AfUBioy4owYH0bJprEYAx5hRFLRhWBqHAG57D0ZM4H7vxbP7bPe0VwhQRYDQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@152.0.2:
-    resolution: {integrity: sha512-w/trjzSjQC8vHHwl4e+WXBGPRN3XnrsY14q/FdxCY8GtTUIlB+wH1gn/Kz3CHpdmbsouUEGal6E8bjEEz72pZg==}
+  chromedriver@152.0.3:
+    resolution: {integrity: sha512-6v3pquS2kgb1HedzALRZeaoFZVCgghW2u1QjlzaoZruw75QBxKQtv/PKzJ8Scb3L8Vx32gcFwvUKcHmW7xjIVg==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -30765,7 +30765,7 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  chromedriver@152.0.2(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
+  chromedriver@152.0.3(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
