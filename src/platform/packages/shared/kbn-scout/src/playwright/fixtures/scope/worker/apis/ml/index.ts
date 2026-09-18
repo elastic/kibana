@@ -15,6 +15,7 @@ import { measurePerformanceAsync } from '../../../../../../common';
 // Model IDs that ship with Elasticsearch and must not be deleted during cleanup
 const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
 const ML_ANNOTATIONS_INDEX_ALIAS_READ = '.ml-annotations-read';
+const ML_NOTIFICATIONS_INDEX_PATTERN = '.ml-notifications*';
 const ML_INTERNAL_HEADERS = { [ELASTIC_HTTP_VERSION_HEADER]: '1' } as const;
 
 export interface Annotation {
@@ -193,6 +194,11 @@ export interface MlNotificationsApi {
    * `earliest` value used by the notifications API, which filters with a strict `timestamp > earliest`.
    */
   waitForToIndex: (jobId: string, earliestMs?: number, timeout?: number) => Promise<void>;
+  /**
+   * Delete every document in .ml-notifications* via the Elasticsearch API. Deleting ML jobs does
+   * not remove their notifications, so use this to stop retained ones leaking into a later run.
+   */
+  deleteAll: () => Promise<void>;
 }
 
 export interface MlApiService {
@@ -863,7 +869,7 @@ export const getMlApiHelper = (
         `notifications for '${jobId}' to exist in .ml-notifications*`,
         async () => {
           const resp = await esClient.search({
-            index: '.ml-notifications*',
+            index: ML_NOTIFICATIONS_INDEX_PATTERN,
             size: 1,
             query: {
               bool: {
@@ -882,6 +888,21 @@ export const getMlApiHelper = (
         timeout
       );
     },
+
+    async deleteAll(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.notifications.deleteAll', async () => {
+        await esClient.deleteByQuery({
+          index: ML_NOTIFICATIONS_INDEX_PATTERN,
+          query: { match_all: {} },
+          ignore_unavailable: true,
+          // notifications can be written while the delete runs; a version conflict on one of
+          // them must not fail the cleanup
+          conflicts: 'proceed',
+          refresh: true,
+          wait_for_completion: true,
+        });
+      });
+    },
   };
 
   const indices: MlIndicesApi = {
@@ -892,6 +913,7 @@ export const getMlApiHelper = (
         await anomalyDetection.filters.deleteAll();
         await anomalyDetection.annotations.deleteAll();
         await anomalyDetection.deleteExpiredData();
+        await notifications.deleteAll();
         await savedObjects.sync();
       });
     },
