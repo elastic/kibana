@@ -431,7 +431,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
-  it('should block removal when a conflicting policy appears on a later fetchAllItems page', async () => {
+  it('should skip removal when a conflicting policy appears on a later fetchAllItems page', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'logs',
       version: '1.0.0',
@@ -476,9 +476,8 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         allPackagePolicies.some((p) => p.id === 'conflict-policy-page-2')
     );
 
-    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
-      `Datastreams matching custom are in use by other package policies and cannot be removed`
-    );
+    await deletePackageDatastreamAssetsHandler(context, request, response);
+    expect(response.ok).toHaveBeenCalledWith({ body: { success: true } });
     expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
     expect(mockedIsInputPackageDatasetUsedByMultiplePolicies).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ id: 'conflict-policy-page-2' })]),
