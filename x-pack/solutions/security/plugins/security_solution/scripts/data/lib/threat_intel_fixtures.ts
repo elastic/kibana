@@ -310,11 +310,15 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       name: 'AWS IAM privilege escalation feed',
       title: 'AWS IAM privilege escalation and credential theft in account 123456789012',
       body:
-        'Security researchers documented a confirmed privilege-escalation campaign in AWS account ' +
-        '123456789012. Compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30) ' +
+        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
+        // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+        'Security researchers attribute a confirmed privilege-escalation campaign in AWS account ' +
+        '123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set. Operators tied to TA-DEMO-SHADOW-ADMIN ' +
+        'compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30), ' +
         'assumed escalated-role via AssumeRole, attached AdministratorAccess, and staged access toward S3 bucket ' +
         'corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
-        'on prod/db-credentials plus StopLogging and DeleteTrail for defense evasion. The campaign ' +
+        'on prod/db-credentials plus StopLogging and DeleteTrail for defense evasion, consistent with ' +
+        'TA-DEMO-SHADOW-ADMIN infrastructure and tradecraft seen in prior intrusions. The campaign ' +
         'is well evidenced with reusable IOCs and ATT&CK mappings, so defenders should prioritize ' +
         'hunts, but this write-up does not assert that customer production is currently offline. ' +
         'Hunt ATT&CK T1098.001, T1078.004, and T1562.008 in aws.cloudtrail logs.',
@@ -322,10 +326,13 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         {
           title: 'CloudTrail retrospective: AdministratorAccess attach in account 123456789012',
           body:
-            'Retrospective for AWS account 123456789012 where user dev-user (dev-user@corp.example) from ' +
+            // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
+            // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
+            'Retrospective for AWS account 123456789012 attributed to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
+            'where user dev-user (dev-user@corp.example) from ' +
             '192[.]0[.]2[.]30 (192.0.2.30) called AssumeRole into escalated-role, attached AdministratorAccess, ' +
             'and later reached bucket corp-prod-data. Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on ' +
-            'prod/db-credentials and StopLogging. Map to T1098.001, T1078.004, and T1562.008.',
+            'prod/db-credentials and StopLogging, consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Map to T1098.001, T1078.004, and T1562.008.',
         },
         {
           title: 'Secrets Manager access after IAM escalation toward corp-prod-data',
@@ -406,20 +413,26 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       name: 'AWS IAM AssumeRole Activity',
       title: 'AWS IAM AssumeRole abuse escalates access to escalated-role in account 123456789012',
       body:
-        'Analysts tracked repeated sts.AssumeRole calls elevating dev-user (dev-user@corp.example) ' +
-        'into escalated-role within AWS account 123456789012, originating from 192[.]0[.]2[.]30 ' +
+        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
+        // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+        'Analysts attribute repeated sts.AssumeRole calls escalating dev-user (dev-user@corp.example) ' +
+        'into escalated-role within AWS account 123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
+        'originating from 192[.]0[.]2[.]30 ' +
         '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31). The assumed role was then used toward ' +
-        'AdministratorAccess and S3 staging on corp-prod-data, consistent with the broader IAM ' +
+        'AdministratorAccess and S3 staging on corp-prod-data, consistent with TA-DEMO-SHADOW-ADMIN ' +
+        'tradecraft in the broader IAM ' +
         'privilege-escalation campaign in this account. Hunt ATT&CK T1078.004 for sts.AssumeRole ' +
         'in aws.cloudtrail logs.',
       historicArticles: [
         {
           title: 'AssumeRole chaining note: escalated-role reused across sessions',
           body:
-            'A follow-up note on repeated sts.AssumeRole calls into escalated-role in account ' +
+            // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
+            // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
+            'A follow-up note attributed to the TA-DEMO-SHADOW-ADMIN intrusion set on repeated sts.AssumeRole calls into escalated-role in account ' +
             '123456789012 by dev-user (dev-user@corp.example) from 192[.]0[.]2[.]30 (192.0.2.30) and ' +
             '192[.]0[.]2[.]31 (192.0.2.31). Sessions preceded AdministratorAccess and corp-prod-data ' +
-            'staging. Hunt T1078.004 for AssumeRole in aws.cloudtrail.',
+            'staging, consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Hunt T1078.004 for AssumeRole in aws.cloudtrail.',
         },
         {
           title: 'CloudTrail retrospective: sts.AssumeRole into escalated-role',

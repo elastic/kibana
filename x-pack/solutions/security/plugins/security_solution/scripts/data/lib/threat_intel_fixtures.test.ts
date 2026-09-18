@@ -622,4 +622,30 @@ describe('per-slot correlation anchors', () => {
       expect(scenario.joinIocs.some((ioc) => (ioc.type as string) === 'hash')).toBe(false);
     }
   });
+
+  it('names the attributed intrusion set in aws-iam canonical body text for Diamond suitability', () => {
+    // enrich_taxonomy's diamond_suitable gate requires the report itself to name an
+    // attributed actor/campaign, not just carry a threat_actors field on the extracted
+    // doc. historicAnchors.threatActors never reaches content.body_text, so the actor
+    // name must be woven into the prose directly (mirrors the okta scenario's pattern).
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'];
+    for (const scenario of awsIamScenarios) {
+      expect(scenario.historicAnchors?.threatActors.length).toBeGreaterThan(0);
+      const namedActor = scenario.historicAnchors!.threatActors[0];
+      expect(scenario.body).toContain(namedActor);
+    }
+  });
+
+  it('names the attributed intrusion set in the anchored historic-article body too', () => {
+    // buildHistoricThreatReportDoc renders content.body_text from historicArticles[itemIndex],
+    // not from scenario.body, whenever historicArticles is non-empty. The seeded
+    // ti-report-*-historic-01 docs (the ones the diamond-extraction demo actually reads) use
+    // historicArticles[0], so the actor name must also be woven into that slot's prose, not
+    // just scenario.body's live/RSS twin.
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'];
+    for (const scenario of awsIamScenarios) {
+      const namedActor = scenario.historicAnchors!.threatActors[0];
+      expect(scenario.historicArticles[0]?.body).toContain(namedActor);
+    }
+  });
 });
