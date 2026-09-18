@@ -69,7 +69,27 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
         ).toBeVisible();
 
         const fieldCombo = page.components.comboBox('text-based-dimension-field');
-        await fieldCombo.setSelectedOptions(['bytes']);
+        const fieldSearchInput = page.testSubj
+          .locator('text-based-dimension-field')
+          .getByTestId('comboBoxSearchInput');
+
+        // The field list is fetched asynchronously (ES|QL `| limit 0`). Wait for it
+        // here, then close the dropdown: EuiComboBox arms a `closeOnScroll` listener
+        // 500ms after opening, and a dropdown left open that long can be closed by
+        // any ancestor scroll (including Playwright's scroll-into-view before a click).
+        await expect
+          .poll(() => fieldCombo.getAllVisibleOptions(), { timeout: 10_000 })
+          .not.toStrictEqual([]);
+        await fieldSearchInput.blur();
+
+        // Select via keyboard so no option row has to be scrolled into view or hit-tested.
+        await fieldSearchInput.click();
+        await fieldSearchInput.fill('bytes');
+        await expect.poll(() => fieldCombo.getAllVisibleOptions()).toContain('bytes');
+        // ArrowDown skips the "Available fields" group label and lands on `bytes`.
+        await fieldSearchInput.press('ArrowDown');
+        await fieldSearchInput.press('Enter');
+        await expect.poll(() => fieldCombo.getSelectedOptions()).toStrictEqual(['bytes']);
         await lens.closeDimensionEditor();
       });
 
@@ -95,17 +115,18 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
-        // Wait for flyout to be ready before switching to line chart
-        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-        await lens.switchToVisualization('line', { search: 'Line' });
-        await dashboard.waitForPanelsToLoad(1);
-
         await setEsqlQueryAndRun(
           dashboard,
           page,
           codeEditor,
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
+        await dashboard.waitForPanelsToLoad(1);
+
+        // Wait for flyout to be ready before switching to line chart
+        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+        await lens.switchToVisualization('line', { search: 'Line' });
+        await dashboard.waitForPanelsToLoad(1);
 
         // Anchor on the Y dimension first so the config panel is known to have
         // rendered the new suggestion before checking the split state.
