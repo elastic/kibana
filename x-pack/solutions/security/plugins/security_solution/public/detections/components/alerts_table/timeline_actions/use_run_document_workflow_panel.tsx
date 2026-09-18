@@ -17,6 +17,8 @@ import {
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { useCaseAttachmentWorkflowRun } from '@kbn/cases-plugin/public';
 import * as i18n from '../translations';
 
 // Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
@@ -32,6 +34,13 @@ export interface DocumentWorkflowsPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * When set, the panel was opened from a single-document row action inside a case. The
+   * executor routes through the Cases API with a `cases.attachment` origin so the run appears in
+   * the case activity feed. Outside a case the value is ignored — the panel falls back to
+   * the generic Workflows API.
+   */
+  originEventId?: string;
 }
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
@@ -39,7 +48,13 @@ export const DocumentWorkflowsPanel = ({
   documents,
   onClose,
   onExecute,
+  originEventId,
 }: DocumentWorkflowsPanelProps) => {
+  const caseRunWorkflow = useCaseAttachmentWorkflowRun({
+    attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
+    attachmentId: originEventId,
+  });
+
   const inputs = useMemo(
     () => ({
       event: {
@@ -53,6 +68,7 @@ export const DocumentWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
+      runWorkflow={caseRunWorkflow}
       sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}
@@ -67,6 +83,12 @@ export interface UseRunDocumentWorkflowPanelProps {
   /** Full documents including _id, _index, and all source fields */
   documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
   closePopover: () => void;
+  /**
+   * When set, the document panel routes the run through the Cases API with a `cases.attachment`
+   * origin. Pass `ecsRowData._id` from the case events table row action. Callers outside a
+   * case context omit this and get the generic Workflows API executor.
+   */
+  originEventId?: string;
 }
 
 export interface UseRunDocumentWorkflowPanelResult {
@@ -79,6 +101,7 @@ export interface UseRunDocumentWorkflowPanelResult {
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
   documents,
+  originEventId,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
@@ -108,10 +131,16 @@ export const useRunDocumentWorkflowPanel = ({
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'document-workflow-context-menu-panel',
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
-        content: <DocumentWorkflowsPanel documents={documents} onClose={closePopover} />,
+        content: (
+          <DocumentWorkflowsPanel
+            documents={documents}
+            onClose={closePopover}
+            originEventId={originEventId}
+          />
+        ),
       },
     ],
-    [closePopover, documents]
+    [closePopover, documents, originEventId]
   );
 
   return useMemo(

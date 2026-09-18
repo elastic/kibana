@@ -23,7 +23,6 @@ export interface CasesWorkflowOperations {
     params: EnsureAuthorizedToRunWorkflowParams
   ) => Promise<Array<{ id: string; owner: string }>>;
   preflightWorkflowExecution: (params: PreflightWorkflowExecutionArgs) => Promise<void>;
-  /** `entities` must come from a prior `ensureAuthorizedToRunWorkflow` call. */
   recordWorkflowExecution: (params: RecordWorkflowExecutionArgs) => Promise<void>;
 }
 
