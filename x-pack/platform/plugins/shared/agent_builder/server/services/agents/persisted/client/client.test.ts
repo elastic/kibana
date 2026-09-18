@@ -492,6 +492,79 @@ describe('AgentClient', () => {
       expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('updateAccessControl persistence', () => {
+    const existingAt = '2020-01-01T00:00:00.000Z';
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 1, _primary_term: 1 });
+    });
+
+    const buildAclDoc = (entries: AgentAccessControlEntry[]) => ({
+      _id: 'acl-agent',
+      _source: {
+        id: 'acl-agent',
+        name: 'ACL Agent',
+        type: 'chat',
+        space: testSpace,
+        description: 'desc',
+        created_by_id: mockUser.id,
+        created_by_name: mockUser.username,
+        access_control: { access_mode: 'private', entries },
+        config: { tools: [] },
+        created_at: existingAt,
+        updated_at: existingAt,
+      },
+    });
+
+    const indexedEntries = () =>
+      mockEsClient.index.mock.calls[0][0].document.access_control.entries;
+
+    it('carries added_at over for a re-sent entry and stamps a new one', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            buildAclDoc([
+              {
+                type: 'user',
+                id: 'u_alice',
+                role: AgentAccessControlRole.User,
+                added_at: existingAt,
+              },
+            ]),
+          ],
+        },
+      });
+
+      await client.updateAccessControl('acl-agent', {
+        entries: [
+          { type: 'user', id: 'u_alice', role: AgentAccessControlRole.Editor },
+          { type: 'user', id: 'u_bob', role: AgentAccessControlRole.User },
+        ],
+      });
+
+      const entries = indexedEntries();
+
+      expect(entries[0]).toMatchObject({ id: 'u_alice', added_at: existingAt });
+      expect(entries[1].id).toBe('u_bob');
+      expect(entries[1].added_at).not.toBe(existingAt);
+      expect(Date.parse(String(entries[1].added_at))).not.toBeNaN();
+    });
+
+    it('stamps added_at on entries persisted before the field existed', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [buildAclDoc([{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.User }])],
+        },
+      });
+
+      await client.updateAccessControl('acl-agent', {
+        entries: [{ type: 'user', id: 'u_alice', role: AgentAccessControlRole.User }],
+      });
+
+      expect(Date.parse(String(indexedEntries()[0].added_at))).not.toBeNaN();
+    });
+  });
 });
 
 describe('SystemAgentClient', () => {
