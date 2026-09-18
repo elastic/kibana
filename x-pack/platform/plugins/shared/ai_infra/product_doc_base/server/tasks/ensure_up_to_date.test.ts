@@ -7,7 +7,7 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance, RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
@@ -15,18 +15,11 @@ import {
   registerEnsureUpToDateTaskDefinition,
   scheduleEnsureUpToDateTask,
   ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
-  ENSURE_DOC_UP_TO_DATE_TASK_ID,
-  ENSURE_DOC_UP_TO_DATE_TASK_ID_FORCED,
-  ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL,
-  ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL_FORCED,
 } from './ensure_up_to_date';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 
-const originallyScheduledAt = '2026-09-17T09:00:00.000Z';
 const requestedAt = '2026-09-17T10:00:00.000Z';
 const since = new Date(requestedAt);
-const nextRunAt = '2026-09-17T10:05:00.000Z';
-const continuation = (state: Record<string, unknown>) => ({ requestedAt, ...state });
 
 describe('EnsureUpToDate task', () => {
   let updateProductIfNeeded: jest.Mock;
@@ -35,7 +28,7 @@ describe('EnsureUpToDate task', () => {
   let wasUninstalledSince: jest.Mock;
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
-  let runTask: (state: Record<string, unknown>, runAt?: string) => Promise<unknown>;
+  let runTask: (state: Record<string, unknown>) => Promise<unknown>;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -61,22 +54,19 @@ describe('EnsureUpToDate task', () => {
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][ENSURE_DOC_UP_TO_DATE_TASK_TYPE];
-    runTask = (state, runAt = nextRunAt) =>
+    runTask = (state) =>
       definition
         .createTaskRunner({
           taskInstance: {
-            params: { inferenceId: '.elser', forceUpdate: true },
+            params: { inferenceId: '.elser', forceUpdate: true, requestedAt },
             state,
-            scheduledAt: new Date(originallyScheduledAt),
-            runAt: new Date(runAt),
-            attempts: 1,
           },
         } as unknown as RunContext)
         .run();
   });
 
-  it('computes the update plan on a new request and handles the first item', async () => {
-    const result = await runTask({}, requestedAt);
+  it('computes the update plan on the first run and handles the first item', async () => {
+    const result = await runTask({});
 
     expect(getProductsToUpdate).toHaveBeenCalledWith({ inferenceId: '.elser', forceUpdate: true });
     expect(updateProductIfNeeded).toHaveBeenCalledWith({
@@ -87,13 +77,13 @@ describe('EnsureUpToDate task', () => {
     });
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { requestedAt, remaining: ['security', 'openapi'] },
+      state: { remaining: ['security', 'openapi'] },
       runAt: expect.any(Date),
     });
   });
 
-  it('does not recompute the plan on a continuation run, whatever the runAt', async () => {
-    await runTask(continuation({ remaining: ['security', 'openapi'] }), '2026-09-17T11:00:00.000Z');
+  it('does not recompute the plan when remaining items are persisted', async () => {
+    await runTask({ remaining: ['security', 'openapi'] });
 
     expect(getProductsToUpdate).not.toHaveBeenCalled();
     expect(updateProductIfNeeded).toHaveBeenCalledWith(
@@ -101,23 +91,8 @@ describe('EnsureUpToDate task', () => {
     );
   });
 
-  it('computes a new plan stamped with the runAt once the scheduler cleared the state', async () => {
-    const newRequest = '2026-09-17T11:00:00.000Z';
-
-    const result = await runTask({}, newRequest);
-
-    expect(getProductsToUpdate).toHaveBeenCalledTimes(1);
-    expect(updateProductIfNeeded).toHaveBeenCalledWith(
-      expect.objectContaining({ productName: 'kibana', since: new Date(newRequest) })
-    );
-    expect(result).toEqual({
-      state: { requestedAt: newRequest, remaining: ['security', 'openapi'] },
-      runAt: expect.any(Date),
-    });
-  });
-
   it('updates the OpenAPI spec as the last item and completes', async () => {
-    const result = await runTask(continuation({ remaining: ['openapi'] }));
+    const result = await runTask({ remaining: ['openapi'] });
 
     expect(updateProductIfNeeded).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).toHaveBeenCalledWith({
@@ -131,7 +106,7 @@ describe('EnsureUpToDate task', () => {
   it('only checks the OpenAPI spec when no product needs an update', async () => {
     getProductsToUpdate.mockResolvedValue([]);
 
-    const result = await runTask({}, requestedAt);
+    const result = await runTask({});
 
     expect(updateProductIfNeeded).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).toHaveBeenCalledTimes(1);
@@ -139,7 +114,7 @@ describe('EnsureUpToDate task', () => {
   });
 
   it('runs each item under the shared install lock', async () => {
-    await runTask(continuation({ remaining: ['openapi'] }));
+    await runTask({ remaining: ['openapi'] });
 
     expect(withLock).toHaveBeenCalledWith(
       PRODUCT_DOC_INSTALL_LOCK_ID,
@@ -151,12 +126,12 @@ describe('EnsureUpToDate task', () => {
   it('defers the run and keeps the computed plan when another install holds the lock', async () => {
     withLock.mockRejectedValue(new LockAcquisitionError('held'));
 
-    const result = await runTask({}, requestedAt);
+    const result = await runTask({});
 
     expect(updateProductIfNeeded).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { requestedAt, remaining: ['kibana', 'security', 'openapi'] },
+      state: { remaining: ['kibana', 'security', 'openapi'] },
       runAt: expect.any(Date),
     });
   });
@@ -164,7 +139,7 @@ describe('EnsureUpToDate task', () => {
   it('stops the OpenAPI item when the OpenAPI spec was uninstalled after this update was requested', async () => {
     wasUninstalledSince.mockResolvedValue(true);
 
-    const result = await runTask(continuation({ remaining: ['openapi'] }));
+    const result = await runTask({ remaining: ['openapi'] });
 
     expect(wasUninstalledSince).toHaveBeenCalledWith({
       inferenceId: '.elser',
@@ -176,7 +151,7 @@ describe('EnsureUpToDate task', () => {
   });
 
   it('checks product items against product documentation uninstalls only', async () => {
-    await runTask(continuation({ remaining: ['security', 'openapi'] }));
+    await runTask({ remaining: ['security', 'openapi'] });
 
     expect(wasUninstalledSince).toHaveBeenCalledWith({
       inferenceId: '.elser',
@@ -188,10 +163,10 @@ describe('EnsureUpToDate task', () => {
   it('retries the OpenAPI spec item with backoff instead of failing the run', async () => {
     ensureOpenApiSpecUpToDate.mockRejectedValue(new Error('no artifact'));
 
-    const result = await runTask(continuation({ remaining: ['openapi'] }));
+    const result = await runTask({ remaining: ['openapi'] });
 
     expect(result).toEqual({
-      state: { requestedAt, remaining: ['openapi'], attempts: 1 },
+      state: { remaining: ['openapi'], attempts: 1 },
       runAt: expect.any(Date),
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[openapi] failed'));
@@ -199,54 +174,29 @@ describe('EnsureUpToDate task', () => {
 });
 
 describe('scheduleEnsureUpToDateTask', () => {
-  it('ensures the task exists, clears its persisted plan and runs it soon', async () => {
+  it('schedules a new task instance per request with its own params', async () => {
     const taskManager = taskManagerMock.createStart();
+    taskManager.schedule.mockResolvedValue({ id: 'update-task-1' } as ConcreteTaskInstance);
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager,
       logger: loggerMock.create(),
-      inferenceId: '.elser',
+      inferenceId: '.multilingual-e5-small',
+      forceUpdate: true,
     });
 
-    expect(taskId).toBe(ENSURE_DOC_UP_TO_DATE_TASK_ID);
-    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
-    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: ENSURE_DOC_UP_TO_DATE_TASK_ID,
-        params: { inferenceId: '.elser', forceUpdate: undefined },
-        state: {},
-      })
-    );
-    expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(
-      [ENSURE_DOC_UP_TO_DATE_TASK_ID],
-      expect.any(Function)
-    );
-    expect(taskManager.bulkUpdateState.mock.invocationCallOrder[0]).toBeLessThan(
-      taskManager.runSoon.mock.invocationCallOrder[0]
-    );
-    expect(taskManager.runSoon).toHaveBeenCalledWith(ENSURE_DOC_UP_TO_DATE_TASK_ID);
+    expect(taskId).toBe('update-task-1');
+    expect(taskManager.schedule).toHaveBeenCalledWith({
+      taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
+      params: {
+        inferenceId: '.multilingual-e5-small',
+        forceUpdate: true,
+        requestedAt: expect.any(String),
+      },
+      state: {},
+      scope: ['productDoc', 'productDoc:inference:.multilingual-e5-small'],
+    });
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+    expect(taskManager.runSoon).not.toHaveBeenCalled();
   });
-
-  it.each([
-    ['.elser', true, ENSURE_DOC_UP_TO_DATE_TASK_ID_FORCED],
-    ['.multilingual-e5-small', false, ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL],
-    ['.multilingual-e5-small', true, ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL_FORCED],
-  ])(
-    'uses a dedicated task for inferenceId=%s forceUpdate=%s',
-    async (inferenceId, forceUpdate, expectedTaskId) => {
-      const taskManager = taskManagerMock.createStart();
-
-      const taskId = await scheduleEnsureUpToDateTask({
-        taskManager,
-        logger: loggerMock.create(),
-        inferenceId,
-        forceUpdate,
-      });
-
-      expect(taskId).toBe(expectedTaskId);
-      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({ id: expectedTaskId, params: { inferenceId, forceUpdate } })
-      );
-    }
-  );
 });

@@ -10,22 +10,20 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import { DocumentationProduct, ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
-  isTaskCurrentlyRunningError,
   chunkedTaskStateSchemaByVersion,
-  getChunkedTaskState,
+  getInferenceScope,
   isProductName,
-  resetChunkedTaskState,
+  isTaskPending,
   runInstallChunk,
+  type ChunkedTaskState,
   type InstallLockManager,
+  type RequestTaskParams,
 } from './utils';
 
 export const INSTALL_ALL_TASK_TYPE = 'ProductDocBase:InstallAll';
-export const INSTALL_ALL_TASK_ID = 'ProductDocBase:InstallAll';
-export const INSTALL_ALL_TASK_ID_MULTILINGUAL = 'ProductDocBase:InstallAllMultilingual';
 
 export const registerInstallAllTaskDefinition = ({
   getServices,
@@ -42,18 +40,14 @@ export const registerInstallAllTaskDefinition = ({
       timeout: '10m',
       maxAttempts: 3,
       createTaskRunner: ({ taskInstance }) => {
-        const inferenceId = taskInstance.params?.inferenceId;
+        const { inferenceId, requestedAt } = taskInstance.params as RequestTaskParams;
         return {
           async run() {
-            const {
-              requestedAt,
-              state: { remaining, attempts },
-            } = getChunkedTaskState(taskInstance);
+            const { remaining, attempts } = taskInstance.state as ChunkedTaskState;
             const { packageInstaller, logger } = getServices();
             return runInstallChunk({
               lockManager,
               logger,
-              requestedAt,
               items: (remaining ?? Object.values(DocumentationProduct)).filter(isProductName),
               attempts,
               install: (productName) =>
@@ -75,6 +69,10 @@ export const registerInstallAllTaskDefinition = ({
   });
 };
 
+/**
+ * Schedules a new install task for this request. Every request gets its own task instance, so a
+ * request can neither be absorbed by an earlier task's persisted plan nor lose its request time.
+ */
 export const scheduleInstallAllTask = async ({
   taskManager,
   logger,
@@ -83,29 +81,23 @@ export const scheduleInstallAllTask = async ({
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
-}) => {
-  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
-    ? INSTALL_ALL_TASK_ID
-    : INSTALL_ALL_TASK_ID_MULTILINGUAL;
-  try {
-    await taskManager.ensureScheduled({
-      id: taskId,
-      taskType: INSTALL_ALL_TASK_TYPE,
-      params: { inferenceId },
-      state: {},
-      scope: ['productDoc'],
-    });
-    // An existing idle task drops its persisted plan and starts over for this request instead of
-    // absorbing it; the task itself is kept so waiting callers still find it
-    await resetChunkedTaskState({ taskManager, taskId });
-    await taskManager.runSoon(taskId);
-
-    logger.info(`Task ${taskId} scheduled to run soon`);
-  } catch (e) {
-    if (!isTaskCurrentlyRunningError(e)) {
-      throw e;
-    }
-  }
-
-  return taskId;
+}): Promise<string> => {
+  const params: RequestTaskParams = { inferenceId, requestedAt: new Date().toISOString() };
+  const { id } = await taskManager.schedule({
+    taskType: INSTALL_ALL_TASK_TYPE,
+    params,
+    state: {},
+    scope: ['productDoc', getInferenceScope(inferenceId)],
+  });
+  logger.info(`Task ${id} scheduled to install product documentation for [${inferenceId}]`);
+  return id;
 };
+
+export const isInstallAllTaskPending = ({
+  taskManager,
+  inferenceId,
+}: {
+  taskManager: TaskManagerStartContract;
+  inferenceId: string;
+}): Promise<boolean> =>
+  isTaskPending({ taskManager, taskType: INSTALL_ALL_TASK_TYPE, inferenceId });

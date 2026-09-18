@@ -9,11 +9,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
   throwUnrecoverableError,
-  type ConcreteTaskInstance,
+  TaskStatus,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import {
   INSTALL_LOCK_RETRY_DELAY_MS,
   tryWithInstallLock,
@@ -30,8 +31,6 @@ const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
 });
 
 export const chunkedTaskStateSchema = schema.object({
-  // Time of the request this plan belongs to (ISO 8601); the schedulers clear the state on a new request
-  requestedAt: schema.maybe(schema.string({ maxLength: 64 })),
   remaining: schema.maybe(itemsSchema),
   // Failed attempts for the current item
   attempts: schema.maybe(schema.number({ min: 0 })),
@@ -61,33 +60,48 @@ export const isProductName = (value: string): value is ProductName =>
   allProductNames.includes(value as ProductName);
 
 /**
- * The persisted plan of a chunked task, or a new plan stamped with the request time. The schedulers
- * clear the task state before `runSoon`, so a run with a plan is always a continuation of it and a
- * run without one is the first run of a request, whose `runAt` (set by `runSoon`) is the request time.
+ * Params shared by the per-request install and update tasks. Each request schedules its own task
+ * instance, so the request time is immutable and never mixed up with an earlier request's plan.
  */
-export const getChunkedTaskState = (
-  taskInstance: Pick<ConcreteTaskInstance, 'state' | 'runAt'>
-): { requestedAt: string; state: ChunkedTaskState } => {
-  const state = taskInstance.state as ChunkedTaskState;
-  const { requestedAt } = state;
-  return requestedAt !== undefined
-    ? { requestedAt, state }
-    : { requestedAt: taskInstance.runAt.toISOString(), state: {} };
-};
+export interface RequestTaskParams {
+  inferenceId: string;
+  /** Time of the request (ISO 8601); a later uninstall of the same resource supersedes the task */
+  requestedAt: string;
+}
+
+// Task scope identifying the inference ID an install or update task works on
+export const getInferenceScope = (inferenceId: string): string =>
+  `productDoc:inference:${isImpliedDefaultElserInferenceId(inferenceId) ? 'default' : inferenceId}`;
+
+const PENDING_TASK_STATUSES = [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running];
 
 /**
- * Clears a chunked task's persisted plan so the next run starts over for a new request. No-op for a
- * task that does not exist; a running task keeps its state (its run result overwrites it) and
- * `runSoon` rejects it anyway.
+ * Whether a task of `taskType` for the given inference scope is still pending, i.e. scheduled,
+ * claimed or running. Completed tasks are removed by Task Manager; failed ones are ignored here
+ * because their outcome is recorded in the installation status.
  */
-export const resetChunkedTaskState = async ({
+export const isTaskPending = async ({
   taskManager,
-  taskId,
+  taskType,
+  inferenceId,
 }: {
   taskManager: TaskManagerStartContract;
-  taskId: string;
-}): Promise<void> => {
-  await taskManager.bulkUpdateState([taskId], () => ({}));
+  taskType: string;
+  inferenceId: string;
+}): Promise<boolean> => {
+  const { docs } = await taskManager.fetch({
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'task.taskType': taskType } },
+          { term: { 'task.scope': getInferenceScope(inferenceId) } },
+          { terms: { 'task.status': PENDING_TASK_STATUSES } },
+        ],
+      },
+    },
+  });
+  return docs.length > 0;
 };
 
 // Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
@@ -114,14 +128,13 @@ export const runTaskUnderInstallLock = async ({
  * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
  * item is kept and the run is deferred instead of failing an attempt. The lock is released between
  * items and does not order operations, so `isSuperseded` is checked under the lock before every item:
- * when a newer request (an uninstall of that item's resource) took effect since this task was
- * requested, the task stops instead of recreating the documentation. A failing item is retried with exponential backoff up to
+ * when a newer request (an uninstall of that item's resource) took effect since this task's request,
+ * the task stops instead of recreating the documentation. A failing item is retried with exponential backoff up to
  * `MAX_INSTALL_ITEM_RETRIES` times, after which the task fails without further Task Manager retries.
  */
 export const runInstallChunk = async <T extends string>({
   lockManager,
   logger,
-  requestedAt,
   items,
   attempts = 0,
   install,
@@ -130,7 +143,6 @@ export const runInstallChunk = async <T extends string>({
 }: {
   lockManager: InstallLockManager;
   logger: Logger;
-  requestedAt: string;
   items: T[];
   attempts?: number;
   install: (item: T) => Promise<unknown>;
@@ -159,10 +171,7 @@ export const runInstallChunk = async <T extends string>({
     metadata: { ...metadata, item },
   });
   if (!acquired) {
-    return {
-      state: { requestedAt, remaining: items, ...(attempts ? { attempts } : {}) },
-      runAt: lockRetryAt(),
-    };
+    return { state: { remaining: items, ...(attempts ? { attempts } : {}) }, runAt: lockRetryAt() };
   }
   if (superseded) {
     logger.info(`Documentation item [${item}] skipped: a later request superseded this task`);
@@ -183,34 +192,13 @@ export const runInstallChunk = async <T extends string>({
       }s: ${installError.message}`
     );
     return {
-      state: { requestedAt, remaining: items, attempts: failedAttempts },
+      state: { remaining: items, attempts: failedAttempts },
       runAt: new Date(Date.now() + delayMs),
     };
   }
   // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
   // a capacity slot for one item and completed items are not redone when a later attempt fails.
-  return rest.length > 0
-    ? { state: { requestedAt, remaining: rest }, runAt: new Date() }
-    : { state: {} };
-};
-
-export const getTaskStatus = async ({
-  taskManager,
-  taskId,
-}: {
-  taskManager: TaskManagerStartContract;
-  taskId: string;
-}) => {
-  try {
-    const taskInstance = await taskManager.get(taskId);
-    return taskInstance.status;
-  } catch (e) {
-    // not found means the task was completed and the entry removed
-    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      return 'not_scheduled';
-    }
-    throw e;
-  }
+  return rest.length > 0 ? { state: { remaining: rest }, runAt: new Date() } : { state: {} };
 };
 
 export const isTaskCurrentlyRunningError = (err: Error): boolean => {

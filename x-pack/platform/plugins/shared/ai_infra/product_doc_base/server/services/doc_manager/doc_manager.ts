@@ -7,20 +7,18 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreAuditService, ElasticsearchClient } from '@kbn/core/server';
-import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
-import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
-  INSTALL_ALL_TASK_ID,
+  isInstallAllTaskPending,
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
   scheduleEnsureSecurityLabsUpToDateTask,
-  getTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
 import { checkLicense } from './check_license';
@@ -35,7 +33,6 @@ import type {
   SecurityLabsUninstallOptions,
   SecurityLabsStatusResponse,
 } from './types';
-import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 import type { PackageInstaller } from '../package_installer';
 import { waitForInstallLock, type InstallLockManager } from '../install_lock';
@@ -351,18 +348,9 @@ export class DocumentationManager implements DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
    */
   async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
-    const taskId = isImpliedDefaultElserInferenceId(inferenceId)
-      ? INSTALL_ALL_TASK_ID
-      : INSTALL_ALL_TASK_ID_MULTILINGUAL;
-    const taskStatus = await getTaskStatus({
-      taskManager: this.taskManager,
-      taskId,
-    });
-    if (taskStatus !== 'not_scheduled') {
-      const status = convertTaskStatus(taskStatus);
-      if (status !== 'unknown') {
-        return { status };
-      }
+    // A failed install task is not reported here: its outcome is in the per-product install status
+    if (await isInstallAllTaskPending({ taskManager: this.taskManager, inferenceId })) {
+      return { status: 'installing' };
     }
 
     const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
@@ -581,22 +569,6 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 }
-
-const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknown' => {
-  switch (taskStatus) {
-    case TaskStatus.Idle:
-    case TaskStatus.Claiming:
-    case TaskStatus.Running:
-      return 'installing';
-    case TaskStatus.Failed:
-      return 'error';
-    case TaskStatus.Unrecognized:
-    case TaskStatus.DeadLetter:
-    case TaskStatus.ShouldDelete:
-    default:
-      return 'unknown';
-  }
-};
 
 const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
   const statusOrder: InstallationStatus[] = [
