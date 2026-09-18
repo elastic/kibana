@@ -1018,6 +1018,20 @@ describe('policy_config and licenses', () => {
       }
     });
 
+    it('leaves an absent custom_yara_signatures absent on every downgrade', () => {
+      for (const license of [Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitCustomYaraSignatures(policy);
+
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(stripped[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+        }
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
     describe('advanced rescan interval', () => {
       const osList = ['windows', 'mac', 'linux'] as const;
 

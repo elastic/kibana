@@ -217,6 +217,18 @@ export const policyFactory = ({
 };
 
 /**
+ * Custom YARA signatures must end up off below Enterprise, but an absent field means "never
+ * configured" rather than "disabled", so a downgrade must not materialize one: that would opt a
+ * legacy policy out of the future backfill for a feature it never had access to.
+ */
+const clearedCustomYaraSignatures = ({
+  custom_yara_signatures: customYaraSignatures,
+}: {
+  custom_yara_signatures?: boolean;
+}): { custom_yara_signatures?: boolean } =>
+  customYaraSignatures === undefined ? {} : { custom_yara_signatures: false };
+
+/**
  * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
  */
 
@@ -234,7 +246,7 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       },
       memory_protection: {
         ...policy.windows.memory_protection,
-        custom_yara_signatures: false,
+        ...clearedCustomYaraSignatures(policy.windows.memory_protection),
       },
       popup: {
         ...policy.windows.popup,
@@ -252,7 +264,7 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       },
       memory_protection: {
         ...policy.mac.memory_protection,
-        custom_yara_signatures: false,
+        ...clearedCustomYaraSignatures(policy.mac.memory_protection),
       },
       popup: {
         ...policy.mac.popup,
@@ -266,7 +278,7 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       ...policy.linux,
       memory_protection: {
         ...policy.linux.memory_protection,
-        custom_yara_signatures: false,
+        ...clearedCustomYaraSignatures(policy.linux.memory_protection),
       },
     },
   };
@@ -315,7 +327,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
-        custom_yara_signatures: false,
+        ...clearedCustomYaraSignatures(policy.windows.memory_protection),
       },
       behavior_protection: {
         mode: ProtectionModes.off,
@@ -369,7 +381,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
-        custom_yara_signatures: false,
+        ...clearedCustomYaraSignatures(policy.mac.memory_protection),
       },
       device_control: {
         enabled: false,
@@ -409,7 +421,7 @@ export const policyFactoryWithoutPaidFeatures = (
       memory_protection: {
         mode: ProtectionModes.off,
         supported: false,
-        custom_yara_signatures: false,
+        ...clearedCustomYaraSignatures(policy.linux.memory_protection),
       },
       popup: {
         ...policy.linux.popup,
