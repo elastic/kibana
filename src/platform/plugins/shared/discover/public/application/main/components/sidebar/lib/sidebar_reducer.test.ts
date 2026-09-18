@@ -24,24 +24,21 @@ import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source
 
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {
-    expect(getInitialState(dataView)).toEqual(
-      expect.objectContaining({
-        dataView,
-        dataSource: undefined,
-        allFields: null,
-        fieldCounts: null,
-        status: DiscoverSidebarReducerStatus.INITIAL,
-      })
-    );
+    expect(getInitialState()).toEqual({
+      dataSource: undefined,
+      allFields: null,
+      fieldCounts: null,
+      status: DiscoverSidebarReducerStatus.INITIAL,
+    });
   });
 
   it('should handle "documents loading" action', function () {
+    const dataViewSource = new DataViewSource(dataView);
     const state: DiscoverSidebarReducerState = {
-      ...getInitialState(dataView),
+      ...getInitialState(),
+      dataSource: dataViewSource,
       allFields: [dataView.fields[0]],
     };
-
-    const dataViewSource = new DataViewSource(dataView);
 
     // DataView → DataView: keep allFields to avoid a loading flash
     const resultForDocuments = discoverSidebarReducer(state, {
@@ -52,7 +49,6 @@ describe('sidebar reducer', function () {
     });
     expect(resultForDocuments).toEqual(
       expect.objectContaining({
-        dataView,
         dataSource: dataViewSource,
         allFields: state.allFields,
         fieldCounts: null,
@@ -69,7 +65,6 @@ describe('sidebar reducer', function () {
     });
     expect(resultForNoSource).toEqual(
       expect.objectContaining({
-        dataView,
         dataSource: undefined,
         allFields: null,
         fieldCounts: null,
@@ -90,7 +85,6 @@ describe('sidebar reducer', function () {
     });
     expect(resultForEsqlQuery).toEqual(
       expect.objectContaining({
-        dataView,
         dataSource: esqlSource,
         allFields: expect.arrayContaining([expect.objectContaining({ name: 'AVG(bytes)' })]),
         fieldCounts: null,
@@ -112,7 +106,6 @@ describe('sidebar reducer', function () {
     });
     expect(resultForEsqlToDataView).toEqual(
       expect.objectContaining({
-        dataView,
         dataSource: dataViewSource,
         allFields: null,
         fieldCounts: null,
@@ -125,17 +118,16 @@ describe('sidebar reducer', function () {
     const dataViewFieldName = stubDataViewWithoutTimeField.fields[0].name;
     const unmappedFieldName = 'field1';
     const fieldCounts = { [unmappedFieldName]: 1, [dataViewFieldName]: 1 };
-    const state: DiscoverSidebarReducerState = getInitialState(dataView);
+    const state: DiscoverSidebarReducerState = getInitialState();
+    const dataViewSource = new DataViewSource(stubDataViewWithoutTimeField);
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        dataSource: new DataViewSource(stubDataViewWithoutTimeField),
+        dataSource: dataViewSource,
         fieldCounts,
       },
     });
-    const dataViewSource = new DataViewSource(stubDataViewWithoutTimeField);
     expect(resultForDocuments).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
       dataSource: dataViewSource,
       allFields: [
         ...stubDataViewWithoutTimeField.fields,
@@ -175,7 +167,6 @@ describe('sidebar reducer', function () {
       },
     });
     expect(resultForEsqlQuery).toStrictEqual({
-      dataView,
       dataSource: esqlSource,
       allFields: [
         new DataViewField({
@@ -210,7 +201,6 @@ describe('sidebar reducer', function () {
       },
     });
     expect(resultWhileLoading).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
       dataSource: dataViewSource2,
       allFields: null,
       fieldCounts: null,
@@ -218,15 +208,38 @@ describe('sidebar reducer', function () {
     });
   });
 
-  it('should handle "data view switched" action', function () {
-    const state: DiscoverSidebarReducerState = getInitialState(dataView);
-    const resultForTheSameDataView = discoverSidebarReducer(state, {
-      type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+  it('uses fallbackDataView when Classic documents loaded have no dataSource', function () {
+    const fieldCounts = { [dataView.fields[0].name]: 1 };
+    const result = discoverSidebarReducer(getInitialState(), {
+      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        dataView: state.dataView,
+        dataSource: undefined,
+        fieldCounts,
+        fallbackDataView: dataView,
       },
     });
-    expect(resultForTheSameDataView).toBe(state);
+    expect(result.allFields).toEqual(expect.arrayContaining([dataView.fields[0]]));
+    expect(result.status).toBe(DiscoverSidebarReducerStatus.COMPLETED);
+  });
+
+  it('should handle "data view switched" action', function () {
+    const state: DiscoverSidebarReducerState = getInitialState();
+    const dataViewSource = new DataViewSource(dataView);
+
+    const loadedState = discoverSidebarReducer(state, {
+      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+      payload: {
+        dataSource: dataViewSource,
+        fieldCounts: {},
+      },
+    });
+    const resultForTheSameDataView = discoverSidebarReducer(loadedState, {
+      type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+      payload: {
+        dataView,
+      },
+    });
+    expect(resultForTheSameDataView).toBe(loadedState);
 
     const resultForAnotherDataView = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
@@ -235,7 +248,6 @@ describe('sidebar reducer', function () {
       },
     });
     expect(resultForAnotherDataView).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
       dataSource: undefined,
       allFields: null,
       fieldCounts: null,
@@ -255,7 +267,6 @@ describe('sidebar reducer', function () {
       }
     );
     expect(resultForAnotherDataViewAfterProcessing).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
       dataSource: undefined,
       allFields: null,
       fieldCounts: null,
@@ -275,7 +286,6 @@ describe('sidebar reducer', function () {
       }
     );
     expect(resultForAnotherDataViewAfterCompleted).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
       dataSource: undefined,
       allFields: null,
       fieldCounts: null,
@@ -301,33 +311,19 @@ describe('sidebar reducer', function () {
         dataView: stubDataViewWithoutTimeField,
       },
     });
-    expect(resultForEsqlDataViewSwitch).toStrictEqual({
-      ...esqlState,
-      dataView: stubDataViewWithoutTimeField,
-    });
+    expect(resultForEsqlDataViewSwitch).toBe(esqlState);
   });
 
   it('should handle "reset" action', function () {
     const state: DiscoverSidebarReducerState = {
-      ...getInitialState(dataView),
+      ...getInitialState(),
       allFields: [dataView.fields[0]],
       fieldCounts: {},
       status: DiscoverSidebarReducerStatus.COMPLETED,
     };
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.RESET,
-      payload: {
-        dataView: stubDataViewWithoutTimeField,
-      },
     });
-    expect(resultForDocuments).toEqual(
-      expect.objectContaining({
-        dataView: stubDataViewWithoutTimeField,
-        dataSource: undefined,
-        allFields: null,
-        fieldCounts: null,
-        status: DiscoverSidebarReducerStatus.INITIAL,
-      })
-    );
+    expect(resultForDocuments).toEqual(getInitialState());
   });
 });

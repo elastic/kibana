@@ -190,8 +190,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
-    selectedDataView,
-    getInitialState
+    getInitialState()
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
@@ -203,9 +202,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         case FetchStatus.UNINITIALIZED:
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.RESET,
-            payload: {
-              dataView: selectedDataViewRef.current,
-            },
           });
           break;
         case FetchStatus.LOADING:
@@ -225,6 +221,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 documentState.dataSource?.kind === 'esql'
                   ? EMPTY_FIELD_COUNTS
                   : calcFieldCounts(documentState.result),
+              fallbackDataView: selectedDataViewRef.current,
             },
           });
           break;
@@ -234,6 +231,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             payload: {
               dataSource: documentState.dataSource,
               fieldCounts: EMPTY_FIELD_COUNTS,
+              fallbackDataView: selectedDataViewRef.current,
             },
           });
           break;
