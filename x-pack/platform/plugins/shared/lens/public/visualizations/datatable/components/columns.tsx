@@ -243,6 +243,7 @@ export const createGridColumns = (
         'data-test-subj': 'lensDatatableResetWidth',
         isDisabled: initialWidth == null,
       });
+
       if (!isTransposed && onColumnHide) {
         additionalActions.push({
           color: 'text',
@@ -306,22 +307,24 @@ export const createGridColumns = (
         displayAsText: name,
         schema: field,
         isResizable: isInteractive,
-        actions: {
-          showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
-          showSortAsc: {
-            label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-              defaultMessage: 'Sort ascending',
-            }),
-          },
-          showSortDesc: {
-            label: i18n.translate('xpack.lens.table.sort.descLabel', {
-              defaultMessage: 'Sort descending',
-            }),
-          },
-          additional: additionalActions,
-        },
+        actions: !isInteractive
+          ? false
+          : {
+              showHide: false,
+              showMoveLeft: false,
+              showMoveRight: false,
+              showSortAsc: {
+                label: i18n.translate('xpack.lens.table.sort.ascLabel', {
+                  defaultMessage: 'Sort ascending',
+                }),
+              },
+              showSortDesc: {
+                label: i18n.translate('xpack.lens.table.sort.descLabel', {
+                  defaultMessage: 'Sort descending',
+                }),
+              },
+              additional: additionalActions,
+            },
       };
 
       if (initialWidth) {

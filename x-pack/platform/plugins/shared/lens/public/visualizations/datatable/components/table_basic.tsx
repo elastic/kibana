@@ -142,7 +142,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props.data]);
 
   const firstTableRef = useRef(firstLocalTable);
-
   useEffect(() => {
     if (!pagination?.pageIndex && !pagination?.pageSize) return;
     const lastPageIndex = firstLocalTable.rows.length
