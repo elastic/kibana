@@ -168,6 +168,28 @@ describe('QualitySummaryCards', () => {
     expect(handleDocsTrendChartChange).toHaveBeenCalledWith('failed');
   });
 
+  it.each([
+    ['Degraded documents', 'failed'],
+    ['Failed documents', 'degraded'],
+  ] as const)('does not select the %s card while loading', (cardTitle, selectedCard) => {
+    const handleDocsTrendChartChange = jest.fn();
+
+    mockUseQualityIssuesDocsChart.mockReturnValue({
+      handleDocsTrendChartChange,
+    });
+    mockUseDatasetQualityDetailsState.mockReturnValue({
+      loadingState: {
+        dataStreamSettingsLoading: true,
+        dataStreamDetailsLoading: true,
+      },
+    });
+
+    renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard={selectedCard} />);
+    fireEvent.click(screen.getByTestId(`datasetQualityDetailsSummaryKpiCard-${cardTitle}`));
+
+    expect(handleDocsTrendChartChange).not.toHaveBeenCalled();
+  });
+
   it('indicates when degraded card is selected', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 

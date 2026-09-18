@@ -100,11 +100,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             },
             dataStreamDetails: {
               initial: 'fetching',
-              on: {
-                QUALITY_ISSUES_CHART_CHANGE: {
-                  actions: ['storeQualityIssuesChart'],
-                },
-              },
               states: {
                 fetching: {
                   invoke: {
@@ -112,7 +107,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     input: ({ context }) => context,
                     onDone: {
                       target: 'done',
-                      actions: ['storeDataStreamDetails', 'normalizeQualityIssuesChart'],
+                      actions: ['storeDataStreamDetails'],
                     },
                     onError: [
                       {
@@ -121,7 +116,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'done',
-                        actions: ['resetQualityIssuesChart', 'notifyFetchDataStreamDetailsFailed'],
+                        actions: ['notifyFetchDataStreamDetailsFailed'],
                       },
                     ],
                   },
@@ -136,6 +131,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target:
                         '#DatasetQualityDetailsController.initializing.checkBreakdownFieldIsEcs.fetching',
                       actions: ['storeBreakDownField'],
+                    },
+                    QUALITY_ISSUES_CHART_CHANGE: {
+                      target: 'done',
+                      actions: ['storeQualityIssuesChart'],
                     },
                   },
                 },
@@ -175,7 +174,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'qualityIssues',
-                        actions: ['storeDataStreamSettings', 'normalizeQualityIssuesChart'],
+                        actions: ['storeDataStreamSettings'],
                       },
                     ],
                     onError: [
@@ -185,7 +184,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'errorFetchingDataStreamSettings',
-                        actions: ['resetQualityIssuesChart', 'notifyFetchDataStreamSettingsFailed'],
+                        actions: ['notifyFetchDataStreamSettingsFailed'],
                       },
                     ],
                   },
@@ -621,29 +620,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             ? { qualityIssuesChart: event.qualityIssuesChart }
             : {};
         }),
-        normalizeQualityIssuesChart: assign(({ context }) => {
-          if (
-            context.qualityIssuesChart !== 'failed' ||
-            !('dataStreamDetails' in context) ||
-            !('dataStreamSettings' in context)
-          ) {
-            return {};
-          }
-
-          const dataStreamDetails = context.dataStreamDetails as DataStreamDetails;
-          const dataStreamSettings = context.dataStreamSettings as DataStreamSettings;
-          const canReadFailureStore = Boolean(
-            dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[context.dataStream]
-              ?.canReadFailureStore
-          );
-
-          return dataStreamDetails.hasFailureStore && canReadFailureStore
-            ? {}
-            : { qualityIssuesChart: 'degraded' as const };
-        }),
-        resetQualityIssuesChart: assign(() => ({
-          qualityIssuesChart: 'degraded' as const,
-        })),
         storeBreakDownField: assign(({ event }) => {
           return 'breakdownField' in event ? { breakdownField: event.breakdownField } : {};
         }),
