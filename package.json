@@ -104,6 +104,7 @@
     "**/baseline-browser-mapping": "2.9.14",
     "**/cheerio": "1.0.0-rc.12",
     "**/chokidar": "3.5.3",
+    "**/compression": "1.8.2",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
     "**/esbuild": "0.27.2",
     "**/fast-xml-parser": "5.5.7",
