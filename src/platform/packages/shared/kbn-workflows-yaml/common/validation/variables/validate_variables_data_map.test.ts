@@ -18,7 +18,7 @@ import { createStepContextResolver } from '../context/step_context_resolver';
 const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('validateVariables data.map nested $map bindings', () => {
-  it('treats custom nested $map item bindings as valid variables', () => {
+  it('keeps dotted field names separate from nested $map paths when caching contexts', () => {
     const yaml = `name: Data Map Validation
 enabled: false
 triggers:
@@ -37,6 +37,7 @@ steps:
       fields:
         created_at: "\${{ item.created_at }}"
         title: "\${{ item.title }}"
+        labels.name: "\${{ item.title }}"
         labels:
           $map: { items: '\${{ item.labels }}', item: 'label' }
           name: "\${{ label.name }}"
