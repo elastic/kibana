@@ -927,11 +927,7 @@ export const sourcesStateMachine = setup({
     flyout: {
       initial: 'closed',
       on: {
-        'source.view': {
-          target: '.loading',
-          reenter: true,
-          actions: 'selectViewedSource',
-        },
+        'source.view': { target: '.loading', actions: 'selectViewedSource' },
         'flyout.close': { target: '.closed', actions: 'closeFlyout' },
         'modal.openCreate': { target: '.closed', actions: 'closeFlyout' },
         'source.delete': {
