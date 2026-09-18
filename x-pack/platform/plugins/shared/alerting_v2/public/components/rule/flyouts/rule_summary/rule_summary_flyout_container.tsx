@@ -9,8 +9,7 @@ import React, { useState } from 'react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { useResolveSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_resolve_source_rule';
-import type { SourceRuleData } from '@kbn/alerting-v2-episodes-ui/types/source_rule_data';
+import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { useDeleteRule } from '../../../../hooks/use_delete_rule';
 import { useToggleRuleEnabled } from '../../../../hooks/use_toggle_rule_enabled';
@@ -62,7 +61,7 @@ export const RuleSummaryFlyoutContainer = ({
     ruleDetailsHref: sourceRuleDetailsHref,
     isLoading: isLoadingSourceRule,
     isError: isSourceRuleError,
-  } = useResolveSourceRule({
+  } = useFetchSourceRule({
     ruleId: isSourceRule ? ruleId : undefined,
     http,
   });
@@ -74,7 +73,7 @@ export const RuleSummaryFlyoutContainer = ({
   if (isSourceRule && sourceRule) {
     return (
       <SourceRuleSummaryFlyout
-        rule={sourceRule as unknown as SourceRuleData}
+        rule={sourceRule}
         ruleCategory={sourceRuleInfo?.category}
         ruleDetailsHref={sourceRuleDetailsHref}
         type={type}

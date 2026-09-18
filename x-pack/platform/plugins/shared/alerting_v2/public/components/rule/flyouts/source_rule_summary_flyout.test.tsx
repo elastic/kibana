@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SourceRuleData } from '@kbn/alerting-v2-episodes-ui/types/source_rule_data';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { SourceRuleSummaryFlyout } from './source_rule_summary_flyout';
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -49,21 +49,19 @@ jest.mock('../../action_policy/details_flyout/take_action_button', () => ({
   ),
 }));
 
-const makeRule = (overrides: Partial<SourceRuleData> = {}): SourceRuleData => ({
-  id: 'rule-1',
-  enabled: true,
-  metadata: { name: 'My classic rule', tags: ['tag-a', 'tag-b'] },
-  schedule: { interval: '1m' },
-  created_by: 'elastic',
-  created_at: '2026-01-15T10:00:00.000Z',
-  updated_by: 'admin',
-  updated_at: '2026-06-01T12:00:00.000Z',
-  rule_type_id: '.es-query',
-  params: {
-    groupBy: ['host.name', 'service.name'],
-  },
-  ...overrides,
-});
+const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
+  ({
+    id: 'rule-1',
+    enabled: true,
+    metadata: { name: 'My classic rule', tags: ['tag-a', 'tag-b'] },
+    schedule: { every: '1m' },
+    grouping: { fields: ['host.name', 'service.name'] },
+    created_by: 'elastic',
+    created_at: '2026-01-15T10:00:00.000Z',
+    updated_by: 'admin',
+    updated_at: '2026-06-01T12:00:00.000Z',
+    ...overrides,
+  } as unknown as RuleResponse);
 
 const defaultProps: React.ComponentProps<typeof SourceRuleSummaryFlyout> = {
   rule: makeRule(),
@@ -116,10 +114,10 @@ describe('SourceRuleSummaryFlyout', () => {
     expect(screen.getByTestId('sourceRuleSchedule')).toBeInTheDocument();
   });
 
-  it('falls back to rule_type_id when ruleCategory is not provided', () => {
+  it('does not render rule type when ruleCategory is not provided', () => {
     renderFlyout({ ruleCategory: undefined });
 
-    expect(screen.getByTestId('sourceRuleType')).toHaveTextContent('.es-query');
+    expect(screen.queryByTestId('sourceRuleType')).not.toBeInTheDocument();
   });
 
   it('renders metadata with plain usernames and formatted dates', () => {
@@ -171,7 +169,7 @@ describe('SourceRuleSummaryFlyout', () => {
 
   it('falls back to rule id when name is not available', () => {
     renderFlyout({
-      rule: { id: 'rule-abc' },
+      rule: { id: 'rule-abc' } as unknown as RuleResponse,
     });
 
     expect(screen.getByTestId('sourceRuleName')).toHaveTextContent('rule-abc');

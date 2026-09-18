@@ -93,7 +93,8 @@ export const queryKeys = {
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
   fetchRule: (id: string) => [...queryKeys.all, 'fetch-rule', id] as const,
-  resolveSourceRule: (id: string) => [...queryKeys.all, 'resolve-source-rule', id] as const,
+  fetchSourceRule: (sourceId: string, id: string) =>
+    [...queryKeys.all, 'fetch-source-rule', sourceId, id] as const,
   histogramAll: () => [...queryKeys.all, 'histogram'] as const,
   histogram: (
     spaceId: string | undefined,

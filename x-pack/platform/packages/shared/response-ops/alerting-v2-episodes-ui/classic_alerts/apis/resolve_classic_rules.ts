@@ -30,35 +30,41 @@ interface ClassicRule {
   tags?: string[];
   enabled?: boolean;
   schedule?: { interval?: string };
-  rule_type_id?: string;
   params?: Record<string, unknown>;
   created_by?: string | null;
   updated_by?: string | null;
   created_at?: string;
   updated_at?: string;
-  [key: string]: unknown;
 }
 
 interface ClassicFindRulesResponse {
   data: ClassicRule[];
 }
 
-const adaptClassicRule = (rule: ClassicRule): RuleResponse =>
-  ({
+const extractGroupingFields = (params: Record<string, unknown> | undefined): string[] => {
+  const value = params?.termField ?? params?.groupBy;
+  return (Array.isArray(value) ? value : [value]).filter(
+    (v): v is string => typeof v === 'string' && v.length > 0
+  );
+};
+
+const adaptClassicRule = (rule: ClassicRule): RuleResponse => {
+  const groupingFields = extractGroupingFields(rule.params);
+  return {
     id: rule.id,
     enabled: rule.enabled ?? false,
     metadata: {
       name: rule.name,
       tags: rule.tags ?? [],
     },
-    schedule: rule.schedule?.interval ? { interval: rule.schedule.interval } : undefined,
+    schedule: rule.schedule?.interval ? { every: rule.schedule.interval } : undefined,
+    grouping: groupingFields.length > 0 ? { fields: groupingFields } : undefined,
     created_by: rule.created_by ?? null,
     updated_by: rule.updated_by ?? null,
     created_at: rule.created_at ?? '',
     updated_at: rule.updated_at ?? '',
-    rule_type_id: rule.rule_type_id,
-    params: rule.params,
-  } as unknown as RuleResponse);
+  } as unknown as RuleResponse;
+};
 
 export interface ResolveClassicRulesParams {
   ids: string[];

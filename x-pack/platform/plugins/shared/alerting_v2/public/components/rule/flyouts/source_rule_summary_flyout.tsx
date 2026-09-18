@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SourceRuleData } from '@kbn/alerting-v2-episodes-ui/types/source_rule_data';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import moment from 'moment';
 import {
@@ -40,14 +40,6 @@ import { RuleDetailsTable } from '../rule_details_table';
 
 const FLYOUT_TITLE_ID = 'sourceRuleSummaryFlyoutTitle';
 
-const getGroupByFields = (params: Record<string, unknown> | undefined): string | undefined => {
-  const value = params?.termField ?? params?.groupBy;
-  const fields = (Array.isArray(value) ? value : [value]).filter(
-    (v): v is string => typeof v === 'string' && v.length > 0
-  );
-  return fields.length > 0 ? fields.join(', ') : undefined;
-};
-
 const { overflowSize: TAGS_OVERFLOW_SIZE, maxVisible: TAGS_MAX_VISIBLE_ON_OVERFLOW } =
   getTagsOverflowLimits(1);
 
@@ -58,42 +50,42 @@ interface DetailItem {
 }
 
 const buildConditionItems = (
-  rule: SourceRuleData,
+  rule: RuleResponse,
   ruleCategory: string | undefined
 ): DetailItem[] => {
-  const { schedule, rule_type_id: ruleTypeId, params } = rule;
-  const groupBy = getGroupByFields(params);
+  const groupByFields = rule.grouping?.fields;
+  const scheduleEvery = rule.schedule?.every;
 
   const items: DetailItem[] = [];
 
-  if (ruleCategory || ruleTypeId) {
+  if (ruleCategory) {
     items.push({
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.ruleType', {
         defaultMessage: 'Rule type',
       }),
-      description: ruleCategory ?? ruleTypeId ?? EMPTY_VALUE,
+      description: ruleCategory,
       'data-test-subj': 'sourceRuleType',
     });
   }
 
-  if (groupBy) {
+  if (groupByFields && groupByFields.length > 0) {
     items.push({
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.groupKey', {
         defaultMessage: 'Group key',
       }),
-      description: groupBy,
+      description: groupByFields.join(', '),
       'data-test-subj': 'sourceRuleGroupKey',
     });
   }
 
-  if (schedule?.interval) {
+  if (scheduleEvery) {
     items.push({
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.schedule', {
         defaultMessage: 'Schedule',
       }),
       description: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.scheduleValue', {
         defaultMessage: 'Every {interval}',
-        values: { interval: schedule.interval },
+        values: { interval: scheduleEvery },
       }),
       'data-test-subj': 'sourceRuleSchedule',
     });
@@ -102,7 +94,7 @@ const buildConditionItems = (
   return items;
 };
 
-const buildMetadataItems = (rule: SourceRuleData, dateFormat: string): DetailItem[] => {
+const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[] => {
   const formatDate = (date: string | undefined): string =>
     date ? moment(date).format(dateFormat) : EMPTY_VALUE;
 
@@ -135,7 +127,7 @@ const buildMetadataItems = (rule: SourceRuleData, dateFormat: string): DetailIte
 };
 
 export interface SourceRuleSummaryFlyoutProps {
-  rule: SourceRuleData;
+  rule: RuleResponse;
   ruleCategory?: string;
   ruleDetailsHref: string | null;
   onClose: () => void;

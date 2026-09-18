@@ -13,7 +13,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createTestQueryClient } from './test_utils';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
-import { useResolveSourceRule } from './use_resolve_source_rule';
+import { useFetchSourceRule } from './use_fetch_source_rule';
 
 const mockRule = { id: 'r1', metadata: { name: 'Classic Rule' } } as unknown as RuleResponse;
 
@@ -33,7 +33,7 @@ const createHttp = () => {
   return http;
 };
 
-describe('useResolveSourceRule', () => {
+describe('useFetchSourceRule', () => {
   it('resolves a rule from the data source', async () => {
     const http = createHttp();
     const source = createTestEpisodeSource({
@@ -42,7 +42,7 @@ describe('useResolveSourceRule', () => {
     });
     const { Wrapper } = createWrapper(source);
 
-    const { result } = renderHook(() => useResolveSourceRule({ ruleId: 'r1', http }), {
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
       wrapper: Wrapper,
     });
 
@@ -63,7 +63,7 @@ describe('useResolveSourceRule', () => {
     });
     const { Wrapper } = createWrapper(source);
 
-    const { result } = renderHook(() => useResolveSourceRule({ ruleId: 'r1', http }), {
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
       wrapper: Wrapper,
     });
 
@@ -79,7 +79,7 @@ describe('useResolveSourceRule', () => {
     });
     const { Wrapper } = createWrapper(source);
 
-    const { result } = renderHook(() => useResolveSourceRule({ ruleId: undefined, http }), {
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: undefined, http }), {
       wrapper: Wrapper,
     });
 
@@ -92,7 +92,7 @@ describe('useResolveSourceRule', () => {
     const http = createHttp();
     const { Wrapper } = createWrapper(undefined);
 
-    const { result } = renderHook(() => useResolveSourceRule({ ruleId: 'r1', http }), {
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
       wrapper: Wrapper,
     });
 
@@ -107,7 +107,7 @@ describe('useResolveSourceRule', () => {
     });
     const { Wrapper } = createWrapper(source);
 
-    const { result } = renderHook(() => useResolveSourceRule({ ruleId: 'r1', http }), {
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http }), {
       wrapper: Wrapper,
     });
 

@@ -8,9 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SourceRuleData } from '@kbn/alerting-v2-episodes-ui/types/source_rule_data';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { useResolveSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_resolve_source_rule';
+import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { RuleSummaryFlyoutContainer } from './rule_summary_flyout_container';
@@ -25,8 +24,8 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 jest.mock('../../../../hooks/use_fetch_rule', () => ({ useFetchRule: jest.fn() }));
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_resolve_source_rule', () => ({
-  useResolveSourceRule: jest.fn(),
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule', () => ({
+  useFetchSourceRule: jest.fn(),
 }));
 
 const mockMutation = { mutate: jest.fn(), isLoading: false };
@@ -69,7 +68,7 @@ jest.mock('../source_rule_summary_flyout', () => ({
     rule,
     ruleDetailsHref,
   }: {
-    rule: SourceRuleData;
+    rule: RuleResponse;
     ruleDetailsHref: string | null;
   }) => (
     <div data-test-subj="mockSourceRuleSummaryFlyout" data-href={ruleDetailsHref}>
@@ -79,7 +78,7 @@ jest.mock('../source_rule_summary_flyout', () => ({
 }));
 
 const mockUseFetchRule = jest.mocked(useFetchRule);
-const mockUseResolveSourceRule = jest.mocked(useResolveSourceRule);
+const mockUseFetchSourceRule = jest.mocked(useFetchSourceRule);
 
 const makeRule = (name: string) =>
   ({ id: 'rule-1', metadata: { name } } as unknown as RuleApiResponse);
@@ -106,7 +105,7 @@ const mockFetchRuleResult = (
     typeof useFetchRule
   >);
 
-const noSourceRule: ReturnType<typeof useResolveSourceRule> = {
+const noSourceRule: ReturnType<typeof useFetchSourceRule> = {
   rule: undefined,
   ruleDetailsHref: null,
   isLoading: false,
@@ -116,7 +115,7 @@ const noSourceRule: ReturnType<typeof useResolveSourceRule> = {
 describe('RuleSummaryFlyoutContainer', () => {
   beforeEach(() => {
     mockMutation.isLoading = false;
-    mockUseResolveSourceRule.mockReturnValue(noSourceRule);
+    mockUseFetchSourceRule.mockReturnValue(noSourceRule);
   });
 
   describe('v2 rules (no sourceRuleInfo)', () => {
@@ -171,7 +170,7 @@ describe('RuleSummaryFlyoutContainer', () => {
   describe('source rules (sourceRuleInfo provided)', () => {
     it('skips the v2 fetch and resolves via the data source', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
-      mockUseResolveSourceRule.mockReturnValue({
+      mockUseFetchSourceRule.mockReturnValue({
         rule: { id: 'rule-1', metadata: { name: 'Classic rule' } } as unknown as RuleResponse,
         ruleDetailsHref: '/base/app/management/insightsAndAlerting/triggersActions/rule/rule-1',
         isLoading: false,
@@ -190,7 +189,7 @@ describe('RuleSummaryFlyoutContainer', () => {
 
     it('renders loading while the source rule is being resolved', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
-      mockUseResolveSourceRule.mockReturnValue({
+      mockUseFetchSourceRule.mockReturnValue({
         ...noSourceRule,
         isLoading: true,
       });
@@ -202,7 +201,7 @@ describe('RuleSummaryFlyoutContainer', () => {
 
     it('renders entity not found when the source cannot resolve the rule', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
-      mockUseResolveSourceRule.mockReturnValue(noSourceRule);
+      mockUseFetchSourceRule.mockReturnValue(noSourceRule);
 
       renderContainer({ sourceRuleInfo: {} });
 

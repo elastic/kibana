@@ -11,27 +11,27 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { queryKeys } from '../query_keys';
 
-export interface UseResolveSourceRuleOptions {
+export interface UseFetchSourceRuleOptions {
   ruleId: string | undefined;
   http: HttpStart;
 }
 
-export interface UseResolveSourceRuleResult {
+export interface UseFetchSourceRuleResult {
   rule: RuleResponse | undefined;
   ruleDetailsHref: string | null;
   isLoading: boolean;
   isError: boolean;
 }
 
-export const useResolveSourceRule = ({
+export const useFetchSourceRule = ({
   ruleId,
   http,
-}: UseResolveSourceRuleOptions): UseResolveSourceRuleResult => {
+}: UseFetchSourceRuleOptions): UseFetchSourceRuleResult => {
   const dataSource = useAdditionalEpisodesDataSource();
   const hasResolver = Boolean(dataSource?.resolveRules);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: queryKeys.resolveSourceRule(ruleId ?? ''),
+    queryKey: queryKeys.fetchSourceRule(dataSource?.id ?? '', ruleId ?? ''),
     queryFn: async () => {
       const rules = await dataSource!.resolveRules!({ services: { http }, ids: [ruleId!] });
       return rules.length > 0 ? rules[0] : null;
