@@ -48,6 +48,7 @@ import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
 import { EpisodeMatcherInput } from './episode_matcher_input';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
+import { useMaintenanceWindowScope } from './hooks/use_maintenance_window_scope';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import type { FormProps } from './schema';
 import { schema } from './schema';
@@ -103,26 +104,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const userConfirmedSaveWithoutScopeRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
 
-  // v1 (alerting) scope state
-  const [isAlertingV1Enabled, setIsAlertingV1Enabled] = useState(
-    initialValue?.scope?.alerting !== undefined
-  );
-  const [alertingV1Kql, setAlertingV1Kql] = useState<string>(
-    initialValue?.scope?.alerting?.kql || ''
-  );
-  const [alertingV1Filters, setAlertingV1Filters] = useState<Filter[]>(
-    (initialValue?.scope?.alerting?.filters as Filter[]) || []
-  );
-  const [alertingV1Errors, setAlertingV1Errors] = useState<string[]>([]);
-
-  // v2 (alertingV2) scope state
-  const [isAlertingV2Enabled, setIsAlertingV2Enabled] = useState(
-    initialValue?.scope?.alertingV2 !== undefined
-  );
-  const [alertingV2Kql, setAlertingV2Kql] = useState<string>(
-    initialValue?.scope?.alertingV2?.kql || ''
-  );
-  const [alertingV2Errors, setAlertingV2Errors] = useState<string[]>([]);
+  const alertingV1 = useMaintenanceWindowScope(initialValue?.scope?.alerting);
+  const alertingV2 = useMaintenanceWindowScope(initialValue?.scope?.alertingV2);
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
@@ -130,14 +113,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     (error: IHttpFetchError<KibanaServerError>) => {
       if (!error.body?.message) return;
       if (isScopedQueryError(error.body.message)) {
-        if (isAlertingV2Enabled && !isAlertingV1Enabled) {
-          setAlertingV2Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+        if (alertingV2.enabled && !alertingV1.enabled) {
+          alertingV2.setErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
         } else {
-          setAlertingV1Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+          alertingV1.setErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
         }
       }
     },
-    [isAlertingV2Enabled, isAlertingV1Enabled]
+    [alertingV1, alertingV2]
   );
 
   const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
@@ -151,19 +134,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
   // Derived scope payloads — computed inline (cheap derivation from local state).
-  const alertingV1Payload = isAlertingV1Enabled
-    ? !alertingV1Kql && !alertingV1Filters.length
+  const alertingV1Payload = alertingV1.enabled
+    ? !alertingV1.kql && !alertingV1.filters.length
       ? null
-      : { kql: alertingV1Kql, filters: transformQueryFilters(alertingV1Filters) }
+      : { kql: alertingV1.kql, filters: transformQueryFilters(alertingV1.filters) }
     : undefined;
 
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
-      if (!isValid || alertingV1Errors.length !== 0 || alertingV2Errors.length !== 0) {
+      if (!isValid || alertingV1.errors.length !== 0 || alertingV2.errors.length !== 0) {
         return;
       }
 
-      const hasAnyScope = isAlertingV1Enabled || isAlertingV2Enabled;
+      const hasAnyScope = alertingV1.enabled || alertingV2.enabled;
       if (!hasAnyScope) {
         if (userConfirmedSaveWithoutScopeRef.current) {
           userConfirmedSaveWithoutScopeRef.current = false;
@@ -177,23 +160,23 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const endDate = moment(formData.endDate);
 
       // Inline payload computation so submit always uses the latest state values.
-      const v1Payload = isAlertingV1Enabled
-        ? !alertingV1Kql && !alertingV1Filters.length
+      const v1Payload = alertingV1.enabled
+        ? !alertingV1.kql && !alertingV1.filters.length
           ? null
-          : { kql: alertingV1Kql, filters: transformQueryFilters(alertingV1Filters) }
+          : { kql: alertingV1.kql, filters: transformQueryFilters(alertingV1.filters) }
         : undefined;
-      const v2Payload = isAlertingV2Enabled
-        ? alertingV2Kql
-          ? { kql: alertingV2Kql }
+      const v2Payload = alertingV2.enabled
+        ? alertingV2.kql
+          ? { kql: alertingV2.kql }
           : null
         : undefined;
 
       // Build scope: key absent = not selected; { enabled: true } = selected, no filter.
       const scope: Record<string, unknown> = {};
-      if (isAlertingV1Enabled) {
+      if (alertingV1.enabled) {
         scope.alerting = { enabled: true, ...(v1Payload ?? {}) };
       }
-      if (isAlertingV2Enabled) {
+      if (alertingV2.enabled) {
         scope.alertingV2 = { enabled: true, ...(v2Payload ?? {}) };
       }
 
@@ -221,13 +204,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       }
     },
     [
-      alertingV1Errors.length,
-      alertingV2Errors.length,
-      isAlertingV1Enabled,
-      isAlertingV2Enabled,
-      alertingV1Kql,
-      alertingV1Filters,
-      alertingV2Kql,
+      alertingV1,
+      alertingV2,
       defaultTimezone,
       isEditMode,
       showMultipleSolutionsWarning,
@@ -256,26 +234,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (!Array.isArray(ruleTypes) || !mounted) return [];
     return ruleTypes.map((ruleType) => ruleType.id);
   }, [ruleTypes, mounted]);
-
-  const onAlertingV1Toggle = (isEnabled: boolean) => {
-    setIsAlertingV1Enabled(isEnabled);
-    if (alertingV1Errors.length) setAlertingV1Errors([]);
-  };
-
-  const onAlertingV2Toggle = (isEnabled: boolean) => {
-    setIsAlertingV2Enabled(isEnabled);
-    if (alertingV2Errors.length) setAlertingV2Errors([]);
-  };
-
-  const onAlertingV1KqlChange = (newKql: string) => {
-    if (alertingV1Errors.length) setAlertingV1Errors([]);
-    setAlertingV1Kql(newKql);
-  };
-
-  const onAlertingV2KqlChange = (newKql: string) => {
-    if (alertingV2Errors.length) setAlertingV2Errors([]);
-    setAlertingV2Kql(newKql);
-  };
 
   const modalTitleId = useGeneratedHtmlId();
   const saveWithoutScopeModalTitleId = useGeneratedHtmlId();
@@ -400,28 +358,28 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             title={i18n.ALERTS_SCOPE_TITLE}
             description={i18n.ALERTS_SCOPE_DESCRIPTION}
             switchLabel={i18n.ALERTS_SCOPE_TITLE}
-            switchChecked={isAlertingV1Enabled}
-            onSwitchChange={onAlertingV1Toggle}
+            switchChecked={alertingV1.enabled}
+            onSwitchChange={alertingV1.onToggle}
             switchDataTestSubj="maintenanceWindowScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_ALERTS_SUBTITLE}
           >
             <MaintenanceWindowScopedQuery
               ruleTypeIds={ruleTypeIds}
-              query={alertingV1Kql}
-              filters={alertingV1Filters}
+              query={alertingV1.kql}
+              filters={alertingV1.filters}
               isLoading={isLoadingRuleTypes}
-              isEnabled={isAlertingV1Enabled}
-              errors={alertingV1Errors}
-              onQueryChange={onAlertingV1KqlChange}
-              onFiltersChange={setAlertingV1Filters}
+              isEnabled={alertingV1.enabled}
+              errors={alertingV1.errors}
+              onQueryChange={alertingV1.onKqlChange}
+              onFiltersChange={alertingV1.onFiltersChange}
             />
           </ScopeSection>
           <ScopeSection
             title={i18n.ALERTING_V2_SCOPE_TITLE}
             description={i18n.ALERTING_V2_SCOPE_DESCRIPTION}
             switchLabel={i18n.ALERTING_V2_SCOPE_TITLE}
-            switchChecked={isAlertingV2Enabled}
-            onSwitchChange={onAlertingV2Toggle}
+            switchChecked={alertingV2.enabled}
+            onSwitchChange={alertingV2.onToggle}
             switchDataTestSubj="alertingV2ScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_ALERTING_V2_SUBTITLE}
             titleBadge={
@@ -435,12 +393,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           >
             <EuiFormRow
               fullWidth
-              isInvalid={alertingV2Errors.length !== 0}
-              error={alertingV2Errors[0]}
+              isInvalid={alertingV2.errors.length !== 0}
+              error={alertingV2.errors[0]}
             >
               <EpisodeMatcherInput
-                value={alertingV2Kql}
-                onChange={onAlertingV2KqlChange}
+                value={alertingV2.kql}
+                onChange={alertingV2.onKqlChange}
                 fullWidth
                 data-test-subj="maintenanceWindowAlertingV2FilterInput"
                 placeholder={i18n.CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER}
@@ -448,7 +406,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </EuiFormRow>
           </ScopeSection>
         </EuiFlexGroup>
-        {(isAlertingV1Enabled && !!alertingV1Payload) || showMultipleSolutionsWarning ? (
+        {(alertingV1.enabled && !!alertingV1Payload) || showMultipleSolutionsWarning ? (
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
             <KbnWarningCallout
