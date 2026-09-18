@@ -22,6 +22,7 @@ import {
 } from './ensure_up_to_date';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 
+const originallyScheduledAt = '2026-09-17T09:00:00.000Z';
 const requestedAt = '2026-09-17T10:00:00.000Z';
 const since = new Date(requestedAt);
 const nextRunAt = '2026-09-17T10:05:00.000Z';
@@ -34,7 +35,7 @@ describe('EnsureUpToDate task', () => {
   let wasUninstalledSince: jest.Mock;
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
-  let runTask: (state: Record<string, unknown>, scheduledAt?: string) => Promise<unknown>;
+  let runTask: (state: Record<string, unknown>, runAt?: string) => Promise<unknown>;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -60,13 +61,14 @@ describe('EnsureUpToDate task', () => {
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][ENSURE_DOC_UP_TO_DATE_TASK_TYPE];
-    runTask = (state, scheduledAt = nextRunAt) =>
+    runTask = (state, runAt = nextRunAt) =>
       definition
         .createTaskRunner({
           taskInstance: {
             params: { inferenceId: '.elser', forceUpdate: true },
             state,
-            scheduledAt: new Date(scheduledAt),
+            scheduledAt: new Date(originallyScheduledAt),
+            runAt: new Date(runAt),
             attempts: 1,
           },
         } as unknown as RunContext)

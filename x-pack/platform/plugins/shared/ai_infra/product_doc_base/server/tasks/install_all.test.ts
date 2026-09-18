@@ -22,13 +22,15 @@ import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 import { MAX_INSTALL_ITEM_RETRIES } from './utils';
 
 const allProducts = Object.values(DocumentationProduct);
+// Task Manager keeps `scheduledAt` at the original scheduling time and writes the `runAt` a run
+// returned (or the current time on `runSoon`) into `runAt`
+const originallyScheduledAt = '2026-09-17T09:00:00.000Z';
 const requestedAt = '2026-09-17T10:00:00.000Z';
-// Task Manager copies the `runAt` a run returned into `scheduledAt` when claiming the next run
 const nextRunAt = '2026-09-17T10:05:00.000Z';
 const continuation = (state: Record<string, unknown>) => ({ requestedAt, nextRunAt, ...state });
 
 interface RunOptions {
-  scheduledAt?: string;
+  runAt?: string;
   attempts?: number;
 }
 
@@ -55,13 +57,14 @@ describe('InstallAll task', () => {
         } as unknown as InternalServices),
     });
     const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][INSTALL_ALL_TASK_TYPE];
-    runTask = (state, { scheduledAt = nextRunAt, attempts = 1 } = {}) =>
+    runTask = (state, { runAt = nextRunAt, attempts = 1 } = {}) =>
       definition
         .createTaskRunner({
           taskInstance: {
             params: { inferenceId: '.elser' },
             state,
-            scheduledAt: new Date(scheduledAt),
+            scheduledAt: new Date(originallyScheduledAt),
+            runAt: new Date(runAt),
             attempts,
           },
         } as unknown as RunContext)
@@ -69,7 +72,7 @@ describe('InstallAll task', () => {
   });
 
   it('installs only the first product on a new request and records the request time', async () => {
-    const result = await runTask({}, { scheduledAt: requestedAt });
+    const result = await runTask({}, { runAt: requestedAt });
 
     expect(installProduct).toHaveBeenCalledTimes(1);
     expect(installProduct).toHaveBeenCalledWith({
@@ -82,7 +85,7 @@ describe('InstallAll task', () => {
     });
   });
 
-  it('continues the plan when claimed for the run it scheduled', async () => {
+  it('continues the plan when run for the runAt it scheduled', async () => {
     const result = await runTask(continuation({ remaining: ['security', 'observability'] }));
 
     expect(installProduct).toHaveBeenCalledWith({ productName: 'security', inferenceId: '.elser' });
@@ -94,7 +97,7 @@ describe('InstallAll task', () => {
 
   it('continues the plan when Task Manager retries a failed run', async () => {
     await runTask(continuation({ remaining: ['security'] }), {
-      scheduledAt: '2026-09-17T10:06:00.000Z',
+      runAt: '2026-09-17T10:06:00.000Z',
       attempts: 2,
     });
 
@@ -105,7 +108,7 @@ describe('InstallAll task', () => {
     const newRequest = '2026-09-17T11:00:00.000Z';
 
     const result = await runTask(continuation({ remaining: ['observability'], attempts: 3 }), {
-      scheduledAt: newRequest,
+      runAt: newRequest,
     });
 
     expect(installProduct).toHaveBeenCalledWith({
@@ -154,7 +157,7 @@ describe('InstallAll task', () => {
   it('stops before the first product when an uninstall acquired the lock first', async () => {
     wasUninstalledSince.mockResolvedValue(true);
 
-    const result = await runTask({}, { scheduledAt: requestedAt });
+    const result = await runTask({}, { runAt: requestedAt });
 
     expect(installProduct).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
@@ -227,7 +230,7 @@ describe('InstallAll task', () => {
 
     const third = (await runTask(
       { ...first.state, attempts: 2 },
-      { scheduledAt: first.runAt.toISOString() }
+      { runAt: first.runAt.toISOString() }
     )) as { state: Record<string, unknown>; runAt: Date };
     expect(third.state).toEqual({
       requestedAt,

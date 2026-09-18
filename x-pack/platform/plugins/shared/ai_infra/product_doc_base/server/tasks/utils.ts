@@ -32,8 +32,8 @@ const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
 export const chunkedTaskStateSchema = schema.object({
   // Time of the request this plan belongs to (ISO 8601)
   requestedAt: schema.maybe(schema.string({ maxLength: 64 })),
-  // `runAt` this task returned for its next run. Task Manager copies `runAt` into `scheduledAt`
-  // when it claims the task, while `runSoon` (a new request) stamps the current time instead.
+  // `runAt` this task returned for its next run; `runSoon` (a new request) replaces `runAt` with
+  // the current time instead
   nextRunAt: schema.maybe(schema.string({ maxLength: 64 })),
   remaining: schema.maybe(itemsSchema),
   // Failed attempts for the current item
@@ -65,19 +65,19 @@ export const isProductName = (value: string): value is ProductName =>
 
 /**
  * The persisted plan of a chunked task, or an empty state when the task has been requested again
- * since the plan was persisted. A run continues its plan when it was claimed for the `runAt` the
- * previous run returned, or when Task Manager is retrying a failed run; any other `scheduledAt`
- * comes from `runSoon`, i.e. a new request.
+ * since the plan was persisted. A run continues its plan when its `runAt` is the one the previous
+ * run returned, or when Task Manager is retrying a failed run; any other `runAt` was set by
+ * `runSoon`, i.e. a new request, whose time then becomes the plan's `requestedAt`.
  */
 export const getChunkedTaskState = (
-  taskInstance: Pick<ConcreteTaskInstance, 'state' | 'scheduledAt' | 'attempts'>
+  taskInstance: Pick<ConcreteTaskInstance, 'state' | 'runAt' | 'attempts'>
 ): { requestedAt: string; state: ChunkedTaskState } => {
-  const scheduledAt = taskInstance.scheduledAt.toISOString();
+  const runAt = taskInstance.runAt.toISOString();
   const state = taskInstance.state as ChunkedTaskState;
   const { requestedAt } = state;
   const isContinuation =
-    requestedAt !== undefined && (state.nextRunAt === scheduledAt || taskInstance.attempts > 1);
-  return isContinuation ? { requestedAt, state } : { requestedAt: scheduledAt, state: {} };
+    requestedAt !== undefined && (state.nextRunAt === runAt || taskInstance.attempts > 1);
+  return isContinuation ? { requestedAt, state } : { requestedAt: runAt, state: {} };
 };
 
 // Reschedules the task, recording the `runAt` so the next run can recognise itself as a continuation
