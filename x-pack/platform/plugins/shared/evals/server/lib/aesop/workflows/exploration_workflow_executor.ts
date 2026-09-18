@@ -31,6 +31,7 @@ import {
 } from '../validation/skill_content_validator';
 import { SkillDeduplicator } from '../dedup/skill_deduplicator';
 import { ConversationAnalyzer, type ConversationInsights } from '../analysis/conversation_analyzer';
+import { parseJsonFromLlmText } from '../utils/llm_json';
 
 const PROPOSED_SKILLS_INDEX = '.aesop-proposed-skills';
 const DISCOVERED_PATTERNS_INDEX = '.aesop-discovered-patterns';
@@ -1108,18 +1109,7 @@ If no improvements are warranted, return an empty array: []`;
     skillDetails: AgentBuilderSkillDetail[]
   ): ProposedSkill[] {
     try {
-      let cleaned = response;
-      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned
-        .replace(/```json?\s*/g, '')
-        .replace(/```\s*/g, '')
-        .trim();
-      if (!cleaned.startsWith('[')) {
-        const match = cleaned.match(/\[[\s\S]*\]/);
-        if (match) cleaned = match[0];
-      }
-
-      const parsed = JSON.parse(cleaned);
+      const parsed = parseJsonFromLlmText(response, 'array');
       if (!Array.isArray(parsed)) return [];
 
       const skillMap = new Map(skillDetails.map((s) => [s.id, s]));
@@ -1479,18 +1469,7 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
 
   private parseLLMSkills(response: string): ProposedSkill[] {
     try {
-      let cleaned = response;
-      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned
-        .replace(/```json?\s*/g, '')
-        .replace(/```\s*/g, '')
-        .trim();
-      if (!cleaned.startsWith('[')) {
-        const match = cleaned.match(/\[[\s\S]*\]/);
-        if (match) cleaned = match[0];
-      }
-
-      const parsed = JSON.parse(cleaned);
+      const parsed = parseJsonFromLlmText(response, 'array');
       if (!Array.isArray(parsed)) return [];
 
       const allIndexNames = this.schemas.map((s) => s.indexName);
@@ -1510,7 +1489,10 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
             skillId: `skill-llm-${patternId}`,
             name: String(item.name || 'Untitled Skill'),
             description: String(item.description || ''),
-            confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0.8)),
+            confidence:
+              item.confidence != null && !isNaN(Number(item.confidence))
+                ? Math.max(0, Math.min(1, Number(item.confidence)))
+                : 0.8,
             markdown: String(item.markdown || ''),
             sourceIndices: indices,
             derivedFrom: 'llm' as const,

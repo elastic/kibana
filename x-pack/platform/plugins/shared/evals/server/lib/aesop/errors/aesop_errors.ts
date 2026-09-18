@@ -113,9 +113,11 @@ export class SkillValidationNotPassedError extends AESOPError {
 }
 
 export class SkillAlreadyDeployedError extends AESOPError {
-  constructor(skillId: string, agentBuilderSkillId: string) {
+  constructor(skillId: string, agentBuilderSkillId?: string) {
     super(
-      `Skill '${skillId}' is already deployed to Agent Builder (ID: ${agentBuilderSkillId}). Cannot deploy twice.`,
+      `Skill '${skillId}' is already deployed to Agent Builder${
+        agentBuilderSkillId ? ` (ID: ${agentBuilderSkillId})` : ''
+      }. Cannot deploy twice.`,
       'SKILL_ALREADY_DEPLOYED',
       409,
       false,
@@ -338,4 +340,38 @@ export function isRetryableError(error: unknown): boolean {
     message.includes('unavailable') ||
     message.includes('429') // Rate limit
   );
+}
+
+/**
+ * Detects an Elasticsearch "document/index does not exist" error.
+ *
+ * The ES client throws a ResponseError with `meta.statusCode === 404` for
+ * `get()` on a missing document; depending on the client version the type
+ * surfaces as `body.error.type` (`document_missing_exception`,
+ * `index_not_found_exception`) or only in the message. Without this check the
+ * route's generic catch block turns a missing skill into a 500.
+ */
+export function isElasticsearchNotFoundError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const err = error as {
+    meta?: { statusCode?: number };
+    statusCode?: number;
+    status?: number;
+    body?: { error?: { type?: string } };
+  };
+
+  if (err.meta?.statusCode === 404 || err.statusCode === 404 || err.status === 404) {
+    return true;
+  }
+
+  const errorType = err.body?.error?.type;
+  if (errorType === 'document_missing_exception' || errorType === 'index_not_found_exception') {
+    return true;
+  }
+
+  const message = getErrorMessage(error).toLowerCase();
+  return message.includes('not_found') || message.includes('document_missing_exception');
 }

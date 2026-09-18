@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of, EMPTY, throwError } from 'rxjs';
+import { of, EMPTY, throwError, Subject } from 'rxjs';
 import { AgentOrchestrator } from './agent_orchestrator';
 
 describe('AgentOrchestrator', () => {
@@ -46,13 +46,14 @@ describe('AgentOrchestrator', () => {
       expect(result).toBe('Hello world');
       expect(agentBuilder.execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
-        request: mockRequest,
-        params: expect.objectContaining({
-          agentId: 'test-agent',
-          connectorId: 'test-connector',
-          nextInput: { message: 'test message' },
-        }),
-      }));
+          request: mockRequest,
+          params: expect.objectContaining({
+            agentId: 'test-agent',
+            connectorId: 'test-connector',
+            nextInput: { message: 'test message' },
+          }),
+        })
+      );
     });
 
     it('extracts response from conversationUpdate event', async () => {
@@ -102,6 +103,42 @@ describe('AgentOrchestrator', () => {
         request: mockRequest,
         connectorId: 'c1',
         logger: mockLogger,
+      });
+
+      const result = await orchestrator.executeAgent('agent1', 'go');
+      expect(result).toBe('');
+    });
+
+    it('keeps the last valid response when the stream never completes', async () => {
+      const events$ = new Subject<any>();
+      const agentBuilder = createMockAgentBuilderStart(events$);
+
+      const orchestrator = new AgentOrchestrator({
+        agentBuilderStart: agentBuilder,
+        request: mockRequest,
+        connectorId: 'c1',
+        logger: mockLogger,
+        timeoutMs: 50,
+      });
+
+      const pending = orchestrator.executeAgent('agent1', 'go');
+      // let executeAgent() resolve and the pipeline subscribe before emitting
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      events$.next({ type: 'messageComplete', message: { content: 'Hello world' } });
+
+      await expect(pending).resolves.toBe('Hello world');
+    });
+
+    it('returns empty string when the stream times out before emitting anything', async () => {
+      const events$ = new Subject<any>();
+      const agentBuilder = createMockAgentBuilderStart(events$);
+
+      const orchestrator = new AgentOrchestrator({
+        agentBuilderStart: agentBuilder,
+        request: mockRequest,
+        connectorId: 'c1',
+        logger: mockLogger,
+        timeoutMs: 25,
       });
 
       const result = await orchestrator.executeAgent('agent1', 'go');
@@ -310,6 +347,90 @@ describe('AgentOrchestrator', () => {
 
       const result = await orchestrator.improveSkill('# Old', 'fix it');
       expect(result.name).toBe('Fixed');
+    });
+  });
+
+  describe('response parsing', () => {
+    const skillPayload = JSON.stringify([
+      { name: 'Test Skill', description: 'desc', markdown: '# Test', confidence: 0.9 },
+    ]);
+
+    const runPipelineWithSkillResponse = async (skillResponse: string) => {
+      const agentBuilder = {
+        execution: {
+          executeAgent: jest
+            .fn()
+            .mockResolvedValueOnce({
+              executionId: 'e1',
+              events$: of({ type: 'messageComplete', message: { content: '{"schemas": []}' } }),
+            })
+            .mockResolvedValueOnce({
+              executionId: 'e2',
+              events$: of({
+                type: 'messageComplete',
+                message: { content: '[{"name": "pattern1"}]' },
+              }),
+            })
+            .mockResolvedValueOnce({
+              executionId: 'e3',
+              events$: of({ type: 'messageComplete', message: { content: skillResponse } }),
+            }),
+        },
+      };
+
+      const orchestrator = new AgentOrchestrator({
+        agentBuilderStart: agentBuilder,
+        request: mockRequest,
+        connectorId: 'c1',
+        logger: mockLogger,
+      });
+
+      return orchestrator.runDiscoveryPipeline({
+        indexNames: ['logs-test'],
+        analystRole: 'SOC Analyst',
+      });
+    };
+
+    it('parses a skills array followed by prose containing brackets', async () => {
+      const result = await runPipelineWithSkillResponse(
+        `${skillPayload}\n\nNote: see [docs] for the skill format.`
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('Test Skill');
+    });
+
+    it('parses a skills array wrapped in prose and code fences', async () => {
+      const result = await runPipelineWithSkillResponse(
+        `Here are the generated skills:\n\`\`\`json\n${skillPayload}\n\`\`\``
+      );
+
+      expect(result).toHaveLength(1);
+    });
+
+    it('parses validation JSON followed by prose containing braces', async () => {
+      const agentBuilder = createMockAgentBuilderStart(
+        of({
+          type: 'messageComplete',
+          message: {
+            content:
+              'Evaluation: {"score": 0.92, "passed": true, "criteria": {"safety": 1}} ' +
+              'Note: placeholders like {this} may appear in the feedback.',
+          },
+        })
+      );
+
+      const orchestrator = new AgentOrchestrator({
+        agentBuilderStart: agentBuilder,
+        request: mockRequest,
+        connectorId: 'c1',
+        logger: mockLogger,
+      });
+
+      const result = await orchestrator.validateSkill('# Test Skill');
+
+      expect(result.score).toBe(0.92);
+      expect(result.passed).toBe(true);
     });
   });
 });

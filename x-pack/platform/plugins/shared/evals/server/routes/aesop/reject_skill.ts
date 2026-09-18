@@ -16,6 +16,7 @@ import {
   SkillNotFoundError,
   SkillAlreadyDeployedError,
   getErrorMessage,
+  isElasticsearchNotFoundError,
 } from '../../lib/aesop/errors/aesop_errors';
 
 const rejectSkillParamsSchema = z.object({
@@ -98,11 +99,7 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
               id: skillId,
             });
           } catch (error) {
-            if (
-              getErrorMessage(error).toLowerCase().includes('not_found') ||
-              getErrorMessage(error).includes('document_missing_exception') ||
-              (error as any)?.meta?.statusCode === 404
-            ) {
+            if (isElasticsearchNotFoundError(error)) {
               throw new SkillNotFoundError(skillId);
             }
             throw error;

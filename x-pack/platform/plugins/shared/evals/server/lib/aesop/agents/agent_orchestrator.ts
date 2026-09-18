@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { lastValueFrom, timeout, catchError, filter, map, of } from 'rxjs';
+import { lastValueFrom, timeout, catchError, filter, map, of, tap } from 'rxjs';
+import { parseJsonFromLlmText } from '../utils/llm_json';
 
 export interface AgentOrchestrationConfig {
   agentBuilderStart: any;
@@ -56,6 +57,10 @@ export class AgentOrchestrator {
     logger.debug(`[AESOP] Agent ${agentId} execution started: ${executionId}`);
 
     try {
+      // Keep the last valid response so a stream that never completes (timeout)
+      // still yields the agent's answer instead of being discarded.
+      let lastResponse = '';
+
       const response = await lastValueFrom(
         events$.pipe(
           filter(
@@ -76,12 +81,15 @@ export class AgentOrchestrator {
             return '';
           }),
           filter((text: string) => text.length > 0),
+          tap((text: string) => {
+            lastResponse = text;
+          }),
           timeout(this.timeoutMs),
           catchError((err) => {
             logger.error(
               `[AESOP] Agent ${agentId} stream error: ${err instanceof Error ? err.message : String(err)}`
             );
-            return of('');
+            return of(lastResponse);
           })
         )
       );
@@ -167,11 +175,8 @@ export class AgentOrchestrator {
 
   private parseSkillsFromResponse(response: string): any[] {
     try {
-      let cleaned = response;
-      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
-      const match = cleaned.match(/\[[\s\S]*\]/);
-      return match ? JSON.parse(match[0]) : [];
+      const parsed = parseJsonFromLlmText(response, 'array');
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       this.config.logger.error('[AESOP] Failed to parse skills from agent response');
       return [];
@@ -179,18 +184,10 @@ export class AgentOrchestrator {
   }
 
   private parseJsonFromResponse(response: string): any | null {
-    try {
-      let cleaned = response;
-      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
-      if (!cleaned.startsWith('{')) {
-        const match = cleaned.match(/\{[\s\S]*\}/);
-        if (match) cleaned = match[0];
-      }
-      return JSON.parse(cleaned);
-    } catch {
+    const parsed = parseJsonFromLlmText(response, 'object');
+    if (parsed === null) {
       this.config.logger.error('[AESOP] Failed to parse JSON from agent response');
-      return null;
     }
+    return parsed;
   }
 }

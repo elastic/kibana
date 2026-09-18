@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import type { ProposedSkillDocument } from '../../lib/aesop/types';
+import { isElasticsearchNotFoundError } from '../../lib/aesop/errors/aesop_errors';
 
 const runSkillValidationParamsSchema = z.object({
   skillId: z.string(),
@@ -53,10 +54,18 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
 
         try {
           // 1. Load skill
-          const skillDoc = await esClient.get({
-            index: '.aesop-proposed-skills',
-            id: skillId,
-          });
+          let skillDoc;
+          try {
+            skillDoc = await esClient.get({
+              index: '.aesop-proposed-skills',
+              id: skillId,
+            });
+          } catch (error) {
+            if (isElasticsearchNotFoundError(error)) {
+              return response.notFound({ body: { message: `Skill ${skillId} not found` } });
+            }
+            throw error;
+          }
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {

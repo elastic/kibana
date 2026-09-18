@@ -9,7 +9,6 @@ import {
   WorkflowNotFoundError,
   WorkflowExecutionError,
   WorkflowTimeoutError,
-  SkillNotFoundError,
   SkillValidationNotPassedError,
   SkillAlreadyDeployedError,
 } from './aesop_errors';
@@ -60,12 +59,12 @@ describe('AESOP Error Classes', () => {
 
   describe('SkillValidationNotPassedError', () => {
     it('should include eval score in metadata', () => {
-      const error = new SkillValidationNotPassedError('test-skill', 0.65, 0.80);
+      const error = new SkillValidationNotPassedError('test-skill', 0.65, 0.8);
 
       expect(error.metadata).toEqual({
         skillId: 'test-skill',
         actualScore: 0.65,
-        requiredScore: 0.80,
+        requiredScore: 0.8,
       });
       expect(error.retryable).toBe(false);
     });
@@ -84,6 +83,23 @@ describe('AESOP Error Classes', () => {
       expect(error.statusCode).toBe(409);
       expect(error.retryable).toBe(false);
       expect(error.message).toMatch(/already deployed|duplicate/i);
+    });
+
+    it('should omit the Agent Builder ID when the deployment record has none', () => {
+      const error = new SkillAlreadyDeployedError('deployed-skill', undefined);
+
+      expect(error.message).toBe(
+        "Skill 'deployed-skill' is already deployed to Agent Builder. Cannot deploy twice."
+      );
+      expect(error.message).not.toContain('undefined');
+      expect(error.metadata.agent_builder_skill_id).toBeUndefined();
+    });
+
+    it('should include the Agent Builder ID when it is recorded', () => {
+      const error = new SkillAlreadyDeployedError('deployed-skill', 'ab-skill-999');
+
+      expect(error.message).toContain('(ID: ab-skill-999)');
+      expect(error.metadata.agent_builder_skill_id).toBe('ab-skill-999');
     });
   });
 
