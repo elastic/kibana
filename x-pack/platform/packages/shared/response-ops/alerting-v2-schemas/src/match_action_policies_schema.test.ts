@@ -6,13 +6,13 @@
  */
 
 import {
-  matchActionPoliciesForRuleBodySchema,
-  matchActionPoliciesForRuleResponseSchema,
-} from './matched_action_policies_response_schema';
+  matchActionPoliciesBodySchema,
+  matchActionPoliciesResponseSchema,
+} from './match_action_policies_schema';
 
-describe('matchActionPoliciesForRuleBodySchema', () => {
+describe('matchActionPoliciesBodySchema', () => {
   it('accepts a valid rule payload', () => {
-    const result = matchActionPoliciesForRuleBodySchema.parse({
+    const result = matchActionPoliciesBodySchema.parse({
       rule: { tags: ['cpu'] },
     });
 
@@ -23,7 +23,7 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
-      matchActionPoliciesForRuleBodySchema.parse({
+      matchActionPoliciesBodySchema.parse({
         rule: { tags: ['cpu'] },
         unknownField: 'x',
       })
@@ -32,7 +32,7 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
 
   it('rejects rule id and name (strict, no longer supported)', () => {
     expect(() =>
-      matchActionPoliciesForRuleBodySchema.parse({
+      matchActionPoliciesBodySchema.parse({
         rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
       })
     ).toThrow();
@@ -40,27 +40,25 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
 
   it('rejects unknown keys inside rule (strict)', () => {
     expect(() =>
-      matchActionPoliciesForRuleBodySchema.parse({
+      matchActionPoliciesBodySchema.parse({
         rule: { unknownField: 'x' },
       })
     ).toThrow();
   });
 });
 
-describe('matchActionPoliciesForRuleResponseSchema', () => {
+describe('matchActionPoliciesResponseSchema', () => {
   it('accepts a response with an empty item list and a total', () => {
-    const result = matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: 0 });
+    const result = matchActionPoliciesResponseSchema.parse({ items: [], total: 0 });
 
     expect(result).toEqual({ items: [], total: 0 });
   });
 
   it('rejects a response missing total', () => {
-    expect(() => matchActionPoliciesForRuleResponseSchema.parse({ items: [] })).toThrow();
+    expect(() => matchActionPoliciesResponseSchema.parse({ items: [] })).toThrow();
   });
 
   it('rejects a negative total', () => {
-    expect(() =>
-      matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: -1 })
-    ).toThrow();
+    expect(() => matchActionPoliciesResponseSchema.parse({ items: [], total: -1 })).toThrow();
   });
 });

@@ -8,7 +8,7 @@
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useMatchedActionPolicies } from '@kbn/alerting-v2-rule-form';
 
-/** Max policies evaluated by _match_for_rule; counts may undercount when the space has more. */
+/** Max policies evaluated by _match; counts may undercount when the space has more. */
 export const LINKED_ACTION_POLICIES_FETCH_LIMIT = 100;
 
 export interface UseLinkedActionPoliciesResult {

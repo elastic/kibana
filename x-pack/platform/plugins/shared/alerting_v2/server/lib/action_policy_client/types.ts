@@ -60,11 +60,11 @@ export interface FindActionPoliciesResponse {
   perPage: number;
 }
 
-export interface MatchActionPoliciesForRuleParams {
+export interface MatchActionPoliciesParams {
   ruleTags?: string[];
 }
 
-export interface MatchActionPoliciesForRuleResponse {
+export interface MatchActionPoliciesResponse {
   items: MatchedActionPolicy[];
   total: number;
 }

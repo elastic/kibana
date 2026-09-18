@@ -42,7 +42,7 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.items).toEqual(fakeResponse.items);
     expect(result.current.total).toBe(42);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/internal/alerting/v2/action_policies/_match_for_rule',
+      '/internal/alerting/v2/action_policies/_match',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
@@ -104,7 +104,7 @@ describe('useMatchedActionPolicies', () => {
 
     expect(result.current.items).toEqual(fakeResponse.items);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/internal/alerting/v2/action_policies/_match_for_rule',
+      '/internal/alerting/v2/action_policies/_match',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: {} }),

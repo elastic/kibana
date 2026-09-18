@@ -6,15 +6,15 @@
  */
 
 import type {
-  MatchActionPoliciesForRuleBody,
-  MatchActionPoliciesForRuleResponse,
+  MatchActionPoliciesBody,
+  MatchActionPoliciesResponse,
 } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { ACTION_POLICY_RESPONSE } from './action_policy_oas_shared_examples';
 
-export const MATCH_ACTION_POLICIES_FOR_RULE_REQUEST: MatchActionPoliciesForRuleBody = {
+export const MATCH_ACTION_POLICIES_REQUEST: MatchActionPoliciesBody = {
   rule: {
     tags: ['production'],
   },
@@ -25,23 +25,23 @@ const TAGGED_ACTION_POLICY_RESPONSE = {
   matcher: { tags: ['production'] },
 };
 
-export const MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE: MatchActionPoliciesForRuleResponse = {
+export const MATCH_ACTION_POLICIES_RESPONSE: MatchActionPoliciesResponse = {
   items: [{ actionPolicy: TAGGED_ACTION_POLICY_RESPONSE, category: 'tags' }],
   total: 1,
 };
 
-export const matchActionPoliciesForRuleOasExamples = (): AlertingOasOperationObject =>
+export const matchActionPoliciesOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'matchActionPoliciesForRuleRequest',
+      name: 'matchActionPoliciesRequest',
       summary: 'Rule to match action policies against',
-      value: MATCH_ACTION_POLICIES_FOR_RULE_REQUEST,
+      value: MATCH_ACTION_POLICIES_REQUEST,
     },
     responses: {
       200: {
-        name: 'matchActionPoliciesForRuleResponse',
+        name: 'matchActionPoliciesResponse',
         summary: 'Action policies matching the rule',
-        value: MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
+        value: MATCH_ACTION_POLICIES_RESPONSE,
       },
       400: invalidResponseExample({
         summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
