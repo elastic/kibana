@@ -163,9 +163,7 @@ describe('RuleTagsSelector', () => {
 
   it('does not add a duplicate tag on onCreateOption', async () => {
     const onChange = jest.fn();
-    renderWithI18n(
-      <RuleTagsSelector matcher={{ tags: ['existing-tag'] }} onChange={onChange} />
-    );
+    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['existing-tag'] }} onChange={onChange} />);
 
     await user.type(getComboBoxInput(), 'existing-tag');
     await user.keyboard('{Enter}');
