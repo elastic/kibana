@@ -48,13 +48,20 @@ export const registerCreateRoute = (router: IRouter) => {
               })
             )
           ),
+          initialNamespaces: schema.maybe(
+            // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
+            schema.arrayOf(
+              // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
+              schema.string()
+            )
+          ),
         }),
       },
     },
     catchAndReturnBoomErrors(async (ctx, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const { attributes, migrationVersion, references } = req.body;
+      const { attributes, migrationVersion, references, initialNamespaces } = req.body;
       const { savedObjects } = await ctx.core;
 
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
@@ -65,6 +72,7 @@ export const registerCreateRoute = (router: IRouter) => {
         overwrite,
         migrationVersion,
         references,
+        initialNamespaces,
       };
       const result = await soClient.create(type, attributes, options);
       return res.ok({ body: result });
