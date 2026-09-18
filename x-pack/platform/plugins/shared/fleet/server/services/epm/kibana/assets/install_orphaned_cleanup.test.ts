@@ -130,7 +130,14 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
   });
 
   it('does not call find() when the archive contains no multiple-isolated assets', async () => {
-    const iterator = makeArchiveIterator([makeDashboardAsset('my-dashboard')]);
+    // Only types not in MULTIPLE_ISOLATED_KIBANA_SO_TYPES (e.g. visualization)
+    const vizAsset: ArchiveAsset = {
+      id: 'my-viz',
+      type: KibanaSavedObjectType.visualization,
+      attributes: {},
+      references: [],
+    };
+    const iterator = makeArchiveIterator([vizAsset]);
 
     await deleteOrphanedMultipleIsolatedAssets({
       kibanaAssetsArchiveIterator: iterator,
@@ -143,7 +150,7 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     expect(mockBulkDelete).not.toHaveBeenCalled();
   });
 
-  it('calls find() for tag and alertingRuleTemplate assets but not other types', async () => {
+  it('calls find() for tag, alertingRuleTemplate, and dashboard assets but not other types', async () => {
     const iterator = makeArchiveIterator([
       makeTagAsset('my-tag'),
       makeDashboardAsset('my-dashboard'),
@@ -157,13 +164,57 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
       logger: mockLogger,
     });
 
-    expect(mockFind).toHaveBeenCalledTimes(2);
+    expect(mockFind).toHaveBeenCalledTimes(3);
     expect(mockFind).toHaveBeenCalledWith(
       expect.objectContaining({ type: KibanaSavedObjectType.tag })
     );
     expect(mockFind).toHaveBeenCalledWith(
       expect.objectContaining({ type: KibanaSavedObjectType.alertingRuleTemplate })
     );
+    expect(mockFind).toHaveBeenCalledWith(
+      expect.objectContaining({ type: KibanaSavedObjectType.dashboard })
+    );
+  });
+
+  it('deletes an untracked orphaned dashboard UUID on a fresh install', async () => {
+    const orphanId = 'uuid-orphan-from-failed-install';
+    mockFind.mockResolvedValueOnce(
+      makeFindResult([
+        { id: orphanId, type: KibanaSavedObjectType.dashboard, originId: 'my-dashboard' },
+      ])
+    );
+
+    const iterator = makeArchiveIterator([makeDashboardAsset('my-dashboard')]);
+
+    await deleteOrphanedMultipleIsolatedAssets({
+      kibanaAssetsArchiveIterator: iterator,
+      installedPkg: undefined,
+      spaceId: 'default',
+      logger: mockLogger,
+    });
+
+    expect(mockBulkDelete).toHaveBeenCalledWith(
+      expect.arrayContaining([{ id: orphanId, type: KibanaSavedObjectType.dashboard }]),
+      expect.anything()
+    );
+  });
+
+  it('does not delete a dashboard whose raw _id matches an asset id and has no originId', async () => {
+    // Objects matched only by _id (no originId) are legitimately shared and must be preserved.
+    mockFind.mockResolvedValueOnce(
+      makeFindResult([{ id: 'my-dashboard', type: KibanaSavedObjectType.dashboard }])
+    );
+
+    const iterator = makeArchiveIterator([makeDashboardAsset('my-dashboard')]);
+
+    await deleteOrphanedMultipleIsolatedAssets({
+      kibanaAssetsArchiveIterator: iterator,
+      installedPkg: undefined,
+      spaceId: 'default',
+      logger: mockLogger,
+    });
+
+    expect(mockBulkDelete).not.toHaveBeenCalled();
   });
 
   it('deletes untracked objects found for a tag asset on a fresh install', async () => {
