@@ -25,7 +25,7 @@ export const fetchConnectorById = async (
       method: 'GET',
       path: `/_connector/${connectorId}`,
     });
-    if (result.deleted) {
+    if (!result?.id || result.deleted) {
       return undefined;
     }
     return result;
@@ -50,7 +50,7 @@ export const fetchConnectorByIndexName = async (
       },
     });
     const result = connectorListResult.count > 0 ? connectorListResult.results[0] : undefined;
-    if (result?.deleted) {
+    if (!result?.id || result.deleted) {
       return undefined;
     }
     return result;

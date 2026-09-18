@@ -71,6 +71,14 @@ describe('fetchConnectors lib', () => {
       ).resolves.toBeUndefined();
     });
 
+    it('should return undefined if connector response has no id', async () => {
+      mockClient.transport.request.mockResolvedValue({});
+
+      await expect(
+        fetchConnectorById(mockClient as unknown as ElasticsearchClient, 'connectorId')
+      ).resolves.toBeUndefined();
+    });
+
     it('should return undefined if connector not found', async () => {
       mockClient.transport.request.mockImplementationOnce(() => Promise.reject(notFoundError));
 
@@ -120,6 +128,16 @@ describe('fetchConnectors lib', () => {
       mockClient.transport.request.mockResolvedValue({
         count: 1,
         results: [{ id: 'connectorId', service_type: 'someServiceType', deleted: true }],
+      });
+
+      await expect(
+        fetchConnectorByIndexName(mockClient as unknown as ElasticsearchClient, 'indexName')
+      ).resolves.toBeUndefined();
+    });
+    it('should return undefined if connector response has no id', async () => {
+      mockClient.transport.request.mockResolvedValue({
+        count: 1,
+        results: [{}],
       });
 
       await expect(
