@@ -6,7 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 
 interface ReleaseLocalContentParams {
   refetch: () => Promise<Conversation>;
@@ -42,10 +42,7 @@ export const releaseLocalContent = async ({
   }
   if (
     executionId &&
-    events.some(
-      (event) =>
-        event.type === TimelineEventType.executionTerminated && event.execution_id === executionId
-    )
+    events.some((event) => isExecutionTerminalEvent(event) && event.execution_id === executionId)
   ) {
     clearExecution(executionId);
   }

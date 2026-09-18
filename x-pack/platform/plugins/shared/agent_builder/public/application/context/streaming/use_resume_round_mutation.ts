@@ -10,7 +10,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -101,7 +101,7 @@ export const useResumeRoundMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
-            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+            if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               timelineExecutionId ??= event.execution_id;
             }
           })

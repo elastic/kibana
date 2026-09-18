@@ -12,7 +12,7 @@ import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ConversationAttachment,
@@ -203,7 +203,7 @@ export const useSendMessageMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
-            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+            if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               timelineExecutionId ??= event.execution_id;
               triggerEventId ??= event.trigger_event_id;
             }
