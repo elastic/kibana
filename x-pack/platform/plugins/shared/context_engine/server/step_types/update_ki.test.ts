@@ -355,6 +355,29 @@ describe('getUpdateKiStepDefinition', () => {
     expect(document['@timestamp']).not.toBe(existing['@timestamp']);
   });
 
+  it('resolves the AI index with the workflow space id', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: { description: 'Updated' } },
+      esClient,
+      spaceId: 'marketing',
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(service.get).toHaveBeenCalledWith('my-ai-index', 'marketing');
+  });
+
   it('throws ConflictError when the update loses the revision check', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),

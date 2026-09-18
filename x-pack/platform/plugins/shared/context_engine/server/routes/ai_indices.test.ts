@@ -11,6 +11,7 @@ import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
@@ -20,6 +21,8 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDICES,
+  MAX_AI_INDEX_TRACES,
+  MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
   aiIndexKiByIdPath,
@@ -93,6 +96,7 @@ const aiIndexItem: AiIndexHttpItem = {
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+  traces: [],
   date_created: '2026-07-08T12:10:30.000Z',
   date_modified: '2026-07-08T12:10:30.000Z',
 };
@@ -122,6 +126,8 @@ describe('ai indices routes', () => {
   let improvementsClients: unknown[];
   let improvementsSpaceIds: string[];
   let getSpaces: jest.Mock;
+  let getAgentBuilder: jest.Mock;
+  let esResolveIndex: jest.Mock;
   const logger = loggerMock.create();
   const defaultSpaceId = 'default';
 
@@ -141,6 +147,7 @@ describe('ai indices routes', () => {
               indices: {
                 deleteDataStream: esDeleteDataStream,
                 delete: esDeleteIndex,
+                resolveIndex: esResolveIndex,
               },
             },
             asInternalUser: {
@@ -172,6 +179,11 @@ describe('ai indices routes', () => {
     esEsqlQuery = jest.fn();
     esDeleteDataStream = jest.fn().mockResolvedValue({ acknowledged: true });
     esDeleteIndex = jest.fn().mockResolvedValue({ acknowledged: true });
+    esResolveIndex = jest.fn().mockResolvedValue({
+      indices: [{ name: 'logs-default', attributes: ['open'] }],
+      aliases: [],
+      data_streams: [],
+    });
     esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     spacesStart = spacesMock.createStart();
     aiIndexService = {
@@ -189,6 +201,7 @@ describe('ai indices routes', () => {
     improvementsClients = [];
     improvementsSpaceIds = [];
     getSpaces = jest.fn().mockResolvedValue(spacesStart);
+    getAgentBuilder = jest.fn().mockResolvedValue(undefined);
     scheduleService = {
       reconcile: jest.fn().mockResolvedValue(undefined),
       remove: jest.fn().mockResolvedValue(undefined),
@@ -227,6 +240,7 @@ describe('ai indices routes', () => {
       },
       getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
       getActions: async () => actions,
+      getAgentBuilder,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
       getSpaces,
     });
@@ -331,6 +345,7 @@ describe('ai indices routes', () => {
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+      traces: [],
     };
 
     it('returns 201 when the AI index is created', async () => {
@@ -423,6 +438,40 @@ describe('ai indices routes', () => {
 
       expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
     });
+
+    it('returns 400 without creating when an index trace does not resolve', async () => {
+      esResolveIndex.mockResolvedValue({ indices: [], aliases: [], data_streams: [] });
+
+      await callRoute('POST', aiIndexPath, {
+        body: { ...postBody, traces: [{ type: 'index', value: 'missing-logs' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: `Index trace 'missing-logs' does not match any index, data stream, or alias`,
+        },
+      });
+    });
+
+    it('returns 400 without creating when an agent trace is not found', async () => {
+      getAgentBuilder.mockResolvedValue({
+        agents: {
+          getRegistry: async () => ({
+            has: async () => false,
+          }),
+        },
+      });
+
+      await callRoute('POST', aiIndexPath, {
+        body: { ...postBody, traces: [{ type: 'elastic_agent', value: 'missing-agent' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: `Agent 'missing-agent' was not found` },
+      });
+    });
   });
 
   describe('PUT /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -432,6 +481,7 @@ describe('ai indices routes', () => {
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow', value: 'nightly-refresh' }],
         sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+        traces: [],
       },
     };
 
@@ -509,6 +559,22 @@ describe('ai indices routes', () => {
         },
       });
     });
+
+    it('returns 400 without updating when an index trace does not resolve', async () => {
+      esResolveIndex.mockResolvedValue({ indices: [], aliases: [], data_streams: [] });
+
+      await callRoute('PUT', aiIndexByIdPath, {
+        ...putRequest,
+        body: { ...putRequest.body, traces: [{ type: 'index', value: 'missing-logs' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: `Index trace 'missing-logs' does not match any index, data stream, or alias`,
+        },
+      });
+    });
   });
 
   describe('GET /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -531,13 +597,17 @@ describe('ai indices routes', () => {
       });
     });
 
-    it('rethrows unexpected errors after logging the audit event', async () => {
-      aiIndexService.get.mockRejectedValue(new Error('boom'));
+    it('returns 500 with the unexpected error message after logging it', async () => {
+      const boom = new Error('boom');
+      aiIndexService.get.mockRejectedValue(boom);
 
-      await expect(
-        callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } })
-      ).rejects.toThrow('boom');
+      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
+      expect(logger.error).toHaveBeenCalledWith(boom.stack);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'boom' },
+      });
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -545,6 +615,26 @@ describe('ai indices routes', () => {
           kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
         })
       );
+    });
+
+    it('forwards Elasticsearch status codes instead of forcing 500', async () => {
+      aiIndexService.get.mockRejectedValue(
+        new errors.ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: 429,
+            body: {
+              error: { type: 'es_rejected_execution_exception', reason: 'too many requests' },
+            },
+          })
+        )
+      );
+
+      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 429,
+        body: { message: 'es_rejected_execution_exception: too many requests' },
+      });
     });
   });
 
@@ -578,6 +668,7 @@ describe('ai indices routes', () => {
         query: { size: 25 },
       });
 
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'default');
       expect(esEsqlQuery.mock.calls[0][0].query).toBe(
         `FROM "${aiIndexItem.dest.value}" METADATA _id, _index\n| LIMIT 0`
       );
@@ -1063,6 +1154,7 @@ describe('ai indices routes', () => {
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
           getActions: async () => actions,
+          getAgentBuilder,
           getWorkflowsManagementApi: async () => undefined,
           getSpaces: async () => undefined,
         });
@@ -1293,7 +1385,14 @@ describe('ai indices routes', () => {
       aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
 
       await callRoute('POST', aiIndexPath, {
-        body: { id: 'customer_support', sources: [], feedback_analysis: feedbackAnalysis },
+        body: {
+          id: 'customer_support',
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          automations: [],
+          sources: [],
+          traces: [],
+          feedback_analysis: feedbackAnalysis,
+        },
       });
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
@@ -1310,7 +1409,12 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', aiIndexByIdPath, {
         params: { aiIndexId: 'customer_support' },
-        body: { sources: [] },
+        body: {
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          automations: [],
+          sources: [],
+          traces: [],
+        },
       });
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
@@ -1367,11 +1471,24 @@ describe('ai indices routes', () => {
         body: feedbackAnalysis,
       });
       await callRoute('POST', aiIndexPath, {
-        body: { id: 'customer_support', sources: [], feedback_analysis: feedbackAnalysis },
+        body: {
+          id: 'customer_support',
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          automations: [],
+          sources: [],
+          traces: [],
+          feedback_analysis: feedbackAnalysis,
+        },
       });
       await callRoute('PUT', aiIndexByIdPath, {
         params: { aiIndexId: 'customer_support' },
-        body: { sources: [], feedback_analysis: feedbackAnalysis },
+        body: {
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          automations: [],
+          sources: [],
+          traces: [],
+          feedback_analysis: feedbackAnalysis,
+        },
       });
 
       expect(scheduleService.reconcile).toHaveBeenCalledTimes(3);
@@ -1513,6 +1630,7 @@ describe('ai indices routes', () => {
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+      traces: [],
     };
 
     const validateBody = (body: Record<string, unknown>) => {
@@ -1594,6 +1712,55 @@ describe('ai indices routes', () => {
       }));
       expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
+
+    it('defaults traces to an empty array when omitted', () => {
+      const { traces, ...bodyWithoutTraces } = validBody;
+      expect(validateBody(bodyWithoutTraces)).toMatchObject({ traces: [] });
+    });
+
+    it('defaults sources to an empty array when omitted', () => {
+      const { sources, ...bodyWithoutSources } = validBody;
+      expect(validateBody(bodyWithoutSources)).toMatchObject({ sources: [] });
+    });
+
+    it('accepts each traces type', () => {
+      expect(() =>
+        validateBody({
+          ...validBody,
+          traces: [
+            { type: 'elastic_agent', value: 'my-agent' },
+            { type: 'index', value: 'logs-*' },
+            { type: 'esql', value: 'FROM traces-* | LIMIT 10' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects traces exceeding the max size', () => {
+      const traces = Array.from({ length: MAX_AI_INDEX_TRACES + 1 }, (_, i) => ({
+        type: 'index',
+        value: `logs-${i}`,
+      }));
+      expect(() => validateBody({ ...validBody, traces })).toThrow();
+    });
+
+    it('rejects an index trace value with more than 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS + 1 },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() => validateBody({ ...validBody, traces: [{ type: 'index', value }] })).toThrow();
+    });
+
+    it('accepts an index trace value with exactly 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() =>
+        validateBody({ ...validBody, traces: [{ type: 'index', value }] })
+      ).not.toThrow();
+    });
   });
 
   describe('PUT body validation', () => {
@@ -1601,6 +1768,7 @@ describe('ai indices routes', () => {
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+      traces: [],
     };
 
     const validateBody = (body: Record<string, unknown>) => {
@@ -1675,9 +1843,9 @@ describe('ai indices routes', () => {
       ).toThrow();
     });
 
-    it('rejects a missing automations array', () => {
+    it('defaults automations to an empty array when omitted', () => {
       const { automations, ...bodyWithoutAutomations } = validBody;
-      expect(() => validateBody(bodyWithoutAutomations)).toThrow();
+      expect(validateBody(bodyWithoutAutomations)).toMatchObject({ automations: [] });
     });
 
     it('rejects automations exceeding the max size', () => {
@@ -1695,6 +1863,34 @@ describe('ai indices routes', () => {
       }));
       expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
+
+    it('defaults traces to an empty array when omitted', () => {
+      const { traces, ...bodyWithoutTraces } = validBody;
+      expect(validateBody(bodyWithoutTraces)).toMatchObject({ traces: [] });
+    });
+
+    it('defaults sources to an empty array when omitted', () => {
+      const { sources, ...bodyWithoutSources } = validBody;
+      expect(validateBody(bodyWithoutSources)).toMatchObject({ sources: [] });
+    });
+
+    it('rejects an index trace value with more than 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS + 1 },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() => validateBody({ ...validBody, traces: [{ type: 'index', value }] })).toThrow();
+    });
+
+    it('accepts an index trace value with exactly 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() =>
+        validateBody({ ...validBody, traces: [{ type: 'index', value }] })
+      ).not.toThrow();
+    });
   });
 
   describe('audit logging', () => {
@@ -1704,6 +1900,7 @@ describe('ai indices routes', () => {
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [],
         sources: [],
+        traces: [],
       },
     };
 
@@ -1713,6 +1910,7 @@ describe('ai indices routes', () => {
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [],
         sources: [],
+        traces: [],
       },
     };
 
@@ -1856,6 +2054,7 @@ describe('ai indices routes', () => {
           dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
           automations: [],
           sources: [],
+          traces: [],
           date_created: '2026-07-01T00:00:00.000Z',
           date_modified: '2026-07-01T00:00:00.000Z',
         });
@@ -1910,10 +2109,16 @@ describe('ai indices routes', () => {
       });
 
       it('logs outcome:failure on error', async () => {
-        aiIndexService.list.mockRejectedValue(new Error('boom'));
+        const boom = new Error('boom');
+        aiIndexService.list.mockRejectedValue(boom);
 
-        await expect(callRoute('GET', aiIndexPath, {})).rejects.toThrow('boom');
+        await callRoute('GET', aiIndexPath, {});
 
+        expect(logger.error).toHaveBeenCalledWith(boom.stack);
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: 500,
+          body: { message: 'boom' },
+        });
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({

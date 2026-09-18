@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
@@ -25,6 +25,7 @@ import type {
 } from '../../common/http_api/signals';
 import { apiPrivileges } from '../../common/features';
 import { getSignalGroups, getSignalsByTag } from '../signals/read';
+import { resolveSpaceId } from '../utils/resolve_space_id';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -57,15 +58,6 @@ const listSignalsQuerySchema = schema.object({
     defaultValue: DEFAULT_SIGNALS_PAGE_SIZE,
   }),
 });
-
-/**
- * Resolves the active space id for the request, falling back to the default space when the spaces
- * plugin is absent. Signals are read from the current space's index.
- */
-const DEFAULT_SPACE_ID = 'default';
-
-const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRequest): string =>
-  spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
 /**
  * Registers the read-only Signals routes. Reads run as the CURRENT USER (the signals indices are

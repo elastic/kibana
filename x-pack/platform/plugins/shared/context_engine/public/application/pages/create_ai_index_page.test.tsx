@@ -130,6 +130,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -156,6 +157,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -180,6 +182,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -209,6 +212,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );

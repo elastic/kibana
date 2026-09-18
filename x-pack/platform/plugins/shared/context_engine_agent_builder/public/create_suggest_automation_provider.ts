@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
+import type { AiIndexAttachmentData } from '../common/agent_builder_attachment_schemas';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
 
@@ -58,7 +59,14 @@ export const createSuggestAutomationProvider = ({
     if (!agentBuilder?.openChat) {
       return;
     }
-
+    const attachmentData: AiIndexAttachmentData = {
+      id: aiIndex.id,
+      description: aiIndex.description,
+      dest: aiIndex.dest,
+      sources: aiIndex.sources,
+      automations: aiIndex.automations,
+      traces: aiIndex.traces,
+    };
     agentBuilder.openChat({
       newConversation: true,
       autoSendInitialMessage: true,
@@ -74,13 +82,7 @@ export const createSuggestAutomationProvider = ({
               defaultMessage: 'AI index {name}',
               values: { name: aiIndex.id },
             }),
-          data: {
-            id: aiIndex.id,
-            description: aiIndex.description,
-            dest: aiIndex.dest,
-            sources: aiIndex.sources,
-            automations: aiIndex.automations,
-          },
+          data: attachmentData,
         },
       ],
     });

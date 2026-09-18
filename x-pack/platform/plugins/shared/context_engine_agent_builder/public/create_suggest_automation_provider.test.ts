@@ -21,6 +21,13 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-existing' }],
   sources: [{ type: 'esql', value: 'FROM tickets' }],
+  traces: [
+    {
+      type: 'elastic_agent',
+      value: 'my-support-agent',
+      query: 'FROM traces-agent_builder.otel-default',
+    },
+  ],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -119,6 +126,7 @@ describe('createSuggestAutomationProvider', () => {
               dest: aiIndex.dest,
               sources: aiIndex.sources,
               automations: aiIndex.automations,
+              traces: aiIndex.traces,
             },
           }),
         ],

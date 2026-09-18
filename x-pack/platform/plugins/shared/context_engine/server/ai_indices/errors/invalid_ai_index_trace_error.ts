@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './skills';
-export { toHashedId, toCustomHashedId, normalizeAgentIdForTelemetry } from './hashing';
+export class InvalidAiIndexTraceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidAiIndexTraceError';
+  }
+}

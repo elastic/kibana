@@ -47,6 +47,7 @@ export const registerCortexAiIndex = (
     dest: { type: 'index', value: CORTEX_AI_INDEX_DEST },
     automations: [],
     sources: [],
+    traces: [],
   });
 };
 

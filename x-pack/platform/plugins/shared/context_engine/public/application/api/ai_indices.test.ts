@@ -14,6 +14,7 @@ const properties: AiIndexProperties = {
   dest: { type: 'index', value: 'ai-index-idx-support' },
   automations: [],
   sources: [],
+  traces: [],
 };
 
 describe('listAiIndices', () => {
