@@ -1189,7 +1189,7 @@ export interface OnWriteScanFields {
 }
 
 export interface CustomYaraSignaturesFields {
-  /** Absent means never configured and is treated as disabled. Existing policies are backfilled when the `customYaraSignaturesEnabled` flag is removed. */
+  /** Absent means never configured and is treated as disabled. */
   custom_yara_signatures?: boolean;
 }
 
