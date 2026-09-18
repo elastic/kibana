@@ -48,3 +48,23 @@ export {
   UpdateWorkerRequestParams,
   UpdateWorkerResponse,
 } from './workers/update_worker_route.gen';
+export {
+  AffectedAsset,
+  HuntForThreatHit,
+  HuntForThreatResult,
+  HuntForThreatStatus,
+  HuntIoc,
+  HuntIocType,
+  HuntTechnology,
+  IndexScopeStatus,
+  IndexScopeWindow,
+  ResolvedIndexScope,
+} from './components/threat_intel.gen';
+export {
+  HuntForThreatRequestBody,
+  HuntForThreatResponse,
+} from './threat_intel/hunt_for_threat_route.gen';
+export {
+  HuntReadinessRequestQuery,
+  HuntReadinessResponse,
+} from './threat_intel/hunt_readiness_route.gen';
