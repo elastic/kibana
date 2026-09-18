@@ -113,8 +113,13 @@ export const createTrailRecorder = ({
   let pageKey = location.getPageKey();
   let unsubscribe: (() => void) | undefined;
   let candidate: Candidate | undefined;
-  /** A click whose UI has not shown up yet; it gets one more look, at the latest when the next click comes in. */
-  let awaited: { candidate: Candidate; timer: ReturnType<typeof setTimeout> } | undefined;
+  /**
+   * A click whose UI has not shown up yet. It gets another look whenever the page
+   * changes and a last one at the deadline, or when the next click comes in.
+   */
+  let awaited:
+    | { candidate: Candidate; timer: ReturnType<typeof setTimeout>; observer: MutationObserver }
+    | undefined;
 
   /** Records the step if the click disclosed UI and its control is still there; false when neither is the case yet. */
   const record = ({ control, step, before }: Candidate): boolean => {
@@ -130,10 +135,28 @@ export const createTrailRecorder = ({
       return;
     }
     clearTimeout(awaited.timer);
+    awaited.observer.disconnect();
     if (finalLook) {
       record(awaited.candidate);
     }
     awaited = undefined;
+  };
+
+  // The look has to come as the UI appears, not only at the deadline: a control
+  // may leave with what it disclosed (a menu item whose panel slides out as the
+  // submenu slides in) and would be taken for dismissed by then.
+  const awaitDisclosure = (current: Candidate) => {
+    const observer = new MutationObserver(() => {
+      if (awaited?.candidate === current && record(current)) {
+        settleAwaited({ finalLook: false });
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    awaited = {
+      candidate: current,
+      timer: setTimeout(() => settleAwaited({ finalLook: true }), DISCLOSURE_WAIT_MS),
+      observer,
+    };
   };
 
   // The step is described before the page handles the click (labels and text can
@@ -165,10 +188,7 @@ export const createTrailRecorder = ({
     const current = candidate;
     candidate = undefined;
     if (!record(current)) {
-      awaited = {
-        candidate: current,
-        timer: setTimeout(() => settleAwaited({ finalLook: true }), DISCLOSURE_WAIT_MS),
-      };
+      awaitDisclosure(current);
     }
   };
 

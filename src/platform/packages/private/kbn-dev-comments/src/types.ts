@@ -138,9 +138,10 @@ export interface CommentsHostServices {
   /**
    * Renders what is on screen, the viewport at its size in CSS pixels, to a
    * canvas (e.g. with dom-to-image), leaving out elements marked with
-   * `IGNORE_ATTR`; without it, comments have no screenshots.
+   * `IGNORE_ATTR` and the host's own `ignoreSelectors`; without it, comments
+   * have no screenshots.
    */
   captureViewport?(): Promise<HTMLCanvasElement>;
-  /** Host UI that must never be commented on. */
+  /** Host UI that must never be commented on, nor appear in screenshots. */
   ignoreSelectors?: string[];
 }

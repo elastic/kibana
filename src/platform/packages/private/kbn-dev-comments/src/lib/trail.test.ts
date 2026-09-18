@@ -112,6 +112,31 @@ describe('trail', () => {
     expect(labels()).toEqual(['Open flyout', 'Open lazy flyout']);
   });
 
+  it('records a menu item whose submenu appears a frame later and takes the item away with its panel', async () => {
+    jest.useFakeTimers();
+    renderPage(`
+      <div id="menu" role="menu"><button type="button" id="alerts">Create alert rule</button></div>
+    `);
+    // Like EUI's nested context menu: the submenu is shown on the next frame,
+    // then the panel holding the clicked item slides out and is removed.
+    query('#alerts').addEventListener('click', () => {
+      requestAnimationFrame(() => {
+        const submenu = document.createElement('div');
+        submenu.setAttribute('role', 'menu');
+        document.body.append(submenu);
+        setTimeout(() => query('#menu').remove(), 250);
+      });
+    });
+
+    query('#alerts').click();
+    jest.advanceTimersByTime(20);
+    // Lets the page change be observed.
+    await Promise.resolve();
+    jest.advanceTimersByTime(500);
+
+    expect(labels()).toEqual(['Create alert rule']);
+  });
+
   it('records a control that showed a dialog kept mounted while hidden, not one that left it hidden', () => {
     renderPage(`
       <button type="button" id="show">Show</button>

@@ -14,7 +14,10 @@ import { routeFromLocation, type CommentRoute } from '../common';
 import { createCommentsApi } from './comments_api';
 import { captureViewport } from './capture_viewport';
 
-/** Developer toolbar and `@kbn/design-tools` UI that must never be commented on (mirrors `IGNORED_SELECTOR` in `@kbn/design-tools`). */
+/**
+ * Developer toolbar and `@kbn/design-tools` UI that must never be commented on,
+ * nor end up in screenshots (mirrors `IGNORED_SELECTOR` in `@kbn/design-tools`).
+ */
 const HOST_IGNORE_SELECTORS = [
   '#developerToolbar',
   '#measureOverlay',
@@ -60,7 +63,7 @@ export const createCommentsHostServices = ({
     return { username: user.username, fullName: user.full_name ?? undefined };
   },
 
-  captureViewport,
+  captureViewport: () => captureViewport(HOST_IGNORE_SELECTORS),
 
   ignoreSelectors: HOST_IGNORE_SELECTORS,
 });

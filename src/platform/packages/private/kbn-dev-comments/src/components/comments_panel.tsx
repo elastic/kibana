@@ -123,6 +123,8 @@ const PanelRow = ({
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
         <EuiFlexItem>
           <EuiPanel
+            element="button"
+            type="button"
             paddingSize="s"
             color="transparent"
             hasShadow={false}

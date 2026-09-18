@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
 import { createCommentsController } from '../state/comments_controller';
 import {
@@ -80,6 +81,34 @@ describe('CommentsLayer', () => {
     );
     expect(controller.store.getState()).toEqual(
       expect.objectContaining({ activeThreadId: 'a', focusPinId: null })
+    );
+  });
+
+  it('opens threads from the panel with the keyboard, inline when the element is not on screen', async () => {
+    const user = userEvent.setup();
+    const gone = createComment('gone', { anchor: anchorById('missing'), text: 'Where did it go' });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, gone]) });
+    act(() => controller.setActive(true));
+    const goneRow = await screen.findByTestId('devCommentsPanelItem-gone');
+    const goneToggle = within(goneRow).getByRole('button', { name: /Where did it go/ });
+
+    // The element is not on the page: Enter shows the thread below the row, Space hides it again.
+    goneToggle.focus();
+    await user.keyboard('{Enter}');
+    expect(goneToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(within(goneRow).getByTestId('devCommentsThread')).toBeInTheDocument();
+    await user.keyboard(' ');
+    expect(goneToggle).toHaveAttribute('aria-expanded', 'false');
+    expect(within(goneRow).queryByTestId('devCommentsThread')).toBeNull();
+
+    // The element is on the page: Enter opens the thread at its pin.
+    const seededRow = screen.getByTestId('devCommentsPanelItem-a');
+    within(seededRow)
+      .getByRole('button', { name: /Comment a/ })
+      .focus();
+    await user.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByTestId('devCommentsPin-a'))
     );
   });
 

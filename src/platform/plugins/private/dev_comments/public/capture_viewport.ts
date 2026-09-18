@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IGNORE_ATTR, getEffectiveBackgroundColor } from '@kbn/dev-comments';
+import { IGNORE_SELECTOR, getEffectiveBackgroundColor } from '@kbn/dev-comments';
 
 /** Elements this far (in px) beyond the viewport are still rendered, so that shadows and edges are not cut short. */
 const OFFSCREEN_MARGIN = 100;
@@ -58,10 +58,18 @@ const preserveScroll = (original: Node, clone: Node, after: boolean) => {
   }
 };
 
-/** What is on screen right now, at the viewport's size in CSS pixels, without the toolbar's or the layer's own UI. */
-export const captureViewport = async (): Promise<HTMLCanvasElement> => {
+/**
+ * What is on screen right now, at the viewport's size in CSS pixels, without
+ * the layer's own UI (marked with `IGNORE_ATTR`) or the host UI matching
+ * `ignoreSelectors`: the same UI that cannot be commented on.
+ */
+export const captureViewport = async (
+  ignoreSelectors: readonly string[] = []
+): Promise<HTMLCanvasElement> => {
   const { default: domtoimage } = await import('dom-to-image-more');
   const { innerWidth: width, innerHeight: height, scrollX, scrollY } = window;
+  // A filtered node is left out with its whole subtree, so matching the roots is enough.
+  const ignored = [IGNORE_SELECTOR, ...ignoreSelectors].join(',');
   return domtoimage.toCanvas(document.body, {
     width,
     height,
@@ -72,8 +80,7 @@ export const captureViewport = async (): Promise<HTMLCanvasElement> => {
     // `body` is transparent in Kibana (the color is on `html`), so captures keep the app's color mode.
     bgcolor: getEffectiveBackgroundColor(document.body),
     filter: (node) =>
-      !(node instanceof Element && node.hasAttribute(IGNORE_ATTR)) &&
-      !isOffScreen(node, width, height),
+      !(node instanceof Element && node.matches(ignored)) && !isOffScreen(node, width, height),
     adjustClonedNode: preserveScroll,
   });
 };
