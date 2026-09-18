@@ -643,6 +643,23 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.attributes['elastic.workflow.execution_id']).not.toBe('exec-uuid-789');
     });
 
+    it('preserves kibana.workflows.run_id verbatim in BOTH ID modes', () => {
+      // Contract, pinned deliberately. This attribute is the workflow-execution -> agent-span
+      // join key, so it must stay queryable without the consumer knowing a uiSetting.
+      // Note `elastic.workflow.*` and `gen_ai.conversation.id` above flip between plain and
+      // hashed with `includeRealIds`; a join key that changes encoding with a setting is
+      // exactly the failure mode this attribute exists to avoid.
+      // If hashing is ever extended to this key, this test fails LOUDLY instead of the join
+      // silently returning zero rows.
+      for (const includeRealIds of [false, true]) {
+        const exported = exportWith(
+          { includeRealIds },
+          { 'kibana.workflows.run_id': 'workflow-exec-uuid-abc' }
+        );
+        expect(exported.attributes['kibana.workflows.run_id']).toBe('workflow-exec-uuid-abc');
+      }
+    });
+
     it('does NOT hash gen_ai.tool.call.id', () => {
       const exported = exportWith(
         { includeRealIds: false },
