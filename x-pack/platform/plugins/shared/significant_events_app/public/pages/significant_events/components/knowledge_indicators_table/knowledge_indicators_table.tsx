@@ -32,6 +32,7 @@ import { DeleteTableItemsModal } from '../../../../components/knowledge_indicato
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
 import { GenerateSplitButton } from '../shared/generate_split_button';
+import { getGenerateDisabledTooltip } from '../shared/translations';
 import { StreamPicker } from '../shared/stream_picker';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useKiGeneration } from './ki_generation_context';
@@ -218,7 +219,10 @@ export function KnowledgeIndicatorsTable() {
           onRunFeaturesOnly={onRunFeaturesOnly}
           onRunQueriesOnly={onRunQueriesOnly}
           isRunDisabled={isRunDisabled}
-          runDisabledTooltip={activityBlockTooltip}
+          runDisabledTooltip={getGenerateDisabledTooltip({
+            activityBlockTooltip,
+            hasSelectedStreams: generationStreamNames.length > 0,
+          })}
           isConfigDisabled={generationStreamNames.length === 0}
           isLoading={isScheduling}
         />
