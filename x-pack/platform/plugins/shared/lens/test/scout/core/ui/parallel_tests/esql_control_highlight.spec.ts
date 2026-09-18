@@ -17,7 +17,7 @@ import {
 } from '../fixtures';
 
 const RELATED_PANEL_ID = testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA;
-const UNRELATED_PANEL_ID = testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA;
+const UNRELATED_PANEL_ID = testData.ESQL_MULTI_LAYER_PANEL_IDS.COMPARISON_DATA;
 const CONTROL_LABEL = 'os';
 const FIELD_CONTROL_LABEL = 'metric_field';
 const VARIABLE_LAYER_ID = 'variable_layer';

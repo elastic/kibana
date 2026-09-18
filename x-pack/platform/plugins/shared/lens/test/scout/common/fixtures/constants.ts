@@ -168,5 +168,5 @@ export const ESQL_CONVERSION_PANEL_IDS = {
 
 export const ESQL_MULTI_LAYER_PANEL_IDS = {
   DATA: 'esql-multi-data-panel',
-  MIXED_DATA: 'esql-mixed-data-panel',
+  COMPARISON_DATA: 'esql-multi-comparison-panel',
 } as const;

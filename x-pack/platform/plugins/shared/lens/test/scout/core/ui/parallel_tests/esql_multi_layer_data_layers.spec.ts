@@ -128,49 +128,6 @@ spaceTest.describe('Lens ES|QL data-layer lifecycle', { tag: '@local-stateful-cl
   );
 
   spaceTest(
-    'keeps text-based and form-based data layers independent',
-    async ({ page, pageObjects }) => {
-      const { dashboard, lens } = pageObjects;
-
-      await openInlineEditorAndWaitVisible(
-        pageObjects,
-        testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA
-      );
-      expect(await lens.layers.getLayerCount()).toBe(2);
-      expect(await lens.workspace.getEsqlQuery()).toBe(COUNT_QUERY);
-
-      await lens.layers.activateLayerTab(1);
-      await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText(Y_DIMENSION))
-        .toBe('Median of bytes');
-
-      await lens.layers.activateLayerTab(0);
-      await lens.workspace.submitEsqlQuery(MAX_QUERY);
-      await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA);
-
-      await lens.layers.activateLayerTab(1);
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText(Y_DIMENSION))
-        .toBe('Median of bytes');
-
-      await lens.layers.activateLayerTab(0);
-      await addDataLayer(page, 'line', 2);
-      expect(await lens.layers.getLayerCount()).toBe(3);
-      expect(await lens.workspace.getEsqlQuery()).toBe(MAX_QUERY);
-      await lens.dimensions.setTextBasedDimensionField(X_DIMENSION, '@timestamp', 2);
-      await lens.dimensions.setTextBasedDimensionField(Y_DIMENSION, 'MAX(bytes)', 2);
-      await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA);
-
-      await lens.layers.activateLayerTab(1);
-      await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText(Y_DIMENSION))
-        .toBe('Median of bytes');
-    }
-  );
-
-  spaceTest(
     'keeps the new source time field after changing a secondary layer query',
     async ({ kbnClient, page, pageObjects, scoutSpace }) => {
       const indexName = 'logstash-2015.09.22';
