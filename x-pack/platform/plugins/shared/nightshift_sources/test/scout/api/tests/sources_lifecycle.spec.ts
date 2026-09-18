@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RoleSessionCredentials } from '@kbn/scout';
@@ -213,9 +214,16 @@ apiTest.describe(
     });
 
     apiTest('returns 404 for an unknown source', async ({ apiClient }) => {
-      const response = await getSource(apiClient, manager.cookieHeader, 'does-not-exist');
+      const unknownId = randomUUID();
+      const response = await getSource(apiClient, manager.cookieHeader, unknownId);
       expect(response).toHaveStatusCode(404);
-      expect(response.body.message).toBe('Source does-not-exist not found');
+      expect(response.body.message).toBe(`Source ${unknownId} not found`);
+    });
+
+    apiTest('returns 400 for a malformed source id', async ({ apiClient }) => {
+      const response = await getSource(apiClient, manager.cookieHeader, 'does-not-exist');
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('Invalid UUID');
     });
   }
 );
