@@ -99,6 +99,12 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
           input: example.input.question,
+          // Pin the skill under test, as the sibling composite and durable specs in
+          // this package do: a routing miss otherwise makes `skillInvoked` false and
+          // fails every quality dimension before the raw-log worker is exercised,
+          // conflating router behaviour with corroboration quality. Routing is
+          // covered by the L0 smoke spec.
+          configurationOverrides: { skillIds: [SKILL_ID] },
         });
 
         const toolCallSteps = getToolCallSteps(response);

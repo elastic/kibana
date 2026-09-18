@@ -44,6 +44,7 @@ import { randomUUID } from 'crypto';
 import { tags, evaluate } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WATCH_WORKFLOW_IDS } from '../src/constants';
+import { hasWorkerEvalRecordShape } from '../src/worker_eval_record';
 import { runWatchWorkflow } from '../src/workflow_task';
 import { pollUntil } from '../src/polling';
 
@@ -182,13 +183,11 @@ evaluate.describe(
           }
 
           const persisted = record != null;
+          // Shape comes from the unit-tested predicate, and the Watch identity is
+          // checked on top of it: the inline presence check this replaced accepted
+          // an empty verdict, `NaN` confidence and `provenance: false`.
           const hasRecordShape =
-            record != null &&
-            typeof record.verdict === 'string' &&
-            typeof record.confidence === 'number' &&
-            record.watch === 'watch-floor' &&
-            record.provenance != null &&
-            record.evidenceRefs != null;
+            record != null && record.watch === 'watch-floor' && hasWorkerEvalRecordShape(record);
 
           log.info(
             `[L4] persisted=${persisted}, hasRecordShape=${hasRecordShape}, ` +
