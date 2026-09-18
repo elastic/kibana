@@ -10,8 +10,8 @@ import countPrimes from './count_primes';
 
 /**
  * Worker module for `sampleWorkerTask`, a fully worker-run task type registered via
- * `workerModuleId`. Runs entirely in a Piscina worker thread with no Kibana services -
- * only structured-cloneable input/output crosses the thread boundary.
+ * `workerModuleId`. Runs entirely in a dedicated worker process with no Kibana services -
+ * only structured-cloneable input/output crosses the process boundary.
  */
 
 export default function countPrimesWorker({ taskInstance }: WorkerTaskInput): WorkerRunResult {

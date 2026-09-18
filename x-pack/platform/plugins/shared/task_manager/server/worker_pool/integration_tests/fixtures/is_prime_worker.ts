@@ -6,10 +6,10 @@
  */
 
 /**
- * Minimal CPU-bound worker module used by `worker_pool_service.test.ts` (end-to-end,
- * real worker thread) to prove `WorkerPoolService` actually dispatches to a Piscina
- * worker rather than just exercising a mock. Deliberately has no dependency on any
- * Kibana service - workers get none.
+ * Minimal CPU-bound worker module used by `worker_pool_service.test.ts` (end-to-end, real
+ * forked process) to prove `WorkerPoolService` actually dispatches to a child process
+ * rather than just exercising a mock. Deliberately has no dependency on any Kibana
+ * service - workers get none.
  */
 function isPrime(candidate: number): boolean {
   if (candidate < 2) {
@@ -30,13 +30,12 @@ interface IsPrimeInput {
 interface IsPrimeResult {
   candidate: number;
   isPrime: boolean;
-  // Confirms the function actually ran off the main thread's event loop.
-  ranInWorkerThread: boolean;
+  // Confirms the function actually ran in a separate OS process, not the test's own.
+  ranInWorkerProcess: boolean;
+  pid: number;
 }
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ candidate }: IsPrimeInput): IsPrimeResult {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { isMainThread } = require('worker_threads');
-  return { candidate, isPrime: isPrime(candidate), ranInWorkerThread: !isMainThread };
+  return { candidate, isPrime: isPrime(candidate), ranInWorkerProcess: true, pid: process.pid };
 }

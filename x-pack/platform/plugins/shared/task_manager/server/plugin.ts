@@ -32,6 +32,10 @@ import {
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
+import {
+  registerWorkerProcessDemoTaskDefinition,
+  scheduleWorkerProcessDemoTask,
+} from './worker_pool/demo_task';
 import { TaskExecutionControlService } from './execution_control';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskManagerConfig } from './config';
@@ -321,6 +325,9 @@ export class TaskManagerPlugin
 
     registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    // Prototype: demo task type exercising worker-process execution end-to-end. See
+    // `worker_pool/demo_task.ts`.
+    registerWorkerProcessDemoTaskDefinition(this.definitions);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
@@ -361,9 +368,9 @@ export class TaskManagerPlugin
       this.logger.warn(`Disabling authentication for background task utilization API`);
     }
 
-    if (this.config.unsafe.worker_threads.enabled) {
+    if (this.config.unsafe.worker_processes.enabled) {
       this.logger.warn(
-        `Task Manager worker threads are enabled (prototype): maxThreads=${this.config.unsafe.worker_threads.max_threads} maxTotalMemoryMb=${this.config.unsafe.worker_threads.max_total_memory_mb}`
+        `Task Manager worker processes are enabled (prototype): maxProcesses=${this.config.unsafe.worker_processes.max_processes} maxTotalMemoryMb=${this.config.unsafe.worker_processes.max_total_memory_mb}`
       );
     }
 
@@ -479,11 +486,11 @@ export class TaskManagerPlugin
 
     const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
-    // Prototype: shared worker-thread pool for task work. No-ops unless
-    // xpack.task_manager.unsafe.worker_threads.enabled is true, and only started on nodes
+    // Prototype: shared worker-process pool for task work. No-ops unless
+    // xpack.task_manager.unsafe.worker_processes.enabled is true, and only started on nodes
     // that actually run tasks.
     if (this.shouldRunBackgroundTasks) {
-      this.workerPool = new WorkerPoolService(this.config.unsafe.worker_threads, this.logger);
+      this.workerPool = new WorkerPoolService(this.config.unsafe.worker_processes, this.logger);
       this.workerPool.start();
     }
 
@@ -553,6 +560,7 @@ export class TaskManagerPlugin
 
     scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleWorkerProcessDemoTask(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
       this.logger,
       taskScheduling,

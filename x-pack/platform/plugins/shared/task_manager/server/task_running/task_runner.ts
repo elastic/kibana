@@ -555,8 +555,8 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Builds the `CancellableTask` for a `workerModuleId` task type: its `run()` dispatches to
-   * the shared worker pool instead of invoking a main-thread `createTaskRunner` closure. Only
-   * a structured-cloneable subset of the task instance crosses into the worker.
+   * the shared worker pool instead of invoking a main-process `createTaskRunner` closure. Only
+   * a structured-cloneable subset of the task instance crosses into the worker process.
    */
   private createWorkerTask(
     definition: Extract<TaskDefinition, { workerModuleId: string }>,
@@ -565,7 +565,7 @@ export class TaskManagerRunner implements TaskRunner {
   ): CancellableTask {
     if (!this.workerPool?.enabled) {
       throw new Error(
-        `Task type "${this.taskType}" requires worker threads, but xpack.task_manager.unsafe.worker_threads.enabled is false.`
+        `Task type "${this.taskType}" requires worker processes, but xpack.task_manager.unsafe.worker_processes.enabled is false.`
       );
     }
     const workerPool = this.workerPool;

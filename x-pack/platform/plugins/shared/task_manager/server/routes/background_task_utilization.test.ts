@@ -79,7 +79,7 @@ describe('backgroundTaskUtilizationRoute', () => {
         unsafe: {
           exclude_task_types: [],
           authenticate_background_task_utilization: false,
-          worker_threads: configSchema.validate({}).unsafe.worker_threads,
+          worker_processes: configSchema.validate({}).unsafe.worker_processes,
         },
       },
       kibanaVersion: '8.0',
@@ -221,7 +221,7 @@ describe('backgroundTaskUtilizationRoute', () => {
         unsafe: {
           exclude_task_types: [],
           authenticate_background_task_utilization: false,
-          worker_threads: configSchema.validate({}).unsafe.worker_threads,
+          worker_processes: configSchema.validate({}).unsafe.worker_processes,
         },
       },
       kibanaVersion: '8.0',

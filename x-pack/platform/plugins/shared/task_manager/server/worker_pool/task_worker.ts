@@ -10,17 +10,18 @@ import type { TaskWorkerPayload } from './types';
 /**
  * A worker module's shape: a default-exported function taking the structured-cloneable
  * `input` and returning a structured-cloneable result. Runs with no Kibana services -
- * no ES/SO clients, no logger, no plugin contracts are available in this thread.
+ * no ES/SO clients, no logger, no plugin contracts are available in this process.
  */
 interface WorkerModule<TInput = unknown, TResult = unknown> {
   default: (input: TInput) => TResult | Promise<TResult>;
 }
 
 /**
- * Generic Piscina task dispatcher. Every worker task type and every `runInWorker(...)` call
- * resolves to this single entry point, which loads the caller-supplied module (by the
- * `require.resolve`d id it registered with) and invokes its default export. Keeping the
- * dispatcher generic means the pool doesn't need a dedicated worker file per task type.
+ * Generic worker-process task dispatcher, invoked by `task_process_wrapper.js` inside each
+ * forked child. Every worker task type and every `runInWorker(...)` call resolves to this
+ * single entry point, which loads the caller-supplied module (by the `require.resolve`d id
+ * it registered with) and invokes its default export. Keeping the dispatcher generic means
+ * the pool doesn't need a dedicated child entry file per task type.
  */
 // eslint-disable-next-line import/no-default-export
 export default function runTaskWorker({ moduleId, input }: TaskWorkerPayload): unknown {

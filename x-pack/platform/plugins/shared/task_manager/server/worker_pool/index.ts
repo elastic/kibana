@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { WorkerPoolService, WorkerPoolAtCapacityError } from './worker_pool_service';
+export {
+  WorkerPoolService,
+  WorkerPoolAtCapacityError,
+  WorkerMemoryBudgetExceededError,
+} from './worker_pool_service';
 export type { TaskWorkerPayload, WorkerPoolRunOptions } from './worker_pool_service';

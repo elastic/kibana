@@ -60,7 +60,7 @@ const config: TaskManagerConfig = {
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
-    worker_threads: configMock.create().unsafe.worker_threads,
+    worker_processes: configMock.create().unsafe.worker_processes,
   },
   event_loop_delay: { monitor: true, warn_threshold: 5000 },
   worker_utilization_running_average_window: 5,

@@ -7,8 +7,9 @@
 
 /**
  * Thrown when a worker pool run's declared `memoryMb` would exceed the configured memory
- * budget (`unsafe.worker_threads.max_total_memory_mb`) given the memory already reserved by
- * in-flight runs. Callers should treat this as a retryable capacity error, not a task failure.
+ * budget (`unsafe.worker_processes.max_total_memory_mb`) given the memory already reserved by
+ * in-flight runs (each reserving its declared `memoryMb` plus `baseline_memory_mb`). Callers
+ * should treat this as a retryable capacity error, not a task failure.
  */
 export class WorkerPoolAtCapacityError extends Error {
   constructor(requestedMemoryMb: number, availableMemoryMb: number) {
@@ -18,3 +19,5 @@ export class WorkerPoolAtCapacityError extends Error {
     this.name = 'WorkerPoolAtCapacityError';
   }
 }
+
+export { WorkerMemoryBudgetExceededError } from './worker_memory_budget_exceeded_error';

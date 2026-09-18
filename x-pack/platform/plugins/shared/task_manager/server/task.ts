@@ -174,10 +174,10 @@ export interface RunContext {
   setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
 
   /**
-   * Runs `moduleId`'s default export with `input` in a worker thread from the shared task
-   * manager worker pool, offloading CPU-bound work without blocking Kibana's (or this
-   * task's) event loop. Only present when
-   * `xpack.task_manager.unsafe.worker_threads.enabled` is `true`. The worker has no Kibana
+   * Runs `moduleId`'s default export with `input` in a dedicated worker process from the
+   * shared task manager worker pool, offloading CPU-bound work without blocking Kibana's
+   * (or this task's) event loop. Only present when
+   * `xpack.task_manager.unsafe.worker_processes.enabled` is `true`. The worker has no Kibana
    * services - no ES/SO clients, no logger - so `input` and the resolved value must be
    * structured-cloneable.
    *
@@ -196,11 +196,14 @@ export interface RunContext {
 }
 
 /**
- * Declares the resources a worker-thread task type (or `runInWorker` call) requires upfront,
+ * Declares the resources a worker-process task type (or `runInWorker` call) requires upfront,
  * so Task Manager can tell whether there's room to run another task with such requirements.
- * Only memory is declarable: Node has no API for reserving or limiting CPU on a per-thread
- * basis, so CPU is implicitly "one thread" per running task, capped by
- * `unsafe.worker_threads.max_threads`.
+ * Declaring `memoryMb` is a hard budget: on Linux with cgroups v2 available, the run's worker
+ * process is kernel-limited to `memoryMb` plus a runtime baseline
+ * (`unsafe.worker_processes.baseline_memory_mb`), covering JS heap, Buffers, and native
+ * memory - see `server/worker_pool/cgroup_enforcer.ts`. CPU is implicitly "one process" per
+ * running task, capped by `unsafe.worker_processes.max_processes`; per-task CPU budgets are
+ * not yet declarable.
  */
 export interface WorkerTaskResources {
   /** Declared memory requirement, in megabytes, for one run of this task type. */
@@ -208,9 +211,9 @@ export interface WorkerTaskResources {
 }
 
 /**
- * The subset of a task instance forwarded into a worker thread for a `workerModuleId` task
+ * The subset of a task instance forwarded into a worker process for a `workerModuleId` task
  * type. Workers get no Kibana services, so only structured-cloneable task data - no
- * `Date` instances, functions, or class instances - crosses the thread boundary.
+ * `Date` instances, functions, or class instances - crosses the process boundary.
  */
 export interface WorkerTaskInput {
   taskInstance: {
@@ -227,7 +230,7 @@ export interface WorkerTaskInput {
 /**
  * The structured-cloneable result a `workerModuleId` task type's module resolves with. A
  * restricted subset of {@link SuccessfulRunResult}/{@link FailedRunResult}: no `schedule`
- * objects or `DecoratedError` class instances, since those cannot cross the thread boundary.
+ * objects or `DecoratedError` class instances, since those cannot cross the process boundary.
  */
 export interface WorkerRunResult {
   state: Record<string, unknown>;

@@ -679,7 +679,7 @@ export class SampleTaskManagerFixturePlugin
       sampleWorkerTask: {
         title: 'Sample Worker Task',
         description:
-          'A task that runs entirely in a worker thread (`workerModuleId`), used to verify the worker-thread prototype end-to-end. Its `params.limit` controls how many candidates it checks for primality; `params.failWith` makes the worker report a failure.',
+          'A task that runs entirely in a worker process (`workerModuleId`), used to verify the worker-process prototype end-to-end. Its `params.limit` controls how many candidates it checks for primality; `params.failWith` makes the worker report a failure.',
         maxAttempts: 1,
         workerModuleId: require.resolve('./worker_tasks/count_primes_worker'),
         workerResources: { memoryMb: 10 },
@@ -696,7 +696,7 @@ export class SampleTaskManagerFixturePlugin
       sampleTaskUsingRunInWorker: {
         title: 'Sample Task Using runInWorker',
         description:
-          'A classic closure-based task that offloads its CPU-bound portion to a worker thread via `context.runInWorker(...)`, used to verify partial offload end-to-end.',
+          'A classic closure-based task that offloads its CPU-bound portion to a worker process via `context.runInWorker(...)`, used to verify partial offload end-to-end.',
         timeout: '1m',
         maxAttempts: 1,
         stateSchemaByVersion: {

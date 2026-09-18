@@ -66,7 +66,7 @@ const pluginInitializerContextParams = {
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
-    worker_threads: configMock.create().unsafe.worker_threads,
+    worker_processes: configMock.create().unsafe.worker_processes,
   },
   event_loop_delay: {
     monitor: true,
@@ -111,7 +111,7 @@ describe('TaskManagerPlugin', () => {
         unsafe: {
           exclude_task_types: ['*'],
           authenticate_background_task_utilization: true,
-          worker_threads: configMock.create().unsafe.worker_threads,
+          worker_processes: configMock.create().unsafe.worker_processes,
         },
       });
 
@@ -130,7 +130,7 @@ describe('TaskManagerPlugin', () => {
         unsafe: {
           exclude_task_types: [],
           authenticate_background_task_utilization: false,
-          worker_threads: configMock.create().unsafe.worker_threads,
+          worker_processes: configMock.create().unsafe.worker_processes,
         },
       });
 

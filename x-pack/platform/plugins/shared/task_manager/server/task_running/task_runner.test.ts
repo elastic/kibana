@@ -3771,7 +3771,7 @@ describe('TaskManagerRunner', () => {
       );
     });
 
-    it('fails the task run when a workerModuleId task type is claimed but worker threads are disabled', async () => {
+    it('fails the task run when a workerModuleId task type is claimed but worker processes are disabled', async () => {
       const disabledWorkerPool = workerPoolServiceMock.create();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (disabledWorkerPool as any).enabled = false;
@@ -3792,7 +3792,7 @@ describe('TaskManagerRunner', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining(
-          'requires worker threads, but xpack.task_manager.unsafe.worker_threads.enabled is false'
+          'requires worker processes, but xpack.task_manager.unsafe.worker_processes.enabled is false'
         ),
         expect.anything()
       );

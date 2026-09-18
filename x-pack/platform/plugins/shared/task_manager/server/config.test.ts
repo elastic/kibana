@@ -58,11 +58,12 @@ describe('config validation', () => {
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
-          "worker_threads": Object {
+          "worker_processes": Object {
+            "baseline_memory_mb": 64,
             "enabled": false,
+            "enforcement": "best_effort",
             "idle_timeout": "PT30S",
-            "max_task_heap_mb": 256,
-            "max_threads": 2,
+            "max_processes": 2,
             "max_total_memory_mb": 512,
           },
         },
@@ -132,11 +133,12 @@ describe('config validation', () => {
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
-          "worker_threads": Object {
+          "worker_processes": Object {
+            "baseline_memory_mb": 64,
             "enabled": false,
+            "enforcement": "best_effort",
             "idle_timeout": "PT30S",
-            "max_task_heap_mb": 256,
-            "max_threads": 2,
+            "max_processes": 2,
             "max_total_memory_mb": 512,
           },
         },
@@ -209,11 +211,12 @@ describe('config validation', () => {
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
-          "worker_threads": Object {
+          "worker_processes": Object {
+            "baseline_memory_mb": 64,
             "enabled": false,
+            "enforcement": "best_effort",
             "idle_timeout": "PT30S",
-            "max_task_heap_mb": 256,
-            "max_threads": 2,
+            "max_processes": 2,
             "max_total_memory_mb": 512,
           },
         },

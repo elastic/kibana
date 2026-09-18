@@ -123,9 +123,9 @@ interface TaskRegisterDefinitionCommon {
 
 /**
  * Defines a task which can be scheduled and run by the Kibana task manager. Provide exactly
- * one of `createTaskRunner` (the classic contract, a main-thread closure) or
+ * one of `createTaskRunner` (the classic contract, a main-process closure) or
  * `workerModuleId` + `workerResources` (an opt-in prototype contract that runs entirely in a
- * worker thread - see `xpack.task_manager.unsafe.worker_threads`).
+ * worker process - see `xpack.task_manager.unsafe.worker_processes`).
  */
 export type TaskRegisterDefinition = TaskRegisterDefinitionCommon &
   (
@@ -141,10 +141,10 @@ export type TaskRegisterDefinition = TaskRegisterDefinitionCommon &
     | {
         /**
          * Absolute path (from `require.resolve(...)`) to a module whose default export
-         * performs this task type's work entirely inside a worker thread, in place of
+         * performs this task type's work entirely inside a worker process, in place of
          * `createTaskRunner`. The worker has no Kibana services (no ES/SO clients); its
          * default export receives a `WorkerTaskInput` and resolves with a `WorkerRunResult`.
-         * Requires `xpack.task_manager.unsafe.worker_threads.enabled`.
+         * Requires `xpack.task_manager.unsafe.worker_processes.enabled`.
          */
         workerModuleId: string;
         /** Required alongside `workerModuleId` - declares this task type's resource needs upfront. */

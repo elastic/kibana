@@ -32,8 +32,25 @@ export interface WorkerPoolRunOptions {
    */
   memoryMb: number;
   /**
-   * Aborting cancels the run. Piscina terminates the underlying thread, so a cancelled run
-   * cannot be resumed - a fresh thread is spun up for the next run.
+   * Aborting cancels the run. The underlying child process is killed, so a cancelled run
+   * cannot be resumed - a fresh process is forked for the next run.
    */
   signal?: AbortSignal;
+}
+
+/**
+ * Message protocol between `WorkerPoolService` (parent) and `task_process_wrapper.js`
+ * (child), sent over the process's IPC channel (`serialization: 'advanced'`, so it supports
+ * the same structured-cloneable payloads as the previous worker-thread transport).
+ */
+export type ChildToParentMessage =
+  | { type: 'ready' }
+  | { type: 'result'; result: unknown }
+  | { type: 'error'; error: { message: string; stack?: string } }
+  | { type: 'memoryUsage'; rss: number; heapUsed: number; external: number };
+
+export interface ParentToChildMessage {
+  type: 'go';
+  moduleId: string;
+  input: unknown;
 }
