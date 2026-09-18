@@ -99,7 +99,15 @@ const setupApi = (
     dataLoading$,
   });
 
-  return { api, analytics, selectedTabId$, savedObjectId$, searchError$, searchEmbeddable };
+  return {
+    api,
+    analytics,
+    selectedTabId$,
+    savedObjectId$,
+    searchError$,
+    dataLoading$,
+    searchEmbeddable,
+  };
 };
 
 describe('initializeInlineEditingApi', () => {
@@ -289,6 +297,18 @@ describe('initializeInlineEditingApi', () => {
       await setup.api.cancelInlineTabSelection();
 
       expect(setup.searchEmbeddable.reinitializeState).not.toHaveBeenCalled();
+    });
+
+    it('resets dataLoading to false when a tab switch fails', async () => {
+      const setup = setupApi();
+
+      await setup.api.startInlineEditing();
+      setup.dataLoading$.next(true);
+      setup.searchEmbeddable.reinitializeState.mockRejectedValueOnce(switchError);
+
+      await setup.api.previewInlineTabSelection('tab-2');
+
+      expect(setup.dataLoading$.getValue()).toBe(false);
     });
   });
 });

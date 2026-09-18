@@ -144,8 +144,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      // Search errors surface in the platform's blocking panel like Lens and Vega, except
-      // while inline editing, where they must render in-panel to keep apply/cancel reachable.
+      // Prevent blocking error when inline editing, with no direct way out of this mode
       const blockingErrorSubscription = combineLatest([
         searchError$,
         inlineEditingApi.isInlineEditing$,

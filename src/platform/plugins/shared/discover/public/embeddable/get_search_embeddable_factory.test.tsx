@@ -256,17 +256,13 @@ describe('saved search embeddable', () => {
         uuid,
         parentApi: mockedDashboardApi,
       });
-      await waitOneTick(); // wait for build to complete
+      await waitOneTick();
       const discoverComponent = renderWithI18n(<Component />);
 
       rejectSearch();
       await waitOneTick();
 
-      // the platform panel reads blockingError$ and renders the error itself,
-      // so the embeddable hands the error over and renders nothing of its own
       expect(api.blockingError$.getValue()).toBe(searchError);
-      // useBatchedPublishingSubjects debounces React state updates by one tick,
-      // so the component re-render needs waitFor rather than a bare assertion
       await waitFor(() => {
         expect(discoverComponent.container).toBeEmptyDOMElement();
       });
@@ -287,7 +283,7 @@ describe('saved search embeddable', () => {
         uuid,
         parentApi: mockedEditableDashboardApi,
       });
-      await waitOneTick(); // wait for build to complete
+      await waitOneTick();
       const discoverComponent = renderWithI18n(<Component />);
 
       await act(async () => {

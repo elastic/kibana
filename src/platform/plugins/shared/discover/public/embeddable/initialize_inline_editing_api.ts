@@ -28,17 +28,6 @@ type InlineEditSnapshot = {
   [K in keyof Required<SearchEmbeddableSerializedAttributes>]: SearchEmbeddableSerializedAttributes[K];
 };
 
-interface InlineEditState {
-  snapshot: InlineEditSnapshot;
-  /**
-   * Whether the applied state has diverged from the snapshot and so must be restored when editing
-   * stops. This is not the same as `inlineEditDirty$`, which only marks a committable change:
-   * `reinitializeState` empties rows before it can reject, so a failed tab switch mutates the
-   * applied state while leaving the edit clean.
-   */
-  diverged: boolean;
-}
-
 interface SearchEmbeddableDeps {
   api: { savedSearch$: PublishingSubject<SavedSearch> };
   reinitializeState: (state: SearchEmbeddableSerializedAttributes) => Promise<void>;
@@ -85,7 +74,23 @@ export const initializeInlineEditingApi = ({
   const inlineEditDirty$ = new BehaviorSubject<boolean>(false);
   const overrideHoverActions$ = isInlineEditing$;
 
-  let inlineEditState: InlineEditState | undefined;
+  // Pre-edit state, captured on the first tab switch; if set, discard restores it
+  let inlineEditSnapshot: InlineEditSnapshot | undefined;
+
+  const applyEmbeddableState = async (
+    state: SearchEmbeddableSerializedAttributes
+  ): Promise<boolean> => {
+    setSearchError(undefined);
+
+    try {
+      await searchEmbeddable.reinitializeState(state);
+      return true;
+    } catch (error) {
+      setSearchError(error as Error);
+      dataLoading$.next(false);
+      return false;
+    }
+  };
 
   const setFocusedPanelId = (panelId?: string) => {
     if (apiCanFocusPanel(parentApi)) {
@@ -93,34 +98,19 @@ export const initializeInlineEditingApi = ({
     }
   };
 
-  const applyState = async (state: SearchEmbeddableSerializedAttributes): Promise<boolean> => {
-    setSearchError(undefined);
-
-    try {
-      await searchEmbeddable.reinitializeState(state);
-
-      return true;
-    } catch (error) {
-      setSearchError(error as Error);
-      dataLoading$.next(false);
-
-      return false;
-    }
-  };
-
   const switchTab = async (tabId: string): Promise<boolean> => {
     const tab = tabs.find((t) => t.id === tabId);
 
-    if (!tab || !inlineEditState) return false;
+    if (!tab || !isInlineEditing$.getValue()) return false;
 
-    inlineEditState.diverged = true;
+    inlineEditSnapshot ??= createSnapshot(searchEmbeddable);
 
-    return applyState(tab);
+    return applyEmbeddableState(tab);
   };
 
-  const restoreSnapshot = async () => {
-    if (inlineEditState?.diverged) {
-      await applyState(inlineEditState.snapshot);
+  const restoreInlineEditSnapshot = async () => {
+    if (inlineEditSnapshot) {
+      await applyEmbeddableState(inlineEditSnapshot);
     }
   };
 
@@ -129,37 +119,13 @@ export const initializeInlineEditingApi = ({
     inlineEditDirty$.next(false);
     draftSelectedTabId$.next(selectedTabId$.getValue());
 
-    inlineEditState = undefined;
+    inlineEditSnapshot = undefined;
 
     setFocusedPanelId();
   };
 
-  const createSnapshot = (): InlineEditSnapshot => {
-    const {
-      stateManager,
-      api: { savedSearch$ },
-    } = searchEmbeddable;
-
-    return {
-      serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
-      sort: stateManager.sort.getValue(),
-      columns: stateManager.columns.getValue(),
-      grid: stateManager.grid.getValue(),
-      sampleSize: stateManager.sampleSize.getValue(),
-      rowsPerPage: stateManager.rowsPerPage.getValue(),
-      rowHeight: stateManager.rowHeight.getValue(),
-      headerRowHeight: stateManager.headerRowHeight.getValue(),
-      viewMode: stateManager.viewMode.getValue(),
-      density: stateManager.density.getValue(),
-      documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
-      jsonModeSettings: stateManager.jsonModeSettings.getValue(),
-    };
-  };
-
   const startInlineEditing = async () => {
     if (isInlineEditing$.getValue()) return;
-
-    inlineEditState = { snapshot: createSnapshot(), diverged: false };
 
     draftSelectedTabId$.next(selectedTabId$.getValue());
     isInlineEditing$.next(true);
@@ -192,7 +158,7 @@ export const initializeInlineEditingApi = ({
 
     if (!draftTabId || draftTabId === committedTabId) {
       // Nothing to commit, so this is a discard
-      await restoreSnapshot();
+      await restoreInlineEditSnapshot();
       stopInlineEditing();
       return;
     }
@@ -215,9 +181,9 @@ export const initializeInlineEditingApi = ({
   };
 
   const cancelInlineTabSelection = async () => {
-    if (!isInlineEditing$.getValue() || !inlineEditState) return;
+    if (!isInlineEditing$.getValue()) return;
 
-    await restoreSnapshot();
+    await restoreInlineEditSnapshot();
     stopInlineEditing();
   };
 
@@ -239,3 +205,21 @@ export const initializeInlineEditingApi = ({
     stopInlineEditing,
   };
 };
+
+const createSnapshot = ({
+  stateManager,
+  api: { savedSearch$ },
+}: SearchEmbeddableDeps): InlineEditSnapshot => ({
+  serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
+  sort: stateManager.sort.getValue(),
+  columns: stateManager.columns.getValue(),
+  grid: stateManager.grid.getValue(),
+  sampleSize: stateManager.sampleSize.getValue(),
+  rowsPerPage: stateManager.rowsPerPage.getValue(),
+  rowHeight: stateManager.rowHeight.getValue(),
+  headerRowHeight: stateManager.headerRowHeight.getValue(),
+  viewMode: stateManager.viewMode.getValue(),
+  density: stateManager.density.getValue(),
+  documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
+  jsonModeSettings: stateManager.jsonModeSettings.getValue(),
+});
