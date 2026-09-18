@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { AgentAccessControlEntry } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useUserProfiles } from '../use_user_profiles';
@@ -17,10 +16,8 @@ import { useUserProfiles } from '../use_user_profiles';
 export const useAccessControlEntryProfiles = (
   entries: AgentAccessControlEntry[]
 ): Map<string, UserProfileWithAvatar> => {
-  const uids = useMemo(
-    () => entries.flatMap((entry) => (entry.id !== undefined ? [entry.id] : [])),
-    [entries]
-  );
+  const uids = entries.map((entry) => entry.id).filter((id): id is string => id !== undefined);
   const { data: profiles = [] } = useUserProfiles({ uids, enabled: uids.length > 0 });
-  return useMemo(() => new Map(profiles.map((profile) => [profile.uid, profile])), [profiles]);
+
+  return new Map(profiles.map((profile) => [profile.uid, profile]));
 };

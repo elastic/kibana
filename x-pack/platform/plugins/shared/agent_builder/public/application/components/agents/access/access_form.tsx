@@ -104,11 +104,13 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  const excludedUids = entries.flatMap((entry) => (entry.id !== undefined ? [entry.id] : []));
+  const excludedUids = entries
+    .map((entry) => entry.id)
+    .filter((id): id is string => id !== undefined);
 
-  const excludedUsernames = entries.flatMap((entry) =>
-    entry.id === undefined && entry.name !== undefined ? [entry.name] : []
-  );
+  const excludedUsernames = entries
+    .map((entry) => (entry.id === undefined ? entry.name : undefined))
+    .filter((name): name is string => name !== undefined);
 
   const handleAdd = (profile: UserProfileWithAvatar) => {
     const nextEntry: AgentAccessControlEntry = {
