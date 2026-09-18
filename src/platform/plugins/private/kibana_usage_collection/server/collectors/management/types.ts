@@ -232,6 +232,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
