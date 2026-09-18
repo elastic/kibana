@@ -6,11 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { IDataStreamClient } from '@kbn/core-data-streams-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { MemoryEntry } from './types';
 import { MemoryServiceImpl } from './memory_service';
 import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
+import type { memoriesMappings, StoredMemoryPage } from './data_stream';
+import type { memoryHistoryMappings, StoredMemoryHistoryRecord } from './history_data_stream';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -112,24 +115,30 @@ const createInMemoryEsClient = () => {
   const memoryDocs: MemoryDocument[] = [];
   let docCounter = 0;
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-
-  // Memory page writes go through DataStreamClient.create, which issues a bulk request.
-  esClient.bulk.mockImplementation(async (params) => {
-    const request = params as { index?: string; operations?: unknown[] };
-    const operations = request.operations ?? [];
-    const items: unknown[] = [];
-    // Operations alternate [actionMetadata, document]; documents sit at odd indices.
-    for (let i = 1; i < operations.length; i += 2) {
-      if (request.index === MEMORIES_DATA_STREAM) {
-        const doc = operations[i] as MemoryDocument;
-        // Each appended document gets a unique _id, mirroring an append-only data stream.
-        doc._id = `doc-${docCounter++}`;
-        memoryDocs.push(doc);
-      }
-      items.push({ create: { status: 201, _id: 'doc', _index: String(request.index) } });
-    }
-    return { errors: false, took: 0, items } as never;
-  });
+  const dataStreamClient: Pick<
+    IDataStreamClient<typeof memoriesMappings, StoredMemoryPage>,
+    'create'
+  > = {
+    create: jest.fn(async ({ documents }) => {
+      const items = documents.map((document) => {
+        memoryDocs.push({ ...document, _id: `doc-${docCounter++}` } as MemoryDocument);
+        return { create: { status: 201, _id: 'doc', _index: MEMORIES_DATA_STREAM } };
+      });
+      return { errors: false, took: 0, items };
+    }),
+  };
+  const historyDataStreamClient: Pick<
+    IDataStreamClient<typeof memoryHistoryMappings, StoredMemoryHistoryRecord>,
+    'create'
+  > = {
+    create: jest.fn(async ({ documents }) => ({
+      errors: false,
+      took: 0,
+      items: documents.map(() => ({
+        create: { status: 201, _id: 'history-doc', _index: 'memory-history' },
+      })),
+    })),
+  };
 
   esClient.search.mockImplementation(async (params) => {
     const request = params as {
@@ -183,7 +192,7 @@ const createInMemoryEsClient = () => {
     } as never;
   });
 
-  return { esClient, memoryDocs };
+  return { esClient, memoryDocs, dataStreamClient, historyDataStreamClient };
 };
 
 describe('MemoryServiceImpl', () => {
@@ -197,9 +206,14 @@ describe('MemoryServiceImpl', () => {
   });
 
   const createService = () => {
-    const { esClient } = createInMemoryEsClient();
-    const service = new MemoryServiceImpl({ logger, esClient });
-    return { service, esClient };
+    const { esClient, dataStreamClient, historyDataStreamClient } = createInMemoryEsClient();
+    const service = new MemoryServiceImpl({
+      logger,
+      esClient,
+      dataStreamClient,
+      historyDataStreamClient,
+    });
+    return { service, esClient, dataStreamClient, historyDataStreamClient };
   };
 
   it('creates, reads, updates, and lists a memory page', async () => {
@@ -207,7 +221,7 @@ describe('MemoryServiceImpl', () => {
       .mockReturnValueOnce('entry-uuid-1')
       .mockReturnValueOnce('history-uuid-1')
       .mockReturnValueOnce('history-uuid-2');
-    const { service } = createService();
+    const { service, dataStreamClient, historyDataStreamClient } = createService();
 
     const created = await service.create({
       name: 'nginx-overview',
@@ -221,6 +235,19 @@ describe('MemoryServiceImpl', () => {
       id: 'entry-uuid-1',
       name: 'nginx-overview',
       version: 1,
+    });
+    expect(dataStreamClient.create).toHaveBeenCalledWith({
+      documents: [expect.objectContaining({ id: 'entry-uuid-1', name: 'nginx-overview' })],
+      refresh: 'wait_for',
+    });
+    expect(historyDataStreamClient.create).toHaveBeenCalledWith({
+      documents: [
+        expect.objectContaining({
+          id: 'history-uuid-1',
+          entry_id: 'entry-uuid-1',
+          '@timestamp': created.updated_at,
+        }),
+      ],
     });
 
     await expect(service.getByName({ name: 'nginx-overview' })).resolves.toMatchObject({
