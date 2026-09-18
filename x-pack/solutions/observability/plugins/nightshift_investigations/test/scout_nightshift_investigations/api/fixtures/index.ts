@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { apiTest } from '@kbn/scout';
+export { apiTest } from '@kbn/scout-oblt';
 export {
   COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,

@@ -2602,7 +2602,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/nightshift_investigations
+        version: link:x-pack/solutions/observability/plugins/nightshift_investigations
       '@kbn/nightshift-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift
@@ -9181,7 +9181,6 @@ importers:
 
   x-pack/platform/plugins/shared/ml/evals: {}
 
-  x-pack/platform/plugins/shared/nightshift_investigations: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 
@@ -9360,6 +9359,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
   x-pack/solutions/observability/plugins/observability: {}
 
