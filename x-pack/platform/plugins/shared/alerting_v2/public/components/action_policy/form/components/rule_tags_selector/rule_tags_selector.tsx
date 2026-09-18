@@ -84,7 +84,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
             defaultMessage: 'Could not load rule tags.',
           })}{' '}
         </span>
-        <EuiLink onClick={refetch} data-test-subj="ruleTagsSelectorRetry">
+        <EuiLink onClick={() => refetch()} data-test-subj="ruleTagsSelectorRetry">
           {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.retryLabel', {
             defaultMessage: 'Retry',
           })}
