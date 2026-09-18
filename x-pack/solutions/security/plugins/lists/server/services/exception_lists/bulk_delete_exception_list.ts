@@ -182,8 +182,8 @@ export const bulkDeleteExceptionList = async ({
   const validationErrors: BulkDeleteExceptionListError[] = [];
   const foundLists: ExceptionListSchema[] = [];
 
-  savedObjects.forEach((savedObject, index) => {
-    const id = uniqueIds[index];
+  savedObjects.forEach((savedObject) => {
+    const { id } = savedObject;
     if (isSavedObjectErrorResult(savedObject)) {
       validationErrors.push({
         lists: [{ id }],
