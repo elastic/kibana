@@ -6166,8 +6166,8 @@ importers:
         specifier: 1.1.13
         version: 1.1.13
       chromedriver:
-        specifier: 152.0.1
-        version: 152.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        specifier: 152.0.3
+        version: 152.0.3(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       clean-webpack-plugin:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.96.1)
@@ -6502,8 +6502,8 @@ importers:
         specifier: 10.5.2
         version: 10.5.2(sass@1.103.1)(webpack@5.96.1)
       selenium-webdriver:
-        specifier: 4.47.0
-        version: 4.47.0
+        specifier: 4.48.0
+        version: 4.48.0
       sharp:
         specifier: 0.35.2
         version: 0.35.2
@@ -16765,8 +16765,8 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@152.0.1:
-    resolution: {integrity: sha512-8zet2yPAFOSlYxUIcQ/1yOOC1xP4ooPZiKFRdlJhFawBKvlZIHDU6qv4LDOfPEw1yXbyu+tQTzbL0Vfb+vHdQQ==}
+  chromedriver@152.0.3:
+    resolution: {integrity: sha512-6v3pquS2kgb1HedzALRZeaoFZVCgghW2u1QjlzaoZruw75QBxKQtv/PKzJ8Scb3L8Vx32gcFwvUKcHmW7xjIVg==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -23861,8 +23861,8 @@ packages:
   select-hose@2.0.0:
     resolution: {integrity: sha512-mEugaLK+YfkijB4fx0e6kImuJdCIt2LxCRcbEYPqRGCs4F2ogyfZU5IAZRdjCP8JPq2AtdNoC/Dux63d9Kiryg==}
 
-  selenium-webdriver@4.47.0:
-    resolution: {integrity: sha512-nxxJnH25tsJxz+pdMxtvH89tbrMnfff6W//uBIVlOWz1KZlADiQ7dyRPehknKdYiC3HwEypTy1l+tozxO0I2Qw==}
+  selenium-webdriver@4.48.0:
+    resolution: {integrity: sha512-rKM9uXFRWcF9aThrZQDNQH2/9Et/WvMZbg3/x1rnSYWoXiwJuShYeH0IAli8Cuw+c3lEV0UWPfUz88H+fvW9Hg==}
     engines: {node: '>= 22.0.0'}
 
   selfsigned@5.5.0:
@@ -34505,7 +34505,7 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  chromedriver@152.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
+  chromedriver@152.0.3(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
@@ -43081,7 +43081,7 @@ snapshots:
 
   select-hose@2.0.0: {}
 
-  selenium-webdriver@4.47.0:
+  selenium-webdriver@4.48.0:
     dependencies:
       '@bazel/runfiles': 6.5.0
       jszip: 3.10.1
