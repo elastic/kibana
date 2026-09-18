@@ -19,7 +19,13 @@ import { useAlertingLocators } from '../../../../application/locator_context';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
-import { RuleSummaryBody } from '../../rule_summary';
+import {
+  RuleSummaryAboutSection,
+  RuleSummaryActionPoliciesSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
@@ -140,7 +146,12 @@ export const RuleSummaryFlyout = ({
         </Header>
 
         <Body>
-          <RuleSummaryBody rule={rule} />
+          <RuleSummaryBody rule={rule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryActionPoliciesSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
         </Body>
 
         <Footer>

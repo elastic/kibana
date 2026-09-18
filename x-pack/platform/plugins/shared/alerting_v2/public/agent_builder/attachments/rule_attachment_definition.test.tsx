@@ -10,7 +10,8 @@ import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
-const mockUpsertRule = jest.fn().mockResolvedValue({});
+const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
+const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
@@ -30,7 +31,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
-    return { upsertRule: mockUpsertRule };
+    return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
 }));
 
@@ -38,17 +39,17 @@ jest.mock('../../services/rules_api', () => ({
   RulesApi: Symbol('RulesApi'),
 }));
 
-jest.mock('../../components/rule_details/rule_context', () => ({
-  RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('../../components/rule/rule_summary', () => ({
+  RuleSummaryBody: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="mockRuleSummaryBody">{children}</div>
+  ),
+  RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
+  RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
+  RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
 }));
 
-jest.mock('../../components/rule_details/rule_summary_header', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
-}));
-
-jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
+jest.mock('../../components/rule/rule_summary/rule_summary_query_preview_section', () => ({
+  RuleSummaryQueryPreviewSection: () => <div data-test-subj="mockQueryPreviewSection" />,
 }));
 
 const createMockServices = () => ({
@@ -176,7 +177,7 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('renderCanvasContent', () => {
-    it('renders sidebar and header description', () => {
+    it('renders the Agent Builder summary composition', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
       const attachment = createAttachment();
@@ -194,8 +195,11 @@ describe('createRuleAttachmentDefinition', () => {
         </>
       );
 
-      expect(getByTestId('mockRuleSidebar')).toBeDefined();
-      expect(getByTestId('mockRuleHeaderDescription')).toBeDefined();
+      expect(getByTestId('mockRuleSummaryBody')).toBeDefined();
+      expect(getByTestId('mockAboutSection')).toBeDefined();
+      expect(getByTestId('mockInvestigationSection')).toBeDefined();
+      expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
+      expect(getByTestId('mockArtifactsSection')).toBeDefined();
     });
 
     it('registers Create rule button for unsaved attachment', () => {

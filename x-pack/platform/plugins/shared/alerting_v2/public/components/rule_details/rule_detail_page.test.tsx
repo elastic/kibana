@@ -242,16 +242,15 @@ describe('RuleDetailPage', () => {
     });
   });
 
-  it('renders native kind, status, and tag badges in the app header', () => {
+  it('renders native kind and status badges without duplicating tags in the app header', () => {
     renderPage(baseRule);
     const kindBadge = screen.getByTestId('kindBadge');
     expect(kindBadge).toHaveTextContent('Events');
     expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('+2'));
-    expect(screen.getByText('prod')).toBeInTheDocument();
-    expect(screen.getByText('infra')).toBeInTheDocument();
+    expect(screen.queryByText('prod')).not.toBeInTheDocument();
+    expect(screen.queryByText('infra')).not.toBeInTheDocument();
   });
 
   it('renders Alerts kind badge with its icon and disabled status badge', () => {
