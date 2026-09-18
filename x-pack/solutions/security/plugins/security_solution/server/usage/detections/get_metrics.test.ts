@@ -6,6 +6,7 @@
  */
 
 import type { DetectionMetrics } from './types';
+import { get } from 'lodash';
 
 import {
   elasticsearchServiceMock,
@@ -23,6 +24,7 @@ import {
   getMockMlDatafeedStatsResponse,
   getMockRuleSearchResponse,
   getMockThreatMatchRuleSO,
+  getMockPrebuiltRuleAssetSearchResponse,
   getMockThreatMatchRuleSearchResponse,
 } from './ml_jobs/get_metrics.mocks';
 import {
@@ -46,8 +48,6 @@ import {
   initialResponseActionsUsage,
 } from './rules/get_initial_usage';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
-import type { RuleVersionSpecifier } from '../../lib/detection_engine/prebuilt_rules/logic/rule_versions/rule_version_specifier';
-import { getPrebuiltRuleMock } from '../../lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.mock';
 
 let mockPrebuiltRuleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
 
@@ -71,11 +71,15 @@ describe('Detections Usage and Metrics', () => {
       mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
       mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValue([]);
       // by default every installed prebuilt rule has its base version asset available
-      mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockImplementation(
-        async (versions: RuleVersionSpecifier[]) => ({
-          assets: versions.map((version) => getPrebuiltRuleMock(version)),
-        })
-      );
+      savedObjectsClient.search.mockImplementation(async (options) => {
+        const soIds = get(options, 'query.bool.must.terms._id', []) as string[];
+        return getMockPrebuiltRuleAssetSearchResponse(
+          soIds.map((soId) => {
+            const [ruleId, version] = soId.replace('security-rule:', '').split(/_(?=\d+$)/);
+            return { rule_id: ruleId, version: Number(version) };
+          })
+        );
+      });
     });
 
     it('returns zeroed counts if calls are empty', async () => {
@@ -1742,25 +1746,37 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
         savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
         mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
-        mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockResolvedValueOnce({
-          assets: [
-            getPrebuiltRuleMock({ rule_id: 'customized-with-base', version: 1 }),
-            getPrebuiltRuleMock({ rule_id: 'noncustomized-with-base-1', version: 1 }),
-            getPrebuiltRuleMock({ rule_id: 'noncustomized-with-base-2', version: 1 }),
-          ],
-        });
+        // assets for rules without a base version are either absent or deprecated, so ES does not return them
+        savedObjectsClient.search.mockResolvedValueOnce(
+          getMockPrebuiltRuleAssetSearchResponse([
+            { rule_id: 'customized-with-base', version: 1 },
+            { rule_id: 'noncustomized-with-base-1', version: 1 },
+            { rule_id: 'noncustomized-with-base-2', version: 1 },
+          ])
+        );
 
         const result = await getDetectionsMetrics(detectionsMetricsParams);
 
-        expect(mockPrebuiltRuleAssetsClient.fetchAssetsByVersion).toHaveBeenCalledWith(
-          [
-            { rule_id: 'customized-with-base', version: 1 },
-            { rule_id: 'customized-without-base', version: 1 },
-            { rule_id: 'noncustomized-with-base-1', version: 1 },
-            { rule_id: 'noncustomized-with-base-2', version: 1 },
-            { rule_id: 'noncustomized-without-base', version: 1 },
-          ],
-          { fields: ['rule_id', 'version'] }
+        expect(savedObjectsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'security-rule',
+            query: {
+              bool: {
+                must: {
+                  terms: {
+                    _id: [
+                      'security-rule:customized-with-base_1',
+                      'security-rule:customized-without-base_1',
+                      'security-rule:noncustomized-with-base-1_1',
+                      'security-rule:noncustomized-with-base-2_1',
+                      'security-rule:noncustomized-without-base_1',
+                    ],
+                  },
+                },
+                must_not: { term: { 'security-rule.deprecated': true } },
+              },
+            },
+          })
         );
         expect(result).toHaveProperty(
           'detection_rules.elastic_detection_rule_base_version_status',

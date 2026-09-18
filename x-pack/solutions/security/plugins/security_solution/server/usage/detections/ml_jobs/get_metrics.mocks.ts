@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import type { RuleSearchResult } from '../../types';
 
 export const getMockListModulesResponse = () => [
@@ -534,3 +534,23 @@ export const getMockThreatMatchRuleSearchResponse = (
     total: 1,
     saved_objects: rulesSO,
   } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+
+type PrebuiltRuleAssetSearchResponse = Awaited<ReturnType<SavedObjectsClientContract['search']>>;
+
+export const getMockPrebuiltRuleAssetSearchResponse = (
+  versions: Array<{ rule_id: string; version: number }>
+): PrebuiltRuleAssetSearchResponse =>
+  ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: {
+      total: { value: versions.length, relation: 'eq' },
+      max_score: null,
+      hits: versions.map((version) => ({
+        _index: '.kibana',
+        _id: `security-rule:${version.rule_id}_${version.version}`,
+        _source: { type: 'security-rule', 'security-rule': version },
+      })),
+    },
+  } as unknown as PrebuiltRuleAssetSearchResponse);

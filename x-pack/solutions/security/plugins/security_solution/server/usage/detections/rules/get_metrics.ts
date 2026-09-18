@@ -14,6 +14,7 @@ import { updateRuleUsage } from './update_usage';
 import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
 import { getChangesHistoryUsage } from '../../queries/get_changes_history_usage';
+import { getInstalledPrebuiltRuleAssets } from '../../queries/get_installed_prebuilt_rule_assets';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
   getInitialAiCreatedRulesUsage,
@@ -124,11 +125,11 @@ export const getRuleMetrics = async ({
     });
 
     // checks which installed prebuilt rules still have their base version asset available
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-    const baseVersionAssetsPromise = ruleAssetsClient.fetchAssetsByVersion(
-      getInstalledPrebuiltRuleVersions(ruleResults),
-      { fields: ['rule_id', 'version'] }
-    );
+    const installedBaseVersionsPromise = getInstalledPrebuiltRuleAssets({
+      versions: getInstalledPrebuiltRuleVersions(ruleResults),
+      logger,
+      savedObjectsClient,
+    });
 
     const [
       detectionAlertsResp,
@@ -136,19 +137,23 @@ export const getRuleMetrics = async ({
       legacyRuleActions,
       eventLogMetricsTypeStatus,
       changesHistoryUsage,
-      baseVersionAssets,
+      installedBaseVersionsList,
     ] = await Promise.all([
       detectionAlertsRespPromise,
       caseCommentsPromise,
       legacyRuleActionsPromise,
       eventLogMetricsTypeStatusPromise,
       changesHistoryUsagePromise,
-      baseVersionAssetsPromise,
+      installedBaseVersionsPromise,
     ]);
 
     const installedBaseVersions = new Set(
-      baseVersionAssets.assets.map((asset) => getRuleVersionKey(asset.rule_id, asset.version))
+      installedBaseVersionsList.map((version) =>
+        getRuleVersionKey(version.rule_id, version.version)
+      )
     );
+
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
     // create in-memory maps for correlation
     const legacyNotificationRuleIds = getRuleIdToEnabledMap(legacyRuleActions);
