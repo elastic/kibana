@@ -8,6 +8,7 @@
 import { escapeKuery } from '@kbn/es-query';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { NotFoundError } from '../../../../../endpoint/errors';
 import { resolveAgentTypeFromPackages } from '../types';
 
 export interface ResolvedEndpoint {
@@ -16,8 +17,27 @@ export interface ResolvedEndpoint {
   packages: string[];
 }
 
+/** A Fleet agent record that matched the hostname but could not be selected. */
+export interface EndpointCandidate {
+  agentId: string;
+  status: string;
+}
+
+/**
+ * Outcome of a hostname lookup.
+ *
+ * `ambiguous` is a first-class outcome, not an error: two distinct live
+ * machines can legitimately share a hostname, so silently picking one would
+ * report — or isolate — the wrong host. Callers must surface the ambiguity
+ * and ask for an agent ID instead of guessing.
+ */
+export type EndpointLookupResult =
+  | { kind: 'found'; endpoint: ResolvedEndpoint }
+  | { kind: 'not_found' }
+  | { kind: 'ambiguous'; candidates: EndpointCandidate[] };
+
 export interface EndpointLookupService {
-  resolveByHostName(hostName: string): Promise<ResolvedEndpoint | null>;
+  resolveByHostName(hostName: string): Promise<EndpointLookupResult>;
 }
 
 /**
@@ -45,7 +65,7 @@ export function createEndpointLookupService(
   const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
 
   return {
-    async resolveByHostName(hostName: string): Promise<ResolvedEndpoint | null> {
+    async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
       const agents = await fleetServices.agent.listAgents({
         showInactive: true,
         kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
@@ -54,27 +74,64 @@ export function createEndpointLookupService(
       });
 
       if (!agents?.agents?.length) {
-        return null;
+        return { kind: 'not_found' };
       }
 
-      const agent = [...agents.agents].sort((a, b) => {
+      // Drop agents this space cannot see BEFORE deciding ambiguity, otherwise
+      // a host that is only reachable from another space would look ambiguous.
+      const visible: Array<{ id: string; status: string; packages?: string[] }> = [];
+      for (const candidate of agents.agents) {
+        try {
+          await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
+          visible.push(candidate as { id: string; status: string; packages?: string[] });
+        } catch (e) {
+          // A not-found means the agent is not visible in the caller's space:
+          // skip it, but do not fail the whole lookup. Anything else (e.g. a
+          // transient Fleet/ES failure) is a real error and must propagate
+          // rather than be misreported as "host not found".
+          if (!(e instanceof NotFoundError)) {
+            throw e;
+          }
+        }
+      }
+
+      if (!visible.length) {
+        return { kind: 'not_found' };
+      }
+
+      const sorted = [...visible].sort((a, b) => {
         const aOnline = a.status === 'online' ? 1 : 0;
         const bOnline = b.status === 'online' ? 1 : 0;
         if (aOnline !== bOnline) return bOnline - aOnline;
-        return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');
-      })[0];
+        return ((b as { enrolled_at?: string }).enrolled_at ?? '').localeCompare(
+          (a as { enrolled_at?: string }).enrolled_at ?? ''
+        );
+      });
+
+      // More than one agent matching the hostname is normal Fleet bookkeeping
+      // (re-enrollment, reinstall, agent upgrade) as long as only ONE of them
+      // is live. Two live machines genuinely sharing a hostname is different:
+      // picking either one silently would report — or isolate — the wrong
+      // host, so surface the ambiguity instead of guessing.
+      const live = sorted.filter((a) => a.status === 'online');
+      if (live.length > 1) {
+        return {
+          kind: 'ambiguous',
+          candidates: live.map((a) => ({ agentId: a.id, status: a.status })),
+        };
+      }
+
+      const agent = sorted[0];
       const agentId = agent.id;
-
-      // Reject hosts that live in a different space than the caller's active
-      // space before the caller reads or acts on them.
-      await fleetServices.ensureInCurrentSpace({ agentIds: [agentId] });
-
       const packages = (agent.packages as string[] | undefined) ?? [];
 
       return {
-        agentId,
-        agentType: resolveAgentTypeFromPackages(packages),
-        packages,
+        kind: 'found',
+        endpoint: {
+          agentId,
+          agentType: resolveAgentTypeFromPackages(packages),
+          packages,
+        },
       };
     },
   };

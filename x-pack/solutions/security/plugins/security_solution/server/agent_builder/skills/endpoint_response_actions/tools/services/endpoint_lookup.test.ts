@@ -7,6 +7,7 @@
 
 import { createEndpointLookupService } from './endpoint_lookup';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { NotFoundError } from '../../../../../endpoint/errors';
 
 describe('createEndpointLookupService', () => {
   const spaceId = 'default';
@@ -18,7 +19,7 @@ describe('createEndpointLookupService', () => {
     const listAgents =
       overrides?.listAgents ??
       jest.fn().mockResolvedValue({
-        agents: [{ id: 'agent-1', packages: ['endpoint'] }],
+        agents: [{ id: 'agent-1', status: 'online', packages: ['endpoint'] }],
       });
     const ensureInCurrentSpace =
       overrides?.ensureInCurrentSpace ?? jest.fn().mockResolvedValue(undefined);
@@ -37,14 +38,14 @@ describe('createEndpointLookupService', () => {
     };
   };
 
-  it('returns null when no agents match the hostname', async () => {
+  it('returns not_found when no agents match the hostname', async () => {
     const { lookup, listAgents } = buildService({
       listAgents: jest.fn().mockResolvedValue({ agents: [] }),
     });
 
     const result = await lookup.resolveByHostName('missing-host');
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ kind: 'not_found' });
     expect(listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
         kuery: 'local_metadata.host.name: missing-host',
@@ -79,41 +80,50 @@ describe('createEndpointLookupService', () => {
     const result = await lookup.resolveByHostName('defend-host');
 
     expect(result).toEqual({
-      agentId: 'agent-1',
-      agentType: 'endpoint',
-      packages: ['endpoint'],
+      kind: 'found',
+      endpoint: {
+        agentId: 'agent-1',
+        agentType: 'endpoint',
+        packages: ['endpoint'],
+      },
     });
   });
 
   it('resolves SentinelOne agents to agentType sentinel_one', async () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({
-        agents: [{ id: 'agent-s1', packages: ['sentinel_one'] }],
+        agents: [{ id: 'agent-s1', status: 'online', packages: ['sentinel_one'] }],
       }),
     });
 
     const result = await lookup.resolveByHostName('s1-host');
 
     expect(result).toEqual({
-      agentId: 'agent-s1',
-      agentType: 'sentinel_one',
-      packages: ['sentinel_one'],
+      kind: 'found',
+      endpoint: {
+        agentId: 'agent-s1',
+        agentType: 'sentinel_one',
+        packages: ['sentinel_one'],
+      },
     });
   });
 
   it('defaults agentType to endpoint when packages are missing', async () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({
-        agents: [{ id: 'agent-unknown' }],
+        agents: [{ id: 'agent-unknown', status: 'online' }],
       }),
     });
 
     const result = await lookup.resolveByHostName('unknown-host');
 
     expect(result).toEqual({
-      agentId: 'agent-unknown',
-      agentType: 'endpoint',
-      packages: [],
+      kind: 'found',
+      endpoint: {
+        agentId: 'agent-unknown',
+        agentType: 'endpoint',
+        packages: [],
+      },
     });
   });
 
@@ -147,7 +157,9 @@ describe('createEndpointLookupService', () => {
 
     const result = await lookup.resolveByHostName('multi-enrolled-host');
 
-    expect(result?.agentId).toBe('current-ga');
+    // One live agent + stale history is normal bookkeeping, not ambiguity.
+    expect(result.kind).toBe('found');
+    expect(result).toHaveProperty('endpoint.agentId', 'current-ga');
   });
 
   it('falls back to the most recently enrolled agent when none are online', async () => {
@@ -162,6 +174,106 @@ describe('createEndpointLookupService', () => {
 
     const result = await lookup.resolveByHostName('all-offline-host');
 
-    expect(result?.agentId).toBe('newer');
+    expect(result.kind).toBe('found');
+    expect(result).toHaveProperty('endpoint.agentId', 'newer');
+  });
+
+  it('reports ambiguity when two online agents share the hostname', async () => {
+    // Two distinct live machines can legitimately share a hostname. Silently
+    // picking one would report — or isolate — the wrong host.
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'live-a', status: 'online', enrolled_at: '2026-07-17T10:00:00.000Z' },
+          { id: 'live-b', status: 'online', enrolled_at: '2026-07-17T13:00:00.000Z' },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('duplicated-host');
+
+    expect(result).toEqual({
+      kind: 'ambiguous',
+      // Newest enrolled first, matching the single-match tiebreak.
+      candidates: [
+        { agentId: 'live-b', status: 'online' },
+        { agentId: 'live-a', status: 'online' },
+      ],
+    });
+  });
+
+  it('is not ambiguous when only one of several matching agents is online', async () => {
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'offline-peer', status: 'offline', enrolled_at: '2026-07-17T10:00:00.000Z' },
+          { id: 'live-one', status: 'online', enrolled_at: '2026-07-17T13:00:00.000Z' },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('one-live-host');
+
+    expect(result.kind).toBe('found');
+    expect(result).toHaveProperty('endpoint.agentId', 'live-one');
+  });
+
+  it('ignores agents that are not visible in the caller space', async () => {
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'other-space', status: 'online', packages: ['endpoint'] },
+          { id: 'mine', status: 'online', packages: ['endpoint'] },
+        ],
+      }),
+      ensureInCurrentSpace: jest.fn(async ({ agentIds }: { agentIds: string[] }) => {
+        if (agentIds.includes('other-space')) {
+          throw new NotFoundError('Agent not found');
+        }
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('cross-space-host');
+
+    expect(result).toEqual({
+      kind: 'found',
+      endpoint: { agentId: 'mine', agentType: 'endpoint', packages: ['endpoint'] },
+    });
+  });
+
+  it('returns not_found when every matching agent is outside the caller space', async () => {
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'other-space', status: 'online', packages: ['endpoint'] }],
+      }),
+      ensureInCurrentSpace: jest.fn().mockRejectedValue(new NotFoundError('Agent not found')),
+    });
+
+    const result = await lookup.resolveByHostName('hidden-host');
+
+    expect(result).toEqual({ kind: 'not_found' });
+  });
+
+  it('does not report ambiguity for agents hidden by space scoping', async () => {
+    // Both would be "live" matches, but only one is visible here — that is a
+    // single valid answer, not an ambiguous hostname.
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'visible-live', status: 'online', packages: ['endpoint'] },
+          { id: 'hidden-live', status: 'online', packages: ['endpoint'] },
+        ],
+      }),
+      ensureInCurrentSpace: jest.fn(async ({ agentIds }: { agentIds: string[] }) => {
+        if (agentIds.includes('hidden-live')) {
+          throw new NotFoundError('Agent not found');
+        }
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('partially-visible-host');
+
+    expect(result.kind).toBe('found');
+    expect(result).toHaveProperty('endpoint.agentId', 'visible-live');
   });
 });

@@ -267,6 +267,44 @@ describe('getEndpointStatusTool', () => {
       }
     });
 
+    it('returns an ambiguous result when two online agents share the hostname', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'live-a', status: 'online' },
+            { id: 'live-b', status: 'online' },
+          ],
+        }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      try {
+        const result = await tool.handler({ hostName: 'duplicated-host' }, mockContext);
+
+        const results = assertStandardReturn(result);
+        expect(results).toHaveLength(1);
+        expect(results[0].type).toBe(ToolResultType.other);
+        const data = results[0].data as Record<string, unknown>;
+        // Must NOT report a status for an arbitrary one of the two hosts.
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('ambiguous_hostname');
+        expect(data.candidates).toEqual([
+          { agentId: 'live-a', status: 'online' },
+          { agentId: 'live-b', status: 'online' },
+        ]);
+        expect(data.message).toContain('duplicated-host');
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+      }
+    });
+
     it('returns insufficient_privileges when caller lacks canReadSecuritySolution and canAccessFleet', async () => {
       const { getEndpointAuthzInitialStateMock } = jest.requireActual(
         '../../../../../../common/endpoint/service/authz/mocks'

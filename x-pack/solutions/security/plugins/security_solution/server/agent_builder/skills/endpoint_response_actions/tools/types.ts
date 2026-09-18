@@ -24,6 +24,13 @@ export const MAX_HOSTNAME_FILTER_LENGTH = 256;
 export const DEFAULT_PAGE_SIZE = 20;
 
 /**
+ * Endpoints returned per page by `list_endpoints`. The tool exposes a `page`
+ * parameter and reports `total`/`hasMore`, so a fleet larger than one page can
+ * still be enumerated instead of being silently truncated.
+ */
+export const LIST_ENDPOINTS_PAGE_SIZE = 50;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.

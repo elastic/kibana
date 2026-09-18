@@ -342,6 +342,27 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     );
 
     if (!hasEndpointPkg) {
+      // Read the installed version from EPM instead of hard-coding a stack
+      // version. The Scout config installs `endpoint` at `latest`
+      // (`evals_endpoint/stateful/classic.stateful.config.ts`), so the
+      // installed version moves with the stack. A hard-coded version can be
+      // rejected by Fleet when that exact package version is not installed,
+      // which leaves the endpoint package policy missing — and every host
+      // lookup then returns `endpoint_not_found` (see the note above).
+      const endpointPackage = await clients.kbnClient.request<{
+        item: { version?: string };
+      }>({
+        method: 'GET',
+        path: '/api/fleet/epm/packages/endpoint',
+      });
+      const endpointPackageVersion = endpointPackage.data.item?.version;
+
+      if (!endpointPackageVersion) {
+        throw new Error(
+          'Could not determine the installed endpoint package version from /api/fleet/epm/packages/endpoint'
+        );
+      }
+
       await clients.kbnClient.request<{ item: { id: string } }>({
         method: 'POST',
         path: '/api/fleet/package_policies',
@@ -350,7 +371,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
           description: 'eval',
           namespace: 'default',
           policy_id: realPolicyId,
-          package: { name: 'endpoint', version: '9.5.0' },
+          package: { name: 'endpoint', version: endpointPackageVersion },
           inputs: [],
         },
       });

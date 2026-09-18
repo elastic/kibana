@@ -16,6 +16,7 @@ import { LIST_ENDPOINTS_TOOL_ID } from '../..';
 import type { HostInfo } from '../types';
 import {
   insufficientPrivilegesResult,
+  LIST_ENDPOINTS_PAGE_SIZE,
   MAX_HOSTNAME_FILTER_LENGTH,
   responseActionErrorResult,
 } from '../types';
@@ -27,6 +28,14 @@ const listEndpointsSchema = z.object({
     .optional()
     .describe(
       'Optional hostname substring to filter results. Only endpoints whose hostname contains this value will be returned.'
+    ),
+  page: z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe(
+      `Zero-based page of results to fetch (default 0). Each page holds up to ${LIST_ENDPOINTS_PAGE_SIZE} endpoints; when the response reports \`hasMore: true\`, request the next page to continue.`
     ),
 });
 
@@ -58,11 +67,14 @@ export const listEndpointsTool = (
           ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter as string)}*`
           : undefined;
 
+        const page = (params.page as number | undefined) ?? 0;
+
         const hostInfo = await metadataService.getHostMetadataList({
-          page: 0,
-          // Return up to 50 endpoints (broader than single-host lookups).
-          // The agent can refine with hostNameFilter if the list is too long.
-          pageSize: 50,
+          page,
+          // One page of results. The response reports `total`/`hasMore` so the
+          // caller can walk further pages instead of silently losing hosts
+          // beyond the first page.
+          pageSize: LIST_ENDPOINTS_PAGE_SIZE,
           ...(kuery ? { kuery } : {}),
         });
 
@@ -72,6 +84,7 @@ export const listEndpointsTool = (
           const os = host?.os;
           const agent = metadata?.agent;
           const endpointState = metadata?.Endpoint?.state;
+          const appliedPolicy = metadata?.Endpoint?.policy?.applied;
 
           const osLabel =
             os?.name && os?.version ? `${os.name} ${os.version}` : os?.name || 'Unknown';
@@ -83,8 +96,19 @@ export const listEndpointsTool = (
             isolated: Boolean(endpointState?.isolation),
             os: osLabel,
             lastSeen: entry.last_checkin || null,
+            // The endpoint's applied integration policy, so the agent can give
+            // the policy context this tool advertises.
+            policy:
+              appliedPolicy?.name || appliedPolicy?.id
+                ? {
+                    name: appliedPolicy?.name || null,
+                    id: appliedPolicy?.id || null,
+                  }
+                : null,
           };
         });
+
+        const total = hostInfo.total ?? 0;
 
         return {
           results: [
@@ -95,7 +119,12 @@ export const listEndpointsTool = (
                 kind: 'response_action_result' as const,
                 action: 'list-endpoints' as const,
                 endpoints,
-                total: hostInfo.total ?? 0,
+                total,
+                page,
+                pageSize: LIST_ENDPOINTS_PAGE_SIZE,
+                // Report truncation explicitly: the agent must not treat a
+                // partial page as the complete inventory.
+                hasMore: page * LIST_ENDPOINTS_PAGE_SIZE + endpoints.length < total,
               },
             },
           ],

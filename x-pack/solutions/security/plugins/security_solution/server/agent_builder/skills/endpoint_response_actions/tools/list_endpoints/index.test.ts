@@ -271,9 +271,183 @@ describe('listEndpointsTool', () => {
 
         expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
           expect.objectContaining({
+            page: 0,
             pageSize: 50,
           })
         );
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('forwards the requested page to the metadata service', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 120 }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        await tool.handler({ page: 2 }, mockContext);
+
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          expect.objectContaining({ page: 2, pageSize: 50 })
+        );
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('reports hasMore when the fleet is larger than one page', async () => {
+      // A fleet bigger than one page must not look like the whole inventory.
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: Array.from({ length: 50 }, (_, i) => ({
+            metadata: {
+              host: { hostname: `host-${i}` },
+              agent: { id: `agent-${i}` },
+              Endpoint: { state: { isolation: false } },
+            },
+            last_checkin: '2024-06-01T12:00:00Z',
+            host_status: 'healthy',
+          })),
+          total: 120,
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ page: 0 }, mockContext);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+        expect(data.total).toBe(120);
+        expect(data.page).toBe(0);
+        expect(data.pageSize).toBe(50);
+        expect(data.hasMore).toBe(true);
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('reports hasMore false on the last page', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: Array.from({ length: 20 }, (_, i) => ({
+            metadata: {
+              host: { hostname: `host-${i}` },
+              agent: { id: `agent-${i}` },
+              Endpoint: { state: { isolation: false } },
+            },
+            last_checkin: '2024-06-01T12:00:00Z',
+            host_status: 'healthy',
+          })),
+          total: 120,
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ page: 2 }, mockContext);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+        expect(data.hasMore).toBe(false);
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('includes the applied policy for each endpoint', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'policy-host', os: { name: 'Ubuntu', version: '22.04' } },
+                agent: { id: 'agent-policy' },
+                Endpoint: {
+                  state: { isolation: false },
+                  policy: { applied: { id: 'policy-1', name: 'Production Defend' } },
+                },
+              },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({}, mockContext);
+        const data = assertStandardReturn(result)[0].data as {
+          endpoints: Array<Record<string, unknown>>;
+        };
+
+        expect(data.endpoints[0].policy).toEqual({
+          id: 'policy-1',
+          name: 'Production Defend',
+        });
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('returns policy: null when policy metadata is absent', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'no-policy-host' },
+                agent: { id: 'agent-no-policy' },
+                Endpoint: { state: { isolation: false } },
+              },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({}, mockContext);
+        const data = assertStandardReturn(result)[0].data as {
+          endpoints: Array<Record<string, unknown>>;
+        };
+
+        expect(data.endpoints[0].policy).toBeNull();
       } finally {
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;

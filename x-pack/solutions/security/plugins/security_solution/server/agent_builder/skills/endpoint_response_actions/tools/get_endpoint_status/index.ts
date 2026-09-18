@@ -59,7 +59,7 @@ export const getEndpointStatusTool = (
         const lookup = createEndpointLookupService(endpointAppContextService, spaceId);
         const resolved = await lookup.resolveByHostName(hostName);
 
-        if (!resolved) {
+        if (resolved.kind === 'not_found') {
           return {
             results: [
               {
@@ -71,7 +71,29 @@ export const getEndpointStatusTool = (
           };
         }
 
-        const { agentId } = resolved;
+        if (resolved.kind === 'ambiguous') {
+          // Two live agents share this hostname. Picking one would report the
+          // wrong machine's status, so ask the analyst for an agent ID instead.
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.other,
+                data: {
+                  kind: 'response_action_result' as const,
+                  action: 'get-endpoint-status' as const,
+                  hostName,
+                  found: false,
+                  reason: 'ambiguous_hostname' as const,
+                  candidates: resolved.candidates,
+                  message: `Multiple online endpoints share the hostname "${hostName}". Ask the analyst for the agent ID to disambiguate.`,
+                },
+              },
+            ],
+          };
+        }
+
+        const { agentId } = resolved.endpoint;
 
         // Get detailed status from endpoint metadata service
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
