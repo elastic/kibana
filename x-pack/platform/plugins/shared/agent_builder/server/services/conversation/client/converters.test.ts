@@ -1990,6 +1990,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -2024,6 +2025,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -2083,6 +2085,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
         },
       };
