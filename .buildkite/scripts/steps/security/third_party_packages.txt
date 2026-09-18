@@ -62,3 +62,4 @@ redux-v4
 reselect-v4
 graphql
 @swc/helpers
+bump-cli

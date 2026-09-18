@@ -13,6 +13,8 @@
 # this material is strictly forbidden unless prior written
 # permission is obtained from Elasticsearch B.V.
 
+export PATH := $(abspath $(CURDIR)/../node_modules/.bin):$(PATH)
+
 .PHONY: api-docs
 api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles
 	$(MAKE) merge-api-docs
@@ -39,15 +41,15 @@ merge-api-docs-serverless: ## Merge only kibana.serverless.yaml
 
 .PHONY: api-docs-lint
 api-docs-lint: ## Run redocly API docs linter
-	@./node_modules/.bin/redocly lint "output/*.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
+	@redocly lint "output/*.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-lint-stateful
 api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
-	@./node_modules/.bin/redocly lint "output/kibana.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
+	@redocly lint "output/kibana.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-lint-serverless
 api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.yaml
-	@./node_modules/.bin/redocly lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
+	@redocly lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-fix-required
 api-docs-fix-required: ## Auto-generate required_field_fixes.overlays.yaml from merged OAS bundles
@@ -55,24 +57,24 @@ api-docs-fix-required: ## Auto-generate required_field_fixes.overlays.yaml from 
 
 .PHONY: api-docs-overlay
 api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Dashboards & Visualizations)
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.serverless.tmp4.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.serverless.tmp5.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.serverless.tmp6.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.serverless.tmp7.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.serverless.tmp8.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp8.yaml"
-	@./node_modules/.bin/redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana.serverless.yaml
-	@./node_modules/.bin/redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.yaml
+	@bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
+	@bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
+	@bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
+	@bump overlay "output/kibana.serverless.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.serverless.tmp4.yaml"
+	@bump overlay "output/kibana.serverless.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.serverless.tmp5.yaml"
+	@bump overlay "output/kibana.serverless.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.serverless.tmp6.yaml"
+	@bump overlay "output/kibana.serverless.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.serverless.tmp7.yaml"
+	@bump overlay "output/kibana.serverless.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.serverless.tmp8.yaml"
+	@bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
+	@bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
+	@bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
+	@bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
+	@bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
+	@bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
+	@bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
+	@bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp8.yaml"
+	@redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana.serverless.yaml
+	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.yaml
 	rm -f output/kibana.tmp*.yaml
 	rm -f output/kibana.serverless.tmp*.yaml
 
@@ -104,25 +106,24 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 # are kept only in the Bump pipeline output (kibana.yaml / kibana.serverless.yaml).
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: api-docs-overlay-external
-api-docs-overlay-external: merge-api-docs-stateful api-docs-fix-required ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
-	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/required_field_fixes.overlays.yaml" > "output/kibana.tmp0.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp0.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.strip_request_examples.yaml" > "output/kibana.tmp8.yaml"
-	@./node_modules/.bin/redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.external.yaml
+api-docs-overlay-external: merge-api-docs-stateful ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
+	@bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
+	@bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
+	@bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
+	@bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
+	@bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
+	@bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
+	@bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
+	@bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.strip_request_examples.yaml" > "output/kibana.tmp8.yaml"
+	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.external.yaml
 	rm -f output/kibana.tmp*.yaml
 
 .PHONY: api-docs-preview
 api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
 	@echo "Rendering stateful docs preview..."
-	@./node_modules/.bin/bump preview "output/kibana.yaml"
+	@bump preview "output/kibana.yaml"
 	@echo "Rendering serverless docs preview..."
-	@./node_modules/.bin/bump preview "output/kibana.serverless.yaml"
+	@bump preview "output/kibana.serverless.yaml"
 
 help:  ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
