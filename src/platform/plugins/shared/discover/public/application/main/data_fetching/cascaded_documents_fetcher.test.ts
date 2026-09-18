@@ -53,6 +53,7 @@ const mockApmCaptureError = jest.mocked(apm.captureError);
 const columnsMeta: DataTableColumnsMeta = {
   extension: {
     type: 'string',
+    isComputedColumn: true,
   },
 };
 
