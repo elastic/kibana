@@ -73,7 +73,7 @@ export const ConversationDetailsFlyoutFooter = ({
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
-        initialAssignee={investigation.assignee}
+        initialAssignee={investigation.assignees[0] ?? null}
         approvalInvestigation={isApprovalOpen ? investigation : undefined}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}

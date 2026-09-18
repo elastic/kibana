@@ -23,6 +23,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   summary: 'A second sign-in replayed the same session cookie.',
+  assignees: [],
   pendingProposalCount: 0,
   events: [],
 };

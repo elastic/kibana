@@ -33,7 +33,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useInvestigation } from '../../hooks/use_investigations_api';
+import { useCloseInvestigation, useInvestigation } from '../../hooks/use_investigations_api';
 import { useProposalsList } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
@@ -228,6 +228,18 @@ export const ConversationsPage: React.FC = () => {
     [conversations, modalState.recordId]
   );
 
+  const closeInvestigation = useCloseInvestigation(actionInvestigation?.id ?? '');
+  const onCloseSubmit = useCallback(
+    (closeReason: string) => {
+      if (!actionInvestigation?.id) return;
+      closeInvestigation.mutate(
+        { closeReason: closeReason as never },
+        { onSuccess: closeModal, onError: onDecisionError }
+      );
+    },
+    [actionInvestigation, closeInvestigation, closeModal, onDecisionError]
+  );
+
   const selectedRecommendedActionConversation = useMemo(
     () =>
       selectedIdForRecommendedAction
@@ -296,11 +308,12 @@ export const ConversationsPage: React.FC = () => {
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
-        initialAssignee={actionInvestigation?.assignee}
+        initialAssignee={actionInvestigation?.assignees[0] ?? null}
         approvalInvestigation={selectedRecommendedActionConversation}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
+        onCloseSubmit={onCloseSubmit}
         renderDismissModal={renderDismissModal}
       />
 

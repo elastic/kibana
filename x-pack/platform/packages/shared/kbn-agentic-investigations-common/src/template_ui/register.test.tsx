@@ -31,6 +31,7 @@ const investigation: Investigation = {
   severity: 'high',
   affectedSurface: 'cfo@corp',
   summary: 'A second sign-in replayed the same session cookie.',
+  assignees: [],
   pendingProposalCount: 0,
   events: [],
 };

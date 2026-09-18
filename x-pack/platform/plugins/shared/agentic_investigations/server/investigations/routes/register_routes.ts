@@ -1,0 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { InvestigationRouteDependencies } from '../types';
+import { registerCloseInvestigationRoute } from './close_investigation';
+import { registerUpdateAssigneesRoute } from './update_assignees';
+
+export const registerInvestigationRoutes = (deps: InvestigationRouteDependencies) => {
+  registerUpdateAssigneesRoute(deps);
+  registerCloseInvestigationRoute(deps);
+};
