@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Filter } from '@kbn/es-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -15,9 +16,9 @@ import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceHistogram } from '../types/episode_data_source';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
-import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
 jest.mock('../utils/execute_esql_query');
@@ -85,6 +86,7 @@ describe('useEpisodesHistogramQuery', () => {
     expect(result.current.table?.type).toBe('datatable');
     expect(result.current.isCapHit).toBe(false);
     expect(result.current.error).toBeUndefined();
+    expect(result.current.sourceErrors).toEqual([]);
   });
 
   it('sets isCapHit when result has exactly HISTOGRAM_EPISODE_LIMIT rows', async () => {
@@ -111,7 +113,7 @@ describe('useEpisodesHistogramQuery', () => {
     expect(result.current.isCapHit).toBe(true);
   });
 
-  it('returns error when query fails', async () => {
+  it('returns sourceErrors and still builds a table when the v2 query fails', async () => {
     const mockError = new Error('ES|QL failed');
     mockExecuteEsqlQuery.mockRejectedValue(mockError);
 
@@ -127,8 +129,9 @@ describe('useEpisodesHistogramQuery', () => {
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.error).toBeDefined();
-    expect(result.current.table).toBeUndefined();
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.table).toBeDefined();
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: mockError }]);
   });
 
   it('passes breakdownField to the query builder', async () => {
@@ -190,7 +193,7 @@ describe('useEpisodesHistogramQuery', () => {
     expect(secondBucket?.count).toBe(0);
   });
 
-  it('includes timeRange in the executeEsqlQuery input', async () => {
+  it('sends the time range as an alert-events-only request filter', async () => {
     mockExecuteEsqlQuery.mockResolvedValue([]);
 
     renderHook(
@@ -206,9 +209,18 @@ describe('useEpisodesHistogramQuery', () => {
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
     const inputArg = mockExecuteEsqlQuery.mock.calls[0][0].input as {
-      timeRange?: typeof mockTimeRange;
+      timeRange?: unknown;
+      filters?: Filter[];
     };
-    expect(inputArg.timeRange).toEqual(mockTimeRange);
+    // The range is sent as a request filter on the alert events only, so the
+    // action documents are kept whatever their timestamp.
+    expect(inputArg.timeRange).toBeUndefined();
+    expect(inputArg.filters).toHaveLength(1);
+    const should = inputArg.filters?.[0].query?.bool.should;
+    expect(should[0].bool.filter[1].range['@timestamp']).toEqual(
+      expect.objectContaining({ gte: mockTimeRange.from, lte: mockTimeRange.to })
+    );
+    expect(should[1]).toEqual({ exists: { field: 'action_type' } });
   });
 
   it('concatenates source histogram rows with v2 rows', async () => {
@@ -332,5 +344,8 @@ describe('useEpisodesHistogramQuery', () => {
 
     expect(result.current.table).toBeDefined();
     expect(result.current.error).toBeUndefined();
+    expect(result.current.sourceErrors).toEqual([
+      { sourceId: 'test-source', error: new Error('source fetch failed') },
+    ]);
   });
 });

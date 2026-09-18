@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+
 export const queryKeys = {
+  /**
+   * AlertZero-specific views over the shared proposals data.
+   * Keys share the platform root so that the platform's invalidateQueries
+   * on approve/dismiss sweeps these up without AlertZero needing its own mutations.
+   */
+  proposals: {
+    grouped: (windowHours: number) =>
+      [...platformQueryKeys.proposals.all, 'grouped', windowHours] as const,
+    chartsSummary: (windowHours: number, bucketMinutes: number) =>
+      [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
+  },
   watches: {
     all: ['alertzero', 'watches'] as const,
     list: () => [...queryKeys.watches.all, 'list'] as const,
@@ -27,12 +40,5 @@ export const queryKeys = {
     detail: (id: string | undefined) => [...queryKeys.investigations.all, 'detail', id] as const,
     proposals: (id: string | undefined) =>
       [...queryKeys.investigations.all, 'proposals', id] as const,
-  },
-  /** Durable proposals from the generic investigation proposals API. */
-  proposals: {
-    all: ['alertzero', 'investigation-proposals'] as const,
-    list: (conversationId?: string) =>
-      [...queryKeys.proposals.all, 'list', conversationId ?? 'any'] as const,
-    detail: (id: string | undefined) => [...queryKeys.proposals.all, 'detail', id] as const,
   },
 };

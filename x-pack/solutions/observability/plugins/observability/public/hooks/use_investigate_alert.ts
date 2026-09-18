@@ -7,29 +7,38 @@
 
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import type {
+  InvestigationStatus,
+  InvestigationSubjectType,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
 
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
+  statuses: ['pending', 'running', 'completed'] satisfies InvestigationStatus[],
+  subject_types: ['alert'] satisfies InvestigationSubjectType[],
   sort_field: 'created_at' as const,
   sort_order: 'desc' as const,
-  size: 1,
+  size: 2,
 });
 
 export const useInvestigateAlert = ({
   alertId,
+  enabled = true,
   onInvestigate,
 }: {
   alertId?: string;
+  enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
-  const { http, notifications } = useKibana().services;
+  const { application, http, notifications } = useKibana().services;
   const investigationsClient = getInvestigationsClient();
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient();
-  const canInvestigate = Boolean(alertId && investigationsClient);
+  const canInvestigate = Boolean(enabled && alertId && investigationsClient);
   const { data: availability } = useQuery({
     queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
     queryFn: ({ signal }) =>
@@ -47,18 +56,33 @@ export const useInvestigateAlert = ({
         signal: signal ?? null,
         params: { query: getStatusQuery(alertId ?? '') },
       }),
-    enabled: canInvestigate && availability?.available === true,
+    enabled: canInvestigate,
     retry: false,
     refetchInterval: (data) =>
-      data?.results[0]?.status === 'pending' || data?.results[0]?.status === 'running'
+      data?.results.some(({ status }) => status === 'pending' || status === 'running')
         ? 5_000
         : false,
   });
   const [isStarting, setIsStarting] = useState(false);
-  const latestStatus = investigations?.results[0]?.status;
+  const latestInvestigation = investigations?.results[0];
+  const latestStatus = latestInvestigation?.status;
   const hasOngoingInvestigation = latestStatus === 'pending' || latestStatus === 'running';
   const isInvestigating = isStarting || hasOngoingInvestigation;
   const showInvestigateAction = availability?.available === true;
+  const viewInvestigationUrl =
+    alertId && latestInvestigation
+      ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+          path: `?${new URLSearchParams({
+            investigationId: latestInvestigation.investigation_id,
+          }).toString()}`,
+        })
+      : undefined;
+  const viewInvestigationActionLabel = i18n.translate(
+    'xpack.observability.alerts.viewInvestigationButtonLabel',
+    {
+      defaultMessage: 'View investigation',
+    }
+  );
   const investigateActionLabel = isInvestigating
     ? i18n.translate('xpack.observability.alerts.investigating', {
         defaultMessage: 'Investigating',
@@ -101,5 +125,12 @@ export const useInvestigateAlert = ({
     }
   };
 
-  return { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel };
+  return {
+    showInvestigateAction,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+  };
 };

@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
   - '@kbn/spaces-plugin'
+  - '@kbn/std'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
@@ -42,6 +43,13 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
+  - '@kbn/actions-plugin'
+  - '@kbn/investigation-output'
+  - '@kbn/sandbox-plugin'
+  - '@kbn/context-engine-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod

@@ -2044,7 +2044,7 @@ describe('UnifiedDataTable', () => {
         const renderCustomToolbarMock = jest.fn((props) => {
           return (
             <div data-test-subj="custom-toolbar">
-              Custom layout {props.gridProps.inTableSearchControl}
+              Custom layout {props.gridProps.inTableSearchButton}
             </div>
           );
         });

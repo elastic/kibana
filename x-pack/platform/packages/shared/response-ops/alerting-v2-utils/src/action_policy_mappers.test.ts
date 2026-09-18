@@ -24,9 +24,8 @@ describe('attachmentDataToActionPolicyPayload', () => {
       name: 'My Policy',
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
-      matcher: 'rule.tags: "prod"',
+      matcher: { tags: ['prod'] },
       group_by: ['host.name'],
-      tags: ['tag1'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
     };
@@ -37,9 +36,8 @@ describe('attachmentDataToActionPolicyPayload', () => {
       name: 'My Policy',
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
-      matcher: 'rule.tags: "prod"',
+      matcher: { tags: ['prod'] },
       group_by: ['host.name'],
-      tags: ['tag1'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
@@ -49,12 +47,12 @@ describe('attachmentDataToActionPolicyPayload', () => {
     const data: Partial<ActionPolicyAttachmentData> = {
       name: 'Rule-scoped Policy',
       description: '',
-      matcher: 'rule.id: "rule-123"',
+      matcher: { tags: ['critical'] },
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     };
 
     const result = attachmentDataToActionPolicyPayload(data);
 
-    expect(result.matcher).toBe('rule.id: "rule-123"');
+    expect(result.matcher).toEqual({ tags: ['critical'] });
   });
 });

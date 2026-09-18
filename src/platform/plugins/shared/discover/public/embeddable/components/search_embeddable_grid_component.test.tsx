@@ -10,11 +10,12 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, waitFor } from '@testing-library/react';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import {
   DataGridDensity,
@@ -92,10 +93,10 @@ const createApi = (savedSearch: SavedSearch, parentApi?: SearchEmbeddableApi['pa
   return {
     dataLoading$: new BehaviorSubject<boolean | undefined>(false),
     savedSearch$: new BehaviorSubject(savedSearch),
-    savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
+    savedObjectId$: new BehaviorSubject<string | undefined>(savedObjectId),
     fetchWarnings$: new BehaviorSubject<SearchResponseIncompleteWarning[]>([]),
     query$: new BehaviorSubject(savedSearch.searchSource.getField('query')),
-    filters$: new BehaviorSubject([]),
+    filters$: new BehaviorSubject<Filter[]>(panelFilters),
     fetchContext$: new BehaviorSubject<FetchContext | undefined>(undefined),
     title$: new BehaviorSubject<string | undefined>('Test'),
     description$: new BehaviorSubject<string | undefined>(undefined),
@@ -183,7 +184,7 @@ describe('SearchEmbeddableGridComponent', () => {
             onCancel: jest.fn(),
           }}
           docViewerRef={docViewerRef}
-          expandedDoc={undefined}
+          expandedDoc={expandedDoc}
           initialDocViewerTabId={undefined}
         />
       </DiscoverTestProvider>
@@ -191,6 +192,9 @@ describe('SearchEmbeddableGridComponent', () => {
 
     return { api, stateManager };
   };
+
+  const getLastFlyoutMenuTrailingActions = (): EuiFlyoutMenuAction[] | undefined =>
+    mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0]?.flyoutMenuTrailingActions;
 
   describe('onUpdateSampleSize', () => {
     it('should pass onUpdateSampleSize as undefined when in ES|QL mode', async () => {
@@ -463,6 +467,7 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.showKeyboardShortcuts).toBe(false);
       expect(lastCallProps?.showSortSelector).toBe(false);
+      expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
     });
   });
 });

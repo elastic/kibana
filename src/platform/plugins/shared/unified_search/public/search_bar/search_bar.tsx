@@ -158,6 +158,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Disables all inputs and interactive elements,
    */
   isDisabled?: boolean;
+  /**
+   * Disables only the submit / Search button, unlike `isDisabled` which
+   * greys out the entire query bar.
+   */
+  disableSubmitAction?: boolean;
 
   submitOnBlur?: boolean;
 
@@ -804,6 +809,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showQueryInput={this.props.showQueryInput}
           showAddFilter={this.props.showFilterBar}
           isDisabled={this.props.isDisabled}
+          disableSubmitAction={this.props.disableSubmitAction}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}

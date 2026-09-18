@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiFlyoutMenuAction } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -53,6 +53,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   documentViewerFlyoutType?: 'push' | 'overlay';
   wrapToolbar?: boolean;
+  flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -64,6 +65,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     interceptedWarnings,
     documentViewerFlyoutType,
     wrapToolbar = true,
+    flyoutMenuTrailingActions,
     ...gridProps
   } = props;
   const { euiTheme } = useEuiTheme();
@@ -106,6 +108,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         query={props.query}
         filters={props.filters}
         docViewerRef={props.docViewerRef}
+        flyoutMenuTrailingActions={flyoutMenuTrailingActions}
         hideFilteringOnComputedColumns={true}
         flyoutType={documentViewerFlyoutType}
       />
@@ -122,6 +125,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.query,
       props.savedSearchId,
       documentViewerFlyoutType,
+      flyoutMenuTrailingActions,
     ]
   );
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -67,6 +67,7 @@ import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { registerDiscoverSessionAttachmentUi } from './agent_builder/register_discover_session_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { getDiscoverRecentlyAccessedService } from './services/discover_recently_accessed_service';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -266,6 +267,30 @@ export class DiscoverPlugin
         application: core.application,
       });
     }
+
+    plugins.navigation.registerNavigationLinks({
+      id: 'discoverLinks',
+      target: 'discover',
+      lists: [
+        {
+          id: 'recentlyViewed',
+          title: i18n.translate('discover.navigation.recentlyViewedTitle', {
+            defaultMessage: 'Recently viewed',
+          }),
+          items$: getDiscoverRecentlyAccessedService(core.http)
+            .get$()
+            .pipe(
+              map((items) =>
+                items.slice(0, 5).map((item) => ({
+                  id: item.id,
+                  href: core.http.basePath.prepend(item.link),
+                  label: item.label,
+                }))
+              )
+            ),
+        },
+      ],
+    });
 
     plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
 

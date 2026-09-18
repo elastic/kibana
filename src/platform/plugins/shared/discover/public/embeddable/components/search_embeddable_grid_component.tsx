@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -45,6 +45,13 @@ import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
 import { getEmbeddableDisplayColumns } from '../utils/get_embeddable_display_columns';
+import type { DiscoverAppLocatorParams } from '../../../common';
+import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
+import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
+import {
+  useCopyLocatorLink,
+  useShareDirectLinkAction,
+} from '../../components/discover_grid_flyout';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -220,6 +227,61 @@ export function SearchEmbeddableGridComponent({
     [fetchContext]
   );
 
+  const expandedDocLinkability = useMemo(
+    () => getExpandedDocLinkability(savedSearchQuery, expandedDoc),
+    [savedSearchQuery, expandedDoc]
+  );
+
+  const buildExpandedDocLocatorParams = useCallback(
+    (): DiscoverAppLocatorParams =>
+      getExpandedDocLocatorParams({
+        api,
+        savedSearch,
+        dataView,
+        query: savedSearchQuery,
+        panelFilters: savedSearchFilters,
+        dashboardFilters: fetchContext?.filters,
+        columns,
+        sort,
+        grid,
+        isEsql,
+        esqlVariables,
+        expandedDoc,
+        timeRange,
+        timefilter: discoverServices.timefilter,
+      }),
+    [
+      api,
+      dataView,
+      savedSearchQuery,
+      savedSearchFilters,
+      fetchContext,
+      columns,
+      sort,
+      grid,
+      savedSearch,
+      isEsql,
+      esqlVariables,
+      expandedDoc,
+      timeRange,
+      discoverServices.timefilter,
+    ]
+  );
+
+  const copyExpandedDocLink = useCopyLocatorLink(buildExpandedDocLocatorParams);
+  const shareDirectLinkActions = useShareDirectLinkAction({
+    copyLink: copyExpandedDocLink,
+    linkability: expandedDocLinkability,
+    query: savedSearchQuery,
+  });
+  const canShareExpandedDocLink =
+    Boolean(discoverServices.capabilities.discover_v2.show) ||
+    Boolean(discoverServices.capabilities.discover_v2.save);
+  const flyoutMenuTrailingActions = useMemo(
+    () => (canShareExpandedDocLink && expandedDoc ? shareDirectLinkActions : undefined),
+    [canShareExpandedDocLink, expandedDoc, shareDirectLinkActions]
+  );
+
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
@@ -301,11 +363,6 @@ export function SearchEmbeddableGridComponent({
     [discoverServices.uiSettings, savedSearchQuery]
   );
 
-  const isDataTableJsonViewEnabled = useMemo(
-    () => discoverServices.discoverFeatureFlags.getDataTableJsonViewEnabled(),
-    [discoverServices.discoverFeatureFlags]
-  );
-
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
@@ -344,16 +401,10 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
-      documentsDisplayModeState={
-        isDataTableJsonViewEnabled ? savedSearch.documentsDisplayMode : undefined
-      }
-      onUpdateDocumentsDisplayMode={
-        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateDocumentsDisplayMode : undefined
-      }
-      jsonModeSettingsState={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
-      onUpdateJsonModeSettings={
-        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateJsonModeSettings : undefined
-      }
+      documentsDisplayModeState={savedSearch.documentsDisplayMode}
+      onUpdateDocumentsDisplayMode={onStateEditedProps.onUpdateDocumentsDisplayMode}
+      jsonModeSettingsState={savedSearch.jsonModeSettings}
+      onUpdateJsonModeSettings={onStateEditedProps.onUpdateJsonModeSettings}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
       expandedDoc={expandedDoc}
@@ -364,6 +415,7 @@ export function SearchEmbeddableGridComponent({
       wrapToolbar={wrapToolbar}
       showKeyboardShortcuts={showKeyboardShortcuts}
       showSortSelector={showSortSelector}
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );
 }
