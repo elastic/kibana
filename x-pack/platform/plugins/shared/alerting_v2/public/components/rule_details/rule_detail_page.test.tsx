@@ -22,12 +22,6 @@ import { AlertingV2RulesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
 
-const mockHistoryPush = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockHistoryPush }),
-}));
-
 let mockCanWriteRules = true;
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
@@ -344,7 +338,7 @@ describe('RuleDetailPage', () => {
 
     const [, options] = mockDeleteRule.mock.calls[0];
     options.onSuccess();
-    expect(mockHistoryPush).toHaveBeenCalledWith('/');
+    expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({});
   });
 
   it('closes delete modal when cancel is clicked', async () => {

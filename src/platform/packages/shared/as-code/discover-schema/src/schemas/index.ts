@@ -17,6 +17,7 @@ export {
   discoverSessionControlPanelsSchema,
 } from './control_panel';
 export { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
+export { panelTabSchema } from './panel_tab';
 export {
   discoverSessionDefaultTabTypeStateSchema,
   discoverSessionClassicTabSchema,

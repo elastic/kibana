@@ -189,9 +189,27 @@ Throttle strategy must be compatible with the grouping mode — see [action-poli
 `;
 
 exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
-"# Matcher Context Fields
+"# Action Policy Matchers
 
-When the dispatcher evaluates a policy's KQL matcher, these fields are available:
+A matcher selects which alert **episodes** a policy applies to.
+Policies are space-scoped; they are not bound to a rule object.
+
+\`\`\`
+matcher: { tags?: string[] | null, expression?: string | null }
+\`\`\`
+
+## \`tags\` — match by rule tag
+
+Matches if the episode's rule has **at least one** of the listed tags (OR / any-of).
+Exact string match: case-sensitive, no wildcards, no prefix matching.
+Max 50 tags, up to 256 characters each.
+
+> **Important**: \`matcher.tags\` is matched against the **rule**'s tags, not the
+> policy's own name or metadata.
+
+## \`expression\` — match by episode content (KQL)
+
+Max 4096 characters. Only the following fields are available in the KQL expression:
 
 | Field | Type | Description |
 |---|---|---|
@@ -200,36 +218,70 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`group_hash\` | string | Hash of the grouping fields |
 | \`last_event_timestamp\` | string | Timestamp of the most recent event |
 | \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Episode severity when present |
-| \`rule.id\` | string | The rule's saved object ID |
-| \`rule.name\` | string | The rule's display name |
-| \`rule.tags\` | string[] | The rule's tags array |
 | \`data\` | \`data.*\` object | Rule-specific ES\\\\|QL output columns (query as \`data.*\`, e.g. \`data.host.name\`, \`data.error_count\`) |
 
-An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use \`rule.id: \\"<ruleId>\\"\`."
+> **Note**: \`rule.id\`, \`rule.name\`, and \`rule.tags\` are **not** available in the
+> KQL expression. Use \`matcher.tags\` to scope a policy by rule.
+
+## How \`tags\` and \`expression\` combine
+
+| \`tags\` | \`expression\` | Result |
+|---|---|---|
+| set | set | **AND** — rule must have a matching tag and KQL must pass |
+| set | absent/null | tag constraint only |
+| absent/null | set | no tag constraint; any rule's episodes may match if KQL passes |
+| absent/null | absent/null | **catch-all** — matches every alert episode in the space |
+
+If \`matcher\` itself is \`null\`, or both fields are empty, the policy is a **catch-all**.
+A rule with no tags never matches a policy that has \`matcher.tags\` set.
+
+## \`set_matcher\` replaces the whole matcher
+
+The \`set_matcher\` operation replaces the matcher object entirely.
+To add tags while keeping an existing KQL filter, resend the current \`expression\`:
+
+\`\`\`json
+{ \\"operation\\": \\"set_matcher\\", \\"matcher\\": { \\"tags\\": [\\"team-sre\\"], \\"expression\\": \\"severity: \\\\\\"critical\\\\\\"\\" } }
+\`\`\`
+
+## Examples
+
+\`\`\`json
+// one rule (via shared link tag):
+{ \\"tags\\": [\\"notify-high-cpu\\"] }
+
+// a family of rules by tag:
+{ \\"tags\\": [\\"production\\", \\"payments\\"] }
+
+// severity filter across all rules:
+{ \\"expression\\": \\"severity: \\\\\\"critical\\\\\\"\\" }
+
+// both (rule family AND severity):
+{ \\"tags\\": [\\"production\\"], \\"expression\\": \\"severity: \\\\\\"critical\\\\\\"\\" }
+\`\`\`"
 `;
 
 exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Multi-rule Action Policies
 
 Use this path when the user wants **one policy across several rules**, a space-wide
-catch-all, or routing by tag/severity — not a policy tied to a single \`rule.id\`.
+catch-all, or routing by tag/severity.
 
 Create the policy with \`set_metadata\` (name by intent, not by one rule),
 \`set_destinations\` (same \`workflowId\` rule as the single-rule path), a matcher from
 the options below, then \`set_grouping\` / \`set_throttle\`.
 
 A policy matches **episodes**, not a rule object. Policies are space-scoped and are
-not bound to a single rule. The matcher is optional KQL over
+not bound to a single rule. The matcher supports a \`tags\` array (matched against rule
+tags) and an optional KQL \`expression\` over
 [matcher context fields](./action-policy-matchers.md).
 
 - **Catch-all**: omit \`set_matcher\` or set matcher to empty/\`null\`. Confirm with the
   user first — this notifies on every \`kind: alert\` episode in the space, including
   rules created later.
-- **Several specific rules**: \`rule.id: \\"<id1>\\" or rule.id: \\"<id2>\\"\`. Collect each
-  \`ruleId\` from \`manage_rule\` / \`sml_search\` (pre-assigned IDs work for unsaved drafts).
-- **A family of rules**: \`rule.tags: \\"production\\"\` or \`rule.name: \\"CPU*\\"\`. Prefer tags
-  when the set will grow.
-- **Route by severity across rules**: \`severity: \\"critical\\"\` (or combine with tags).
+- **A family of rules by tag**: \`matcher: { tags: [\\"production\\"] }\`. Matched against the rule's tags.
+  Prefer this when the set of rules will grow.
+- **Route by severity across rules**: \`matcher: { expression: \\"severity: \\\\\\"critical\\\\\\"\\" }\` (or combine with tags).
   Useful for a PagerDuty policy vs an email policy.
 - **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —
   \`inputs.payload.rules[ep.rule_id].name\`, \`ep.episode_status\`, and guarded
@@ -566,19 +618,47 @@ Action policies only process alert episodes. If the rule is \`kind: signal\`, do
 proceed: ask the user (or the rule-management skill) to convert or recreate the
 rule as \`kind: alert\` first.
 
-Create the policy with these operations in order:
+## Scoping a policy to one rule
+
+A policy matches **episodes**, not a rule object. The only way to scope one policy
+to one rule is a **shared link tag on both sides**:
+
+- The rule must carry a tag that uniquely identifies it.
+- The policy's \`matcher.tags\` must contain that same tag.
+
+Use the convention \`notify-<rule-slug>\` (lowercase kebab of the rule name,
+for example \`notify-high-cpu-prod\`).
+
+## Steps
+
+### 1. Add the link tag to the rule
+
+Call \`manage_rule\` → \`set_metadata\` with \`tags: [<all existing tags>, \\"notify-<rule-slug>\\"]\`.
+
+> **Tags are replaced wholesale.** Read the current tags off the rule attachment first
+> and re-send them alongside the new link tag. The rule tag cap is 20; the
+> agent-builder provenance tag consumes one slot. If the rule is already at the cap,
+> ask the user which existing tag to drop.
+
+> **Save reminder**: \`manage_rule\` only updates the in-memory rule attachment.
+> The link tag only takes effect once the user saves the rule
+> (Rule → Workflow → Action Policy save order).
+
+### 2. Create the action policy
+
+Call \`manage_action_policy\` with these operations in order:
 
 1. \`set_metadata\`: name = \`\\"Notify on <rule-name>\\"\`, description = \`\\"Default notification for <rule-name>\\"\`
 2. \`set_destinations\`: \`[{ type: \\"workflow\\", id: \\"<workflowId>\\" }]\`
    - Use the \`workflowId\` passed to \`generate_workflow\`, **not** the workflow \`attachmentId\`.
-3. \`set_matcher\`: \`rule.id: \\"<ruleId>\\"\`
-   - \`ruleId\` comes from the \`manage_rule\` tool result. It is pre-assigned when the
-     rule attachment is created and becomes the saved-object ID when the user clicks
-     \\"Create rule\\".
-   - It is available even for unsaved/proposed rules — do not ask the user to save
-     the rule first.
+3. \`set_matcher\`: \`{ tags: [\\"notify-<rule-slug>\\"] }\` — **do not omit**.
+   An omitted or empty matcher is a space-wide catch-all, not \\"this rule\\".
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: \\"on_status_change\\" }\`
+6. \`validate\`
+
+If the rule already has a tag that uniquely identifies it, you may reuse that tag
+instead of adding \`notify-<rule-slug>\` — but confirm it is not shared with other rules.
 
 If the user explicitly requests a cross-rule or shared policy, consult the
 [multi-rule action policies reference](./action-policy-multi-rule.md)."
