@@ -163,6 +163,7 @@ describe('startJob', () => {
       content: expect.stringContaining('echo hi'),
     });
     expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('TIMEOUT=20'));
+    expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('set -m'));
     expect(mockedExecScript).toHaveBeenCalledWith(
       ctx,
       expect.stringContaining('command -v setsid')

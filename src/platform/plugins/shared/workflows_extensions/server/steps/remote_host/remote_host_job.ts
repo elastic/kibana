@@ -149,6 +149,7 @@ const buildLauncherScript = (workdir: string, scriptFile: string): string => {
   return `#!/bin/bash
 ${BASH_STATUS_HELPERS}
 mkdir -p "${workdir}"
+set -m
 if command -v setsid >/dev/null 2>&1; then
   setsid bash -c '${jobCmd}' < /dev/null > /dev/null 2>&1 &
 else
