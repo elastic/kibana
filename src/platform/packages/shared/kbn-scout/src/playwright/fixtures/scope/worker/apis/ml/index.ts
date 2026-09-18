@@ -187,8 +187,12 @@ export interface MlIndicesApi {
 }
 
 export interface MlNotificationsApi {
-  /** Poll until at least one notification for the given job ID appears in .ml-notifications* */
-  waitForToIndex: (jobId: string, timeout?: number) => Promise<void>;
+  /**
+   * Poll until at least one notification for the given job ID appears in .ml-notifications*.
+   * Pass `earliestMs` to ignore notifications retained from earlier runs; it must match the
+   * `earliest` value used by the notifications API, which filters with a strict `timestamp > earliest`.
+   */
+  waitForToIndex: (jobId: string, earliestMs?: number, timeout?: number) => Promise<void>;
 }
 
 export interface MlApiService {
@@ -850,14 +854,27 @@ export const getMlApiHelper = (
   };
 
   const notifications: MlNotificationsApi = {
-    async waitForToIndex(jobId: string, timeout: number = 60 * 1000): Promise<void> {
+    async waitForToIndex(
+      jobId: string,
+      earliestMs?: number,
+      timeout: number = 60 * 1000
+    ): Promise<void> {
       await waitForCondition(
         `notifications for '${jobId}' to exist in .ml-notifications*`,
         async () => {
           const resp = await esClient.search({
             index: '.ml-notifications*',
             size: 1,
-            query: { term: { job_id: { value: jobId } } },
+            query: {
+              bool: {
+                filter: [
+                  { term: { job_id: { value: jobId } } },
+                  ...(earliestMs === undefined
+                    ? []
+                    : [{ range: { timestamp: { gt: earliestMs } } }]),
+                ],
+              },
+            },
           });
           if (resp.hits.hits.length > 0) return true;
           throw new Error(`Notifications for '${jobId}' not yet indexed`);

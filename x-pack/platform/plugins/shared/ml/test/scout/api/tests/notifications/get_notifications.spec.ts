@@ -12,11 +12,26 @@ import {
   getDFABmClassificationJobConfig,
 } from '../../services/ml_common_configs';
 
-const AD_JOB_ID = 'fq_job';
-const DFA_JOB_ID = 'df_job';
+// Namespaced so a concurrent run on the same cluster cannot create jobs with these IDs
+// inside our time range. The shared suffix keeps `df_job_*` sorting before `fq_job_*`.
+const RUN_ID = Date.now();
+const AD_JOB_ID = `fq_job_${RUN_ID}`;
+const DFA_JOB_ID = `df_job_${RUN_ID}`;
+
+// The endpoint returns notifications for every ML entity visible in the space plus the
+// unscoped `system` channel, so exact totals and positional results must be scoped to our jobs.
+const JOB_SCOPE = `job_id:(${AD_JOB_ID} OR ${DFA_JOB_ID})`;
 
 apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => {
   let testStart: number;
+
+  const notificationsUrl = (extraParams: string = '', extraQuery: string = '') => {
+    const queryString = extraQuery ? `${JOB_SCOPE} AND ${extraQuery}` : JOB_SCOPE;
+    return (
+      `internal/ml/notifications?earliest=${testStart}&latest=now${extraParams}` +
+      `&queryString=${encodeURIComponent(queryString)}`
+    );
+  };
 
   apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
     testStart = Date.now();
@@ -29,8 +44,8 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
       getDFABmClassificationJobConfig(DFA_JOB_ID)
     );
 
-    await apiServices.ml.notifications.waitForToIndex(AD_JOB_ID);
-    await apiServices.ml.notifications.waitForToIndex(DFA_JOB_ID);
+    await apiServices.ml.notifications.waitForToIndex(AD_JOB_ID, testStart);
+    await apiServices.ml.notifications.waitForToIndex(DFA_JOB_ID, testStart);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -42,7 +57,7 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
   apiTest('returns all notifications for an authorized user', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
-    const res = await apiClient.get(`internal/ml/notifications?earliest=${testStart}&latest=now`, {
+    const res = await apiClient.get(notificationsUrl(), {
       headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
       responseType: 'json',
     });
@@ -56,16 +71,11 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asMlViewer();
 
-      const res = await apiClient.get(
-        `internal/ml/notifications?earliest=${testStart}&latest=now&queryString=${encodeURIComponent(
-          'job_type:anomaly_detector'
-        )}`,
-        { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
-      );
+      const res = await apiClient.get(notificationsUrl('', 'job_type:anomaly_detector'), {
+        headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
 
-      expect(res.body.total).toBe(1);
-      expect(res.body.results).toHaveLength(1);
-      expect(res.body.results[0].job_type).toBe('anomaly_detector');
       expect(res.body.total).toBe(1);
       expect(res.body.results).toHaveLength(1);
       expect(res.body.results[0].job_type).toBe('anomaly_detector');
@@ -75,10 +85,10 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
   apiTest('returns notifications sorted ascending by job_id', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
-    const res = await apiClient.get(
-      `internal/ml/notifications?earliest=${testStart}&latest=now&sortField=job_id&sortDirection=asc`,
-      { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
-    );
+    const res = await apiClient.get(notificationsUrl('&sortField=job_id&sortDirection=asc'), {
+      headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
 
     expect(res).toHaveStatusCode(200);
     expect(res.body.results[0].job_id).toBe(DFA_JOB_ID);
@@ -87,10 +97,10 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
   apiTest('returns notifications sorted descending by job_id', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asMlPoweruser();
 
-    const res = await apiClient.get(
-      `internal/ml/notifications?earliest=${testStart}&latest=now&sortField=job_id&sortDirection=desc`,
-      { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
-    );
+    const res = await apiClient.get(notificationsUrl('&sortField=job_id&sortDirection=desc'), {
+      headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
 
     expect(res).toHaveStatusCode(200);
     expect(res.body.results[0].job_id).toBe(AD_JOB_ID);
