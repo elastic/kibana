@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CONNECTOR_ID = '.ssh-host';
+export const CONNECTOR_ID = '.ssh';
 
 export const CONNECTOR_NAME = i18n.translate('connectors.sshHost.title', {
   defaultMessage: 'SSH Host',

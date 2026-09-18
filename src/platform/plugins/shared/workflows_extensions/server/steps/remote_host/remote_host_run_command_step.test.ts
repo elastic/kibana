@@ -50,11 +50,11 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
 
   const createContext = (
     overrides: {
-      input?: { code: string };
+      input?: { command: string };
       state?: { jobId: string; stdoutOffset: number; stderrOffset: number };
     } = {}
   ): PollHandlerContext<any, any, any> => {
-    const input = overrides.input ?? { code: 'echo hi' };
+    const input = overrides.input ?? { command: 'echo hi' };
     const base: StepHandlerContext<any, any> = {
       config: { 'connector-id': 'conn-1' },
       input,
@@ -74,7 +74,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       },
       abortSignal: new AbortController().signal,
       stepId: 'run-command',
-      stepType: 'ssh-host.runCommand',
+      stepType: 'ssh.run',
     };
 
     return {
@@ -104,8 +104,8 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       return startHandler;
     };
 
-    it('returns an error when code is empty', async () => {
-      const result = await start()(createContext({ input: { code: '   ' } }));
+    it('returns an error when command is empty', async () => {
+      const result = await start()(createContext({ input: { command: '   ' } }));
 
       expect(result).toEqual({ error: expect.any(Error) });
       expect(mockedUploadFile).not.toHaveBeenCalled();

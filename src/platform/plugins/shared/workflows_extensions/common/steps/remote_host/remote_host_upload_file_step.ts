@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const SshHostUploadFileStepTypeId = 'ssh-host.uploadFile' as const;
+export const SshUploadFileStepTypeId = 'ssh.uploadFile' as const;
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().min(1),
@@ -34,7 +34,7 @@ export const remoteHostUploadFileStepCommonDefinition: CommonStepDefinition<
   RemoteHostUploadFileStepOutputSchema,
   RemoteHostUploadFileStepConfigSchema
 > = {
-  id: SshHostUploadFileStepTypeId,
+  id: SshUploadFileStepTypeId,
   category: StepCategory.Kibana,
   stability: 'tech_preview',
   label: i18n.translate('workflowsExtensions.remoteHostUploadFileStep.label', {
@@ -46,15 +46,15 @@ export const remoteHostUploadFileStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: `# Upload File
 
-Upload a file to a remote host via an SSH Host connector.
+Upload a file to a remote host via an SSH connector.
 
 ## Basic Usage
 
 \`\`\`yaml
 - name: deploy-config
-  type: ssh-host.uploadFile
+  type: ssh.uploadFile
   config:
-    connector-id: my-ssh-host-connector
+    connector-id: my-ssh-connector
   with:
     remotePath: /etc/myapp/config.json
     content: '{{ steps.build_config.output | json }}'

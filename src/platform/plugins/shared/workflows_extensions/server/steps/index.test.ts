@@ -10,20 +10,20 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerInternalStepDefinitions } from '.';
 import {
-  SshHostDownloadFileStepTypeId,
-  SshHostRunCommandStepTypeId,
-  SshHostUploadFileStepTypeId,
+  SshDownloadFileStepTypeId,
+  SshRunStepTypeId,
+  SshUploadFileStepTypeId,
 } from '../../common/steps/remote_host';
 import { ServerStepRegistry } from '../step_registry';
 
 describe('registerInternalStepDefinitions', () => {
-  it('always registers all ssh-host steps', () => {
+  it('always registers all ssh steps', () => {
     const registry = new ServerStepRegistry(loggerMock.create());
 
     registerInternalStepDefinitions(registry, { getActionsStart: () => undefined });
 
-    expect(registry.has(SshHostRunCommandStepTypeId)).toBe(true);
-    expect(registry.has(SshHostUploadFileStepTypeId)).toBe(true);
-    expect(registry.has(SshHostDownloadFileStepTypeId)).toBe(true);
+    expect(registry.has(SshRunStepTypeId)).toBe(true);
+    expect(registry.has(SshUploadFileStepTypeId)).toBe(true);
+    expect(registry.has(SshDownloadFileStepTypeId)).toBe(true);
   });
 });

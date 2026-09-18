@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { SshHostConnectorTypeId as SSH_HOST_CONNECTOR_ID } from '@kbn/connector-schemas';
+import { SshConnectorTypeId as SSH_CONNECTOR_ID } from '@kbn/connector-schemas';
 import { remoteHostDownloadFileStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createPublicStepDefinition } from '../../step_registry/types';
 
@@ -23,7 +23,7 @@ export const remoteHostDownloadFileStepDefinition = createPublicStepDefinition({
     config: {
       'connector-id': {
         connectorIdSelection: {
-          connectorTypes: [SSH_HOST_CONNECTOR_ID],
+          connectorTypes: [SSH_CONNECTOR_ID],
           enableCreation: true,
         },
       },

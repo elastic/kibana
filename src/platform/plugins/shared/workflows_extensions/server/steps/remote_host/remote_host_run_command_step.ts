@@ -79,16 +79,16 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
       maxWaitMs: 60000,
     },
     start: async (context) => {
-      const { code } = context.input;
+      const { command } = context.input;
       const connectorId = context.config['connector-id'];
 
-      if (typeof code !== 'string' || code.trim().length === 0) {
-        return { error: new Error('Code is required') };
+      if (typeof command !== 'string' || command.trim().length === 0) {
+        return { error: new Error('Command is required') };
       }
 
       const result = await startJob(
         toConnectorContext(connectorId, context, getActionsStart),
-        code,
+        command,
         context.input.env,
         context.input.cwd
       );

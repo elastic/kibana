@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const SshHostRunCommandStepTypeId = 'ssh-host.runCommand' as const;
+export const SshRunStepTypeId = 'ssh.run' as const;
 
 export const REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB
 
@@ -21,7 +21,7 @@ export const ConfigSchema = z.object({
 });
 
 export const InputSchema = z.object({
-  code: z.string().max(REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS),
+  command: z.string().max(REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS),
   env: z.record(z.string(), z.string()).optional(),
   cwd: z.string().optional(),
 });
@@ -37,7 +37,7 @@ export const remoteHostRunCommandStepCommonDefinition: CommonStepDefinition<
   RemoteHostRunCommandStepOutputSchema,
   RemoteHostRunCommandStepConfigSchema
 > = {
-  id: SshHostRunCommandStepTypeId,
+  id: SshRunStepTypeId,
   category: StepCategory.Kibana,
   // stability: 'tech_preview',
   label: i18n.translate('workflowsExtensions.remoteHostRunCommandStep.label', {
@@ -49,7 +49,7 @@ export const remoteHostRunCommandStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: `# Run Command
 
-Execute a shell command on a remote host via an SSH Host connector. The script can set
+Execute a shell command on a remote host via an SSH connector. The script can set
 \`STEP_OUTPUT\` to a string or JSON value — that value becomes the step output.
 Standard output and stderr are captured to logs.
 
@@ -57,11 +57,11 @@ Standard output and stderr are captured to logs.
 
 \`\`\`yaml
 - name: get-hostname
-  type: ssh-host.runCommand
+  type: ssh.run
   config:
-    connector-id: my-ssh-host-connector
+    connector-id: my-ssh-connector
   with:
-    code: |
+    command: |
       STEP_OUTPUT=$(hostname -f)
 \`\`\`
 
@@ -69,11 +69,11 @@ Standard output and stderr are captured to logs.
 
 \`\`\`yaml
 - name: disk-info
-  type: ssh-host.runCommand
+  type: ssh.run
   config:
-    connector-id: my-ssh-host-connector
+    connector-id: my-ssh-connector
   with:
-    code: |
+    command: |
       AVAILABLE=$(df -BG / | awk 'NR==2{print $4}')
       STEP_OUTPUT="{\"available\": \"$AVAILABLE\"}"
 \`\`\`
@@ -82,22 +82,22 @@ Standard output and stderr are captured to logs.
 
 \`\`\`yaml
 - name: deploy
-  type: ssh-host.runCommand
+  type: ssh.run
   config:
-    connector-id: my-ssh-host-connector
+    connector-id: my-ssh-connector
   with:
     env:
       APP_DIR: /opt/myapp
       DEPLOY_ENV: production
-    code: |
+    command: |
       cd "$APP_DIR"
       echo "Deploying to $DEPLOY_ENV"
 \`\`\`
 
 ## Inputs
 
-- **code** (required): Shell script to execute on the remote host.
-- **env** (optional): Key-value map of environment variables exported before \`code\` runs.
+- **command** (required): Shell command to execute on the remote host.
+- **env** (optional): Key-value map of environment variables exported before \`command\` runs.
 
 ## Output
 
