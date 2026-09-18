@@ -10,11 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import moment from 'moment';
 import { entityStoreMetrics } from '../../monitor/metrics';
-import type {
-  EntityStoreGlobalState,
-  EntityStoreGlobalStateClient,
-  HistorySnapshotStatus,
-} from '../saved_objects';
+import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import {
   chunkByUrlLength,
   createIndex,
@@ -58,9 +54,6 @@ export interface HistorySnapshotClientDependencies {
   taskManager: TaskManagerStartContract;
 }
 
-// Whether to run the history snapshot task immediately upon enabling it.
-const HISTORY_SNAPSHOT_TASK_RUN_SOON_ON_ENABLE = true;
-
 export class HistorySnapshotClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
@@ -83,14 +76,64 @@ export class HistorySnapshotClient {
   }
 
   public async enable(request: KibanaRequest): Promise<void> {
-    await this.setTaskEnabled(true, request);
+    const globalState = await this.globalStateClient.findOrThrow();
+    const taskId = getHistorySnapshotTaskId(this.namespace);
+
+    // Step 1: Enable the task but do NOT schedule it for immediate execution yet.
+    // If runSoon were passed here, a worker could claim the task before step 2 updates
+    // the global state to 'started', causing runHistorySnapshot to see the old 'stopped'
+    // status and skip the run — pushing the next execution out by a full cadence.
+    const enableResult = await this.taskManager.bulkEnable([taskId], false, { request });
+    const error = enableResult?.errors?.[0];
+    if (error) {
+      throw new Error(`Failed to enable history snapshot task: ${error?.error?.message}`);
+    }
+
+    // Step 2: Persist 'started' status
+    await this.globalStateClient.update({
+      historySnapshot: { ...globalState.historySnapshot, status: 'started' },
+    });
+
+    // Step 3: Schedule an immediate run. Non-fatal if this fails — the task is enabled
+    // and will execute at its next scheduled cadence.
+    const runSoonResult = await this.taskManager
+      .bulkEnable([taskId], true, { request })
+      .catch((err) => {
+        this.logger.warn(
+          `History snapshot task enabled but immediate run could not be scheduled: ${getErrorMessage(
+            err
+          )}`
+        );
+        return null;
+      });
+    const runSoonError = runSoonResult?.errors?.[0];
+    if (runSoonError) {
+      this.logger.warn(
+        `History snapshot enabled but runSoon failed; will run at next cadence: ${runSoonError?.error?.message}`
+      );
+    }
+
+    this.logger.debug(`Enabled history snapshot task ${taskId}`);
   }
 
   public async disable(
     request: KibanaRequest,
     options?: { clearHistorySnapshots?: boolean }
   ): Promise<void> {
-    await this.setTaskEnabled(false, request);
+    const globalState = await this.globalStateClient.findOrThrow();
+    const taskId = getHistorySnapshotTaskId(this.namespace);
+
+    const result = await this.taskManager.bulkDisable([taskId], false, { request });
+    const error = result?.errors?.[0];
+    if (error) {
+      throw new Error(`Failed to disable history snapshot task: ${error?.error?.message}`);
+    }
+
+    await this.globalStateClient.update({
+      historySnapshot: { ...globalState.historySnapshot, status: 'stopped' },
+    });
+    this.logger.debug(`Disabled history snapshot task ${taskId}`);
+
     if (options?.clearHistorySnapshots === true) {
       // Do not block response waiting for indices to finish clearing
       this.clearSnapshotIndices()
@@ -111,12 +154,12 @@ export class HistorySnapshotClient {
     const patterns = await resolveHistorySnapshotIndexPatterns(this.esClient, this.namespace);
     const resolvedPerPattern = await Promise.all(
       patterns.map(async (pattern) => {
-        try {
-          const { indices } = await this.esClient.indices.resolveIndex({ name: pattern });
-          return indices.map((index) => index.name);
-        } catch {
-          return [];
-        }
+        const { indices } = await this.esClient.indices.resolveIndex({
+          name: pattern,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
+        return indices.map((index) => index.name);
       })
     );
     const indices = resolvedPerPattern.flat();
@@ -173,7 +216,7 @@ export class HistorySnapshotClient {
 
       const docCount = reindexResult.total;
       if (docCount === 0) {
-        await this.updateGlobalStateOnSuccess(globalState);
+        await this.updateGlobalStateOnSuccess();
         entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
         entityStoreMetrics.historySnapshotDocCount.record(0, { namespace: this.namespace });
         return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
@@ -197,7 +240,7 @@ export class HistorySnapshotClient {
         namespace: this.namespace,
       });
 
-      await this.updateGlobalStateOnSuccess(globalState);
+      await this.updateGlobalStateOnSuccess();
       entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
       entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
       return {
@@ -209,42 +252,17 @@ export class HistorySnapshotClient {
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
       this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
-      await this.updateGlobalStateOnError(globalState, caughtError);
+      await this.updateGlobalStateOnError(caughtError);
       return { ok: false, error: new Error('History snapshot failed') };
     }
   }
 
-  private async setTaskEnabled(enabled: boolean, request: KibanaRequest): Promise<void> {
-    const globalState = await this.globalStateClient.findOrThrow();
-    const taskId = getHistorySnapshotTaskId(this.namespace);
-    const action = enabled ? 'enable' : 'disable';
-    const result = enabled
-      ? await this.taskManager.bulkEnable([taskId], HISTORY_SNAPSHOT_TASK_RUN_SOON_ON_ENABLE, {
-          request,
-        })
-      : await this.taskManager.bulkDisable([taskId], false, { request });
-
-    // Check for errors
-    const error = result?.errors?.[0];
-    if (error) {
-      throw new Error(`Failed to ${action} history snapshot task: ${error?.error?.message}`);
-    }
-
-    const status: HistorySnapshotStatus = enabled ? 'started' : 'stopped';
-    await this.globalStateClient.update({
-      historySnapshot: {
-        ...globalState.historySnapshot,
-        status,
-      },
-    });
-    this.logger.debug(`${enabled ? 'Enabled' : 'Disabled'} history snapshot task ${taskId}`);
-  }
-
-  private async updateGlobalStateOnSuccess(globalState: EntityStoreGlobalState): Promise<void> {
+  private async updateGlobalStateOnSuccess(): Promise<void> {
     try {
+      const current = await this.globalStateClient.findOrThrow();
       await this.globalStateClient.update({
         historySnapshot: {
-          ...globalState.historySnapshot,
+          ...current.historySnapshot,
           lastExecutionTimestamp: moment.utc().toISOString(),
           lastError: undefined,
         },
@@ -256,14 +274,12 @@ export class HistorySnapshotClient {
     }
   }
 
-  private async updateGlobalStateOnError(
-    globalState: EntityStoreGlobalState,
-    error: Error
-  ): Promise<void> {
+  private async updateGlobalStateOnError(error: Error): Promise<void> {
     try {
+      const current = await this.globalStateClient.findOrThrow();
       await this.globalStateClient.update({
         historySnapshot: {
-          ...globalState.historySnapshot,
+          ...current.historySnapshot,
           lastError: {
             message: error.message,
             timestamp: moment.utc().toISOString(),

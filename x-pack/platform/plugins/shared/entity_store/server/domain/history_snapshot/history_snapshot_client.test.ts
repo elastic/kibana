@@ -270,17 +270,20 @@ describe('HistorySnapshotClient', () => {
   });
 
   describe('enable', () => {
-    it('enables the Task Manager task and runs it immediately and marks snapshot status started', async () => {
+    it('enables without runSoon, persists started status, then schedules immediate run', async () => {
       await client.enable(request);
 
       expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.bulkEnable).toHaveBeenCalledWith([taskId], true, { request });
+      // First call: enable only, no runSoon, so status update happens before any worker can claim
+      expect(mockTaskManager.bulkEnable).toHaveBeenNthCalledWith(1, [taskId], false, { request });
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: { status: 'started', frequency: '24h' },
       });
+      // Second call: schedule immediate run after status is persisted
+      expect(mockTaskManager.bulkEnable).toHaveBeenNthCalledWith(2, [taskId], true, { request });
     });
 
-    it('throws when the task document is missing', async () => {
+    it('throws and does not update status when the initial enable fails', async () => {
       mockTaskManager.bulkEnable.mockResolvedValue({
         tasks: [],
         errors: [
@@ -298,22 +301,26 @@ describe('HistorySnapshotClient', () => {
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
 
-    it('throws when Task Manager fails to enable the task', async () => {
-      mockTaskManager.bulkEnable.mockResolvedValue({
-        tasks: [],
-        errors: [
-          {
-            id: taskId,
-            type: 'task',
-            error: { statusCode: 500, message: 'conflict', error: 'Conflict' },
-          },
-        ],
-      });
+    it('logs a warning but does not throw when runSoon fails', async () => {
+      // First call (enable) succeeds; second call (runSoon) returns an error
+      mockTaskManager.bulkEnable
+        .mockResolvedValueOnce({ tasks: [], errors: [] })
+        .mockResolvedValueOnce({
+          tasks: [],
+          errors: [
+            {
+              id: taskId,
+              type: 'task',
+              error: { statusCode: 500, message: 'conflict', error: 'Conflict' },
+            },
+          ],
+        });
 
-      await expect(client.enable(request)).rejects.toThrow(
-        'Failed to enable history snapshot task: conflict'
-      );
-      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      await expect(client.enable(request)).resolves.toBeUndefined();
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: { status: 'started', frequency: '24h' },
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('runSoon failed'));
     });
   });
 
@@ -399,6 +406,8 @@ describe('HistorySnapshotClient', () => {
         );
         expect(mockResolveIndex).toHaveBeenCalledWith({
           name: '.entities.v2.history.default.*',
+          ignore_unavailable: true,
+          allow_no_indices: true,
         });
         expect(mockIndicesDelete).toHaveBeenCalledWith(
           {
@@ -433,6 +442,21 @@ describe('HistorySnapshotClient', () => {
 
         await flushPromises();
 
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to clear history snapshot indices')
+        );
+      });
+
+      it('does not throw and logs an error if resolveIndex fails', async () => {
+        mockResolveIndex.mockRejectedValue(new Error('Forbidden'));
+
+        await expect(
+          client.disable(request, { clearHistorySnapshots: true })
+        ).resolves.toBeUndefined();
+
+        await flushPromises();
+
+        expect(mockIndicesDelete).not.toHaveBeenCalled();
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringContaining('Failed to clear history snapshot indices')
         );
