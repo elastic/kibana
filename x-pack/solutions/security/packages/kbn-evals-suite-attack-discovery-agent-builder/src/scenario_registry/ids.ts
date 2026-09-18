@@ -50,14 +50,28 @@ export const ad2SeedDigest = (...parts: ReadonlyArray<string | number>): string 
  * `kind` names the document type (alert, process, rule, ...). That is not a
  * target/noise discriminator, and it is part of the digested input as well, so
  * two kinds can never collide on one digest.
+ *
+ * `runMarker` IS part of the digest, so every identifier belongs to exactly one
+ * seeded run. The dense profile re-seeds the clean profile's four chains
+ * verbatim, so without it the two runs would write the same `_id` into the same
+ * index: the later seed overwrites the earlier one's document and re-tags it
+ * with its own marker, and the earlier run then retrieves fewer alerts than it
+ * seeded. Run-scoping the ids is what lets a run-scoped marker be sufficient on
+ * its own. The id stays 16 hex characters either way, so its shape is unchanged.
  */
-export const ad2SeedId = (kind: string, ...parts: ReadonlyArray<string | number>): string =>
-  `${AD2_SCENARIO_ID_PREFIX}${kind}-${ad2SeedDigest(kind, ...parts)}`;
+export const ad2SeedId = (
+  runMarker: string,
+  kind: string,
+  ...parts: ReadonlyArray<string | number>
+): string => `${AD2_SCENARIO_ID_PREFIX}${kind}-${ad2SeedDigest(runMarker, kind, ...parts)}`;
 
 /**
  * The one id that has to agree with the reference `alertIds` the datasets hand
  * the Rubric evaluator, so it lives in a named function rather than being
  * rebuilt at each call site.
  */
-export const ad2ScenarioAlertId = (scenarioKey: string, stepNumber: number): string =>
-  ad2SeedId('alert', scenarioKey, stepNumber);
+export const ad2ScenarioAlertId = (
+  runMarker: string,
+  scenarioKey: string,
+  stepNumber: number
+): string => ad2SeedId(runMarker, 'alert', scenarioKey, stepNumber);

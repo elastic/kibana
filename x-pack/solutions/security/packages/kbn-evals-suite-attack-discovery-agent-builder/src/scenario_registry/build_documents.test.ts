@@ -32,18 +32,22 @@ describe('AD2 scenario registry (clean profile)', () => {
     ).toBe(true);
   });
 
-  it('carries the fixture marker in root tags, the field a retrieval can filter on', () => {
+  it('carries the run marker in root tags, the field a retrieval can filter on', () => {
     const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
 
     // `labels` is the cleanup marker; root `tags` is the RETRIEVAL marker — an
     // ECS keyword field, which is what the live-retrieval datasets scope their
-    // query by. Losing it silently turns the dense profile's exact-population
-    // expectation into a count of whatever else is in the shared alerts index.
+    // query by. Both carry the run marker: losing it silently turns the dense
+    // profile's exact-population expectation into a count of whatever else is
+    // in the shared alerts index.
     const tagged = plan.alerts.filter((alert) =>
-      ((alert.source.tags as string[] | undefined) ?? []).includes(AD2_SCENARIO_SEED_LABEL)
+      ((alert.source.tags as string[] | undefined) ?? []).includes(plan.runMarker)
     );
     expect(tagged).toHaveLength(plan.alerts.length);
     expect(plan.alerts.length).toBeGreaterThan(0);
+    // The generation marker stays the prefix, so a seeded index is still
+    // greppable as this fixture.
+    expect(plan.runMarker).toContain(AD2_SCENARIO_SEED_LABEL);
   });
 
   it('writes the ids the resolver hands the reference discoveries', () => {
@@ -52,14 +56,21 @@ describe('AD2 scenario registry (clean profile)', () => {
       scenarioKey: 'encoded-powershell',
       baseTime: fixedBaseTime,
     });
-    const resolvedIds = [...getAd2ScenarioAlertIds('encoded-powershell')];
+    const resolvedIds = [...getAd2ScenarioAlertIds('encoded-powershell', 'clean', plan.runMarker)];
 
     expect(plan.alerts).toHaveLength(4);
     expect(plan.alerts.map((alert) => alert.id)).toEqual(resolvedIds);
     expect(plan.alerts[0]?.source).toMatchObject({
-      labels: { ad_portable_seed: 'ad-scenario-registry-2026-07' },
+      labels: { ad_portable_seed: plan.runMarker },
+      tags: [plan.runMarker],
       host: { name: 'wks-alice-01' },
     });
+
+    // A different run resolves different ids for the same chain: the reference
+    // discoveries of one run cannot name another run's documents.
+    expect([...getAd2ScenarioAlertIds('encoded-powershell', 'clean', 'another-run')]).not.toEqual(
+      resolvedIds
+    );
 
     // Opaque: an id (or a per-document label) naming the chain is the same
     // target/noise discriminator a model could read the four real chains out of

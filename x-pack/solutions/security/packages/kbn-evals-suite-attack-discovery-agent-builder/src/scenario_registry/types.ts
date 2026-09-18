@@ -62,12 +62,25 @@ export interface Ad2IndexedRawEvent {
 
 export interface Ad2SeedPlan {
   readonly profile: Ad2SeedProfile;
+  /** The run marker every document in this plan is identified by. */
+  readonly runMarker: string;
   readonly scenarioKeys: readonly string[];
   readonly alerts: readonly Ad2IndexedAlert[];
   readonly rawEvents: readonly Ad2IndexedRawEvent[];
 }
 
-export interface Ad2SeedSummary {
+/**
+ * What a cleanup or a count is allowed to reach: the marker the seeding run
+ * stamped on the documents it wrote (`run_marker.ts`).
+ *
+ * `Ad2SeedSummary` satisfies it, so an `afterAll` hands back exactly what its
+ * `beforeAll` received and cannot name a scope it did not seed.
+ */
+export interface Ad2SeedRunScope {
+  readonly runMarker: string;
+}
+
+export interface Ad2SeedSummary extends Ad2SeedRunScope {
   readonly profile: Ad2SeedProfile;
   readonly scenarioKeys: readonly string[];
   readonly alertCount: number;

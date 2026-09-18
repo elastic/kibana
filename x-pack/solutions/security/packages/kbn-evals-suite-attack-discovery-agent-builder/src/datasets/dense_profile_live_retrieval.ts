@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AD2_CLEAN_SCENARIO_KEYS, AD2_SCENARIO_SEED_LABEL } from '../scenario_registry';
+import { AD2_CLEAN_SCENARIO_KEYS } from '../scenario_registry';
 import { AD2_DENSE_TARGET_ALERTS } from '../scenario_registry/dense_scenarios';
 import type { AttackDiscoveryAgentBuilderExample } from '../types';
-import { CLEAN_PROFILE_REFERENCE_DISCOVERIES } from './clean_profile_provided_alerts';
+import { buildCleanProfileReferenceDiscoveries } from './clean_profile_provided_alerts';
 
 /**
  * Dense-profile live retrieval.
@@ -21,26 +21,30 @@ import { CLEAN_PROFILE_REFERENCE_DISCOVERIES } from './clean_profile_provided_al
  * alerts, of which only the four clean chains are real. Finding them is the
  * task. This is the volume-sensitive measurement the clean profile cannot make.
  *
- * The retrieval is scoped to the fixture marker, the same way the golden-path
+ * The retrieval is scoped to THIS run's marker, the same way the golden-path
  * live-retrieval example scopes its own. That scope is load-bearing rather than
  * cosmetic: the expectation below is an EXACT population, and
  * `.alerts-security.alerts-default` is a shared index — the sibling
- * golden-path spec seeds its own alerts into it, and anything else present at
- * retrieval time changes the observed count, scoring a correct full retrieval
- * as a failure. The window is 24h because the background chains are spread up
- * to 20 hours back (see `startHoursAgo` in `dense_scenarios.ts`), so the marker
- * is the only bound that matters here.
+ * golden-path spec seeds its own alerts into it, a concurrent invocation of
+ * this suite seeds the clean profile's chains into it, and anything else
+ * present at retrieval time changes the observed count, scoring a correct full
+ * retrieval as a failure. The run marker is the only bound that separates this
+ * run's population from every other one; the 24h window only bounds it in time
+ * (the background chains are spread up to 20 hours back — see `startHoursAgo`
+ * in `dense_scenarios.ts`).
  */
-export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExample = {
+export const buildDenseProfileLiveRetrievalExample = (
+  runMarker: string
+): AttackDiscoveryAgentBuilderExample => ({
   input: {
-    question: `Run Attack Discovery by retrieving alerts with the marker ${AD2_SCENARIO_SEED_LABEL} from the last 24 hours and return the validated discoveries.`,
+    question: `Run Attack Discovery by retrieving alerts with the marker ${runMarker} from the last 24 hours and return the validated discoveries.`,
     triageType: 'live-retrieval',
     expectedSkills: ['attack-discovery-generator'],
     expectedToolPath: ['security.attack-discovery.run'],
     // The scope the retrieval is counted under, not just the scope the question
     // asks for: a retrieval that does not carry the marker observes whatever the
     // shared index held, so its row count is not this fixture's population.
-    retrievalScope: AD2_SCENARIO_SEED_LABEL,
+    retrievalScope: runMarker,
   },
   output: {
     expectedToolPath: ['security.attack-discovery.run'],
@@ -57,8 +61,10 @@ export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExampl
     // Omitting the key leaves the passed count unscored.
     //
     // The reference discoveries make the Rubric evaluator fire on this
-    // profile; without them it is structurally N/A (7/7 N/A on golden).
-    attackDiscoveries: CLEAN_PROFILE_REFERENCE_DISCOVERIES.map((discovery) => ({
+    // profile; without them it is structurally N/A (7/7 N/A on golden). They
+    // are resolved from the same marker the seeder writes ids with, so the
+    // reference names this run's documents and not a previous run's.
+    attackDiscoveries: buildCleanProfileReferenceDiscoveries(runMarker).map((discovery) => ({
       ...discovery,
       alertIds: [...discovery.alertIds],
     })),
@@ -74,10 +80,10 @@ export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExampl
     scenarioKey: 'dense-profile-live-retrieval',
     seedProfile: 'dense',
   },
-};
+});
 
-export const denseProfileLiveRetrievalDataset = {
+export const buildDenseProfileLiveRetrievalDataset = (runMarker: string) => ({
   name: 'attack-discovery-agent-builder: scenario-registry (dense profile)',
   description: `Live-retrieval Attack Discovery over a ${AD2_DENSE_TARGET_ALERTS}-alert seeded population containing ${AD2_CLEAN_SCENARIO_KEYS.length} real attack chains and synthetic background noise.`,
-  examples: [denseProfileLiveRetrievalExample],
-};
+  examples: [buildDenseProfileLiveRetrievalExample(runMarker)],
+});
