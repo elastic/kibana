@@ -200,7 +200,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       return;
     }
 
-    await executionClient.updateStatus(executionId, ExecutionStatus.aborted, undefined, reason);
+    await executionClient.updateStatus(executionId, ExecutionStatus.aborted, {
+      abortReason: reason,
+    });
     this.logger.debug(`Aborted execution ${executionId} (${reason.source})`);
   }
 
@@ -322,7 +324,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       // terminal status here instead of leaving the document `running` forever.
       const status = isRequestAbortedError(e) ? ExecutionStatus.aborted : ExecutionStatus.failed;
       try {
-        await executionClient.updateStatus(executionId, status, serializeExecutionError(e));
+        await executionClient.updateStatus(executionId, status, {
+          error: serializeExecutionError(e),
+        });
       } catch (statusErr) {
         this.logger.error(
           `Failed to update status for local execution ${executionId}: ${statusErr.message}`
@@ -369,7 +373,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           ? ExecutionStatus.aborted
           : ExecutionStatus.failed;
         try {
-          await executionClient.updateStatus(executionId, status, serializeExecutionError(error));
+          await executionClient.updateStatus(executionId, status, {
+            error: serializeExecutionError(error),
+          });
         } catch (statusErr) {
           this.logger.error(
             `Failed to update status for local execution ${executionId}: ${statusErr.message}`

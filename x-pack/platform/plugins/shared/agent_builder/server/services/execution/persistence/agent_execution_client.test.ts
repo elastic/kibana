@@ -64,9 +64,8 @@ describe('AgentExecutionClient', () => {
 
     it('writes the status and the error through a script that keeps aborted sticky', async () => {
       await statusClient.updateStatus('exec-1', ExecutionStatus.failed, {
-        code: 'internalError',
-        message: 'boom',
-      } as never);
+        error: { code: 'internalError', message: 'boom' } as never,
+      });
 
       expect(esClient.update).toHaveBeenCalledTimes(1);
       const [request] = esClient.update.mock.calls[0];
@@ -99,7 +98,7 @@ describe('AgentExecutionClient', () => {
 
     it('records the abort reason when given', async () => {
       const abortReason = { source: 'api' as const, actor: { id: 'u1', username: 'alice' } };
-      await statusClient.updateStatus('exec-1', ExecutionStatus.aborted, undefined, abortReason);
+      await statusClient.updateStatus('exec-1', ExecutionStatus.aborted, { abortReason });
 
       const [request] = esClient.update.mock.calls[0];
       expect((request as { script: { params: unknown } }).script.params).toEqual({

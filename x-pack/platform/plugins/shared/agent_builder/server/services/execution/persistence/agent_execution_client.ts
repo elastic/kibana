@@ -31,6 +31,14 @@ type CreateExecutionParams = Pick<
   | 'parentExecutionId'
 >;
 
+/** What a status update records alongside the status. */
+export interface UpdateExecutionStatusOptions {
+  /** The error that ended the execution (`failed`, or the abort error for `aborted`). */
+  error?: SerializedExecutionError;
+  /** Where the abort came from; only meaningful with `aborted`. */
+  abortReason?: ExecutionAbortReason;
+}
+
 /**
  * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
  * Includes only the status, error, event count, and last heartbeat — no events payload.
@@ -80,8 +88,7 @@ export interface AgentExecutionClient {
   updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError,
-    abortReason?: ExecutionAbortReason
+    options?: UpdateExecutionStatusOptions
   ): Promise<void>;
 
   /** Append events to an execution document using a scripted update. */
@@ -192,8 +199,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   async updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError,
-    abortReason?: ExecutionAbortReason
+    { error, abortReason }: UpdateExecutionStatusOptions = {}
   ): Promise<void> {
     // `aborted` is sticky: once an abort was requested the execution reports it, and neither a
     // later `failed` (the graph erroring inside the abort-detection window) nor `completed` (the

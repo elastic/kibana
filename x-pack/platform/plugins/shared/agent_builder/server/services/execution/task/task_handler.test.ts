@@ -171,8 +171,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenCalledWith(
       'execution-1',
       ExecutionStatus.aborted,
-      undefined,
-      { source: 'task_manager' }
+      { abortReason: { source: 'task_manager' } }
     );
   });
 
@@ -246,7 +245,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      { code: 'internal_error', message: 'setup failed' }
+      { error: { code: 'internal_error', message: 'setup failed' } }
     );
   });
 
@@ -258,7 +257,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      { code: 'internal_error', message: 'agent failed' }
+      { error: { code: 'internal_error', message: 'agent failed' } }
     );
   });
 
@@ -272,7 +271,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.aborted,
-      { code: 'internal_error', message: 'Converse request was aborted' }
+      { error: { code: 'internal_error', message: 'Converse request was aborted' } }
     );
   });
 
@@ -284,7 +283,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
-      undefined
+      { error: undefined }
     );
   });
 

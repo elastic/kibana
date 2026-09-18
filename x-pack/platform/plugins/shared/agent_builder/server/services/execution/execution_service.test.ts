@@ -338,7 +338,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
         executionId,
         ExecutionStatus.aborted,
-        expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted })
+        { error: expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted }) }
       );
     });
 
@@ -359,7 +359,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
         executionId,
         ExecutionStatus.failed,
-        expect.objectContaining({ message: 'llm exploded' })
+        { error: expect.objectContaining({ message: 'llm exploded' }) }
       );
     });
 
@@ -381,7 +381,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
         expect.any(String),
         ExecutionStatus.failed,
-        expect.objectContaining({ message: 'registry down' })
+        { error: expect.objectContaining({ message: 'registry down' }) }
       );
     });
 
@@ -401,7 +401,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
         expect.any(String),
         ExecutionStatus.aborted,
-        expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted })
+        { error: expect.objectContaining({ code: AgentBuilderErrorCode.requestAborted }) }
       );
     });
   });
@@ -505,8 +505,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
         ExecutionStatus.aborted,
-        undefined,
-        { source: 'api' }
+        { abortReason: { source: 'api' } }
       );
     });
 
@@ -552,8 +551,7 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
         ExecutionStatus.aborted,
-        undefined,
-        { source: 'api', actor: { id: 'u1', username: 'alice' } }
+        { abortReason: { source: 'api', actor: { id: 'u1', username: 'alice' } } }
       );
     });
 
@@ -586,11 +584,12 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.updateStatus).toHaveBeenLastCalledWith(
         expect.any(String),
         ExecutionStatus.aborted,
-        undefined,
         {
-          source: 'caller',
-          parent_execution_id: 'parent-1',
-          actor: { id: 'u1', username: 'alice' },
+          abortReason: {
+            source: 'caller',
+            parent_execution_id: 'parent-1',
+            actor: { id: 'u1', username: 'alice' },
+          },
         }
       );
     });
