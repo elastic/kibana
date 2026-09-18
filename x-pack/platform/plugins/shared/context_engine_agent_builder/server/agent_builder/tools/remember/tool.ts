@@ -96,11 +96,14 @@ export const createRememberTool = ({
   },
   description: dedent`
     Write a memory to a memory-enabled Context Engine AI index.
+    Memory is shared across everyone in the space. Only record findings that would be useful
+    to any agent or user working in this context — such as discovered patterns, effective
+    approaches, or domain knowledge. Do not record personal details, individual user
+    preferences, or anything specific to the person making the request.
     Use memory.session_fact for a granular fact discovered during a session.
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
-    deliberately revising that memory. This tool handles session metadata, conversation references,
-    and provenance server-side.
+    deliberately revising that memory.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
