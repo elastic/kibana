@@ -50,7 +50,7 @@ const isNonFilterableComputedColumn = (column: DatatableColumn): boolean => {
 
 // match_phrase query cannot find an empty string because of how text fields are tokenized and analyzed
 const isBlankEsqlTextField = (column: DatatableColumn, value: unknown): boolean =>
-  column.meta?.esType === 'text' && (value == null || value === '');
+  column.meta?.esType === 'text' && value === '';
 
 export const isFilterableColumnSet = (
   columns: Array<DatatableColumn | undefined>,

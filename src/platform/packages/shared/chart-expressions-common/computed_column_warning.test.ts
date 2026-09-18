@@ -81,8 +81,8 @@ describe('isFilterableColumnSet', () => {
     const textColumn = buildColumn({ meta: { type: 'string', esType: 'text' } });
     const keywordColumn = buildColumn({ meta: { type: 'string', esType: 'keyword' } });
 
-    it('is false for a text column with a null value', () => {
-      expect(isFilterableColumnSet([textColumn], [null])).toBe(false);
+    it('is true for a text column with a null value', () => {
+      expect(isFilterableColumnSet([textColumn], [null])).toBe(true);
     });
 
     it('is false for a text column with an empty string value', () => {
@@ -170,9 +170,8 @@ describe('getFilterDrilldownWarningMessage', () => {
     const textColumn = buildColumn({ meta: { type: 'string', esType: 'text' } });
     const keywordColumn = buildColumn({ meta: { type: 'string', esType: 'keyword' } });
 
-    it('returns the blank text field message for a text column with a null value', () => {
-      const message = getFilterDrilldownWarningMessage([textColumn], [null]);
-      expect(message).toContain('keyword field');
+    it('returns undefined for a text column with a null value', () => {
+      expect(getFilterDrilldownWarningMessage([textColumn], [null])).toBeUndefined();
     });
 
     it('returns the blank text field message for a text column with an empty string value', () => {
