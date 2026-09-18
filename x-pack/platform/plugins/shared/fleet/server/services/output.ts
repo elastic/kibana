@@ -1619,11 +1619,12 @@ class OutputService {
         fields: ['id'],
       }),
       packagePolicyService.list(internalSoClient, {
+      packagePolicyService.list(internalSoClient, {
         kuery: packagePoliciesKuery,
         perPage: SO_SEARCH_LIMIT,
         spaceId: '*',
+        fields: ['policy_ids'],
       }),
-    ]);
 
     const directPolicyIds = directPolicies.items.map((p) => p.id);
     const pkgDerivedIds = packagePolicySOs.items.flatMap((pp) =>
