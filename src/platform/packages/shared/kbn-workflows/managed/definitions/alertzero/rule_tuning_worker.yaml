@@ -54,8 +54,8 @@ triggers:
         max_rules_per_sweep:
           type: integer
           minimum: 1
-          # Can only lower the cap: the harvest pool (max_candidate_rules) overscans
-          # the default so disabled candidates can be backfilled.
+          # Can only lower the cap: the fan-out's parallel slots are sized for the
+          # default, so a larger value could not open every gate at once.
           maximum: 10
           description: Overrides how many tuning reviews one sweep may launch, up to the default of 10.
       additionalProperties: false
