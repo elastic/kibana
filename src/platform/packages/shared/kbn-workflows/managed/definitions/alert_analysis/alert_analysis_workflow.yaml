@@ -105,10 +105,10 @@ triggers:
           type: string
           description: >
             Conversation id of an existing Investigation conversation (created by the
-            Worker before calling this sub-workflow). When supplied, the agent reasoning
-            is written directly into that conversation so the analyst sees the full
-            classification chain without leaving the Investigation (R3). Absent on the
-            standalone path — falls back to the uiSettings createConversation setting.
+            Worker before calling this sub-workflow). When supplied and calledByWorker
+            is true, progress comments are posted into that conversation so the analyst
+            sees batch-by-batch results without leaving the Investigation. Absent on the
+            standalone path — no comments are posted.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -233,8 +233,8 @@ steps:
       # ai.agent step can check both with a single variable.
       connector_id_by_feature: ""
       # Initialised empty; overridden by apply_caller_input_overrides when the Worker
-      # passes investigationConversationId. When non-empty, runAgent_step writes
-      # its reasoning directly into the Investigation conversation (R3).
+      # passes investigationConversationId. When non-empty and calledByWorker is true,
+      # progress comments are posted into that conversation.
       investigation_conversation_id: ""
 
   # ---------------------------------------------------------------------------
@@ -303,11 +303,9 @@ steps:
           auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
-          # Force the agent reasoning into the Investigation conversation so the
-          # analyst sees the full classification chain without leaving it (R3).
-          # Setting create_conversation: false prevents a second orphaned conversation;
-          # investigation_conversation_id drives the ai.agent step's conversation_id.
-          create_conversation: false
+          # When the Worker passes investigationConversationId, store it for progress
+          # comment steps guarded by calledByWorker. The ai.agent step no longer reads
+          # this — create_conversation follows the uiSettings value on all paths.
           investigation_conversation_id: "{{ inputs.investigationConversationId }}"
 
       # autoCloseEnabled cannot use `| default:`: Liquid treats false as falsy, so
@@ -1208,10 +1206,6 @@ steps:
               # partial batch: the verdicts it did return are applied, the rest get error notes.
               continue: true
             with:
-              # Worker path: write reasoning into the existing Investigation conversation (R3).
-              # Standalone path: empty string — the engine treats it as absent and
-              # create-conversation (set from uiSettings) controls conversation creation.
-              conversation_id: "{{ variables.investigation_conversation_id }}"
               # Context is pre-built, so strip the tool belt: no tool calls, and smaller framework prompt.
               configuration_overrides:
                 enable_elastic_capabilities: false
@@ -1278,6 +1272,28 @@ steps:
                   message: >-
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
+
+              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+              - name: post_batch_failure_comment
+                type: kibana.request
+                if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ variables.investigation_conversation_id }}"
+                    trigger_mode: "never"
+                    input: >-
+                      🤖 **Alert Analysis** — Batch {{ foreach.index }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts.
+                      The alerts in this batch will not have tags or notes written; a re-run of the Worker will retry them.
+                      Execution: {{ execution.url }}
+
             else:
               - name: collect_batch_verdicts
                 type: data.set
@@ -1286,6 +1302,29 @@ steps:
                   batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
                   batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
                   batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
+
+              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+              - name: post_batch_progress_comment
+                type: kibana.request
+                if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ variables.investigation_conversation_id }}"
+                    trigger_mode: "never"
+                    input: >-
+                      🤖 **Alert Analysis** — Batch {{ foreach.index }} complete:
+                      {{ steps.runAgent_step.output.structured_output.verdicts | where: 'classification', 'true_positive' | size }} true positive,
+                      {{ steps.runAgent_step.output.structured_output.verdicts | where: 'classification', 'false_positive' | size }} false positive,
+                      {{ steps.runAgent_step.output.structured_output.verdicts | where: 'classification', 'inconclusive' | size }} inconclusive
+                      ({{ foreach.item | size }} alert(s) in this batch).
 
       # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts

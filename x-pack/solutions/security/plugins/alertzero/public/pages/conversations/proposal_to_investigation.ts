@@ -126,17 +126,12 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     summary: proposal.comment,
-<<<<<<< HEAD
-    primaryActionLabel: proposal.action?.name,
+    primaryActionLabel:
+      (isClosed ? closedActionLabel(proposal) : undefined) ?? proposal.action?.name,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
-=======
-    primaryActionLabel:
-      (isClosed ? closedActionLabel(proposal) : undefined) ?? proposal.action?.name,
-    assignee: null,
->>>>>>> 76b54686f56f (fix(umbrella): map close→respond bucket and show past-tense label on decided proposals)
     events: [],
     // affectedSurface left undefined → Impact self-hides (returns null).
   };
