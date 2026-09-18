@@ -20,6 +20,7 @@ steps:
   # Only Jest unit tests gate the queue.
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order and Store Cache'
+    key: pick_test_group_run_order
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -32,6 +33,7 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_UNIT_MAX_MINUTES: '15.0'
       LIMIT_CONFIG_TYPE: 'unit'
+      JEST_CONFIGS_DEPS: 'pick_test_group_run_order'
     retry:
       automatic:
         - exit_status: '*'
