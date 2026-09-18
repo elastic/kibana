@@ -245,13 +245,11 @@ describe('readAgentToolCallsFromTraces', () => {
   });
 
   describe('anonymized conversation ids', () => {
-    // AgentBuilderSpanProcessor hashes gen_ai.conversation.id before export
-    // unless agentBuilder:tracing:includeRealIds is on, and it defaults to off.
-    // Real value produced by toHashedId (sha256 hex, first 16 chars).
+    // AgentBuilderSpanProcessor hashes gen_ai.conversation.id before export unless
+    // agentBuilder:tracing:includeRealIds is on (default off). Real value from toHashedId.
     const REAL_ID = 'c9682441-2d72-4e5f-9a1b-0c3d4e5f6a7b';
-    // Hardcoded on purpose: computing it with toHashedId here would assert the
-    // implementation against itself. Independently reproducible with
-    // `node -e 'console.log(require("crypto").createHash("sha256").update("<REAL_ID>").digest("hex").slice(0,16))'`
+    // Hardcoded on purpose: computing it with toHashedId here would assert the implementation
+    // against itself. Independently reproducible: sha256(REAL_ID) hex, first 16 chars.
     const HASHED_ID = 'cccbfba40403ea00';
 
     it('matches the hash Agent Builder writes onto spans', () => {
