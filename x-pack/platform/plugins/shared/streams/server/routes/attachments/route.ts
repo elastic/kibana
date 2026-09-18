@@ -94,7 +94,7 @@ const listAttachmentsRoute = createServerRoute({
           .optional(z.union([attachmentTypeSchema, z.array(attachmentTypeSchema)]))
           .describe('Filter by attachment types (single value or array)'),
         tags: z
-          .optional(z.union([z.string().max(256), z.array(z.string().max(256))]))
+          .optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)]))
           .describe('Filter by tags (single value or array)'),
       })
       .optional(),

@@ -21,18 +21,28 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-// Handles arbitrarily nested arrays (including arrays of objects) while bounding
-// string length at every level. z.lazy is required for mutual recursion with
-// recursiveRecord: array items can be primitives, nested arrays, or records.
-const boundedArrayItem: z.ZodType<Primitive | RecursiveRecord | unknown[]> = z.lazy(() =>
-  z.union([primitive, recursiveRecord, z.array(boundedArrayItem).max(1000)])
-);
+const MAX_ARRAY_NESTING_DEPTH = 5;
+
+// Build a fixed-depth bounded-array schema at module load time to prevent
+// stack-overflow DoS on deeply nested inputs. z.lazy() defers the
+// recursiveRecord reference to parse time (avoiding initialization-order
+// issues). Real document samples rarely exceed depth 3.
+function buildBoundedArray(depth: number): z.ZodType<unknown[]> {
+  if (depth === 0) {
+    return z.array(z.union([primitive, z.lazy(() => recursiveRecord)])).max(1000);
+  }
+  return z.array(
+    z.union([primitive, z.lazy(() => recursiveRecord), buildBoundedArray(depth - 1)])
+  ).max(1000);
+}
+
+const boundedNestedArray = buildBoundedArray(MAX_ARRAY_NESTING_DEPTH);
 
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z
   .lazy(() =>
     z.record(
       z.string().max(1000),
-      z.union([primitive, z.array(boundedArrayItem).max(1000), recursiveRecord])
+      z.union([primitive, boundedNestedArray, recursiveRecord])
     )
   )
   .meta({ id: 'RecursiveRecord' });
@@ -41,7 +51,7 @@ export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknow
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
   z.string().max(1000),
-  z.union([primitive, z.array(boundedArrayItem).max(1000)])
+  z.union([primitive, boundedNestedArray])
 );
 
 export const sampleDocument = recursiveRecord;

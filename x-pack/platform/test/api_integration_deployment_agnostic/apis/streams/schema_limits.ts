@@ -173,22 +173,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('accepts esql exactly at 65535 chars', async () => {
         const paddingNeeded = 65535 - 'FROM logs.otel | WHERE message == ""'.length;
         const esql = 'FROM logs.otel | WHERE message == "' + 'x'.repeat(paddingNeeded) + '"';
-        // Stream does not exist; expect 404 or domain error, not 400 (schema passed)
-        const response = await apiClient
-          .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
-            params: {
-              path: { name: 'logs.otel.query-limit-test' },
-              body: { query: { esql } },
-            },
-          });
-        const status = response.status as number;
-        if (status === 400) {
-          // Only acceptable if it's a domain error, not a Zod schema error
-          const body = response.body as { message?: string };
-          if (body.message?.includes('String must contain at most 65535 character')) {
-            throw new Error(`Zod rejected esql at exactly 65535 chars: ${body.message}`);
-          }
-        }
+        // Schema validation passes; the handler may return any non-schema status
+        // (404, feature-flag error, etc.) but must not return a Zod 400.
+        const response = await apiClient.fetch('PUT /api/streams/{name}/_query 2023-10-31', {
+          params: {
+            path: { name: 'logs.otel.query-limit-test' },
+            body: { query: { esql } },
+          },
+        });
+        expect(response.status).not.to.equal(400);
       });
     });
 
