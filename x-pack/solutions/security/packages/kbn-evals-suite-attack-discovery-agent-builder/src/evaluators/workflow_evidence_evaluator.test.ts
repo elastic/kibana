@@ -277,4 +277,36 @@ describe('createWorkflowEvidenceEvaluator', () => {
     expect(result.metadata?.unscopedPipelineAlertRetrievalCounts).toEqual([95, 95]);
     expect(result.metadata?.agentEsqlRowCounts).toEqual([97]);
   });
+
+  // The same dodge, one step earlier: making NO retrieval at all must not buy
+  // an `N/A` either. The reader reports 0 for a scoped example that observed
+  // none of its population, so the evidence is complete and the run is scored
+  // — the source is `none` (nothing retrieved) rather than `unscoped_retrieval`,
+  // which is what keeps the two findings apart in the metadata.
+  it('scores 0 when the run made no retrieval at all', async () => {
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({
+        retrievedAlertCount: 0,
+        retrievedAlertCountSource: 'none',
+        passedAlertCount: 16,
+        retrievalEvidence: {
+          ...EMPTY_RETRIEVAL_EVIDENCE,
+          retrievalScope: 'ad-scenario-registry-2026-07',
+        },
+      }),
+      expected: baseExpected({ expectedRetrievedAlertCount: 95 }),
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+    expect(result.metadata?.retrievedAlertCountSource).toBe('none');
+    expect(result.metadata?.retrievalScope).toBe('ad-scenario-registry-2026-07');
+    expect(result.metadata?.unscopedAgentAlertRetrievalRowCounts).toEqual([]);
+    expect(result.metadata?.agentEsqlRowCounts).toEqual([]);
+  });
 });

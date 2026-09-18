@@ -607,8 +607,11 @@ describe('the declared scope is enforced on pipeline-derived counts too', () => 
   });
 
   // A pipeline count that is not a retrieval at all (`provided` / `skill`) is
-  // excluded by strategy, never recorded as a scope violation.
-  it('does not record a supplied count as a scope violation', () => {
+  // excluded by strategy, never recorded as a scope violation — and it is
+  // never admitted as the retrieved count either: the scoped example observes
+  // none of its population, so it scores 0 rather than borrowing the supplied
+  // 16.
+  it('does not score a supplied count as a retrieved one', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {
         alert_retrieval: [{ alerts_context_count: 16, extraction_strategy: 'provided' }],
@@ -618,17 +621,17 @@ describe('the declared scope is enforced on pipeline-derived counts too', () => 
       retrievalScope: AD2_SCENARIO_SEED_LABEL,
     });
 
-    expect(result.retrievedAlertCount).toBeNull();
+    expect(result.retrievedAlertCount).toBe(0);
     expect(result.retrievedAlertCountSource).toBe('none');
     expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([]);
   });
 });
 
-// Fix 1: an unscoped retrieval used to produce NO count, so the run took `N/A`
-// — dropped from the aggregate — and a model that ignored the marker was never
-// penalised for the retrieval the example asked for. It now reports 0: the
-// count means "alerts of this fixture observed", and that is 0. `null` stays
-// reserved for a run that retrieved nothing at all, where there is no count.
+// A scoped example asserts a retrieved population, so BOTH ways of observing
+// none of it are failures of that one assertion and score 0: retrieving
+// without the marker, and not retrieving at all. `null` would let either take
+// `N/A` (dropped from the aggregate). It stays reserved for an example that
+// asks no retrieval question at all.
 describe('an unscoped retrieval scores 0 rather than going unscored', () => {
   const scopedQuery = `FROM .alerts-security.alerts-default | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"`;
 
@@ -654,20 +657,23 @@ describe('an unscoped retrieval scores 0 rather than going unscored', () => {
     expect(result.retrievedAlertCountSource).toBe('unscoped_retrieval');
   });
 
-  // No retrieval of any kind: nothing to report a count for, so the evaluator
-  // marks the evidence incomplete instead of scoring a retrieval that did not
-  // happen.
-  it('stays null when the run retrieved nothing at all', () => {
+  // The dodge this closes: a run that makes NO retrieval at all reports 0 too,
+  // so skipping retrieval cannot take `N/A` in place of the failure. The source
+  // is `none` (nothing retrieved) rather than `unscoped_retrieval` (retrieved,
+  // out of scope), so the record still separates the two findings.
+  it('reports 0 when the run retrieved nothing at all', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {},
       retrievalScope: AD2_SCENARIO_SEED_LABEL,
       adToolEsqlQuery: scopedQuery,
     });
 
-    expect(result.retrievedAlertCount).toBeNull();
+    expect(result.retrievedAlertCount).toBe(0);
     expect(result.retrievedAlertCountSource).toBe('none');
   });
 
+  // The `null`/`N/A` path that survives: no scope declared means no retrieval
+  // question, so there is no count to score and the evidence stays incomplete.
   it('stays null for an example that declares no scope, whatever it retrieved', () => {
     const result = computeWorkflowAlertCounts({ pipeline: {}, retrievalScope: null });
 
@@ -841,10 +847,12 @@ describe('retrieval evidence persisted on the task output', () => {
     expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([97]);
   });
 
-  // The other half of the same contract: a run that retrieved NOTHING is not a
-  // scope violation, so it keeps `null` and the evaluator's `N/A` — there is no
-  // count to report, and 0 would assert a retrieval that never happened.
-  it('leaves the retrieved count null when the run retrieved nothing at all', () => {
+  // The other half of the same contract: a run that retrieved NOTHING scores 0
+  // too, because the example asks for a retrieval and the run observed none of
+  // its population. The source stays `none` (nothing retrieved) rather than
+  // `unscoped_retrieval`, so the record separates "skipped the retrieval" from
+  // "retrieved out of scope" — both 0, different findings.
+  it('scores 0 when the run retrieved nothing at all', () => {
     const workflow = buildWorkflow({
       pipeline: null,
       adToolResult: { status: 'completed', alertsContextCount: 16, discoveryCount: 4 },
@@ -854,8 +862,10 @@ describe('retrieval evidence persisted on the task output', () => {
       unscopedAgentAlertRetrievalRowCounts: [],
     });
 
-    expect(workflow.retrievedAlertCount).toBeNull();
+    expect(workflow.retrievedAlertCount).toBe(0);
     expect(workflow.retrievedAlertCountSource).toBe('none');
+    expect(workflow.retrievalEvidence.unscopedAgentAlertRetrievalRowCounts).toEqual([]);
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([]);
   });
 
   // The recorded dense rep 2 shape end to end: the agent ran no ES|QL of its

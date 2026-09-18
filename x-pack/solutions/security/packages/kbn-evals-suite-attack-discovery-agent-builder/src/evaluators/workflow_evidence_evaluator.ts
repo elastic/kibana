@@ -64,12 +64,13 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         evidenceState: hasCompleteWorkflowEvidence ? 'complete' : 'incomplete',
         // Which observable produced the count the comparison above used, so an
         // `N/A` (or a surprise 0) is self-explaining from the score document
-        // alone: `none` means no source reported a number, `pipeline_*` means
-        // the product's Alert Retrieval phase did, `agent_esql_retrieval` means
-        // the count came from the agent's OWN retrieval — the only source a
-        // `provided`-mode run (retrieval skipped by design) can have — and
-        // `unscoped_retrieval` means a retrieval happened but carried none of
-        // the example's declared scope, i.e. a scored 0 rather than an `N/A`.
+        // alone: `pipeline_*` means the product's Alert Retrieval phase
+        // reported it, `agent_esql_retrieval` means it came from the agent's
+        // OWN retrieval — the only source a `provided`-mode run (retrieval
+        // skipped by design) can have — and the last two are the two ways a
+        // scoped example observes none of its population, both scored 0:
+        // `unscoped_retrieval` (a retrieval happened, out of scope) and `none`
+        // (no alerts retrieval at all).
         retrievedAlertCountSource: output.workflow.retrievedAlertCountSource ?? 'none',
         alertRetrievalMode: output.workflow.retrievalEvidence?.alertRetrievalMode ?? null,
         agentEsqlRowCounts: output.workflow.retrievalEvidence?.agentEsqlRowCounts ?? [],
@@ -78,7 +79,8 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         // results and the pipeline counts derived from the query it handed the
         // AD tool. All three are here so a 0 reads as "the run retrieved N rows
         // unscoped" (none of it attributable to this fixture) instead of "no
-        // retrieval happened", which is the only case that stays `N/A`.
+        // retrieval happened": both score 0 on a scoped example, and these
+        // fields are what tell them apart after the fact.
         retrievalScope: output.workflow.retrievalEvidence?.retrievalScope ?? null,
         unscopedAgentAlertRetrievalRowCounts:
           output.workflow.retrievalEvidence?.unscopedAgentAlertRetrievalRowCounts ?? [],

@@ -327,6 +327,11 @@ export const extractAdToolEsqlQuery = (
  */
 const NON_RETRIEVAL_STRATEGIES: ReadonlySet<string> = new Set(['provided', 'skill']);
 
+/** Which observable produced the count, for the evidence metadata. The last
+ *  two cases are the two ways a scoped example observes none of its
+ *  population: a retrieval that happened but carried no scope
+ *  (`unscoped_retrieval`), and no alerts retrieval at all (`none`) — both
+ *  score 0, and the source is what tells them apart in the record. */
 const resolveRetrievedAlertCountSource = ({
   fromAlertRetrieval,
   fromCombinedAlerts,
@@ -369,13 +374,16 @@ const resolveRetrievedAlertCountSource = ({
 // query carries `retrievalScope`; the excluded ones come back as
 // `unscopedPipelineAlertRetrievalCounts` for the evidence block.
 //
-// A run that retrieved but observed NONE of the fixture's population — every
-// alerts retrieval it made omitted the declared scope — scores 0, not `null`.
+// A run that observed NONE of the fixture's population scores 0, not `null`.
 // The count is defined as "alerts of this fixture observed", so 0 is the
-// truthful reading, and `null` would let a model that ignores the marker take
-// `N/A` (dropped from the aggregate) instead of failing the retrieval the
-// example's question asked for. `null` stays reserved for a run that
-// retrieved nothing at all, where there is no count to report.
+// truthful reading, and `null` would let a model take `N/A` (dropped from the
+// aggregate) instead of failing the retrieval the example's question asked
+// for. Two ways to observe none are both failures of that one assertion, and
+// both score 0: retrieving without the declared scope, and not retrieving at
+// all — the second is why the gate is `retrievalScope`, not "some unscoped
+// retrieval happened". `null` stays reserved for an example that asks no
+// retrieval question (no declared scope, hence no expected population), where
+// there is genuinely nothing to score.
 export const computeWorkflowAlertCounts = ({
   pipeline,
   adToolResult,
@@ -435,12 +443,17 @@ export const computeWorkflowAlertCounts = ({
     (unscopedAgentAlertRetrievalRowCounts.length > 0 ||
       unscopedPipelineAlertRetrievalCounts.length > 0);
 
+  // A scoped example asserts a retrieved population, so a run that had no
+  // count admitted observed none of it — 0, whether it retrieved unscoped or
+  // not at all. See the gate's doc block above.
+  const observedNoneOfThePopulation = retrievalScope != null;
+
   return {
     retrievedAlertCount:
       admittedFromAlertRetrieval ??
       admittedFromCombinedAlerts ??
       agentAlertRetrievalPopulation ??
-      (onlyUnscopedRetrievals ? 0 : null),
+      (observedNoneOfThePopulation ? 0 : null),
     retrievedAlertCountSource: resolveRetrievedAlertCountSource({
       fromAlertRetrieval: admittedFromAlertRetrieval,
       fromCombinedAlerts: admittedFromCombinedAlerts,

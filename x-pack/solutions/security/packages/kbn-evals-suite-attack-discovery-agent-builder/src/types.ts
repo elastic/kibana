@@ -32,11 +32,13 @@ export interface AttackDiscoveryAgentBuilderInput extends Record<string, unknown
    *
    * Enforced on BOTH observables: the agent's own ES|QL results and the
    * `esql_query` the agent hands `security.attack-discovery.run` (the pipeline's
-   * Alert Retrieval phase runs that query). A run whose only alerts retrievals
-   * omit this string observed none of the example's population, so it reports a
-   * retrieved count of 0 — a failed retrieval, scored — rather than `null`
-   * (unobservable, and therefore excluded from the aggregate). `null` is
-   * reserved for a run that retrieved nothing at all.
+   * Alert Retrieval phase runs that query). Declaring this string means the
+   * example asserts a retrieval, so a run that observed none of the example's
+   * population reports a retrieved count of 0 — a failed retrieval, scored —
+   * rather than `null` (unobservable, and therefore excluded from the
+   * aggregate). Both ways of observing none score 0: omitting this string in
+   * every retrieval, and making no alerts retrieval at all. `null` is reserved
+   * for the examples that omit this field, which ask no retrieval question.
    *
    * Omitted on examples that do not assert a retrieved population.
    */
@@ -97,11 +99,14 @@ export type AttackDiscoveryAgentBuilderExample = Example<
  * alerts index) — the only observable retrieval source in `provided` mode,
  * where the pipeline skips retrieval by design.
  *
- * `unscoped_retrieval` means a retrieval DID happen but none of it carried the
- * example's declared scope, so it observed none of this fixture's population:
- * the count is 0 (a failed retrieval), not `null`. `none` means nothing
- * retrieved at all — there is no count to report, and the evaluator marks the
- * evidence incomplete rather than scoring a retrieval that never happened.
+ * `unscoped_retrieval` and `none` are the two ways a scoped example observes
+ * none of this fixture's population, and both score 0 rather than `N/A` (which
+ * the aggregate drops, so `N/A` would make skipping the retrieval the way to
+ * avoid the assertion): `unscoped_retrieval` means a retrieval DID happen but
+ * none of it carried the example's declared scope, `none` means no alerts
+ * retrieval happened at all. `none` is also what an example that declares no
+ * scope reports — it asks no retrieval question, so its count stays `null` and
+ * the evaluator leaves the evidence incomplete.
  */
 export type RetrievedAlertCountSource =
   | 'pipeline_alert_retrieval'
