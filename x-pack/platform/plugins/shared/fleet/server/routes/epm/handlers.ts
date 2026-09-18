@@ -699,7 +699,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
   const installSource = 'upload';
-
   const res = await installPackage({
     installSource,
     savedObjectsClient,
