@@ -52,6 +52,13 @@ export function createSkillInvocationEvaluator({
 | WHERE trace.id == "${traceId}"
 | STATS
   total_spans = COUNT(*),
+  agent_spans = COUNT(
+    CASE(
+      attributes.elastic.inference.span.kind == "AGENT",
+      1,
+      NULL
+    )
+  ),
   total_tool_spans = COUNT(
     CASE(
       attributes.elastic.inference.span.kind == "TOOL",
@@ -86,6 +93,9 @@ export function createSkillInvocationEvaluator({
         const totalSpansIndex = response.columns.findIndex(
           (column) => column.name === 'total_spans'
         );
+        const agentSpansIndex = response.columns.findIndex(
+          (column) => column.name === 'agent_spans'
+        );
         const totalToolSpansIndex = response.columns.findIndex(
           (column) => column.name === 'total_tool_spans'
         );
@@ -93,16 +103,29 @@ export function createSkillInvocationEvaluator({
           (column) => column.name === 'skill_invoked'
         );
 
-        if (totalSpansIndex === -1 || totalToolSpansIndex === -1 || skillInvokedIndex === -1) {
+        if (
+          totalSpansIndex === -1 ||
+          agentSpansIndex === -1 ||
+          totalToolSpansIndex === -1 ||
+          skillInvokedIndex === -1
+        ) {
           log.warning('Expected columns not found in trace query response');
           return null;
         }
 
         const totalSpans = row?.[totalSpansIndex] as number | undefined;
+        const agentSpans = row?.[agentSpansIndex] as number | undefined;
         const totalToolSpans = row?.[totalToolSpansIndex] as number | undefined;
         const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
 
         if (!totalSpans) {
+          return null;
+        }
+
+        // The run's root span (`kind: AGENT`) is exported last, so its absence means the trace is
+        // still being indexed. Returning 0 here would be a permanent false failure: 0 is a valid
+        // score, so the shared retry loop would stop on a trace whose tool spans have not arrived.
+        if (!agentSpans) {
           return null;
         }
 
