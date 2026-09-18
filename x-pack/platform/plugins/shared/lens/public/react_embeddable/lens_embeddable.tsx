@@ -174,10 +174,10 @@ export const createLensEmbeddableFactory = (
           return comparators;
         },
         applySerializedState: async (nextState) => {
-          actionsConfig.reinitializeState(nextState);
-          dashboardConfig.reinitializeState(nextState);
-          searchContextConfig.reinitializeState(nextState);
           const nextRuntimeState = await deserializeState(services, nextState);
+          actionsConfig.reinitializeState(nextState);
+          dashboardConfig.reinitializeState(nextRuntimeState);
+          searchContextConfig.reinitializeState(nextState);
           stateConfig.reinitializeRuntimeState(nextRuntimeState);
         },
       });
