@@ -76,7 +76,9 @@ jest.mock('../../../hooks', () => ({
   }),
   useBreadcrumbs: jest.fn(),
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
-  useUrlParams: jest.fn().mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: jest.fn(() => '') }),
+  useUrlParams: jest
+    .fn()
+    .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: jest.fn(() => '') }),
   useKibanaVersion: jest.fn().mockReturnValue('8.3.0'),
   useFleetServerUnhealthy: jest.fn().mockReturnValue({
     isUnhealthy: false,
