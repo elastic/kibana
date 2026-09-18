@@ -382,6 +382,45 @@ export interface ActiveExecution {
 export const CONVERSATION_EVENT_ID_DELIMITER = '::' as const;
 
 /**
+ * Suffixes used to build the ids of every round-derived timeline event.
+ */
+export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
+  userMessage: '::user_message',
+  executionStarted: '::execution_started',
+  executionTerminated: '::execution_terminated',
+  executionFailed: '::execution_failed',
+  executionAborted: '::execution_aborted',
+  execution: '::execution',
+  stepPrefix: '::step::',
+  promptResponse: '::prompt_response',
+} as const;
+
+/** ID for a step event. */
+export const roundStepEventId = (roundId: string, sequence: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
+
+/** Builds an execution id for a resume appended to a round without rewriting its initial run. */
+export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
+
+/** Parses initial and resume execution ids, returning undefined for unrelated ids. */
+export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
+  const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
+  if (!match) {
+    return undefined;
+  }
+  return { roundId: match[1], index: Number(match[2] ?? 0) };
+};
+
+/** The `execution_terminated` event id for an execution index (0 = the initial run). */
+export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated
+      }`;
+
+/**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.
  */
