@@ -8,7 +8,12 @@
 import { AD2_CLEAN_SCENARIO_KEYS } from './clean_scenarios';
 import { AD2_DENSE_BACKGROUND_TEMPLATES, AD2_DENSE_TARGET_ALERTS } from './dense_scenarios';
 import { AD2_SCENARIO_ID_PREFIX } from './constants';
-import { buildAd2SeedPlan, getAd2Scenario, listAd2ScenarioKeys } from './registry';
+import {
+  buildAd2SeedPlan,
+  getAd2Scenario,
+  getAd2ScenarioAlertIds,
+  listAd2ScenarioKeys,
+} from './registry';
 
 const fixedBaseTime = new Date('2026-07-01T00:00:00.000Z');
 
@@ -113,6 +118,20 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
     // ...and the failure burst is contained by a control rather than escalating.
     expect(steps.map((step) => step.ruleName)).toContain('Account Lockout Policy Triggered');
+  });
+
+  it('resolves alert ids for every key the dense profile lists', () => {
+    const denseKeys = listAd2ScenarioKeys('dense');
+
+    expect(denseKeys.length).toBeGreaterThan(AD2_CLEAN_SCENARIO_KEYS.length);
+
+    for (const key of denseKeys) {
+      const steps = getAd2Scenario(key, 'dense')?.steps ?? [];
+      expect(steps.length).toBeGreaterThan(0);
+      // Resolving ids without the profile returns [] for dense-only keys, which
+      // silently drops them for any caller that enumerates the profile.
+      expect(getAd2ScenarioAlertIds(key, 'dense')).toHaveLength(steps.length);
+    }
   });
 
   it('still returns the clean profile by default', () => {

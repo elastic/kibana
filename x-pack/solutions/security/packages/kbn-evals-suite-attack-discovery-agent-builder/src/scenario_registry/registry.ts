@@ -58,8 +58,11 @@ export const buildAd2SeedPlan = ({
   return { profile, scenarioKeys, alerts, rawEvents };
 };
 
-export const getAd2ScenarioAlertIds = (scenarioKey: string): readonly string[] => {
-  const scenario = getAd2Scenario(scenarioKey);
+export const getAd2ScenarioAlertIds = (
+  scenarioKey: string,
+  profile: Ad2SeedProfile = 'clean'
+): readonly string[] => {
+  const scenario = getAd2Scenario(scenarioKey, profile);
   if (!scenario) {
     return [];
   }

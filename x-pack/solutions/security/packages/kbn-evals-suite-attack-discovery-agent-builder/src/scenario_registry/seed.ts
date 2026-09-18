@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpHandler } from '@kbn/core/public';
 import { AD2_ALERTS_INDEX, AD2_SCENARIO_ALL_INDICES, AD2_SCENARIO_SEED_LABEL } from './constants';
 import { buildAd2SeedPlan } from './registry';
@@ -16,6 +17,35 @@ export interface SeedAd2ScenarioProfileOptions {
   readonly scenarioKey?: string;
   readonly baseTime?: Date;
 }
+
+/**
+ * A bulk request resolves with HTTP 200 even when individual documents were
+ * rejected, so a partial seed would otherwise surface as an off-by-N retrieval
+ * score instead of a fixture failure.
+ */
+const assertBulkIndexSucceeded = (response: BulkResponse, label: string): void => {
+  if (!response.errors) {
+    return;
+  }
+
+  const failures = response.items
+    .map((item) => item.index)
+    .filter((indexResult) => indexResult?.error !== undefined)
+    .map(
+      (indexResult) =>
+        `${indexResult?._id ?? 'unknown id'} (${indexResult?.error?.type}: ${
+          indexResult?.error?.reason
+        })`
+    );
+
+  throw new Error(
+    `Seeding ${label} failed: ${failures.length} of ${
+      response.items.length
+    } documents were rejected: ${failures.slice(0, 5).join(', ')}${
+      failures.length > 5 ? ` (+${failures.length - 5} more)` : ''
+    }`
+  );
+};
 
 export const seedAd2ScenarioProfile = async (
   esClient: EsClient,
@@ -37,7 +67,8 @@ export const seedAd2ScenarioProfile = async (
   ]);
 
   if (alertOperations.length > 0) {
-    await esClient.bulk({ refresh: 'wait_for', operations: alertOperations });
+    const response = await esClient.bulk({ refresh: 'wait_for', operations: alertOperations });
+    assertBulkIndexSucceeded(response, `the ${plan.alerts.length} seeded alerts`);
   }
 
   const rawOperations = plan.rawEvents.flatMap((event) => [
@@ -46,7 +77,8 @@ export const seedAd2ScenarioProfile = async (
   ]);
 
   if (rawOperations.length > 0) {
-    await esClient.bulk({ refresh: 'wait_for', operations: rawOperations });
+    const response = await esClient.bulk({ refresh: 'wait_for', operations: rawOperations });
+    assertBulkIndexSucceeded(response, `the ${plan.rawEvents.length} seeded raw events`);
   }
 
   return {
