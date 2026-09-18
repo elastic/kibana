@@ -32,7 +32,7 @@ Pull requests are made into the main branch and only backported when it is safe 
 
 ### Managing dependency updates across branches
 
-We want to keep updates to dependencies (both transitive dependencies and direct dependencies) in sync across both `main` and `<previous major>.<last minor>` (ex: `7.17`) as much as possible.
+We want to keep updates to dependencies (both transitive dependencies and direct dependencies) in sync across both `main` and `<previous major>.<last minor>` as much as possible.
 A good rule of thumb is that most package upgrades should be backported to the `<previous major>.<last minor>` branch, though as always, exceptions may apply – if an upgrade requires significant code changes, then it might make sense to skip a backport for it.
 
 ## Commits and Merging
@@ -125,39 +125,19 @@ Many of our labels follow the pattern of `{key}:{value}`.
 
 ### Team labels
 
-Examples: `Team:Security`, `Team:Operations`, `Team:Docs`.
+Examples: `Team:Security`, `Team:Operations`.
 
 These labels map the issue to the team that owns the particular area. Every issue should have at least one team label applied.
 
 ### Feature labels
 
-Examples: `Feature:Lens`, `Feature:Cases`, `Feature:Vega`.
+Examples: `Feature:Dashboards`, `Feature:Detection Rules`, `Feature:Streams`.
 
 Feature labels break down architectural domains that are owned by a given team.
 
-### Project labels
-
-Examples: `Project:RuntimeFields`, `Project:MakeItSlow`.
-
-Sometimes issues span multiple teams, that is often when Project labels are more appropriate. To avoid too much noise,
-these should be used for high visibility projects. Try not to use project labels for small, single team projects, where a team
-and feature label would be applicable. Use your best judgement when determining whether to add a new project label.
-
-### Needed For labels (`NeededFor:{Team}`)
-
-Examples: `NeededFor:APM`, `NeededFor:AppServices`.
-
-We use these labels to help us organize internal dependencies. An issue with the labels
-`NeededFor:APM` and `Team:AppServices` means APM has a dependency on the App services team. The owning team
-can filter on these labels during roadmap prioritization, and the dependent team can use these labels to
-search and view the status of its dependencies. To avoid noise, use these labels for high priority requests that
-need to be taken into account in roadmap planning. A low priority item that can be prioritized along with
-other community requests does not need this label, as part of its usefulness is helping teams wade through the noise
-of external feature requests.
-
 ### Version labels
 
-Examples: `v7.9.2`, `v8.0`
+Examples: `v9.4.0`, `v8.19.24`
 
 We use version labels on PRs to indicate which versions a PR will be merged into. For issues,
 teams use these labels inconsistently. On a bug, it might mean the version the bug was found in, or
@@ -184,13 +164,13 @@ These labels categorize the type of work. For example:
 These labels affect whether your PR appears in the release notes (that is to say,
 it's notable and affects our users) and which section it appears in. For example:
 
-- `release_note:breaking`: Specifies a breaking change and adds the PR to the Breaking changes section in the release notes
-- `release_note:deprecation`: Specifies a deprecated feature and adds the PR to the Deprecations section in the release notes
-- `release_note:enhancement`: Specifies a feature enhancement and adds the PR to the Enhancements section in the release notes
-- `release_note:feature`: Specifies a new feature and adds the PR to the  Features section in the release notes
-- `release_note:fix`: Specifies a bug fix and adds the PR to the Bug fixes section in the release notes
-- `release_node:plugin_api_changes`: Specifies a changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide
-- `release_note:skip`: Omits the PR from release notes
+- `release_note:breaking`: Specifies a breaking change and adds the PR to the Breaking changes section in the release notes. Breaking changes between minors should be rare and limited to experimental or preview features or features with very low usage. 
+- `release_note:deprecation`: Specifies a deprecated feature and adds the PR to the Deprecations section in the release notes. This section warns users about features that will be removed at a later date, usually the next major version.
+- `release_note:feature`: Specifies a new feature and adds the PR to the  Features section in the release notes. Use the feature label for a brand new capability or major functionality that did not exist before.
+- `release_note:enhancement`: Specifies a feature enhancement and adds the PR to the Enhancements section in the release notes. Use the enhancement label for improvements, optimizations, or extensions to an existing feature.
+- `release_note:fix`: Specifies a bug fix and adds the PR to the Bug fixes section in the release notes.
+- `release_node:plugin_api_changes`: Specifies a changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide.
+- `release_note:skip`: Omits the PR from release notes.
 
 The following labels are related to backporting PRs:
 
@@ -212,19 +192,17 @@ node scripts/backport --sha <commit-sha> --branch 9.2 --branch 9.1
 
 ## Release notes
 
-{{kib}} publishes [Release Notes](/release-notes/index.md) for major and minor releases. Release Notes summarize merged PRs in user-friendly language. A script generates these notes by collecting merged PRs for each release.
+{{kib}} publishes [Release Notes](/release-notes/index.md) for major and minor releases, and for every Serverless rollout. Release Notes summarize merged PRs in user-friendly language. A script generates these notes by collecting merged PRs for each release.
 
-### Writing release notes text
+Features, enhancements and fixes are sourced from your PR title and will include a link back to the PR. Ensure the initial PR description is informative.
 
-Release notes text is sourced from your PR title or a single paragraph in the PR description.
+Deprecations, breaking changes and known issues require additional context. todo
 
-To provide a custom paragraph, use a `Release note:` or `## Release note` header in your PR description, followed by the text.
+You may optionally provide a custom paragraph within the initial PR description. Use a `Release note:` or `## Release note` header, followed by the text. This is the place to give a clear, user-focussed summary, rather than implementation detail.
 
-When you create the release notes text, use the following best practices:
-
-- Use active voice.
+When creating a PR title:
 - Use sentence case.
-- When you create a PR that adds a feature, start with `Adds`.
-- When you create a PR that improves an existing feature, start with `Improves`.
-- When you create a PR that fixes existing functionality, start with `Fixes`.
-- When you create a PR that deprecates functionality, start with `Deprecates`.
+- Start PR titles with action words such as `Add`, `Fix`, `Improve`, `Show`, `Deprecate`
+- Keep it short. Try to keep the title less than 80 characters.
+- Describe what was fixed, rather than just stating that a fix happened. (e.g. `Fix timeout` is not informative; this is better described as `Fix duplicate API call prevent timeout on initialization`)
+

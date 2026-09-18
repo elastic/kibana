@@ -69,7 +69,8 @@ When you push a new branch, GitHub prints a URL in the terminal that takes you d
 
 In the PR description itself:
 
-- Describe what the change does and mention the issue where discussion happened, for example "Closes #123".
+- Describe what the change does and mention the issue where discussion happened, for example "Closes #123". 
+- PRs that will included in release notes must have clear and concise titles and descriptions that are informative and well-written.
 - Assign the `review` and `💝community` labels if you're not a member of the Elastic organization — this signals that someone needs to give the PR attention.
 - Do **not** assign a version label. Elastic staff will assign one when the PR is ready to be merged.
 - Target `main` unless the bug is only present in an older version. If the bug affects both `main` and another branch, say so.
