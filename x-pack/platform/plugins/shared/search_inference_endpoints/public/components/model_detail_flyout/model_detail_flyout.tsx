@@ -52,6 +52,7 @@ import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavai
 import type { CspRegion, EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
+import { ModelAvailabilitySection } from './model_availability_section';
 
 const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
 
@@ -366,6 +367,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
             </EuiSplitPanel.Outer>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <ModelAvailabilitySection allEndpoints={allEndpoints} modelEndpoints={endpoints} />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

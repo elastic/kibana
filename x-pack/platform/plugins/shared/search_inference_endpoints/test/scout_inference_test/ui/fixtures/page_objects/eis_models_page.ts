@@ -29,6 +29,7 @@ export class EisModelsPage {
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
   readonly flyoutRegionUnavailableCallout: Locator;
+  readonly flyoutModelAvailabilitySection: Locator;
   readonly allEndpointRows: Locator;
 
   // Add/View Endpoint Modal
@@ -106,6 +107,7 @@ export class EisModelsPage {
     this.flyoutRegionUnavailableCallout = this.page.testSubj.locator(
       'modelDetailFlyoutRegionUnavailableCallout'
     );
+    this.flyoutModelAvailabilitySection = this.page.testSubj.locator('modelAvailabilitySection');
     this.allEndpointRows = this.page.testSubj
       .locator('modelDetailFlyout')
       .locator('[data-test-subj^="endpoint-row-"]');
