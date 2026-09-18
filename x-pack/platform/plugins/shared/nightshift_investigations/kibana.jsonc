@@ -14,7 +14,10 @@
       "taskManager"
     ],
     "optionalPlugins": [
+      "actions",
       "agentBuilder",
+      "contextEngine",
+      "inference",
       "ruleRegistry",
       "searchInferenceEndpoints",
       "spaces",

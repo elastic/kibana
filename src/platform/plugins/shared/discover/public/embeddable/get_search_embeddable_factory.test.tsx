@@ -13,6 +13,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
@@ -22,10 +23,12 @@ import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/context_awareness';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
+import { deserializeState } from './utils/serialization_utils';
 import type {
   SearchEmbeddableApi,
   SearchEmbeddablePanelApiState,
@@ -41,7 +44,9 @@ import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/m
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
-jest.mock('./utils/serialization_utils', () => ({}));
+jest.mock('./utils/serialization_utils', () => ({
+  deserializeState: jest.fn(),
+}));
 
 describe('saved search embeddable', () => {
   const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
@@ -73,11 +78,15 @@ describe('saved search embeddable', () => {
   };
 
   let runtimeState = getInitialRuntimeState();
+  const defaultProfileStateRegistry = discoverServiceMock.profileStateRegistry;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('./utils/serialization_utils').deserializeState = () => runtimeState;
+    jest.mocked(deserializeState).mockImplementation(async () => runtimeState);
     mockedEditableDashboardApi.setFocusedPanelId.mockClear();
+  });
+
+  afterEach(() => {
+    discoverServiceMock.profileStateRegistry = defaultProfileStateRegistry;
   });
 
   const mockServices = {
@@ -286,6 +295,50 @@ describe('saved search embeddable', () => {
   });
 
   describe('search embeddable api', () => {
+    describe('applySerializedState', () => {
+      const initialTabTypeState: SearchEmbeddableRuntimeState['tabTypeState'] = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['initial.dimension'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p99',
+      };
+
+      it.each([
+        {
+          type: DiscoverTabType.Metrics,
+          tabTypeState: { ...initialTabTypeState, dimensions: ['restored.dimension'] },
+        },
+        { type: DiscoverTabType.Default, tabTypeState: undefined },
+      ])('restores $type profile state in savedSearch$', async ({ tabTypeState }) => {
+        runtimeState = getInitialRuntimeState({
+          partialState: { tabTypeState: initialTabTypeState },
+        });
+
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: mockInitializeDrilldownsManager,
+          initialState: byValueInitialState,
+          finalizeApi: (apiRegistration) => ({
+            ...finalizeApiMock(apiRegistration),
+            applySerializedState: apiRegistration.applySerializedState,
+          }),
+          uuid,
+          parentApi: mockedDashboardApi,
+        });
+        await waitOneTick();
+
+        expect(api.savedSearch$.getValue().tabTypeState).toEqual(initialTabTypeState);
+
+        runtimeState = getInitialRuntimeState({ partialState: { tabTypeState } });
+        await act(async () => {
+          await api.applySerializedState(byValueInitialState);
+        });
+
+        expect(api.savedSearch$.getValue().tabTypeState).toEqual(tabTypeState);
+      });
+    });
+
     it('should not fetch data if only a new input title is set', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
@@ -313,7 +366,7 @@ describe('saved search embeddable', () => {
       expect(search).toHaveBeenCalledTimes(1);
     });
 
-    it('should reflect whether the initial query is an ES|QL query via usesEsql$', async () => {
+    it('should reflect whether the initial query is an ES|QL query via esql$', async () => {
       const { search } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({ searchMock: search });
 
@@ -337,10 +390,10 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick();
 
-      expect(api.usesEsql$.getValue()).toBe(true);
+      expect(api.esql$.getValue().length).toBeGreaterThan(0);
     });
 
-    it('should be false for usesEsql$ when the initial query is not an ES|QL query', async () => {
+    it('should be empty for esql$ when the initial query is not an ES|QL query', async () => {
       const { search } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({ searchMock: search });
 
@@ -353,7 +406,7 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick();
 
-      expect(api.usesEsql$.getValue()).toBe(false);
+      expect(api.esql$.getValue()).toEqual([]);
     });
 
     it('should not provide inline editing overrides for by-value embeddables', async () => {
@@ -686,6 +739,59 @@ describe('saved search embeddable', () => {
         ...TEST_PROFILE_STATE_DEF.defaultState,
         uiValue: 'success',
       });
+    });
+
+    it('should initialize profile state from the runtime tab state', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      discoverServiceMock.profileStateRegistry = createProfileStateRegistry();
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState({
+        partialState: {
+          tabTypeState: {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            searchTerm: 'cpu',
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p99',
+          },
+        },
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      if (!capturedToolkit) {
+        throw new Error('Expected search embeddable to create a scoped profiles manager.');
+      }
+
+      expect(capturedToolkit.getStateAdapter(METRICS_STATE_DEF).getState()).toEqual({
+        ...METRICS_STATE_DEF.defaultState,
+        dimensions: ['host.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p99',
+      });
+      expect(api.savedSearch$.getValue().tabTypeState).toEqual(runtimeState.tabTypeState);
     });
 
     it('should not expose addFilter through the toolkit when filters are disabled', async () => {

@@ -167,7 +167,6 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
             <EuiButtonGroup
               css={buttonGroupStyles}
               buttonSize="compressed"
-              color="primary"
               idSelected={selectedTab.id}
               isFullWidth
               legend="Categories"

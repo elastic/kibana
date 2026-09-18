@@ -103,7 +103,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         }
       } catch (error) {
         if (isMaximumResponseSizeExceededError(error)) {
-          const sizeError = toQueryResponseSizeExceededError(error, step.maxQueryResponseSize);
+          const sizeError = toQueryResponseSizeExceededError(
+            error,
+            'breach',
+            step.maxQueryResponseSize
+          );
           logger.warn({
             message: sizeError.message,
             code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,

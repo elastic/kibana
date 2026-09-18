@@ -81,6 +81,23 @@ describe('useHasChromeAppHeaderContent', () => {
     expect(screen.getByText('has content')).toBeInTheDocument();
   });
 
+  it('detects experimental dashboard AI action-only registered content', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.appHeader.set({
+      experimentalDashboardAiAction: {
+        onClick: jest.fn(),
+      },
+    });
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('has content')).toBeInTheDocument();
+  });
+
   it('detects metadata-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.appHeader.set({

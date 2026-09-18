@@ -210,10 +210,7 @@ describe('detectDataPresence', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
-    expect((error as Error).message).toContain(
-      'ES|QL query response exceeded the maximum allowed size'
-    );
-    expect((error as Error).message).toContain('KEEP');
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('data_presence');
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

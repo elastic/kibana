@@ -81,7 +81,7 @@ export const executeRecoveryQuery = async ({
     });
   } catch (error) {
     if (isMaximumResponseSizeExceededError(error)) {
-      const sizeError = toQueryResponseSizeExceededError(error, maxResponseSize);
+      const sizeError = toQueryResponseSizeExceededError(error, 'recovery', maxResponseSize);
       logger.warn({
         message: `Recovery query: ${sizeError.message}`,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,

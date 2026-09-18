@@ -94,7 +94,7 @@ export const allowedExperimentalValues = Object.freeze({
    * serverless project with no linked projects reads exactly as it did before CPS. Off until the
    * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
-  defendCrossProjectSearch: false,
+  defendCrossProjectSearch: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -272,6 +272,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Shipped dark by default; enable per environment via config.
    */
   endpointForensicAnalysisSkill: false,
+
+  /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
+   * Shipped dark by default; enable per environment via config.
+   */
+  elasticDefendPolicyManagementSkill: false,
 
   /**
    * Enables the investigate-rule Agent Builder skill.

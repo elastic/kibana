@@ -112,10 +112,17 @@ export interface WorkflowDetailHeaderProps {
   // TODO: manage it in a workflow state context
   highlightDiff: boolean;
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
+  /** When provided, Executions opens the flyout list instead of switching editor tabs. */
+  onOpenExecutionList?: () => void;
 }
 
 export const WorkflowDetailHeader = React.memo(
-  ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
+  ({
+    isLoading,
+    highlightDiff,
+    setHighlightDiff,
+    onOpenExecutionList,
+  }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
     const back = useWorkflowDetailHeaderBack();
@@ -253,8 +260,12 @@ export const WorkflowDetailHeader = React.memo(
     }, [hasUnsavedChanges, isSchemaValid]);
 
     const toggleExecutionsPanel = useCallback(() => {
+      if (onOpenExecutionList) {
+        onOpenExecutionList();
+        return;
+      }
       setActiveTab(isExecutionsTab ? 'workflow' : 'executions');
-    }, [isExecutionsTab, setActiveTab]);
+    }, [isExecutionsTab, onOpenExecutionList, setActiveTab]);
 
     const executionsToggleItem = useMemo<AppMenuItemType>(
       () => ({
@@ -470,6 +481,7 @@ export const WorkflowDetailHeader = React.memo(
             badges={badges}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
+            spacing="compact"
           />
         </EuiPageTemplate>
         {runConfirmationModal}

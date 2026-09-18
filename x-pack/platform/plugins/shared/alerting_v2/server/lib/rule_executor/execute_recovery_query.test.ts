@@ -185,10 +185,7 @@ describe('executeRecoveryQuery', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
-    expect((error as Error).message).toContain(
-      'ES|QL query response exceeded the maximum allowed size'
-    );
-    expect((error as Error).message).toContain('KEEP');
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('recovery');
   });
 
   it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {

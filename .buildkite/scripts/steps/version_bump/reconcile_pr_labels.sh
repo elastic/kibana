@@ -19,7 +19,7 @@ if [[ "${DRY_RUN:-false}" == "true" ]]; then
 fi
 
 echo "Running label-reconcile..."
-node "$SCRIPT_DIR/label_reconcile.js" \
+node "$SCRIPT_DIR/label_reconcile.cjs" \
   --shipped "v${OLD_VERSION}" \
   --upcoming "v${NEW_VERSION}" \
   ${DRY_RUN_FLAG}
