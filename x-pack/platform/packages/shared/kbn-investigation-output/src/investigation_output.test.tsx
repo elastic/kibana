@@ -178,42 +178,54 @@ describe('InvestigationOutput', () => {
     expect(finalResults).not.toHaveTextContent('95%');
   });
 
-  it('renders non-interactive inline markdown in titles', async () => {
+  it('renders titles as plain text while preserving markdown in descriptions', async () => {
     const user = userEvent.setup();
+    const recommendationTitle =
+      '**Block the attacker IPs** via `hosts.deny` and [runbook](https://example.com)';
+    const blindSpotTitle = 'No `apm-*` indices';
     const stateWithMarkdown: InvestigationState = {
       ...finalState,
       recommendations: [
         {
-          title:
-            '**Block the attacker IPs** at the firewall via `hosts.deny` and [runbook](https://example.com)',
+          title: recommendationTitle,
           confidence: 0.9,
+          description: 'Follow the **response procedure** in the [runbook](https://example.com).',
         },
       ],
       blind_spots: [
-        { title: 'No `apm-*` indices', confidence: 0.8, description: 'Needed for _tracing_.' },
+        { title: blindSpotTitle, confidence: 0.8, description: 'Needed for _tracing_.' },
       ],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
 
     const finalResults = screen.getByTestId('investigationOutputFinalResults');
-    expect(finalResults).toHaveTextContent(
-      'Block the attacker IPs at the firewall via hosts.deny and runbook'
-    );
-    expect(finalResults).not.toHaveTextContent('**');
-    expect(screen.getByText('Block the attacker IPs').tagName).toBe('STRONG');
-    expect(screen.getByText('hosts.deny').tagName).toBe('CODE');
+    expect(finalResults).toHaveTextContent(recommendationTitle);
+    expect(finalResults).toHaveTextContent(blindSpotTitle);
     expect(screen.queryByRole('link', { name: 'runbook' })).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: /Block the attacker IPs/ })
-    ).not.toBeInTheDocument();
-    expect(finalResults).toHaveTextContent('No apm-* indices');
 
-    const blindSpotButton = screen.getByRole('button', { name: /No apm/ });
-    expect(blindSpotButton.querySelector('a, div, p, button')).toBeNull();
+    const recommendationButton = screen.getByText(recommendationTitle).closest('button');
+    expect(recommendationButton).not.toBeNull();
+    if (!recommendationButton) {
+      throw new Error('Expected recommendation title to be rendered inside a button');
+    }
+    expect(recommendationButton.querySelector('a, div, p, button, strong, code')).toBeNull();
+    await user.click(recommendationButton);
+
+    const dialog = screen.getByRole('dialog');
+    expect(screen.getByText('response procedure').tagName).toBe('STRONG');
+    expect(screen.getByRole('link', { name: 'runbook' })).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+
+    const blindSpotButton = screen.getByText(blindSpotTitle).closest('button');
+    expect(blindSpotButton).not.toBeNull();
+    if (!blindSpotButton) {
+      throw new Error('Expected blind-spot title to be rendered inside a button');
+    }
+    expect(blindSpotButton.querySelector('a, div, p, button, strong, code')).toBeNull();
     await user.click(blindSpotButton);
 
-    expect(finalResults).toHaveTextContent('Needed for tracing.');
+    expect(screen.getByText('tracing').tagName).toBe('EM');
   });
 
   it('renders a recovered blind spot once when its title and description are the same sentence', () => {
