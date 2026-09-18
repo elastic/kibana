@@ -21,10 +21,11 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-// Handles arbitrarily nested arrays while bounding string length at every level.
-// z.lazy is required because boundedArrayItem references itself for nested arrays.
-const boundedArrayItem: z.ZodType<Primitive | unknown[]> = z.lazy(() =>
-  z.union([primitive, z.array(boundedArrayItem).max(1000)])
+// Handles arbitrarily nested arrays (including arrays of objects) while bounding
+// string length at every level. z.lazy is required for mutual recursion with
+// recursiveRecord: array items can be primitives, nested arrays, or records.
+const boundedArrayItem: z.ZodType<Primitive | RecursiveRecord | unknown[]> = z.lazy(() =>
+  z.union([primitive, recursiveRecord, z.array(boundedArrayItem).max(1000)])
 );
 
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z

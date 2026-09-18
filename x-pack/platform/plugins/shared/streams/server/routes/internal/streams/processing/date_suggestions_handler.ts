@@ -28,7 +28,16 @@ export const processingDateSuggestionsSchema = z.object({
   path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
     dates: z
-      .array(z.union([z.string().nonempty().max(100), z.number()]))
+      .array(
+        z.union([
+          z
+            .string()
+            .nonempty()
+            .max(100)
+            .refine((val) => val.trim() !== '', { message: 'String must not be whitespace only' }),
+          z.number(),
+        ])
+      )
       .nonempty()
       .max(100),
   }),

@@ -356,16 +356,18 @@ const bulkAttachmentsRoute = createServerRoute({
       streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
     }),
     body: z.object({
-      operations: z.array(
-        z.union([
-          z.object({
-            index: attachmentSchema,
-          }),
-          z.object({
-            delete: attachmentSchema,
-          }),
-        ])
-      ),
+      operations: z
+        .array(
+          z.union([
+            z.object({
+              index: attachmentSchema,
+            }),
+            z.object({
+              delete: attachmentSchema,
+            }),
+          ])
+        )
+        .max(1000),
     }),
   }),
   handler: async ({
