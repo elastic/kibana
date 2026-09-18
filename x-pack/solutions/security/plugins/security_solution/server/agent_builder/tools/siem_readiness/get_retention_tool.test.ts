@@ -137,7 +137,7 @@ describe('getRetentionTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<RetentionPayload>).data;
-      expect(data.actionableFindings![0].category).toBe('Network');
+      expect(data.actionableFindings![0].categories).toEqual(['Network']);
     });
 
     it('filters out findings whose resource has no category match', async () => {
@@ -158,6 +158,24 @@ describe('getRetentionTool', () => {
       const data = (result.results[0] as OtherResult<RetentionPayload>).data;
       // logs-orphan-default is not in any category backing index → finding is dropped
       expect(data.actionableFindings).toHaveLength(0);
+    });
+  });
+
+  describe('handler — item category enrichment', () => {
+    it('populates categories on items so item grouping matches finding grouping (UI/agent parity)', async () => {
+      mockGetRetention.mockResolvedValueOnce(
+        makePayload({
+          items: [makeRetentionItem(CLOUD_DATA_STREAM, 'non-compliant')],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
+      expect(data.items[0].categories).toEqual(['Cloud']);
     });
   });
 
