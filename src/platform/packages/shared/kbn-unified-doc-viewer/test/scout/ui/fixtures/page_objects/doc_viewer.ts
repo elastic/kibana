@@ -392,6 +392,33 @@ export class DocViewer {
     await this.clickFieldActionInTable(fieldName, 'toggleColumnButton');
   }
 
+  /**
+   * Opens the `EuiDataGrid` cell popover for a field's name cell in the fields
+   * table, revealing the cell-level actions. Distinct from
+   * {@link openFieldDescription}, which opens the field's description instead:
+   * the expand button only mounts once the cell is hovered and focused, so both
+   * the hover and the click on the cell are required before it can be clicked.
+   */
+  async expandFieldNameCell(fieldName: string) {
+    await this.openTab('doc_view_table');
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+
+    await expect(async () => {
+      const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameCell.waitFor({ state: 'visible' });
+      await nameCell.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameCell.hover();
+      await nameCell.click();
+
+      const expandButton = flyout.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+      await expandButton.waitFor({ state: 'visible' });
+      await expandButton.click();
+    }).toPass({ timeout: 15_000 });
+  }
+
   async openSurroundingDocuments(rowIndex: number) {
     await this.openAndWaitForFlyout({ rowIndex });
     await this.page.testSubj
