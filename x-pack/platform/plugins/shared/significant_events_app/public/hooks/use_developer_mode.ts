@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
@@ -21,7 +22,6 @@ export interface UseDeveloperModeResult {
 export const useDeveloperMode = (): UseDeveloperModeResult => {
   const { core } = useKibana();
   const settingsClient = core.settings.client;
-  const [isSaving, setIsSaving] = useState(false);
   const developerMode$ = useMemo(
     () => settingsClient.get$<boolean>(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, false),
     [settingsClient]
@@ -31,9 +31,8 @@ export const useDeveloperMode = (): UseDeveloperModeResult => {
     settingsClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, false)
   );
 
-  const setDeveloperMode = useCallback(
+  const [{ loading: isSaving }, setDeveloperMode] = useAsyncFn(
     async (enabled: boolean): Promise<void> => {
-      setIsSaving(true);
       try {
         const wasSaved = await settingsClient.set(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE, enabled);
         if (!wasSaved) {
@@ -54,8 +53,6 @@ export const useDeveloperMode = (): UseDeveloperModeResult => {
           ),
           text: getFormattedError(error).message,
         });
-      } finally {
-        setIsSaving(false);
       }
     },
     [core.notifications.toasts, settingsClient]
