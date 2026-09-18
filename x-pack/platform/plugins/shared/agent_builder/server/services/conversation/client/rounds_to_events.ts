@@ -22,24 +22,15 @@ import type {
 import {
   ConversationRoundStatus,
   EventActorType,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
   TimelineEventType,
   TimelineTriggerType,
+  executionTerminatedEventId,
+  parseExecutionId,
+  resumeExecutionId,
+  roundStepEventId,
 } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
-
-/**
- * Suffixes used to build the ids of every round-derived timeline event.
- */
-export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
-  userMessage: '::user_message',
-  executionStarted: '::execution_started',
-  executionTerminated: '::execution_terminated',
-  executionFailed: '::execution_failed',
-  executionAborted: '::execution_aborted',
-  execution: '::execution',
-  stepPrefix: '::step::',
-  promptResponse: '::prompt_response',
-} as const;
 
 const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
   ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage,
@@ -68,10 +59,6 @@ const roundDerivedEventIds = (roundId: string) => ({
   executionTerminated: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`,
   execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
 });
-
-/** ID for a step event. */
-export const roundStepEventId = (roundId: string, sequence: number): string =>
-  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
 
 /** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
@@ -231,19 +218,6 @@ export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventA
   id: conversation.agent_id,
 });
 
-/** Builds an execution id for a resume appended to a round without rewriting its initial run. */
-export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
-  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
-
-/** Parses initial and resume execution ids, returning undefined for unrelated ids. */
-export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
-  const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
-  if (!match) {
-    return undefined;
-  }
-  return { roundId: match[1], index: Number(match[2] ?? 0) };
-};
-
 /** The `execution_started` event id for an execution index (0 = the initial run). */
 export const executionStartedEventId = (roundId: string, executionIndex: number): string =>
   executionIndex === 0
@@ -268,14 +242,6 @@ export const nextResumeIndex = (
   );
   return roundExecutionIds.size;
 };
-
-/** The `execution_terminated` event id for an execution index (0 = the initial run). */
-export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>
-  executionIndex === 0
-    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`
-    : `${resumeExecutionId(roundId, executionIndex)}${
-        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated
-      }`;
 
 /** The `prompt_response` link event id written for the k-th resume of a round. */
 export const promptResponseEventId = (roundId: string, executionIndex: number): string =>

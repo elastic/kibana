@@ -15,12 +15,15 @@ import type {
   TimelineEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  isEventsNativeVersion,
+  parseExecutionId,
+} from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import {
   isRoundDerivedEventId,
-  parseExecutionId,
   roundsToEvents,
 } from '../../../conversation/client/rounds_to_events';
 

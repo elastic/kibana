@@ -15,11 +15,12 @@ import type {
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
   createAttachmentPermanentDeleteBlockedError,
+  parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
 import { eventsToRounds } from './events_to_rounds';
-import { isRoundDerivedEventId, parseExecutionId, roundToEvents } from './rounds_to_events';
+import { isRoundDerivedEventId, roundToEvents } from './rounds_to_events';
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
 const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>

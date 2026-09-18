@@ -30,6 +30,7 @@ import {
   isPromptRequestEvent,
   isToolCallStep,
   isUserQuestionAnsweredEvent,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
 } from '@kbn/agent-builder-common';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
@@ -39,10 +40,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
-import {
-  ROUND_DERIVED_EVENT_ID_SUFFIXES,
-  userMessageActor,
-} from '../../../conversation/client/rounds_to_events';
+import { userMessageActor } from '../../../conversation/client/rounds_to_events';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';

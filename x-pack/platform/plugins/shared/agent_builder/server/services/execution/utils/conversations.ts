@@ -38,19 +38,19 @@ import {
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
   TimelineEventType,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
+  executionTerminatedEventId,
+  resumeExecutionId,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import {
-  ROUND_DERIVED_EVENT_ID_SUFFIXES,
   roundToEvents,
   userMessageEvent,
   promptResponseEvent,
   resumeExecutionToEvents,
-  executionTerminatedEventId,
   interruptedExecutionToEvents,
   lastTerminatedExecutionIndex,
   nextResumeIndex,
-  resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 import { toClientError } from './convert_errors';
