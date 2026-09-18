@@ -191,10 +191,14 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
   const { conclusion, recommendations, blind_spots: blindSpots } = state;
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
-  const currentRecommendation =
-    selectedRecommendation && recommendations?.includes(selectedRecommendation)
-      ? selectedRecommendation
-      : undefined;
+  const currentRecommendation = selectedRecommendation
+    ? recommendations?.find(
+        ({ title, description, code }) =>
+          title === selectedRecommendation.title &&
+          description === selectedRecommendation.description &&
+          code === selectedRecommendation.code
+      )
+    : undefined;
   const recommendationModalTitleId = useGeneratedHtmlId({ prefix: 'investigationRecommendation' });
 
   if (!conclusion && !recommendations?.length && !blindSpots?.length) {

@@ -295,7 +295,7 @@ describe('InvestigationOutput', () => {
     expect(action).toHaveFocus();
   });
 
-  it('does not retain recommendation details after the recommendations change', async () => {
+  it('retains recommendation details across equivalent state refreshes and closes them after a change', async () => {
     const user = userEvent.setup();
     const { rerender } = renderWithI18n(
       <InvestigationOutput status="complete" state={finalState} />
@@ -306,6 +306,22 @@ describe('InvestigationOutput', () => {
         name: /Roll back the deployment that introduced the regression/,
       })
     );
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <InvestigationOutput
+          status="complete"
+          state={{
+            ...finalState,
+            recommendations: finalState.recommendations?.map((recommendation) => ({
+              ...recommendation,
+            })),
+          }}
+        />
+      </I18nProvider>
+    );
+
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     rerender(
