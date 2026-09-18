@@ -342,11 +342,8 @@ export function ESQLEditor({
   // Refresh the ES|QL results table for the last submitted query when inputs to the preview
   // request change without the user submitting again.
   useEffect(() => {
-    if (onLayerQuerySubmit) {
-      return;
-    }
-
-    // Skip the initial render, the grid is populated by useInitializeChart → runQuery
+    // Skip the initial render: useInitializeChart populates the global grid, while
+    // the layer-scoped initial-grid effect above populates a per-layer grid.
     if (isInitialRenderRef.current) {
       isInitialRenderRef.current = false;
       return;
@@ -359,24 +356,49 @@ export function ESQLEditor({
 
     const abortController = new AbortController();
 
-    getSuggestions(
-      lastSubmittedQuery,
-      data,
-      http,
-      uiSettings,
-      datasourceMap,
-      visualizationMap,
-      adHocDataViews,
-      undefined,
-      abortController,
-      setDataGridAttrs,
-      esqlVariables,
-      false,
-      currentAttributesRef.current,
-      isApproximate
-    ).catch(() => {
-      // The chart itself will surface query errors via its own error handling path
-    });
+    if (onLayerQuerySubmit) {
+      getGridAttrs(
+        lastSubmittedQuery,
+        adHocDataViews,
+        data,
+        http,
+        uiSettings,
+        abortController,
+        esqlVariables,
+        isApproximate
+      )
+        .then((gridAttrs) => {
+          const columns = mapVariableToColumn(
+            lastSubmittedQuery.esql,
+            esqlVariables,
+            gridAttrs.columns
+          );
+          addColumnsToCache(lastSubmittedQuery, columns);
+          setDataGridAttrs({ ...gridAttrs, columns });
+        })
+        .catch(() => {
+          // The chart itself will surface query errors via its own error handling path
+        });
+    } else {
+      getSuggestions(
+        lastSubmittedQuery,
+        data,
+        http,
+        uiSettings,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        undefined,
+        abortController,
+        setDataGridAttrs,
+        esqlVariables,
+        false,
+        currentAttributesRef.current,
+        isApproximate
+      ).catch(() => {
+        // The chart itself will surface query errors via its own error handling path
+      });
+    }
 
     return () => {
       abortController.abort();

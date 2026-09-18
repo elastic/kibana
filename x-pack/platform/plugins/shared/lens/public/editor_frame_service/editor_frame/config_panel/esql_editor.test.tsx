@@ -250,6 +250,31 @@ describe('ESQLEditor', () => {
       );
     });
 
+    it('refreshes the layer-scoped results grid when ES|QL variables change', async () => {
+      const onLayerQuerySubmit = jest.fn().mockResolvedValue(undefined);
+      const editor = renderEditor({ onLayerQuerySubmit });
+      await waitFor(() => expect(getGridAttrsMock).toHaveBeenCalledTimes(1));
+
+      const updatedVariables = [{ key: 'field', value: 'memory', type: ESQLVariableType.FIELDS }];
+      useFetchContextMock.mockReturnValue(
+        createMockFetchContext({ esqlVariables: updatedVariables })
+      );
+      editor.rerenderEditor({ onLayerQuerySubmit });
+
+      await waitFor(() => expect(getGridAttrsMock).toHaveBeenCalledTimes(2));
+      expect(getGridAttrsMock).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.any(AbortController),
+        updatedVariables,
+        false
+      );
+      expect(onLayerQuerySubmit).not.toHaveBeenCalled();
+    });
+
     it('does not cache columns or mark the query submitted when the layer rejects it', async () => {
       const onLayerQuerySubmit = jest.fn().mockRejectedValue(new Error('incompatible dimensions'));
       renderEditor({ onLayerQuerySubmit });
