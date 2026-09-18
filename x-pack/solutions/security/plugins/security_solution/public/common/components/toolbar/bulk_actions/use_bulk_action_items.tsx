@@ -27,6 +27,7 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -41,6 +42,13 @@ export interface BulkActionsProps {
   data?: TimelineItem[];
   closePopover?: () => void;
   showRunWorkflowActions?: boolean;
+  /** True when the user chose "select all N", so the selection exceeds the loaded rows. */
+  isAllSelected?: boolean;
+  /**
+   * Query context used to resolve a select-all beyond the loaded rows for the run-workflow
+   * action. Omit it and a run stays scoped to the loaded rows, as it always has.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
 }
 
 export const useBulkActionItems = ({
@@ -56,6 +64,8 @@ export const useBulkActionItems = ({
   data,
   closePopover,
   showRunWorkflowActions = true,
+  isAllSelected,
+  selectionScope,
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
@@ -185,6 +195,8 @@ export const useBulkActionItems = ({
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
     documentIds: workflowDocumentIds,
     closePopover: closePopover ?? noop,
+    isAllSelected,
+    selectionScope,
   });
 
   const items = useMemo(() => {

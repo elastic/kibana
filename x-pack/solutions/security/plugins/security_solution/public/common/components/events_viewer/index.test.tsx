@@ -17,6 +17,7 @@ import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from './use_timelines_events';
+import { useAlertBulkActions } from './use_alert_bulk_actions';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
@@ -37,6 +38,15 @@ jest.mock('react-redux-v7', () => {
 });
 
 jest.mock('./use_timelines_events');
+
+// Spied rather than stubbed so the rest of the viewer keeps rendering its real bulk actions.
+jest.mock('./use_alert_bulk_actions', () => {
+  const actual = jest.requireActual('./use_alert_bulk_actions');
+  return {
+    ...actual,
+    useAlertBulkActions: jest.fn((args) => actual.useAlertBulkActions(args)),
+  };
+});
 
 jest.mock('../../utils/normalize_time_range');
 
@@ -153,6 +163,27 @@ describe('StatefulEventsViewer', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({ id: dataTableId }),
+      })
+    );
+  });
+
+  // Bulk actions that act on a whole "select all" need the table's query to resolve the rows
+  // the store never loaded.
+  test('gives the bulk actions the query context needed to resolve a select all', () => {
+    render(
+      <TestProviders>
+        <StatefulEventsViewer {...testProps} indexNames={['logs-*']} />
+      </TestProviders>
+    );
+
+    expect(useAlertBulkActions).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        selectionScope: expect.objectContaining({
+          indexNames: ['logs-*'],
+          from,
+          to,
+          queryId: `${TableId.test}-run-workflow-selection`,
+        }),
       })
     );
   });

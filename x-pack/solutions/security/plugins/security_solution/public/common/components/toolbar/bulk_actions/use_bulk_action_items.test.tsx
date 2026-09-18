@@ -105,13 +105,13 @@ describe('useBulkActionItems', () => {
             _id: 'selected-1',
             _index: 'test-index',
             data: [],
-            ecs: { _id: 'selected-1', host: { name: 'host-1' } },
+            ecs: { _id: 'selected-1', host: { name: ['host-1'] } },
           },
           {
             _id: 'selected-2',
             _index: 'test-index',
             data: [],
-            ecs: { _id: 'selected-2', host: { name: 'host-2' } },
+            ecs: { _id: 'selected-2', host: { name: ['host-2'] } },
           },
           {
             _id: 'not-selected',
@@ -132,6 +132,25 @@ describe('useBulkActionItems', () => {
       );
       expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
         expect.objectContaining({ documents: expect.anything() })
+      );
+    });
+
+    // Without the scope a "select all" would silently run on the loaded rows only.
+    it('forwards the select-all flag and selection scope so a run is not capped to the page', () => {
+      const selectionScope = {
+        dataViewId: 'security-solution-default',
+        indexNames: ['logs-*'],
+        filterQuery: '{"bool":{}}',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        runtimeMappings: {},
+        queryId: 'test-table-run-workflow-selection',
+      };
+
+      renderUseBulkActionItems({ isAllSelected: true, selectionScope });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({ isAllSelected: true, selectionScope })
       );
     });
 
