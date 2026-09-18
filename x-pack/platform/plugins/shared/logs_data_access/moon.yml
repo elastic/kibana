@@ -37,10 +37,7 @@ dependsOn:
   - '@kbn/use-tracked-promise'
   - '@kbn/core-application-browser'
   - '@kbn/i18n-react'
-  - '@kbn/agent-builder-genai-utils'
   - '@kbn/storage-adapter'
-  - '@kbn/dev-cli-runner'
-  - '@kbn/tooling-log'
 tags:
   - plugin
   - prod
@@ -52,7 +49,6 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
-    - scripts/**/*
     - jest.config.js
     - '!target/**/*'
   jest-config:

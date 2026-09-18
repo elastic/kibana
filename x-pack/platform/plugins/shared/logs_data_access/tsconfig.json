@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "public/**/*", "scripts/**/*", "jest.config.js"],
+  "include": ["common/**/*", "server/**/*", "public/**/*", "jest.config.js"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -26,9 +26,6 @@
     "@kbn/use-tracked-promise",
     "@kbn/core-application-browser",
     "@kbn/i18n-react",
-    "@kbn/agent-builder-genai-utils",
-    "@kbn/storage-adapter",
-    "@kbn/dev-cli-runner",
-    "@kbn/tooling-log"
+    "@kbn/storage-adapter"
   ]
 }
