@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 export type Primitive = string | number | boolean | null | undefined;
 
 export const primitive: z.ZodType<Primitive> = z.union([
-  z.string(),
+  z.string().max(65535),
   z.number(),
   z.boolean(),
   z.null(),
@@ -24,7 +24,7 @@ export interface RecursiveRecord {
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z
   .lazy(() =>
     z.record(
-      z.string(),
+      z.string().max(1000),
       z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord])
     )
   )
@@ -33,7 +33,7 @@ export const recursiveRecord: z.ZodType<RecursiveRecord> = z
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
-  z.string(),
+  z.string().max(1000),
   z.union([primitive, z.array(primitive), z.array(z.unknown())])
 );
 

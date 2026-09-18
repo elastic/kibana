@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   ReviewDissectFieldsPrompt,
@@ -53,11 +54,11 @@ export interface ProcessingDissectSuggestionsHandlerDeps {
 }
 
 export const processingDissectSuggestionsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    connector_id: z.string(),
-    field_name: z.string(),
-    sample_messages: z.array(z.string()),
+    connector_id: z.string().max(256),
+    field_name: z.string().max(256),
+    sample_messages: z.array(z.string().max(10000)),
   }),
 }) satisfies z.Schema<ProcessingDissectSuggestionsParams>;
 

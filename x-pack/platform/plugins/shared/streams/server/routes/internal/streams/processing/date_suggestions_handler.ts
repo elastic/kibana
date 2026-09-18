@@ -7,6 +7,7 @@
 
 import { isString, uniq } from 'lodash';
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 export interface ProcessingDateSuggestionsParams {
@@ -24,7 +25,7 @@ export interface ProcessingDateSuggestionsHandlerDeps {
 }
 
 export const processingDateSuggestionsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
     dates: z.array(z.unknown()).nonempty(),
   }),

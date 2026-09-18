@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
@@ -62,7 +62,7 @@ export const readStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.') }),
   }),
   handler: async ({
     params,
@@ -173,7 +173,7 @@ export const editStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
     body: Streams.all.UpsertRequest.right,
   }),
@@ -251,7 +251,7 @@ export const deleteStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
