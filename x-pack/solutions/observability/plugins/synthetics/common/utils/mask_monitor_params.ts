@@ -39,7 +39,7 @@ export const maskMonitorParams = (params?: string): string | undefined => {
 
   const parsedParams = parseMonitorParams(params);
   if (!parsedParams) {
-    return params;
+    return MASKED_PARAM_VALUE;
   }
 
   return JSON.stringify(
@@ -57,6 +57,10 @@ export const restoreMaskedMonitorParams = ({
 }): string | undefined => {
   if (!submittedParams) {
     return submittedParams;
+  }
+
+  if (submittedParams === MASKED_PARAM_VALUE) {
+    return previousParams;
   }
 
   const parsedSubmittedParams = parseMonitorParams(submittedParams);

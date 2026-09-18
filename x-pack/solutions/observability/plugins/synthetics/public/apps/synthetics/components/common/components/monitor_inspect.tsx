@@ -32,6 +32,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 
 import { stringify } from 'yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type {
   SyntheticsMonitor,
@@ -48,6 +49,7 @@ import {
   inspectMonitorAPI,
   updateMonitorAPI,
 } from '../../../state/monitor_management/api';
+import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import {
   FORMATTED_CONFIG_DESCRIPTION,
@@ -64,6 +66,7 @@ interface InspectorProps {
 
 export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
+  const { spaceId } = useGetUrlParams();
   const registerHeader = useRegisterInspectMonitorHeader();
   const { application } = useKibana().services;
   const canRevealParams = canRevealParameterValues({
@@ -103,17 +106,46 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
     };
   }, [isValid, registerHeader]);
 
+  const shouldFetchRevealedParams = Boolean(
+    isInspecting && isEditFlow && !hideParams && canRevealParams && monitorFields.config_id
+  );
+
+  const {
+    data: monitorWithRevealedParams,
+    loading: loadingRevealedParams,
+    error: revealParamsError,
+  } = useFetcher(() => {
+    if (shouldFetchRevealedParams) {
+      return fetchSyntheticsMonitor({
+        monitorId: monitorFields.config_id!,
+        spaceId,
+        hideParams: false,
+      });
+    }
+  }, [shouldFetchRevealedParams, monitorFields.config_id, spaceId]);
+
+  const monitorForInspection = monitorWithRevealedParams
+    ? {
+        ...monitorFields,
+        [ConfigKey.PARAMS]: monitorWithRevealedParams[ConfigKey.PARAMS],
+      }
+    : monitorFields;
+  const waitingForRevealedParams = shouldFetchRevealedParams && !monitorWithRevealedParams;
+
   const { data, loading, error } = useFetcher(() => {
-    if (isInspecting) {
+    if (isInspecting && !waitingForRevealedParams) {
       return inspectMonitorAPI({
         hideParams,
-        monitor: monitorFields,
+        monitor: monitorForInspection,
       });
     }
     // FIXME: Dario couldn't find a solution for monitorFields
     // which is not memoized downstream
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInspecting, hideParams, migrateCount]);
+  }, [isInspecting, hideParams, migrateCount, waitingForRevealedParams]);
+
+  const inspectError = revealParamsError ?? error;
+  const isLoading = loading || loadingRevealedParams;
 
   let flyout;
 
@@ -148,7 +180,7 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
-          {!loading && data ? (
+          {!isLoading && data ? (
             <>
               <EuiCodeBlock
                 language={asJson ? 'json' : 'yaml'}
@@ -167,15 +199,16 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
                     links={data.packagePolicyLinks}
                     hasMissingReferences={data.hasMissingReferences}
                     monitorFields={monitorFields}
+                    preserveMaskedParams={!canRevealParams}
                     onMigrateSuccess={() => setMigrateCount((c) => c + 1)}
                   />
                 </>
               )}
             </>
-          ) : loading && !error ? (
+          ) : isLoading && !inspectError ? (
             <LoadingState />
           ) : (
-            <p>{error?.message}</p>
+            <p>{inspectError?.message}</p>
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
@@ -223,11 +256,13 @@ const PackagePolicyLinksTable = ({
   links,
   hasMissingReferences,
   monitorFields,
+  preserveMaskedParams,
   onMigrateSuccess,
 }: {
   links: PackagePolicyLink[];
   hasMissingReferences: boolean;
   monitorFields: SyntheticsMonitor;
+  preserveMaskedParams: boolean;
   onMigrateSuccess: () => void;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
@@ -239,7 +274,7 @@ const PackagePolicyLinksTable = ({
     setIsMigrating(true);
     try {
       const savedMonitor = stripServerFields(await fetchMonitorAPI({ id: monitorId }));
-      await updateMonitorAPI({ monitor: savedMonitor, id: monitorId });
+      await updateMonitorAPI({ monitor: savedMonitor, id: monitorId, preserveMaskedParams });
       kibanaService.toasts.addSuccess({
         title: MIGRATE_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
