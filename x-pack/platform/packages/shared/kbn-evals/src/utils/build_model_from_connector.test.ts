@@ -48,11 +48,24 @@ const eisEndpoint: InferenceEndpointDefinition = {
 
 describe('buildModelFromConnector', () => {
   describe('stack connectors', () => {
-    it('attributes a .gen-ai connector from its defaultModel', () => {
+    it('attributes a .gen-ai connector from its defaultModel, not the connector type', () => {
       expect(buildModelFromConnector(openRouterConnector)).toEqual({
-        family: ModelFamily.GPT,
+        family: ModelFamily.Claude,
         provider: ModelProvider.OpenAI,
         id: 'anthropic/claude-sonnet-4.6',
+      });
+    });
+
+    it('falls back to the connector-type family when the .gen-ai defaultModel is unknown', () => {
+      expect(
+        buildModelFromConnector({
+          ...openRouterConnector,
+          config: { ...openRouterConnector.config, defaultModel: 'mistralai/mistral-large' },
+        })
+      ).toEqual({
+        family: ModelFamily.Unknown,
+        provider: ModelProvider.OpenAI,
+        id: 'mistralai/mistral-large',
       });
     });
 
@@ -96,20 +109,69 @@ describe('buildModelFromConnector', () => {
       });
     });
 
+    const openRouterEndpoint: InferenceEndpointDefinition = {
+      type: 'inference_endpoint',
+      id: 'openrouter-anthropic-claude-sonnet-4-6',
+      name: 'OpenRouter anthropic/claude-sonnet-4.6',
+      inferenceId: 'openrouter-anthropic-claude-sonnet-4-6',
+      provider: 'openai',
+      taskType: 'chat_completion',
+      providerConfig: { model_id: 'anthropic/claude-sonnet-4.6' },
+    };
+
     it('attributes a non-EIS endpoint to its own provider, not Elastic', () => {
-      const openRouterEndpoint: InferenceEndpointDefinition = {
-        type: 'inference_endpoint',
-        id: 'openrouter-anthropic-claude-sonnet-4-6',
-        name: 'OpenRouter anthropic/claude-sonnet-4.6',
-        inferenceId: 'openrouter-anthropic-claude-sonnet-4-6',
-        provider: 'openai',
-        taskType: 'chat_completion',
-        providerConfig: { model_id: 'anthropic/claude-sonnet-4.6' },
-      };
+      expect(buildModelFromConnector(openRouterEndpoint).provider).toBe(ModelProvider.OpenAI);
+    });
+
+    it('derives the family from model_id, not from the OpenAI-compatible transport', () => {
       expect(buildModelFromConnector(openRouterEndpoint)).toEqual({
-        family: ModelFamily.GPT,
+        family: ModelFamily.Claude,
         provider: ModelProvider.OpenAI,
         id: 'anthropic/claude-sonnet-4.6',
+      });
+
+      expect(
+        buildModelFromConnector({
+          ...openRouterEndpoint,
+          providerConfig: { model_id: 'google/gemini-2.5-pro' },
+        })
+      ).toEqual({
+        family: ModelFamily.Gemini,
+        provider: ModelProvider.OpenAI,
+        id: 'google/gemini-2.5-pro',
+      });
+
+      expect(
+        buildModelFromConnector({
+          ...openRouterEndpoint,
+          providerConfig: { model_id: 'openai/gpt-5.6-sol' },
+        })
+      ).toEqual({
+        family: ModelFamily.GPT,
+        provider: ModelProvider.OpenAI,
+        id: 'openai/gpt-5.6-sol',
+      });
+    });
+
+    it('reports Unknown when model_id matches no known family', () => {
+      expect(
+        buildModelFromConnector({
+          ...openRouterEndpoint,
+          providerConfig: { model_id: 'mistralai/mistral-large' },
+        })
+      ).toEqual({
+        family: ModelFamily.Unknown,
+        provider: ModelProvider.OpenAI,
+        id: 'mistralai/mistral-large',
+      });
+    });
+
+    it('falls back to the provider default family when model_id is absent', () => {
+      const { providerConfig, ...withoutModel } = openRouterEndpoint;
+      expect(buildModelFromConnector(withoutModel)).toEqual({
+        family: ModelFamily.GPT,
+        provider: ModelProvider.OpenAI,
+        id: 'OpenRouter anthropic/claude-sonnet-4.6',
       });
     });
 

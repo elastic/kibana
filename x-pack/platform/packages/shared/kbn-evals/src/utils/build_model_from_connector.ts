@@ -15,34 +15,42 @@ import {
 } from '@kbn/inference-common';
 import { isInferenceEndpointDefinition, type EvalConnector } from './eval_connector';
 
+/**
+ * Infers the model family from a model id.
+ */
+export function familyFromModelId(modelId?: string): ModelFamily | undefined {
+  if (!modelId) {
+    return undefined;
+  }
+  const id = modelId.toLowerCase();
+  if (id.includes('claude') || id.includes('anthropic')) {
+    return ModelFamily.Claude;
+  }
+  if (id.includes('gemini')) {
+    return ModelFamily.Gemini;
+  }
+  if (id.includes('gpt') || id.includes('openai') || id.includes('o1') || id.includes('o3')) {
+    return ModelFamily.GPT;
+  }
+  return ModelFamily.Unknown;
+}
+
 function providerStringToModel(
   provider: string,
   modelId?: string
 ): { provider: ModelProvider; family: ModelFamily } {
+  const familyFromId = familyFromModelId(modelId);
   switch (provider) {
-    case 'elastic': {
-      if (modelId) {
-        const id = modelId.toLowerCase();
-        if (id.includes('gpt') || id.includes('openai') || id.includes('o1') || id.includes('o3')) {
-          return { provider: ModelProvider.Elastic, family: ModelFamily.GPT };
-        }
-        if (id.includes('gemini')) {
-          return { provider: ModelProvider.Elastic, family: ModelFamily.Gemini };
-        }
-        if (id.includes('claude') || id.includes('anthropic')) {
-          return { provider: ModelProvider.Elastic, family: ModelFamily.Claude };
-        }
-      }
-      return { provider: ModelProvider.Elastic, family: ModelFamily.Unknown };
-    }
+    case 'elastic':
+      return { provider: ModelProvider.Elastic, family: familyFromId ?? ModelFamily.Unknown };
     case 'anthropic':
-      return { provider: ModelProvider.Anthropic, family: ModelFamily.Claude };
+      return { provider: ModelProvider.Anthropic, family: familyFromId ?? ModelFamily.Claude };
     case 'google':
-      return { provider: ModelProvider.Google, family: ModelFamily.Gemini };
+      return { provider: ModelProvider.Google, family: familyFromId ?? ModelFamily.Gemini };
     case 'openai':
-      return { provider: ModelProvider.OpenAI, family: ModelFamily.GPT };
+      return { provider: ModelProvider.OpenAI, family: familyFromId ?? ModelFamily.GPT };
     default:
-      return { provider: ModelProvider.Other, family: ModelFamily.Unknown };
+      return { provider: ModelProvider.Other, family: familyFromId ?? ModelFamily.Unknown };
   }
 }
 
@@ -80,9 +88,10 @@ export function buildModelFromConnector(connector: EvalConnector): Model {
     },
   };
 
+  const stackModelId = getConnectorModel(inferenceConnector);
   return {
-    family: getConnectorFamily(inferenceConnector),
+    family: familyFromModelId(stackModelId) ?? getConnectorFamily(inferenceConnector),
     provider: getConnectorProvider(inferenceConnector),
-    id: getConnectorModel(inferenceConnector) ?? connector.name,
+    id: stackModelId ?? connector.name,
   };
 }
