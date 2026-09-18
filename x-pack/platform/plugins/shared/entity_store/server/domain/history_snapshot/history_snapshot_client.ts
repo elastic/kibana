@@ -93,6 +93,11 @@ export class HistorySnapshotClient {
       throw new Error(`Failed to enable history snapshot task: ${error?.error?.message}`);
     }
 
+    if (enableResult.tasks.length === 0) {
+      // Task was already enabled, no need to proceed further.
+      return;
+    }
+
     // Step 2: Persist 'started' status. If this fails, roll back the task enable so
     // the task-enabled flag and the global state status stay in sync.
     try {
@@ -136,6 +141,11 @@ export class HistorySnapshotClient {
     const error = result?.errors?.[0];
     if (error) {
       throw new Error(`Failed to disable history snapshot task: ${error?.error?.message}`);
+    }
+
+    if (result.tasks.length === 0) {
+      // Task was already disabled, no need to proceed further.
+      return;
     }
 
     // Persist 'stopped' status. If this fails, roll back the task disable so

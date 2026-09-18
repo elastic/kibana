@@ -59,9 +59,17 @@ function createMockGlobalStateClient(overrides?: { status?: 'started' | 'stopped
 }
 
 function createMockTaskManager() {
+  // Default: return the task in tasks[] so callers see it as "changed".
+  // Tests that need the already-in-desired-state path override with tasks: [].
   return {
-    bulkEnable: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
-    bulkDisable: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
+    bulkEnable: jest.fn().mockResolvedValue({
+      tasks: [{ id: 'entity_store:v2:history_snapshot_task:default' }],
+      errors: [],
+    }),
+    bulkDisable: jest.fn().mockResolvedValue({
+      tasks: [{ id: 'entity_store:v2:history_snapshot_task:default' }],
+      errors: [],
+    }),
     runSoon: jest.fn().mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
   };
 }
@@ -337,6 +345,16 @@ describe('HistorySnapshotClient', () => {
         expect.stringContaining('roll back task enable')
       );
     });
+
+    it('returns without updating state or running the task when it is already enabled', async () => {
+      // bulkEnable is a no-op for an already-enabled task — Task Manager returns tasks: []
+      mockTaskManager.bulkEnable.mockResolvedValue({ tasks: [], errors: [] });
+
+      await client.enable(request);
+
+      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalled();
+    });
   });
 
   describe('disable', () => {
@@ -386,6 +404,15 @@ describe('HistorySnapshotClient', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('roll back task disable')
       );
+    });
+
+    it('returns without updating state when the task is already disabled', async () => {
+      // bulkDisable is a no-op for an already-disabled task — Task Manager returns tasks: []
+      mockTaskManager.bulkDisable.mockResolvedValue({ tasks: [], errors: [] });
+
+      await client.disable(request);
+
+      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
 
     describe('with clearHistorySnapshots', () => {
