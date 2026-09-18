@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
@@ -26,6 +26,38 @@ export interface AlertEpisodeRunbookProps {
 }
 
 export const AlertEpisodeRunbook = ({ content, compressed, preview }: AlertEpisodeRunbookProps) => {
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  // React 18 does not support `inert` as a prop, so set it directly on the preview node.
+  const registerPreview = useCallback((node: HTMLDivElement | null) => {
+    previewRef.current = node;
+    node?.setAttribute('inert', '');
+  }, []);
+
+  useEffect(() => {
+    const node = previewRef.current;
+    if (!node) {
+      setIsOverflowing(false);
+      return;
+    }
+
+    const measure = () => setIsOverflowing(node.scrollHeight > node.clientHeight);
+    measure();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    for (const child of Array.from(node.children)) {
+      observer.observe(child);
+    }
+
+    return () => observer.disconnect();
+  }, [content, preview]);
+
   if (!content || content.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeDetailsRunbookEmpty">
@@ -52,13 +84,20 @@ export const AlertEpisodeRunbook = ({ content, compressed, preview }: AlertEpiso
 
   return (
     <div
+      ref={registerPreview}
       // A mask fades the cut-off edge instead of a gradient overlay, so it works on any
       // panel background without having to know the colour.
-      css={css`
-        max-block-size: ${RUNBOOK_PREVIEW_MAX_HEIGHT}px;
-        overflow: hidden;
-        mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-      `}
+      css={[
+        css`
+          max-block-size: ${RUNBOOK_PREVIEW_MAX_HEIGHT}px;
+          overflow: hidden;
+        `,
+        isOverflowing
+          ? css`
+              mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+            `
+          : undefined,
+      ]}
       data-test-subj="alertingV2EpisodeDetailsRunbookPreview"
     >
       {markdown}

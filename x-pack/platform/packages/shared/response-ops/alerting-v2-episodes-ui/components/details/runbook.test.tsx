@@ -29,15 +29,45 @@ describe('AlertEpisodeRunbook', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsRunbookContent')).toBeInTheDocument();
   });
 
-  it('clamps and fades the content in preview mode', () => {
+  it('makes links non-interactive in preview mode', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeRunbook content={'[Some link](https://elastic.co)'} preview />
+      </I18nProvider>
+    );
+
+    const preview = screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview');
+    expect(preview).toHaveAttribute('inert');
+    expect(preview).toContainElement(screen.getByTestId('alertingV2EpisodeDetailsRunbookContent'));
+  });
+
+  it('does not fade preview content that fits within the maximum height', () => {
     render(
       <I18nProvider>
         <AlertEpisodeRunbook content={'# Some runbook'} preview />
       </I18nProvider>
     );
 
-    const preview = screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview');
-    expect(preview).toContainElement(screen.getByTestId('alertingV2EpisodeDetailsRunbookContent'));
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview')).not.toHaveStyleRule(
+      'mask-image',
+      'linear-gradient(to bottom, #000 55%, transparent 100%)'
+    );
+  });
+
+  it('fades preview content that exceeds the maximum height', () => {
+    jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(121);
+    jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(120);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRunbook content={'# Some runbook'} preview />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview')).toHaveStyleRule(
+      'mask-image',
+      'linear-gradient(to bottom, #000 55%, transparent 100%)'
+    );
   });
 
   it('does not clamp the content outside preview mode', () => {
