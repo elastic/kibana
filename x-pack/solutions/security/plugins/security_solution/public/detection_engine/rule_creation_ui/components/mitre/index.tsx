@@ -28,7 +28,6 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import { sortMitreEntitiesByName } from './helpers';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
@@ -99,10 +98,6 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     return [...(field.value as Threats)];
   }, [field]);
 
-  // Pickers present tactics alphabetically; sort here so getSelectTactic receives a stable,
-  // name-ordered reference without re-sorting on every render.
-  const sortedTactics = useMemo(() => sortMitreEntitiesByName(tactics), [tactics]);
-
   const findCurrentTacticOption = useCallback(
     (threat: Threat) =>
       threat.tactic.name === 'none' || tactics.length === 0
@@ -158,7 +153,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                       }),
                     ]
                   : []),
-                ...sortedTactics.map((t) => ({
+                ...tactics.map((t) => ({
                   inputDisplay: <>{getMitreEntityDisplayName(t)}</>,
                   value: t.id,
                   disabled,
@@ -188,15 +183,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         </EuiFlexGroup>
       );
     },
-    [
-      field.label,
-      isDisabled,
-      isUnsupportedTactic,
-      removeTactic,
-      sortedTactics,
-      updateTactic,
-      values,
-    ]
+    [field.label, isDisabled, isUnsupportedTactic, removeTactic, tactics, updateTactic, values]
   );
 
   /**

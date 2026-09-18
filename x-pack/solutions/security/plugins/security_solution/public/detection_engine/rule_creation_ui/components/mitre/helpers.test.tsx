@@ -6,7 +6,7 @@
  */
 
 import type { MitreSubtechniqueSummary } from '@kbn/security-mitre-attack-common';
-import { hasSubtechniqueOptions, sortMitreEntitiesByName } from './helpers';
+import { hasSubtechniqueOptions } from './helpers';
 
 const makeSubtechnique = (id: string, technique_id: string): MitreSubtechniqueSummary => ({
   type: 'subtechnique',
@@ -59,32 +59,6 @@ describe('helpers', () => {
       it('returns false', () => {
         expect(hasSubtechniqueOptions(technique, [])).toBe(false);
       });
-    });
-  });
-
-  describe('sortMitreEntitiesByName', () => {
-    it('sorts entities alphabetically by name', () => {
-      const entities = [
-        { name: 'Zulu', id: 'Z1' },
-        { name: 'Alpha', id: 'A1' },
-        { name: 'Mike', id: 'M1' },
-      ];
-      const sorted = sortMitreEntitiesByName(entities);
-      expect(sorted.map((e) => e.name)).toEqual(['Alpha', 'Mike', 'Zulu']);
-    });
-
-    it('does not mutate the input array', () => {
-      const entities = [
-        { name: 'Bravo', id: 'B1' },
-        { name: 'Alpha', id: 'A1' },
-      ];
-      const originalOrder = entities.map((e) => e.name);
-      sortMitreEntitiesByName(entities);
-      expect(entities.map((e) => e.name)).toEqual(originalOrder);
-    });
-
-    it('returns an empty array when given an empty array', () => {
-      expect(sortMitreEntitiesByName([])).toEqual([]);
     });
   });
 });

@@ -13,7 +13,6 @@ import type {
 import type { CoverageOverviewMitreSubTechnique } from '../../model/coverage_overview/mitre_subtechnique';
 import type { CoverageOverviewMitreTactic } from '../../model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../model/coverage_overview/mitre_technique';
-
 export function buildCoverageOverviewMitreGraph(
   tactics: MitreTacticSummary[],
   techniques: MitreTechniqueSummary[],
