@@ -20,22 +20,24 @@ import {
 const VALID_VERSIONS = [1, 2, 3, 4] as const;
 type ValidVersion = (typeof VALID_VERSIONS)[number];
 
-const filterlistSchema = z.record(z.string(), z.nativeEnum(Action));
-const queryTypeSchema = z.nativeEnum(QueryType);
-// Accepts YYYY-MM-DD strings, ISO datetime strings (truncated to date), and YAML Date objects.
+const filterlistSchema = z.record(z.string(), z.enum(Action));
+const queryTypeSchema = z.enum(QueryType);
+// Accepts YYYY-MM-DD dates, full ISO datetime strings, and YAML Date objects.
+// The complete input is validated (no truncation) and normalised to an ISO instant:
+// a bare date maps to start-of-day UTC, a datetime keeps its exact instant.
 const expiresAtSchema = z
-  .preprocess((val) => {
-    if (val instanceof Date) return val.toISOString().slice(0, 10);
-    if (typeof val === 'string') return val.slice(0, 10);
-    return val;
-  }, z.string().date())
+  .preprocess(
+    (val) => (val instanceof Date ? val.toISOString() : val),
+    z.union([z.iso.date(), z.iso.datetime()])
+  )
+  .transform((val) => new Date(val).toISOString())
   .optional();
 
 // ---------------------------------------------------------------------------
 // Shared index-query logic (used by v2 and v3 index schemas)
 // ---------------------------------------------------------------------------
 
-// Field definitions shared between v2 and v3 index schemas to avoid duplication.
+// Field definitions shared between v2+ schemas to avoid duplication.
 const indexQueryFields = {
   id: z.string().min(1),
   name: z.string().min(1),
@@ -61,14 +63,14 @@ interface IndexQueryRaw {
   id: string;
   name: string;
   scheduleCron: string;
-  filterlist: Record<string, Action>;
+  filterlist?: Record<string, Action>;
   enabled: boolean;
   type: QueryType;
   query: string;
   size?: number;
   tiers?: string[];
   encryptionKeyId?: string;
-  encryptDocument?: true;
+  encryptDocument?: boolean;
 }
 
 const validateIndexQuery = (data: IndexQueryRaw, ctx: z.RefinementCtx): void => {
@@ -136,13 +138,13 @@ const transformIndexQuery = (data: IndexQueryRaw): IndexQuery => {
     id: data.id,
     name: data.name,
     scheduleCron: data.scheduleCron,
-    filterlist: data.filterlist,
+    filterlist: data.filterlist ?? {},
     enabled: data.enabled,
     type: data.type,
     query: data.query,
   };
   if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
-  if (data.encryptDocument !== undefined) q.encryptDocument = data.encryptDocument;
+  if (data.encryptDocument === true) q.encryptDocument = true;
   if (data.size !== undefined) q.size = data.size;
   if (data.tiers !== undefined) q.tiers = data.tiers;
   if (integrations !== undefined) q.integrations = integrations;
@@ -176,13 +178,21 @@ const v3IndexSchema = z
 
 const validateEncryptDocument = (
   data: {
-    encryptDocument?: true;
+    encryptDocument?: boolean;
     encryptionKeyId?: string;
     filterlist?: Record<string, Action>;
   },
   ctx: z.RefinementCtx
 ): void => {
-  if (data.encryptDocument !== true) return;
+  if (data.encryptDocument !== true) {
+    if (data.filterlist === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'filterlist is required unless encryptDocument is true',
+      });
+    }
+    return;
+  }
   if (!data.encryptionKeyId) {
     ctx.addIssue({
       code: 'custom',
@@ -217,8 +227,7 @@ const v3IntegrationsSchema = z.preprocess((val) => {
   return val; // invalid types pass through to schema validation
 }, z.array(z.string().min(1)).min(1).optional());
 
-// V3 API: targets a Kibana/ES HTTP endpoint.
-// .strict() rejects index/query/tiers/datastreamTypes and any other unknown field.
+// V3 API: targets a Kibana/ES HTTP endpoint + all previous attributes.
 const v3ApiSchema = z
   .object({
     id: z.string().min(1),
@@ -273,8 +282,8 @@ const v4IndexSchema = z
   .object({
     version: z.literal(4),
     ...indexQueryFields,
-    filterlist: filterlistSchema.optional().default({}),
-    encryptDocument: z.literal(true).optional(),
+    filterlist: filterlistSchema.optional(),
+    encryptDocument: z.boolean().optional(),
     expiresAt: expiresAtSchema,
   })
   .strict()
@@ -297,13 +306,13 @@ const v4ApiSchema = z
     responsePath: z.string().optional(),
     scheduleCron: z.string().min(1),
     enabled: z.boolean(),
-    filterlist: filterlistSchema.optional().default({}),
+    filterlist: filterlistSchema.optional(),
     pathParams: z.record(z.string(), z.string()).optional(),
     queryParams: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
     responsePathKey: z.string().optional(),
     integrations: v3IntegrationsSchema,
     encryptionKeyId: z.string().min(1).optional(),
-    encryptDocument: z.literal(true).optional(),
+    encryptDocument: z.boolean().optional(),
     expiresAt: expiresAtSchema,
   })
   .strict()
@@ -325,7 +334,7 @@ const v4ApiSchema = z
       id: data.id,
       name: data.name,
       scheduleCron: data.scheduleCron,
-      filterlist: data.filterlist,
+      filterlist: data.filterlist ?? {},
       enabled: data.enabled,
       api: data.api,
     };
@@ -335,7 +344,7 @@ const v4ApiSchema = z
     if (data.responsePathKey !== undefined) q.responsePathKey = data.responsePathKey;
     if (data.integrations !== undefined) q.integrations = data.integrations;
     if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
-    if (data.encryptDocument !== undefined) q.encryptDocument = data.encryptDocument;
+    if (data.encryptDocument === true) q.encryptDocument = true;
     if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
     return q;
   });
@@ -354,7 +363,7 @@ const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
     return 'version' in obj ? obj : { ...obj, version: 1 };
   }, z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema, v4ApiSchema, v4IndexSchema]))
   .catch((ctx) => {
-    const raw = ctx.input as Record<string, unknown> | null;
+    const raw = ctx.value as Record<string, unknown> | null;
     const version = raw?.version;
     // unknown_version: silently dropped, debug log only, no telemetry stat doc.
     // invalid_descriptor: warning logged + skipped stat doc emitted.
@@ -367,7 +376,7 @@ const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
     return {
       id: raw?.id as string | undefined,
       name: raw?.name as string | undefined,
-      _raw: ctx.input,
+      _raw: ctx.value,
       failureReason,
     } as unknown as IndexQuery;
   });

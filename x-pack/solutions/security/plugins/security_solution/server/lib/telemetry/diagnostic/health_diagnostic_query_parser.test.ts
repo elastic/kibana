@@ -782,6 +782,79 @@ describe('v4 encryptDocument', () => {
     const [result] = parseHealthDiagnosticQueries(yaml);
     expect(result).toMatchObject({ kind: 'index' });
   });
+
+  it('produces invalid_descriptor when filterlist is absent and encryptDocument is not set', () => {
+    const yaml = [
+      'version: 4',
+      'id: no-filterlist',
+      'name: No Filterlist',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('accepts a v4 descriptor without encryptDocument when a filterlist is provided', () => {
+    const yaml = [
+      'version: 4',
+      'id: with-filterlist',
+      'name: With Filterlist',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'filterlist:',
+      '  user.name: keep',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      filterlist: { 'user.name': Action.KEEP },
+    });
+  });
+
+  it('accepts encryptDocument: false with a filterlist and normalises the flag away', () => {
+    const yaml = [
+      'version: 4',
+      'id: enc-false',
+      'name: Enc False',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptDocument: false',
+      'filterlist:',
+      '  user.name: keep',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      filterlist: { 'user.name': Action.KEEP },
+    });
+    expect((result as { encryptDocument?: boolean }).encryptDocument).toBeUndefined();
+  });
+
+  it('produces invalid_descriptor when encryptDocument: false and filterlist is absent', () => {
+    const yaml = [
+      'version: 4',
+      'id: enc-false-no-filterlist',
+      'name: Enc False No Filterlist',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptDocument: false',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
 });
 
 describe('expiresAt', () => {
@@ -794,14 +867,16 @@ describe('expiresAt', () => {
     "scheduleCron: '0 */1 * * *'",
     'enabled: true',
     'index: logs-*',
+    'filterlist:',
+    '  user.name: keep',
   ].join('\n');
 
-  const v3BaseYaml = `${v4BaseYaml.replace('version: 4', 'version: 3')}\nfilterlist: {}`;
+  const v3BaseYaml = v4BaseYaml.replace('version: 4', 'version: 3');
 
-  it('parses a valid expiresAt date string on v4', () => {
+  it('normalises a bare expiresAt date to start-of-day UTC on v4', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31'`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T00:00:00.000Z' });
   });
 
   it('leaves expiresAt undefined when absent on v4', () => {
@@ -816,16 +891,22 @@ describe('expiresAt', () => {
     expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
   });
 
-  it('accepts an ISO datetime string by truncating to the date part', () => {
+  it('produces invalid_descriptor for a date with a trailing suffix', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31-typo'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('preserves the exact instant of a full ISO datetime string', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59Z'`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T23:59:59.000Z' });
   });
 
   it('accepts an unquoted YAML date (parsed as Date object by the YAML library)', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: 2099-12-31`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T00:00:00.000Z' });
   });
 
   it('produces invalid_descriptor when expiresAt is used on a v3 descriptor', () => {

@@ -191,19 +191,15 @@ export interface HealthDiagnosticQueryResult {
 }
 
 export interface HealthDiagnosticQueryStats {
-  // existing — unchanged
   name: string;
   started: string;
   finished: string;
   traceId: string;
   numDocs: number;
-  /** Kept for downstream backward compatibility. Derived from `status`. */
   passed: boolean;
   failure?: HealthDiagnosticQueryFailure;
   fieldNames: string[];
   circuitBreakers?: Record<string, unknown>;
-  // new fields
-  descriptorVersion: number;
   status: 'success' | 'failed' | 'skipped';
   skipReason?: SkipReason;
   integration?: IntegrationResolution;

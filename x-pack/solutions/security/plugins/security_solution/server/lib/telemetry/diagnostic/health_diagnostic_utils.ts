@@ -45,11 +45,7 @@ export function fieldNames<T>(documents: T): string[] {
   return Array.from(result);
 }
 
-export const emptyStat = (
-  name: string,
-  now: Date,
-  descriptorVersion: number
-): HealthDiagnosticQueryStats => ({
+export const emptyStat = (name: string, now: Date): HealthDiagnosticQueryStats => ({
   name,
   started: now.toISOString(),
   traceId: randomUUID(),
@@ -57,7 +53,6 @@ export const emptyStat = (
   numDocs: 0,
   passed: false,
   fieldNames: [],
-  descriptorVersion,
   status: 'failed',
 });
 

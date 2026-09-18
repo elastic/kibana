@@ -174,7 +174,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       numDocs: 0,
       passed: false,
       fieldNames: [],
-      descriptorVersion: 'kind' in query ? (query.kind === 'api' ? 3 : 2) : 0,
       status: 'skipped',
       skipReason: skipped.reason,
     };
@@ -220,8 +219,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     const now = new Date();
 
     return new Promise<HealthDiagnosticQueryStats>((resolve) => {
-      const descriptorVersion = query.kind === 'api' ? 3 : 2;
-      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, descriptorVersion);
+      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now);
       let currentPage = 0;
 
       query$
@@ -433,7 +431,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
           return true;
         }
         const { name, scheduleCron, enabled, expiresAt } = query;
-        if (expiresAt !== undefined && now.toISOString().slice(0, 10) > expiresAt) {
+        if (expiresAt !== undefined && now.getTime() >= new Date(expiresAt).getTime()) {
           this.logger.debug('Skipping expired health diagnostic query', {
             queryId: (query as { id?: string }).id,
             name,

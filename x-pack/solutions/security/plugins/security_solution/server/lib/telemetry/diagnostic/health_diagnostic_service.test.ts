@@ -138,7 +138,6 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           name: 'test-query',
           passed: true,
           status: 'success',
-          descriptorVersion: 2,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -190,9 +189,29 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
       });
 
-      test('should run queries whose expiresAt is today', async () => {
+      test('should skip queries whose expiresAt is a bare date of today (start-of-day)', async () => {
         const today = new Date().toISOString().slice(0, 10);
         setupDefaultArtifact({ version: 4, expiresAt: today });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt datetime already passed today', async () => {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        setupDefaultArtifact({ version: 4, expiresAt: oneHourAgo });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should run queries whose expiresAt datetime is later today', async () => {
+        const oneHourAhead = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        setupDefaultArtifact({ version: 4, expiresAt: oneHourAhead });
 
         const result = await service.runHealthDiagnosticQueries({});
 
@@ -367,7 +386,6 @@ enabled: true`,
           name: 'test-query',
           passed: false,
           status: 'failed',
-          descriptorVersion: 2,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
