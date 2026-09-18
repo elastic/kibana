@@ -595,6 +595,7 @@ function DiscoverDocumentsComponent({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             externalAdditionalControls={
+            externalAdditionalControls={
               approximationApplied ? (
                 <span style={{ marginRight: 4 }}>
                   <ApproximationBadge
@@ -604,9 +605,9 @@ function DiscoverDocumentsComponent({
                 </span>
               ) : undefined
             }
-              </span>
-            }
-            services={services}
+            renderDocumentView="external"
+            setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
+            renderCustomToolbar={renderCustomToolbarWithElements}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
