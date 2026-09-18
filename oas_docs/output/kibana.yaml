@@ -77210,7 +77210,9 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+            curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -d '{}' \
               "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
         - label: Disable and clear indices
           lang: curl
@@ -77222,6 +77224,7 @@ paths:
         - lang: Console
           source: |
             PUT kbn://api/security/entity_store/history_snapshot/disable
+            {}
         - label: Disable and clear indices
           lang: Console
           source: |
