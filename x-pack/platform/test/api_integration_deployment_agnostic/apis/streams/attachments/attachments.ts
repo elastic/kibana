@@ -1285,7 +1285,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       const createSloSavedObject = async (name: string) => {
-        const logicalSloId = `${name}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const randomSuffix = Math.random().toString(36).slice(2, 8);
+        const logicalSloId = `${name}-${Date.now()}-${randomSuffix}`;
         return kibanaServer.savedObjects.create({
           type: 'slo',
           attributes: {
@@ -1294,6 +1295,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             enabled: true,
           },
         });
+      };
+
+      const safelyDeleteSloSavedObject = async (sloSavedObjectId: string) => {
+        await kibanaServer.savedObjects
+          .delete({ type: 'slo', id: sloSavedObjectId })
+          .catch((err) => {
+            const message = String(err?.message ?? err);
+            if (!/\b404\b/.test(message)) {
+              log.warning(
+                `SLO cascade cleanup: delete saved object failed for ${sloSavedObjectId}: ${message}`
+              );
+            }
+          });
       };
 
       it('removes SLO attachment links when the stream is deleted', async () => {
@@ -1341,14 +1355,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             }
           });
           if (sloSavedObjectId) {
-            await kibanaServer.savedObjects.delete({ type: 'slo', id: sloSavedObjectId }).catch((err) => {
-              const message = String(err?.message ?? err);
-              if (!/\b404\b/.test(message)) {
-                log.warning(
-                  `SLO cascade cleanup: delete saved object failed for ${sloSavedObjectId}: ${message}`
-                );
-              }
-            });
+            await safelyDeleteSloSavedObject(sloSavedObjectId);
           }
         }
       });
@@ -1378,7 +1385,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           try {
             await putQueryStream(apiClient, SLO_QUERY_TEST_STREAM, queryStreamBody);
 
-            const slo = await createSloSavedObject('streams-attachments-slo-query-unlink-regression');
+            const slo = await createSloSavedObject(
+              'streams-attachments-slo-query-unlink-regression'
+            );
             sloSavedObjectId = slo.id;
             expect(sloSavedObjectId).to.be.a('string');
             expect(sloSavedObjectId).to.not.be.empty();
@@ -1419,14 +1428,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               }
             });
             if (sloSavedObjectId) {
-              await kibanaServer.savedObjects.delete({ type: 'slo', id: sloSavedObjectId }).catch((err) => {
-                const message = String(err?.message ?? err);
-                if (!/\b404\b/.test(message)) {
-                  log.warning(
-                    `SLO cascade cleanup: delete saved object failed for ${sloSavedObjectId}: ${message}`
-                  );
-                }
-              });
+              await safelyDeleteSloSavedObject(sloSavedObjectId);
             }
           }
         });
