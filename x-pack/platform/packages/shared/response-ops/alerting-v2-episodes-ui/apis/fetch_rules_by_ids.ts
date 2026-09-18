@@ -38,7 +38,7 @@ export const fetchRulesByIds = async ({
   const response = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
     query: {
       filter: buildRuleIdsFilter(idsToFetch),
-      perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+      per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
       page: 1,
     },
   });
