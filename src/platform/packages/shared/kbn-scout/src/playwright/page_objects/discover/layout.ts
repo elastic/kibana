@@ -282,6 +282,11 @@ export abstract class LayoutMixin extends SaveMixin {
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
 
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
+  }
+
   async createRuntimeField({
     fieldName,
     script,
