@@ -97,6 +97,7 @@ function ExplorerChartContainer({
   timefilter,
   timeRange,
   onSelectEntity,
+  previewMode,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -260,9 +261,10 @@ function ExplorerChartContainer({
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
             onSelectEntity={onSelectEntity}
-            showFilterIcons={showFilterIcons}
+            showFilterIcons={!previewMode && showFilterIcons}
           />
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <div
             css={css`
@@ -278,7 +280,7 @@ function ExplorerChartContainer({
                 color="warning"
               />
             )}
-            {explorerSeriesLink && (
+            {!previewMode && explorerSeriesLink && (
               <EuiToolTip position="top" content={textViewButton}>
                 {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
                 {/* disabling because we need button to behave as link and to have a callback */}
@@ -327,7 +329,7 @@ function ExplorerChartContainer({
             </MlTooltipComponent>
           );
         }
-
+        console.log({ chartType, previewMode });
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION
@@ -349,6 +351,7 @@ function ExplorerChartContainer({
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
                   euiTheme={euiTheme}
+                  previewMode={previewMode}
                 />
               )}
             </MlTooltipComponent>
@@ -372,6 +375,7 @@ function ExplorerChartContainer({
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
                   euiTheme={euiTheme}
+                  previewMode={previewMode}
                 />
               )}
             </MlTooltipComponent>
@@ -398,6 +402,7 @@ export const ExplorerChartsContainerUI = ({
   timefilter,
   timeRange,
   onSelectEntity,
+  previewMode,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -467,6 +472,7 @@ export const ExplorerChartsContainerUI = ({
                   timefilter={timefilter}
                   timeRange={timeRange}
                   onSelectEntity={onSelectEntity}
+                  previewMode={previewMode}
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
                   chartsService={chartsService}

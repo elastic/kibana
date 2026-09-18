@@ -41,6 +41,7 @@ interface ExplorerAnomaliesContainerProps {
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;
   showFilterIcons: boolean;
+  previewMode?: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -66,6 +67,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   chartsService,
   timeRange,
   showFilterIcons,
+  previewMode = false,
 }) => {
   return (
     <div>
@@ -92,6 +94,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
           {...{
             ...chartsData,
             isEmbeddable: true,
+            previewMode,
             severity,
             mlLocator,
             tableData,
