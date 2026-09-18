@@ -60,7 +60,7 @@ export async function executeKIQueryGenerationAgent({
   const conversation = await conversationClient.create({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     title: `KI query generation: ${definition.name}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: ConversationAccessControlMode.Private },
+    accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
   const { events$ } = await agentBuilder.execution.executeAgent({
