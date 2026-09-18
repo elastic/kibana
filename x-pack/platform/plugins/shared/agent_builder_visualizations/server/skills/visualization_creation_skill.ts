@@ -129,7 +129,7 @@ Always reference real fields from the index mapping.
 
 ${
   platformCoreTools.createVisualization
-} renders with **Lens** (standard charts) or **Vega** (custom Vega-Lite). Decide and pass \`renderer\`:
+} renders with **Lens** (standard charts), **Vega** (custom Vega-Lite), or **custom content** (HTML layouts). Decide and pass \`renderer\`:
 
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
@@ -140,15 +140,7 @@ ${
 
 ### Custom content
 
-\`chartType\` does not apply. Two things work differently from the chart renderers:
-
-**Data vs static is decided for you.** Describe what to display in \`query\`. The server classifies whether the panel needs live data and generates the ES|QL when it does:
-- The panel shows live data → just describe it in \`query\`. Pass \`esql\` only when you already have a validated query.
-- The panel is genuinely static (a banner, a legend, an explanatory note, a decorative header) → just describe it in \`query\`. Do not try to opt into a static mode; omitting \`esql\` is not how you get an empty panel either — a data-shaped description still gets a query.
-
-The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails the call and returns an error naming the reason. Correct it and retry rather than proceeding.
-
-**You never write the markup.** \`query\` is a plain-English description of what to display; the HTML template is generated server-side from it and stored in the attachment. Never author HTML, and never try to pass a template. To change an existing panel, call the tool again with its \`attachment_id\` and describe the change — a style-only edit refines the existing template and preserves its layout.
+Pass \`renderer: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Omit \`chartType\`. Do not write HTML. To change an existing panel, pass its \`attachment_id\` and describe the update.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -205,21 +197,12 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 }
 \`\`\`
 
-## Create a custom content panel (HTML layout, live data)
+## Create a custom content panel
 
 \`\`\`json
 {
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
-  "renderer": "custom_content"
-}
-\`\`\`
-
-## Create a static custom content panel (no data)
-
-\`\`\`json
-{
-  "query": "A header banner reading 'Production overview' with a short subtitle",
   "renderer": "custom_content"
 }
 \`\`\`

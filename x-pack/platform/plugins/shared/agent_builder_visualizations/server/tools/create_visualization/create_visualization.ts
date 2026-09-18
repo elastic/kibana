@@ -89,7 +89,10 @@ const createVisualizationSchema = z
       .enum(['lens', 'vega', 'custom_content'])
       .optional()
       .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values. Omit this field when updating an existing attachment; edits keep the existing renderer.'
+        `(optional, new visualizations only) Which engine renders the visualization. Omit when updating an existing attachment; edits keep the existing renderer.
+- "lens" (default when omitted): standard charts.
+- "vega": custom Vega-Lite when Lens cannot express the request — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings — or when the user explicitly asks for Vega/Vega-Lite.
+- "custom_content": last resort, only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values.`
       ),
     chartType: z
       .nativeEnum(SupportedChartType)
