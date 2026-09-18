@@ -232,9 +232,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     /**
      * Migration recommendation: MIGRATE TO SCOUT. ES|QL chrome (save vis, edit-on-fly,
-     * no interval selector) plus time-range update. Suggestion type histogramForESQL is
-     * unit-tested; new_search_action.spec.ts only asserts it after New. Keep the 10 / 1
-     * hit counts after the time-range change. Own `spaceTest` — do not chain into customize/save.
+     * no interval selector) plus time-range update. Keep the 10 / 1 hit counts after
+     * the time-range change. Own `spaceTest` — do not chain into customize/save.
      */
     it('should show ESQL histogram for ES|QL query', async () => {
       await discover.selectTextBaseLang();
@@ -766,8 +765,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     /**
      * Migration recommendation: DELETE. Waffle → revert → waffle → Treemap → save is the
-     * same vis-edit/revert/save contract as the Line → Area revert above. Fold one extra
-     * suggestion-picker click into that step if partition vis needs coverage.
+     * same vis-edit/revert/save contract as the Line → Area revert above.
      */
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLVis');
@@ -859,10 +857,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO SCOUT. Distinct from
-     * request_cancellation.spec.ts (user cancel → warnings). This aborts an in-flight
-     * `error_query` stall by changing the time range and asserts histogram + hits recover.
-     * initialize_fetch.test.ts only covers embeddable abort. Keep the recovered 4,756 count.
+     * Migration recommendation: MIGRATE TO SCOUT. Move to
+     * embedded_search_cancellation.spec.ts (expanded in #283781) and add network
+     * assertions. Keep the recovered 4,756 count after the time-range abort.
      */
     it('should be able to recover after an aborted request', async () => {
       const reducedTimeRange = {

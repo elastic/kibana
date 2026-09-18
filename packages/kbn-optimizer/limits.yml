@@ -7,11 +7,12 @@ pageLoadAssetSize:
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 4955
+  agenticInvestigations: 18018
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
   alertingVTwo: 29788
-  alertzero: 13291
+  alertzero: 20079
   apm: 53172
   apmShared: 5852
   apmSourcesAccess: 2747
@@ -143,6 +144,7 @@ pageLoadAssetSize:
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
+  observabilityAlerting: 3500
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
   observabilityShared: 86067

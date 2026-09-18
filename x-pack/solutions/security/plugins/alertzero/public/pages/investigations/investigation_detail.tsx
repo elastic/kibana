@@ -9,11 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -22,13 +18,18 @@ import {
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { Proposal } from '@kbn/alertzero-common';
+import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
+import { PendingProposalsPanel } from '../../components/pending_proposals';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigation, useInvestigationProposals } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
 
-const ProposalRow: React.FC<{ proposal: Proposal; isSelected: boolean }> = ({
+/**
+ * Mock-backed proposal summary. Decisions are made on durable proposals, which
+ * are rendered by `PendingProposalsPanel` above this list.
+ */
+const ProposalRow: React.FC<{ proposal: ProposalWithMetadata; isSelected: boolean }> = ({
   proposal,
   isSelected,
 }) => (
@@ -39,28 +40,10 @@ const ProposalRow: React.FC<{ proposal: Proposal; isSelected: boolean }> = ({
   >
     <EuiText size="s">
       <p>
-        <strong>{proposal.summary}</strong>
+        <strong>{proposal.action?.name ?? proposal.actionWorkflowId}</strong>
       </p>
-      <p>{proposal.recommendation}</p>
+      <p>{proposal.comment}</p>
     </EuiText>
-    <EuiSpacer size="s" />
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton size="s" disabled>
-          {i18n.ACTION_APPROVE}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton size="s" color="text" disabled>
-          {i18n.ACTION_MODIFY}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" disabled>
-          {i18n.ACTION_DISMISS}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   </EuiPanel>
 );
 
@@ -149,7 +132,11 @@ export const InvestigationDetailPage: React.FC = () => {
       content: (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title={i18n.DECISIONS_UNAVAILABLE} iconType="info" />
+          <PendingProposalsPanel
+            conversationId={id}
+            selectedProposalId={proposalId}
+            hideWhenEmpty
+          />
           <EuiSpacer size="m" />
           {proposalsQuery.isLoading ? (
             <EuiLoadingSpinner size="l" aria-label={i18n.LOADING_PROPOSALS} />

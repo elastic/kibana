@@ -1,5 +1,5 @@
 {
-  "sha1": "0640a9904d53c5d516bcc45441a2172a4f43bebe",
+  "sha1": "8492aa87303d5d878cf9be3c6d8fd4d8d794ea6c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
-        "line": 50,
+        "line": 53,
         "column": 33
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
-        "line": 62,
+        "line": 65,
         "column": 15
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
-        "line": 84,
+        "line": 87,
         "column": 26
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_api/api/tests/enrollment_flow.spec.ts",
-        "line": 110,
+        "line": 113,
         "column": 19
       }
     }

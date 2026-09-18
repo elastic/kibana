@@ -27,11 +27,12 @@ triggers:
           type: number
           default: 2
           description: Rule executions the preview simulates.
-      required:
-        - technique
+      required: []
       additionalProperties: false
 outputs:
   - name: created
+    type: boolean
+  - name: reviewed
     type: boolean
   - name: rule_name
     type: string
@@ -194,4 +195,5 @@ steps:
     status: completed
     with:
       created: "${{ steps.create_rule.error == null and steps.create_rule.output.id != null }}"
+      reviewed: "${{ steps.review_creation.output.response.approved == true or steps.review_creation.output.response.approved == false }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"

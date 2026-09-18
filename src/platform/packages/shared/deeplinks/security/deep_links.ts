@@ -92,6 +92,7 @@ export enum SecurityPageName {
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   trustedDevices = 'trusted_devices',
+  customYaraSignatures = 'custom_yara_signatures',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
@@ -148,7 +149,7 @@ export enum SecurityPageName {
   alertZeroWatchesSkills = 'watches_skills',
   alertZeroWatchFloor = 'watch_floor',
   alertZeroWatchOfficer = 'watch_officer',
-  alertZeroWatchDark = 'watch_dark',
+  alertZeroWatchHunt = 'watch_hunt',
   alertZeroWatchDeep = 'watch_deep',
   alertZeroWatchDetection = 'watch_detection',
 }

@@ -13,19 +13,27 @@ import {
 describe('matchActionPoliciesForRuleBodySchema', () => {
   it('accepts a valid rule payload', () => {
     const result = matchActionPoliciesForRuleBodySchema.parse({
-      rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+      rule: { tags: ['cpu'] },
     });
 
     expect(result).toEqual({
-      rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+      rule: { tags: ['cpu'] },
     });
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       matchActionPoliciesForRuleBodySchema.parse({
-        rule: { id: 'rule-1' },
+        rule: { tags: ['cpu'] },
         unknownField: 'x',
+      })
+    ).toThrow();
+  });
+
+  it('rejects rule id and name (strict, no longer supported)', () => {
+    expect(() =>
+      matchActionPoliciesForRuleBodySchema.parse({
+        rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
       })
     ).toThrow();
   });
@@ -33,26 +41,37 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
   it('rejects unknown keys inside rule (strict)', () => {
     expect(() =>
       matchActionPoliciesForRuleBodySchema.parse({
-        rule: { id: 'rule-1', unknownField: 'x' },
+        rule: { unknownField: 'x' },
       })
     ).toThrow();
   });
 });
 
 describe('matchActionPoliciesForRuleResponseSchema', () => {
-  it('accepts a response with an empty item list and a total', () => {
-    const result = matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: 0 });
+  const emptyResponse = { items: [], total: 0, evaluated_count: 0, is_truncated: false };
 
-    expect(result).toEqual({ items: [], total: 0 });
+  it.each([
+    emptyResponse,
+    { items: [], total: 3, evaluated_count: 3, is_truncated: false },
+    { items: [], total: 250, evaluated_count: 100, is_truncated: true },
+  ])('accepts a response with an empty list and evaluation metadata: %j', (response) => {
+    expect(matchActionPoliciesForRuleResponseSchema.parse(response)).toEqual(response);
   });
 
-  it('rejects a response missing total', () => {
-    expect(() => matchActionPoliciesForRuleResponseSchema.parse({ items: [] })).toThrow();
-  });
-
-  it('rejects a negative total', () => {
+  it.each(['total', 'evaluated_count', 'is_truncated'])('requires %s', (field) => {
     expect(() =>
-      matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: -1 })
+      matchActionPoliciesForRuleResponseSchema.parse({ ...emptyResponse, [field]: undefined })
+    ).toThrow();
+  });
+
+  it.each([
+    { total: -1 },
+    { evaluated_count: -1 },
+    { evaluated_count: 1.5 },
+    { is_truncated: 'true' },
+  ])('rejects invalid evaluation metadata: %j', (invalidFields) => {
+    expect(() =>
+      matchActionPoliciesForRuleResponseSchema.parse({ ...emptyResponse, ...invalidFields })
     ).toThrow();
   });
 });

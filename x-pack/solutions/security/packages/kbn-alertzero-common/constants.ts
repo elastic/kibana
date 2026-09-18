@@ -6,7 +6,6 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { RecommendedAction } from './impl/schemas';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
@@ -41,6 +40,15 @@ export const ALERTZERO_INVESTIGATION_URL_TEMPLATE = `${ALERTZERO_INVESTIGATIONS_
 export const buildInvestigationUrl = (id: string) =>
   `${ALERTZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 
+/** Proposals grouped by category — AlertZero landing page. */
+export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
+
+/** Action catalog — category-scoped discovery of installed action workflows. */
+export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+
+/** Agent Builder builtin tool wrapping the action catalog API. */
+export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
+
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
  * Can expand this to multiple scoped thin agents in the future if needed.
@@ -51,14 +59,14 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
-export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
+export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
 export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
 ] as const;
@@ -99,9 +107,9 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     color: '#3b82f6',
   },
   {
-    id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDark,
-    name: 'Dark Watch',
+    id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchHunt,
+    name: 'Hunt Watch',
     color: '#f59e0b',
     isBeta: true,
   },
@@ -126,25 +134,25 @@ export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATA
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
-export const WATCH_DARK_TAG = 'watch-dark' as const;
+export const WATCH_HUNT_TAG = 'watch-hunt' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
-  WATCH_DARK_TAG,
+  WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
 ] as const;
 
-/** Managed Worker workflow ids — tagged Watch members. Dark CTH is the externally settled id. */
+/** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
-export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
-  'system-security-dark-continuous-threat-hunt' as const;
+export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
+  'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
@@ -153,7 +161,7 @@ export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
 ] as const;
@@ -176,10 +184,10 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_FLOOR_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+    id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     name: 'Continuous Threat Hunt',
-    watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watchTag: WATCH_DARK_TAG,
+    watchId: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watchTag: WATCH_HUNT_TAG,
   },
   {
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -216,13 +224,3 @@ export const API_VERSIONS = {
 } as const;
 
 export const INTERNAL_API_ACCESS = 'internal' as const;
-
-export const CONVERSATION_CATEGORY_COLORS: Record<
-  RecommendedAction,
-  'danger' | 'warning' | 'accentSecondary' | 'accent'
-> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'accentSecondary',
-  tune: 'accent',
-};

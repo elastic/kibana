@@ -14,13 +14,18 @@
       "taskManager"
     ],
     "optionalPlugins": [
+      "actions",
       "agentBuilder",
+      "contextEngine",
+      "inference",
       "ruleRegistry",
+      "sandbox",
       "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
       "workflowsManagement",
     ],
     "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   },
 }

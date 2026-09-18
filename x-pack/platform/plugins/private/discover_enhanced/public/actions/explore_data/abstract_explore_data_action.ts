@@ -57,7 +57,7 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
 };
 
 export abstract class AbstractExploreDataAction {
-  public readonly getIconType = (): string => 'discoverApp';
+  public readonly getIconType = (): string => 'productDiscover';
 
   public readonly getDisplayName = (): string =>
     i18n.translate('xpack.discover.FlyoutCreateDrilldownAction.displayName', {
