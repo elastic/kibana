@@ -58,6 +58,8 @@ export const validateCustomYaraRule = async (
     validateMetaOsField(rule, textLines, result, osTypes);
   }
 
+  validateMetaFieldsConsistencyAcrossRules(result.rules, textLines, result);
+
   return result;
 };
 
@@ -260,3 +262,51 @@ const shortenMetaValue = (value: string): string =>
   value.length > MAXIMUM_META_VALUE_LENGTH
     ? `${value.slice(0, MAXIMUM_META_VALUE_LENGTH)}...`
     : value;
+
+/**
+ * Within one artifact entry, each meta field of interest must be either omitted on every rule
+ * or set to the same values on every rule. Checked independently per field.
+ */
+const validateMetaFieldsConsistencyAcrossRules = (
+  rules: YaraCompiledRule[],
+  textLines: string[],
+  result: YaraValidateResult
+) => {
+  if (rules.length < 2) {
+    return;
+  }
+
+  const [referenceRule, ...restOfRules] = rules;
+
+  for (const metaKey of Object.values(YaraMetaKeyOfInterest)) {
+    const referenceValue = unifyMetaFieldValues(referenceRule.meta[metaKey]);
+
+    for (const rule of restOfRules) {
+      const value = unifyMetaFieldValues(rule.meta[metaKey]);
+      if (value !== referenceValue) {
+        const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
+        const lineNumber =
+          value !== undefined
+            ? findFirstOccurrenceLineNumberAfterLineNumber(textLines, metaKey, lineNumberOfRule)
+            : lineNumberOfRule;
+
+        result.errorCount++;
+        result.errors.push({
+          message: `Inconsistent "meta.${metaKey}" across rules in this entry. All rules must omit "meta.${metaKey}" or use the same value; found ${describeMetaValue(
+            referenceValue
+          )} on rule "${referenceRule.identifier}" and ${describeMetaValue(value)} on rule "${
+            rule.identifier
+          }"`,
+          line: lineNumber,
+          severity: 'error',
+        });
+      }
+    }
+  }
+};
+
+const describeMetaValue = (value: string | undefined): string =>
+  value === undefined ? 'omitted' : `"${shortenMetaValue(value)}"`;
+
+const unifyMetaFieldValues = (values?: string): string | undefined =>
+  values?.split(/, ?/).sort().join(', ') ?? undefined;
