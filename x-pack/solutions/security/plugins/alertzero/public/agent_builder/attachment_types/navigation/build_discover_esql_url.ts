@@ -6,18 +6,30 @@
  */
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DISCOVER_LOOKUP_TIME_RANGE } from './constants';
+
+export interface DiscoverLookupTimeRange {
+  from: string;
+  to: string;
+}
 
 export const buildDiscoverEsqlUrl = ({
   share,
   esql,
+  timeRange = DISCOVER_LOOKUP_TIME_RANGE,
 }: {
   share?: SharePluginStart;
   esql: string;
+  /** Defaults to a wide window so historic reports / events are not filtered out. */
+  timeRange?: DiscoverLookupTimeRange;
 }): string | undefined => {
   if (!share || !esql) {
     return undefined;
   }
 
   const locator = share.url.locators.get('DISCOVER_APP_LOCATOR');
-  return locator?.getRedirectUrl({ query: { esql } });
+  return locator?.getRedirectUrl({
+    query: { esql },
+    timeRange,
+  });
 };

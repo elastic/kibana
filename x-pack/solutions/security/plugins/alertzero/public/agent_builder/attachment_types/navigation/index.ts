@@ -8,11 +8,13 @@
 export {
   DEFAULT_ALERTS_INDEX,
   DEFAULT_LOGS_INDEX_PATTERN,
+  DISCOVER_LOOKUP_TIME_RANGE,
   SECURITY_ALERT_DETAILS_REDIRECT_PATH,
   THREAT_REPORTS_INDEX_PATTERN,
 } from './constants';
 export { buildAlertDetailsPath, buildAlertDetailsUrl } from './build_alert_details_url';
 export { buildDiscoverEsqlUrl } from './build_discover_esql_url';
+export type { DiscoverLookupTimeRange } from './build_discover_esql_url';
 export { DiscoverLink } from './discover_link';
 export type { DiscoverLinkProps } from './discover_link';
 export {
