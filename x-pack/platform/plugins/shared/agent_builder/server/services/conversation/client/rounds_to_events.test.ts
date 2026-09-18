@@ -16,12 +16,12 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   EventActorType,
+  parseExecutionId,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import {
   executionStartedEvent,
   nextResumeIndex,
-  parseExecutionId,
   resumeExecutionId,
   resumeExecutionStartedEvent,
   isRoundDerivedEventId,

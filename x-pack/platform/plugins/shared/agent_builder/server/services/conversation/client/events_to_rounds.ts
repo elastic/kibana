@@ -19,12 +19,12 @@ import type {
 import {
   ConversationRoundStatus,
   EventActorType,
+  parseExecutionId,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
 import { isAskUserQuestionPromptResponse } from '@kbn/agent-builder-common/agents/prompts';
-import { parseExecutionId } from './rounds_to_events';
 import { applyResumeResolution } from './merge_rounds';
 
 /** A single execution reconstructed into a partial round, awaiting the fold. */

@@ -388,6 +388,8 @@ export {
   type TimelineEventInput,
   type ActiveExecution,
   CONVERSATION_EVENT_ID_DELIMITER,
+  parseExecutionId,
+  turnIdFromExecutionId,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,

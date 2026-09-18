@@ -18,7 +18,11 @@ import type {
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { TimelineEventType, isAskUserQuestionStep } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  isAskUserQuestionStep,
+  turnIdFromExecutionId,
+} from '@kbn/agent-builder-common';
 import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
 
 export type AgentTurnStatus = 'running' | 'awaiting_prompt' | 'completed' | 'failed' | 'aborted';
@@ -26,6 +30,10 @@ export type AgentTurnStatus = 'running' | 'awaiting_prompt' | 'completed' | 'fai
 export interface AgentTurnItem {
   kind: 'agentTurn';
   key: string;
+  /** The turn this item renders. One turn spans every execution of a HITL pause/resume. */
+  turnId?: string;
+  /** The executions folded into this turn, used to detect an already-persisted live draft. */
+  executionIds?: string[];
   executionId?: string;
   triggerEventId?: string;
   status: AgentTurnStatus;
@@ -46,19 +54,22 @@ export type TimelineItem =
   | { kind: 'userMessage'; key: string; event: UserMessageEvent; isPending?: boolean }
   | AgentTurnItem;
 
-const responseResolvesTerminal = (
-  response: PromptResponseEvent | undefined,
-  terminal: { id: string } | undefined
-): response is PromptResponseEvent =>
-  !!response && !!terminal && response.data.prompt_requested_event_id === terminal.id;
-
-interface ExecutionAccumulator {
-  executionId: string;
+interface TurnAccumulator {
+  turnId: string;
   startedAt: string;
   triggerEventId?: string;
+  /** Every execution folded into this turn, in order. */
+  executionIds: string[];
   steps: ConversationRoundStep[];
   terminal?: ExecutionTerminatedEvent | ExecutionFailedEvent | ExecutionAbortedEvent;
   attachmentRefs?: AttachmentVersionRef[];
+  /** Answers from every `prompt_response` in this turn, keyed by prompt id. */
+  answers: Record<string, PromptResponse>;
+  /**
+   * Terminal event ids a `prompt_response` has answered. A turn can re-ask the same prompt, so
+   * only the answered terminal tells us a pause is resolved — a prompt id cannot.
+   */
+  answeredTerminalIds: Set<string>;
 }
 
 // Keeps the highest version seen per attachment, so a later turn resolves an attachment the way
@@ -76,7 +87,7 @@ const foldAttachmentRefs = (
 };
 
 const resolveStatus = (
-  terminal: ExecutionAccumulator['terminal'],
+  terminal: TurnAccumulator['terminal'],
   isAnswered: boolean
 ): AgentTurnStatus => {
   if (!terminal) return 'running';
@@ -109,24 +120,23 @@ type ExecutionContent = Pick<
   'status' | 'steps' | 'terminal' | 'response' | 'pendingPrompts'
 >;
 
-const toExecutionContent = (
+const toTurnContent = (
   steps: ConversationRoundStep[],
-  terminal: ExecutionAccumulator['terminal'],
-  promptResponse?: PromptResponseEvent
+  terminal: TurnAccumulator['terminal'],
+  answers: Record<string, PromptResponse> = {},
+  answeredTerminalIds: ReadonlySet<string> = new Set()
 ): ExecutionContent => {
-  const answers = responseResolvesTerminal(promptResponse, terminal)
-    ? promptResponse.data.responses
-    : undefined;
+  const isAnswered = !!terminal && answeredTerminalIds.has(terminal.id);
   const content: ExecutionContent = {
-    status: resolveStatus(terminal, answers !== undefined),
-    steps: answers ? backfillAskUserQuestionAnswers(steps, answers) : steps,
+    status: resolveStatus(terminal, isAnswered),
+    steps: backfillAskUserQuestionAnswers(steps, answers),
   };
   if (terminal) content.terminal = terminal;
   if (terminal?.type === TimelineEventType.executionTerminated) {
     const { outcome } = terminal.data;
     if (outcome.type === 'responded') {
       content.response = outcome.response;
-    } else if (!answers && outcome.prompts.length) {
+    } else if (!isAnswered && outcome.prompts.length) {
       content.pendingPrompts = outcome.prompts;
     }
   }
@@ -134,25 +144,22 @@ const toExecutionContent = (
 };
 
 const accumulatorToItem = (
-  acc: ExecutionAccumulator,
-  eventsById: Map<string, TimelineEvent>,
-  responsesByRequestId: Map<string, PromptResponseEvent>
+  acc: TurnAccumulator,
+  eventsById: Map<string, TimelineEvent>
 ): AgentTurnItem => {
-  const { executionId, startedAt, triggerEventId, steps, terminal, attachmentRefs } = acc;
+  const { turnId, startedAt, triggerEventId, steps, terminal, attachmentRefs, answers } = acc;
+  const { answeredTerminalIds } = acc;
   const trigger = triggerEventId ? eventsById.get(triggerEventId) : undefined;
   const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
   const triggerAttachmentRefs =
     trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
   const item: AgentTurnItem = {
     kind: 'agentTurn',
-    key: executionId,
-    executionId,
+    key: turnId,
+    turnId,
+    executionIds: acc.executionIds,
     startedAt,
-    ...toExecutionContent(
-      steps,
-      terminal,
-      terminal ? responsesByRequestId.get(terminal.id) : undefined
-    ),
+    ...toTurnContent(steps, terminal, answers, answeredTerminalIds),
   };
   if (triggerEventId) item.triggerEventId = triggerEventId;
   if (origin) item.origin = origin;
@@ -163,12 +170,14 @@ const accumulatorToItem = (
 
 export const ACTIVE_EXECUTION_ITEM_KEY = 'active';
 
-// Keyed by the persisted execution id as soon as it is known, so the saved item that replaces
-// this one after the refetch keeps the same React identity.
+// Keyed by the turn id as soon as it is known, so the saved item that replaces this one after
+// the refetch keeps the same React identity.
 export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnItem => {
-  const key = draft.executionId ?? ACTIVE_EXECUTION_ITEM_KEY;
+  const turnId = draft.executionId ? turnIdFromExecutionId(draft.executionId) : undefined;
+  const key = turnId ?? ACTIVE_EXECUTION_ITEM_KEY;
   const startedAt = draft.startedAt ?? new Date().toISOString();
-  const identity: Pick<AgentTurnItem, 'executionId' | 'triggerEventId'> = {};
+  const identity: Pick<AgentTurnItem, 'turnId' | 'executionId' | 'triggerEventId'> = {};
+  if (turnId) identity.turnId = turnId;
   if (draft.executionId) identity.executionId = draft.executionId;
   if (draft.triggerEventId) identity.triggerEventId = draft.triggerEventId;
 
@@ -178,7 +187,14 @@ export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnIte
       key,
       ...identity,
       startedAt,
-      ...toExecutionContent(draft.steps, draft.terminalEvent, draft.promptResponse),
+      ...toTurnContent(
+        draft.steps,
+        draft.terminalEvent,
+        draft.promptResponse?.data.responses,
+        draft.promptResponse
+          ? new Set([draft.promptResponse.data.prompt_requested_event_id])
+          : undefined
+      ),
     };
   }
 
@@ -203,35 +219,56 @@ export const groupTimelineEvents = (
   eventsById: Map<string, TimelineEvent>,
   localPromptResponse?: PromptResponseEvent
 ): TimelineItem[] => {
-  const ordered: Array<UserEntry | ExecutionAccumulator> = [];
-  const accMap = new Map<string, ExecutionAccumulator>();
-  const responsesByRequestId = new Map<string, PromptResponseEvent>();
-  if (localPromptResponse) {
-    responsesByRequestId.set(
-      localPromptResponse.data.prompt_requested_event_id,
-      localPromptResponse
-    );
-  }
+  const ordered: Array<UserEntry | TurnAccumulator> = [];
+  const accMap = new Map<string, TurnAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
 
   const getOrCreateAcc = (
-    executionId: string,
+    turnId: string,
     createdAt: string,
     triggerEventId?: string
-  ): ExecutionAccumulator => {
-    let acc = accMap.get(executionId);
+  ): TurnAccumulator => {
+    let acc = accMap.get(turnId);
     if (!acc) {
       acc = {
-        executionId,
+        turnId,
         startedAt: createdAt,
         triggerEventId,
+        executionIds: [],
         steps: [],
+        answers: {},
+        answeredTerminalIds: new Set(),
         attachmentRefs: Array.from(seenAttachmentRefs.values()),
       };
-      accMap.set(executionId, acc);
+      accMap.set(turnId, acc);
       ordered.push(acc);
     }
     return acc;
+  };
+
+  /**
+   * The turn accumulator a lifecycle event belongs to, creating it on first sight. A HITL pause
+   * and its resume are separate executions of one turn, so both resolve to the same accumulator.
+   */
+  const accFor = (event: TimelineEvent & { execution_id: string }): TurnAccumulator => {
+    const { execution_id: executionId } = event;
+    const acc = getOrCreateAcc(
+      turnIdFromExecutionId(executionId),
+      event.created_at,
+      event.trigger_event_id
+    );
+    if (!acc.executionIds.includes(executionId)) {
+      acc.executionIds.push(executionId);
+    }
+    return acc;
+  };
+
+  /** The turn a prompt answers. A `prompt_response` has no execution of its own. */
+  const answeredAcc = (response: PromptResponseEvent): TurnAccumulator | undefined => {
+    const paused = eventsById.get(response.data.prompt_requested_event_id);
+    return paused?.execution_id
+      ? accMap.get(turnIdFromExecutionId(paused.execution_id))
+      : undefined;
   };
 
   for (const event of events) {
@@ -241,43 +278,51 @@ export const groupTimelineEvents = (
         ordered.push({ kind: 'userMessage', key: event.id, event });
         break;
 
-      case TimelineEventType.promptResponse:
+      case TimelineEventType.promptResponse: {
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
-        responsesByRequestId.set(event.data.prompt_requested_event_id, event);
+        const answered = answeredAcc(event);
+        if (answered) {
+          Object.assign(answered.answers, event.data.responses);
+          answered.answeredTerminalIds.add(event.data.prompt_requested_event_id);
+        }
         break;
+      }
 
       case TimelineEventType.executionStarted:
         if (!event.execution_id) break;
-        getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
+        accFor({ ...event, execution_id: event.execution_id });
         break;
 
-      case TimelineEventType.executionStep: {
+      case TimelineEventType.executionStep:
         if (!event.execution_id) break;
-        const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.steps.push(event.data.step);
+        accFor({ ...event, execution_id: event.execution_id }).steps.push(event.data.step);
         break;
-      }
 
       case TimelineEventType.executionTerminated:
       case TimelineEventType.executionFailed:
-      case TimelineEventType.executionAborted: {
+      case TimelineEventType.executionAborted:
         if (!event.execution_id) break;
-        const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.terminal = event;
+        // The turn's last terminal wins, so a resolved pause is replaced by the real outcome.
+        accFor({ ...event, execution_id: event.execution_id }).terminal = event;
         break;
-      }
 
       default:
         break;
     }
   }
 
-  return ordered.map((entry): TimelineItem => {
-    if ('executionId' in entry) {
-      return accumulatorToItem(entry, eventsById, responsesByRequestId);
+  // The answer being sent is not on the server timeline yet; it belongs to the paused turn.
+  if (localPromptResponse) {
+    const acc = answeredAcc(localPromptResponse);
+    if (acc) {
+      Object.assign(acc.answers, localPromptResponse.data.responses);
+      acc.answeredTerminalIds.add(localPromptResponse.data.prompt_requested_event_id);
     }
-    return entry;
-  });
+  }
+
+  return ordered.map(
+    (entry): TimelineItem => ('turnId' in entry ? accumulatorToItem(entry, eventsById) : entry)
+  );
 };
 
 export const isCompletedTurn = (
@@ -358,18 +403,40 @@ export const findSavedReplacement = (
   return {
     turn:
       executionId !== undefined &&
-      savedItems.some((item) => item.kind === 'agentTurn' && item.executionId === executionId),
+      savedItems.some(
+        (item) => item.kind === 'agentTurn' && !!item.executionIds?.includes(executionId)
+      ),
     userMessage:
       triggerEventId !== undefined &&
       savedItems.some((item) => item.kind === 'userMessage' && item.key === triggerEventId),
   };
 };
 
-const appendDraftItem = (items: TimelineItem[], draftItem: AgentTurnItem): void => {
-  const alreadyPersisted = findSavedReplacement(items, draftItem).turn;
-  if (!alreadyPersisted) {
+/** The live execution continues the turn already on screen, so it extends that item. */
+const foldDraftIntoTurn = (saved: AgentTurnItem, draft: AgentTurnItem): AgentTurnItem => ({
+  ...saved,
+  status: draft.status,
+  steps: [...saved.steps, ...draft.steps],
+  response: draft.response ?? saved.response,
+  terminal: draft.terminal ?? saved.terminal,
+  pendingPrompts: draft.pendingPrompts,
+});
+
+const applyDraftItem = (items: TimelineItem[], draftItem: AgentTurnItem): void => {
+  const { turnId, executionId } = draftItem;
+  const index = turnId
+    ? items.findIndex((item) => item.kind === 'agentTurn' && item.turnId === turnId)
+    : -1;
+  if (index === -1) {
     items.push(draftItem);
+    return;
   }
+  const saved = items[index] as AgentTurnItem;
+  // The refetch already folded this execution into the saved turn; the saved copy wins.
+  if (executionId && saved.executionIds?.includes(executionId)) {
+    return;
+  }
+  items[index] = foldDraftIntoTurn(saved, draftItem);
 };
 
 export const assembleTimelineItems = (
@@ -381,7 +448,7 @@ export const assembleTimelineItems = (
   const { userMessage: userMessagePersisted } = findSavedReplacement(savedItems, liveTurn);
   for (const item of liveItems) {
     if (item.kind === 'agentTurn') {
-      appendDraftItem(items, item);
+      applyDraftItem(items, item);
     } else if (!(item.isPending && userMessagePersisted)) {
       items.push(item);
     }

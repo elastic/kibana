@@ -347,6 +347,25 @@ export interface ActiveExecution {
 export const CONVERSATION_EVENT_ID_DELIMITER = '::' as const;
 
 /**
+ * Splits an execution id built by the round scheme (`<turnId>::execution[::<index>]`).
+ * Returns `undefined` for an id outside that scheme.
+ */
+export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
+  const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
+  if (!match) {
+    return undefined;
+  }
+  return { roundId: match[1], index: Number(match[2] ?? 0) };
+};
+
+/**
+ * The turn an execution belongs to. A HITL pause and its resume run as separate executions
+ * (`::execution`, `::execution::1`) of one turn, so both resolve to the same turn id.
+ */
+export const turnIdFromExecutionId = (executionId: string): string =>
+  parseExecutionId(executionId)?.roundId ?? executionId;
+
+/**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.
  */

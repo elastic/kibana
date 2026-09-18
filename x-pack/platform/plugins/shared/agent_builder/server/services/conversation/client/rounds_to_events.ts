@@ -18,6 +18,7 @@ import type {
 import {
   ConversationRoundStatus,
   EventActorType,
+  parseExecutionId,
   TimelineEventType,
   TimelineTriggerType,
 } from '@kbn/agent-builder-common';
@@ -226,15 +227,6 @@ export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventA
 /** Builds an execution id for a resume appended to a round without rewriting its initial run. */
 export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
-
-/** Parses initial and resume execution ids, returning undefined for unrelated ids. */
-export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
-  const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
-  if (!match) {
-    return undefined;
-  }
-  return { roundId: match[1], index: Number(match[2] ?? 0) };
-};
 
 /** The `execution_started` event id for an execution index (0 = the initial run). */
 export const executionStartedEventId = (roundId: string, executionIndex: number): string =>
