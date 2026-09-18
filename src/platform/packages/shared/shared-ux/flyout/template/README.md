@@ -101,7 +101,7 @@ Behavior:
 | `data-test-subj` | `string` | Forwarded to the trigger; the popover panel gets `${value}Panel`. |
 | everything else on `EuiButton` | — | Forwarded to the trigger, e.g. `isLoading`, `isDisabled`, `color`, `size`, `className`, `css`, and any `data-*` attribute. |
 
-The template sets `children`, `fill`, `iconType`, `iconSide`, and the click handler on the trigger itself, so those are rejected at the type level rather than silently ignored. `isSelected` is rejected too: it applies `aria-pressed`, which describes a toggle button, whereas a popover trigger is described by the `aria-expanded` EUI already sets.
+The template sets `children`, `fill`, `iconType`, `iconSide`, `element`, `aria-haspopup`, and the click handler on the trigger itself, so those are rejected at the type level rather than silently ignored. `isSelected` is rejected too: it applies `aria-pressed`, which describes a toggle button, whereas a popover trigger is described by the `aria-expanded` EUI already sets. `type` is rejected and pinned to `"button"`, so a trigger placed inside a `<form>` opens the menu without submitting it.
 
 ## Behavior
 

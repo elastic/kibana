@@ -195,7 +195,8 @@ type MenuTriggerOwnedProps =
   | 'element'
   | 'onClick'
   | 'isSelected'
-  | 'aria-haspopup';
+  | 'aria-haspopup'
+  | 'type';
 
 /**
  * Props for the <FlyoutTemplate.Footer.PrimaryActionMenu> component.

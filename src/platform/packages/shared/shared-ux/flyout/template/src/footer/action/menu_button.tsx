@@ -130,6 +130,7 @@ export const PrimaryActionMenuButton = ({
       button={
         <EuiButton
           {...triggerProps}
+          type="button"
           element="button"
           isSelected={undefined}
           fill

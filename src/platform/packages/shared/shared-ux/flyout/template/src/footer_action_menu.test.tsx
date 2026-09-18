@@ -344,6 +344,33 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
     );
   });
 
+  it('the trigger is always type="button" even inside a form', async () => {
+    // A type="submit" override would submit the enclosing form when clicked.
+    // The template rejects the prop at the type level and hard-codes type="button" after the spread.
+    const onSubmit = jest.fn((e: React.FormEvent) => e.preventDefault());
+    render(
+      <form onSubmit={onSubmit}>
+        <FlyoutTemplate onClose={noop} session="never">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.PrimaryActionMenu
+              label="Take action"
+              panels={SIMPLE_PANELS}
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      </form>
+    );
+
+    const trigger = screen.getByRole('button', { name: /take action/i });
+    expect(trigger).toHaveAttribute('type', 'button');
+
+    await user.click(trigger);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it('the popover panel gets a derived data-test-subj', async () => {
     renderMenu();
 
