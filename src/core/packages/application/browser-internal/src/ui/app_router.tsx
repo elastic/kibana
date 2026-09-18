@@ -62,12 +62,17 @@ export const AppRouter: FunctionComponent<Props> = ({
 
   const showPlainSpinner = useObservable(hasCustomBranding$ ?? EMPTY, false);
 
+  const sortedMounters = useMemo(
+    () => [...mounters].sort(([, a], [, b]) => b.appRoute.length - a.appRoute.length),
+    [mounters]
+  );
+
   return (
     <KibanaErrorBoundaryProvider analytics={analytics}>
       <KibanaErrorBoundary>
         <Router history={history}>
           <Routes>
-            {[...mounters].map(([appId, mounter]) => (
+            {sortedMounters.map(([appId, mounter]) => (
               <Route
                 key={mounter.appRoute}
                 path={mounter.appRoute}

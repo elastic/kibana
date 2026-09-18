@@ -46,6 +46,10 @@ import {
   STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { EpisodeFooterActionMenu } from '@kbn/alerting-v2-episodes-ui/components/details/footer_action_menu';
+import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { mapClassicAlertToEpisode } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
+import type { ClassicAlertSource } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
 import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
 import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
@@ -69,6 +73,8 @@ export interface ClassicAlertDetailsFlyoutProps {
   alertId: string;
   onClose: () => void;
   services: { http: HttpStart };
+  actions?: EpisodeAction[];
+  onSuccess?: () => void;
 }
 
 /**
@@ -132,6 +138,8 @@ export const ClassicAlertDetailsFlyout = ({
   alertId,
   onClose,
   services,
+  actions,
+  onSuccess,
 }: ClassicAlertDetailsFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'classicAlertDetailsFlyout' });
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
@@ -151,6 +159,22 @@ export const ClassicAlertDetailsFlyout = ({
       }),
     enabled: Boolean(alertId),
   });
+
+  const episode = useMemo(
+    () =>
+      alert
+        ? mapClassicAlertToEpisode(
+            alert as unknown as ClassicAlertSource,
+            typeof alert._index === 'string' ? alert._index : ''
+          )
+        : undefined,
+    [alert]
+  );
+  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  const compatibleActions = useMemo(
+    () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
+    [actions, episodes]
+  );
 
   const title = useMemo(() => {
     const fetchedName = alert ? asDisplayValue(alert[ALERT_RULE_NAME]) : undefined;
@@ -360,7 +384,16 @@ export const ClassicAlertDetailsFlyout = ({
                 {i18n.CLASSIC_ALERT_DETAILS_CLOSE}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {alertDetailsHref ? (
+            {actions && (compatibleActions.length > 0 || alertDetailsHref) ? (
+              <EuiFlexItem grow={false}>
+                <EpisodeFooterActionMenu
+                  actions={compatibleActions}
+                  episodes={episodes}
+                  viewDetailsHref={alertDetailsHref}
+                  onSuccess={onSuccess}
+                />
+              </EuiFlexItem>
+            ) : alertDetailsHref ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill

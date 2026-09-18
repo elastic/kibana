@@ -374,4 +374,26 @@ describe('AppRouter', () => {
 
     expect(dom?.queryByTestId('appNotFoundPageContent')).toBeDefined();
   });
+
+  it('prioritizes nested app routes over parent app routes', async () => {
+    const parentApp = createAppMounter({
+      appId: 'parentApp',
+      appRoute: '/app/parent',
+      html: '<div>Parent App</div>',
+    });
+    const nestedApp = createAppMounter({
+      appId: 'nestedApp',
+      appRoute: '/app/parent/nested',
+      html: '<div>Nested App</div>',
+    });
+
+    mounters.set('parentApp', parentApp[1]);
+    mounters.set('nestedApp', nestedApp[1]);
+    update = createMountersRenderer();
+
+    await navigate('/app/parent/nested');
+
+    expect(nestedApp[1].mounter.mount).toHaveBeenCalledTimes(1);
+    expect(parentApp[1].mounter.mount).not.toHaveBeenCalled();
+  });
 });
