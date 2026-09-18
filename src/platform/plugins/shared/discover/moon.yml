@@ -172,6 +172,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-session-constants'
+  - '@kbn/field-types'
 tags:
   - plugin
   - prod
