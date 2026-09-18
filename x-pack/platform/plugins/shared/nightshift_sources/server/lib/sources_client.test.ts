@@ -283,7 +283,7 @@ describe('SourcesClient', () => {
         .mockResolvedValueOnce({
           ...emptyCatalogFind,
           total: 1,
-          saved_objects: [makeSavedObject()],
+          saved_objects: [{ ...makeSavedObject(), score: 0 }],
         })
         .mockResolvedValueOnce(emptyCatalogFind);
 
