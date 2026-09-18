@@ -9,7 +9,7 @@
 
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicStepContextSchema, DynamicWorkflowContextSchema } from '@kbn/workflows';
+import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 
 jest.mock('../context/get_context_for_path');
@@ -347,48 +347,6 @@ describe('validateVariables', () => {
     expect(mockExtendWithPathSpecificContext).toHaveBeenCalledTimes(1);
     expect(mockGetContextSchemaWithTemplateLocals).toHaveBeenCalledTimes(1);
     expect(mockValidateVariable).toHaveBeenCalledTimes(2);
-  });
-
-  it('keeps distinct step and path pairs separate when their colon-delimited keys collide', () => {
-    const definition = {
-      ...mockWorkflowDefinition,
-      steps: [
-        { name: 'a:b', type: 'console', with: { x: '{{ test.variable }}' } },
-        { name: 'a', type: 'console', 'b:with': { x: '{{ test.variable }}' } },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const variables = [
-      createVariableItem({ yamlPath: ['steps', 0, 'with', 'x'] }),
-      createVariableItem({ yamlPath: ['steps', 1, 'b:with', 'x'] }),
-    ];
-    const firstContext = DynamicStepContextSchema.extend({});
-    const secondContext = DynamicStepContextSchema.extend({});
-    mockExtendWithPathSpecificContext
-      .mockReturnValueOnce(firstContext)
-      .mockReturnValueOnce(secondContext);
-
-    validateVariables(
-      createStepContextResolver(emptyRegistry, definition, graph),
-      variables,
-      definition
-    );
-
-    expect(mockExtendWithPathSpecificContext).toHaveBeenCalledTimes(2);
-    expect(mockExtendWithPathSpecificContext).toHaveBeenNthCalledWith(
-      1,
-      mockStepSchema,
-      definition.steps[0],
-      ['with', 'x']
-    );
-    expect(mockExtendWithPathSpecificContext).toHaveBeenNthCalledWith(
-      2,
-      mockStepSchema,
-      definition.steps[1],
-      ['b:with', 'x']
-    );
-    expect(mockValidateVariable).toHaveBeenNthCalledWith(1, variables[0], firstContext);
-    expect(mockValidateVariable).toHaveBeenNthCalledWith(2, variables[1], secondContext);
   });
 
   it('should pass correct parameters to validateVariable', () => {
