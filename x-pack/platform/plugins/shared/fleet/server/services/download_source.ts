@@ -15,6 +15,7 @@ import {
   DEFAULT_DOWNLOAD_SOURCE_URI,
   DEFAULT_DOWNLOAD_SOURCE_NAME,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from '../constants';
 
 import type {
@@ -141,6 +142,11 @@ class DownloadSourceService {
     logger.debug(`Creating new download source`);
 
     validateFleetSavedObjectId(options?.id);
+    if (options?.id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE) {
+      throw new DownloadSourceError(
+        `'${DEFAULT_DOWNLOAD_SOURCE_REFERENCE}' is a reserved download source ID and cannot be used.`
+      );
+    }
 
     const data: DownloadSourceSOAttributes = {
       ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
