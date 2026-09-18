@@ -9,8 +9,27 @@
 
 import React from 'react';
 
-export const ConcatIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+
+// Forward SVG props so EuiIcon can apply `color` via currentColor.
+export const ConcatIcon = ({
+  title,
+  titleId,
+  ...props
+}: React.SVGProps<SVGSVGElement> & SVGRProps) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-labelledby={titleId}
+    {...props}
+  >
+    {title ? <title id={titleId}>{title}</title> : null}
     <path
       d="M5 3H3V13H5V14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H5V3Z"
       fill="currentColor"

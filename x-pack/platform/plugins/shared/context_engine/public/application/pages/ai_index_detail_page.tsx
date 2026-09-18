@@ -5,20 +5,33 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
   DescriptionPanel,
-  KnowledgeIndicatorsPanel,
+  LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
+import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
+import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
 import {
@@ -26,6 +39,8 @@ import {
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
+
+type DetailTabId = 'overview' | 'knowledge_indicators';
 
 const backToContextLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToContext', {
   defaultMessage: 'Back to Context',
@@ -35,14 +50,38 @@ const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.mana
   defaultMessage: 'Managed',
 });
 
+const automationsLockedAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
+  {
+    defaultMessage: 'Automations locked. Add a source above to unlock automations.',
+  }
+);
+
+const signalsLockedAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
+  {
+    defaultMessage: 'Signals locked. Create an automation above to start collecting signals.',
+  }
+);
+
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
 
-  const isManaged = aiIndex !== undefined && aiIndex.managed;
-  const hideEditControls = isLoading || isManaged;
+  const { summary } = useKiList({
+    aiIndexId: aiIndex?.id,
+    size: KI_SUMMARY_PAGE_SIZE,
+    enabled: aiIndex !== undefined,
+  });
+
+  const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
+    useAiIndexOverviewSections({
+      aiIndex,
+      isLoading,
+    });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
@@ -52,7 +91,7 @@ export const AiIndexDetailPage = () => {
         <EuiFlexItem grow={false}>
           <span data-test-subj="contextAiIndexDetailPageTitle">{pageTitle}</span>
         </EuiFlexItem>
-        {isManaged && (
+        {aiIndex?.managed && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" data-test-subj="contextAiIndexDetailManagedBadge">
               {managedBadgeLabel}
@@ -61,7 +100,7 @@ export const AiIndexDetailPage = () => {
         )}
       </EuiFlexGroup>
     ),
-    [isManaged, pageTitle]
+    [aiIndex?.managed, pageTitle]
   );
 
   const pageContent = error ? (
@@ -81,31 +120,105 @@ export const AiIndexDetailPage = () => {
     />
   ) : (
     <>
-      <DescriptionPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={isManaged}
-      />
+      <EuiTabs data-test-subj="contextAiIndexDetailTabs">
+        <EuiTab
+          isSelected={selectedTab === 'overview'}
+          onClick={() => setSelectedTab('overview')}
+          data-test-subj="contextAiIndexDetailTab-overview"
+        >
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.tabs.overview"
+            defaultMessage="Overview"
+          />
+        </EuiTab>
+        <EuiTab
+          isSelected={selectedTab === 'knowledge_indicators'}
+          onClick={() => setSelectedTab('knowledge_indicators')}
+          append={
+            summary.total > 0 ? (
+              <EuiNotificationBadge>{summary.total}</EuiNotificationBadge>
+            ) : undefined
+          }
+          data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+        >
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
+            defaultMessage="Knowledge Indicators"
+          />
+        </EuiTab>
+      </EuiTabs>
+
       <EuiSpacer size="m" />
-      <SourcesPanel
-        isLoading={isLoading}
-        sources={aiIndex?.sources ?? []}
-        canEdit={aiIndex !== undefined}
-        onEditSources={() => setIsEditingSources(true)}
-        isManaged={hideEditControls}
-      />
-      <EuiSpacer size="m" />
-      <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
-      <EuiSpacer size="m" />
-      <AutomationsPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={isManaged}
-      />
-      <EuiSpacer size="m" />
-      <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+
+      {selectedTab === 'overview' && (
+        <>
+          <DescriptionPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={!!aiIndex?.managed}
+          />
+          <EuiSpacer size="m" />
+          <SourcesPanel
+            isLoading={isLoading}
+            sources={aiIndex?.sources ?? []}
+            canEdit={aiIndex !== undefined}
+            onEditSources={() => setIsEditingSources(true)}
+            isManaged={hideEditControls}
+          />
+          <EuiSpacer size="m" />
+          {showAutomationsPanel ? (
+            <AutomationsPanel
+              isLoading={isLoading}
+              aiIndex={aiIndex}
+              onSaved={refetch}
+              isManaged={!!aiIndex?.managed}
+            />
+          ) : (
+            <LockedSectionPanel
+              data-test-subj="contextAutomationsLocked"
+              ariaLabel={automationsLockedAriaLabel}
+              title={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.automations.title"
+                  defaultMessage="Automations"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.automations.lockedBody"
+                  defaultMessage="Add a source above to unlock automations."
+                />
+              }
+            />
+          )}
+          <EuiSpacer size="m" />
+          {showSignalsSection &&
+            (showSignalsPanel ? (
+              <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+            ) : (
+              <LockedSectionPanel
+                data-test-subj="contextSignalsLocked"
+                ariaLabel={signalsLockedAriaLabel}
+                title={
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.signals.title"
+                    defaultMessage="Signals"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.signals.lockedBody"
+                    defaultMessage="Create an automation above to start collecting signals."
+                  />
+                }
+              />
+            ))}
+        </>
+      )}
+
+      {selectedTab === 'knowledge_indicators' && aiIndex && <KiListPanel aiIndex={aiIndex} />}
+
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout
           aiIndex={aiIndex}

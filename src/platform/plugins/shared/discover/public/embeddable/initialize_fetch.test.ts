@@ -50,6 +50,7 @@ describe('initialize fetch', () => {
       }),
       refreshTrigger$,
       ...setters,
+      setApproximationApplied: jest.fn(),
     });
     await waitOneTick();
   });

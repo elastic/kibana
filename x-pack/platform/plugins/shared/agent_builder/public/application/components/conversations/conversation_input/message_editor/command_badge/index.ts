@@ -15,7 +15,7 @@ export {
 } from './attributes';
 export { createCommandBadgeElement, isElementCommandBadge } from './create_badge_element';
 export {
-  deserializeCommandBadge,
+  deserializeInputSegments,
   serializeCommandBadge,
   CommandBadgeSerializationError,
 } from './command_badge_serializer';

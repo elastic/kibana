@@ -24,4 +24,20 @@ describe('inferZodType', () => {
       })
     );
   });
+
+  it('keeps __proto__ as an own key of the inferred shape', () => {
+    const schema = inferZodType(JSON.parse('{"__proto__": {"x": 1}, "a": "b"}'));
+    const { shape } = schema as z.ZodObject;
+
+    expect(Object.hasOwn(shape, '__proto__')).toBe(true);
+    expect(shape.__proto__).toBeInstanceOf(z.ZodType);
+    expectZodSchemaEqual(shape.__proto__ as z.ZodType, z.object({ x: z.number() }));
+  });
+
+  it('does not expose Object.prototype members for keys the object lacks', () => {
+    const { shape } = inferZodType({ a: 'b' }) as z.ZodObject;
+
+    expect(Object.hasOwn(shape, 'toString')).toBe(false);
+    expect(Object.hasOwn(shape, 'constructor')).toBe(false);
+  });
 });

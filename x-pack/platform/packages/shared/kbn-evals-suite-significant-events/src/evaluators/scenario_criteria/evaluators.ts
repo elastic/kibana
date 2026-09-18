@@ -58,6 +58,7 @@ export const createScenarioCriteriaLlmEvaluator = <
 > => ({
   name,
   kind: 'LLM' as const,
+  direction: 'maximize',
   evaluate: async (params) => {
     const { input, output, expected, metadata } = params;
 

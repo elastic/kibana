@@ -43,13 +43,20 @@ import type {
 
 import { Loading } from '../../../../../components';
 import {
+  useDisabledIdentityFederationProviders,
   useGetEpmDatastreams,
   useGetIlmPoliciesQuery,
   useStartServices,
   useVarGroupCloudConnector,
 } from '../../../../../hooks';
 
-import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
+import {
+  isAdvancedVar,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  getHiddenVarGroupOptionsForDisabledProviders,
+  mergeHiddenVarGroupOptions,
+} from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -122,6 +129,27 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
+    // Identity federation options for CSPs switched off via LaunchDarkly are hidden alongside
+    // any options the caller already hides (e.g. unsupported by the scoped policy template).
+    const disabledIdentityFederationProviders = useDisabledIdentityFederationProviders();
+    const effectiveHideInVarGroupOptions = useMemo(
+      () =>
+        mergeHiddenVarGroupOptions(
+          hideInVarGroupOptions,
+          getHiddenVarGroupOptionsForDisabledProviders(
+            varGroups,
+            disabledIdentityFederationProviders,
+            packagePolicy.var_group_selections
+          )
+        ),
+      [
+        hideInVarGroupOptions,
+        varGroups,
+        disabledIdentityFederationProviders,
+        packagePolicy.var_group_selections,
+      ]
+    );
+
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
         varGroups,
@@ -129,7 +157,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
         packagePolicy,
-        hideInVarGroupOptions,
+        hideInVarGroupOptions: effectiveHideInVarGroupOptions,
+        isEditPage,
       });
 
     const {
@@ -183,7 +212,28 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoading: isOutputsLoading,
       canUseOutputPerIntegration,
       allowedOutputs,
-    } = useOutputs(packagePolicy, packageInfo.name);
+      inheritedOutputName,
+    } = useOutputs(packagePolicy, packageInfo.name, agentPolicies);
+
+    // An unset output_id means "use the output of the parent agent policy". EuiSelect cannot
+    // hold null, so that state is represented by an empty value — label it explicitly, since
+    // an unlabelled option reads as "no output configured".
+    const inheritedOutputText = useMemo(
+      () =>
+        inheritedOutputName
+          ? i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInheritedWithNameOption',
+              {
+                defaultMessage: 'Inherited from agent policy (currently {outputName})',
+                values: { outputName: inheritedOutputName },
+              }
+            )
+          : i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInheritedOption',
+              { defaultMessage: 'Inherited from agent policy' }
+            ),
+      [inheritedOutputName]
+    );
 
     const { data: epmDatastreamsRes } = useGetEpmDatastreams();
 
@@ -643,7 +693,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           options={[
                             {
                               value: '',
-                              text: '',
+                              text: inheritedOutputText,
                             },
                             ...allowedOutputs.map((output) => ({
                               value: output.id,
@@ -913,7 +963,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           isAgentlessEnabled={isAgentlessSelected}
                           disabled={isEditPage && isCloudConnectorSelected}
                           hideTitle={true}
-                          hideInVarGroupOptions={hideInVarGroupOptions}
+                          hideInVarGroupOptions={effectiveHideInVarGroupOptions}
                         />
                       </EuiFlexItem>
 

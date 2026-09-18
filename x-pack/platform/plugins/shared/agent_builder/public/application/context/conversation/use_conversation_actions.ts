@@ -56,7 +56,6 @@ export interface ConversationActions {
     agentId: string;
   }) => Promise<void>;
   removeOptimisticRound: () => void;
-  clearLastRoundResponse: () => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
   setToolCallProgress: ({
@@ -199,13 +198,6 @@ export const createConversationActions = ({
           draft?.rounds?.pop();
         })
       );
-    },
-    clearLastRoundResponse: () => {
-      setCurrentRound((round) => {
-        round.response.message = '';
-        round.steps = [];
-        round.status = ConversationRoundStatus.inProgress;
-      });
     },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {

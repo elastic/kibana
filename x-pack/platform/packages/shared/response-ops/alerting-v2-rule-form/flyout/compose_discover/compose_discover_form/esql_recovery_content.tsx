@@ -58,7 +58,14 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
         color="text"
         iconType="chevronLimitLeft"
         isDisabled={state.childOpen}
-        onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })}
+        onClick={() =>
+          dispatch({
+            type: 'OPEN_CHILD_FOR_STEP',
+            step: state.step,
+            isAlert: true,
+            focusedTab: 'recovery',
+          })
+        }
         data-test-subj="composeDiscoverEditRecovery"
       >
         <FormattedMessage

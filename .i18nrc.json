@@ -115,6 +115,7 @@
       "src/platform/packages/shared/react",
       "src/platform/packages/private/react"
     ],
+    "esqlBrowser": "src/platform/packages/shared/esql/kbn-esql-browser",
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
     "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
@@ -194,6 +195,7 @@
     ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
+    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
     "unifiedDocViewer": [
       "src/platform/plugins/shared/unified_doc_viewer",
       "src/platform/packages/shared/kbn-unified-doc-viewer"

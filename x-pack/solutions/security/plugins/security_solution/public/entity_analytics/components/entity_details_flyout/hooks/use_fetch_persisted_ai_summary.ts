@@ -7,8 +7,10 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { PersistedEntityAiSummary } from '@kbn/entity-store/common';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 export const PERSISTED_AI_SUMMARY_QUERY_KEY = 'PERSISTED_AI_SUMMARY';
 
@@ -40,11 +42,20 @@ export const useFetchPersistedAiSummary = ({
   skip?: boolean;
 }): UseFetchPersistedAiSummaryResult => {
   const { fetchPersistedAiSummary } = useEntityAnalyticsRoutes();
+  const { addError } = useAppToasts();
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier],
     queryFn: ({ signal }) => fetchPersistedAiSummary({ entityType, entityIdentifier }, signal),
     enabled: !skip && Boolean(entityIdentifier),
+    onError: (err: Error) => {
+      addError(err, {
+        title: i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.highlights.fetchPersistedSummaryError',
+          { defaultMessage: 'Error fetching persisted AI summary' }
+        ),
+      });
+    },
   });
 
   return useMemo(

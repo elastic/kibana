@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import type { attachmentApiV2 } from '../../common/types/api';
+import type { attachmentApiV2Union } from '../../common/types/api';
 import { createAttachments } from './api';
 import * as i18n from './translations';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
@@ -37,7 +37,7 @@ export const useCreateAttachments = () => {
       // bridges the two type systems at the wire boundary. Server-side
       // validation re-runs through the per-type Zod schemas.
       return createAttachments({
-        attachments: attachments as unknown as attachmentApiV2.BulkCreateAttachmentsRequestV2,
+        attachments: attachments as unknown as attachmentApiV2Union.BulkCreateAttachmentsRequestV2,
         caseId: request.caseId,
       });
     },

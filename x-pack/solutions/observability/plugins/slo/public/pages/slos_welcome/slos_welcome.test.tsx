@@ -212,7 +212,7 @@ describe('SLOs Welcome Page', () => {
         });
 
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.sloCreate);
+          expect(mockNavigate).toHaveBeenCalledWith(paths.sloCreate);
         });
       });
 

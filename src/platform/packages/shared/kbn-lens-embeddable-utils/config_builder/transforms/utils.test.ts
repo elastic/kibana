@@ -29,7 +29,7 @@ import type {
   FormBasedLayer,
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { TextBasedLayer } from '@kbn/lens-common';
+import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -354,6 +354,55 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+
+  describe('ES|QL Control Variable reconstruction', () => {
+    const buildEsqlColumns = (
+      query: string,
+      columns: TextBasedLayerColumn[]
+    ): TextBasedLayerColumn[] => {
+      const results = buildDatasourceStates(
+        {
+          type: 'metric',
+          title: 'test',
+          data_source: { type: 'esql', query },
+          metrics: [{ type: 'primary', label: 'test', column: 'test' }],
+          styling: { primary: { value: { sizing: 'auto' } } },
+          sampling: 1,
+          ignore_global_filters: true,
+        },
+        () => undefined,
+        () => columns
+      );
+      const layers = results.layers.textBased?.layers ?? {};
+      return Object.values(layers).flatMap((layer) => layer.columns);
+    };
+
+    it('stamps `variable` (prefix stripped) on a column backed by a genuine Identifier Control', () => {
+      const columns = buildEsqlColumns('FROM logs | STATS COUNT(*) BY ??field', [
+        { columnId: 'a', fieldName: '??field' },
+        { columnId: 'b', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??field')?.variable).toBe('field');
+      expect(columns.find((c) => c.fieldName === 'COUNT(*)')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` on a real column merely named `??x` (not a query parameter)', () => {
+      const columns = buildEsqlColumns('FROM logs | EVAL `??x` = bytes | STATS m = SUM(`??x`)', [
+        { columnId: 'a', fieldName: '??x' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??x')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` for Value (`?`) controls (they are literals, not columns)', () => {
+      const columns = buildEsqlColumns('FROM logs | WHERE os == ?os | STATS COUNT(*)', [
+        { columnId: 'a', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.every((c) => c.variable === undefined)).toBe(true);
+    });
   });
 });
 
@@ -774,7 +823,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState, []);
 
-    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    // ES|QL data-source queries are never mirrored into the top-level slot
+    expect(result.query).toBeUndefined();
     expect(result.filters).toHaveLength(2);
     expect(result.references).toHaveLength(1);
     expect(result.filters).toMatchObject([
@@ -816,7 +866,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState, []);
 
-    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    // ES|QL data-source queries are never mirrored into the top-level slot
+    expect(result.query).toBeUndefined();
     expect(result.filters).toEqual([]);
     expect(result.references).toEqual([]);
   });
@@ -949,7 +1000,7 @@ describe('filtersAndQueryToApiFormat', () => {
   test('should not include filters if empty and query if ES|QL', () => {
     const lensState = {
       state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
-    } as LensAttributes;
+    } as unknown as LensAttributes;
 
     const result = filtersAndQueryToApiFormat(lensState);
 

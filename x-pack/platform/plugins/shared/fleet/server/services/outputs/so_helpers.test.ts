@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Output } from '../../../common/types';
+import type { NewBeatsOutput, Output } from '../../../common/types';
 
 import {
   patchUpdateDataWithRequireEncryptedAADFields,
@@ -32,7 +32,11 @@ describe(`_getFieldsToIncludeEncryptedSO`, () => {
 
 describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
   const ORIGINAL_LOGSTASH_OUTPUT = {
+    id: 'logstash-output-1',
     type: 'logstash',
+    is_default: false,
+    is_default_monitoring: false,
+    name: 'logstash-output',
     allow_edit: ['hosts'],
     ssl: {
       certificate: 'testcertificate',
@@ -171,7 +175,7 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
     it('it should work', () => {
       const updateData = {
         ...ORIGINAL_LOGSTASH_OUTPUT,
-        ssl: JSON.stringify(ORIGINAL_LOGSTASH_OUTPUT.ssl),
+        ssl: JSON.stringify((ORIGINAL_LOGSTASH_OUTPUT as NewBeatsOutput).ssl),
         //  Remove kafka field as done by the output service
         password: null,
       };
@@ -182,6 +186,10 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
           "allow_edit": Array [
             "hosts",
           ],
+          "id": "logstash-output-1",
+          "is_default": false,
+          "is_default_monitoring": false,
+          "name": "logstash-output",
           "password": null,
           "secrets": Object {
             "ssl": Object {

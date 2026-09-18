@@ -73,6 +73,7 @@ describe('compileUserDefinedEvaluator', () => {
         kind: 'llm',
         origin: 'user_defined',
         description: 'Judges tone',
+        direction: 'maximize',
       })
     );
   });

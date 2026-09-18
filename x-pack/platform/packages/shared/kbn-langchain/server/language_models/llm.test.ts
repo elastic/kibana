@@ -190,7 +190,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError();
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow();
 
       expect(
         getDebugMessages().some((message) => message.includes('action-result-service-message'))
@@ -209,7 +209,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
         'ActionsClientLlm: action result status is error: action-result-message - action-result-service-message'
       );
     });
@@ -230,7 +230,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
         'ActionsClientLlm: content should be a string, but it had an unexpected type: number'
       );
     });
@@ -312,7 +312,7 @@ describe('ActionsClientLlm', () => {
           logger: mockLogger,
         });
 
-        await expect(actionsClientLlm._call(prompt)).rejects.toThrowError('quota exceeded');
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
 
         expect(getDebugMessages().some((message) => message.includes('quota exceeded'))).toBe(true);
       });
@@ -325,7 +325,7 @@ describe('ActionsClientLlm', () => {
           logger: mockLogger,
         });
 
-        await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
           'ActionsClientLlm: inferenceClient is required when isInferenceEndpoint is true'
         );
       });
@@ -343,7 +343,7 @@ describe('ActionsClientLlm', () => {
           logger: mockLogger,
         });
 
-        await expect(actionsClientLlm._call(prompt)).rejects.toThrowError('quota exceeded');
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
       });
     });
   });

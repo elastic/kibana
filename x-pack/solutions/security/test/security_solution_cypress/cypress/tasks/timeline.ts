@@ -229,11 +229,14 @@ export const clearEqlInTimeline = () => {
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
+  cy.get(TIMELINE_FILTER_FIELD).should('not.be.disabled');
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
+  cy.get(TIMELINE_FILTER_OPERATOR).should('not.be.disabled');
   cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
+  cy.get(SAVE_FILTER_BTN).should('not.be.disabled');
   return cy.get(SAVE_FILTER_BTN).click();
 };
 
@@ -352,7 +355,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {

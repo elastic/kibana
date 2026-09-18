@@ -17,6 +17,8 @@ import type { EuiTextProps } from '@elastic/eui';
 export type InfoBlockSize = 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
 export interface InfoBlockItem {
+  /** Stable identity used as the React key. Falls back to array position when omitted. */
+  id?: string;
   /** Fixed-style text label rendered above the value. */
   title: string;
   /** Arbitrary content rendered as the block value. */
