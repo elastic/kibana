@@ -21,7 +21,13 @@ const GetInvestigationRequestParams = z.object({
   id: z.string().min(1).max(256),
 });
 
-export const registerGetInvestigationRoute = ({ router, logger, config }: RouteDependencies) => {
+export const registerGetInvestigationRoute = ({
+  router,
+  logger,
+  config,
+  getConversationProposalsService,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: ALERTZERO_INVESTIGATION_URL_TEMPLATE,
@@ -55,9 +61,20 @@ export const registerGetInvestigationRoute = ({ router, logger, config }: RouteD
             return response.ok({ body });
           }
 
-          return response.notFound({
-            body: { message: `Investigation "${id}" not found` },
-          });
+          const investigation = await getConversationProposalsService().getInvestigation(
+            id,
+            request,
+            getSpaceId(request)
+          );
+
+          if (!investigation) {
+            return response.notFound({
+              body: { message: `No investigation exists for conversation id ${id}.` },
+            });
+          }
+
+          const body: GetInvestigationResponse = { investigation };
+          return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to get investigation: ${error}`);
           return response.customError({

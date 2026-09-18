@@ -7,12 +7,14 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type {
   ProposalWithMetadata,
   ProposalsQuery,
 } from '@kbn/agentic-investigations-plugin/common';
 import { isAwaitingDecision } from '@kbn/agentic-investigations-plugin/common';
+import type { Investigation } from '@kbn/alertzero-common';
 import {
   CLOSED_GROUP_KEY,
   type ProposalGroups,
@@ -89,6 +91,49 @@ export class ConversationProposalsService {
     });
 
     return groups;
+  }
+
+  async getInvestigation(
+    conversationId: string,
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<Investigation | null> {
+    const client = await this.agentBuilder.conversations.getScopedClient({ request });
+
+    let conversation: Awaited<ReturnType<typeof client.get>>;
+    try {
+      conversation = await client.get(conversationId);
+    } catch (err) {
+      if (isConversationNotFoundError(err)) {
+        return null;
+      }
+      throw err;
+    }
+
+    const { total: pendingProposalCount } = await this.proposalsService.list(
+      {
+        conversationId,
+        status: 'pending',
+        size: 1,
+        from: 0,
+        excludeSuperseded: false,
+        excludeExpired: false,
+      },
+      spaceId
+    );
+
+    return {
+      id: conversationId,
+      template_id: 'investigation',
+      title: conversation.title,
+      createdAt: conversation.created_at,
+      updatedAt: conversation.updated_at,
+      // No workflow metadata is stored on the conversation; fabricated like proposalToInvestigation.
+      watch_id: '',
+      watch_execution_id: '',
+      pendingProposalCount,
+      events: [],
+    };
   }
 
   private async getTitles(
