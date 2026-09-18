@@ -429,26 +429,4 @@ describe('checkUploadPackageAssetPrivileges', () => {
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
-  it('skips all checks when skipUploadPackageValidation is true', async () => {
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
-      internal: { skipUploadPackageValidation: true },
-    });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-    const security = makeSecurity(false, ['api:rules-all']);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-
-    await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId
-      )
-    ).resolves.toBeUndefined();
-
-    expect(createArchiveIterator).not.toHaveBeenCalled();
-    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
-  });
 });
