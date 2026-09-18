@@ -202,7 +202,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       // non-emitting no_data events enter pending without threshold evaluation to avoid
       // false active alerts.
       if (!this.isBreachEvent(alertEvent.status, rule.no_data_strategy)) {
-        return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
+        return { status: alertEpisodeStatus.pending, statusCount: NO_STATUS_COUNT };
       }
       return this.getFirstEntryStateTransition(this.getPendingThreshold(rule, stateTransition), {
         successStatus: alertEpisodeStatus.active,

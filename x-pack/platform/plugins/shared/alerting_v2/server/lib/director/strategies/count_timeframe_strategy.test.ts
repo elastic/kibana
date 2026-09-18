@@ -184,7 +184,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.pending,
         stateTransition,
-        expectedStatusCount: 1,
+        expectedStatusCount: 0,
       });
     });
 
@@ -196,7 +196,7 @@ describe('CountTimeframeStrategy', () => {
           to: alertEpisodeStatus.pending,
           stateTransition,
           noDataStrategy: noDataStrategyValue,
-          expectedStatusCount: 1,
+          expectedStatusCount: 0,
         });
       }
     );
@@ -541,6 +541,51 @@ describe('CountTimeframeStrategy', () => {
         })
       ).toBe(expected);
     });
+
+    it.each([
+      [1, 1],
+      [2, 2],
+      [3, 3],
+    ])(
+      'pendingCount %i still requires %i breach(es) when the first evaluation is a non-breach',
+      (pendingCount, expectedBreaches) => {
+        // Seed the episode with a non-breach event (no previous episode).
+        const firstResult = strategy.getNextState(
+          buildStrategyStateTransitionContext({
+            eventStatus: alertEventStatus.recovered,
+            stateTransition: { pending_count: pendingCount },
+          })
+        );
+        expect(firstResult.status).toBe(alertEpisodeStatus.pending);
+
+        // Now count how many consecutive breaches are needed to activate.
+        let previousEpisode = buildLatestAlertEvent({
+          episodeStatus: firstResult.status,
+          eventStatus: alertEventStatus.recovered,
+          statusCount: firstResult.statusCount,
+        });
+
+        let breachCount = 0;
+        for (let i = 0; i < 10; i++) {
+          breachCount++;
+          const result = strategy.getNextState(
+            buildStrategyStateTransitionContext({
+              eventStatus: alertEventStatus.breached,
+              stateTransition: { pending_count: pendingCount },
+              previousEpisode,
+            })
+          );
+          if (result.status === alertEpisodeStatus.active) break;
+          previousEpisode = buildLatestAlertEvent({
+            episodeStatus: result.status,
+            eventStatus: alertEventStatus.breached,
+            statusCount: result.statusCount,
+          });
+        }
+
+        expect(breachCount).toBe(expectedBreaches);
+      }
+    );
   });
 
   describe('phase with no threshold configured', () => {
