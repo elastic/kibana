@@ -26,9 +26,18 @@ const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
+
 export interface DocumentWorkflowsPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  /**
+   * The selected documents as `(id, index)` pairs. The server fetches each document's fields,
+   * so the request stays small no matter how many are selected, and every caller produces the
+   * same document shape.
+   */
+  documentIds: DocumentSelection[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -36,7 +45,7 @@ export interface DocumentWorkflowsPanelProps {
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
 export const DocumentWorkflowsPanel = ({
-  documents,
+  documentIds,
   onClose,
   onExecute,
 }: DocumentWorkflowsPanelProps) => {
@@ -44,10 +53,10 @@ export const DocumentWorkflowsPanel = ({
     () => ({
       event: {
         triggerType: 'document' as const,
-        documents,
+        documentIds,
       },
     }),
-    [documents]
+    [documentIds]
   );
 
   return (
@@ -65,8 +74,7 @@ export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
 export const RUN_DOCUMENT_WORKFLOW_ACTION_ID = 'run-document-workflow-action';
 
 export interface UseRunDocumentWorkflowPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  documentIds: DocumentSelection[];
   closePopover: () => void;
 }
 
@@ -79,7 +87,7 @@ export interface UseRunDocumentWorkflowPanelResult {
 
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
-  documents,
+  documentIds,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
@@ -110,10 +118,10 @@ export const useRunDocumentWorkflowPanel = ({
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'document-workflow-context-menu-panel',
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
-        content: <DocumentWorkflowsPanel documents={documents} onClose={closePopover} />,
+        content: <DocumentWorkflowsPanel documentIds={documentIds} onClose={closePopover} />,
       },
     ],
-    [closePopover, documents]
+    [closePopover, documentIds]
   );
 
   return useMemo(

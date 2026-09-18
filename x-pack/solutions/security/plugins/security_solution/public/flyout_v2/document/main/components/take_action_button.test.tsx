@@ -424,14 +424,19 @@ describe('<TakeActionButton />', () => {
     );
   });
 
-  it('should call useRunDocumentWorkflowPanel with the document and closePopover', () => {
+  // Ids only: the server resolves each document's fields, so every caller produces the same
+  // document shape regardless of which data it happens to have loaded.
+  it('should call useRunDocumentWorkflowPanel with the document id and closePopover', () => {
     const hit = createMockHit({ 'event.kind': 'event' });
     renderTakeActionButton({ ...defaultProps, hit });
 
     expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
       expect.objectContaining({
-        documents: [expect.objectContaining({ _id: 'test-id', _index: 'test-index' })],
+        documentIds: [{ _id: 'test-id', _index: 'test-index' }],
       })
+    );
+    expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
+      expect.objectContaining({ documents: expect.anything() })
     );
   });
 
