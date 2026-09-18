@@ -73,6 +73,24 @@ function makeSecurity(hasAllRequested: boolean, missingPrivileges: string[] = []
   };
 }
 
+function makeSavedObjectsClient(
+  rules: Array<{ id: string; attributes?: Record<string, unknown>; error?: object }> = []
+) {
+  return {
+    bulkGet: jest.fn().mockResolvedValue({
+      saved_objects: rules.map((r) => ({
+        id: r.id,
+        type: 'security-rule',
+        references: [],
+        attributes: r.attributes ?? {},
+        ...(r.error ? { error: r.error } : {}),
+      })),
+    }),
+  };
+}
+
+const mockSavedObjectsClient = makeSavedObjectsClient() as any;
+
 describe('collectArchiveSignals', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -231,6 +249,7 @@ describe('buildRequiredActions', () => {
 describe('checkUploadPackageAssetPrivileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
   });
 
   it('allows upload when archive contains no gated asset types', async () => {
@@ -251,7 +270,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockContentType,
         mockSpaceId,
         'mypackage',
-        undefined
+        undefined,
+        mockSavedObjectsClient
       )
     ).resolves.toEqual([]);
 
@@ -275,7 +295,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      undefined
+      undefined,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -309,7 +330,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      undefined
+      undefined,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -339,7 +361,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockContentType,
         mockSpaceId,
         'mypackage',
-        undefined
+        undefined,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -359,7 +382,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockContentType,
         mockSpaceId,
         'mypackage',
-        undefined
+        undefined,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -378,7 +402,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      undefined
+      undefined,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -407,7 +432,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      undefined
+      undefined,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -436,7 +462,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockContentType,
         mockSpaceId,
         'mypackage',
-        undefined
+        undefined,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -462,7 +489,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -493,7 +521,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       'space-x',
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -525,7 +554,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']));
@@ -553,7 +583,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       'space-x',
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(result).toEqual(['space-x']);
@@ -581,7 +612,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
@@ -616,7 +648,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockContentType,
         mockSpaceId,
         'mypackage',
-        installation
+        installation,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -643,7 +676,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(result).toEqual([]);
@@ -680,7 +714,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       'request-space',
       'security_detection_engine',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     // Must detect the security-rule in installed_kibana and require rules-all.
@@ -716,7 +751,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'security_detection_engine',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(result).toEqual([mockSpaceId]);
@@ -757,7 +793,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
@@ -803,7 +840,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -843,10 +881,102 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockContentType,
       mockSpaceId,
       'mypackage',
-      installation
+      installation,
+      mockSavedObjectsClient
     );
 
     expect(result).toEqual([]);
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
+
+  it('checks rules-all + ml:canCreateJob when existing installed rule is ML type but archive is benign (ML-to-benign upgrade)', async () => {
+    // Regression: archive contains only a dashboard (hasMlSecurityRules=false) but the
+    // currently installed security-rule SO has attributes.type === 'machine_learning'.
+    // cleanUpUnusedKibanaAssetsStep will delete the ML rule via the internal client.
+    // Preflight must detect the ML subtype from the SO and require ml:canCreateJob.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'existing-ml-rule', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {},
+      },
+    } as any;
+
+    mockSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'existing-ml-rule',
+          type: 'security-rule',
+          references: [],
+          attributes: { type: 'machine_learning' },
+        },
+      ],
+    });
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation,
+      mockSavedObjectsClient
+    );
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
+    expect(result).toEqual([mockSpaceId]);
+  });
+
+  it('fails closed (requires ml:canCreateJob) when savedObjectsClient.bulkGet throws during ML subtype detection', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'some-rule', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {},
+      },
+    } as any;
+
+    mockSavedObjectsClient.bulkGet.mockRejectedValue(new Error('SO read failed'));
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation,
+      mockSavedObjectsClient
+    );
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
+    expect(result).toEqual([mockSpaceId]);
   });
 });

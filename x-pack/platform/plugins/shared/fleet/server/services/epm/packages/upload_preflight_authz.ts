@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObject } from '@kbn/core/server';
+import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -101,7 +101,8 @@ export async function checkUploadPackageAssetPrivileges(
   contentType: string,
   spaceId: string,
   pkgName: string | undefined,
-  installation: SavedObject<Installation> | undefined
+  installation: SavedObject<Installation> | undefined,
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<string[]> {
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
@@ -136,29 +137,52 @@ export async function checkUploadPackageAssetPrivileges(
   const isStreamingPackage =
     pkgName != null && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
-  // Build per-Space gated type sets: archive types (written to every destination Space) union
-  // each Space's own existing gated types (which cleanUpUnusedKibanaAssetsStep would remove).
-  // Keeping these sets per-Space avoids requiring privileges for a type in a Space that never
-  // had it — e.g. if space-a holds rules and space-b holds AI prompts, space-a only needs
-  // rules-all and space-b only needs elasticAssistant, not both everywhere.
-  const spaceGatedTypes = new Map<string, Set<KibanaAssetType>>();
+  // Build per-Space data: gated asset types (archive types union existing ref types) and whether
+  // any existing security rule in this Space is ML type (requires ml:canCreateJob).
+  // Keeping these per-Space avoids requiring privileges for a type in a Space that never had it.
+  // For the primary/streaming Space, read SO attributes to detect ML subtype — stored refs only
+  // carry the SO type, not the rule subtype. Fail closed if the read fails.
+  const spaceData = new Map<string, { types: Set<KibanaAssetType>; hasMlRules: boolean }>();
   for (const space of destinationSpaces) {
     const types = new Set(signals.gatedTypesFound);
-    if (installation) {
-      const refs =
-        isStreamingPackage || space === effectivePrimarySpace
-          ? installation.attributes.installed_kibana
-          : installation.attributes.additional_spaces_installed_kibana?.[space];
-      for (const ref of refs ?? []) {
-        const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type);
-        if (assetType) types.add(assetType);
+    const usePrimaryRefs = isStreamingPackage || space === effectivePrimarySpace;
+    const refs = installation
+      ? usePrimaryRefs
+        ? installation.attributes.installed_kibana
+        : installation.attributes.additional_spaces_installed_kibana?.[space]
+      : undefined;
+    for (const ref of refs ?? []) {
+      const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type);
+      if (assetType) types.add(assetType);
+    }
+
+    let hasMlRules = signals.hasMlSecurityRules;
+    if (installation && usePrimaryRefs) {
+      const primaryRefs = installation.attributes.installed_kibana ?? [];
+      const ruleIds = primaryRefs
+        .filter((ref) => ref.type === KibanaSavedObjectType.securityRule)
+        .map((ref) => ref.id);
+      if (ruleIds.length > 0) {
+        try {
+          const bulkResult = await savedObjectsClient.bulkGet<{ type?: string }>(
+            ruleIds.map((id) => ({ type: KibanaSavedObjectType.securityRule, id }))
+          );
+          for (const so of bulkResult.saved_objects) {
+            if (!so.error && so.attributes?.type === 'machine_learning') {
+              hasMlRules = true;
+              break;
+            }
+          }
+        } catch {
+          hasMlRules = true;
+        }
       }
     }
-    spaceGatedTypes.set(space, types);
+
+    spaceData.set(space, { types, hasMlRules });
   }
 
-  const anyGated =
-    [...spaceGatedTypes.values()].some((s) => s.size > 0) || signals.hasMlSecurityRules;
+  const anyGated = [...spaceData.values()].some((d) => d.types.size > 0 || d.hasMlRules);
   if (!anyGated) {
     return [];
   }
@@ -176,9 +200,9 @@ export async function checkUploadPackageAssetPrivileges(
   // Group spaces with identical required action sets to minimise security API calls.
   // Spaces that need no privileged writes are pre-authorised and skipped.
   const actionGroupMap = new Map<string, { spaces: string[]; actions: string[] }>();
-  for (const [space, types] of spaceGatedTypes) {
+  for (const [space, { types, hasMlRules }] of spaceData) {
     const actions = buildRequiredActions(
-      { gatedTypesFound: types, hasMlSecurityRules: signals.hasMlSecurityRules },
+      { gatedTypesFound: types, hasMlSecurityRules: hasMlRules },
       security
     );
     if (actions.length === 0) continue;

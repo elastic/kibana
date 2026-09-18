@@ -967,7 +967,8 @@ async function installPackageByUpload({
         contentType,
         spaceId,
         pkgName,
-        installedPkg
+        installedPkg,
+        savedObjectsClient
       );
     }
 
