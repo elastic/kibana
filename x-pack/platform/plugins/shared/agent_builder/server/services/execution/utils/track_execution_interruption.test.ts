@@ -108,10 +108,13 @@ describe('trackExecutionInterruption', () => {
     expect(persist).not.toHaveBeenCalled();
   });
 
-  it('round_complete seen, abort during the in-flight success write: does nothing', async () => {
-    const { persist } = await run([roundStarted, roundComplete], createRequestAbortedError('stop'));
+  it('round_complete seen, abort before its terminal was observed: persists from the completed payload', async () => {
+    // the success write failed (its error normalised to an abort) or is still in flight; the
+    // client's terminal guard settles the race with a landed success write
+    const error = createRequestAbortedError('stop');
+    const { persist } = await run([roundStarted, roundComplete], error);
 
-    expect(persist).not.toHaveBeenCalled();
+    expect(persist).toHaveBeenCalledWith({ error, completed: roundComplete.data });
   });
 
   it('round_complete seen, non-abort error (success write failed): persists from the round_complete payload', async () => {

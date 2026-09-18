@@ -409,20 +409,32 @@ apiTest.describe(
         expect(typeof abortedBy?.actor?.id).toBe('string');
         expect(typeof abortedBy?.actor?.username).toBe('string');
 
-        // 4. the execution document says aborted (not failed), with the abort error recorded
-        await sysEsClient.indices.refresh({ index: AGENT_EXECUTIONS_INDEX });
-        const doc = await sysEsClient.get<{
+        // 4. the execution document says aborted (not failed), with the abort error recorded. The
+        //    worker writes that error after callback delivery settled, which can be after the
+        //    failure callback was observed above: poll for it, bounded.
+        interface ExecutionDoc {
           status: string;
           error?: { code: string; meta?: { abort_reason?: { source: string } } };
           abort_reason?: { source: string };
-        }>({
-          index: AGENT_EXECUTIONS_INDEX,
-          id: accepted.execution_id,
-        });
-        expect(doc._source?.status).toBe('aborted');
-        expect(doc._source?.error?.code).toBe(AgentBuilderErrorCode.requestAborted);
-        expect(doc._source?.abort_reason?.source).toBe('api');
-        expect(doc._source?.error?.meta?.abort_reason?.source).toBe('api');
+        }
+        let doc: Awaited<ReturnType<typeof sysEsClient.get<ExecutionDoc>>> | undefined;
+        const docDeadline = Date.now() + 15_000;
+        while (Date.now() < docDeadline) {
+          await sysEsClient.indices.refresh({ index: AGENT_EXECUTIONS_INDEX });
+          doc = await sysEsClient.get<ExecutionDoc>({
+            index: AGENT_EXECUTIONS_INDEX,
+            id: accepted.execution_id,
+          });
+          if (doc._source?.error?.code === AgentBuilderErrorCode.requestAborted) {
+            break;
+          }
+          await new Promise<void>((resolve) => setTimeout(resolve, 500));
+        }
+        expect(doc).toBeDefined();
+        expect(doc!._source?.status).toBe('aborted');
+        expect(doc!._source?.error?.code).toBe(AgentBuilderErrorCode.requestAborted);
+        expect(doc!._source?.abort_reason?.source).toBe('api');
+        expect(doc!._source?.error?.meta?.abort_reason?.source).toBe('api');
 
         // 5. a third round does not see the aborted round's input
         await setupAgentDirectAnswer({

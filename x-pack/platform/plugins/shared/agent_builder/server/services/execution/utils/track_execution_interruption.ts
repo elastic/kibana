@@ -15,7 +15,6 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   isExecutionTerminatedEvent,
-  isRequestAbortedError,
   isRoundCompleteEvent,
   isRoundInterruptedEvent,
 } from '@kbn/agent-builder-common';
@@ -36,10 +35,10 @@ export type PersistInterruptionFn = (args: {
  *   payload when it arrived; a minimal projection otherwise).
  * - the persisted `execution_terminated` was seen → the success write landed and owns the
  *   terminal; nothing to do.
- * - `round_complete` seen and the error is an abort → the run completed; the in-flight success
- *   write owns the terminal; nothing to do.
- * - `round_complete` seen and any other error → the success write failed; persist
- *   `execution_failed` from the `round_complete` payload.
+ * - `round_complete` seen but its persisted terminal not → the success write failed (any error,
+ *   including a write error normalised to an abort) or is still in flight (the abort deadline cut
+ *   the stream): persist from the `round_complete` payload and let the client's atomic terminal
+ *   guard arbitrate against the success write.
  */
 export const trackExecutionInterruption = ({
   persist,
@@ -56,9 +55,12 @@ export const trackExecutionInterruption = ({
         if (!completed) {
           return persist({ error, interrupted });
         }
-        if (terminatedPersisted || isRequestAbortedError(error)) {
+        if (terminatedPersisted) {
           return Promise.resolve([]);
         }
+        // `round_complete` seen but its persisted terminal never observed: the success write
+        // failed, or is still in flight (an abort cut the stream). Persist from the completed
+        // payload; the client's atomic terminal guard arbitrates against an in-flight success write.
         return persist({ error, completed });
       };
 

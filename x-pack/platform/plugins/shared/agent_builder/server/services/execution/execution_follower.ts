@@ -10,7 +10,9 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   createInternalError,
   createRequestAbortedError,
+  isExecutionAbortedEvent,
   isExecutionTerminalEvent,
+  isRequestAbortedError,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
@@ -182,13 +184,29 @@ async function* pollExecutionEvents(
     if (status === ExecutionStatus.aborted) {
       // `aborted` is flipped by the abort request before the worker has stopped: keep draining for
       // a bounded window so the `execution_aborted` terminal can be forwarded first.
+      let drainedTerminal: ChatEvent | undefined;
       if (!receivedExecutionTerminal) {
-        yield* drainUntilTerminal(executionId, executionClient, lastEventIndex, {
+        drainedTerminal = yield* drainUntilTerminal(executionId, executionClient, lastEventIndex, {
           timeoutMs: FOLLOW_ABORT_DRAIN_TIMEOUT_MS,
           pollMs: FOLLOW_POLL_INTERVAL_MS,
         });
       }
-      throw createRequestAbortedError('request was aborted');
+      // The worker records the abort error (with its `abort_reason`) after winding down; prefer
+      // it so followers see the same attribution as live clients, else derive it from the
+      // terminal that was drained.
+      const latest = await executionClient.peek(executionId);
+      const persistedError = latest?.error ?? error;
+      if (persistedError && isRequestAbortedError(deserializeExecutionError(persistedError))) {
+        throw deserializeExecutionError(persistedError);
+      }
+      const abortedBy =
+        drainedTerminal && isExecutionAbortedEvent(drainedTerminal)
+          ? drainedTerminal.data.aborted_by
+          : undefined;
+      throw createRequestAbortedError(
+        'request was aborted',
+        abortedBy ? { abort_reason: abortedBy } : undefined
+      );
     }
 
     if (status === ExecutionStatus.completed) {
@@ -234,28 +252,29 @@ async function* drainRemainingEvents(
 
 /**
  * Yields new events until a terminal timeline event (`execution_terminated` / `execution_failed` /
- * `execution_aborted`) is seen or `timeoutMs` elapses. Used once the status is `failed` /
- * `aborted`, so the terminal the executing node wrote reaches the follower before the error.
+ * `execution_aborted`) is seen or `timeoutMs` elapses, and returns that terminal (undefined on
+ * timeout). Used once the status is `failed` / `aborted`, so the terminal the executing node wrote
+ * reaches the follower before the error.
  */
 async function* drainUntilTerminal(
   executionId: string,
   executionClient: AgentExecutionClient,
   lastEventIndex: number,
   { timeoutMs, pollMs }: { timeoutMs: number; pollMs: number }
-): AsyncGenerator<ChatEvent> {
+): AsyncGenerator<ChatEvent, ChatEvent | undefined> {
   const deadline = Date.now() + timeoutMs;
   while (true) {
     const { events } = await executionClient.readEvents(executionId, lastEventIndex);
-    let terminal = false;
+    let terminal: ChatEvent | undefined;
     for (const event of events) {
       yield event;
       if (isExecutionTerminalEvent(event)) {
-        terminal = true;
+        terminal = event;
       }
     }
     lastEventIndex += events.length;
     if (terminal || Date.now() >= deadline) {
-      return;
+      return terminal;
     }
     await delay(pollMs);
   }

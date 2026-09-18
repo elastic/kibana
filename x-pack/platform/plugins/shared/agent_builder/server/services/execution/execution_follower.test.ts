@@ -375,6 +375,65 @@ describe('followExecution$', () => {
       expect(executionClient.readEvents).toHaveBeenCalledTimes(1);
     });
 
+    it('aborted: rebuilds the persisted abort error, with its abort_reason, once the worker recorded it', async () => {
+      const executionClient = createMockExecutionClient();
+      const aborted = terminalEvent(TimelineEventType.executionAborted);
+      const persistedError = {
+        code: AgentBuilderErrorCode.requestAborted,
+        message: 'Converse request was aborted',
+        meta: { abort_reason: { source: 'api', actor: { id: 'u1' } } },
+      };
+
+      // first poll: aborted, error not recorded yet; the peek after the drain has it
+      executionClient.peek
+        .mockResolvedValueOnce(peekResult(ExecutionStatus.aborted, 0))
+        .mockResolvedValueOnce({
+          status: ExecutionStatus.aborted,
+          eventCount: 1,
+          error: persistedError as never,
+        });
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([aborted], ExecutionStatus.aborted)
+      );
+
+      const result = await collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+
+      expect(result.events).toEqual([aborted]);
+      expect(isRequestAbortedError(result.error!)).toBe(true);
+      expect(
+        (result.error as unknown as { meta: Record<string, unknown> }).meta.abort_reason
+      ).toEqual({
+        source: 'api',
+        actor: { id: 'u1' },
+      });
+    });
+
+    it('aborted: derives abort_reason from the drained execution_aborted when no error is recorded yet', async () => {
+      const executionClient = createMockExecutionClient();
+      const aborted = {
+        ...terminalEvent(TimelineEventType.executionAborted),
+        data: { time_to_last_token: 1, aborted_by: { source: 'task_manager' } },
+      } as ChatEvent;
+
+      executionClient.peek.mockResolvedValue(peekResult(ExecutionStatus.aborted, 0));
+      executionClient.readEvents.mockResolvedValueOnce(
+        readEventsResult([aborted], ExecutionStatus.aborted)
+      );
+
+      const result = await collectEvents(
+        followExecution$({ executionId: EXECUTION_ID, executionClient })
+      );
+
+      expect(isRequestAbortedError(result.error!)).toBe(true);
+      expect(
+        (result.error as unknown as { meta: Record<string, unknown> }).meta.abort_reason
+      ).toEqual({
+        source: 'task_manager',
+      });
+    });
+
     it('aborted: drains until execution_aborted arrives, yields it, then throws RequestAbortedError', async () => {
       const executionClient = createMockExecutionClient();
       const aborted = terminalEvent(TimelineEventType.executionAborted);
