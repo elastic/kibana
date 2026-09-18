@@ -14,9 +14,6 @@ export interface AlertZeroClientConfig {
   ui: {
     useMockData: boolean;
   };
-  featureFlags: {
-    alertTriageWorkerEnabled: boolean;
-  };
 }
 
 export type AlertZeroSetupDependencies = Record<string, never>;
