@@ -8,6 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
+  IndicesIndexSettingsAnalysis,
   MappingDynamicTemplate,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -455,14 +456,14 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
  * a new backing index can pick it up.  This typically happens when a `@custom` component
  * template gains a custom analyzer after the write index was created.
  *
- * The patterns are anchored on the analyzer/normalizer name so that unrelated invalid mappings
- * keep surfacing as errors instead of being masked by a pointless rollover.
+ * Each pattern captures the kind and the name of the offending analysis component so that the
+ * composed index template can be checked for it before a rollover is scheduled.
  */
 const MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   // (search_)analyzer [standard_lower] has not been configured in mappings
-  /(analyzer|normalizer) \[[^\]]+\] has not been configured in mappings/,
+  /(analyzer|normalizer) \[([^\]]+)\] has not been configured in mappings/,
   // normalizer [uppercase_normalizer] not found for field [name]
-  /(analyzer|normalizer) \[[^\]]+\] not found for field/,
+  /(analyzer|normalizer) \[([^\]]+)\] not found for field/,
 ];
 
 /**
@@ -487,18 +488,30 @@ const collectErrorReasons = (err: any): string[] => {
   return reasons;
 };
 
-const errorReasonRequiresRollover = (
-  err: any,
-  reasonsRequiringRollover: Array<string | RegExp>
-): boolean => {
+const errorReasonRequiresRollover = (err: any, reasonsRequiringRollover: string[]): boolean => {
   const reasons = collectErrorReasons(err);
   return reasonsRequiringRollover.some((reasonRequiringRollover) =>
-    reasons.some((reason) =>
-      typeof reasonRequiringRollover === 'string'
-        ? reason.includes(reasonRequiringRollover)
-        : reasonRequiringRollover.test(reason)
-    )
+    reasons.some((reason) => reason.includes(reasonRequiringRollover))
   );
+};
+
+/**
+ * Extracts the analyzer or normalizer that an ES mapping error complains about, or undefined
+ * when the error is not about a missing analysis component.
+ */
+const getReferencedAnalysisComponent = (
+  err: any
+): { kind: 'analyzer' | 'normalizer'; name: string } | undefined => {
+  for (const reason of collectErrorReasons(err)) {
+    for (const pattern of MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER) {
+      const match = reason.match(pattern);
+      if (match) {
+        // `search_analyzer [x]` also matches the `analyzer` alternative, which is correct as its
+        // value is resolved from `analysis.analyzer` too.
+        return { kind: match[1] as 'analyzer' | 'normalizer', name: match[2] };
+      }
+    }
+  }
 };
 
 /**
@@ -514,8 +527,13 @@ const errorReasonRequiresRollover = (
  * rather than by type alone: both types also cover genuinely invalid mappings, and a rollover
  * here swallows the error and reports the install as successful, so matching them
  * unconditionally would hide real packaging bugs.
+ *
+ * `simulatedAnalysis` is the `index.analysis` section of the composed index template, and is
+ * undefined when the template could not be simulated at all.  A `mapper_parsing_exception` is
+ * only rollover-worthy when the analyzer it names is actually present there, as that is what
+ * the new backing index will be built from.
  */
-function errorNeedRollover(err: any): boolean {
+function errorNeedRollover(err: any, simulatedAnalysis?: IndicesIndexSettingsAnalysis): boolean {
   if (
     isResponseError(err) &&
     err.statusCode === 400 &&
@@ -533,11 +551,12 @@ function errorNeedRollover(err: any): boolean {
   ) {
     return true;
   }
-  if (
-    err.body?.error?.type === 'mapper_parsing_exception' &&
-    errorReasonRequiresRollover(err, MAPPER_PARSING_EXCEPTION_REASONS_REQUIRING_ROLLOVER)
-  ) {
-    return true;
+  if (err.body?.error?.type === 'mapper_parsing_exception') {
+    const referenced = getReferencedAnalysisComponent(err);
+    // If the analyzer is missing from the composed template too — or the template could not be
+    // simulated — the next backing index would be built from the same broken definition, so the
+    // error has to surface instead of being masked by a rollover.
+    return Boolean(referenced && simulatedAnalysis?.[referenced.kind]?.[referenced.name]);
   }
   return false;
 }
@@ -628,6 +647,9 @@ const updateExistingDataStream = async ({
   let lifecycle: any;
   let subobjectsFieldChanged: boolean = false;
   let simulateResult: any = {};
+  // Stays undefined if the template cannot be simulated, which `errorNeedRollover` relies on to
+  // tell a failed simulation apart from a failed mappings update.
+  let simulatedAnalysis: IndicesIndexSettingsAnalysis | undefined;
   try {
     simulateResult = await retryTransientEsErrors(async () =>
       esClient.indices.simulateTemplate({
@@ -636,6 +658,7 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
+    simulatedAnalysis = settings?.index?.analysis;
 
     try {
       mappings = fillConstantKeywordValues(
@@ -673,7 +696,7 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    if (errorNeedRollover(err) || subobjectsFieldChanged) {
+    if (errorNeedRollover(err, simulatedAnalysis) || subobjectsFieldChanged) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
       logger.trace(`Attempted mappings: ${mappings}`);
       if (options?.skipDataStreamRollover === true) {

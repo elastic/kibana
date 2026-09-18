@@ -2504,7 +2504,21 @@ describe('EPM template', () => {
     });
 
     describe('mapper_parsing_exception', () => {
-      const setupEsClientForMapperParsingException = (error: any) => {
+      // The composed index template defines both analysis components, so a rollover can pick
+      // them up in the new backing index.
+      const simulatedAnalysis = {
+        normalizer: {
+          uppercase_normalizer: { type: 'custom', filter: ['uppercase'] },
+        },
+        analyzer: {
+          standard_lower: { type: 'custom', tokenizer: 'standard', filter: ['lowercase'] },
+        },
+      };
+
+      const setupEsClientForMapperParsingException = (
+        error: any,
+        { analysis = simulatedAnalysis }: { analysis?: object } = {}
+      ) => {
         const esClient = elasticsearchServiceMock.createElasticsearchClient();
         esClient.indices.getDataStream.mockResponse({
           data_streams: [{ name: 'test.prefix1-default' }],
@@ -2516,7 +2530,7 @@ describe('EPM template', () => {
         } as any);
         esClient.indices.simulateTemplate.mockResponse({
           template: {
-            settings: { index: {} },
+            settings: { index: { analysis } },
             mappings: {},
           },
         } as any);
@@ -2615,6 +2629,55 @@ describe('EPM template', () => {
         const esClient = setupEsClientForMapperParsingException({
           type: 'mapper_parsing_exception',
           reason: 'copy_to [bar] not found for field [foo]',
+        });
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates)
+        ).rejects.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+
+      it('should not rollover when the normalizer is missing from the composed template too', async () => {
+        // A new backing index would be built from the same broken definition, so the error has
+        // to surface rather than be masked by a rollover that reports a successful install.
+        const esClient = setupEsClientForMapperParsingException(
+          {
+            type: 'mapper_parsing_exception',
+            reason: 'normalizer [uppercase_normalizer] not found for field [name]',
+          },
+          { analysis: {} }
+        );
+
+        await expect(
+          updateCurrentWriteIndices(esClient, loggerMock.create(), indexTemplates)
+        ).rejects.toThrow();
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(
+          expect.objectContaining({ path: '/test.prefix1-default/_rollover' })
+        );
+      });
+
+      it('should not rollover when the template itself cannot be simulated', async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.indices.getDataStream.mockResponse({
+          data_streams: [{ name: 'test.prefix1-default' }],
+        } as any);
+        esClient.indices.get.mockResponse({
+          'test.prefix1-default': { mappings: {} },
+        } as any);
+        esClient.indices.simulateTemplate.mockImplementation(() => {
+          throw new errors.ResponseError({
+            statusCode: 400,
+            body: {
+              error: {
+                type: 'mapper_parsing_exception',
+                reason: 'normalizer [uppercase_normalizer] not found for field [name]',
+              },
+            },
+          } as any);
         });
 
         await expect(
