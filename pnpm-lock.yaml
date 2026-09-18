@@ -2972,6 +2972,9 @@ importers:
       '@kbn/sample-task-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
+      '@kbn/sandbox-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/sandbox
       '@kbn/saved-object-export-transforms-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms
@@ -9173,6 +9176,8 @@ importers:
   x-pack/platform/plugins/shared/rule_registry: {}
 
   x-pack/platform/plugins/shared/sample_data_ingest: {}
+
+  x-pack/platform/plugins/shared/sandbox: {}
 
   x-pack/platform/plugins/shared/saved_objects_tagging: {}
 
