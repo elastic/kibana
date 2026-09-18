@@ -208,33 +208,9 @@ steps:
       type: security.rule
       origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
       description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
-
-  # One route per verdict, mutually exclusive, so exactly one child runs below.
-  # A verdict the actions cannot honour (unknown rule, missing prebuilt version,
-  # a verdict outside the enum) is reported instead of silently dropped.
-  - name: route_verdict
-    type: data.set
-    with:
-      enable: >-
-        ${{ steps.coverage_check.output.structured_output.verdict == 'covered_disabled'
-          and steps.resolve_rule.output.id != null }}
-      install: >-
-        ${{ steps.coverage_check.output.structured_output.verdict == 'prebuilt_available'
-          and steps.coverage_check.output.structured_output.rule_id != ''
-          and steps.coverage_check.output.structured_output.prebuilt_version > 0 }}
-      confirm: "${{ steps.coverage_check.output.structured_output.verdict == 'covered_enabled' }}"
-      create: "${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage' }}"
-
-  - name: route_fallback
-    type: data.set
-    with:
-      report: >-
-        ${{ steps.route_verdict.output.enable != true
-          and steps.route_verdict.output.install != true
-          and steps.route_verdict.output.confirm != true
-          and steps.route_verdict.output.create != true }}
 
   # Evidence shared by every proposal comment below. Links carry the space prefix:
   # the review runs in the space of the sweep that started it, and a link without
@@ -254,18 +230,15 @@ steps:
         {% endif %}
       check_line: "**Coverage check:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
 
-  - name: run_rule_creation
-    type: workflow.execute
-    if: "${{ steps.route_verdict.output.create == true }}"
-    on-failure:
-      continue: true
+  # One route per verdict. A verdict the actions cannot honour (unknown rule,
+  # missing prebuilt version, a verdict outside the enum) routes to `report` so
+  # the analyst learns what happened instead of the run ending silently. The
+  # switch below matches on this string, so the compound tests live here.
+  - name: route_verdict
+    type: data.set
     with:
-      workflow-id: system-security-rule-creation
-      inputs:
-        technique: "{{ steps.gap.output.technique }}"
-        gap_description: "{{ steps.gap.output.description }}"
-        evidence: "{{ steps.gap.output.evidence }}"
-        preview_invocation_count: "${{ inputs.preview_invocation_count }}"
+      route: >-
+        {% if steps.coverage_check.output.structured_output.verdict == 'covered_disabled' and steps.resolve_rule.output.id != null %}enable{% elsif steps.coverage_check.output.structured_output.verdict == 'prebuilt_available' and steps.coverage_check.output.structured_output.rule_id != '' and steps.coverage_check.output.structured_output.prebuilt_version > 0 %}install{% elsif steps.coverage_check.output.structured_output.verdict == 'covered_enabled' %}confirm{% elsif steps.coverage_check.output.structured_output.verdict == 'no_coverage' %}create{% else %}report{% endif %}
 
   # The proposal gate records the recommendation on the investigation, parks on
   # the analyst's decision for up to 72h, and on approval runs the action as the
@@ -273,140 +246,157 @@ steps:
   # completes without a decision: the indicator stays pending for the next sweep
   # and the investigation stays open because nobody decided. No on-failure: a
   # gate that fails outright fails this run before `mark_processed`.
-  - name: propose_enable
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.route_verdict.output.enable == true }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: |-
-          **Enable an existing rule that covers this gap**
+  # Exactly one branch runs. Inside a branch the route already holds and the
+  # investigation exists (its create step has no on-failure), so the steps carry
+  # no guards of their own.
+  - name: handle_verdict
+    type: switch
+    expression: "{{ steps.route_verdict.output.route }}"
+    cases:
+      - match: create
+        steps:
+          - name: run_rule_creation
+            type: workflow.execute
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-security-rule-creation
+              inputs:
+                technique: "{{ steps.gap.output.technique }}"
+                gap_description: "{{ steps.gap.output.description }}"
+                evidence: "{{ steps.gap.output.evidence }}"
+                preview_invocation_count: "${{ inputs.preview_invocation_count }}"
 
-          {{ steps.compose_evidence.output.rule_line }}
-          **Recommended action:** Enable rule
-          {{ steps.compose_evidence.output.investigation_line }}
+      - match: enable
+        steps:
+          - name: propose_enable
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Enable an existing rule that covers this gap**
 
-          {{ steps.compose_evidence.output.gap_block }}
+                  {{ steps.compose_evidence.output.rule_line }}
+                  **Recommended action:** Enable rule
+                  {{ steps.compose_evidence.output.investigation_line }}
 
-          **Why it matches**
-          {{ steps.coverage_check.output.structured_output.rationale }}
+                  {{ steps.compose_evidence.output.gap_block }}
 
-          {{ steps.compose_evidence.output.check_line }}
+                  **Why it matches**
+                  {{ steps.coverage_check.output.structured_output.rationale }}
 
-          **On approval**
-          The rule is enabled and starts producing alerts on its next scheduled run. Dismissing leaves it off.
-        actionWorkflowId: system-alertzero-action-enable-rule
-        actionInput:
-          id: "{{ steps.resolve_rule.output.id }}"
-        impact: low
-        confidence: medium
-        # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.
-        autoApprove: false
+                  {{ steps.compose_evidence.output.check_line }}
 
-  - name: propose_install
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.route_verdict.output.install == true }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: |-
-          **Install a prebuilt rule that covers this gap**
+                  **On approval**
+                  The rule is enabled and starts producing alerts on its next scheduled run. Dismissing leaves it off.
+                actionWorkflowId: system-alertzero-action-enable-rule
+                actionInput:
+                  id: "{{ steps.resolve_rule.output.id }}"
+                impact: low
+                confidence: medium
+                # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.
+                autoApprove: false
 
-          {{ steps.compose_evidence.output.rule_line }}
-          **Recommended action:** Install and enable prebuilt rule (version {{ steps.coverage_check.output.structured_output.prebuilt_version }})
-          {{ steps.compose_evidence.output.investigation_line }}
+      - match: install
+        steps:
+          - name: propose_install
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Install a prebuilt rule that covers this gap**
 
-          {{ steps.compose_evidence.output.gap_block }}
+                  {{ steps.compose_evidence.output.rule_line }}
+                  **Recommended action:** Install and enable prebuilt rule (version {{ steps.coverage_check.output.structured_output.prebuilt_version }})
+                  {{ steps.compose_evidence.output.investigation_line }}
 
-          **Why it matches**
-          {{ steps.coverage_check.output.structured_output.rationale }}
+                  {{ steps.compose_evidence.output.gap_block }}
 
-          {{ steps.compose_evidence.output.check_line }}
+                  **Why it matches**
+                  {{ steps.coverage_check.output.structured_output.rationale }}
 
-          **On approval**
-          The Elastic prebuilt rule is installed from the package and enabled immediately. Dismissing leaves it uninstalled.
-        actionWorkflowId: system-alertzero-action-install-prebuilt-rule
-        actionInput:
-          rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-          version: "${{ steps.coverage_check.output.structured_output.prebuilt_version }}"
-        impact: medium
-        confidence: medium
-        autoApprove: false
+                  {{ steps.compose_evidence.output.check_line }}
 
-  # Same gate without an action: approval is the analyst's judgement that the
-  # enabled rule fully addresses the gap, so approval is the whole lifecycle.
-  # An action-less proposal has no action metadata to take its category from,
-  # so the queue bucket is named here; without it the proposal lands in the
-  # uncategorized fallback instead of beside the other coverage decisions.
-  - name: propose_confirm
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.route_verdict.output.confirm == true }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: |-
-          **Confirm an enabled rule already covers this gap**
+                  **On approval**
+                  The Elastic prebuilt rule is installed from the package and enabled immediately. Dismissing leaves it uninstalled.
+                actionWorkflowId: system-alertzero-action-install-prebuilt-rule
+                actionInput:
+                  rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+                  version: "${{ steps.coverage_check.output.structured_output.prebuilt_version }}"
+                impact: medium
+                confidence: medium
+                autoApprove: false
 
-          {{ steps.compose_evidence.output.rule_line }}
-          **Recommended action:** None; confirm coverage
-          {{ steps.compose_evidence.output.investigation_line }}
+      # Same gate without an action: approval is the analyst's judgement that the
+      # enabled rule fully addresses the gap, so approval is the whole lifecycle.
+      - match: confirm
+        steps:
+          - name: propose_confirm
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Confirm an enabled rule already covers this gap**
 
-          {{ steps.compose_evidence.output.gap_block }}
+                  {{ steps.compose_evidence.output.rule_line }}
+                  **Recommended action:** None; confirm coverage
+                  {{ steps.compose_evidence.output.investigation_line }}
 
-          **Why it covers**
-          {{ steps.coverage_check.output.structured_output.rationale }}
+                  {{ steps.compose_evidence.output.gap_block }}
 
-          This check does not account for rule exceptions, which may limit coverage.
+                  **Why it covers**
+                  {{ steps.coverage_check.output.structured_output.rationale }}
 
-          {{ steps.compose_evidence.output.check_line }}
+                  This check does not account for rule exceptions, which may limit coverage.
 
-          **On approval**
-          Nothing changes; approving records that the gap is covered. Dismiss if the rule does not fully address the reported behavior.
-        category: configure
-        impact: low
-        confidence: medium
+                  {{ steps.compose_evidence.output.check_line }}
 
-  # Anything the routes above could not honour lands here so the analyst learns
-  # what happened instead of the run ending silently.
-  - name: propose_report
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.route_fallback.output.report == true }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: |-
-          **Coverage check needs a manual follow-up**
+                  **On approval**
+                  Nothing changes; approving records that the gap is covered. Dismiss if the rule does not fully address the reported behavior.
+                category: configure
+                impact: low
+                confidence: medium
 
-          {% if steps.coverage_check.output.structured_output.verdict == 'covered_disabled' %}The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.{% elsif steps.coverage_check.output.structured_output.verdict == 'prebuilt_available' %}The check matched a prebuilt rule, but did not report a rule id and version to install.{% else %}The coverage check returned an unexpected verdict and no automated action was taken.{% endif %}
+    default:
+      # Only a check that produced a verdict is reported; without one nobody is
+      # asked and `emit_result` carries `check_error`.
+      - name: propose_report
+        type: workflow.execute
+        if: >-
+          ${{ steps.coverage_check.output.structured_output.verdict != null
+            and steps.coverage_check.output.structured_output.verdict != '' }}
+        with:
+          workflow-id: system-create-investigation-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            comment: |-
+              **Coverage check needs a manual follow-up**
 
-          **Verdict:** {{ steps.coverage_check.output.structured_output.verdict }}
-          {{ steps.compose_evidence.output.rule_line }}
-          {{ steps.compose_evidence.output.investigation_line }}
+              {% if steps.coverage_check.output.structured_output.verdict == 'covered_disabled' %}The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.{% elsif steps.coverage_check.output.structured_output.verdict == 'prebuilt_available' %}The check matched a prebuilt rule, but did not report a rule id and version to install.{% else %}The coverage check returned an unexpected verdict and no automated action was taken.{% endif %}
 
-          {{ steps.compose_evidence.output.gap_block }}
+              **Verdict:** {{ steps.coverage_check.output.structured_output.verdict }}
+              {{ steps.compose_evidence.output.rule_line }}
+              {{ steps.compose_evidence.output.investigation_line }}
 
-          {% if steps.coverage_check.output.structured_output.rationale != null and steps.coverage_check.output.structured_output.rationale != '' %}**Rationale**
-          {{ steps.coverage_check.output.structured_output.rationale }}
-          {% endif %}
-          {{ steps.compose_evidence.output.check_line }}
+              {{ steps.compose_evidence.output.gap_block }}
 
-          **On approval**
-          Nothing is applied automatically; approving acknowledges the follow-up.
-        category: investigate
-        impact: low
-        confidence: low
+              {% if steps.coverage_check.output.structured_output.rationale != null and steps.coverage_check.output.structured_output.rationale != '' %}**Rationale**
+              {{ steps.coverage_check.output.structured_output.rationale }}
+              {% endif %}
+              {{ steps.compose_evidence.output.check_line }}
+
+              **On approval**
+              Nothing is applied automatically; approving acknowledges the follow-up.
+            category: investigate
+            impact: low
+            confidence: low
+
 
   # The gate reports its outcome on two axes: `decision` is what the analyst
   # concluded (`approved` / `dismissed`, absent until someone decides) and
@@ -473,7 +463,7 @@ steps:
   - name: attach_installed_rule
     type: ai.attachment.add
     if: >-
-      ${{ steps.route_verdict.output.install == true
+      ${{ steps.route_verdict.output.route == 'install'
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
@@ -482,6 +472,7 @@ steps:
       type: security.rule
       origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
       description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 
@@ -498,7 +489,7 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        verdict: "{% if steps.route_verdict.output.enable %}Analyst approved enabling the existing rule.{% elsif steps.route_verdict.output.install %}Analyst approved installing the prebuilt rule.{% elsif steps.route_verdict.output.confirm %}Analyst confirmed the enabled rule covers the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
+        verdict: "{% if steps.route_verdict.output.route == 'enable' %}Analyst approved enabling the existing rule.{% elsif steps.route_verdict.output.route == 'install' %}Analyst approved installing the prebuilt rule.{% elsif steps.route_verdict.output.route == 'confirm' %}Analyst confirmed the enabled rule covers the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
     on-failure:
       continue: true
 
