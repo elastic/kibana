@@ -643,9 +643,13 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       });
 
       await lastValueFrom(
-        provider.search(factoryRequest(OsqueryQueries.actionResults), {} as never, {
-          request: {},
-        } as never)
+        provider.search(
+          factoryRequest(OsqueryQueries.actionResults),
+          {} as never,
+          {
+            request: {},
+          } as never
+        )
       );
 
       expect(searchMock.mock.calls.length).toBeGreaterThanOrEqual(2);

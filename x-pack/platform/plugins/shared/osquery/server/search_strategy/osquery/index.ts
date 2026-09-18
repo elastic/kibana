@@ -97,8 +97,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           }) => {
             // Single decision for hit-level enforceSpaceScope and for any
             // global-agg builder that cannot inherit the top-level query.
-            const matchActionDataSpaceId =
-              ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
+            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
 
             const strictRequest = {
               factoryQueryType,
