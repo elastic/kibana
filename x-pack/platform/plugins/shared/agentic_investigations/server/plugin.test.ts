@@ -30,6 +30,8 @@ import {
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
 import { registerRoutes } from './proposals/routes/register_routes';
+import { registerImpactRoutes } from './impact/routes/register_routes';
+import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 
 jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
   initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
@@ -37,6 +39,10 @@ jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
 
 jest.mock('./proposals/routes/register_routes', () => ({
   registerRoutes: jest.fn(),
+}));
+
+jest.mock('./impact/routes/register_routes', () => ({
+  registerImpactRoutes: jest.fn(),
 }));
 
 const createContext = () =>
@@ -125,6 +131,33 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
     });
 
+    it('pulls impact capabilities up through a sub-feature rather than more inline privileges', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features);
+
+      expect(subFeatures).toEqual([
+        expect.objectContaining({
+          privilegeGroups: [
+            expect.objectContaining({
+              groupType: 'mutually_exclusive',
+              privileges: [
+                expect.objectContaining({
+                  id: 'impact_all',
+                  includeIn: 'all',
+                  api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
+                }),
+                expect.objectContaining({
+                  id: 'impact_read',
+                  includeIn: 'read',
+                  api: [IMPACT_API_PRIVILEGE_READ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ]);
+    });
+
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {
       const { workflowsExtensions } = setupPlugin();
 
@@ -162,6 +195,7 @@ describe('AgenticInvestigationsPlugin', () => {
       setupPlugin();
 
       expect(registerRoutes).toHaveBeenCalledTimes(1);
+      expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -174,12 +208,13 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('exposes the proposals service for in-process callers', () => {
+    it('exposes the proposals and impact services for in-process callers', () => {
       const { plugin } = setupPlugin();
 
       const { contract } = startPlugin(plugin);
 
       expect(contract.getProposalsService()).toBeDefined();
+      expect(contract.getImpactService()).toBeDefined();
     });
   });
 
