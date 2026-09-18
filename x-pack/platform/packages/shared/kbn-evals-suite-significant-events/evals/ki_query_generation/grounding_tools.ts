@@ -42,12 +42,8 @@ const readDatasetValue = (
 
 /**
  * Resolves the SCS `repository` label (e.g. "open-telemetry/opentelemetry-demo") for a dataset.
- * The legacy `*_CODE_INDEX*` variables hold index names, which SCS no longer accepts as `repository`.
+ * Reads a per-dataset JSON map from `KI_QUERY_GENERATION_REPOSITORIES` and falls back to a single
+ * `KI_QUERY_GENERATION_REPOSITORY` for all datasets.
  */
 export const resolveRepositoryForDataset = (datasetId: string): string | undefined =>
-  readDatasetValue(
-    datasetId,
-    'KI_QUERY_GENERATION_REPOSITORIES',
-    'KI_QUERY_GENERATION_REPOSITORY'
-  ) ??
-  readDatasetValue(datasetId, 'KI_QUERY_GENERATION_CODE_INDICES', 'KI_QUERY_GENERATION_CODE_INDEX');
+  readDatasetValue(datasetId, 'KI_QUERY_GENERATION_REPOSITORIES', 'KI_QUERY_GENERATION_REPOSITORY');
