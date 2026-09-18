@@ -84,7 +84,7 @@ export interface SingleCompileConfigOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
-  /** Set to false to exclude developer-tools plugins; omit to include them */
+  /** Include developer-tools plugins. Default false. */
   devTools?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
@@ -129,7 +129,7 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
-    devTools,
+    devTools = false,
     pluginPaths,
     pluginScanDirs,
     allowlistPluginGroups,

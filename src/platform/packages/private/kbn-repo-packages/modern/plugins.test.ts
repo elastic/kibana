@@ -15,21 +15,21 @@ const DEV_TOOL_PLUGIN_IDS = ['developerToolbar', 'inspectComponent'];
 describe('getPluginPackagesFilter devTools', () => {
   const packages = getPackages(REPO_ROOT);
 
-  it('includes developer-tools plugins by default', () => {
+  it('excludes developer-tools plugins by default', () => {
     const ids = packages.filter(getPluginPackagesFilter()).map((pkg) => pkg.manifest.plugin.id);
 
     for (const id of DEV_TOOL_PLUGIN_IDS) {
-      expect(ids).toContain(id);
+      expect(ids).not.toContain(id);
     }
   });
 
-  it('excludes developer-tools plugins when selector.devTools is false', () => {
+  it('includes developer-tools plugins when selector.devTools is true', () => {
     const ids = packages
-      .filter(getPluginPackagesFilter({ devTools: false }))
+      .filter(getPluginPackagesFilter({ devTools: true }))
       .map((pkg) => pkg.manifest.plugin.id);
 
     for (const id of DEV_TOOL_PLUGIN_IDS) {
-      expect(ids).not.toContain(id);
+      expect(ids).toContain(id);
     }
   });
 });

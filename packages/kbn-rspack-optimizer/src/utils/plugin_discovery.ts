@@ -20,7 +20,7 @@ export interface DiscoverPluginsOptions {
   repoRoot: string;
   examples?: boolean;
   testPlugins?: boolean;
-  /** Set to false to exclude developer-tools plugins; omit to include them */
+  /** Include developer-tools plugins. Default false. */
   devTools?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   paths?: string[];
@@ -63,7 +63,7 @@ export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<
     repoRoot,
     examples = false,
     testPlugins = false,
-    devTools,
+    devTools = false,
     paths,
     parentDirs,
     allowlistPluginGroups,

@@ -35,7 +35,7 @@ function matchCategory(selector, category) {
     return false;
   }
 
-  if (category.devTools && selector.devTools === false) {
+  if (category.devTools && !selector.devTools) {
     return false;
   }
 

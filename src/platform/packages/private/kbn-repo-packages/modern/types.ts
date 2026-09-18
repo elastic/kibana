@@ -177,7 +177,7 @@ export interface PluginSelector {
    */
   testPlugins?: boolean;
   /**
-   * Set to `false` to exclude plugins marked `devTools`. Omit/undefined includes them.
+   * Set to `true` to include plugins marked `devTools`.
    */
   devTools?: boolean;
   /**

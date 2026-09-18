@@ -148,6 +148,7 @@ describe('webpack optimizer path', () => {
         Object {
           "allowlistPluginGroups": undefined,
           "cache": true,
+          "devTools": true,
           "dist": true,
           "examples": true,
           "includeCoreBundle": true,
@@ -165,6 +166,7 @@ describe('webpack optimizer path', () => {
         Object {
           "allowlistPluginGroups": undefined,
           "cache": false,
+          "devTools": true,
           "dist": false,
           "examples": false,
           "includeCoreBundle": true,
@@ -333,6 +335,7 @@ describe('rspack path', () => {
         cache: true,
         dist: true,
         examples: true,
+        devTools: true,
         pluginPaths: ['/some/dir'],
         pluginScanDirs: ['/some-scan-path'],
         basePath: '/s/kibana',

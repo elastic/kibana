@@ -56,6 +56,11 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
+      const devTools = flags['dev-tools'] ?? false;
+      if (typeof devTools !== 'boolean') {
+        throw createFlagError('expected --dev-tools to have no value');
+      }
+
       // cache and hmr are declared as positive booleans defaulting to true.
       // getopts interprets --no-cache as cache=false and --no-hmr as hmr=false.
       const cache = flags.cache as boolean;
@@ -206,7 +211,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         cache,
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
-        devTools: effectiveDist ? false : undefined,
+        devTools: updateLimits ? false : devTools,
         allowlistPluginGroups,
         themeTags: themes,
         log,
@@ -239,6 +244,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'dist',
           'examples',
           'test-plugins',
+          'dev-tools',
           'cache',
           'hmr',
           'profile',
@@ -263,6 +269,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           dist: false,
           examples: false,
           'test-plugins': false,
+          'dev-tools': false,
           cache: true,
           hmr: true,
           profile: false,
@@ -275,6 +282,7 @@ export function runRspackCli(options: CliOptions = {}): void {
             --dist                    Build for distribution (minified, no source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
+            --dev-tools               Include developer toolbar / inspect plugins
             --themes <tags>           Comma-separated theme tags to build (default: all)
             --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
                                       Mirrors the server's plugins.allowlistPluginGroups setting.

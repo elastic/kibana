@@ -643,6 +643,7 @@ describe('plugins discovery system', () => {
           oss: false,
           parentDirs: [],
           paths: [],
+          devTools: true,
         },
       ]);
 

@@ -124,6 +124,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -153,6 +154,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -182,6 +184,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": true,
           "parentDirs": undefined,
           "paths": undefined,
@@ -210,6 +213,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -239,6 +243,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -268,6 +273,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -297,6 +303,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -327,6 +334,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -357,6 +365,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
           "allowlistPluginGroups": undefined,
+          "devTools": false,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
