@@ -29,12 +29,15 @@ import {
   ConversationRoundStepType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 import {
   fromEs,
+  fromEsWithoutRounds,
+  toAttachmentSummaries,
   toEs,
   toConversationResponse,
   toConversationResponseFromDocument,
@@ -803,6 +806,86 @@ describe('conversation model converters', () => {
     };
   };
 
+  describe('attachment summaries', () => {
+    const documentWithAttachments = (attachments: VersionedAttachment[]): ConversationDocument => ({
+      _id: 'conv_id',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        user_id: 'user_id',
+        user_name: 'user_name',
+        space: 'space',
+        conversation_rounds: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+        attachments,
+      },
+    });
+
+    const textAttachment = (id: string, active?: boolean): VersionedAttachment => ({
+      id,
+      type: 'text',
+      versions: [
+        {
+          version: 1,
+          data: { content: 'Hello' },
+          created_at: creationDate,
+          content_hash: 'abc123',
+          estimated_tokens: 5,
+        },
+      ],
+      current_version: 1,
+      ...(active === undefined ? {} : { active }),
+    });
+
+    it('reduces attachments to id and type, dropping version content', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1'), textAttachment('att-2')])).toEqual([
+        { id: 'att-1', type: 'text' },
+        { id: 'att-2', type: 'text' },
+      ]);
+    });
+
+    it('treats an attachment with no active field as active', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1')])).toEqual([
+        { id: 'att-1', type: 'text' },
+      ]);
+    });
+
+    it('omits soft-deleted attachments', () => {
+      expect(
+        toAttachmentSummaries([textAttachment('att-1', true), textAttachment('att-2', false)])
+      ).toEqual([{ id: 'att-1', type: 'text' }]);
+    });
+
+    it('summarizes a conversation with no attachments to nothing', () => {
+      expect(toAttachmentSummaries([])).toEqual([]);
+      expect(toAttachmentSummaries(undefined)).toEqual([]);
+    });
+
+    it('leaves the rounds-less row itself free of attachments', () => {
+      const deserialized = fromEsWithoutRounds(
+        documentWithAttachments([textAttachment('att-1')]),
+        requestingUser
+      );
+
+      expect(deserialized).not.toHaveProperty('attachments');
+    });
+
+    it('keeps soft-deleted attachments on the full conversation', () => {
+      const deserialized = fromEs(
+        documentWithAttachments([textAttachment('att-1'), textAttachment('att-2', false)]),
+        requestingUser
+      );
+
+      expect(deserialized.attachments).toEqual([
+        expect.objectContaining({ id: 'att-1', current_version: 1 }),
+        expect.objectContaining({ id: 'att-2', active: false }),
+      ]);
+    });
+  });
+
   describe('toConversationResponse', () => {
     it('strips internal fields from normalized conversations', () => {
       const response = toConversationResponse({
@@ -1387,9 +1470,13 @@ describe('conversation model converters', () => {
 
     // --- Single promoter to events-native -----------------------------------
     // `createRequestToEs` is the only place that stamps `schema_version`; new
-    // conversations are always events-native from round 1. It also *derives*
-    // `events` from the caller's rounds rather than trusting an array off the
-    // request, so each field has exactly one writer.
+    // conversations are always events-native from round 1. It derives `events`
+    // from the caller's rounds when no `events` array is supplied; when the
+    // caller provides `events`, it is serialized verbatim and the round-derived
+    // projection is NOT re-composed on top — matching the update converter's
+    // contract. Callers that need both a round and additive events (e.g.
+    // attachment events at round-complete time) are responsible for composing
+    // the full events array themselves.
 
     it('stamps schema_version at CONVERSATION_SCHEMA_VERSION on every create', () => {
       const conversation = {
@@ -1475,6 +1562,63 @@ describe('conversation model converters', () => {
 
       // Caller-supplied events win over the empty round-derived projection.
       expect(serialized.events?.map((event) => event.id)).toEqual(['round-1::user_message']);
+    });
+
+    it('serializes caller-supplied events verbatim when both events and rounds are provided (caller composes)', () => {
+      // Contract: when both are supplied, `events` is the full stored projection; the round is
+      // only serialized to `conversation_rounds`. Callers needing composition (e.g.
+      // `createConversation$` at round-complete time) must pre-compose the events array.
+      const attachmentAddedEvent: TimelineEvent = {
+        id: 'att-evt-1',
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2025-01-01T00:00:11.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        execution_id: 'round-seed::execution',
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'chat_input',
+        },
+      } as TimelineEvent;
+
+      const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [
+          {
+            id: 'round-seed',
+            status: ConversationRoundStatus.completed,
+            input: { message: 'hello' },
+            response: { message: 'hi' },
+            steps: [],
+            started_at: roundCreationDate,
+            time_to_first_token: 10,
+            time_to_last_token: 50,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 3,
+              output_tokens: 4,
+            },
+          },
+        ],
+        events: [attachmentAddedEvent],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      // Events written verbatim — the round's derived events are NOT re-composed here.
+      expect(serialized.events?.map((event) => event.id)).toEqual(['att-evt-1']);
+      // The round is still serialized to `conversation_rounds`, so read-through-rounds is intact.
+      expect(serialized.conversation_rounds).toHaveLength(1);
+      expect(serialized.conversation_rounds[0].id).toBe('round-seed');
     });
   });
 
