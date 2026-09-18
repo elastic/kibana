@@ -13,9 +13,11 @@ import {
   loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
+  validateOpenApiArtifactArchiveMock,
   fetchArtifactVersionsMock,
   fetchSecurityLabsVersionsMock,
   ensureDefaultElserDeployedMock,
+  ensureInferenceDeployedMock,
 } from './package_installer.test.mocks';
 import { cloneDeep } from 'lodash';
 import type { ProductName } from '@kbn/product-doc-common';
@@ -72,6 +74,7 @@ describe('PackageInstaller', () => {
     });
 
     validateArtifactArchiveMock.mockReturnValue({ valid: true });
+    validateOpenApiArtifactArchiveMock.mockReturnValue({ valid: true });
   });
 
   afterEach(() => {
@@ -82,9 +85,11 @@ describe('PackageInstaller', () => {
     loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
+    validateOpenApiArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
     fetchSecurityLabsVersionsMock.mockReset();
     ensureDefaultElserDeployedMock.mockReset();
+    ensureInferenceDeployedMock.mockReset();
   });
 
   describe('installPackage', () => {
@@ -165,6 +170,61 @@ describe('PackageInstaller', () => {
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
 
       expect(productDocClient.setInstallationFailed).not.toHaveBeenCalled();
+    });
+
+    it('does not deploy local ELSER when installing with ELSER in EIS', async () => {
+      const zipArchive = { close: jest.fn() };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      const artifactName = getArtifactName({
+        productName: 'kibana',
+        productVersion: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+      });
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+      loadMappingFileMock.mockResolvedValue({
+        properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
+      });
+
+      await packageInstaller.installPackage({
+        productName: 'kibana',
+        productVersion: '8.16',
+        customInference: {
+          inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+          task_type: 'sparse_embedding' as InferenceTaskType,
+          service: 'elastic',
+          service_settings: {},
+        },
+      });
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).toHaveBeenCalledTimes(1);
+      expect(ensureInferenceDeployedMock).toHaveBeenCalledWith({
+        client: esClient,
+        inferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+      });
+      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith(
+        'kibana',
+        getProductDocIndexName('kibana', defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID),
+        defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+      );
+    });
+
+    it('rejects a custom inference endpoint that is not a text embedding model', async () => {
+      await expect(
+        packageInstaller.installPackage({
+          productName: 'kibana',
+          productVersion: '8.16',
+          customInference: {
+            inference_id: 'my-reranker',
+            task_type: 'rerank' as InferenceTaskType,
+            service: 'elastic',
+            service_settings: {},
+          },
+        })
+      ).rejects.toThrow(/task type rerank is not supported/);
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
     });
 
     it('executes the steps in the right order', async () => {
@@ -502,6 +562,31 @@ describe('PackageInstaller', () => {
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
     });
 
+    it('does not deploy local ELSER when installing with ELSER in EIS', async () => {
+      const inferenceId = defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
+      const zipArchive = { close: jest.fn() };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
+      downloadToDiskMock.mockResolvedValue(
+        `${artifactsFolder}/${getSecurityLabsArtifactName({ version: VERSION_NEW, inferenceId })}`
+      );
+      loadMappingFileMock.mockResolvedValue({
+        properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
+      });
+      loadManifestFileMock.mockResolvedValue({ formatVersion: TEST_FORMAT_VERSION } as any);
+
+      await packageInstaller.installSecurityLabs({ inferenceId });
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).toHaveBeenCalledTimes(1);
+      expect(ensureInferenceDeployedMock).toHaveBeenCalledWith({ client: esClient, inferenceId });
+      expect(productDocClient.setSecurityLabsInstallationSuccessful).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        indexName: getSecurityLabsIndexName(inferenceId),
+        inferenceId,
+      });
+    });
+
     it('calls setSecurityLabsInstallationFailed if installation fails', async () => {
       const zipArchive = { close: jest.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
@@ -527,6 +612,123 @@ describe('PackageInstaller', () => {
       });
 
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('on serverless', () => {
+    const EIS_ELSER = defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
+    const VERSION = '2025.12.12';
+
+    beforeEach(() => {
+      packageInstaller = new PackageInstaller({
+        artifactsFolder,
+        logger,
+        esClient,
+        productDocClient,
+        artifactRepositoryUrl,
+        kibanaVersion,
+        isServerless: true,
+      });
+      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      loadMappingFileMock.mockResolvedValue({
+        properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
+      });
+      loadManifestFileMock.mockResolvedValue({ formatVersion: TEST_FORMAT_VERSION } as any);
+      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION]);
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/artifact.zip`);
+    });
+
+    it('installs product documentation with an EIS endpoint', async () => {
+      await packageInstaller.installPackage({
+        productName: 'kibana',
+        productVersion: '8.16',
+        customInference: {
+          inference_id: EIS_ELSER,
+          task_type: 'sparse_embedding' as InferenceTaskType,
+          service: 'elastic',
+          service_settings: {},
+        },
+      });
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
+      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses to install product documentation with the local default ELSER', async () => {
+      await expect(
+        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+      ).rejects.toThrow(/Only EIS endpoints are supported on serverless/);
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
+      expect(productDocClient.setInstallationFailed).toHaveBeenCalledWith(
+        'kibana',
+        expect.stringContaining('Only EIS endpoints are supported on serverless'),
+        defaultInferenceEndpoints.ELSER
+      );
+    });
+
+    it('refuses to install product documentation with an ML node hosted endpoint', async () => {
+      await expect(
+        packageInstaller.installPackage({
+          productName: 'kibana',
+          productVersion: '8.16',
+          customInference: {
+            inference_id: 'my-e5',
+            task_type: 'text_embedding' as InferenceTaskType,
+            service: 'elasticsearch',
+            service_settings: {},
+          },
+        })
+      ).rejects.toThrow(/Only EIS endpoints are supported on serverless/);
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
+    });
+
+    it('installs Security Labs with an EIS endpoint', async () => {
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [{ inference_id: EIS_ELSER, service: 'elastic' }],
+      } as never);
+
+      await packageInstaller.installSecurityLabs({ inferenceId: EIS_ELSER });
+
+      expect(esClient.inference.get).toHaveBeenCalledWith({ inference_id: EIS_ELSER });
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
+      expect(productDocClient.setSecurityLabsInstallationSuccessful).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses to install Security Labs with the local default ELSER', async () => {
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [{ inference_id: defaultInferenceEndpoints.ELSER, service: 'elasticsearch' }],
+      } as never);
+
+      await expect(packageInstaller.installSecurityLabs({})).rejects.toThrow(
+        /Only EIS endpoints are supported on serverless/
+      );
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
+      expect(productDocClient.setSecurityLabsInstallationFailed).toHaveBeenCalledWith({
+        version: undefined,
+        failureReason: expect.stringContaining('Only EIS endpoints are supported on serverless'),
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+    });
+
+    it('refuses to install OpenAPI specs with the local default ELSER', async () => {
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [{ inference_id: defaultInferenceEndpoints.ELSER, service: 'elasticsearch' }],
+      } as never);
+
+      await expect(packageInstaller.installOpenAPISpec({ version: '8.16' })).rejects.toThrow(
+        /Only EIS endpoints are supported on serverless/
+      );
+
+      expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
+      expect(ensureInferenceDeployedMock).not.toHaveBeenCalled();
     });
   });
 

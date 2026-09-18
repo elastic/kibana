@@ -7,8 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBadge,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,8 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
 import { BadgeList } from '../badge_list';
-import { PopoverItems } from '../../popover_items';
 import { DestinationRow } from './destination_row';
+import { MatcherSummary } from './matcher_summary';
 
 const EMPTY_VALUE = '-';
 
@@ -32,7 +30,6 @@ export interface ActionPolicyDefinitionListProps {
 export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionListProps) => {
   const {
     description,
-    tags,
     matcher,
     grouping_mode: groupingMode,
     group_by: groupBy,
@@ -51,53 +48,10 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
 
   items.push(
     {
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.tags', {
-        defaultMessage: 'Tags',
-      }),
-      description:
-        tags && tags.length > 0 ? (
-          <PopoverItems
-            items={tags}
-            numberOfItemsToDisplay={1}
-            wrapItems
-            popoverTitle={i18n.translate(
-              'xpack.alertingV2.actionPolicyDefinition.tags.popoverTitle',
-              { defaultMessage: 'Tags' }
-            )}
-            popoverButtonTitle={`+${Math.max(tags.length - 1, 0)}`}
-            dataTestPrefix="actionPolicyDefinitionTags"
-            renderItem={(tag) => (
-              <EuiBadge
-                key={tag}
-                color="hollow"
-                title={tag}
-                css={{
-                  maxWidth: '100%',
-                  '.euiBadge__text': { minWidth: 0 },
-                }}
-              >
-                {tag}
-              </EuiBadge>
-            )}
-          />
-        ) : (
-          EMPTY_VALUE
-        ),
-    },
-    {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher', {
         defaultMessage: 'Matcher',
       }),
-      description: matcher ? (
-        <EuiCode>{matcher}</EuiCode>
-      ) : (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicyDefinition.matchesAll"
-            defaultMessage="Matches all alerts."
-          />
-        </EuiText>
-      ),
+      description: <MatcherSummary matcher={matcher} />,
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.dispatchMode', {

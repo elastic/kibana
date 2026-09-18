@@ -48,7 +48,7 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
       }
 
       if (queryIds.length > 0) {
-        requests.push(deleteQueriesInBulk({ queryIds, streamName }));
+        requests.push(deleteQueriesInBulk({ queryIds }));
       }
 
       await Promise.all(requests);

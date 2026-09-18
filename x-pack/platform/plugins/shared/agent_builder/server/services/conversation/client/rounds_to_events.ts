@@ -68,7 +68,12 @@ export const roundStepEventId = (roundId: string, sequence: number): string =>
 /** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
 
-export const userMessageEvent = (round: RoundStart, conversation: Conversation): TimelineEvent => ({
+type ConversationForRoundEvents = Pick<Conversation, 'agent_id' | 'user'>;
+
+export const userMessageEvent = (
+  round: RoundStart,
+  conversation: ConversationForRoundEvents
+): TimelineEvent => ({
   id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
   type: TimelineEventType.userMessage,
   created_at: round.started_at,
@@ -78,7 +83,7 @@ export const userMessageEvent = (round: RoundStart, conversation: Conversation):
 
 export const executionStartedEvent = (
   round: Pick<ConversationRound, 'id' | 'started_at'>,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent => {
   const ids = roundDerivedEventIds(round.id);
   return {
@@ -94,7 +99,7 @@ export const executionStartedEvent = (
 
 export const roundStartEvents = (
   round: RoundStart,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent[] => [
   userMessageEvent(round, conversation),
   executionStartedEvent(round, conversation),
@@ -102,7 +107,7 @@ export const roundStartEvents = (
 
 export const roundStepEvents = (
   round: Pick<ConversationRound, 'id' | 'started_at' | 'steps'>,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
   const ids = roundDerivedEventIds(round.id);
   return (round.steps ?? []).map((step, index) => ({
@@ -118,7 +123,7 @@ export const roundStepEvents = (
 
 export const roundTerminatedEvent = (
   round: ConversationRound,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent | undefined => {
   const ids = roundDerivedEventIds(round.id);
   const endedAt = new Date(
@@ -153,7 +158,7 @@ const outcomeForRound = (round: ConversationRound): ExecutionOutcome | undefined
 
 export const roundToEvents = (
   round: ConversationRound,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
   const terminated = roundTerminatedEvent(round, conversation);
   return [
@@ -183,7 +188,7 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
 
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
-  conversation: Conversation,
+  conversation: Pick<Conversation, 'user'> | undefined,
   round: Pick<ConversationRound, 'author' | 'origin'>
 ): EventActor => {
   if (round.author) {
@@ -196,10 +201,18 @@ export const userMessageActor = (
     };
   }
 
+  if (conversation) {
+    return {
+      type: round.origin ? EventActorType.external : EventActorType.user,
+      id: conversation.user.id ?? conversation.user.username,
+      ...(conversation.user.username ? { username: conversation.user.username } : {}),
+      ...(round.origin ? { origin: round.origin } : {}),
+    };
+  }
+
   return {
     type: round.origin ? EventActorType.external : EventActorType.user,
-    id: conversation.user.id ?? conversation.user.username,
-    ...(conversation.user.username ? { username: conversation.user.username } : {}),
+    id: 'unknown',
     ...(round.origin ? { origin: round.origin } : {}),
   };
 };
@@ -221,6 +234,31 @@ export const parseExecutionId = (id: string): { roundId: string; index: number }
     return undefined;
   }
   return { roundId: match[1], index: Number(match[2] ?? 0) };
+};
+
+/** The `execution_started` event id for an execution index (0 = the initial run). */
+export const executionStartedEventId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted
+      }`;
+
+/**
+ * The index of the next execution to append to a round. Counts distinct executions already stored
+ * for the round on `conversation.events`. Returns 0 when the round has no prior executions.
+ */
+export const nextResumeIndex = (
+  conversation: Pick<Conversation, 'events'>,
+  roundId: string
+): number => {
+  const storedEvents = conversation.events ?? [];
+  const roundExecutionIds = new Set(
+    storedEvents
+      .map((event) => event.execution_id)
+      .filter((id): id is string => id !== undefined && parseExecutionId(id)?.roundId === roundId)
+  );
+  return roundExecutionIds.size;
 };
 
 /** The `execution_terminated` event id for an execution index (0 = the initial run). */
@@ -268,6 +306,37 @@ export const promptResponseEvent = ({
 });
 
 /**
+ * Builds the `execution_started` event for a resume execution (`exec_k`). Shared between the
+ * persisted timeline projection ({@link resumeExecutionToEvents}) and the start-time SSE emission
+ * so both paths produce byte-identical events for the same `started_at` / trigger.
+ */
+export const resumeExecutionStartedEvent = ({
+  roundId,
+  executionIndex,
+  startedAt,
+  triggerEventId,
+  conversation,
+}: {
+  roundId: string;
+  executionIndex: number;
+  startedAt: string;
+  /** The `prompt_response` event id that triggered this execution. */
+  triggerEventId: string;
+  conversation: Conversation;
+}): TimelineEvent => {
+  const executionId = resumeExecutionId(roundId, executionIndex);
+  return {
+    id: executionStartedEventId(roundId, executionIndex),
+    type: TimelineEventType.executionStarted,
+    created_at: startedAt,
+    actor: agentActor(conversation),
+    execution_id: executionId,
+    trigger_event_id: triggerEventId,
+    data: { trigger_type: TimelineTriggerType.promptResponse },
+  };
+};
+
+/**
  * Builds the events for a resume execution (`exec_k`). Mirrors {@link roundToEvents} but with
  * execution-scoped ids and a `prompt_response` trigger, and without a `user_message` (a resume
  * continues an existing round, it does not start one).
@@ -287,15 +356,13 @@ export const resumeExecutionToEvents = ({
   conversation: Conversation;
 }): TimelineEvent[] => {
   const executionId = resumeExecutionId(roundId, executionIndex);
-  const startedEvent: TimelineEvent = {
-    id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
-    type: TimelineEventType.executionStarted,
-    created_at: followUpRound.started_at,
-    actor: agentActor(conversation),
-    execution_id: executionId,
-    trigger_event_id: triggerEventId,
-    data: { trigger_type: TimelineTriggerType.promptResponse },
-  };
+  const startedEvent = resumeExecutionStartedEvent({
+    roundId,
+    executionIndex,
+    startedAt: followUpRound.started_at,
+    triggerEventId,
+    conversation,
+  });
   const stepEvents: TimelineEvent[] = (followUpRound.steps ?? []).map((step, index) => ({
     id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${index}`,
     type: TimelineEventType.executionStep,

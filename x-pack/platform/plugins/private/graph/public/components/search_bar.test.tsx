@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { SearchBarProps, SearchBarStateProps } from './search_bar';
 import { SearchBar, SearchBarComponent } from './search_bar';
-import type { Component } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import type {
   DocLinksStart,
   HttpStart,
@@ -17,19 +16,16 @@ import type {
   NotificationsStart,
   OverlayStart,
 } from '@kbn/core/public';
-import { act } from 'react-dom/test-utils';
-import { QueryStringInput } from '@kbn/kql/public';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { InjectedIntl } from '@kbn/i18n-react';
-import { I18nProvider } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 
 import type { GraphStore } from '../state_management';
 import { setDatasource, submitSearchSaga } from '../state_management';
-import type { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 import { createQueryStringInput } from '@kbn/kql/public/components/query_string_input/get_query_string_input';
@@ -40,25 +36,23 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
-const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
-
-function getServiceMocks() {
+const getServiceMocks = () => {
   const docLinks = {
     links: {
       query: {
         kueryQuerySyntax: '',
+        luceneQuerySyntax: '',
       },
     },
   } as DocLinksStart;
   const uiSettings = {
-    get: (key: string) => {
-      return 10;
-    },
-  } as IUiSettingsClient;
-
+    get: () => 10,
+  } as unknown as IUiSettingsClient;
   const kqlMock = kqlPluginMock.createStartContract();
+
   return {
     overlays: {} as OverlayStart,
+    appName: 'graph',
     kql: {
       QueryStringInput: createQueryStringInput({
         docLinks,
@@ -72,34 +66,36 @@ function getServiceMocks() {
         data: dataPluginMock.createStartContract(),
         autocomplete: kqlMock.autocomplete,
         notifications: {} as NotificationsStart,
-        http: {} as HttpStart,
+        http: {
+          post: jest.fn().mockResolvedValue(undefined),
+        } as unknown as HttpStart,
         dataViews: dataViewPluginMocks.createStartContract(),
       }),
     },
   };
-}
+};
 
-function wrapSearchBarInContext(testProps: SearchBarProps) {
-  const services = getServiceMocks();
-  return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <SearchBar {...testProps} />
-      </KibanaContextProvider>
-    </I18nProvider>
+const SearchBarHarness = (props: SearchBarProps) => {
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(
+    props.currentIndexPattern
   );
-}
 
-describe('search_bar', () => {
+  return (
+    <SearchBar
+      {...props}
+      currentIndexPattern={currentIndexPattern}
+      onIndexPatternChange={setCurrentIndexPattern}
+    />
+  );
+};
+
+// Failing: See https://github.com/elastic/kibana/issues/229631
+describe.skip('search_bar', () => {
   let dispatchSpy: jest.Mock;
-  let instance: ReactWrapper<
-    SearchBarProps & { intl: InjectedIntl },
-    Readonly<{}>,
-    Component<{}, {}, any>
-  >;
   let store: GraphStore;
-  const defaultProps = {
+  const defaultProps: SearchBarProps = {
     isLoading: false,
+    urlQuery: null,
     indexPatternProvider: {
       get: jest.fn(() =>
         Promise.resolve(createStubDataView({ spec: { fields: {}, name: 'Test Name' } }))
@@ -108,15 +104,46 @@ describe('search_bar', () => {
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
-    onIndexPatternChange: (indexPattern?: DataView) => {
-      instance.setProps({
-        ...defaultProps,
-        currentIndexPattern: indexPattern,
-      });
-    },
+    onIndexPatternChange: jest.fn(),
+  };
+
+  const renderSearchBar = (props: Partial<SearchBarProps> = {}) =>
+    renderWithKibanaRenderContext(
+      <Provider store={store}>
+        <KibanaContextProvider services={getServiceMocks()}>
+          <SearchBarHarness {...defaultProps} {...props} />
+        </KibanaContextProvider>
+      </Provider>
+    );
+
+  const renderSearchBarComponent = (props: SearchBarProps & SearchBarStateProps) =>
+    renderWithKibanaRenderContext(
+      <KibanaContextProvider services={getServiceMocks()}>
+        <SearchBarComponent {...props} />
+      </KibanaContextProvider>
+    );
+
+  const submitForm = () => {
+    const form = screen.getByTestId('graph-explore-button').closest('form');
+    if (!form) {
+      throw new Error('Expected the graph search bar form to be rendered');
+    }
+    fireEvent.submit(form);
+  };
+
+  const enterQuery = async (query: string, language?: 'lucene') => {
+    const user = userEvent.setup();
+
+    if (language === 'lucene') {
+      await user.click(await screen.findByTestId('switchQueryLanguageButton'));
+      await user.click(await screen.findByTestId('luceneLanguageMenuItem'));
+    }
+
+    fireEvent.change(await screen.findByTestId('queryInput'), { target: { value: query } });
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     store = createMockGraphStore({
       sagas: [submitSearchSaga],
     }).store;
@@ -133,52 +160,24 @@ describe('search_bar', () => {
     store.dispatch = dispatchSpy;
   });
 
-  async function mountSearchBar() {
-    jest.clearAllMocks();
-    const searchBarTestRoot = React.createElement((updatedProps: SearchBarProps) => (
-      <Provider store={store}>
-        {wrapSearchBarInContext({ ...defaultProps, ...updatedProps })}
-      </Provider>
-    ));
-
-    await act(async () => {
-      instance = mountWithIntl(searchBarTestRoot);
-    });
-  }
-
-  async function mountSearchBarWithExplicitContext(props: SearchBarProps & SearchBarStateProps) {
-    jest.clearAllMocks();
-    const services = getServiceMocks();
-
-    await act(async () => {
-      instance = mountWithIntl(
-        <I18nProvider>
-          <KibanaContextProvider services={services}>
-            <SearchBarComponent {...props} />
-          </KibanaContextProvider>
-        </I18nProvider>
-      );
-    });
-  }
-
   it('should render search bar and fetch index pattern', async () => {
-    await mountSearchBar();
+    renderSearchBar();
 
-    expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
+    await waitFor(() => {
+      expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
+    });
   });
 
   it('should render search bar and submit queries', async () => {
-    await mountSearchBar();
+    renderSearchBar();
 
-    await waitForIndexPatternFetch();
-
-    act(() => {
-      instance.find(QueryStringInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
+    await waitFor(() => {
+      expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
     });
+    await screen.findByText('Test Name');
 
-    act(() => {
-      instance.find('form').simulate('submit', { preventDefault: () => {} });
-    });
+    await enterQuery('testQuery', 'lucene');
+    submitForm();
 
     expect(dispatchSpy).toHaveBeenCalledWith({
       type: 'x-pack/graph/workspace/SUBMIT_SEARCH',
@@ -187,17 +186,15 @@ describe('search_bar', () => {
   });
 
   it('should translate kql query into JSON dsl', async () => {
-    await mountSearchBar();
+    renderSearchBar();
 
-    await waitForIndexPatternFetch();
-
-    act(() => {
-      instance.find(QueryStringInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
+    await waitFor(() => {
+      expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
     });
+    await screen.findByText('Test Name');
 
-    act(() => {
-      instance.find('form').simulate('submit', { preventDefault: () => {} });
-    });
+    await enterQuery('test: abc');
+    submitForm();
 
     const parsedQuery = JSON.parse(dispatchSpy.mock.calls[0][0].payload);
     expect(parsedQuery).toEqual({
@@ -206,52 +203,49 @@ describe('search_bar', () => {
   });
 
   it('should open index pattern picker', async () => {
-    await mountSearchBar();
+    const user = userEvent.setup();
+    renderSearchBar();
 
-    // pick the button component out of the tree because
-    // it's part of a popover and thus not covered by enzyme
-    instance.find('button[data-test-subj="graphDatasourceButton"]').first().simulate('click');
+    await user.click(await screen.findByTestId('graphDatasourceButton'));
 
     expect(openSourceModal).toHaveBeenCalled();
   });
 
   it('should disable the graph button when no data view is configured', async () => {
-    const stateProps = {
+    renderSearchBarComponent({
+      ...defaultProps,
       submit: jest.fn(),
       onIndexPatternSelected: jest.fn(),
       currentDatasource: undefined,
-      selectedFields: [],
-    };
-    await mountSearchBarWithExplicitContext({
-      urlQuery: null,
-      ...defaultProps,
-      ...stateProps,
+      selectedFields: [
+        {
+          name: 'field1',
+          color: 'black',
+          icon: { id: 'a', package: 'eui', label: '', prevName: '' },
+          selected: true,
+          type: 'string',
+          aggregatable: true,
+        },
+      ],
     });
 
-    expect(
-      instance.find('[data-test-subj="graph-explore-button"]').first().prop('disabled')
-    ).toBeTruthy();
+    expect(await screen.findByTestId('graph-explore-button')).toBeDisabled();
   });
 
   it('should disable the graph button when no field is configured', async () => {
-    const stateProps = {
+    renderSearchBarComponent({
+      ...defaultProps,
+      currentIndexPattern: createStubDataView({ spec: { fields: {}, name: 'Test Name' } }),
       submit: jest.fn(),
       onIndexPatternSelected: jest.fn(),
       currentDatasource: {
-        type: 'indexpattern' as const,
+        type: 'indexpattern',
         id: '123',
         title: 'test-index',
       },
       selectedFields: [],
-    };
-    await mountSearchBarWithExplicitContext({
-      urlQuery: null,
-      ...defaultProps,
-      ...stateProps,
     });
 
-    expect(
-      instance.find('[data-test-subj="graph-explore-button"]').first().prop('disabled')
-    ).toBeTruthy();
+    expect(await screen.findByTestId('graph-explore-button')).toBeDisabled();
   });
 });

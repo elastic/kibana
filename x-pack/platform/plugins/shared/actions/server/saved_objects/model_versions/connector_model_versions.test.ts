@@ -10,12 +10,17 @@ import type {
   SavedObjectsFullModelVersion,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { connectorModelVersions } from './connector_model_versions';
+import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
 describe('Connector Model Versions', () => {
+  const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+  const versions = connectorModelVersions(encryptedSavedObjects);
+
   describe('version 1', () => {
     it('has correct structure', () => {
-      const version1 = connectorModelVersions['1'] as SavedObjectsFullModelVersion;
+      const version1 = versions['1'] as SavedObjectsFullModelVersion;
       expect(version1).toBeDefined();
       expect(version1.changes).toEqual([]);
       expect(version1.schemas).toBeDefined();
@@ -24,7 +29,7 @@ describe('Connector Model Versions', () => {
   });
 
   describe('version 2', () => {
-    const version2 = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
+    const version2 = versions['2'] as SavedObjectsFullModelVersion;
     const context: SavedObjectModelTransformationContext = {
       log: {
         get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
@@ -118,6 +123,55 @@ describe('Connector Model Versions', () => {
           ...mockDocument,
         });
       });
+    });
+  });
+
+  describe('version 3', () => {
+    it('wraps the model version with createModelVersion for the new encrypted attributes', () => {
+      expect(encryptedSavedObjects.createModelVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputType: actionEncryptedRegistrationV2,
+          outputType: actionEncryptedRegistrationV3,
+          shouldTransformIfDecryptionFails: true,
+        })
+      );
+    });
+
+    it('has a no-op backfill to trigger re-encryption', () => {
+      const version3 = versions['3'] as SavedObjectsFullModelVersion;
+      expect(version3.changes).toHaveLength(1);
+      expect(version3.changes[0].type).toBe('data_backfill');
+      expect(version3.schemas?.create).toBeDefined();
+      expect(version3.schemas?.forwardCompatibility).toBeDefined();
+    });
+
+    it('leaves existing documents unchanged so old docs still decrypt', () => {
+      const version3 = versions['3'] as SavedObjectsFullModelVersion;
+      const backfillChange = version3.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'old-connector',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.inboundWebhook',
+          name: 'legacy',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+        },
+        references: [],
+      };
+
+      expect(
+        backfillFn!(mockDocument as never, {
+          log: { get: () => ({ debug: jest.fn() }) } as never,
+          modelVersion: 3,
+          namespaceType: 'single',
+        })
+      ).toBe(mockDocument);
     });
   });
 });

@@ -107,6 +107,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.attack_discovery.api_config.provider': schemaString,
   'kibana.alert.attack_discovery.entity_summary_markdown': schemaString,
   'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements': schemaString,
+  'kibana.alert.attack_discovery.generation_source': schemaString,
   'kibana.alert.attack_discovery.mitre_attack_tactics': schemaStringArray,
   'kibana.alert.attack_discovery.replacements': schemaUnknown,
   'kibana.alert.attack_discovery.user.id': schemaString,

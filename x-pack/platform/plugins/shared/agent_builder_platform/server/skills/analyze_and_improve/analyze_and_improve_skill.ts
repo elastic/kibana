@@ -16,15 +16,15 @@ export const analyzeAndImproveSkill = defineSkillType({
   basePath: 'skills/platform/context-engine',
   experimental: true,
   description:
-    'Diagnose why a Context Engine AI index is not serving agents well and propose changes to its knowledge indicator pipeline. Load when analyzing Context Engine signals (query_error, empty_retrieval, coverage_gap) for an AI index, when handling an "Analyze & improve" hand-off, or when a user asks why an index\'s knowledge indicators are not being retrieved or why an agent keeps falling back to raw data. Read-only: it proposes changes, it never applies them.',
+    'Decide what a Context Engine AI index should contain and whether what it contains is working. Load when setting up the Context Engine for a user\'s Elasticsearch data or connector sources, when choosing a Knowledge Indicator (KI) generation strategy, when handling an "Analyze & improve" hand-off, or when diagnosing why an index\'s KIs are not being retrieved and agents keep falling back to raw data. Directs to `context-engine-signals`, `ai-index-sources` and `ai-index-automations` for the mechanics.',
   content,
-  referencedContent: [],
+  // Read-only by construction. Skill tools are additive, so keeping the authoring and execution
+  // tools in `ai-index-automations` is what lets an unattended analysis run load this skill without
+  // gaining the ability to write.
   getRegistryTools: () => [
     platformCoreTools.executeEsql,
     platformCoreTools.listIndices,
+    platformCoreTools.getIndexMapping,
     `${internalNamespaces.workflows}.get_workflow`,
-    // Read-only despite the verb: it parses a candidate definition and reports what is wrong with
-    // it, saving a reviewer a proposal whose YAML was never going to load.
-    `${internalNamespaces.workflows}.validate_workflow`,
   ],
 });
