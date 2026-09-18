@@ -42,16 +42,21 @@ export function shouldHideWorkflowsOnlyConnector(
 }
 
 /**
- * Fetches a connector spec from the API.
+ * Fetches a connector spec from the API. `specVersion` selects the version a connector is
+ * pinned to; omitted, the server returns the catalog-active version.
  */
 export async function fetchConnectorSpec(
   http: HttpSetup,
   connectorTypeId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  specVersion?: string
 ): Promise<ConnectorSpecResponse> {
   const wire = await http.get<ConnectorSpecWireResponse>(
     `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
-    { signal }
+    {
+      signal,
+      ...(specVersion !== undefined ? { query: { spec_version: specVersion } } : {}),
+    }
   );
   return transformConnectorSpecResponse(wire);
 }

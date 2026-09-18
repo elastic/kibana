@@ -1449,4 +1449,171 @@ describe('create()', () => {
     expect(saved.apiKey).toBeUndefined();
     expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
   });
+
+  describe('spec version pin', () => {
+    const specVersions = {
+      getActiveVersion: jest.fn().mockReturnValue('1.1.0'),
+      getActiveSpec: jest.fn(),
+      getSpec: jest.fn(async (version?: string) => {
+        if (version === undefined || version === '1.1.0' || version === '1.0.0') {
+          return {};
+        }
+        throw new Error(`definition:.abuseipdb@${version} not found`);
+      }),
+      hasVersion: jest.fn(),
+    };
+    const configSchema = { parse: jest.fn((value: unknown) => value) };
+    const savedObjectCreateResult = (specVersion: string) => ({
+      id: '1',
+      type: 'action',
+      attributes: {
+        name: 'my name',
+        actionTypeId: '.abuseipdb',
+        isMissingSecrets: false,
+        config: {},
+        specVersion,
+      },
+      references: [],
+    });
+
+    beforeEach(() => {
+      specVersions.getActiveVersion.mockClear();
+      specVersions.getSpec.mockClear();
+      configSchema.parse.mockClear();
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.abuseipdb',
+          source: ACTION_TYPE_SOURCES.spec,
+          specVersions,
+          validate: {
+            config: {
+              schema: configSchema,
+              customValidator: jest.fn(),
+            },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+    });
+
+    test('pins the active version when no spec version is requested and returns it', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult('1.1.0'));
+
+      const result = await create({
+        context: mockContext,
+        action: { name: 'my name', actionTypeId: '.abuseipdb', config: {}, secrets: {} },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ specVersion: '1.1.0' }),
+        { id: 'mock-saved-object-id' }
+      );
+      expect(result.specVersion).toBe('1.1.0');
+    });
+
+    test('pins the requested version after loading it and validates against it', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult('1.0.0'));
+      const actionType = (actionTypeRegistry.get as jest.Mock)();
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: '.abuseipdb',
+          config: { baseUrl: 'http://127.0.0.1:8090' },
+          secrets: {},
+          specVersion: '1.0.0',
+        },
+      });
+
+      expect(specVersions.getSpec).toHaveBeenCalledWith('1.0.0');
+      expect(actionType.validate.config.customValidator).toHaveBeenCalledWith(
+        { baseUrl: 'http://127.0.0.1:8090' },
+        expect.objectContaining({ specVersion: '1.0.0' })
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ specVersion: '1.0.0' }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('rejects a requested version the type cannot obtain with 400', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.abuseipdb',
+            config: {},
+            secrets: {},
+            specVersion: '9.9.9',
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('"9.9.9"'),
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('rejects a requested version on a classic connector type', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+            specVersion: '1.0.0',
+          },
+        })
+      ).rejects.toThrow('does not support spec versions');
+    });
+
+    test('does not persist a spec version for classic connector types', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      const result = await create({
+        context: mockContext,
+        action: { name: 'my name', actionTypeId: 'my-connector-type', config: {}, secrets: {} },
+      });
+
+      const [, attributes] = unsecuredSavedObjectsClient.create.mock.calls[0];
+      expect(attributes).not.toHaveProperty('specVersion');
+      expect(result).not.toHaveProperty('specVersion');
+    });
+  });
 });

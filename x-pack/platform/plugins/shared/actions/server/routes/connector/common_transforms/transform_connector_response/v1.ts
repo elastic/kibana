@@ -20,6 +20,7 @@ export const transformConnectorResponse = ({
   isSystemAction,
   isConnectorTypeDeprecated,
   authMode,
+  specVersion,
 }: Connector): ConnectorResponseV1 => ({
   id,
   name,
@@ -31,4 +32,5 @@ export const transformConnectorResponse = ({
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { auth_mode: authMode } : {}),
+  ...(specVersion !== undefined ? { spec_version: specVersion } : {}),
 });

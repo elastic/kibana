@@ -40,6 +40,8 @@ export interface ActionType {
   subActions?: string[];
   /** Spec metadata icon: EUI icon name or data/HTTP URL. */
   icon?: string;
+  /** Catalog-active spec version of a versioned spec type; omitted for classic connectors. */
+  specVersion?: string;
 }
 
 export enum InvalidEmailReason {

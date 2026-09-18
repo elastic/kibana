@@ -668,3 +668,49 @@ describe('validateConnectors', () => {
     );
   });
 });
+
+describe('resolveSchema', () => {
+  const v1 = z.object({ version: z.literal('1.0.0') });
+  const v2 = z.object({ version: z.literal('1.1.0') });
+  const byVersion = (services: ValidatorServices) => (services.specVersion === '1.0.0' ? v1 : v2);
+  const actionType = getConnectorType({
+    validate: {
+      config: { schema: v2, resolveSchema: byVersion },
+      secrets: { schema: v2, resolveSchema: byVersion },
+      params: { schema: v2, resolveSchema: byVersion },
+    },
+  });
+
+  test('dispatches config, secrets and params validation on specVersion', () => {
+    const pinned = { configurationUtilities, specVersion: '1.0.0' };
+    expect(validateConfig(actionType, { version: '1.0.0' }, pinned)).toEqual({ version: '1.0.0' });
+    expect(validateSecrets(actionType, { version: '1.0.0' }, pinned)).toEqual({ version: '1.0.0' });
+    expect(validateParams(actionType, { version: '1.0.0' }, pinned)).toEqual({ version: '1.0.0' });
+    expect(() => validateConfig(actionType, { version: '1.1.0' }, pinned)).toThrow(
+      /error validating connector type config/
+    );
+  });
+
+  test('uses the resolved schema for the active version when no pin is given', () => {
+    expect(validateConfig(actionType, { version: '1.1.0' }, { configurationUtilities })).toEqual({
+      version: '1.1.0',
+    });
+  });
+
+  test('falls back to schema when resolveSchema is absent', () => {
+    const classic = getConnectorType({
+      validate: {
+        config: { schema: v1 },
+        secrets: { schema: v1 },
+        params: { schema: v1 },
+      },
+    });
+    expect(
+      validateConfig(
+        classic,
+        { version: '1.0.0' },
+        { configurationUtilities, specVersion: '1.1.0' }
+      )
+    ).toEqual({ version: '1.0.0' });
+  });
+});

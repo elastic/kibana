@@ -25,6 +25,7 @@ export const transformGetAllConnectorsResponse = (
       isSystemAction,
       isConnectorTypeDeprecated,
       authMode,
+      specVersion,
     }) => ({
       id,
       name,
@@ -37,6 +38,7 @@ export const transformGetAllConnectorsResponse = (
       is_system_action: isSystemAction,
       is_connector_type_deprecated: isConnectorTypeDeprecated,
       ...(authMode !== undefined ? { auth_mode: authMode } : {}),
+      ...(specVersion !== undefined ? { spec_version: specVersion } : {}),
     })
   );
 };

@@ -22,6 +22,8 @@ export type {
   ActionTypeExecutorOptions,
   ActionType,
   ClassicActionType,
+  SpecVersionsContract,
+  ValidatorServices,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
   ConnectorLifecycleListener,
@@ -42,7 +44,7 @@ export type {
 } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type { CatalogSpecProvider } from './catalog_spec_provider';
+export type { CatalogSpecProvider, CatalogActionType } from './catalog_spec_provider';
 export { RelayRequestError } from './lib/relay';
 export type {
   RelayBinding,

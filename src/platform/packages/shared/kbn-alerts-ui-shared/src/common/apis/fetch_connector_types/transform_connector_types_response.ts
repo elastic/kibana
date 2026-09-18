@@ -22,6 +22,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   is_experimental: isExperimental,
   is_testable: isTestable,
   sub_actions: subActions,
+  spec_version: specVersion,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
@@ -36,6 +37,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   isExperimental,
   isTestable,
   subActions,
+  ...(specVersion !== undefined ? { specVersion } : {}),
   ...res,
 });
 

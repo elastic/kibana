@@ -279,4 +279,32 @@ describe('useActionTypeModel', () => {
     expect(result.current.actionTypeModel?.getHideInUi?.([])).toBe(true);
     expect(uiSettingsGet).toHaveBeenCalledWith('workflows:ui:enabled', true);
   });
+
+  it('fetches the pinned spec version and exposes the served version', async () => {
+    actionTypeRegistry.has.mockReturnValue(false);
+    mockHttp.get.mockResolvedValue({
+      ...mockSpecResponse,
+      is_testable: true,
+      spec_version: '1.0.0',
+    });
+
+    const { result } = renderHook(
+      () =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionTypeId: 'spec-connector',
+          http: mockHttp as never,
+          docLinks: mockDocLinks,
+          specVersion: '1.0.0',
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.actionTypeModel).not.toBeNull());
+    expect(mockHttp.get).toHaveBeenCalledWith(
+      '/internal/actions/connector_types/spec-connector/spec',
+      expect.objectContaining({ query: { spec_version: '1.0.0' } })
+    );
+    expect(result.current.specVersion).toBe('1.0.0');
+  });
 });

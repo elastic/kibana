@@ -12,6 +12,12 @@ export { DeclarativeCatalogService } from './catalog_service';
 export { registerDeclarativeCatalogRoutes } from './catalog_routes';
 export { DiskSnapshotSource } from './disk_snapshot_source';
 export { createCatalogSpecProvider, toKibanaMinor } from './catalog_spec_provider';
+export type { VersionedTypeFactory, CatalogBootResult } from './catalog_spec_provider';
+export { createVersionedConnectorType } from './versioned_connector_type';
+export type { VersionedConnectorType } from './versioned_connector_type';
+export { SpecVersionLoader } from './version_loader';
+export { findPinnedSpecVersions } from './pinned_versions';
+export { checkAdditiveCompatibility } from './compatibility';
 export {
   CATALOG_REFRESH_TASK_ID,
   CATALOG_REFRESH_TASK_TYPE,
@@ -23,6 +29,9 @@ export { catalogDocId, createConnectorCatalogStorage, definitionDocId } from './
 export type {
   DeclarativeCatalogEntry,
   DeclarativeCatalogHealth,
+  DeclarativeCatalogIncompatibleVersion,
+  DeclarativeCatalogPinnedVersionMissing,
+  DeclarativeCatalogRegisteredVersions,
   DeclarativeCatalogManifest,
   DeclarativeCatalogSkipReason,
   DeclarativeCatalogSkippedEntry,

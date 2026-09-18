@@ -101,6 +101,8 @@ export interface ActionTypeExecutorOptions<
   authMode?: AuthMode;
   profileUid?: string;
   connectorVersion?: string;
+  /** Spec version the connector instance is pinned to; undefined for classic and legacy connectors. */
+  specVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -130,11 +132,32 @@ export type ExecutorType<
 type Validator<T> = Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
+  /**
+   * Resolves the schema for one validation call. Spec-versioned connector types use it to
+   * dispatch on `validatorServices.specVersion`; classic types leave it undefined and `schema`
+   * is used.
+   */
+  resolveSchema?: (validatorServices: ValidatorServices) => Validator<T>;
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
   configurationUtilities: ActionsConfigurationUtilities;
+  /** Spec version the connector instance is pinned to; undefined for classic and legacy connectors. */
+  specVersion?: string;
+}
+
+/**
+ * Version dispatch contract of a spec-sourced connector type that serves more than one spec
+ * version behind a single registry id.
+ */
+export interface SpecVersionsContract {
+  getActiveVersion(): string;
+  /** Materialized spec of the active version. Always loaded. */
+  getActiveSpec(): ConnectorSpec;
+  /** Resolves a spec version, lazily loading it when needed. Rejects when the version cannot be obtained. */
+  getSpec(version?: string): Promise<ConnectorSpec>;
+  hasVersion(version: string): boolean;
 }
 
 export interface ActionValidationService {
@@ -257,6 +280,8 @@ export interface ActionTypeCoreFields<
   isExperimental?: boolean;
   /** Materialized ConnectorSpec when this type was registered from a spec. */
   connectorSpec?: ConnectorSpec;
+  /** Present when the type serves several spec versions behind one id. */
+  specVersions?: SpecVersionsContract;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -321,6 +346,7 @@ export interface RawAction extends Record<string, unknown> {
   apiKey?: string | null;
   uiamApiKey?: string | null;
   uiamApiKeyExternal?: boolean;
+  specVersion?: string;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

@@ -325,4 +325,49 @@ describe('getConnectorSpecRoute', () => {
     expect(validateConfig.response?.[404]).toBeDefined();
     expect(validateConfig.response?.[500]).toBeDefined();
   });
+
+  it('forwards spec_version from the query and echoes the served version', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsConfigUtils = createActionsConfigUtilsMock();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockResolvedValue({
+      metadata: {
+        id: '.abuseipdb',
+        displayName: 'AbuseIPDB',
+        description: 'IP reputation',
+        minimumLicense: 'gold',
+        supportedFeatureIds: ['workflows'],
+      },
+      schema: {},
+      isTestable: true,
+      specVersion: '1.0.0',
+    } as never);
+
+    getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+
+    const [config, handler] = router.get.mock.calls[0];
+    expect(config.validate).toEqual(
+      expect.objectContaining({
+        request: expect.objectContaining({ query: expect.anything() }),
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { params: { id: '.abuseipdb' }, query: { spec_version: '1.0.0' } },
+      ['ok', 'notFound']
+    );
+
+    const result = await handler(context, req, res);
+
+    expect(actionsClient.getConnectorSpec).toHaveBeenCalledWith({
+      id: '.abuseipdb',
+      configurationUtilities: actionsConfigUtils,
+      specVersion: '1.0.0',
+    });
+    expect(result).toEqual({
+      body: expect.objectContaining({ spec_version: '1.0.0', is_testable: true }),
+    });
+  });
 });

@@ -11,12 +11,26 @@ import { getContentHash, validateSvgIcon } from './icon';
 import { materializeDeclarativeConnectorSpec } from './materialize_spec';
 import { parseDeclarativeConnectorSpec } from './parse_spec';
 import type { RawConnectorSpecAsset } from './spec_source';
+import type { DeclarativeConnectorSpec } from './types';
+
+/** One materialized spec version together with the parsed YAML it came from. */
+export interface MaterializedSpec {
+  id: string;
+  version: string;
+  contentHash: string;
+  declarative: DeclarativeConnectorSpec;
+  spec: ConnectorSpec;
+}
 
 const toIconDataUrl = (iconRaw: string): string =>
   `data:image/svg+xml;base64,${Buffer.from(iconRaw, 'utf8').toString('base64')}`;
 
 /** Materializes one raw YAML/icon asset into a `ConnectorSpec`. */
-export const loadDeclarativeConnectorSpec = (asset: RawConnectorSpecAsset): ConnectorSpec => {
+export const loadDeclarativeConnectorSpec = (asset: RawConnectorSpecAsset): ConnectorSpec =>
+  materializeDeclarativeAsset(asset).spec;
+
+/** Materializes one raw YAML/icon asset and keeps the parsed definition for compatibility checks. */
+export const materializeDeclarativeAsset = (asset: RawConnectorSpecAsset): MaterializedSpec => {
   const parsed = parseDeclarativeConnectorSpec(asset.yaml);
   let iconDataUrl: string | undefined;
 
@@ -36,5 +50,11 @@ export const loadDeclarativeConnectorSpec = (asset: RawConnectorSpecAsset): Conn
     iconDataUrl = toIconDataUrl(asset.icon);
   }
 
-  return materializeDeclarativeConnectorSpec(parsed, iconDataUrl);
+  return {
+    id: parsed.id,
+    version: parsed.version,
+    contentHash: getContentHash(asset.yaml),
+    declarative: parsed,
+    spec: materializeDeclarativeConnectorSpec(parsed, iconDataUrl),
+  };
 };

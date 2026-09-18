@@ -56,6 +56,8 @@ export interface ActionConnectorProps<Config, Secrets> {
   source?: ActionTypeSource;
   authMode?: 'shared' | 'per-user';
   userAuthStatus?: ConnectorUserAuthStatus;
+  /** Spec version a spec connector is pinned to; absent for classic and legacy connectors. */
+  specVersion?: string;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {

@@ -13,6 +13,8 @@ export interface ConnectorCreate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
+  /** Spec version to pin. Omitted: the catalog-active version at create time. */
+  specVersion?: string;
 }
 
 export interface ConnectorCreateParams {

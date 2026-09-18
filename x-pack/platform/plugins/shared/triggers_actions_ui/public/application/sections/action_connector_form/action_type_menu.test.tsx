@@ -424,10 +424,9 @@ describe('connector_add_flyout', () => {
       );
 
       expect(await screen.findByTestId('my-spec-connector-card')).toBeInTheDocument();
-      expect(screen.getByTestId('my-spec-connector-card').querySelector('[data-euiicon-type]')).toHaveAttribute(
-        'data-euiicon-type',
-        icon
-      );
+      expect(
+        screen.getByTestId('my-spec-connector-card').querySelector('[data-euiicon-type]')
+      ).toHaveAttribute('data-euiicon-type', icon);
     });
 
     it('does not render a spec connector when enabledInConfig is false', async () => {

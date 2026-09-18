@@ -30,6 +30,7 @@ export const transformListTypesResponse = (
       isTestable,
       subActions,
       icon,
+      specVersion,
     }) => ({
       id,
       name,
@@ -48,6 +49,7 @@ export const transformListTypesResponse = (
       is_testable: Boolean(isTestable),
       ...(subActions ? { sub_actions: subActions } : {}),
       ...(icon !== undefined ? { icon } : {}),
+      ...(specVersion !== undefined ? { spec_version: specVersion } : {}),
     })
   );
 };

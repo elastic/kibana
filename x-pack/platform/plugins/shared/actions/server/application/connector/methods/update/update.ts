@@ -14,7 +14,12 @@ import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
+import {
+  ensureSpecVersionLoaded,
+  validateConfig,
+  validateConnector,
+  validateSecrets,
+} from '../../../../lib';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
@@ -77,7 +82,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-  const { actionTypeId, authMode } = attributes;
+  const { actionTypeId, authMode, specVersion } = attributes;
   const { name, config, secrets } = action;
 
   const currentAuthMode = authMode ?? 'shared';
@@ -114,11 +119,15 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+  // The pin is an identity fact of the connector: the request body cannot change it.
+  await ensureSpecVersionLoaded(actionType, specVersion, id);
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
+    specVersion,
   });
   const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
     configurationUtilities,
+    specVersion,
   });
   if (actionType.validate?.connector) {
     validateConnector(actionType, { config, secrets });
@@ -201,6 +210,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           isMissingSecrets: false,
           config: configWithIngress,
           secrets: validatedActionTypeSecrets,
+          ...(specVersion !== undefined ? { specVersion } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         omitBy(
@@ -277,5 +287,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(result.attributes.specVersion !== undefined
+      ? { specVersion: result.attributes.specVersion as string }
+      : {}),
   };
 }

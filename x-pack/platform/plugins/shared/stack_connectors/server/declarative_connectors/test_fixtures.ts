@@ -117,6 +117,7 @@ export const LIVE_CATALOG_PATHS = {
   abuseipdbDefinition: '/connectors/abuseipdb/1.1.0.yaml',
   abuseipdbPublishedDefinition: '/connectors/abuseipdb/1.0.0.yaml',
   abuseipdbIcon: '/connectors/abuseipdb/1.1.0.svg',
+  abuseipdbPublishedIcon: '/connectors/abuseipdb/1.0.0.svg',
   oktaDefinition: '/connectors/okta/1.0.0.yaml',
   oktaIcon: '/connectors/okta/1.0.0.svg',
 } as const;
@@ -159,6 +160,7 @@ export const createLiveCatalogFetchDouble = (overrides: Record<string, FetchDoub
     [LIVE_CATALOG_PATHS.abuseipdbDefinition]: { body: LIVE_ABUSEIPDB_1_1_0_YAML },
     [LIVE_CATALOG_PATHS.abuseipdbPublishedDefinition]: { body: LIVE_ABUSEIPDB_1_0_0_YAML },
     [LIVE_CATALOG_PATHS.abuseipdbIcon]: { body: LIVE_ABUSEIPDB_ICON },
+    [LIVE_CATALOG_PATHS.abuseipdbPublishedIcon]: { body: LIVE_ABUSEIPDB_ICON },
     [LIVE_CATALOG_PATHS.oktaDefinition]: { body: LIVE_OKTA_1_0_0_YAML },
     [LIVE_CATALOG_PATHS.oktaIcon]: { body: LIVE_OKTA_ICON },
     ...overrides,

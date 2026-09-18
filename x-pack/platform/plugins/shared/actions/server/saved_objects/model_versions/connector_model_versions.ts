@@ -11,6 +11,7 @@ import {
   rawConnectorSchemaV1,
   rawConnectorSchemaV2,
   rawConnectorSchemaV3,
+  rawConnectorSchemaV4,
 } from '../schemas/raw_connector';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
@@ -58,4 +59,20 @@ export const connectorModelVersions = (
     outputType: actionEncryptedRegistrationV3,
     shouldTransformIfDecryptionFails: true,
   }),
+  '4': {
+    changes: [
+      {
+        // `specVersion` pins a spec connector to the catalog version it was created from.
+        // No backfill: legacy documents stay unpinned and resolve to the active version.
+        type: 'mappings_addition',
+        addedMappings: {
+          specVersion: { type: 'keyword' },
+        },
+      },
+    ],
+    schemas: {
+      create: rawConnectorSchemaV4,
+      forwardCompatibility: rawConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
+    },
+  },
 });

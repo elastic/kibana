@@ -221,7 +221,15 @@ export class ActionTypeRegistry {
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
-    this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
+    // Shallow clone that keeps accessor properties: spec-versioned types expose live
+    // active-version fields (name, connectorSpec, sub-actions) through getters.
+    this.actionTypes.set(
+      actionType.id,
+      Object.create(
+        Object.getPrototypeOf(actionType),
+        Object.getOwnPropertyDescriptors(actionType)
+      ) as ActionType
+    );
 
     // Skip task type registration for connectors without execute/params
     if (actionType.executor && actionType.validate.params) {
@@ -305,8 +313,18 @@ export class ActionTypeRegistry {
             ? { subActions: Object.keys(actionType.connectorSpec.actions) }
             : {}),
           ...(typeof specIcon === 'string' ? { icon: specIcon } : {}),
+          ...(actionType.specVersions
+            ? { specVersion: actionType.specVersions.getActiveVersion() }
+            : {}),
         };
       });
+  }
+
+  /**
+   * Returns the catalog-active spec version of a versioned spec type; undefined for classic types.
+   */
+  public getActiveSpecVersion(id: string): string | undefined {
+    return this.actionTypes.get(id)?.specVersions?.getActiveVersion();
   }
 
   /**

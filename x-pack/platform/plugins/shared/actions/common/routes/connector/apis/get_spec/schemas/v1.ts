@@ -17,3 +17,16 @@ export const getConnectorSpecParamsSchema = schema.object({
     },
   }),
 });
+
+export const getConnectorSpecQuerySchema = schema.object({
+  spec_version: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 32,
+      meta: {
+        description:
+          'Spec version to serve. Omitted: the catalog-active version. Edit and test flows pass the connector pin.',
+      },
+    })
+  ),
+});

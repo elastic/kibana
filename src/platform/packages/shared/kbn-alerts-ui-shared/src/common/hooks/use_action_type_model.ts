@@ -29,6 +29,8 @@ export interface UseActionTypeModelResult {
   error: Error | null;
   /** Re-runs the connector spec query (no-op when the model is from the registry) */
   refetch: () => void;
+  /** Spec version the fetched spec was served from; undefined for registry models */
+  specVersion?: string;
 }
 
 /**
@@ -46,12 +48,15 @@ export function useActionTypeModel({
   http,
   docLinks,
   uiSettings,
+  specVersion,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
   http: HttpSetup;
   docLinks: DocLinksStart;
   uiSettings?: IUiSettingsClient;
+  /** Pin of the connector being edited or tested. Omitted for the create flow. */
+  specVersion?: string;
 }): UseActionTypeModelResult {
   const registeredModel = useMemo(() => {
     if (!actionTypeId) {
@@ -74,9 +79,9 @@ export function useActionTypeModel({
     error,
     refetch,
   } = useQuery<ConnectorSpecResponse, Error>({
-    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
+    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId, specVersion],
     queryFn: async ({ signal }) => {
-      const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
+      const spec = await fetchConnectorSpec(http, actionTypeId!, signal, specVersion);
       // Validate eagerly — fail fast before caching. The schema is re-parsed
       // lazily inside actionConnectorFields when the form component mounts.
       if (!fromConnectorSpecSchema(spec.schema)) {
@@ -105,5 +110,6 @@ export function useActionTypeModel({
     refetch: () => {
       void refetch();
     },
+    specVersion: data?.specVersion,
   };
 }

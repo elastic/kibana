@@ -8,3 +8,8 @@
 export { rawConnectorSchema as rawConnectorSchemaV1 } from './v1';
 export { rawConnectorSchema as rawConnectorSchemaV2 } from './v2';
 export { rawConnectorSchema as rawConnectorSchemaV3 } from './v3';
+export {
+  rawConnectorSchema as rawConnectorSchemaV4,
+  SPEC_VERSION_MAX_LENGTH,
+  validateSpecVersion,
+} from './v4';

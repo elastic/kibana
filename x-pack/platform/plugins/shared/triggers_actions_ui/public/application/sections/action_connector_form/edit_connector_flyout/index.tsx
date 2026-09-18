@@ -49,6 +49,7 @@ import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { InboundIngressCredentials } from '../inbound_ingress_credentials';
 import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
+import { SpecVersionCallout } from './spec_version_callout';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -242,6 +243,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     http,
     docLinks,
     uiSettings,
+    // Edit and test always render the spec version the connector is pinned to.
+    specVersion: connector.specVersion,
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
@@ -427,6 +430,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                 onRetry={refetchConnectorSpec}
               />
 
+              {connector.specVersion !== undefined && (
+                <SpecVersionCallout
+                  connector={connector}
+                  canUpgrade={canSave && !isFormModified}
+                  onConnectorUpdated={onConnectorUpdated}
+                />
+              )}
+
               {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
                 <>
                   <ConnectorForm
@@ -468,6 +479,9 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     preSubmitValidationErrorMessage,
     refetchConnectorSpec,
     inboundSettingsContent,
+    canSave,
+    isFormModified,
+    onConnectorUpdated,
   ]);
 
   const renderTestTab = useCallback(() => {

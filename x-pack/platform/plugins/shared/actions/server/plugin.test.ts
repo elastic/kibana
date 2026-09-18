@@ -38,6 +38,8 @@ import {
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { CatalogActionType } from './catalog_spec_provider';
+import { createConnectorTypeFromSpec } from './lib';
 import { getConnectorType } from './fixtures';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { LeasePool } from './lib';
@@ -629,10 +631,10 @@ describe('Actions Plugin', () => {
         },
       });
 
-      let resolveLoad: (specs: ConnectorSpec[]) => void = () => {};
+      let resolveLoad: (types: CatalogActionType[]) => void = () => {};
       const load = jest.fn(
         () =>
-          new Promise<ConnectorSpec[]>((resolve) => {
+          new Promise<CatalogActionType[]>((resolve) => {
             resolveLoad = resolve;
           })
       );
@@ -647,10 +649,12 @@ describe('Actions Plugin', () => {
       await Promise.resolve();
       expect(load).toHaveBeenCalledWith({
         esClient: coreStart.elasticsearch.client.asInternalUser,
+        savedObjectsRepository: expect.anything(),
       });
+      expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith(['action']);
       expect(startResolved).toBe(false);
 
-      resolveLoad([catalogSpec()]);
+      resolveLoad([createConnectorTypeFromSpec(catalogSpec(), pluginSetup)]);
       const pluginStart = await startPromise;
       expect(startResolved).toBe(true);
       expect(pluginStart.getAllTypes()).toContain('.abuseipdb');

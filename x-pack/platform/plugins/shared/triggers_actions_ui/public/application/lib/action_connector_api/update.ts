@@ -23,6 +23,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
+  spec_version: specVersion,
   ...res
 }) => ({
   ...res,
@@ -33,6 +34,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isSystemAction,
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
+  ...(specVersion !== undefined ? { specVersion } : {}),
 });
 
 export async function updateActionConnector({

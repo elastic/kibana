@@ -12,7 +12,12 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
+import {
+  resolveSpecVersionForCreate,
+  validateConfig,
+  validateConnector,
+  validateSecrets,
+} from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
@@ -30,7 +35,7 @@ import {
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: { actionTypeId, name, config, secrets, specVersion: requestedSpecVersion },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -84,11 +89,14 @@ export async function create({
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+  const specVersion = await resolveSpecVersionForCreate(actionType, requestedSpecVersion);
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
+    specVersion,
   });
   const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
     configurationUtilities,
+    specVersion,
   });
   if (actionType.validate?.connector) {
     validateConnector(actionType, { config, secrets });
@@ -168,6 +176,7 @@ export async function create({
           config: configWithIngress,
           secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
+          ...(specVersion !== undefined ? { specVersion } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         { id }
@@ -240,5 +249,8 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(result.attributes.specVersion !== undefined
+      ? { specVersion: result.attributes.specVersion }
+      : {}),
   };
 }

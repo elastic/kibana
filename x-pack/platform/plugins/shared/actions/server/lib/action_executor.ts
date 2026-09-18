@@ -36,6 +36,7 @@ import {
   validateParams,
   validateSecrets,
 } from './validate_with_schema';
+import { ensureSpecVersionLoaded } from './spec_version';
 import type {
   ActionType,
   ActionTypeConfig,
@@ -430,6 +431,7 @@ export class ActionExecutor {
         const { actionTypeId, name, config, secrets, rawAction, connectorVersion, isInMemory } =
           actionInfo;
         const authMode = rawAction.authMode;
+        const specVersion = rawAction.specVersion;
         const profileUid = providedProfileUid || currentUser?.profile_uid;
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
@@ -546,6 +548,9 @@ export class ActionExecutor {
         let validatedConfig;
         let validatedSecrets;
         try {
+          // A pinned spec version must be materialized before the synchronous validators run.
+          // Fails closed: a version this node cannot obtain is an error, not a fallback.
+          await ensurePinnedSpecVersion({ actionId, actionType, specVersion, taskInfo });
           const validationResult = validateAction(
             {
               actionId,
@@ -555,7 +560,7 @@ export class ActionExecutor {
               secrets,
               taskInfo,
             },
-            { configurationUtilities }
+            { configurationUtilities, specVersion }
           );
           validatedParams = validationResult.validatedParams;
           validatedConfig = validationResult.validatedConfig;
@@ -607,6 +612,7 @@ export class ActionExecutor {
                   connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
                 }
               : {}),
+            ...(specVersion !== undefined ? { specVersion } : {}),
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -857,6 +863,27 @@ interface ValidateActionOpts {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   taskInfo?: TaskInfo;
+}
+
+async function ensurePinnedSpecVersion({
+  actionId,
+  actionType,
+  specVersion,
+  taskInfo,
+}: Pick<ValidateActionOpts, 'actionId' | 'actionType' | 'taskInfo'> & {
+  specVersion?: string;
+}): Promise<void> {
+  try {
+    await ensureSpecVersionLoaded(actionType, specVersion, actionId);
+  } catch (err) {
+    throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+      actionId,
+      status: 'error',
+      message: err.message,
+      retry: !!taskInfo,
+      errorSource: TaskErrorSource.FRAMEWORK,
+    });
+  }
 }
 
 function validateAction(

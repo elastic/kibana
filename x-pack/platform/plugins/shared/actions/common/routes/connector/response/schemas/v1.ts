@@ -50,6 +50,14 @@ export const connectorResponseSchema = schema.object(
         },
       })
     ),
+    spec_version: schema.maybe(
+      schema.string({
+        maxLength: 32,
+        meta: {
+          description: 'Spec version the connector is pinned to. Omitted for classic connectors.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_response' } }
 );
@@ -175,6 +183,15 @@ export const connectorTypeResponseSchema = schema.object(
         maxLength: 65536,
         meta: {
           description: 'Optional icon key or data URL for this connector type in the UI.',
+        },
+      })
+    ),
+    spec_version: schema.maybe(
+      schema.string({
+        maxLength: 32,
+        meta: {
+          description:
+            'Catalog-active spec version of a versioned spec connector type. New connectors pin to it.',
         },
       })
     ),
@@ -344,4 +361,12 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
+  spec_version: schema.maybe(
+    schema.string({
+      maxLength: 32,
+      meta: {
+        description: 'Spec version that produced this response. Omitted for unversioned types.',
+      },
+    })
+  ),
 });

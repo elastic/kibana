@@ -13,6 +13,7 @@ import type {
   ActionTypeSecrets,
   ActionTypeParams,
   ValidatorServices,
+  ValidatorType,
 } from '../types';
 
 export function validateParams<
@@ -84,6 +85,9 @@ export function validateConnector<
 
 type ValidKeys = 'params' | 'config' | 'secrets';
 
+const schemaFor = <T>(validator: ValidatorType<T>, validatorServices: ValidatorServices) =>
+  validator.resolveSchema ? validator.resolveSchema(validatorServices) : validator.schema;
+
 function validateWithSchema<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -102,7 +106,9 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            const validatedValue = actionType.validate.params.schema.parse(value);
+            const validatedValue = schemaFor(actionType.validate.params, validatorServices).parse(
+              value
+            );
 
             if (actionType.validate.params.customValidator) {
               actionType.validate.params.customValidator(
@@ -116,7 +122,9 @@ function validateWithSchema<
         case 'config':
           name = 'connector type config';
           if (actionType.validate.config) {
-            const validatedValue = actionType.validate.config.schema.parse(value);
+            const validatedValue = schemaFor(actionType.validate.config, validatorServices).parse(
+              value
+            );
 
             if (actionType.validate.config.customValidator) {
               actionType.validate.config.customValidator(
@@ -131,7 +139,9 @@ function validateWithSchema<
         case 'secrets':
           name = 'connector type secrets';
           if (actionType.validate.secrets && value !== undefined && value !== null) {
-            const validatedValue = actionType.validate.secrets.schema.parse(value);
+            const validatedValue = schemaFor(actionType.validate.secrets, validatorServices).parse(
+              value
+            );
 
             if (actionType.validate.secrets.customValidator) {
               actionType.validate.secrets.customValidator(

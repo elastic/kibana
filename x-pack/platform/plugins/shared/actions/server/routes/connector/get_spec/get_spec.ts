@@ -8,7 +8,9 @@
 import type { IRouter } from '@kbn/core/server';
 import {
   type GetConnectorSpecParamsV1,
+  type GetConnectorSpecQueryV1,
   getConnectorSpecParamsSchemaV1,
+  getConnectorSpecQuerySchemaV1,
 } from '../../../../common/routes/connector/apis/get_spec';
 import {
   getConnectorSpecResponseBodySchemaV1,
@@ -49,6 +51,7 @@ export const getConnectorSpecRoute = (
       validate: {
         request: {
           params: getConnectorSpecParamsSchemaV1,
+          query: getConnectorSpecQuerySchemaV1,
         },
         response: {
           200: {
@@ -68,9 +71,11 @@ export const getConnectorSpecRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorSpecParamsV1 = req.params;
+        const { spec_version: specVersion }: GetConnectorSpecQueryV1 = req.query ?? {};
         const specResult = await actionsClient.getConnectorSpec({
           id,
           configurationUtilities,
+          ...(specVersion !== undefined ? { specVersion } : {}),
         });
         const responseBody: GetConnectorSpecResponseV1 =
           transformGetConnectorSpecResponseV1(specResult);

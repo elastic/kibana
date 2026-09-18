@@ -1074,4 +1074,94 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
+
+  describe('spec version pin', () => {
+    const specVersions = {
+      getActiveVersion: jest.fn().mockReturnValue('1.1.0'),
+      getActiveSpec: jest.fn(),
+      getSpec: jest.fn(async (version?: string) => {
+        if (version === undefined || version === '1.0.0') {
+          return {};
+        }
+        throw new Error(`definition:.abuseipdb@${version} not found`);
+      }),
+      hasVersion: jest.fn(),
+    };
+    const customValidator = jest.fn();
+
+    beforeEach(() => {
+      specVersions.getSpec.mockClear();
+      customValidator.mockClear();
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.abuseipdb',
+          source: ACTION_TYPE_SOURCES.spec,
+          specVersions,
+          validate: {
+            config: { schema: z.any(), customValidator },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+    });
+
+    test('validates against the stored pin, keeps it, and returns it', async () => {
+      const soResult = makeSavedObjectResult({ actionTypeId: '.abuseipdb', specVersion: '1.0.0' });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soResult);
+
+      const result = await update({
+        context: mockContext,
+        id: '1',
+        action: { name: 'Test Connector', config: { baseUrl: 'http://x' }, secrets: {} },
+      });
+
+      expect(specVersions.getSpec).toHaveBeenCalledWith('1.0.0');
+      expect(customValidator).toHaveBeenCalledWith(
+        { baseUrl: 'http://x' },
+        expect.objectContaining({ specVersion: '1.0.0' })
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ specVersion: '1.0.0' }),
+        expect.anything()
+      );
+      expect(result.specVersion).toBe('1.0.0');
+    });
+
+    test('fails closed when the stored pin cannot be loaded', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
+        makeSavedObjectResult({ actionTypeId: '.abuseipdb', specVersion: '9.9.9' })
+      );
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: { name: 'Test Connector', config: {}, secrets: {} },
+        })
+      ).rejects.toThrow(
+        'Connector "1" of type ".abuseipdb" is pinned to spec version "9.9.9", which is not available'
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('leaves legacy connectors unpinned and validates against the active version', async () => {
+      const soResult = makeSavedObjectResult({ actionTypeId: '.abuseipdb' });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soResult);
+
+      const result = await update({
+        context: mockContext,
+        id: '1',
+        action: { name: 'Test Connector', config: {}, secrets: {} },
+      });
+
+      expect(specVersions.getSpec).not.toHaveBeenCalled();
+      const [, attributes] = unsecuredSavedObjectsClient.create.mock.calls[0];
+      expect(attributes).not.toHaveProperty('specVersion');
+      expect(result).not.toHaveProperty('specVersion');
+    });
+  });
 });

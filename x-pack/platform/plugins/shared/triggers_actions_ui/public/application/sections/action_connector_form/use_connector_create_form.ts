@@ -70,6 +70,7 @@ export const useConnectorCreateForm = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
+    specVersion: servedSpecVersion,
   } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, docLinks, uiSettings });
 
   // Delay the spinner so quick spec loads don't flash a loading state.
@@ -114,18 +115,21 @@ export const useConnectorCreateForm = ({
       }
 
       const { actionTypeId: typeId, name, config, secrets, id } = data;
+      // Pin the new connector to the spec version the form was rendered from, so a catalog
+      // update landing mid-form cannot change what the connector validates against.
       return createConnector({
         actionTypeId: typeId,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
         id: id ?? '',
+        ...(servedSpecVersion !== undefined ? { specVersion: servedSpecVersion } : {}),
       });
     }
 
     setShowFormErrors(true);
     return undefined;
-  }, [submit, preSubmitValidator, createConnector]);
+  }, [submit, preSubmitValidator, createConnector, servedSpecVersion]);
 
   useEffect(() => {
     isMounted.current = true;

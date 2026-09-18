@@ -12,4 +12,6 @@ export interface GetConnectorSpecParams {
   context: ActionsClientContext;
   id: string;
   configurationUtilities: ActionsConfigurationUtilities;
+  /** Spec version to serve. Omitted: the catalog-active version. */
+  specVersion?: string;
 }

@@ -13,9 +13,11 @@ export const transformCreateConnectorBody = ({
   name,
   config,
   secrets,
+  spec_version: specVersion,
 }: CreateConnectorRequestBodyV1): ConnectorCreateParams['action'] => ({
   actionTypeId,
   name,
   config,
   secrets,
+  ...(specVersion !== undefined ? { specVersion } : {}),
 });

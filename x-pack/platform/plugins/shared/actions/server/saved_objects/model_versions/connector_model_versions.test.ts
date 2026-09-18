@@ -174,4 +174,35 @@ describe('Connector Model Versions', () => {
       ).toBe(mockDocument);
     });
   });
+
+  describe('version 4', () => {
+    it('adds the specVersion keyword mapping without a backfill', () => {
+      const version4 = versions['4'] as SavedObjectsFullModelVersion;
+      expect(version4.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: { specVersion: { type: 'keyword' } },
+        },
+      ]);
+      expect(version4.schemas?.create).toBeDefined();
+      expect(version4.schemas?.forwardCompatibility).toBeDefined();
+    });
+
+    it('accepts pinned and unpinned documents through the create schema', () => {
+      const version4 = versions['4'] as SavedObjectsFullModelVersion;
+      const create = version4.schemas?.create as { validate: (doc: unknown) => unknown };
+      const base = {
+        actionTypeId: '.abuseipdb',
+        name: 'pinned',
+        isMissingSecrets: false,
+        config: {},
+        secrets: '{}',
+      };
+      expect(create.validate(base)).toEqual(base);
+      expect(create.validate({ ...base, specVersion: '1.0.0' })).toEqual({
+        ...base,
+        specVersion: '1.0.0',
+      });
+    });
+  });
 });

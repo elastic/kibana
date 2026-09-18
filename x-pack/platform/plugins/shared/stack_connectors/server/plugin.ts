@@ -14,9 +14,10 @@ import type {
 } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type {
+  CatalogActionType,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -41,6 +42,9 @@ import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
 import {
   CatalogSpecSource,
   DeclarativeCatalogService,
+  DiskSnapshotSource,
+  SpecVersionLoader,
+  createVersionedConnectorType,
   registerDeclarativeCatalogRoutes,
   createCatalogSpecProvider,
   toKibanaMinor,
@@ -48,6 +52,7 @@ import {
   scheduleCatalogRefreshTask,
   refreshIntervalToSchedule,
 } from './declarative_connectors';
+import type { VersionedTypeFactory } from './declarative_connectors';
 
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
@@ -78,7 +83,7 @@ export class StackConnectorsPlugin
   private isServerlessTrial = false;
   private licensing?: LicensingPluginStart;
   private declarativeCatalog?: DeclarativeCatalogService;
-  private registerSpecType?: (spec: ConnectorSpec) => void;
+  private registerCatalogType?: (actionType: CatalogActionType) => void;
   private readonly kibanaMinor: string;
 
   constructor(context: PluginInitializerContext) {
@@ -86,19 +91,6 @@ export class StackConnectorsPlugin
     this.logger = context.logger.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaMinor = toKibanaMinor(context.env.packageInfo.version);
-
-    if (this.config.declarativeCatalog?.enabled) {
-      this.declarativeCatalog = new DeclarativeCatalogService({
-        source: new CatalogSpecSource({
-          registryUrl: this.config.declarativeCatalog.registryUrl,
-          logger: this.logger,
-        }),
-        registryUrl: this.config.declarativeCatalog.registryUrl,
-        refreshIntervalMs: this.config.declarativeCatalog.refreshIntervalMs,
-        logger: this.logger,
-        kibanaMinor: this.kibanaMinor,
-      });
-    }
   }
 
   // Trial detection for the Elastic-managed email SMTP relay (the `elastic_cloud` service).
@@ -128,12 +120,38 @@ export class StackConnectorsPlugin
     getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
     getHttpSecretQueryParamsKeyRoute(router, core.getStartServices);
 
-    if (this.declarativeCatalog) {
+    if (this.config.declarativeCatalog?.enabled) {
+      const { registryUrl, refreshIntervalMs } = this.config.declarativeCatalog;
+      const source = new CatalogSpecSource({ registryUrl, logger: this.logger });
+      const loader = new SpecVersionLoader({
+        logger: this.logger,
+        registrySource: source,
+        diskSource: new DiskSnapshotSource(),
+      });
+      const buildType: VersionedTypeFactory = ({ id, versions, activeVersion }) =>
+        createVersionedConnectorType({
+          id,
+          versions,
+          activeVersion,
+          actions,
+          logger: this.logger,
+          loadVersion: loader.load,
+        });
+      this.declarativeCatalog = new DeclarativeCatalogService({
+        source,
+        registryUrl,
+        refreshIntervalMs,
+        logger: this.logger,
+        kibanaMinor: this.kibanaMinor,
+        buildType,
+        onStorageReady: (storage) => loader.setStorage(storage),
+      });
       registerCatalogRefreshTask(plugins.taskManager, () => this.declarativeCatalog);
       actions.registerSpecProvider(
         createCatalogSpecProvider({
           logger: this.logger,
           kibanaMinor: this.kibanaMinor,
+          buildType,
           onBoot: (result) => this.declarativeCatalog?.recordIndexBoot(result),
         })
       );
@@ -151,8 +169,7 @@ export class StackConnectorsPlugin
       registerConnectorTypesFromSpecs({ actions });
     }
 
-    this.registerSpecType = (spec) =>
-      actions.registerType(createConnectorTypeFromSpec(spec, actions));
+    this.registerCatalogType = (actionType) => actions.registerType(actionType);
 
     if (plugins.usageCollection) {
       registerInferenceConnectorsUsageCollector(plugins.usageCollection, core);
@@ -161,11 +178,12 @@ export class StackConnectorsPlugin
 
   public async start(core: CoreStart, plugins: ConnectorsPluginsStart): Promise<void> {
     this.licensing = plugins.licensing;
-    if (this.declarativeCatalog && this.registerSpecType) {
+    if (this.declarativeCatalog && this.registerCatalogType) {
       await this.declarativeCatalog.start({
-        registerSpec: this.registerSpecType,
+        registerType: this.registerCatalogType,
         isTypeRegistered: (id) => plugins.actions.getAllTypes().includes(id),
         esClient: core.elasticsearch.client.asInternalUser,
+        savedObjectsRepository: core.savedObjects.createInternalRepository(['action']),
       });
       await scheduleCatalogRefreshTask(
         plugins.taskManager,

@@ -12,6 +12,8 @@ export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  /** Version that produced the response. Undefined for unversioned spec types. */
+  specVersion?: string;
 }
 
 export const transformGetConnectorSpecResponse = (
@@ -31,4 +33,5 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
+  ...(spec.specVersion !== undefined ? { spec_version: spec.specVersion } : {}),
 });

@@ -26,4 +26,17 @@ describe('DiskSnapshotSource', () => {
       assets.every((asset) => typeof asset.icon === 'string' && asset.icon.includes('<svg'))
     ).toBe(true);
   });
+
+  it('loads one exact id@version and returns undefined for unlisted versions', async () => {
+    const source = new DiskSnapshotSource();
+
+    const asset = await source.loadVersion('.okta', '1.0.0');
+    expect(asset).toBeDefined();
+    expect(parseDeclarativeConnectorSpec(asset!.yaml)).toEqual(
+      expect.objectContaining({ id: '.okta', version: '1.0.0' })
+    );
+
+    await expect(source.loadVersion('.okta', '9.9.9')).resolves.toBeUndefined();
+    await expect(source.loadVersion('.declarative-okta', '1.0.0')).resolves.toBeUndefined();
+  });
 });

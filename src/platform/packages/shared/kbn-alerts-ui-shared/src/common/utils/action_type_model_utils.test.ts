@@ -74,7 +74,23 @@ describe('action_type_model_utils', () => {
       expect(http.get.mock.calls[0][0]).toBe(
         '/internal/actions/connector_types/test-connector/spec'
       );
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/actions/connector_types/test-connector/spec',
+        { signal: undefined }
+      );
       expect(result).toEqual(expectedClientSpec());
+    });
+
+    it('passes spec_version as a query parameter and maps the served version', async () => {
+      http.get.mockResolvedValue({ ...mockWireResponse(), spec_version: '1.0.0' });
+
+      const result = await fetchConnectorSpec(http, 'test-connector', undefined, '1.0.0');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/actions/connector_types/test-connector/spec',
+        expect.objectContaining({ query: { spec_version: '1.0.0' } })
+      );
+      expect(result).toEqual({ ...expectedClientSpec(), specVersion: '1.0.0' });
     });
   });
 

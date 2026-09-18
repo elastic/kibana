@@ -49,12 +49,19 @@ export interface StoredCatalogDefinition {
   addedAt: string;
 }
 
+export type StoredCatalogRowStatus = 'active' | 'published' | 'incompatible';
+
 export interface StoredCatalogRow {
   id: string;
   version: string;
   contentHash: string;
   definitionId: string;
+  /** Absent on rows written before all listed versions were stored; treated as `active`. */
+  status?: StoredCatalogRowStatus;
 }
+
+/** Legacy rows predate the status field and only ever described the active version. */
+export const rowStatus = (row: StoredCatalogRow): StoredCatalogRowStatus => row.status ?? 'active';
 
 export interface StoredCatalogView {
   catalogVersion: string;
@@ -86,8 +93,30 @@ export interface CatalogViewRecord {
 
 export type ConnectorCatalogStorageClient = Pick<
   InternalIStorageClient<ConnectorCatalogStorageDocument>,
-  'get' | 'index'
+  'get' | 'index' | 'search'
 >;
+
+const toStoredDefinition = (
+  source: ConnectorCatalogStorageDocument | undefined
+): StoredCatalogDefinition | undefined => {
+  if (
+    source?.id === undefined ||
+    source.version === undefined ||
+    source.yaml === undefined ||
+    source.contentHash === undefined ||
+    source.addedAt === undefined
+  ) {
+    return undefined;
+  }
+  return {
+    id: source.id,
+    version: source.version,
+    yaml: source.yaml,
+    iconSvg: source.iconSvg,
+    contentHash: source.contentHash,
+    addedAt: source.addedAt,
+  };
+};
 
 export class ConnectorCatalogStorage {
   constructor(
@@ -130,30 +159,36 @@ export class ConnectorCatalogStorage {
   ): Promise<StoredCatalogDefinition | undefined> {
     try {
       const response = await this.client.get({ id: definitionDocId(id, version) });
-      const source = response._source;
-      if (
-        source?.id === undefined ||
-        source.version === undefined ||
-        source.yaml === undefined ||
-        source.contentHash === undefined ||
-        source.addedAt === undefined
-      ) {
-        return undefined;
-      }
-      return {
-        id: source.id,
-        version: source.version,
-        yaml: source.yaml,
-        iconSvg: source.iconSvg,
-        contentHash: source.contentHash,
-        addedAt: source.addedAt,
-      };
+      return toStoredDefinition(response._source);
     } catch (error) {
       if (isNotFoundError(error)) {
         return undefined;
       }
       throw error;
     }
+  }
+
+  /** Reads many definitions in one request. Missing documents are absent from the result. */
+  public async getDefinitions(
+    keys: Array<{ id: string; version: string }>
+  ): Promise<Map<string, StoredCatalogDefinition>> {
+    const definitions = new Map<string, StoredCatalogDefinition>();
+    if (keys.length === 0) {
+      return definitions;
+    }
+    const ids = keys.map(({ id, version }) => definitionDocId(id, version));
+    const response = await this.client.search({
+      size: ids.length,
+      track_total_hits: false,
+      query: { ids: { values: ids } },
+    });
+    for (const hit of response.hits.hits) {
+      const definition = toStoredDefinition(hit._source ?? undefined);
+      if (definition) {
+        definitions.set(definitionDocId(definition.id, definition.version), definition);
+      }
+    }
+    return definitions;
   }
 
   public async putDefinitionCreate(

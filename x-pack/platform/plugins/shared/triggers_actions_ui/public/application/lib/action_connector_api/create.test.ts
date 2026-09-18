@@ -108,4 +108,38 @@ describe('createActionConnector', () => {
     const result = await createActionConnector({ http, connector });
     expect(result).toMatchObject({ authMode: 'shared' });
   });
+
+  test('sends spec_version and maps it back from the response', async () => {
+    http.post.mockResolvedValueOnce({
+      connector_type_id: '.abuseipdb',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'Pinned',
+      config: {},
+      id: '123',
+      spec_version: '1.0.0',
+    });
+
+    const result = await createActionConnector({
+      http,
+      connector: {
+        actionTypeId: '.abuseipdb',
+        name: 'Pinned',
+        config: {},
+        secrets: {},
+        specVersion: '1.0.0',
+      },
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/api/actions/connector', {
+      body: JSON.stringify({
+        name: 'Pinned',
+        config: {},
+        secrets: {},
+        connector_type_id: '.abuseipdb',
+        spec_version: '1.0.0',
+      }),
+    });
+    expect(result.specVersion).toBe('1.0.0');
+  });
 });

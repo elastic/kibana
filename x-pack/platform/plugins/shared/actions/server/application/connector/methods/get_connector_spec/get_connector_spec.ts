@@ -6,14 +6,43 @@
  */
 
 import Boom from '@hapi/boom';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import type { ActionType } from '../../../../types';
 import type { GetConnectorSpecParams } from './types';
+
+const resolveSpec = async (
+  actionType: Pick<ActionType, 'connectorSpec' | 'specVersions'> | undefined,
+  id: string,
+  specVersion: string | undefined
+): Promise<{ spec: ConnectorSpec; servedVersion?: string }> => {
+  const { specVersions } = actionType ?? {};
+  if (!specVersions) {
+    // Unversioned spec type: the version parameter has nothing to select and is ignored.
+    const spec = actionType?.connectorSpec;
+    if (!spec) {
+      throw Boom.notFound(`Spec for connector type "${id}" not found.`);
+    }
+    return { spec };
+  }
+  try {
+    const spec = await specVersions.getSpec(specVersion);
+    return { spec, servedVersion: specVersion ?? specVersions.getActiveVersion() };
+  } catch (error) {
+    throw Boom.notFound(
+      `Spec version "${specVersion}" for connector type "${id}" not found: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
 
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
   configurationUtilities,
+  specVersion,
 }: GetConnectorSpecParams) {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
@@ -27,13 +56,10 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const spec = context.actionTypeRegistry.has(id)
-    ? context.actionTypeRegistry.get(id).connectorSpec
+  const actionType = context.actionTypeRegistry.has(id)
+    ? context.actionTypeRegistry.get(id)
     : undefined;
-
-  if (!spec) {
-    throw Boom.notFound(`Spec for connector type "${id}" not found.`);
-  }
+  const { spec, servedVersion } = await resolveSpec(actionType, id, specVersion);
 
   try {
     const webhookSettings = configurationUtilities.getWebhookSettings();
@@ -49,6 +75,7 @@ export async function getConnectorSpecAsJsonSchema({
       metadata: serialized.metadata,
       schema: serialized.schema,
       isTestable: Boolean(spec.test.enabled),
+      ...(servedVersion !== undefined ? { specVersion: servedVersion } : {}),
     };
   } catch (error) {
     throw new Error(

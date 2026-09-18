@@ -1048,3 +1048,50 @@ describe('actionTypeRegistry', () => {
     });
   });
 });
+
+describe('spec versions', () => {
+  const specVersions = {
+    getActiveVersion: () => '1.1.0',
+    getActiveSpec: jest.fn(),
+    getSpec: jest.fn(),
+    hasVersion: () => true,
+  };
+
+  test('getActiveSpecVersion returns the active version of a versioned type and undefined otherwise', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register(getConnectorType({ id: 'versioned', specVersions }));
+    actionTypeRegistry.register(getConnectorType({ id: 'classic' }));
+
+    expect(actionTypeRegistry.getActiveSpecVersion('versioned')).toBe('1.1.0');
+    expect(actionTypeRegistry.getActiveSpecVersion('classic')).toBeUndefined();
+    expect(actionTypeRegistry.getActiveSpecVersion('missing')).toBeUndefined();
+  });
+
+  test('list exposes the active version as specVersion on versioned types only', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register(getConnectorType({ id: 'versioned', specVersions }));
+    actionTypeRegistry.register(getConnectorType({ id: 'classic' }));
+
+    const byId = Object.fromEntries(actionTypeRegistry.list().map((type) => [type.id, type]));
+    expect(byId.versioned.specVersion).toBe('1.1.0');
+    expect(byId.classic).not.toHaveProperty('specVersion');
+  });
+
+  test('register keeps accessor properties live while still cloning data properties', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    let name = 'v1';
+    const actionType = getConnectorType({ id: 'live' });
+    Object.defineProperty(actionType, 'name', {
+      get: () => name,
+      enumerable: true,
+      configurable: true,
+    });
+    actionTypeRegistry.register(actionType);
+
+    name = 'v2';
+    expect(actionTypeRegistry.get('live').name).toBe('v2');
+    actionType.description = 'mutated after register';
+    expect(actionTypeRegistry.get('live').description).toBeUndefined();
+  });
+});

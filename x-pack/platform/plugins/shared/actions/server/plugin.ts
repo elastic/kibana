@@ -135,9 +135,8 @@ import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
 import type { CatalogSpecProvider } from './catalog_spec_provider';
-import { createConnectorTypeFromSpec } from './lib';
 
-export type { CatalogSpecProvider } from './catalog_spec_provider';
+export type { CatalogSpecProvider, CatalogActionType } from './catalog_spec_provider';
 
 export interface PluginSetupContract {
   registerType<
@@ -1228,14 +1227,16 @@ export class ActionsPlugin
       return;
     }
 
-    const specs = await specProvider.load({
+    const actionTypes = await specProvider.load({
       esClient: core.elasticsearch.client.asInternalUser,
+      savedObjectsRepository: core.savedObjects.createInternalRepository([
+        ACTION_SAVED_OBJECT_TYPE,
+      ]),
     });
-    for (const spec of specs) {
-      if (actionTypeRegistry.has(spec.metadata.id)) {
+    for (const actionType of actionTypes) {
+      if (actionTypeRegistry.has(actionType.id)) {
         continue;
       }
-      const actionType = createConnectorTypeFromSpec(spec, setupApi);
       ensureSufficientLicense(actionType);
       actionTypeRegistry.register(actionType);
     }

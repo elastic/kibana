@@ -11,6 +11,7 @@ import { CatalogSpecSource } from './catalog_spec_source';
 import { getContentHash } from './icon';
 import {
   createLiveCatalogFetchDouble,
+  LIVE_ABUSEIPDB_1_0_0_YAML,
   LIVE_ABUSEIPDB_1_1_0_YAML,
   LIVE_ABUSEIPDB_ICON,
   LIVE_CATALOG_MANIFEST,
@@ -35,7 +36,7 @@ describe('CatalogSpecSource', () => {
     mockedFetch.mockReset();
   });
 
-  it('returns active AbuseIPDB and Okta assets and skips published rows', async () => {
+  it('returns every listed version, active and published, with its identity', async () => {
     mockedFetch.mockImplementation(createLiveCatalogFetchDouble() as unknown as typeof fetch);
 
     const snapshot = await createSource().loadSnapshot();
@@ -43,15 +44,34 @@ describe('CatalogSpecSource', () => {
     expect(snapshot.catalogVersion).toBe(
       'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95'
     );
-    expect(snapshot.assets).toHaveLength(2);
-    expect(snapshot.assets[0].yaml).toBe(LIVE_ABUSEIPDB_1_1_0_YAML);
-    expect(snapshot.assets[0].icon).toBe(LIVE_ABUSEIPDB_ICON);
-    expect(snapshot.assets[0].yamlPath).toBe(
-      'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml'
+    expect(snapshot.activeVersions).toEqual({ '.abuseipdb': '1.1.0', '.okta': '1.0.0' });
+    expect(snapshot.assets).toHaveLength(3);
+    expect(snapshot.assets[0]).toEqual(
+      expect.objectContaining({
+        id: '.abuseipdb',
+        version: '1.1.0',
+        contentHash: getContentHash(LIVE_ABUSEIPDB_1_1_0_YAML),
+        yaml: LIVE_ABUSEIPDB_1_1_0_YAML,
+        icon: LIVE_ABUSEIPDB_ICON,
+        yamlPath: 'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml',
+      })
     );
-    expect(snapshot.assets[1].yaml).toBe(LIVE_OKTA_1_0_0_YAML);
-    expect(snapshot.assets[1].icon).toBe(LIVE_OKTA_ICON);
-    expect(snapshot.assets[1].yamlPath).toBe('http://127.0.0.1:8089/connectors/okta/1.0.0.yaml');
+    expect(snapshot.assets[1]).toEqual(
+      expect.objectContaining({
+        id: '.abuseipdb',
+        version: '1.0.0',
+        yaml: LIVE_ABUSEIPDB_1_0_0_YAML,
+      })
+    );
+    expect(snapshot.assets[2]).toEqual(
+      expect.objectContaining({
+        id: '.okta',
+        version: '1.0.0',
+        yaml: LIVE_OKTA_1_0_0_YAML,
+        icon: LIVE_OKTA_ICON,
+        yamlPath: 'http://127.0.0.1:8089/connectors/okta/1.0.0.yaml',
+      })
+    );
     expect(snapshot.versions).toEqual([
       { id: '.abuseipdb', version: '1.1.0', status: 'active' },
       { id: '.abuseipdb', version: '1.0.0', status: 'published' },
@@ -60,14 +80,86 @@ describe('CatalogSpecSource', () => {
     expect(snapshot.skipped).toEqual([]);
 
     const requestedPaths = mockedFetch.mock.calls.map(([url]) => new URL(String(url)).pathname);
-    expect(requestedPaths).toEqual([
-      LIVE_CATALOG_PATHS.manifest,
-      LIVE_CATALOG_PATHS.abuseipdbDefinition,
-      LIVE_CATALOG_PATHS.abuseipdbIcon,
-      LIVE_CATALOG_PATHS.oktaDefinition,
-      LIVE_CATALOG_PATHS.oktaIcon,
+    expect(requestedPaths[0]).toBe(LIVE_CATALOG_PATHS.manifest);
+    expect(requestedPaths.slice(1).sort()).toEqual(
+      [
+        LIVE_CATALOG_PATHS.abuseipdbDefinition,
+        LIVE_CATALOG_PATHS.abuseipdbIcon,
+        LIVE_CATALOG_PATHS.abuseipdbPublishedDefinition,
+        LIVE_CATALOG_PATHS.abuseipdbPublishedIcon,
+        LIVE_CATALOG_PATHS.oktaDefinition,
+        LIVE_CATALOG_PATHS.oktaIcon,
+      ].sort()
+    );
+  });
+
+  it('loadRawSpecs keeps only active assets', async () => {
+    mockedFetch.mockImplementation(createLiveCatalogFetchDouble() as unknown as typeof fetch);
+
+    const assets = await createSource().loadRawSpecs();
+
+    expect(assets.map((asset) => asset.yamlPath)).toEqual([
+      'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml',
+      'http://127.0.0.1:8089/connectors/okta/1.0.0.yaml',
     ]);
-    expect(requestedPaths).not.toContain(LIVE_CATALOG_PATHS.abuseipdbPublishedDefinition);
+  });
+
+  it('skips fetching definitions whose stored hash matches the manifest', async () => {
+    mockedFetch.mockImplementation(createLiveCatalogFetchDouble() as unknown as typeof fetch);
+
+    const snapshot = await createSource().loadSnapshot({
+      storedHashes: new Map([
+        ['.abuseipdb@1.1.0', getContentHash(LIVE_ABUSEIPDB_1_1_0_YAML)],
+        ['.okta@1.0.0', 'sha256:stale'],
+      ]),
+    });
+
+    expect(snapshot.assets.map((asset) => `${asset.id}@${asset.version}`)).toEqual([
+      '.abuseipdb@1.0.0',
+      '.okta@1.0.0',
+    ]);
+    expect(snapshot.versions).toHaveLength(3);
+    const requestedPaths = mockedFetch.mock.calls.map(([url]) => new URL(String(url)).pathname);
+    expect(requestedPaths).not.toContain(LIVE_CATALOG_PATHS.abuseipdbDefinition);
+    expect(requestedPaths).toContain(LIVE_CATALOG_PATHS.oktaDefinition);
+  });
+
+  it('fetches definitions with bounded concurrency', async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const double = createLiveCatalogFetchDouble();
+    mockedFetch.mockImplementation((async (url: string) => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return double(url);
+    }) as unknown as typeof fetch);
+
+    const source = new CatalogSpecSource({
+      registryUrl: REGISTRY_URL,
+      logger: loggerMock.create(),
+      fetchConcurrency: 1,
+    });
+    const snapshot = await source.loadSnapshot();
+
+    expect(snapshot.assets).toHaveLength(3);
+    expect(maxInFlight).toBe(1);
+  });
+
+  it('loads one exact id@version from the manifest', async () => {
+    mockedFetch.mockImplementation(createLiveCatalogFetchDouble() as unknown as typeof fetch);
+
+    const source = createSource();
+    const published = await source.loadVersion('.abuseipdb', '1.0.0');
+    expect(published).toEqual(
+      expect.objectContaining({
+        id: '.abuseipdb',
+        version: '1.0.0',
+        yaml: LIVE_ABUSEIPDB_1_0_0_YAML,
+      })
+    );
+    await expect(source.loadVersion('.abuseipdb', '9.9.9')).resolves.toBeUndefined();
   });
 
   it('skips connector ids reserved with the .declarative- prefix', async () => {
@@ -115,6 +207,7 @@ describe('CatalogSpecSource', () => {
     const snapshot = await createSource().loadSnapshot();
 
     expect(snapshot.assets.map((asset) => asset.yamlPath)).toEqual([
+      'http://127.0.0.1:8089/connectors/abuseipdb/1.0.0.yaml',
       'http://127.0.0.1:8089/connectors/okta/1.0.0.yaml',
     ]);
     expect(snapshot.skipped).toEqual(
@@ -138,7 +231,9 @@ describe('CatalogSpecSource', () => {
 
     const snapshot = await createSource().loadSnapshot();
 
+    // Only the 1.1.0 icon path is tampered with; 1.0.0 resolves its own icon path.
     expect(snapshot.assets.map((asset) => asset.yamlPath)).toEqual([
+      'http://127.0.0.1:8089/connectors/abuseipdb/1.0.0.yaml',
       'http://127.0.0.1:8089/connectors/okta/1.0.0.yaml',
     ]);
     expect(snapshot.skipped).toEqual(

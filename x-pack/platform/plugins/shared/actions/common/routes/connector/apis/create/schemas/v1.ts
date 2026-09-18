@@ -39,6 +39,16 @@ export const createConnectorRequestBodySchema = schema.object(
     secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
       defaultValue: {},
     }),
+    spec_version: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 32,
+        meta: {
+          description:
+            'Spec version to pin the connector to. Only for spec-sourced connector types. Omitted: the catalog-active version at create time.',
+        },
+      })
+    ),
   },
   { meta: { id: 'new_connector' } }
 );

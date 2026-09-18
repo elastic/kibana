@@ -41,22 +41,39 @@ export class DiskSnapshotSource extends ConnectorSpecSource {
       if (manifest.activeVersions[entry.id] !== entry.version) {
         continue;
       }
-
-      const yamlPath = this.resolve(entry.definitionUrl);
-      const yaml = await fs.readFile(yamlPath, 'utf8');
-      const parsed = parseDeclarativeConnectorSpec(yaml);
-      const asset: RawConnectorSpecAsset = { yamlPath, yaml };
-
-      if (parsed.metadata.icon) {
-        const iconPath = this.resolve(path.dirname(entry.definitionUrl), parsed.metadata.icon.path);
-        asset.iconPath = iconPath;
-        asset.icon = await fs.readFile(iconPath, 'utf8');
-      }
-
-      assets.push(asset);
+      assets.push(await this.loadEntry(entry.definitionUrl));
     }
 
     return assets;
+  }
+
+  /** Reads one exact `id@version` from the snapshot, active or not. Undefined when not listed. */
+  public async loadVersion(
+    id: string,
+    version: string
+  ): Promise<RawConnectorSpecAsset | undefined> {
+    const manifest = await this.loadManifest();
+    const entry = manifest.connectors.find(
+      (candidate) => candidate.id === id && candidate.version === version
+    );
+    if (!entry || entry.id.startsWith(RESERVED_PREFIX)) {
+      return undefined;
+    }
+    return this.loadEntry(entry.definitionUrl);
+  }
+
+  private async loadEntry(definitionUrl: string): Promise<RawConnectorSpecAsset> {
+    const yamlPath = this.resolve(definitionUrl);
+    const yaml = await fs.readFile(yamlPath, 'utf8');
+    const parsed = parseDeclarativeConnectorSpec(yaml);
+    const asset: RawConnectorSpecAsset = { yamlPath, yaml };
+
+    if (parsed.metadata.icon) {
+      const iconPath = this.resolve(path.dirname(definitionUrl), parsed.metadata.icon.path);
+      asset.iconPath = iconPath;
+      asset.icon = await fs.readFile(iconPath, 'utf8');
+    }
+    return asset;
   }
 
   private resolve(...relativeParts: string[]): string {

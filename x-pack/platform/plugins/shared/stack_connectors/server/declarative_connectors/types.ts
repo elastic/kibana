@@ -90,7 +90,7 @@ export interface DeclarativeCatalogManifest {
   connectors: DeclarativeCatalogEntry[];
 }
 
-export type DeclarativeCatalogVersionStatus = 'active' | 'published';
+export type DeclarativeCatalogVersionStatus = 'active' | 'published' | 'incompatible';
 
 export interface DeclarativeCatalogVersionEntry {
   id: string;
@@ -107,6 +107,24 @@ export interface DeclarativeCatalogSkippedEntry {
   detail?: string;
 }
 
+export interface DeclarativeCatalogIncompatibleVersion {
+  id: string;
+  version: string;
+  /** Version that stays active because the candidate is not additive. */
+  activeVersion: string;
+  reasons: string[];
+}
+
+export interface DeclarativeCatalogPinnedVersionMissing {
+  id: string;
+  version: string;
+}
+
+export interface DeclarativeCatalogRegisteredVersions {
+  activeVersion: string;
+  versions: string[];
+}
+
 export interface DeclarativeCatalogHealth {
   enabled: boolean;
   ready: boolean;
@@ -114,6 +132,10 @@ export interface DeclarativeCatalogHealth {
   activeCatalogVersion?: string;
   versions: DeclarativeCatalogVersionEntry[];
   registeredTypeIds: string[];
+  registeredVersionsByType: Record<string, DeclarativeCatalogRegisteredVersions>;
+  incompatibleVersions: DeclarativeCatalogIncompatibleVersion[];
+  /** Versions pinned by saved connectors that exist neither in the index nor in the manifest. */
+  pinnedVersionsMissing: DeclarativeCatalogPinnedVersionMissing[];
   skipped: DeclarativeCatalogSkippedEntry[];
   lastRefreshAt?: string;
   lastError?: { message: string; at: string };

@@ -57,6 +57,49 @@ describe('ConnectorCatalogStorage', () => {
   const createClient = (): jest.Mocked<ConnectorCatalogStorageClient> => ({
     get: jest.fn(),
     index: jest.fn(),
+    search: jest.fn(),
+  });
+
+  describe('getDefinitions', () => {
+    it('reads many definitions with one ids query and drops incomplete hits', async () => {
+      const client = createClient();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'definition:.abuseipdb@1.1.0',
+              _source: { docType: 'definition', ...definition },
+            },
+            {
+              _id: 'definition:.abuseipdb@1.0.0',
+              _source: { docType: 'definition', id: '.abuseipdb' },
+            },
+          ],
+        },
+      } as never);
+      const storage = new ConnectorCatalogStorage(client, loggerMock.create());
+
+      const result = await storage.getDefinitions([
+        { id: '.abuseipdb', version: '1.1.0' },
+        { id: '.abuseipdb', version: '1.0.0' },
+      ]);
+
+      expect([...result.keys()]).toEqual(['definition:.abuseipdb@1.1.0']);
+      expect(result.get('definition:.abuseipdb@1.1.0')).toEqual(definition);
+      expect(client.search).toHaveBeenCalledWith({
+        size: 2,
+        track_total_hits: false,
+        query: { ids: { values: ['definition:.abuseipdb@1.1.0', 'definition:.abuseipdb@1.0.0'] } },
+      });
+    });
+
+    it('does not query when no keys are requested', async () => {
+      const client = createClient();
+      const storage = new ConnectorCatalogStorage(client, loggerMock.create());
+
+      await expect(storage.getDefinitions([])).resolves.toEqual(new Map());
+      expect(client.search).not.toHaveBeenCalled();
+    });
   });
 
   it('indexes a definition with op_type create', async () => {

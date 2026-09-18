@@ -21,6 +21,10 @@ export const actionMappings: SavedObjectsTypeMappingDefinition = {
     actionTypeId: {
       type: 'keyword',
     },
+    // Spec version pin of a spec-sourced connector. Aggregated at boot and by catalog health.
+    specVersion: {
+      type: 'keyword',
+    },
     // NO NEED TO BE INDEXED
     // isMissingSecrets: {
     //   type: 'boolean',
