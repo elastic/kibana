@@ -1994,4 +1994,43 @@ describe('ai indices routes', () => {
       expect(() => validateParams({ aiIndexId: '' })).toThrow();
     });
   });
+
+  describe('dest value body validation', () => {
+    const validateBody = (body: unknown) => {
+      const { validate } = getRoute('POST', aiIndexPath);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('Expected a body schema');
+      }
+      return validate.request.body.validate(body);
+    };
+    const body = (value: string) => ({
+      id: 'customer_support',
+      dest: { type: 'index', value },
+      automations: [],
+      sources: [],
+    });
+
+    const validValues = [
+      'ai-index-idx-mine',
+      'ai-index-idx-a*,ai-index-idx-b*',
+      'ai-index-idx-a.b+c',
+    ];
+    validValues.forEach((value) => {
+      it(`accepts ${value}`, () => {
+        expect(() => validateBody(body(value))).not.toThrow();
+      });
+    });
+
+    const invalidValues = [
+      'ai-index-idx-mine\n| EVAL leaked = 1',
+      'ai-index-idx-Mine',
+      'ai-index-idx-a b',
+      'ai-index-idx-a"b',
+    ];
+    invalidValues.forEach((value) => {
+      it(`rejects ${JSON.stringify(value)}`, () => {
+        expect(() => validateBody(body(value))).toThrow(/lowercase letters, numbers, hyphens/);
+      });
+    });
+  });
 });

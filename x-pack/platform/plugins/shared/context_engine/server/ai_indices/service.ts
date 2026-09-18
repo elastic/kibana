@@ -33,7 +33,9 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import { deleteKiView, putKiView } from './ki_view';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
+import { AI_INDEX_DEST_VALUE_PATTERN } from '../../common/validation';
 
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
 const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
@@ -127,6 +129,7 @@ export class AiIndexService {
     if (existing) {
       throw new AiIndexAlreadyExistsError(aiIndexId);
     }
+    await this.putView(aiIndexId, properties.dest);
 
     // Uniqueness is a read-then-write check rather than `op_type: 'create'`, matching the Agent Builder persisted clients.
     await this.writeDocument(
@@ -155,6 +158,7 @@ export class AiIndexService {
       throw new AiIndexManagedError(aiIndexId);
     }
 
+    await this.putView(aiIndexId, properties.dest);
     return this.writeDocument(
       aiIndexId,
       spaceId,
@@ -184,6 +188,7 @@ export class AiIndexService {
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
     }
+    await this.putView(aiIndexId, properties.dest);
     return this.writeDocument(
       aiIndexId,
       spaceId,
@@ -402,6 +407,11 @@ export class AiIndexService {
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);
     }
+    await deleteKiView({ esClient: this.esClient, logger: this.logger, aiIndexId });
+  }
+
+  private putView(aiIndexId: string, dest: AiIndexDest): Promise<void> {
+    return putKiView({ esClient: this.esClient, aiIndexId, dest });
   }
 
   private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
@@ -477,6 +487,11 @@ export class AiIndexService {
    * prefixes.
    */
   private assertDestValueHasPrefix(value: string, prefixes: string[]): void {
+    if (!AI_INDEX_DEST_VALUE_PATTERN.test(value)) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: only lowercase letters, numbers, and '_.*,+-' are permitted`
+      );
+    }
     const invalid = value
       .split(',')
       .find((expression) => !prefixes.some((prefix) => expression.startsWith(prefix)));

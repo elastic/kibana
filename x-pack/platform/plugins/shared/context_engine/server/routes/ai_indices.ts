@@ -62,6 +62,7 @@ import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
 import {
   validateAbsoluteSignalWindow,
+  validateAiIndexDestValue,
   validateAiIndexId,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
@@ -236,6 +237,7 @@ const aiIndexPropertiesSchema = {
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
+      validate: validateAiIndexDestValue,
       meta: {
         description:
           'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',

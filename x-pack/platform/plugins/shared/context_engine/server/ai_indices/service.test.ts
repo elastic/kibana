@@ -116,6 +116,7 @@ describe('AiIndexService', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let storageClient: jest.Mocked<Pick<AiIndexStorageClient, 'index' | 'search' | 'delete'>>;
   let service: AiIndexService;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockSearchHits = (...hits: SearchHitInput[]) => {
     storageClient.search.mockResolvedValue(
@@ -152,10 +153,8 @@ describe('AiIndexService', () => {
     createAiIndexStorageClientMock.mockReturnValue(storageClient);
     mockSearchHits();
 
-    service = new AiIndexService({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
-    });
+    logger = loggingSystemMock.createLogger();
+    service = new AiIndexService({ esClient, logger });
   });
 
   const properties = {
@@ -210,6 +209,59 @@ describe('AiIndexService', () => {
         AiIndexManagedError
       );
       expect(storageClient.index).not.toHaveBeenCalled();
+      expect(esClient.esql.putView).not.toHaveBeenCalled();
+    });
+
+    it('creates the retrieval view for the dest', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, properties);
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-customer_support',
+        query: [
+          'FROM ai-index-ds-customer_support* METADATA _id, _index, _score',
+          'EVAL id = COALESCE(id, _id)',
+          'INLINE STATS latest = MAX(@timestamp) BY id',
+          'WHERE @timestamp == latest',
+          'INLINE STATS latest_doc = MAX(_id) BY id',
+          'WHERE _id == latest_doc',
+          'DROP latest, latest_doc',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+        ].join('\n| '),
+      });
+    });
+
+    it('creates a view without the revision collapse for an index dest', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-idx-logs-app', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await service.create('logs_app', DEFAULT_SPACE, {
+        ...properties,
+        dest: { type: 'index', value: 'ai-index-idx-logs-app' },
+      });
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-logs_app',
+        query: [
+          'FROM ai-index-idx-logs-app METADATA _id, _index, _score',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+        ].join('\n| '),
+      });
+    });
+
+    it('fails when the view cannot be created', async () => {
+      esClient.esql.putView.mockRejectedValue(new Error('views are disabled'));
+
+      await expect(service.create('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
+        'views are disabled'
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
     });
 
     it('rejects an invalid dest before writing', async () => {
@@ -219,6 +271,17 @@ describe('AiIndexService', () => {
           dest: { type: 'data_stream', value: 'customer_support*' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a dest with characters outside the index name allowlist', async () => {
+      await expect(
+        service.create('customer_support', DEFAULT_SPACE, {
+          ...properties,
+          dest: { type: 'index', value: 'ai-index-idx-mine\n| EVAL leaked = 1' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
@@ -276,6 +339,23 @@ describe('AiIndexService', () => {
       expect(indexArgs.if_primary_term).toBe(2);
       expect(indexArgs.document?.date_created).toBe(aiIndexDocument.date_created);
       expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
+    });
+
+    it('replaces the retrieval view with the new dest', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
+
+      await service.put('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        dest: { type: 'data_stream', value: 'ai-index-ds-customer_support_v2' },
+      });
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-customer_support',
+        query: expect.stringContaining(
+          'FROM ai-index-ds-customer_support_v2 METADATA _id, _index, _score'
+        ),
+      });
     });
 
     it('persists feedback_analysis when updating an existing AI index', async () => {
@@ -585,6 +665,10 @@ describe('AiIndexService', () => {
           space: DEFAULT_SPACE,
           managed: true,
         }),
+      });
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-elastic',
+        query: expect.stringContaining('FROM ai-index-idx-sml-data'),
       });
     });
 
@@ -978,7 +1062,6 @@ describe('AiIndexService', () => {
       const okDocument: AiIndexDocument = { ...aiIndexDocument, id: 'ok', managed: true };
       mockSearchHitsOnce();
       mockSearchHitsOnce(storedHit(okDocument, { id: 'ok' }));
-      const logger = loggingSystemMock.createLogger();
       const ensure = jest.fn().mockImplementation(async (id: string) => {
         if (id === 'broken') {
           throw new InvalidAiIndexDestError('dest is invalid');
@@ -1002,6 +1085,18 @@ describe('AiIndexService', () => {
   });
 
   describe('delete', () => {
+    it('deletes the retrieval view with the AI index', async () => {
+      mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1' }));
+      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
+
+      await service.delete('customer_support', DEFAULT_SPACE);
+
+      expect(esClient.esql.deleteView).toHaveBeenCalledWith(
+        { name: 'v-ai-index-customer_support' },
+        { ignore: [404] }
+      );
+    });
+
     it('resolves when the AI index is deleted', async () => {
       mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1' }));
       storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
