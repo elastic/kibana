@@ -88,6 +88,16 @@ describe('useFetchRuleExecutions', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBe(error);
   });
+
+  it('does not call the API when enabled is false', async () => {
+    const { result } = renderHook(
+      () => useFetchRuleExecutions({ page: 1, perPage: 10, enabled: false }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(mockListRuleExecutions).not.toHaveBeenCalled();
+  });
 });
 
 describe('toListRuleExecutionsRequest', () => {
