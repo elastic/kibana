@@ -1,0 +1,222 @@
+version: "1"
+name: Attack Discovery Batched Generation
+description: |
+  Runs Attack Discovery over the whole open alert population for a lookback
+  window instead of a single truncated slice: retrieve once sorted by
+  @timestamp, slice into fixed-size batches, run the pipeline per batch in
+  parallel, and aggregate. A batch that fails is reported in `batch_errors`
+  rather than failing the run.
+
+  Each batch runs the full pipeline, so every batch persists its own
+  discoveries. Persistence is idempotent (de-duplication keys on the attack
+  hash), so a re-run cannot create duplicates.
+
+  Enabled because it is invoked via `workflow.execute` and owns no trigger: the
+  opt-in gate is the AD Worker, which ships disabled.
+
+  Emits to the caller: attack_discoveries (the persisted alert documents),
+  batch_errors,
+  batches_total, batches_succeeded, batches_failed. A declared outputs block is
+  deliberately omitted: a legacy array-typed output is validated as an array of
+  scalars (items anyOf string/number/boolean), which would reject arrays of
+  discovery objects at runtime, and workflow.execute types a child's output as
+  unknown regardless.
+enabled: true
+tags:
+  - watch
+  - watch-floor
+  - attack-discovery
+
+triggers:
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        batch_size:
+          default: 100
+          description: >
+            Maximum alerts per Attack Discovery run. Also sets the retrieval
+            ceiling at `batch_size * 100`, because the engine caps a parallel
+            fan-out at 100 branches — a smaller batch buys less total coverage,
+            not more.
+          maximum: 1000
+          minimum: 50
+          type: integer
+        connector_id:
+          description: >
+            LLM connector. Omit to use the configured default AI connector.
+          type: string
+        lookback:
+          default: "24h"
+          description: >
+            How far back to retrieve alerts: "30m", "2h", "7d".
+          pattern: "^[0-9]+(ms|s|m|h|d|w)$"
+          type: string
+
+steps:
+  # Not `elasticsearch.esql.query`: this step anonymizes each alert and emits
+  # the `_id,<value>` CSV shape the pipeline requires. Raw ES|QL rows would send
+  # real hostnames and usernames to the model, and the gate's `_id` contract
+  # would reject them.
+  - name: retrieve_alerts
+    type: security.attack-discovery.defaultAlertRetrieval
+    timeout: "5m"
+    with:
+      alerts_index_pattern: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      anonymization_fields: []
+      api_config:
+        connector_id: "{{ inputs.connector_id }}"
+      # Required by the step schema. Ignored on the ES|QL path, where the
+      # ceiling is the query's own LIMIT, so it is kept equal to it.
+      size: "${{ inputs.batch_size | times: 100 | at_most: 10000 }}"
+      # The `IS NULL` arm is load-bearing: `!=` alone is null-valued, and so
+      # false, for an alert with no closing reason. Kept as its own `| WHERE`
+      # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
+      #
+      # `LIMIT` is derived so the fan-out can never exceed 100 branches.
+      esql_query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+          | WHERE @timestamp >= NOW() - {{ inputs.lookback }}
+          | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
+          | WHERE kibana.alert.building_block_type IS NULL
+          | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
+          | SORT @timestamp ASC
+          | LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}
+
+  # `mode: settled` is what turns a failed batch into a gap instead of a failed
+  # run. Concurrency is the per-run rate-limit exposure against the connector as
+  # well as the wall-clock lever, so it stays low.
+  #
+  # The 30m limit is `branch-timeout`, not a step `timeout`: a step-level timeout
+  # inside a branch compiles to a timeout-zone node the parallel executor cannot
+  # drive, and graph-build rejects it. Each branch holds one step, so the branch
+  # deadline is that run's deadline.
+  #
+  # Fans out over batch *offsets*, not the alert chunks, and each branch slices
+  # its own window. The `foreach` item becomes the branch `key`, which the engine
+  # persists in branch state AND copies into `results[].key` — chunks would put
+  # ~2 MB through that twice per run, for a correlation-only field.
+  #
+  # `divided_by` returns a float, so the batch count is floored and incremented:
+  # the naive `(total + size - 1) / size` ceil yields one extra, empty batch on
+  # exact multiples. The `total > 0` guard keeps a zero-alert run at zero branches.
+  - name: generate_batches
+    type: parallel
+    mode: settled
+    concurrency:
+      # 2 to match the review fan-out in the AD Worker runner. Each branch here is
+      # a full generation pipeline making inference calls, so this width is the
+      # per-run rate-limit exposure against the connector, not just a throughput
+      # lever. Widen it with evidence, not before.
+      #
+      # `count-waiting` is left at its default (true), so a branch parked mid-run
+      # still holds its slot — these branches are long-running inference work, and
+      # at `false` the width would not restrain concurrent LLM load at all.
+      max: 2
+    branch-timeout: "30m"
+    foreach: |-
+      [{%- assign total = steps.retrieve_alerts.output.alerts | size -%}
+      {%- if total > 0 -%}
+      {%- assign n = total | minus: 1 | divided_by: inputs.batch_size | floor | plus: 1 -%}
+      {%- for i in (1..n) -%}{%- unless forloop.first -%},{%- endunless -%}
+      {{ forloop.index0 | times: inputs.batch_size }}{%- endfor -%}
+      {%- endif -%}]
+    steps:
+      - name: run_batch
+        type: security.attack-discovery.run
+        with:
+          alerts: "${{ steps.retrieve_alerts.output.alerts | slice: foreach.item, inputs.batch_size }}"
+          connector_id: "{{ inputs.connector_id }}"
+          # Stated on the leaf step rather than threaded down from the Worker: the
+          # tier is a property of the call, not of the caller. Only consulted when
+          # `connector_id` is empty, and ignored when AlertZero is disabled and the
+          # tier is therefore unregistered. Keep in sync with
+          # ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          feature_id: alertzero_reasoning
+          # The discoveries are read back from the index below instead. They
+          # dominate this step's output, and an output above the engine's
+          # eviction threshold is dropped from in-memory state before the
+          # parallel step aggregates its branches — so returning them inline
+          # loses them. Omitting them keeps the branch output ~150 bytes.
+          include_attack_discoveries: false
+
+  # Each batch persisted its own discoveries; read them back scoped to this run's
+  # generation uuids. `kibana.alert.rule.execution.uuid` is the `execution_uuid`
+  # the run step returns, so this is exact — no time window, and concurrent runs
+  # cannot bleed into each other.
+  #
+  # It also returns only genuinely new attacks: a re-discovered attack hashes to
+  # an existing document, the bulk create 409s, and that document keeps the
+  # execution uuid of the run that first found it.
+  - name: fetch_discoveries
+    type: elasticsearch.search
+    with:
+      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      # Ceiling on attacks returned per run, above any realistic per-run volume.
+      size: 1000
+      query:
+        terms:
+          kibana.alert.rule.execution.uuid:
+            "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
+
+  # A batch delivered only when the branch completed AND the run itself reports
+  # `completed`. Both halves matter: the branch can be `failed`, `skipped` or
+  # `timed_out`, and a branch that completed can still carry a run whose status
+  # is `pending` — it returned an execution_uuid and no discoveries, which the
+  # engine's own `succeeded` count would score as a success. A batch that found
+  # no attacks is still a delivery, not a gap.
+  - name: aggregate
+    type: data.set
+    with:
+      errors_json: |-
+        [
+        {%- assign is_first = true -%}
+        {%- for result in steps.generate_batches.output.results -%}
+        {%- unless result.status == 'completed' and result.output.status == 'completed' -%}
+        {%- unless is_first -%},{%- endunless -%}
+        {%- assign is_first = false -%}
+        {%- if result.status == 'completed' -%}
+        {"batch_index":{{ result.index }},"status":"pending","message":"run did not finish; returned execution_uuid {{ result.output.execution_uuid }}"}
+        {%- else -%}
+        {"batch_index":{{ result.index }},"status":"{{ result.status }}","message":{{ result.error.message | default: 'no error message reported' | json }}}
+        {%- endif -%}
+        {%- endunless -%}
+        {%- endfor -%}
+        ]
+      delivered: |-
+        {%- assign delivered = 0 -%}
+        {%- for result in steps.generate_batches.output.results -%}
+        {%- if result.status == 'completed' and result.output.status == 'completed' -%}
+        {%- assign delivered = delivered | plus: 1 -%}
+        {%- endif -%}
+        {%- endfor -%}
+        {{ delivered }}
+      # Summed across batches rather than taken from one, because each batch runs
+      # its own retrieval and reports its own count. Accumulated via a local
+      # because a filter argument cannot itself be a filter chain, so
+      # `plus: result.output.alerts_context_count | default: 0` would not parse.
+      alerts_analyzed: |-
+        {%- assign analyzed = 0 -%}
+        {%- for result in steps.generate_batches.output.results -%}
+        {%- assign batch_count = result.output.alerts_context_count | default: 0 -%}
+        {%- assign analyzed = analyzed | plus: batch_count -%}
+        {%- endfor -%}
+        {{ analyzed }}
+
+  # `| plus: 0` coerces the counted strings above back to numbers.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      attack_discoveries: "${{ steps.fetch_discoveries.output.hits.hits | map: '_source' }}"
+      batch_errors: "${{ steps.aggregate.output.errors_json | json_parse }}"
+      batches_failed: "${{ steps.generate_batches.output.total | minus: steps.aggregate.output.delivered }}"
+      batches_succeeded: "${{ steps.aggregate.output.delivered | plus: 0 }}"
+      batches_total: "${{ steps.generate_batches.output.total }}"
+      # One generation id per delivered batch, not one per run: batching turns the
+      # run step's single `execution_uuid` into 1:N. Each is a
+      # `kibana.alert.rule.execution.uuid` on that batch's persisted discoveries,
+      # so a caller can still trace a run to everything it produced. Same
+      # expression `fetch_discoveries` queries by, so the two cannot drift.
+      execution_uuids: "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
+      alerts_analyzed: "${{ steps.aggregate.output.alerts_analyzed | plus: 0 }}"

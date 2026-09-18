@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import {
+  ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
@@ -214,19 +215,23 @@ describe('Attack Discovery worker chain', () => {
   describe('generation step', () => {
     const run = stepIn(workerSteps, 'run_generation');
 
-    it('reuses the existing generation engine through the run step', () => {
-      expect(run?.type).toBe('security.attack-discovery.run');
+    it('delegates generation to the batched sub-workflow', () => {
+      expect(run?.type).toBe('workflow.execute');
+      expect(run?.with?.['workflow-id']).toBe(
+        'system-security-attack-discovery-batched-generation'
+      );
     });
 
-    it('runs generation in sync mode', () => {
-      expect(run?.with?.mode).toBe('sync');
+    // `workflow.execute`, not `executeAsync`: the fan-out below needs the
+    // discoveries inline, and a child failure must fail this run.
+    it('waits for the child rather than firing it off', () => {
+      expect(run?.type).not.toBe('workflow.executeAsync');
     });
 
-    // The pipeline enforces its own 30m budget internally. A step timeout at or below
-    // it would win the race and produce an opaque engine kill that does NOT cancel the
-    // background pipeline, instead of an attributed PipelineStepError.
-    it('sets a step timeout above the 30m pipeline budget', () => {
-      expect(run?.timeout).toBe('35m');
+    // The child runs N pipelines, each with its own 30m branch-timeout, so this
+    // bounds the whole batched run rather than a single pipeline's 30m budget.
+    it('sets a step timeout that bounds the whole batched child', () => {
+      expect(run?.timeout).toBe('4h');
     });
 
     it('leaves failure propagation alone so a failed generation fails the run', () => {
@@ -417,13 +422,55 @@ describe('Attack Discovery worker chain', () => {
       }
     );
 
-    it('passes title through to the review', () => {
-      expect(branchInputs.title).toContain('foreach.item.title');
-    });
+    // Generation now comes from the batched child, which emits persisted alert
+    // `_source` documents. Their discovery fields are namespaced AND written as
+    // flat dotted keys, so a dotted-path read resolves to empty and every review
+    // would be dispatched with no title and no alert ids -- silently, because the
+    // review steps are stubs and an empty title still satisfies `required`.
+    // Rendering against the real `_source` shape is what makes this a real check;
+    // asserting the template text alone would not catch the shape mismatch.
+    describe('per-attack review inputs', () => {
+      const liquidEngine = createWorkflowLiquidEngine();
+      // Exactly what `transform_to_alert_documents` writes.
+      const persistedAttack = {
+        'kibana.alert.attack_discovery.title': 'Suspicious lateral movement',
+        'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
+        'kibana.alert.attack_discovery.summary_markdown': 'A **summary**',
+      };
 
-    // `${{ }}` preserves the array type; `{{ }}` would stringify it.
-    it('passes alert_ids through as a typed array', () => {
-      expect(branchInputs.alert_ids).toBe('${{ foreach.item.alert_ids }}');
+      const render = (template: unknown) =>
+        liquidEngine.parseAndRender(
+          String(template).replace(/^\$\{\{(.*)\}\}$/s, '{{$1| json }}'),
+          {
+            foreach: { item: persistedAttack },
+          }
+        );
+
+      it('resolves the title against a persisted attack document', async () => {
+        await expect(render(branchInputs.title)).resolves.toBe('Suspicious lateral movement');
+      });
+
+      it('resolves alert_ids against a persisted attack document', async () => {
+        await expect(render(branchInputs.alert_ids)).resolves.toBe('["alert-1","alert-2"]');
+      });
+
+      it('resolves summary_markdown against a persisted attack document', async () => {
+        await expect(render(branchInputs.summary_markdown)).resolves.toBe('A **summary**');
+      });
+
+      // `${{ }}` preserves the array type; `{{ }}` would stringify it.
+      it('passes alert_ids as a typed array rather than a string', () => {
+        expect(String(branchInputs.alert_ids).startsWith('${{')).toBe(true);
+      });
+
+      // The anonymized fields, matching what the previous inline handover passed.
+      // De-anonymizing reviews is a behaviour change owned by #19022 / #19211.
+      it.each(['title', 'alert_ids', 'summary_markdown'])(
+        'reads the anonymized %s, not its _with_replacements twin',
+        (field) => {
+          expect(String(branchInputs[field])).not.toContain('with_replacements');
+        }
+      );
     });
 
     it('passes autonomy through as a typed enum', () => {
@@ -591,15 +638,16 @@ describe('Attack Discovery worker chain', () => {
       );
     });
 
-    it('reports the generation execution_uuid so a run can be traced to its discoveries', () => {
-      expect((worker.outputs ?? []).map((output) => output.name)).toContain('execution_uuid');
+    it('reports the generation execution_uuids so a run can be traced to its discoveries', () => {
+      expect((worker.outputs ?? []).map((output) => output.name)).toContain('execution_uuids');
     });
 
-    // The Attack Discovery generation id from the run step, not this workflow's
-    // execution id: it keys the AD generations API and every persisted discovery.
-    it('takes execution_uuid from the run step rather than the workflow execution', () => {
-      expect(stepIn(workerSteps, 'emit_result')?.with?.execution_uuid).toContain(
-        'steps.run_generation.output.execution_uuid'
+    // The Attack Discovery generation ids from the generation step, not this
+    // workflow's execution id: each keys the AD generations API and the persisted
+    // discoveries of its batch. Plural because generation is batched 1:N.
+    it('takes execution_uuids from the generation step rather than the workflow execution', () => {
+      expect(stepIn(workerSteps, 'emit_result')?.with?.execution_uuids).toContain(
+        'steps.run_generation.output.execution_uuids'
       );
     });
 
@@ -661,5 +709,39 @@ describe('Attack Discovery worker chain', () => {
     ['worker', worker],
   ])('leaves the %s workflow-level timeout at its generous default', (_name, workflow) => {
     expect(workflow.settings?.timeout).toBeUndefined();
+  });
+
+  // Systemic guard, not a point fix. Three separate references to the batched
+  // child's output went stale during this re-site (`title` / `alert_ids` /
+  // `summary_markdown`, then `alerts_context_count` and `status`), each failing
+  // silently: an unknown field renders empty rather than erroring, so nothing
+  // downstream notices. Enumerating what the child actually emits and checking
+  // every reference against it catches the whole class in one assertion.
+  describe('runner references to the batched generation child', () => {
+    const childYaml = ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml;
+    const child = parse(childYaml) as YamlWorkflow;
+    const runnerYaml = ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.yaml;
+
+    const emitted = Object.keys(
+      (child.steps ?? []).find(({ name }) => name === 'emit_result')?.with ?? {}
+    );
+
+    it('the child emits a non-empty output contract', () => {
+      expect(emitted.length).toBeGreaterThan(0);
+    });
+
+    it('every steps.run_generation.output.<field> reference is a field the child emits', () => {
+      const referenced = [
+        ...new Set(
+          Array.from(
+            runnerYaml.matchAll(/steps\.run_generation\.output\.([a-zA-Z_][a-zA-Z0-9_]*)/g),
+            (match) => match[1]
+          )
+        ),
+      ];
+
+      expect(referenced.length).toBeGreaterThan(0);
+      expect(referenced.filter((field) => !emitted.includes(field))).toEqual([]);
+    });
   });
 });

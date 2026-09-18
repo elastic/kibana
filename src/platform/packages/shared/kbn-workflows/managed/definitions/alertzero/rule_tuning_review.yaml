@@ -1,14 +1,23 @@
 version: "1"
 name: Detection Rule Tuning Review
 description: >
-  Diagnoses one rule whose alerts analysts closed as false positives, parks on its own
-  approval gate, and applies an approved query change. Launched per rule by the rule
-  tuning sweep so every review's gate can be pending at the same time.
+  Diagnoses one rule whose alerts analysts closed as false positives, records the
+  recommendation as a proposal on a new investigation, and lets the proposal gate
+  apply an approved query change. Launched per rule by the rule tuning sweep so every
+  review's proposal can be pending at the same time.
 enabled: true
 tags:
   - security
   - detection-rule-tuning
 settings:
+  # This run parks in WAITING_FOR_CHILD for as long as the proposal gate holds
+  # the decision, and the engine's default 6h workflow timeout would cancel the
+  # review out from under the analyst. So this has to stay above the gate's own
+  # ceiling, which is `168h`: a 72h decision window, plus a second full 72h for
+  # a proposal re-parked just before its deadline, plus margin. A test pins the
+  # relationship, so raising the gate's ceiling fails here rather than silently
+  # cancelling reviews.
+  timeout: "176h"
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
   # review is still pending: alerts are only tagged after the gate resolves,
   # so the harvest keeps returning such a rule until then.
@@ -47,6 +56,22 @@ triggers:
             this list). The agent retrieves these by id to ground the diagnosis; they
             are tagged once the gate resolves, which places the reviewed watermark
             that retires any older untagged false positives.
+        total_alert_count:
+          type: integer
+          minimum: 0
+          description: Every alert the rule produced in the window; with total_fp_count gives the FP rate shown to the analyst.
+        total_fp_count:
+          type: integer
+          minimum: 0
+          description: All false positives in the window, reviewed or not.
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          default: assisted
+          description: >-
+            Detection Watch autonomy level. "manual" adds an entry gate: the analyst
+            approves the review before diagnosis starts. Both levels gate the tuning
+            proposal itself.
         analysis_window_days:
           type: integer
           minimum: 1
@@ -109,8 +134,127 @@ steps:
     on-failure:
       continue: true
 
+  # Human-facing record of this review, deliberately separate from diagnose_rule's
+  # own conversation: the agent transcript stays opaque, the investigation is where
+  # analysts collaborate and where both proposal gates attach their decision. Public
+  # so anyone in the space can pick it up. Created before diagnosis so the manual
+  # entry gate has somewhere to land. No on-failure: without an investigation there
+  # is nowhere to propose, so the review fails, the alerts stay untagged, and the
+  # next sweep retries.
+  - name: create_investigation
+    type: ai.conversation.create
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true }}
+    with:
+      title: "Rule tuning: {{ steps.fetch_rule.output.name }}"
+      access_control:
+        access_mode: public
+      template_id: investigation
+      metadata:
+        status: open
+        description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
+        workflow_execution_id: "{{ execution.id }}"
+
+  # By-reference security.rule attachment: the framework resolves the rule once
+  # from its rule_id and snapshots it, recording the rule as it was when this
+  # review started. The fixed attachment id makes the refresh below deterministic.
+  - name: attach_rule
+    type: ai.attachment.add
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: "tuned-rule"
+      type: security.rule
+      origin: "{{ steps.fetch_rule.output.rule_id }}"
+      description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+    on-failure:
+      continue: true
+
+  # Evidence shared by both proposal comments below.
+  - name: compose_evidence
+    type: data.set
+    with:
+      rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
+      investigation_line: "**Investigation:** [Rule tuning: {{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
+      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
+      sample_alerts: "{% for alert_id in inputs.alert_ids limit: 5 %}[{{ alert_id }}](/s/{{ workflow.spaceId }}/app/security/alerts/redirect/{{ alert_id }}?index=.alerts-security.alerts-{{ workflow.spaceId }}){% unless forloop.last %}, {% endunless %}{% endfor %}"
+
+  # Manual autonomy entry gate: the sweep's findings are reported and nothing else
+  # happens until an analyst approves the review. No action, so approval is the whole
+  # lifecycle; a dismissal ends the run below. Assisted runs skip straight to
+  # diagnosis and meet only the proposal gate.
+  - name: propose_entry
+    type: workflow.execute
+    if: >-
+      ${{ inputs.autonomy_level == 'manual'
+        and steps.create_investigation.output.conversation_id != null }}
+    with:
+      workflow-id: system-create-investigation-proposal
+      inputs:
+        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        comment: |-
+          **Review rule for tuning?**
+
+          {{ steps.compose_evidence.output.rule_line }}
+          {{ steps.compose_evidence.output.investigation_line }}
+
+          **Why this rule was picked**
+          {{ steps.compose_evidence.output.fp_summary }}
+
+          **Sample alerts**
+          {{ steps.compose_evidence.output.sample_alerts }}
+
+          **On approval**
+          The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
+        impact: low
+
+  - name: record_entry
+    type: data.set
+    with:
+      declined: "${{ steps.propose_entry.output.decision == 'dismissed' }}"
+
+  # A declined review still retires its alerts, or the next sweep would open the
+  # same entry gate for the same alerts again.
+  - name: mark_alerts_declined
+    type: security.setAlertTags
+    if: "${{ steps.record_entry.output.declined == true }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.dismissed_tag }}"
+
+  - name: close_investigation_declined
+    type: ai.conversation.metadata.patch
+    if: "${{ steps.record_entry.output.declined == true }}"
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: other
+        verdict: "Analyst declined the tuning review."
+    on-failure:
+      continue: true
+
+  # workflow.output terminates the run, so no later step needs to check the entry
+  # decision.
+  - name: stop_declined
+    type: workflow.output
+    if: "${{ steps.record_entry.output.declined == true }}"
+    status: completed
+    with:
+      rule_uuid: "{{ inputs.rule_uuid }}"
+      approved: false
+      applied: false
+
   - name: diagnose_rule
     type: ai.agent
+    # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_agentic
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_rule_tuning_review
+    aggregate-by: alertzero_parent
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
@@ -170,6 +314,13 @@ steps:
           paths you considered (exception / query / risk_score) and why each is unsafe
           or inapplicable for this rule, and (c) a concrete recommendation for what the
           analyst should do manually in the Detection Rules UI.
+
+        The analyst sees your output as a proposal card, so fill every field for a
+        reader who has not seen the alerts: title is one short line naming the
+        change; summary says why the rule needs tuning; fp_pattern describes the
+        recurring benign pattern; reasoning is a numbered list of the steps that led
+        to the recommendation; confidence is how sure you are that the change removes
+        the false positives without losing detections.
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -180,6 +331,15 @@ steps:
                 const: exception
               summary:
                 type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
               exception_entries:
                 type: array
                 minItems: 1
@@ -217,23 +377,39 @@ steps:
                           type: string
                           enum: [exists, does_not_exist]
                       required: [field, operator]
-            required: [change_type, summary, exception_entries]
+            required: [change_type, summary, exception_entries, title, fp_pattern, reasoning, confidence]
           - type: object
             properties:
               change_type:
                 const: query
               summary:
                 type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string  
               proposed_query:
                 type: string
                 minLength: 1
-            required: [change_type, summary, proposed_query]
+            required: [change_type, summary, proposed_query, title, fp_pattern, reasoning, confidence]
           - type: object
             properties:
               change_type:
                 const: risk_score
               summary:
                 type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string  
               proposed_risk_score:
                 type: integer
                 minimum: 0
@@ -241,14 +417,22 @@ steps:
               proposed_severity:
                 type: string
                 enum: [low, medium, high, critical]
-            required: [change_type, summary, proposed_risk_score, proposed_severity]
+            required: [change_type, summary, proposed_risk_score, proposed_severity, title, fp_pattern, reasoning, confidence]
           - type: object
             properties:
               change_type:
                 const: manual
               summary:
                 type: string
-            required: [change_type, summary]
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string     
+            required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
   # Rules using a data view, timestamp override, or alert suppression need fields
   # the preview API cannot conditionally omit, so query auto-apply is restricted.
@@ -347,29 +531,46 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
-  # A timeout fails this run before the tag steps, so the alerts stay unreviewed
-  # and the next sweep proposes the rule again with a fresh diagnosis.
-  - name: review_tuning
-    type: waitForApproval
-    if: >-
-      ${{ steps.fetch_rule.error == null
-        and steps.fetch_rule.output.enabled == true
-        and steps.diagnose_rule.output.structured_output.summary != null }}
-    timeout: "72h"
+  - name: compose_proposal
+    type: data.set
     with:
-      approveLabel: Approve change
-      rejectLabel: Dismiss
-      message: |-
-        Rule tuning review for {{ steps.fetch_rule.output.name }}
-        {{ inputs.fp_count }} alerts were closed as false positives in the last
-        {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
+      comment: |-
+        **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
+
+        {{ steps.compose_evidence.output.rule_line }}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        {{ steps.compose_evidence.output.investigation_line }}
+
+        **Why this rule needs tuning**
+        {{ steps.compose_evidence.output.fp_summary }}
         {% if inputs.fp_count > inputs.alert_ids.size %}
-        The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }}
-        of the {{ inputs.fp_count }} false positives; tagging them retires the older
-        ones from future sweeps too.
+        The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives; tagging them retires the older ones from future sweeps too.
         {% endif %}
 
+        **Summary**
         {{ steps.diagnose_rule.output.structured_output.summary }}
+
+        **False positive pattern**
+        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+
+        **Reasoning**
+        {{ steps.diagnose_rule.output.structured_output.reasoning }}
+
+        **Sample alerts**
+        {{ steps.compose_evidence.output.sample_alerts }}
+
+        **Proposed change**
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        Current query:
+        ```
+        {{ steps.fetch_rule.output.query }}
+        ```
+
+        Proposed query:
+        ```
+        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+        ```
+        {% endif %}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
@@ -378,14 +579,25 @@ steps:
         {% endfor %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
         {% endif %}
+
+        {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }}
+        Current severity: {{ steps.fetch_rule.output.severity }}
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
+        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+        Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+        {% endif %}
+        
+        {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
+        No automated change can be applied safely for this rule.
+        Approving records the handoff — no rule changes are made automatically.
+        Apply the recommended change in the Detection Rules UI.
+        {% endif %}
+
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
-        Current query:
-        {{ steps.fetch_rule.output.query }}
-
-        Proposed query:
-        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
-
         {% if steps.can_preview_query_change.output.supported %}
+        **Backtest**
+
         Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
         lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
         {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
@@ -397,67 +609,88 @@ steps:
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
-        Approving applies the proposed query only if both backtests succeeded and the
-        rule has not been edited since this diagnosis. Otherwise no rule or alert tags
-        change, and a later sweep can retry with current data.
         {% else %}
         This rule is not a query rule, or uses a data view, timestamp override, or
         alert suppression, so the proposed query is not previewed or applied automatically.
         Approving marks these alerts acknowledged; apply the change manually in the Detection Rules UI.
         {% endif %}
         {% endif %}
-        {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }}
-        Current severity: {{ steps.fetch_rule.output.severity }}
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
-        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
-        Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
-        {% endif %}
-        {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
-        No automated change can be applied safely for this rule.
-        Approving records the handoff — no rule changes are made automatically.
-        Apply the recommended change in the Detection Rules UI.
-        {% endif %}
 
-        {% if steps.diagnose_rule.output.conversation_id %}
-        Continue investigation: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
-        {% endif %}
-
-  # The gate can stay open for 72h; re-read the rule so an analyst edit made in the
-  # meantime is not clobbered by a stale diagnosis.
-  - name: refetch_rule
-    type: kibana.request
+  # The proposal gate records the recommendation on the investigation, parks on
+  # the analyst's decision for up to 72h, and on approval runs the edit-rule action
+  # as the approver. A gate timeout fails the gate, which fails this run before the
+  # tag steps: the alerts stay unreviewed and the next sweep proposes the rule again
+  # with a fresh diagnosis, while the investigation stays open because nobody decided.
+  - name: propose_action
+    type: workflow.execute
     if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.can_preview_query_change.output.supported == true }}
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
     with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-    on-failure:
-      continue: true
+      workflow-id: system-create-investigation-proposal
+      inputs:
+        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        comment: "{{ steps.compose_proposal.output.comment }}"
+        actionWorkflowId: system-alertzero-action-edit-rule
+        actionInput:
+          id: "{{ inputs.rule_uuid }}"
+          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+        impact: medium
+        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+        # Query edits always wait for an analyst; matches the action's approvalPolicy.
+        autoApprove: false
 
-  - name: apply_query_tuning
-    type: security.patchRule
+  # Same gate without an action: the analyst carries the change out themselves, so
+  # approval is the whole lifecycle. Needs a diagnosis, since the investigation now
+  # exists before one.
+  - name: propose_manual
+    type: workflow.execute
     if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.can_preview_query_change.output.supported == true
-        and steps.record_preview_outcome.output.current_succeeded == true
-        and steps.record_preview_outcome.output.current_is_aborted == false
-        and steps.record_preview_outcome.output.proposed_succeeded == true
-        and steps.record_preview_outcome.output.proposed_is_aborted == false
-        and steps.refetch_rule.error == null
-        and steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at }}
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.change_type == 'manual' }}
     with:
-      patch:
-        id: "{{ steps.refetch_rule.output.id }}"
-        query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+      workflow-id: system-create-investigation-proposal
+      inputs:
+        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        comment: "{{ steps.compose_proposal.output.comment }}"
+        impact: low
+        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
-  # Each approval creates its own item. A rule only returns here on new false
-  # positives, so a later proposal is a different pattern, not a duplicate.
+  # The gate reports its outcome on two independent axes: `decision` is what the
+  # analyst concluded (`approved` / `dismissed`, absent until someone decides),
+  # and `status` is how far it got (`succeeded` once the action ran, `no_action`
+  # when there was nothing to run, `expired` when nobody answered). Spelled out
+  # per outcome rather than derived from a single flag so a run that never
+  # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
+  #
+  # NOTE: `approved` still reads `succeeded` for the action path, so a decision
+  # the analyst approved but whose patch failed counts as not approved. The
+  # decision axis can now tell those apart — left as-is here because this change
+  # is only migrating the renamed values.
+  - name: record_proposal_action_decision
+    type: data.set
+    with:
+      applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
+      approved: >-
+        ${{ steps.propose_action.output.status == 'succeeded'
+          or steps.propose_manual.output.decision == 'approved' }}
+      dismissed: >-
+        ${{ steps.propose_action.output.decision == 'dismissed'
+          or steps.propose_manual.output.decision == 'dismissed' }}
+
+  ### this is temporray, unitl excepion/rule score proposals is implemented
+  - name: review_tuning
+    type: waitForApproval
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' or steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
+    timeout: "72h"
+    with:
+      approveLabel: Approve change
+      rejectLabel: Dismiss
+      message: |-
+        {{ steps.compose_proposal.output.comment }}
+
+  ### this is temporray, unitl excepion/rule score proposals is implemented
   - name: apply_exception_tuning
     type: security.createRuleException
     if: >-
@@ -471,6 +704,7 @@ steps:
       description: "Added by the rule tuning workflow."
       entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
 
+  ### this is temporray, unitl excepion/rule score proposals is implemented
   - name: apply_risk_score_tuning
     type: security.patchRule
     if: >-
@@ -484,6 +718,40 @@ steps:
         risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
         severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
 
+  # The action ran inside the gate, so its result is not visible here; re-read the
+  # rule to refresh the attachment with the query that actually landed.
+  - name: refetch_rule
+    type: kibana.request
+    if: "${{ steps.record_proposal_action_decision.output.applied == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  # security.rule attachments resolve once and never refresh, so after the patch
+  # the snapshot would silently show the pre-tuning rule. This writes the patched
+  # rule as version 2; version 1 keeps the before state in the attachment history.
+  - name: refresh_rule_attachment
+    type: ai.attachment.update
+    if: >-
+      ${{ steps.attach_rule.error == null
+        and steps.refetch_rule.error == null
+        and steps.refetch_rule.output.id != null }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      attachment_id: "tuned-rule"
+      data:
+        text: "{{ steps.refetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.refetch_rule.output.name }}"
+      description: "Rule after applied tuning: {{ steps.fetch_rule.output.name }}"
+    on-failure:
+      continue: true
+
   # A skipped step leaves no execution record. Query success requires a returned
   # rule id; the other error checks are paired with their apply gates. Failed
   # changes stay untagged so a later sweep can retry.
@@ -491,8 +759,7 @@ steps:
     type: data.set
     with:
       query_applied: >-
-        ${{ steps.apply_query_tuning.error == null
-          and steps.apply_query_tuning.output.id != null }}
+        ${{ steps.record_proposal_action_decision.output.applied == true and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
       exception_applied: >-
         ${{ steps.review_tuning.output.response.approved == true
           and steps.diagnose_rule.output.structured_output.change_type == 'exception'
@@ -512,9 +779,13 @@ steps:
           or steps.record_apply_results.output.exception_applied == true
           or steps.record_apply_results.output.risk_score_applied == true }}
 
+  # Dismissals arrive from either gate: the proposal gate for query and manual,
+  # the interim in-run gate for exception and risk score.
   - name: mark_alerts_dismissed
     type: security.setAlertTags
-    if: "${{ steps.review_tuning.output.response.approved == false }}"
+    if: >-
+      ${{ steps.record_proposal_action_decision.output.dismissed == true
+        or steps.review_tuning.output.response.approved == false }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
@@ -535,27 +806,62 @@ steps:
   # An approved change the pipeline does not apply itself is the analyst's to act
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
   # the rule returns once new false positives accumulate past the watermark. The
-  # auto-apply path stays untagged when its apply fell through (failed backtest,
-  # stale edit), so a later sweep can retry with current data.
+  # auto-apply path stays untagged when its apply fell through, so a later sweep can retry with current data.
   # Liquid evaluates right-to-left: approved gates both the manual path and the
   # unsupported-query path without needing parentheses.
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
     if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'manual'
-        or steps.diagnose_rule.output.structured_output.change_type == 'query'
-        and steps.can_preview_query_change.output.supported == false }}
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.decision == 'approved' }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
         - "{{ consts.reviewed_tag }}"
         - "{{ consts.acknowledged_tag }}"
 
+  # Metadata writes fire the ai.conversation.metadataUpdated trigger, which is
+  # the emit point for downstream feedback signals. A gate timeout leaves the
+  # investigation open on purpose: nobody decided.
+  - name: close_investigation_applied
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_proposal_action_decision.output.approved == true }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: resolved
+        verdict: "Analyst approved the {{ steps.diagnose_rule.output.structured_output.change_type }} tuning proposal."
+    on-failure:
+      continue: true
+
+  # Liquid evaluates right-to-left, so the conversation check gates both
+  # dismissal sources without parentheses.
+  - name: close_investigation_dismissed
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_proposal_action_decision.output.dismissed == true
+        or steps.review_tuning.output.response.approved == false }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: other
+        verdict: "The tuning proposal was dismissed."
+    on-failure:
+      continue: true
+
   - name: emit_result
     type: workflow.output
     status: completed
     with:
       rule_uuid: "{{ inputs.rule_uuid }}"
-      approved: "${{ steps.review_tuning.output.response.approved == true }}"
+      # Two approval sources: the proposal gate (query, manual) and the interim
+      # in-run gate (exception, risk_score). A plain or-chain, since Liquid has no
+      # parentheses.
+      approved: >-
+        ${{ steps.record_proposal_action_decision.output.approved == true
+          or steps.review_tuning.output.response.approved == true }}
       applied: "${{ steps.record_outcome.output.rule_patched == true }}"
