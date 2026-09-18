@@ -1,0 +1,63 @@
+curl -X POST "http://localhost:9200/.demo-rna-dedup-test/_bulk" \
+  -H 'Content-Type: application/json' \
+  -u "elastic:changeme" \
+  --data-raw '
+{"index":{"_id":"evt-001"}}
+{"@timestamp":"2026-09-18T02:12:07.978Z","host":{"name":"web-01"},"source":{"ip":"198.51.100.4"},"event":{"action":"authentication_failure","category":["authentication"]},"user":{"name":"root"},"message":"Failed password for root from 198.51.100.4"}
+'
+{"index":{"_id":"evt-002"}}
+{"@timestamp":"2026-09-18T01:49:31.007Z","host":{"name":"web-01"},"source":{"ip":"198.51.100.4"},"event":{"action":"authentication_failure","category":["authentication"]},"user":{"name":"admin"},"message":"Failed password for admin from 198.51.100.4"}
+{"index":{"_id":"evt-003"}}
+{"@timestamp":"2026-09-18T01:49:31.007Z","host":{"name":"db-01"},"source":{"ip":"203.0.113.7"},"event":{"action":"authentication_failure","category":["authentication"]},"user":{"name":"root"},"message":"Failed password for root from 203.0.113.7"}
+'
+
+
+
+curl -X POST "http://localhost:5601/plv/api/alerting/v2/rules" \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: true' \
+  -u "elastic:changeme" \
+  -d '{
+  "kind": "alert",
+  "metadata": {
+    "name": "Demo — rule_event dedup (SSH brute force)",
+    "description": "Re-matches of the same source document are dropped. The rule-events count freezes after the first run.",
+    "tags": ["demo", "dedup-rule-event"]
+  },
+  "time_field": "@timestamp",
+  "schedule": { "every": "1m", "lookback": "10m" },
+  "query": {
+    "format": "standalone",
+    "breach": {
+      "query": "FROM .demo-rna-dedup-test METADATA _id, _index, _version | WHERE event.action == \"authentication_failure\" | KEEP _id, _index, _version, host.name, source.ip, user.name, message"
+    }
+  },
+  "grouping": { "fields": ["_index", "_id", "_version"] },
+  "state_transition": { "pending_count": 0 },
+  "deduplication_strategy": "rule_event"
+}'
+
+
+curl -X POST "http://localhost:5601/glj/api/alerting/v2/rules" \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: true' \
+  -u "elastic:changeme" \
+  -d '{
+  "kind": "alert",
+  "metadata": {
+    "name": "Demo — episode dedup (SSH brute force)",
+    "description": "Every match is written. Manually closing an episode keeps it closed even as new documents arrive.",
+    "tags": ["demo", "dedup-episode"]
+  },
+  "time_field": "@timestamp",
+  "schedule": { "every": "1m", "lookback": "10m" },
+  "query": {
+    "format": "standalone",
+    "breach": {
+      "query": "FROM .demo-rna-dedup-test METADATA _id, _index, _version | WHERE event.action == \"authentication_failure\" | KEEP _id, _index, _version, host.name, source.ip, user.name, message"
+    }
+  },
+  "grouping": { "fields": ["_index", "_id", "_version"] },
+  "state_transition": { "pending_count": 0 },
+  "deduplication_strategy": "episode"
+}'

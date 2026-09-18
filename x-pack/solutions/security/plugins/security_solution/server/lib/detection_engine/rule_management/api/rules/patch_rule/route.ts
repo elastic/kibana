@@ -115,6 +115,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             body: patchedRule,
           });
         } catch (err) {
+          // console.error('ERROR', err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,
