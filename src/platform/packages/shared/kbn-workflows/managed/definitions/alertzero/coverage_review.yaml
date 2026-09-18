@@ -341,6 +341,9 @@ steps:
 
   # Same gate without an action: approval is the analyst's judgement that the
   # enabled rule fully addresses the gap, so approval is the whole lifecycle.
+  # An action-less proposal has no action metadata to take its category from,
+  # so the queue bucket is named here; without it the proposal lands in the
+  # uncategorized fallback instead of beside the other coverage decisions.
   - name: propose_confirm
     type: workflow.execute
     if: >-
@@ -368,6 +371,7 @@ steps:
 
           **On approval**
           Nothing changes; approving records that the gap is covered. Dismiss if the rule does not fully address the reported behavior.
+        category: configure
         impact: low
         confidence: medium
 
@@ -400,6 +404,7 @@ steps:
 
           **On approval**
           Nothing is applied automatically; approving acknowledges the follow-up.
+        category: investigate
         impact: low
         confidence: low
 

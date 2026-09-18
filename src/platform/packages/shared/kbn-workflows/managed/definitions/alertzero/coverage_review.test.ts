@@ -328,11 +328,16 @@ describe('Detection Coverage review', () => {
     });
 
     // The gate types actionInput as an object, so action-less proposals omit the keys
-    // rather than pass an empty value.
-    it.each(['propose_confirm', 'propose_report'])('%s carries no action', (name) => {
+    // rather than pass an empty value. With no action to inherit a category from, they
+    // must name their own queue bucket or fall into the uncategorized fallback.
+    it.each([
+      ['propose_confirm', 'configure'],
+      ['propose_report', 'investigate'],
+    ])('%s carries no action but names its category', (name, category) => {
       const inputs = inputsOf(stepByName(name));
       expect(inputs).not.toHaveProperty('actionWorkflowId');
       expect(inputs).not.toHaveProperty('actionInput');
+      expect(inputs.category).toBe(category);
     });
 
     it('dispatches rule creation only for no_coverage and outside the gate', () => {
