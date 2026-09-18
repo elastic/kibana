@@ -244,6 +244,20 @@ describe('investigation proposals routes', () => {
     expect(response.conflict).toHaveBeenCalled();
   });
 
+  it('should map revising an expired proposal to 410', async () => {
+    const revise = jest.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
+    const { posts, byPath } = registerAndCollect({ revise });
+    const response = httpServerMock.createResponseFactory();
+
+    await byPath(posts, '/revisions').handler(
+      {},
+      httpServerMock.createKibanaRequest({ params: { proposalId: 'proposal-1' }, body: {} }),
+      response
+    );
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 410 }));
+  });
+
   it('should map revising a missing proposal to 404', async () => {
     const revise = jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1'));
     const { posts, byPath } = registerAndCollect({ revise });

@@ -20,16 +20,12 @@ import {
  * was validated against the original action's schema and would silently
  * become meaningless.
  *
- * `expiresAt` is excluded for the same reason the failure-recovery clone
- * excludes it — a revision must not be usable to extend a near-expired
- * deadline indefinitely. Per issue elastic/security-team#19289 (rewritten
- * 2026-09-17 19:45 CEST), both `expiresAt` and `createdAt` instead INHERIT
- * unchanged from the proposal being revised — see `ProposalsService.revise`.
- *
- * PROVISIONAL: the issue's author flagged in Slack, six minutes after writing
- * that inheritance rule, that he is personally still unsure about it and
- * wants to sync before it's final (as of 2026-09-17, unresolved). Implemented
- * per the issue's current written word; do not treat this as settled.
+ * `expiresAt` and `createdAt` are also excluded, both inherited unchanged
+ * from the proposal being revised rather than tunable — see
+ * `ProposalsService.revise`. The deadline belongs to the analyst, not the
+ * attempt: resetting it on revision would let a near-expired proposal be
+ * extended indefinitely by repeated revisions (issue #19289, "Previously
+ * open, now decided").
  */
 export const reviseProposalRequestSchema = z.object({
   /** Updated rationale, rendered as markdown. */

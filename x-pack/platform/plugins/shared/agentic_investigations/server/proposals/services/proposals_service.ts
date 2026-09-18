@@ -671,12 +671,10 @@ export class ProposalsService {
    * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather
    * than restarted — the deadline and the gate execution both belong to the
    * chain, not to any single revision. This mirrors `clone()`'s inheritance
-   * of the same three fields for the same reason.
-   *
-   * PROVISIONAL: the issue's author flagged in Slack, six minutes after
-   * writing this inheritance rule, that he is personally still unsure about
-   * it and wants to sync before it is final. Implemented as currently
-   * written pending that confirmation — do not treat this as settled.
+   * of the same three fields for the same reason: the deadline belongs to
+   * the analyst, not the attempt, and resetting it on revision would let a
+   * near-expired proposal be extended indefinitely (issue #19289,
+   * "Previously open, now decided").
    */
   async revise(
     { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
@@ -704,6 +702,15 @@ export class ProposalsService {
       throw new ProposalConflictError(
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
+    }
+    // Mirrors the check in `assertDecidable`, for the same lag: a deadline can
+    // pass before the workflow settles the record to `expired`, during which
+    // it still reads `pending`. `createdAt`/`expiresAt` are inherited
+    // unchanged by design (issue #19289 — the deadline belongs to the
+    // analyst, not the attempt), so a revision created in that window would
+    // be born already past a deadline it can never be decided against.
+    if (isExpired(proposal)) {
+      throw new ProposalExpiredError(id);
     }
 
     const revisionId = uuidv4();

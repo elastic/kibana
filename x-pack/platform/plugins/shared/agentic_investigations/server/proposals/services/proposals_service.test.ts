@@ -1199,11 +1199,11 @@ describe('ProposalsService', () => {
       expect(newRevisionCallOrder).toBeLessThan(supersedeCallOrder);
     });
 
-    it('inherits createdAt and expiresAt from the original unchanged (provisional per issue #19289)', async () => {
+    it('inherits createdAt and expiresAt from the original unchanged', async () => {
       const storage = createStorage(
         baseDocument({
           createdAt: '2026-09-01T00:00:00.000Z',
-          expiresAt: '2026-09-08T00:00:00.000Z',
+          expiresAt: '2099-01-01T00:00:00.000Z',
         })
       );
       const { service } = createService(storage);
@@ -1214,7 +1214,7 @@ describe('ProposalsService', () => {
         expect.objectContaining({
           document: expect.objectContaining({
             createdAt: '2026-09-01T00:00:00.000Z',
-            expiresAt: '2026-09-08T00:00:00.000Z',
+            expiresAt: '2099-01-01T00:00:00.000Z',
           }),
         })
       );
@@ -1276,6 +1276,20 @@ describe('ProposalsService', () => {
 
       await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
         ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
+      // `createdAt`/`expiresAt` inherit unchanged across a revision (issue
+      // #19289), so a revision created in the lag between a deadline passing
+      // and the workflow settling the record to `expired` would be born
+      // already past a deadline it can never be decided against.
+      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
+      const { service } = createService(storage);
+
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalExpiredError
       );
       expect(storage.index).not.toHaveBeenCalled();
     });
