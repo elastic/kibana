@@ -42,17 +42,17 @@ object should be encrypted.
 ```ts
   export interface EncryptedSavedObjectTypeRegistration {
     readonly type: string; // The name of the Saved Object type. This must match the name used to register the type with Core's Saved Object Service.
-    readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>; // The attributes to protect (anything considered sensitive data)
-    readonly attributesToIncludeInAAD?: ReadonlySet<string>; // The attributes to include in AAD (more on this below)
+    readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>; // The attributes to protect (anything considered sensitive data). Top-level names only.
+    readonly attributesToIncludeInAAD?: ReadonlySet<string>; // The attributes to include in AAD (more on this below). Top-level names only.
   }
 ```
 
 `attributesToEncrypt` can be defined by either a string matching the name of the attribute, or an `AttributeToEncrypt` object, which enables you to specify when
 an attribute's value should be allowed to be "dangerously exposed". There are generally three use cases to consider regarding the accessing of encrypted values:
 
-1. By default, when ESOs are retrieved with any "standard" Saved Object Client APIs (e.g. get, find), decryption does not occur, and instead all encrypted
+1. By default, when ESOs are retrieved with any "standard" Saved Object Client APIs (for example get, find), decryption does not occur, and instead all encrypted
 attributes are removed from the returned Saved Objects.
-2. As a plugin developer, if you want to access decrypted attributes of ESOs, you should use the dedicated APIs exposed via the Encrypted Saved Objects Client (e.g.
+2. As a plugin developer, if you want to access decrypted attributes of ESOs, you should use the dedicated APIs exposed via the Encrypted Saved Objects Client (for example
 `getDecryptedAsInternalUser`, `createPointInTimeFinderDecryptedAsInternalUser`). When using these functions, it is assumed that you will only consume decrypted
 attributes internally and will not expose them to end users unless it is absolutely necessary. In this case, these APIs can serve as a way to conditionally expose
 certain decrypted secrets in a controlled manner.
@@ -86,24 +86,53 @@ This is one reason why it is important to carefully consider whether an attribut
 
 #### Nested attributes
 
-When an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD. When AAD is constructed as key-value pairs, the nested properties
-of an attribute are all included in its value. In this way, AAD inclusion is hierarchical. If restructuring the attributes of an object to account for AAD hierarchical
-inclusion is not possible or desireable, you can make use of more granular keys, e.g. `firstLevelAttribute.nestedFieldToInclude`.
+`attributesToEncrypt` and `attributesToIncludeInAAD` accept top-level attribute names only. Names are compared to the keys of the object's `attributes` with an exact
+string match; a dot in a registered name is not interpreted as a path, and nothing traverses into subfields. Nested data is still covered, but at the granularity of the
+top-level attribute that contains it: when an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD, because AAD is constructed
+as key-value pairs and the nested properties of an attribute are all part of its value. In this way, AAD inclusion is hierarchical. If some subfields of an attribute need
+different treatment than others, restructure the object so that the subfields you care about become top-level attributes.
+
+Were a dotted key such as `auth.apiKey` accepted against a nested `auth: { apiKey }`, it would fail silently in the worst possible way. Listed in
+`attributesToEncrypt`, it would match nothing, so the sensitive value would be
+stored in plaintext and - because stripping uses the same names - would also be returned by the "standard" Saved Object Client APIs (for example get, find). Listed in
+`attributesToIncludeInAAD`, it would be dropped from AAD, weakening the integrity binding of the encrypted attributes while encryption and decryption both continued to
+succeed. In neither case is there an error, a failing test, or anything beyond a debug-level log.
+
+Because those failures are invisible, registration rejects dotted attribute keys outright. Registering a type with a dotted key in either set throws, reporting every
+offending key at once:
+
+```
+Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level attribute names,
+not as nested paths, so these keys would not encrypt the nested values they appear to name: auth.apiKey
+```
+
+This is a runtime check rather than a lint rule, and it runs on the fully resolved attribute sets. That means it sees keys that arrive through enum members, imported
+constants and spreads without needing any static analysis, and it cannot be switched off by a comment or a config setting. The one gap is that a type behind a disabled
+config never registers, so it is never checked.
+
+The only dotted keys that are permitted are those grandfathered for the `synthetics-monitor` and `synthetics-monitor-multi-space` types, whose attributes are genuine
+flat top-level names that contain dots because they match the heartbeat config key format (`'service.name'`, `'url.port'`, `'ssl.key'`). That allowance lives in the ESO
+plugin, spells out every permitted key rather than matching by prefix, and does not extend from one type to another - so a new dotted key is rejected even when it sits
+under a prefix already in use. The list exists to grandfather in types that predate the check, not to make room for new ones, so it should only ever shrink. If you
+believe your type needs a dotted attribute key, consult the Kibana Security team rather than adding to it.
+
+Note that this behavior differs from Core's Model Version `data_removal` change, whose `removedAttributePaths` does resolve nested paths. Within the same type definition,
+`removedAttributePaths: ['auth.apiKey']` reaches a nested `apiKey` subfield, but `attributesToEncrypt: ['auth.apiKey']` does not.
 
 #### What attributes should be included in AAD
 
 Determining which attributes to include in AAD is not an exact science, however there are some basic guidelines.
 
 Good candidates for attributes to INCLUDE in AAD are attributes that...
-- have some association or relationship with an encrypted attribute (e.g. a configuration element of an ESO that reflects the shape of the encrypted data, the token type of a connector, the URL or TLS certificate for a monitor)
+- have some association or relationship with an encrypted attribute (for example a configuration element of an ESO that reflects the shape of the encrypted data, the token type of a connector, the URL or TLS certificate for a monitor)
 - have a value that will never change once an object is created (e.g the created date or created by user, the type of action or connector)
 
 Good candidates for attributes to EXCLUDE from AAD are attributes that...
 
-- the value can be changed by an end user, and is meant to be updated separately from encrypted data, and has no association to any of the encrypted or AAD attributes (e.g. the name or UI properties of an object, the email title for an action or alert)
-- may not be present or populated, or populated algorithmically (e.g. any optional attributes, or calculated attributes like statistics or last updated time)
-- may be removed from the object or refactored in the future (e.g. deprecated or soon-to-be deprecated attributes, experimental attributes)
-- contain a large amount of data that can significantly slow down encryption and decryption, especially during bulk operations (e.g. large geo shape, arbitrary HTML document or image data)
+- the value can be changed by an end user, and is meant to be updated separately from encrypted data, and has no association to any of the encrypted or AAD attributes (for example the name or UI properties of an object, the email title for an action or alert)
+- may not be present or populated, or populated algorithmically (for example any optional attributes, or calculated attributes like statistics or last updated time)
+- may be removed from the object or refactored in the future (for example deprecated or soon-to-be deprecated attributes, experimental attributes)
+- contain a large amount of data that can significantly slow down encryption and decryption, especially during bulk operations (for example large geo shape, arbitrary HTML document or image data)
 
 There are additional considerations to make due to how version upgrades work in Serverless. These are covered in more detail in the
 [Serverless Considerations](./encrypted-saved-objects.md#serverless-considerations) section, but the basics are:
@@ -164,8 +193,8 @@ version will not be able to decrypt it. It is critical that when changes are mad
 subsequent Model Versions.
 
 It is worth noting here that if a ESO's Model Version `forwardCompatibility` schema is set to drop unknown fields (when the `unknowns` option is set to `ignore`),
-ESOs of this type will first be decrypted before the unknown fields are dropped. This more easily supports the hierarchical aspect of AAD-included attributes - when
-subfields of an attribute are added or removed, the previous version of Kibana will still be able to successfully construct AAD and decrypt the object.
+ESOs of this type will first be decrypted before the unknown fields are dropped. This more easily supports the fact that an AAD-included attribute covers all of its
+subfields - when subfields of an attribute are added or removed, the previous version of Kibana will still be able to successfully construct AAD and decrypt the object.
 
 The table below offers some general guidance on how various changes could be supported (or not). Keep in mind that any time you are adding or removing attributes from
 a Saved Object type, all related business logic for that type must be capable of gracefully and appropriately handling an object with or without the attribute in both
@@ -334,10 +363,10 @@ encrypted attribute `apiKeyToUse`:
   revision: schema.number(),
 ```
 
-This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. It is worth considering the nature
-of AAD hierarchical inclusion when structuring attributes for your saved objects. You can also utilize more granular keys when specifying which attributes to include in AAD,
-e.g. `rule.apiKeyOwner`. For more information, see the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of
-this document.
+This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. Note that `rule` can only be
+included in AAD as a whole. `attributesToIncludeInAAD` accepts top-level attribute names only, so a more granular key such as `rule.apiKeyOwner` is not supported -
+registering it would throw. If only part of an attribute belongs in AAD, the attribute must be restructured so that part of it is top-level. For more information, see
+the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of this document.
 
 Additionally, the owning team implemented a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them undecryptable.
 
