@@ -60,27 +60,32 @@ const getConvertibleLayerName = (layerId: string): string =>
   });
 
 /**
- * Detects query-based annotations in a visualization state. These rely on data views
- * and are not yet supported on ES|QL charts, so they block conversion.
+ * Detects annotation layers that cannot be represented by an ES|QL visualization.
+ * Query annotations rely on data views, while by-reference annotation groups are
+ * rejected by the ES|QL schema even when every event in the group is manual.
  *
  * The state is intentionally probed structurally instead of via `XYVisualizationState`
  * and `isAnnotationsLayer`: this hook is visualization-agnostic (`visualization.state`
  * is `unknown` in the store and may belong to any vis type), mirroring the
- * `getTrendlineLayerId` probe for metric state below. Trade-off: if the annotation
- * layer shape ever changes (`layerType` / `annotations`), this returns `false` and
- * the conversion guard silently disappears — keep it in sync with
+ * `getTrendlineLayerId` probe for metric state below. Keep this shape in sync with
  * `XYAnnotationLayerConfig` (`@kbn/lens-common`).
  */
-export const hasQueryBasedAnnotations = (visualizationState: unknown): boolean => {
+export const hasUnsupportedAnnotations = (visualizationState: unknown): boolean => {
   const layers = (visualizationState as { layers?: unknown })?.layers;
   if (!Array.isArray(layers)) {
     return false;
   }
   return layers.some(
-    (layer: { layerType?: string; annotations?: EventAnnotationConfig[] }) =>
+    (layer: {
+      layerType?: string;
+      annotations?: EventAnnotationConfig[];
+      annotationGroupId?: string;
+      __lastSaved?: unknown;
+    }) =>
       layer?.layerType === layerTypes.ANNOTATIONS &&
-      Array.isArray(layer.annotations) &&
-      layer.annotations.some(isQueryAnnotationConfig)
+      (layer.annotationGroupId !== undefined ||
+        layer.__lastSaved !== undefined ||
+        (Array.isArray(layer.annotations) && layer.annotations.some(isQueryAnnotationConfig)))
   );
 };
 
@@ -145,7 +150,7 @@ export const useEsqlConversionCheck = (
     }
 
     // Guard: query-based annotations require data views and are not yet supported on ES|QL charts
-    if (hasQueryBasedAnnotations(state)) {
+    if (hasUnsupportedAnnotations(state)) {
       return getEsqlConversionDisabledSettings(
         esqlConversionFailureReasonMessages.query_annotations_not_supported
       );

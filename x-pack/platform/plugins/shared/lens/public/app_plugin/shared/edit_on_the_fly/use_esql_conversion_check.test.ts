@@ -17,7 +17,7 @@ import {
 } from '@kbn/lens-common';
 import type { CoreStart } from '@kbn/core/public';
 
-import { hasQueryBasedAnnotations, useEsqlConversionCheck } from './use_esql_conversion_check';
+import { hasUnsupportedAnnotations, useEsqlConversionCheck } from './use_esql_conversion_check';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import type { LensPluginStartDependencies } from '../../../plugin';
 
@@ -53,16 +53,16 @@ const queryAnnotation: EventAnnotationConfig = {
   label: 'Query',
 };
 
-describe('hasQueryBasedAnnotations', () => {
+describe('hasUnsupportedAnnotations', () => {
   it('returns false for a state without layers', () => {
-    expect(hasQueryBasedAnnotations(undefined)).toBe(false);
-    expect(hasQueryBasedAnnotations({})).toBe(false);
-    expect(hasQueryBasedAnnotations({ layers: 'not-an-array' })).toBe(false);
+    expect(hasUnsupportedAnnotations(undefined)).toBe(false);
+    expect(hasUnsupportedAnnotations({})).toBe(false);
+    expect(hasUnsupportedAnnotations({ layers: 'not-an-array' })).toBe(false);
   });
 
   it('returns false for data and reference line layers', () => {
     expect(
-      hasQueryBasedAnnotations({
+      hasUnsupportedAnnotations({
         layers: [
           { layerId: 'a', layerType: 'data' },
           { layerId: 'b', layerType: 'referenceLine' },
@@ -73,7 +73,7 @@ describe('hasQueryBasedAnnotations', () => {
 
   it('returns false for annotation layers with only manual annotations', () => {
     expect(
-      hasQueryBasedAnnotations({
+      hasUnsupportedAnnotations({
         layers: [{ layerId: 'a', layerType: 'annotations', annotations: [manualAnnotation] }],
       })
     ).toBe(false);
@@ -81,13 +81,31 @@ describe('hasQueryBasedAnnotations', () => {
 
   it('returns true when any annotation layer contains a query-based annotation', () => {
     expect(
-      hasQueryBasedAnnotations({
+      hasUnsupportedAnnotations({
         layers: [
           { layerId: 'a', layerType: 'data' },
           {
             layerId: 'b',
             layerType: 'annotations',
             annotations: [manualAnnotation, queryAnnotation],
+          },
+        ],
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    ['annotationGroupId', { annotationGroupId: 'saved-annotation-group' }],
+    ['__lastSaved', { __lastSaved: { title: 'Saved annotation group' } }],
+  ])('returns true for a manual by-reference annotation layer carrying %s', (_, byReference) => {
+    expect(
+      hasUnsupportedAnnotations({
+        layers: [
+          {
+            layerId: 'annotation',
+            layerType: 'annotations',
+            annotations: [manualAnnotation],
+            ...byReference,
           },
         ],
       })
