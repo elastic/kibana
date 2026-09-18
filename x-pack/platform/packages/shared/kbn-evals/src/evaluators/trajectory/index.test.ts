@@ -196,6 +196,37 @@ describe('createTrajectoryEvaluator', () => {
       });
     });
 
+    it('flags a same-length sequence that swaps a golden tool for an unexpected one', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'hack'] },
+        expected: { tools: ['search', 'display'] },
+        metadata: null,
+      });
+
+      // Same length as the golden path, so the length ratio is 1; the unexpected call still
+      // has to be visible as something other than an ordinary partial match.
+      expect(result.metadata).toMatchObject({
+        precision: 1,
+        exactSequence: false,
+        extraTools: ['hack'],
+        missingTools: ['display'],
+      });
+      expect(result.score).toBeCloseTo(0.4 * 0.5 + 0.6 * 0.5);
+      expect(result.label).toBe('extra-or-duplicate-tools');
+    });
+
+    it('keeps the ordinary labels when the penalty is off', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'hack'] },
+        expected: { tools: ['search', 'display'] },
+        metadata: null,
+      });
+
+      expect(result.label).toBe('partial');
+    });
+
     it('does not penalize a shorter actual sequence', async () => {
       const result = await strictEvaluator.evaluate({
         input: {},

@@ -12,6 +12,16 @@ import { createTraceBasedEvaluator } from './factory';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
+/**
+ * Tool call arguments are recorded as compact JSON of the tool's parameters — e.g.
+ * `{"skill":"detection-rule-edit"}` for `load_skill` (its only parameter is `skill`) or
+ * `{"path":"/skills/security/threat-hunting/SKILL.md"}` for `filestore.read`/`read_file`.
+ * The `load_skill` branch therefore anchors the *value* of `skill` (`\"skill\":\"<name>\"`)
+ * instead of matching the name as a bare substring, which also matched a different skill whose
+ * name merely contains it (`detection-rule-edit-v2`), scoring a successful invocation for a
+ * skill that was never loaded. The path form stays anchored on `<name>/SKILL.md` for both
+ * tools, since `load_skill` accepts a folder path or a SKILL.md path as well as the name.
+ */
 export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
@@ -47,7 +57,10 @@ export function createSkillInvocationEvaluator({
     CASE(
       (
         attributes.gen_ai.tool.name == "load_skill"
-          AND attributes.gen_ai.tool.call.arguments LIKE "*${skillName}*"
+          AND (
+            attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\":\\"${skillName}\\"*"
+            OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+          )
       )
       OR
       (

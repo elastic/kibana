@@ -173,8 +173,12 @@ export function createTrajectoryEvaluator(config: {
       }
 
       // Extra/duplicate calls get their own label so a scaled score is not read as a
-      // "good" or "partial" match in the report.
-      const hasExtraOrDuplicateCalls = penalizeExtraCalls && !exactSequence && precision < 1;
+      // "good" or "partial" match in the report. The condition follows what is reported in
+      // the metadata rather than the length ratio alone: with a multi-step golden path,
+      // `['search', 'hack']` against `['search', 'display']` has `precision === 1` (same
+      // length) but still contains an unexpected call.
+      const hasExtraOrDuplicateCalls =
+        penalizeExtraCalls && (extraTools.length > 0 || duplicateTools.length > 0);
       const label = hasExtraOrDuplicateCalls
         ? 'extra-or-duplicate-tools'
         : score >= 0.8

@@ -67,6 +67,31 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
   });
 
+  it('anchors the load_skill argument to the configured skill name', async () => {
+    const evaluator = createSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'data-exploration',
+    });
+
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [
+        { name: 'total_spans', type: 'long' },
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[50, 1, 1]],
+    });
+
+    await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
+    // Arguments are compact JSON of the tool's parameters, so the value is delimited by quotes:
+    // `{"skill":"data-exploration"}` matches, `{"skill":"data-exploration-v2"}` does not.
+    expect(calledQuery).toContain('*\\"skill\\":\\"data-exploration\\"*');
+    expect(calledQuery).not.toContain('LIKE "*data-exploration*"');
+  });
+
   it('should return 1 when the skill was invoked', async () => {
     const evaluator = createSkillInvocationEvaluator({
       traceEsClient: mockEsClient,
