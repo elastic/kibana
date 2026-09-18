@@ -1,6 +1,6 @@
 The fix — whether you are proposing one, writing the patch, or revising an existing one — must be **durable** and **well-researched**, and must **address the root cause**. Be unapologetically critical about fix quality: it is far better to spend extra time now and fix the flakiness for good than to whip up a lightly researched patch. Spending time learning the feature under test and the surrounding code (application and test) is expected and encouraged.
 
-Most of this is judgment, and a justified departure is fine. The items under **Don't hide the failure** are not judgment calls: a patch that needs one of them isn't a fix. A departure from either the best practices below or this document must be justified in the PR description (not in code comments; a good fix is self-explanatory).
+Most of this is judgment, and a justified departure is fine. The items under **Don't hide the failure** are not judgment calls: a patch that needs one of them isn't a fix. A departure from either the best practices below or this document must be justified in the fix proposal or PR description (not in code comments; a good fix is self-explanatory).
 
 Again, be unapologetically critical about the fix quality.
 
