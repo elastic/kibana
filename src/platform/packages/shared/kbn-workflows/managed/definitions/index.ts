@@ -48,7 +48,7 @@ import {
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW } from './nightshift_investigations/decision_tree_reinforce';
 import { NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW } from './nightshift_investigations/alert_trigger';
-import { NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW } from './nightshift_investigations/sandbox_hydrate';
+import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW } from './nightshift_investigations/sandbox_materialize_workspace';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import { DEDUCTIVE_INVESTIGATION_WORKFLOW } from './nightshift_investigations/deductive_investigation';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
@@ -115,7 +115,7 @@ export { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
 export { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_reinforce';
 export { NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW_ID } from './nightshift_investigations/alert_trigger';
-export { NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/sandbox_hydrate';
+export { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from './nightshift_investigations/sandbox_materialize_workspace';
 export { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/agent_optimize';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
 export { CREATE_PROPOSAL_WORKFLOW_ID } from './proposals';
@@ -189,7 +189,7 @@ export const managedWorkflowDefinitions = [
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW,
-  NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW,
   DEDUCTIVE_INVESTIGATION_WORKFLOW,

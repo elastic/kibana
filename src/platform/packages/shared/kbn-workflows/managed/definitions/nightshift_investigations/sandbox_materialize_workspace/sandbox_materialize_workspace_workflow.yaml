@@ -1,5 +1,5 @@
 version: '1'
-name: Nightshift Sandbox Hydrate
+name: Nightshift Sandbox Materialize Workspace
 description: >
   Pre-execution workflow that allocates the investigator sandbox once, then
   materializes Cortex and Semantic Memory into that same workspace. Writers run
@@ -34,7 +34,7 @@ steps:
     timeout: 45s
     with:
       conversation_id: '{{ inputs.conversation_id }}'
-  - name: hydrate_workspaces
+  - name: materialize_workspaces
     type: parallel
     if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
     mode: fail-fast
