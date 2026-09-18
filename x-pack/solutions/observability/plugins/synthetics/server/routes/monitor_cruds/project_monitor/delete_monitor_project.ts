@@ -11,10 +11,11 @@ import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { getSavedObjectKqlFilter } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
+import { isUrlMonitorForParent } from '../../../synthetics_service/project_monitor/expand_project_monitor_urls';
 
 const MAX_MONITORS_TO_DELETE = 500;
+const MAX_PROJECT_MONITORS_TO_DELETE = 2000;
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
@@ -34,19 +35,25 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     await validateSpaceId(routeContext);
 
-    const deleteFilter = `${syntheticsMonitorAttributes}.${
-      ConfigKey.PROJECT_ID
-    }: "${decodedProjectName}" AND ${getSavedObjectKqlFilter({
-      field: 'journey_id',
-      values: monitorsToDelete.map((id: string) => `${id}`),
-    })}`;
+    const deleteFilter = `${syntheticsMonitorAttributes}.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`;
 
-    const { saved_objects: monitors } =
+    const { saved_objects: projectMonitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: MAX_MONITORS_TO_DELETE,
+        perPage: MAX_PROJECT_MONITORS_TO_DELETE,
         filter: deleteFilter,
-        fields: [],
+        fields: [ConfigKey.JOURNEY_ID],
       });
+
+    const monitors = projectMonitors.filter(({ attributes }) => {
+      const journeyId = attributes[ConfigKey.JOURNEY_ID];
+      if (!journeyId) {
+        return false;
+      }
+
+      return monitorsToDelete.some(
+        (parentId: string) => journeyId === parentId || isUrlMonitorForParent(journeyId, parentId)
+      );
+    });
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 

@@ -19,6 +19,7 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { expandProjectMonitorUrls } from '../../../synthetics_service/project_monitor/expand_project_monitor_urls';
 import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
 import { assertCanPerformMonitorBulkActionInAllSpaces } from '../monitor_locations_utils';
 
@@ -63,7 +64,8 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-    const lightWeightMonitors = monitors.filter((monitor) => monitor.type !== 'browser');
+    const expandedMonitors = expandProjectMonitorUrls(monitors);
+    const lightWeightMonitors = expandedMonitors.filter((monitor) => monitor.type !== 'browser');
     const browserMonitors = monitors.filter((monitor) => monitor.type === 'browser');
 
     if (browserMonitors.length > MAX_BROWSER_MONITORS) {

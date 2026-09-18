@@ -23,6 +23,7 @@ import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
+import { getUrlMonitorId } from './expand_project_monitor_urls';
 
 jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
   getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
@@ -423,6 +424,41 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [],
     });
+  });
+
+  it('fans out each URL in a multi-URL HTTP monitor', async () => {
+    const monitor = {
+      id: 'multi-url-monitor',
+      name: 'Multi URL monitor',
+      schedule: 3,
+      type: MonitorTypeEnum.HTTP,
+      urls: ['https://example.com/one', 'https://example.com/two'],
+    };
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
+      projectId: 'test-project',
+      spaceId: 'default-space',
+      monitors: [monitor],
+      routeContext,
+    });
+    const validateProjectMonitor = jest
+      .spyOn(pushMonitorFormatter, 'validateProjectMonitor')
+      .mockReturnValue(null);
+    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+
+    await pushMonitorFormatter.configureAllProjectMonitors();
+
+    expect(
+      validateProjectMonitor.mock.calls.map(([{ monitor: validatedMonitor }]) => validatedMonitor)
+    ).toEqual([
+      expect.objectContaining({
+        id: getUrlMonitorId('multi-url-monitor', 'https://example.com/one'),
+        urls: 'https://example.com/one',
+      }),
+      expect.objectContaining({
+        id: getUrlMonitorId('multi-url-monitor', 'https://example.com/two'),
+        urls: 'https://example.com/two',
+      }),
+    ]);
   });
 
   describe('API Journey monitors on Serverless', () => {

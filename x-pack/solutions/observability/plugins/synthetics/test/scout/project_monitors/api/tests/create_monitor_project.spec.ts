@@ -37,6 +37,7 @@ import { projectApiMonitorFixture } from '../fixtures/data/project_api_monitor';
 import { projectHttpMonitorFixture } from '../fixtures/data/project_http_monitor';
 import { projectTcpMonitorFixture } from '../fixtures/data/project_tcp_monitor';
 import { projectIcmpMonitorFixture } from '../../../common/fixtures/data/project_icmp_monitor';
+import { getUrlMonitorId } from '../../../../../server/synthetics_service/project_monitor/expand_project_monitor_urls';
 import type { ScoutPrivateLocation } from '../../../common/services/synthetics_private_location_api_service';
 
 type ProjectMonitor = Record<string, any>;
@@ -355,30 +356,26 @@ apiTest.describe(
       }
     );
 
-    apiTest('project monitors - handles http monitors', async ({ apiClient, kbnClient }) => {
-      const kibanaVersion = await kbnClient.version.get();
+    apiTest('project monitors - handles http monitors', async ({ apiClient }) => {
       const monitors = withUniqueIds(projectHttpMonitorFixture.monitors);
-      const successfulMonitors = [monitors[1]];
+      const multiUrlMonitor = {
+        ...monitors[1],
+        urls: projectHttpMonitorFixture.monitors[0].urls,
+      };
+      const successfulMonitors = multiUrlMonitor.urls.map((url) => ({
+        ...multiUrlMonitor,
+        id: getUrlMonitorId(multiUrlMonitor.id, url),
+        urls: url,
+      }));
       const project = `test-project-${uuidv4()}`;
 
       try {
-        const res = await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
+        const res = await pushProjectMonitors(apiClient, editorHeaders, project, [multiUrlMonitor]);
 
         expect(res.body).toStrictEqual({
           updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
-          failedMonitors: [
-            {
-              id: monitors[0].id,
-              details: `\`http\` project monitors must have exactly one value for field \`urls\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
-              reason: 'Invalid Heartbeat configuration',
-            },
-            {
-              id: monitors[0].id,
-              details: `The following Heartbeat options are not supported for ${monitors[0].type} project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
-            },
-          ],
+          failedMonitors: [],
         });
 
         for (const monitor of successfulMonitors) {
