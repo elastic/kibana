@@ -14,14 +14,15 @@ import type {
   TimelineEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
-import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
-import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import {
+  TimelineEventType,
+  isEventsNativeVersion,
   isRoundDerivedEventId,
   parseExecutionId,
-  roundsToEvents,
-} from '../../../conversation/client/rounds_to_events';
+} from '@kbn/agent-builder-common';
+import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
+import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
+import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
 
 /** A `user_message` whose payload has been processed for the agent (attachments migrated to refs, context rendered). */
 export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'data'> & {
