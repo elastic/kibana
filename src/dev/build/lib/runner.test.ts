@@ -56,6 +56,7 @@ const setup = async () => {
     dockerTag: '',
     dockerTagQualifier: '',
     downloadFreshNode: true,
+    withDevTools: false,
     withExamplePlugins: false,
     withTestPlugins: true,
   });

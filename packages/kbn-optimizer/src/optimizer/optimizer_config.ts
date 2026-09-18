@@ -110,6 +110,8 @@ interface Options {
   examples?: boolean;
   /** discover and build test plugins along with the standard plugins */
   testPlugins?: boolean;
+  /** set to false to exclude developer-tools plugins; omit to include them */
+  devTools?: boolean;
   /** absolute paths to specific plugins which should be built */
   pluginPaths?: string[];
   /** absolute paths to directories, any plugins in these directories will be built */
@@ -236,6 +238,7 @@ export class OptimizerConfig {
       pluginSelector: {
         examples,
         testPlugins,
+        ...(typeof options.devTools === 'boolean' ? { devTools: options.devTools } : {}),
         paths: pluginPaths,
         parentDirs: pluginScanDirs,
         allowlistPluginGroups: options.allowlistPluginGroups,

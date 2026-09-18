@@ -63,6 +63,13 @@ export const MANIFEST_V2: JSONSchema = {
       `,
       default: false,
     },
+    devTools: {
+      type: 'boolean',
+      description: desc`
+        Included when developing Kibana (yarn start) and omitted from the default
+        distributable unless --with-dev-tools is passed.
+      `,
+    },
     build: {
       type: 'object',
       properties: {

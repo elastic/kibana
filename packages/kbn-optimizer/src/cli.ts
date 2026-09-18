@@ -115,6 +115,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         cache,
         examples: examples && !(validateLimits || updateLimits),
         testPlugins: testPlugins && !(validateLimits || updateLimits),
+        devTools: dist || updateLimits || validateLimits ? false : undefined,
         profileWebpack,
         inspectWorkers,
         includeCoreBundle,

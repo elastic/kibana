@@ -57,6 +57,7 @@ it('build default and oss dist for current platform, without packages, by defaul
         "targetAllPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -100,6 +101,7 @@ it('builds packages if --all-platforms is passed', () => {
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -143,6 +145,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -186,6 +189,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -230,6 +234,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -281,6 +286,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -325,6 +331,7 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },
@@ -333,6 +340,12 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
       "unknownFlags": Array [],
     }
   `);
+});
+
+it('includes developer-tools plugins when --with-dev-tools is passed', () => {
+  expect(
+    readCliArgs(['node', 'scripts/build', '--with-dev-tools']).buildOptions?.withDevTools
+  ).toBe(true);
 });
 
 it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', () => {
@@ -369,6 +382,7 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
         "targetAllPlatforms": true,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
+        "withDevTools": false,
         "withExamplePlugins": false,
         "withTestPlugins": false,
       },

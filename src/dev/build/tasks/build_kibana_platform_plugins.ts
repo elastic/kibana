@@ -36,6 +36,7 @@ export const BuildKibanaPlatformPlugins: Task = {
       limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
       examples: buildConfig.pluginSelector.examples,
       testPlugins: buildConfig.pluginSelector.testPlugins,
+      devTools: buildConfig.pluginSelector.devTools,
     });
 
     await lastValueFrom(

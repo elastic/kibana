@@ -175,6 +175,7 @@ async function main() {
       cache: !args['no-cache'],
       examples: args.examples,
       testPlugins: args['test-plugins'],
+      devTools: dist ? false : undefined,
       allowlistPluginGroups: allowlistPluginGroups,
       themeTags: themes,
       log: log,

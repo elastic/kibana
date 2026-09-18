@@ -45,6 +45,7 @@ export interface BuildOptions {
   tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
+  withDevTools: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 

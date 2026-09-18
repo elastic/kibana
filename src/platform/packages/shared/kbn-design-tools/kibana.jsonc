@@ -4,5 +4,6 @@
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared",
-  "description": "Developer Toolbar design tools addon."
+  "description": "Developer Toolbar design tools addon.",
+  "devTools": true
 }

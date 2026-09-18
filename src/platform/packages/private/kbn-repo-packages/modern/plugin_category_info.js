@@ -20,6 +20,7 @@ const isValidPluginCategoryInfo = (v) =>
   isObj(v) &&
   typeof v.oss === 'boolean' &&
   typeof v.example === 'boolean' &&
-  typeof v.testPlugin === 'boolean';
+  typeof v.testPlugin === 'boolean' &&
+  typeof v.devTools === 'boolean';
 
 module.exports = { PLUGIN_CATEGORY, isValidPluginCategoryInfo };

@@ -39,6 +39,7 @@ interface Options {
   dockerPush: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
+  withDevTools: boolean;
   downloadFreshNode: boolean;
 }
 
@@ -72,6 +73,7 @@ export class Config {
       {
         examples: opts.withExamplePlugins,
         testPlugins: opts.withTestPlugins,
+        devTools: opts.withDevTools,
       },
       opts
     );
@@ -271,6 +273,7 @@ export class Config {
     return getPackages(this.repoRoot).filter(
       (p) =>
         (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
+        (this.pluginSelector.devTools || !p.isDevTools()) &&
         (!p.isPlugin() || (this.pluginFilter(p) && !p.isDevOnly()))
     );
   }

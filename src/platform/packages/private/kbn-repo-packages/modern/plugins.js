@@ -35,6 +35,10 @@ function matchCategory(selector, category) {
     return false;
   }
 
+  if (category.devTools && selector.devTools === false) {
+    return false;
+  }
+
   return true;
 }
 

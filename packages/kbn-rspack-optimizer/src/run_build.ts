@@ -44,6 +44,8 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Set to false to exclude developer-tools plugins; omit to include them */
+  devTools?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
   /** Directories scanned for plugins */
@@ -98,6 +100,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    devTools,
     pluginPaths,
     pluginScanDirs,
     allowlistPluginGroups,
@@ -138,6 +141,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      devTools,
       pluginPaths,
       pluginScanDirs,
       allowlistPluginGroups,

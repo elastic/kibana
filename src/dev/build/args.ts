@@ -49,6 +49,7 @@ export function readCliArgs(argv: string[]) {
       'help',
       'with-test-plugins',
       'with-example-plugins',
+      'with-dev-tools',
       'serverless',
       'tar-zstd',
     ],
@@ -159,6 +160,7 @@ export function readCliArgs(argv: string[]) {
     tarZstd: Boolean(flags['tar-zstd']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
+    withDevTools: Boolean(flags['with-dev-tools']),
   };
 
   return {

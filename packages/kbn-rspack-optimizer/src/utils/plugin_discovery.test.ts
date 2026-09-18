@@ -167,3 +167,24 @@ describe('discoverPlugins with explicit paths', () => {
     );
   }, 30000);
 });
+
+describe('discoverPlugins with devTools', () => {
+  it('omits developer-tools plugins when devTools is false', async () => {
+    const included = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+    });
+    const excluded = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      devTools: false,
+    });
+
+    expect(included.map((p) => p.id)).toEqual(expect.arrayContaining(['developerToolbar']));
+    expect(included.map((p) => p.id)).toEqual(expect.arrayContaining(['inspectComponent']));
+    expect(excluded.map((p) => p.id)).not.toContain('developerToolbar');
+    expect(excluded.map((p) => p.id)).not.toContain('inspectComponent');
+  }, 30000);
+});

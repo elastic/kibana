@@ -95,6 +95,7 @@ describe('BuildRspackBundles', () => {
         hmr: false,
         examples: config.pluginSelector.examples,
         testPlugins: config.pluginSelector.testPlugins,
+        devTools: config.pluginSelector.devTools,
         log,
       })
     );

@@ -144,6 +144,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           repoRoot: REPO_ROOT,
           examples: false,
           testPlugins: false,
+          devTools: false,
         });
         const pluginIds = ['core', ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id)];
         validateLimitsForAllBundles(log, pluginIds, limitsPath);
@@ -205,6 +206,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         cache,
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
+        devTools: effectiveDist ? false : undefined,
         allowlistPluginGroups,
         themeTags: themes,
         log,

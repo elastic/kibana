@@ -152,6 +152,15 @@ class Package {
   }
 
   /**
+   * Is this package a Kibana developer-tools module? Included on yarn start;
+   * omitted from the default distributable unless `--with-dev-tools`.
+   * @returns {boolean}
+   */
+  isDevTools() {
+    return !!this.manifest.devTools;
+  }
+
+  /**
    * Does this package expose a plugin, is it of one of the plugin types?
    * @returns {this is import('./types').PluginPackage}
    */
@@ -202,6 +211,7 @@ class Package {
       oss,
       example,
       testPlugin,
+      devTools: !!this.manifest.devTools,
     };
   }
 

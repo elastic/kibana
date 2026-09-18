@@ -228,6 +228,7 @@ function validatePackageManifest(parsed, repoRoot, path) {
     group,
     visibility,
     devOnly,
+    devTools,
     build,
     description,
     serviceFolders,
@@ -288,6 +289,10 @@ function validatePackageManifest(parsed, repoRoot, path) {
     throw err(`devOnly`, devOnly, `must be a boolean when defined`);
   }
 
+  if (devTools !== undefined && typeof devTools !== 'boolean') {
+    throw err(`devTools`, devTools, `must be a boolean when defined`);
+  }
+
   if (description !== undefined && !isSomeString(description)) {
     throw err(`description`, description, `must be a non-empty string when specified`);
   }
@@ -302,6 +307,7 @@ function validatePackageManifest(parsed, repoRoot, path) {
     group,
     visibility,
     devOnly,
+    devTools,
     build: validatePackageManifestBuild(build),
     description,
     serviceFolders,

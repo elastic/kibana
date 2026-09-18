@@ -79,6 +79,11 @@ export interface PackageManifestBaseFields {
    */
   devOnly?: boolean;
   /**
+   * Included on yarn start; omitted from the default distributable unless
+   * `--with-dev-tools` is passed.
+   */
+  devTools?: boolean;
+  /**
    * configuration used to customize how this package is built
    */
   build?: {
@@ -172,6 +177,10 @@ export interface PluginSelector {
    */
   testPlugins?: boolean;
   /**
+   * Set to `false` to exclude plugins marked `devTools`. Omit/undefined includes them.
+   */
+  devTools?: boolean;
+  /**
    * Absolute paths to specific plugin package which will always be included, regardless of the other settings
    */
   paths?: readonly string[];
@@ -219,4 +228,6 @@ export interface PluginCategoryInfo {
   example: boolean;
   /** is this a test plugin? */
   testPlugin: boolean;
+  /** is this a Kibana developer-tools plugin? */
+  devTools: boolean;
 }
