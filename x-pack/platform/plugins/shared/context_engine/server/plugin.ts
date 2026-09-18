@@ -13,6 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -203,6 +204,14 @@ export class ContextEnginePlugin
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
+      },
+      // Resolved at runtime because a static dependency on agentBuilder would be a cycle:
+      // agentBuilder -> agentBuilderSml -> contextEngine.
+      getAgentBuilder: async () => {
+        const { agentBuilder } = await coreSetup.plugins.onStart<{
+          agentBuilder: AgentBuilderPluginStart;
+        }>('agentBuilder');
+        return agentBuilder.found ? agentBuilder.contract : undefined;
       },
       getWorkflowsManagementApi: () => this.workflowsManagementApiPromise,
       getSpaces: async () => {

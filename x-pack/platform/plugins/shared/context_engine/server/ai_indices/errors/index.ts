@@ -12,6 +12,7 @@ export { AiIndexManagedError } from './ai_index_managed_error';
 export { AiIndexIdConflictError } from './ai_index_id_conflict_error';
 export { AiIndexAlreadyExistsError } from './ai_index_already_exists_error';
 export { InvalidConnectorSourceError } from './invalid_connector_source_error';
+export { InvalidAiIndexTraceError } from './invalid_ai_index_trace_error';
 export { KiNotFoundError } from './ki_not_found_error';
 export { AiIndexQueryResponseTooLargeError } from './ai_index_query_response_too_large_error';
 export { AiIndexDescribeResponseTooLargeError } from './ai_index_describe_response_too_large_error';

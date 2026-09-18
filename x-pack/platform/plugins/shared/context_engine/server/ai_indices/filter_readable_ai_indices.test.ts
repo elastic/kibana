@@ -16,6 +16,7 @@ const aiIndex = (id: string, target = `ai-index-idx-${id}`): AiIndexHttpItem => 
   managed: false,
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 });
