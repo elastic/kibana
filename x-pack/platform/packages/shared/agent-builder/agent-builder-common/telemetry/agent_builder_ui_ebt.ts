@@ -177,7 +177,6 @@ const ebtAction = {
     VIEW_JSON: 'view_json',
     VIEW_TRACE: 'view_trace',
     ROUND_ADD_TO_DATASET: 'round_add_to_dataset',
-    RETRY: 'retry',
     STALE_USE_UPDATED: 'stale_use_updated',
     STALE_DISMISS: 'stale_dismiss',
     SCROLL_DOWN: 'scroll_down',

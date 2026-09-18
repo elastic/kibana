@@ -11958,8 +11958,6 @@
     "xpack.agentBuilder.round.error.hook.title": "钩子执行失败",
     "xpack.agentBuilder.round.error.reasoningError": "推理错误",
     "xpack.agentBuilder.round.error.requestAborted.description": "请求在模型完成响应前被打断。这通常发生在工具返回大量数据时，例如包含多个字段的索引映射。请您尝试缩小您的问题范围，或使用更具体的索引模式。",
-    "xpack.agentBuilder.round.error.retryLabel": "重试",
-    "xpack.agentBuilder.round.error.tryAgain": "再试一次？",
     "xpack.agentBuilder.round.error.workflowAborted.title": "对话中止",
     "xpack.agentBuilder.round.error.workflowExecution.title": "工作流程失败",
     "xpack.agentBuilder.round.jsonFlyout.title": "原始响应",

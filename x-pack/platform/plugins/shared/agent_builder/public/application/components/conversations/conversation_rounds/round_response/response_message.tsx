@@ -26,7 +26,6 @@ export interface ResponseMessageProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
-  hasError: boolean;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
@@ -34,7 +33,6 @@ export interface ResponseMessageProps {
 }
 
 export const ResponseMessage: React.FC<ResponseMessageProps> = ({
-  hasError,
   response,
   steps,
   isLoading,
@@ -79,7 +77,7 @@ export const ResponseMessage: React.FC<ResponseMessageProps> = ({
           />
         ) : null}
       </EuiFlexItem>
-      {!isLoading && !hasError && (
+      {!isLoading && (
         <EuiFlexItem grow={false}>
           <ResponseActions
             content={response.message}
