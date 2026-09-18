@@ -8,6 +8,8 @@
 import {
   merge,
   of,
+  from,
+  concat,
   filter,
   identity,
   map,
@@ -38,7 +40,6 @@ import {
   isAgentBuilderError,
   AgentExecutionMode,
   createInternalError,
-  createRequestAbortedError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
@@ -58,6 +59,7 @@ import type { AgentsServiceStart } from '../agents';
 import {
   generateTitle,
   handleCancellation,
+  createAbortedError,
   executeAgent$,
   getConversation,
   persistRoundInput,
@@ -449,23 +451,27 @@ const handleConversationExecution = async ({
   } catch (err) {
     // Normalised once so the conversation terminal, the execution document and the client all
     // carry the same error.
-    const normalized = abortSignal.aborted
-      ? createRequestAbortedError('Converse request was aborted')
-      : toClientError(err);
-    if (storeConversation) {
-      await persistExecutionInterruption({
-        conversation,
-        conversationClient,
-        roundId,
-        receivedAt,
-        input: nextInput,
-        author,
-        origin: roundOrigin,
-        error: normalized,
-        logger,
-      });
-    }
-    throw normalized;
+    const normalized = abortSignal.aborted ? createAbortedError(abortSignal) : toClientError(err);
+    const terminals = storeConversation
+      ? await persistExecutionInterruption({
+          conversation,
+          conversationClient,
+          roundId,
+          receivedAt,
+          input: nextInput,
+          author,
+          origin: roundOrigin,
+          error: normalized,
+          logger,
+        })
+      : [];
+    // Surfaced as a stream — the persisted terminal, then the error — so live clients and
+    // followers see the same thing a reloaded conversation shows, and the stream-based status
+    // writers record the outcome exactly as they do for a failure mid-run.
+    return concat(
+      from(terminals as ChatEvent[]),
+      throwError(() => normalized)
+    );
   }
 };
 

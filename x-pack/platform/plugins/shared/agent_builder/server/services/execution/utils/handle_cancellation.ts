@@ -11,6 +11,17 @@ import { createRequestAbortedError, isExecutionAbortReason } from '@kbn/agent-bu
 import { CANCELLATION_DEADLINE_MS } from '../constants';
 
 /**
+ * The canonical abort error. The recorded abort reason rides on `signal.reason` (see
+ * `AbortMonitor`) and is stamped on the error meta so every reader of the error — stream,
+ * execution document, follower, callback, conversation — sees where the abort came from.
+ */
+export const createAbortedError = (abortSignal: AbortSignal) =>
+  createRequestAbortedError(
+    'Converse request was aborted',
+    isExecutionAbortReason(abortSignal.reason) ? { abort_reason: abortSignal.reason } : undefined
+  );
+
+/**
  * Graceful cancellation with abort normalisation.
  *
  * Before the signal fires, the source is mirrored and its errors flow through unchanged. Once it
@@ -31,16 +42,7 @@ export function handleCancellation<T>(
 
     return new Observable<T>((subscriber) => {
       let deadline: ReturnType<typeof setTimeout> | undefined;
-      // `signal.reason` carries the recorded abort reason (see AbortMonitor); it rides on the
-      // error meta so every reader of the error — stream, execution document, follower, callback,
-      // conversation — sees where the abort came from.
-      const abortedError = () =>
-        createRequestAbortedError(
-          'Converse request was aborted',
-          isExecutionAbortReason(abortSignal.reason)
-            ? { abort_reason: abortSignal.reason }
-            : undefined
-        );
+      const abortedError = () => createAbortedError(abortSignal);
       const clearDeadline = () => {
         if (deadline !== undefined) {
           clearTimeout(deadline);

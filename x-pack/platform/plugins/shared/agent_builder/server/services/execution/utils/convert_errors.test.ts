@@ -53,6 +53,14 @@ describe('toClientError', () => {
     expect((converted as Error & { cause?: unknown }).cause).toBe(original);
   });
 
+  it('preserves a validated HTTP status carried by the wrapped error', () => {
+    const forbidden = Object.assign(new Error('nope'), { statusCode: 403 });
+    expect(toClientError(forbidden).meta).toEqual(expect.objectContaining({ statusCode: 403 }));
+    expect(toClientError(Object.assign(new Error('weird'), { statusCode: 200 })).meta).toEqual(
+      expect.objectContaining({ statusCode: 500 })
+    );
+  });
+
   it('wraps a non-Error value', () => {
     expect(toClientError('boom').message).toBe('Error executing agent: boom');
   });

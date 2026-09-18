@@ -1026,29 +1026,32 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionFailed);
   });
 
-  it('setup failure after the receipt write: minimal execution_failed persisted and the normalised error rethrown', async () => {
+  it('setup failure after the receipt write: minimal execution_failed persisted, streamed, then the normalised error', async () => {
     const conversationClient = echoingClient();
     mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
     stubResolveServices(conversationClient);
     const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
     deps.agentService.getRegistry.mockRejectedValue(new Error('registry down'));
 
-    await expect(
-      handleAgentExecution({
-        execution: {
-          executionId: 'execution-1',
-          executionMode: AgentExecutionMode.conversation,
-          agentParams: {
-            agentId: 'test-agent',
-            conversationId: 'conversation-1',
-            nextInput: { message: 'Hello' },
-          },
-        } as never,
-        deps: deps as never,
-        request: { headers: {} } as never,
-        abortSignal: new AbortController().signal,
-      })
-    ).rejects.toMatchObject({
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    // the persisted terminal reaches the stream before the error, like a mid-run failure
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionFailed]);
+    expect(thrown).toMatchObject({
       code: AgentBuilderErrorCode.internalError,
       message: 'Error executing agent: registry down',
     });
@@ -1062,6 +1065,41 @@ describe('handleAgentExecution — interrupted executions', () => {
       'round-1::execution_started',
       'round-1::execution_failed',
     ]);
+  });
+
+  it('setup-time abort carries the recorded abort reason into execution_aborted', async () => {
+    const conversationClient = echoingClient();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
+    stubResolveServices(conversationClient);
+    const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
+    const abortController = new AbortController();
+    deps.agentService.getRegistry.mockImplementation(async () => {
+      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      throw new Error('AbortError');
+    });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: abortController.signal,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.at(-1)!.data).toMatchObject({
+      aborted_by: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+    });
   });
 
   it('setup failure on a HITL resume: prompt_response + minimal exec_k projection appended', async () => {
@@ -1091,22 +1129,23 @@ describe('handleAgentExecution — interrupted executions', () => {
     const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
     deps.agentService.getRegistry.mockRejectedValue(new Error('registry down'));
 
-    await expect(
-      handleAgentExecution({
-        execution: {
-          executionId: 'execution-1',
-          executionMode: AgentExecutionMode.conversation,
-          agentParams: {
-            agentId: 'test-agent',
-            conversationId: 'conversation-1',
-            nextInput: { prompts: {} },
-          },
-        } as never,
-        deps: deps as never,
-        request: { headers: {} } as never,
-        abortSignal: new AbortController().signal,
-      })
-    ).rejects.toThrow();
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { prompts: {} },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { seen, thrown } = await collect(events$);
+    expect(thrown).toBeDefined();
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionFailed]);
 
     // no receipt write on a resume; one append with the prompt_response and the exec_1 projection
     expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);

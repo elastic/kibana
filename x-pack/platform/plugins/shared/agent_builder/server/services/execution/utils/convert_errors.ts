@@ -13,6 +13,7 @@ import { createInternalError, isAgentBuilderError } from '@kbn/agent-builder-com
 import type { ModelProvider } from '@kbn/inference-common';
 import { getCurrentTraceId } from '../../../tracing';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
+import { getHttpStatusFromError } from './serialize_execution_error';
 
 /**
  * Converts any error into the {@link AgentBuilderError} the client receives, stamping the current
@@ -31,9 +32,10 @@ export const toClientError = (err: unknown): AgentBuilderError<AgentBuilderError
     return err;
   }
   const message = err instanceof Error ? err.message : String(err);
+  // A Boom-style 4xx from a dependency (auth, not found…) stays actionable for the client.
   return createInternalError(
     `Error executing agent: ${message}`,
-    { statusCode: 500, traceId },
+    { statusCode: getHttpStatusFromError(err) ?? 500, traceId },
     { cause: err }
   );
 };
