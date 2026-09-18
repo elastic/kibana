@@ -615,8 +615,7 @@ steps:
         {% endif %}
 
   # One switch, four exclusive arms, one gate call each. Separate arms because a
-  # YAML object cannot be assembled conditionally. No default arm: an unknown
-  # change type proposes nothing, and the next sweep retries the alerts.
+  # YAML object cannot be assembled conditionally. The manual arm is the default.
   #
   # The gate parks on the analyst's decision for up to 72h and on approval runs
   # the named action as the approver. A gate timeout fails this run before the
@@ -685,21 +684,21 @@ steps:
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
 
-      # Same gate without an action: the analyst carries the change out
-      # themselves, so approval is the whole lifecycle.
-      - match: manual
-        steps:
-          - name: propose_manual
-            type: workflow.execute
-            with:
-              workflow-id: system-create-investigation-proposal
-              inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                comment: "{{ steps.compose_proposal.output.comment }}"
-                impact: low
-                # No action, so no inherited category; see the entry gate.
-                category: configure
-                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+    # Same gate without an action: the analyst carries the change out
+    # themselves, so approval is the whole lifecycle. The default arm, so a
+    # change type the arms above do not recognise still reaches the analyst.
+    default:
+      - name: propose_manual
+        type: workflow.execute
+        with:
+          workflow-id: system-create-investigation-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            comment: "{{ steps.compose_proposal.output.comment }}"
+            impact: low
+            # No action, so no inherited category; see the entry gate.
+            category: configure
+            confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
   # The gate reports its outcome on two independent axes: `decision` is what the
   # analyst concluded (`approved` / `dismissed`, absent until someone decides),

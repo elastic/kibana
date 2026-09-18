@@ -264,18 +264,13 @@ describe('detection rule workflows', () => {
         'query',
         'risk_score',
         'exception',
-        'manual',
       ]);
       expect(
         (fork.cases ?? []).map(({ steps: armSteps }) => armSteps.map(({ name }) => name))
-      ).toEqual([
-        ['propose_query'],
-        ['propose_risk_score'],
-        ['propose_exception'],
-        ['propose_manual'],
-      ]);
-      // No default arm: an unknown change type proposes nothing.
-      expect(fork).not.toHaveProperty('default');
+      ).toEqual([['propose_query'], ['propose_risk_score'], ['propose_exception']]);
+      // The manual proposal is the default arm, so an unrecognised change type
+      // still reaches the analyst.
+      expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
       expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
       // The switch already guards the arms.
