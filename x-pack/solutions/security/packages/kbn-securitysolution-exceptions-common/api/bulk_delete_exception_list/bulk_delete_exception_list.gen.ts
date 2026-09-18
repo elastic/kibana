@@ -29,17 +29,25 @@ export const BulkDeleteExceptionListsRequestBody = lazySchema(() =>
       /**
        * The bulk action to perform.
        */
-      action: z.literal('delete'),
+      action: z.literal('delete').describe('The bulk action to perform.'),
       /**
        * Array of exception list saved object identifiers.
        */
-      ids: z.array(ExceptionListId).min(1).max(100),
+      ids: z
+        .array(ExceptionListId)
+        .min(1)
+        .max(100)
+        .describe('Array of exception list saved object identifiers.'),
       /**
       * `single` targets lists in the current Kibana space; `agnostic` targets global
 lists. Applies to every list in the request.
 
       */
-      namespace_type: ExceptionNamespaceType.optional().default('single'),
+      namespace_type: ExceptionNamespaceType.optional()
+        .default('single')
+        .describe(
+          '`single` targets lists in the current Kibana space; `agnostic` targets global\nlists. Applies to every list in the request.\n'
+        ),
     })
     .strict()
 );
@@ -55,73 +63,83 @@ export const BulkDeleteExceptionListsResponse = lazySchema(() =>
     /**
      * Whether all requested operations succeeded.
      */
-    success: z.boolean(),
+    success: z.boolean().describe('Whether all requested operations succeeded.'),
     /**
      * Successfully deleted exception lists.
      */
-    results: z.array(ExceptionList),
+    results: z.array(ExceptionList).describe('Successfully deleted exception lists.'),
     /**
      * Per-list errors encountered during the operation.
      */
-    errors: z.array(
-      z.object({
-        /**
-         * Human-readable error description.
-         */
-        message: z.string(),
-        /**
-         * HTTP status code for the error.
-         */
-        status_code: z.number().int(),
-        /**
-         * Lists affected by this error.
-         */
-        lists: z.array(
-          z.object({
-            id: ExceptionListId,
-            list_id: ExceptionListHumanId.optional(),
-          })
-        ),
-        /**
-         * Rules that reference the affected lists. Present only for 409 (conflict) errors.
-         */
-        rule_references: z
-          .array(
-            z.object({
-              /**
-               * The rule's `rule_id` (human-assigned identifier).
-               */
-              rule_id: z.string(),
-              /**
-               * The rule's saved object id.
-               */
-              id: z.string(),
-              /**
-               * The rule's name.
-               */
-              name: z.string(),
-            })
-          )
-          .optional(),
-      })
-    ),
+    errors: z
+      .array(
+        z.object({
+          /**
+           * Human-readable error description.
+           */
+          message: z.string().describe('Human-readable error description.'),
+          /**
+           * HTTP status code for the error.
+           */
+          status_code: z.number().int().describe('HTTP status code for the error.'),
+          /**
+           * Lists affected by this error.
+           */
+          lists: z
+            .array(
+              z.object({
+                id: ExceptionListId,
+                list_id: ExceptionListHumanId.optional(),
+              })
+            )
+            .describe('Lists affected by this error.'),
+          /**
+           * Rules that reference the affected lists. Present only for 409 (conflict) errors.
+           */
+          rule_references: z
+            .array(
+              z.object({
+                /**
+                 * The rule's `rule_id` (human-assigned identifier).
+                 */
+                rule_id: z.string().describe("The rule's `rule_id` (human-assigned identifier)."),
+                /**
+                 * The rule's saved object id.
+                 */
+                id: z.string().describe("The rule's saved object id."),
+                /**
+                 * The rule's name.
+                 */
+                name: z.string().describe("The rule's name."),
+              })
+            )
+            .optional()
+            .describe(
+              'Rules that reference the affected lists. Present only for 409 (conflict) errors.'
+            ),
+        })
+      )
+      .describe('Per-list errors encountered during the operation.'),
     summary: z.object({
       /**
        * Total number of lists in the request (after deduplication).
        */
-      total: z.number().int(),
+      total: z
+        .number()
+        .int()
+        .describe('Total number of lists in the request (after deduplication).'),
       /**
        * Number of lists successfully deleted.
        */
-      succeeded: z.number().int(),
+      succeeded: z.number().int().describe('Number of lists successfully deleted.'),
       /**
        * Number of lists that could not be deleted.
        */
-      failed: z.number().int(),
+      failed: z.number().int().describe('Number of lists that could not be deleted.'),
       /**
        * Number of duplicate entries removed before processing.
        */
-      skipped: z.number().int(),
+      skipped: z.number().int().describe('Number of duplicate entries removed before processing.'),
     }),
   })
 );
