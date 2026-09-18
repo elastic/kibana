@@ -76,3 +76,42 @@ export interface RenderIacTemplateResponse {
   /** Blueprint and version that produced this artifact. */
   blueprint: RenderedIacBlueprint;
 }
+
+export const IAC_NOT_COVERED_REASONS = [
+  'unknown_package',
+  'unknown_policy_template',
+  'no_patch_for_input',
+  'below_support_floor',
+] as const;
+
+export type IacNotCoveredReasonCode = (typeof IAC_NOT_COVERED_REASONS)[number];
+
+export interface IacNotCoveredReason {
+  /** EPR package name of the integration that is not covered. */
+  integration: string;
+  reason: IacNotCoveredReasonCode;
+  policyTemplate?: string;
+  input?: string;
+  supportFloor?: string;
+  installedVersion?: string;
+}
+
+export interface IacBlueprintCoverage {
+  /** Identity mechanism name, e.g. `federated_identity`. */
+  workflow: string;
+  /** Blueprint version that satisfies the request, or null when not deployable. */
+  resolvedVersion: string | null;
+  deployable: boolean;
+  notCovered: IacNotCoveredReason[];
+}
+
+export interface ResolveIacBlueprintsRequest {
+  provider: typeof AWS_CLOUD_PROVIDER;
+  /** The Kibana flow requesting resolve; reported in telemetry. */
+  flow: IacProvisionerRenderFlow;
+  integrations: RenderIacTemplateIntegration[];
+}
+
+export interface ResolveIacBlueprintsResponse {
+  blueprints: IacBlueprintCoverage[];
+}

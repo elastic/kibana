@@ -19,6 +19,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW, useIacProvisioner } from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
@@ -34,6 +35,7 @@ import {
   ECF_CROWDSTRIKE_STACK_NAME,
 } from '../ecf_cloudformation';
 import {
+  reconcileInstances,
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
@@ -57,7 +59,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     setDeploymentMethod,
     detectAndReviewStep,
     updateDetectAndReviewStep,
+    iacBlueprintCoverage,
   } = useOnboardingFlow();
+  const { isIacProvisionerEnabled } = useIacProvisioner();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
@@ -71,19 +75,17 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
-  // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
-  // (multi-bucket / multi-log-group configs from Step 2). Fall back to one base instance per
-  // selected service when session storage hasn't been written yet — e.g. the user jumped to
-  // Step 3 directly via the horizontal step indicator without clicking Next in Step 2.
-  const ecfInstances = useMemo(() => {
-    const stored = serviceSettings?.instances;
-    if (stored && stored.length > 0) return stored;
-    return selectedServiceIds.flatMap((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service?.showInUI) return [];
-      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-    });
-  }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
+  // Reconciled instances (ECF and managed integrations). Session-storage
+  // instances carry duplicate-instance configs (multi-bucket /
+  // multi-log-group from Step 2) but can be stale: the step indicator lets
+  // users change the selection and jump here without clicking Next in
+  // Step 2. Reconcile against the current selection — dropping deselected
+  // instances and adding a base instance per newly selected service — using
+  // the same helper Service Settings uses (it also covers empty storage).
+  const reconciledInstances = useMemo(
+    () => reconcileInstances(selectedServiceIds, serviceSettings?.instances, awsServicesMap),
+    [serviceSettings?.instances, selectedServiceIds, awsServicesMap]
+  );
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({
@@ -163,10 +165,20 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const showIdentityFederation = useMemo(() => {
     if (miServiceIds.length === 0) return true;
-    return miServiceIds.every(
+    const manifestSupported = miServiceIds.every(
       (id) => awsServicesMap?.get(id)?.identityFederationSupported !== false
     );
-  }, [miServiceIds, awsServicesMap]);
+    if (!manifestSupported) return false;
+    // Blueprint coverage comes from the resolve call fired on Service
+    // Settings → Next. Missing coverage (provisioner disabled, resolve
+    // failed, page refreshed) falls back to manifest capability so a
+    // provisioner outage never hides the option. Access keys are not gated
+    // on coverage and are always offered.
+    if (!isIacProvisionerEnabled || iacBlueprintCoverage === undefined) return true;
+    return iacBlueprintCoverage.some(
+      ({ workflow, deployable }) => deployable && workflow === IAC_FEDERATED_IDENTITY_WORKFLOW
+    );
+  }, [miServiceIds, awsServicesMap, isIacProvisionerEnabled, iacBlueprintCoverage]);
 
   // ── Elastic Cloud Forwarder ───────────────────────────────────────────────────
   // ECF is suppressed in agent-based mode — agent-based services are deployed via the agent policy,
@@ -177,7 +189,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
   } = useEcfDeployment({
-    instances: isAgentBased ? [] : ecfInstances,
+    instances: isAgentBased ? [] : reconciledInstances,
     serviceVars,
     globalRegion,
     otlpEndpoint,
@@ -318,6 +330,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
           serviceIds={miServiceIds}
+          instances={reconciledInstances}
           serviceVars={serviceVars}
           showIdentityFederation={showIdentityFederation}
           onDeploy={handleDeployClick}

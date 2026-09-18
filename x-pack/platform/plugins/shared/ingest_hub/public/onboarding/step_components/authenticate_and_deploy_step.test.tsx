@@ -46,6 +46,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => ({ services: { cloud: undefined } })),
 }));
 
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  IAC_FEDERATED_IDENTITY_WORKFLOW: 'federated_identity',
+  useIacProvisioner: jest.fn(() => ({ isIacProvisionerEnabled: false })),
+}));
+
 jest.mock('./authenticate_and_deploy_step/use_onboarding_so', () => ({
   useOnboardingSO: jest.fn(),
 }));
@@ -58,6 +63,7 @@ import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useIacProvisioner } from '@kbn/fleet-plugin/public';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -69,6 +75,7 @@ const MockEcfDeploymentSection = EcfDeploymentSection as unknown as jest.Mock;
 const mockUseAgentBasedDeploy = useAgentBasedDeploy as jest.Mock;
 const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockUseIacProvisioner = useIacProvisioner as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -174,6 +181,7 @@ describe('AuthenticateAndDeployStep', () => {
     });
     // clearAllMocks wipes the factory's default implementation, so restore it here.
     MockAgentBasedSection.mockImplementation(() => null);
+    mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
     mockUseEcfDeployment.mockReturnValue(makeEcfReturn());
     mockUseSessionStorage.mockReturnValue([
@@ -306,6 +314,179 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       expect(mockHandleDeploy).toHaveBeenCalledWith(['guardduty']);
+    });
+  });
+
+  describe('showIdentityFederation — blueprint coverage gating', () => {
+    const flowState = (overrides: Record<string, unknown> = {}) => ({
+      servicesStep: { selectedServiceIds: ['guardduty'], dataFormat: 'json' },
+      awsServicesMap: awsServicesMapWithMI,
+      deploymentMethod: 'managed_integration',
+      setDeploymentMethod: jest.fn(),
+      detectAndReviewStep: {
+        serviceStatuses: {},
+        policyIdsByInstance: {},
+        onboardingDeploymentId: undefined,
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      iacBlueprintCoverage: undefined,
+      ...overrides,
+    });
+
+    const lastMiProps = () =>
+      MockManagedIntegrationsSection.mock.calls[
+        MockManagedIntegrationsSection.mock.calls.length - 1
+      ][0];
+
+    it('shows identity federation when the provisioner is disabled, regardless of coverage', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+      mockUseOnboardingFlow.mockReturnValue(
+        flowState({
+          iacBlueprintCoverage: [
+            {
+              workflow: 'federated_identity',
+              resolvedVersion: null,
+              deployable: false,
+              notCovered: [],
+            },
+          ],
+        })
+      );
+      renderStep();
+      expect(lastMiProps().showIdentityFederation).toBe(true);
+    });
+
+    it('shows identity federation when the provisioner is enabled but no coverage arrived', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseOnboardingFlow.mockReturnValue(flowState());
+      renderStep();
+      expect(lastMiProps().showIdentityFederation).toBe(true);
+    });
+
+    it('shows identity federation when coverage marks federated_identity deployable', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseOnboardingFlow.mockReturnValue(
+        flowState({
+          iacBlueprintCoverage: [
+            {
+              workflow: 'federated_identity',
+              resolvedVersion: '1.0.0',
+              deployable: true,
+              notCovered: [],
+            },
+          ],
+        })
+      );
+      renderStep();
+      expect(lastMiProps().showIdentityFederation).toBe(true);
+    });
+
+    it('hides identity federation when coverage marks federated_identity not deployable', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseOnboardingFlow.mockReturnValue(
+        flowState({
+          iacBlueprintCoverage: [
+            {
+              workflow: 'federated_identity',
+              resolvedVersion: null,
+              deployable: false,
+              notCovered: [{ integration: 'aws', reason: 'below_support_floor' }],
+            },
+          ],
+        })
+      );
+      renderStep();
+      expect(lastMiProps().showIdentityFederation).toBe(false);
+    });
+
+    it('hides identity federation when coverage lists only other workflows', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseOnboardingFlow.mockReturnValue(
+        flowState({
+          iacBlueprintCoverage: [
+            {
+              workflow: 'other_workflow',
+              resolvedVersion: '1.0.0',
+              deployable: true,
+              notCovered: [],
+            },
+          ],
+        })
+      );
+      renderStep();
+      expect(lastMiProps().showIdentityFederation).toBe(false);
+    });
+
+    it('keeps the manifest gate: unsupported service hides the option despite deployable coverage', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+      mockUseOnboardingFlow.mockReturnValue(
+        flowState({
+          servicesStep: { selectedServiceIds: ['nosupport'], dataFormat: 'json' },
+          awsServicesMap: new Map([
+            ['nosupport', { ...miService, id: 'nosupport', identityFederationSupported: false }],
+          ]),
+          iacBlueprintCoverage: [
+            {
+              workflow: 'federated_identity',
+              resolvedVersion: '1.0.0',
+              deployable: true,
+              notCovered: [],
+            },
+          ],
+        })
+      );
+      renderStep();
+      expect(lastMiProps().showIdentityFederation).toBe(false);
+    });
+  });
+
+  describe('instance reconciliation', () => {
+    it('drops stale stored instances and adds base instances for the current selection', () => {
+      // The step indicator lets users change the selection and jump here
+      // without revisiting Service Settings, so stored instances can name
+      // deselected services and miss newly selected ones.
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          serviceVars: {},
+          instances: [
+            {
+              instanceId: 'vpcflow',
+              serviceId: 'vpcflow',
+              name: 'AWS VPC Flow Logs',
+              isDuplicate: false,
+            },
+          ],
+        },
+        jest.fn(),
+      ]);
+      renderStep();
+
+      const miProps =
+        MockManagedIntegrationsSection.mock.calls[
+          MockManagedIntegrationsSection.mock.calls.length - 1
+        ][0];
+      expect(miProps.instances).toEqual([
+        {
+          instanceId: 'guardduty',
+          serviceId: 'guardduty',
+          name: 'AWS GuardDuty',
+          isDuplicate: false,
+        },
+      ]);
+      // The ECF path consumes the same reconciled list.
+      expect(mockUseEcfDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          instances: [
+            {
+              instanceId: 'guardduty',
+              serviceId: 'guardduty',
+              name: 'AWS GuardDuty',
+              isDuplicate: false,
+            },
+          ],
+        })
+      );
     });
   });
 

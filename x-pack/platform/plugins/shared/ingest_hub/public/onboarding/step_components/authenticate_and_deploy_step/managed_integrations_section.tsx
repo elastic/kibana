@@ -44,6 +44,7 @@ import type {
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 import { getIacRenderIntegrations } from './iac_render_integrations';
+import type { IacInstanceSelection } from './iac_render_integrations';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
@@ -51,6 +52,8 @@ type PreferredMethod = 'identity_federation' | 'access_keys';
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   serviceIds: string[];
+  /** All reconciled instances; duplicates carry vars under their own instanceId. */
+  instances: IacInstanceSelection[];
   serviceVars: Record<string, ServiceVars>;
   showIdentityFederation: boolean;
   onDeploy: () => void;
@@ -62,6 +65,7 @@ interface ManagedIntegrationsSectionProps {
 export function ManagedIntegrationsSection({
   serviceCount,
   serviceIds,
+  instances,
   serviceVars,
   showIdentityFederation,
   onDeploy,
@@ -88,16 +92,30 @@ export function ManagedIntegrationsSection({
   );
 
   useEffect(() => {
-    if (!showIdentityFederation && preferredMethod === 'identity_federation') {
-      setPreferredMethod('access_keys');
-    }
-  }, [showIdentityFederation, preferredMethod]);
-
-  useEffect(() => {
     if (isDone) setIsOpen(false);
   }, [isDone]);
 
   const [isDeployReady, setIsDeployReady] = useState(false);
+
+  useEffect(() => {
+    if (showIdentityFederation) {
+      return;
+    }
+    // Federation is unavailable (manifest gate or resolve coverage, which can
+    // land after this step rendered). Mirror the manual switch to Access Keys.
+    if (preferredMethod === 'identity_federation') {
+      setPreferredMethod('access_keys');
+      setIsDeployReady(false);
+    }
+    // A connector chosen for federation must not survive into deploy —
+    // useDeploy selects the identity-federation path whenever a connectorId
+    // is set. Cleared independently of preferredMethod so a persisted
+    // connector from an earlier visit is dropped even when this section
+    // mounts with federation already revoked.
+    if (initialConnectorId !== undefined) {
+      setConnectorId(undefined);
+    }
+  }, [showIdentityFederation, preferredMethod, initialConnectorId, setConnectorId]);
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -116,10 +134,14 @@ export function ManagedIntegrationsSection({
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
-  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(
-    () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
-    [serviceIds, awsServicesMap, serviceVars]
-  );
+  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(() => {
+    const managedServiceIds = new Set(serviceIds);
+    return getIacRenderIntegrations(
+      instances.filter(({ serviceId }) => managedServiceIds.has(serviceId)),
+      awsServicesMap,
+      serviceVars
+    );
+  }, [instances, serviceIds, awsServicesMap, serviceVars]);
   const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
   const radioOptions = [

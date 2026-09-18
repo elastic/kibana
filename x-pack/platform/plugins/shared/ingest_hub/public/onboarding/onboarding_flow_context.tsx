@@ -10,6 +10,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type {
   AwsStaticKeyCredentials,
   CloudOnboardingDeploymentAuthMethod,
+  IacBlueprintCoverage,
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
@@ -128,6 +129,25 @@ interface OnboardingFlowState {
   refetchAwsServiceMatrix: () => void;
   /** False while the default data format is being resolved (async spaces lookup). */
   isDataFormatResolved: boolean;
+  /**
+   * Blueprint coverage from the IaC Provisioner resolve call fired on
+   * Service Settings → Next. Undefined until a resolve succeeds — also after
+   * a resolve failure or a page refresh — in which case the
+   * Authenticate & Deploy step falls back to manifest-derived capability.
+   * Held in memory only: coverage describes the current selection and must
+   * not outlive it.
+   */
+  iacBlueprintCoverage: IacBlueprintCoverage[] | undefined;
+  /**
+   * Drops stored coverage and invalidates every in-flight resolve. Returns
+   * the token the next commitIacBlueprintCoverage call must present. Owned
+   * by the provider so it survives step navigation (the resolve hook
+   * unmounts with Service Settings) and fires whenever an input the
+   * coverage was computed from changes.
+   */
+  invalidateIacBlueprintCoverage: () => number;
+  /** Stores resolve coverage unless a newer invalidation happened since `token` was issued. */
+  commitIacBlueprintCoverage: (token: number, coverage: IacBlueprintCoverage[]) => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -143,6 +163,27 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const [persistedServices, setPersistedServices] = useSessionStorage<PersistedServicesStep>(
     getOnboardingSessionKey('aws', 'servicesStep'),
     { selectedServiceIds: DEFAULT_SELECTED_IDS }
+  );
+
+  const [iacBlueprintCoverage, setIacBlueprintCoverage] = useState<
+    IacBlueprintCoverage[] | undefined
+  >(undefined);
+  // Monotonic token identifying the latest resolve request; a commit carrying
+  // an older token lost the race to a newer invalidation and is discarded.
+  const iacResolveTokenRef = useRef(0);
+
+  const invalidateIacBlueprintCoverage = useCallback(() => {
+    setIacBlueprintCoverage(undefined);
+    return ++iacResolveTokenRef.current;
+  }, []);
+
+  const commitIacBlueprintCoverage = useCallback(
+    (token: number, coverage: IacBlueprintCoverage[]) => {
+      if (token === iacResolveTokenRef.current) {
+        setIacBlueprintCoverage(coverage);
+      }
+    },
+    []
   );
 
   // secret_access_key lives in memory only; access_key_id is restored from session storage.
@@ -221,8 +262,13 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const setSelectedServiceIds = useCallback(
     (ids: string[]) => {
       setPersistedServices({ ...persistedServices, selectedServiceIds: ids });
+      // Coverage was resolved for the previous selection. The step indicator
+      // lets users reach Authenticate & Deploy without passing Service
+      // Settings → Next again, so drop it here rather than relying on the
+      // next resolve call.
+      invalidateIacBlueprintCoverage();
     },
-    [persistedServices, setPersistedServices]
+    [persistedServices, setPersistedServices, invalidateIacBlueprintCoverage]
   );
 
   const setDataFormat = useCallback(
@@ -230,8 +276,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       // Clear selection atomically with the format change in one write — two separate
       // setPersistedServices calls would race because each closes over the same persistedServices.
       setPersistedServices({ ...persistedServices, dataFormat: format, selectedServiceIds: [] });
+      // Changing format resets the selection, so any resolved coverage is stale.
+      invalidateIacBlueprintCoverage();
     },
-    [persistedServices, setPersistedServices]
+    [persistedServices, setPersistedServices, invalidateIacBlueprintCoverage]
   );
 
   const [persistedDetectAndReviewStep, setPersistedDetectAndReviewStep] =
@@ -417,6 +465,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
         isDataFormatResolved,
+        iacBlueprintCoverage,
+        invalidateIacBlueprintCoverage,
+        commitIacBlueprintCoverage,
       }}
     >
       {children}

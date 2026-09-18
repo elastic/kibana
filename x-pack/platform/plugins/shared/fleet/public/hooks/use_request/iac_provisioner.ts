@@ -8,6 +8,8 @@
 import type {
   RenderIacTemplateRequest,
   RenderIacTemplateResponse,
+  ResolveIacBlueprintsRequest,
+  ResolveIacBlueprintsResponse,
 } from '../../../common/types/rest_spec/iac_provisioner';
 import { API_VERSIONS, IAC_PROVISIONER_API_ROUTES } from '../../../common/constants';
 
@@ -17,6 +19,15 @@ export function sendRenderIacTemplate(body: RenderIacTemplateRequest) {
   return sendRequest<RenderIacTemplateResponse>({
     method: 'post',
     path: IAC_PROVISIONER_API_ROUTES.RENDER_TEMPLATE_PATTERN,
+    version: API_VERSIONS.internal.v1,
+    body,
+  });
+}
+
+export function sendResolveIacBlueprints(body: ResolveIacBlueprintsRequest) {
+  return sendRequest<ResolveIacBlueprintsResponse>({
+    method: 'post',
+    path: IAC_PROVISIONER_API_ROUTES.RESOLVE_BLUEPRINTS_PATTERN,
     version: API_VERSIONS.internal.v1,
     body,
   });

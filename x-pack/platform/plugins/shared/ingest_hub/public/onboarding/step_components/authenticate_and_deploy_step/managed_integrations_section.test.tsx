@@ -171,6 +171,7 @@ function renderSection(
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
           serviceIds={['guardduty']}
+          instances={[{ instanceId: 'guardduty', serviceId: 'guardduty' }]}
           serviceVars={{}}
           showIdentityFederation={props.showIdentityFederation ?? true}
           onDeploy={props.onDeploy ?? jest.fn()}
@@ -410,6 +411,7 @@ describe('ManagedIntegrationsSection', () => {
               <ManagedIntegrationsSection
                 serviceCount={3}
                 serviceIds={['guardduty']}
+                instances={[{ instanceId: 'guardduty', serviceId: 'guardduty' }]}
                 serviceVars={{}}
                 showIdentityFederation={true}
                 onDeploy={jest.fn()}
@@ -503,6 +505,59 @@ describe('ManagedIntegrationsSection', () => {
         access_key_id: 'AKIA',
         secret_access_key: 'secret',
       });
+    });
+  });
+
+  describe('federation becoming unavailable after render', () => {
+    it('switches to Access Keys and clears the connector when coverage revokes federation', () => {
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId, connectorId: 'connector-1' });
+      const { rerender } = renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('identity-federation')).toBeInTheDocument();
+      // Federation reported ready before coverage arrived — the flip must
+      // reset readiness, not carry it into the access-keys form.
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+
+      // Resolve coverage arrives asynchronously and marks federation non-deployable.
+      act(() => {
+        rerender(
+          <I18nProvider>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ManagedIntegrationsSection
+                serviceCount={3}
+                serviceIds={['guardduty']}
+                instances={[{ instanceId: 'guardduty', serviceId: 'guardduty' }]}
+                serviceVars={{}}
+                showIdentityFederation={false}
+                onDeploy={jest.fn()}
+                isDeploying={false}
+                isDone={false}
+                hasFailed={false}
+              />
+            </React.Suspense>
+          </I18nProvider>
+        );
+      });
+
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
+      // The stale connector must not survive into deploy — useDeploy selects
+      // the identity-federation path whenever a connectorId is set.
+      expect(setConnectorId).toHaveBeenCalledWith(undefined);
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('clears a persisted connector when mounting with federation already unavailable', () => {
+      // Coverage usually lands before the user reaches this step, so the
+      // section can mount with federation revoked while a connector from an
+      // earlier visit is still persisted.
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId, connectorId: 'connector-1' });
+      renderSection({ showIdentityFederation: false });
+
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
+      expect(setConnectorId).toHaveBeenCalledWith(undefined);
     });
   });
 });
