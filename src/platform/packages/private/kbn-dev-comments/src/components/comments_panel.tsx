@@ -46,7 +46,6 @@ interface PageGroup {
   comments: Comment[];
 }
 
-/** Comments by page, the current page first and the rest by page key. */
 const groupByPage = (comments: Comment[], currentPageKey: string): PageGroup[] => {
   const groups = new Map<string, PageGroup>();
   comments.forEach((comment) => {

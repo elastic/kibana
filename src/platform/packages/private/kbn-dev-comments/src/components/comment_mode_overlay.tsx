@@ -56,8 +56,7 @@ const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
  * Comment mode: pointer and keyboard input to the page is swallowed in the
  * capture phase, so the UI state being commented on does not change. A click
  * starts a comment (or moves the one being written); so do Enter and Space on
- * the focused element, which Tab still moves between. The layer's own UI, and
- * the host's excluded UI, keep working.
+ * the focused element, which Tab still moves between.
  */
 export const CommentModeOverlay = () => {
   const controller = useComments();
@@ -91,7 +90,7 @@ export const CommentModeOverlay = () => {
       }
       event.preventDefault();
       event.stopPropagation();
-      // `detail` is 0 for clicks synthesized from the keyboard, which `onKey` already handled.
+
       if (event.type === 'click' && event instanceof MouseEvent && event.detail > 0) {
         controller.pick(
           promoteToCommentable(target),
@@ -108,19 +107,22 @@ export const CommentModeOverlay = () => {
       }
     };
 
-    // Both keydown and keyup are cancelled: Space activates buttons on keyup.
     const onKey = (event: KeyboardEvent) => {
       const target = pageTarget(event);
+
       if (!target || passesThrough(event)) {
         return;
       }
+
       event.preventDefault();
       event.stopPropagation();
+
       const isSelection =
         event.type === 'keydown' &&
         SELECT_KEYS.includes(event.key) &&
         target !== document.body &&
         target !== document.documentElement;
+
       if (isSelection) {
         controller.pick(promoteToCommentable(target), centerOf(target), target);
       }

@@ -12,11 +12,16 @@ import { QUOTA_ID, newCommentSchema, normalizeRoute, routeFromLegacy } from './s
 const timestamp = '2026-01-01T00:00:00.000Z';
 
 const valid = {
-  author: { username: 'dana', displayName: 'Dana' },
+  author: { username: 'capybara', displayName: 'Capybara' },
   text: 'Hello',
   resolved: false,
   replies: [
-    { id: 'r1', author: { username: 'sam', displayName: 'Sam' }, text: 'Hi', createdAt: timestamp },
+    {
+      id: 'r1',
+      author: { username: 'penguin', displayName: 'Penguin' },
+      text: 'Hi',
+      createdAt: timestamp,
+    },
   ],
   route: { pageKey: '/app/one', path: '/app/one?x=1#/y' },
   anchor: { locators: [{ type: 'id', value: 'x' }], relativeX: 0.5, relativeY: 0.5 },

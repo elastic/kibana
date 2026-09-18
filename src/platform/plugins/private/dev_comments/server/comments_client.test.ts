@@ -54,7 +54,7 @@ const searchResponse = (hits: Array<{ _id: string; _source: object }>): SearchRe
 });
 
 const input: NewComment = {
-  author: { username: 'dana', displayName: 'Dana' },
+  author: { username: 'capybara', displayName: 'Capybara' },
   text: 'Hello',
   resolved: false,
   replies: [],

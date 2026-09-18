@@ -8,53 +8,21 @@
  */
 
 import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
+import { createComment, createLocation, deferred, flush, query, renderPage } from '../test_helpers';
 import type { Comment, CommentsApi, CommentsHostServices } from '../types';
 import { createCommentsController } from './comments_controller';
 
-/** A promise settled by the test, to interleave requests. */
-const deferred = <T>() => {
-  let resolve!: (value: T) => void;
-  let reject!: (error: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-};
+const target = () => query('#target');
 
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
-
-const target = (): Element => {
-  const element = document.getElementById('target');
-  if (!element) {
-    throw new Error('No target element');
-  }
-  return element;
-};
-
-const comment = (id: string, overrides: Partial<Comment> = {}): Comment => ({
-  id,
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  author: { username: 'dana', displayName: 'Dana' },
-  text: `Comment ${id}`,
-  resolved: false,
-  replies: [],
-  route: { pageKey: '/app/one', path: '/app/one?x=1' },
-  anchor: { locators: [{ type: 'id', value: id }], relativeX: 0.5, relativeY: 0.5 },
-  trail: [],
-  ...overrides,
-});
-
+/** A host at `/app/one?x=1` whose API is mocked and whose navigation changes the location. */
 const createHost = () => {
-  const listeners = new Set<() => void>();
-  let path = '/app/one?x=1';
+  const { location, navigate } = createLocation('/app/one?x=1');
   const api: jest.Mocked<CommentsApi> = {
     list: jest.fn(async () => []),
     getSnapshot: jest.fn(async (_id: string) => undefined),
-    create: jest.fn(async (input) => ({ ...input, ...comment('created'), text: input.text })),
+    create: jest.fn(async (input) => ({ ...input, ...createComment('created'), text: input.text })),
     update: jest.fn(async (id, patch) =>
-      comment(id, {
+      createComment(id, {
         resolved: patch.resolved ?? false,
         replies: patch.reply ? [{ id: 'reply', createdAt: '', ...patch.reply }] : [],
       })
@@ -62,26 +30,16 @@ const createHost = () => {
   };
   const services: CommentsHostServices = {
     api,
-    location: {
-      getPageKey: () => path.split(/[?#]/)[0],
-      getPath: () => path,
-      subscribe: (listener) => {
-        listeners.add(listener);
-        return () => listeners.delete(listener);
-      },
-    },
-    navigateToPath: jest.fn(async (next: string) => {
-      path = next;
-      listeners.forEach((listener) => listener());
-    }),
-    getCurrentUser: jest.fn(async () => ({ username: 'dana', fullName: 'Dana Designer' })),
+    location,
+    navigateToPath: jest.fn(async (next: string) => navigate(next)),
+    getCurrentUser: jest.fn(async () => ({ username: 'capybara', fullName: 'Capybara Designer' })),
   };
-  return { api, services, navigate: (next: string) => services.navigateToPath(next) };
+  return { api, services };
 };
 
 describe('createCommentsController', () => {
   beforeEach(() => {
-    document.body.innerHTML = '<button id="target">Target</button>';
+    renderPage('<button id="target">Target</button>');
     localStorage.clear();
   });
 
@@ -96,24 +54,24 @@ describe('createCommentsController', () => {
       controller.start();
       await services.navigateToPath('/app/two');
       // The first (stale) list arrives after the second was requested.
-      first.resolve([comment('stale')]);
+      first.resolve([createComment('stale')]);
       await flush();
       expect(controller.store.getState().comments).toEqual([]);
 
-      second.resolve([comment('fresh')]);
+      second.resolve([createComment('fresh')]);
       await flush();
-      expect(controller.store.getState().comments).toEqual([comment('fresh')]);
+      expect(controller.store.getState().comments).toEqual([createComment('fresh')]);
 
       // A list requested before a reply completed may not include it: it is fetched again.
       const third = deferred<Comment[]>();
-      api.list.mockReturnValueOnce(third.promise).mockResolvedValueOnce([comment('after')]);
+      api.list.mockReturnValueOnce(third.promise).mockResolvedValueOnce([createComment('after')]);
       await services.navigateToPath('/app/three');
       expect(api.list).toHaveBeenCalledTimes(3);
-      await controller.reply('fresh', 'hello', 'Dana');
-      third.resolve([comment('fresh')]);
+      await controller.reply('fresh', 'hello', 'Capybara');
+      third.resolve([createComment('fresh')]);
       await flush();
       expect(api.list).toHaveBeenCalledTimes(4);
-      expect(controller.store.getState().comments).toEqual([comment('after')]);
+      expect(controller.store.getState().comments).toEqual([createComment('after')]);
     });
 
     it('reports a failed load once and ignores results after dispose', async () => {
@@ -134,7 +92,7 @@ describe('createCommentsController', () => {
       api.list.mockReturnValueOnce(late.promise);
       await services.navigateToPath('/app/two');
       controller.dispose();
-      late.resolve([comment('late')]);
+      late.resolve([createComment('late')]);
       await flush();
       expect(controller.store.getState().comments).toEqual([]);
     });
@@ -145,18 +103,21 @@ describe('createCommentsController', () => {
       const controller = createCommentsController(services);
       controller.start();
       await flush();
-      expect(controller.store.getState().author).toEqual({ username: 'dana', displayName: 'D.' });
+      expect(controller.store.getState().author).toEqual({
+        username: 'capybara',
+        displayName: 'D.',
+      });
 
       const setItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new Error('QuotaExceededError');
       });
       try {
         controller.pick(target(), { x: 5, y: 5 });
-        await controller.save('Hi', { attachScreenshot: false, displayName: ' Dana D. ' });
+        await controller.save('Hi', { attachScreenshot: false, displayName: ' Capybara D. ' });
       } finally {
         setItem.mockRestore();
       }
-      expect(controller.store.getState().author?.displayName).toBe('Dana D.');
+      expect(controller.store.getState().author?.displayName).toBe('Capybara D.');
       expect(controller.store.getState().notice).toBeNull();
     });
   });
@@ -172,14 +133,14 @@ describe('createCommentsController', () => {
 
       controller.setActive(true);
       controller.pick(target(), { x: 5, y: 5 });
-      const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Dana' });
+      const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
       await flush();
       expect(controller.store.getState().pending?.saving).toBe(true);
       expect(api.create).toHaveBeenCalledWith(
         expect.objectContaining({
           text: 'Hello',
           route: { pageKey: '/app/one', path: '/app/one?x=1' },
-          author: { username: 'dana', displayName: 'Dana' },
+          author: { username: 'capybara', displayName: 'Capybara' },
         })
       );
 
@@ -202,7 +163,7 @@ describe('createCommentsController', () => {
       expect(controller.store.getState().pending).toEqual(
         expect.objectContaining({ saving: true })
       );
-      create.resolve(comment('created'));
+      create.resolve(createComment('created'));
       await saving;
       expect(controller.store.getState()).toEqual(
         expect.objectContaining({ pending: null, activeThreadId: null, focusPinId: null })
@@ -227,7 +188,7 @@ describe('createCommentsController', () => {
 
       controller.setActive(true);
       controller.pick(target(), { x: 5, y: 5 });
-      const saving = controller.save('Hello', { attachScreenshot: true, displayName: 'Dana' });
+      const saving = controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
       await flush();
       expect(captureViewport).toHaveBeenCalledTimes(1);
       await services.navigateToPath('/app/two');
@@ -244,7 +205,7 @@ describe('createCommentsController', () => {
       );
 
       // Saved again, the comment is made where its element was, without a screenshot of this page.
-      await controller.save('Hello', { attachScreenshot: true, displayName: 'Dana' });
+      await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
       expect(captureViewport).toHaveBeenCalledTimes(1);
       expect(api.create).toHaveBeenLastCalledWith(
         expect.objectContaining({ route: { pageKey: '/app/one', path: '/app/one?x=1' } })
@@ -264,7 +225,7 @@ describe('createCommentsController', () => {
 
       controller.setActive(true);
       controller.pick(target(), { x: 5, y: 5 });
-      const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Dana' });
+      const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
       await flush();
       controller.setActive(false);
       expect(controller.store.getState().active).toBe(true);
@@ -287,7 +248,7 @@ describe('createCommentsController', () => {
       controller.start();
 
       controller.pick(target(), { x: 5, y: 5 });
-      await controller.save('Hello', { attachScreenshot: false, displayName: 'Dana' });
+      await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
       expect(controller.store.getState()).toEqual(
         expect.objectContaining({ pending: null, activeThreadId: 'created', focusPinId: 'created' })
       );
@@ -296,7 +257,7 @@ describe('createCommentsController', () => {
 
       api.create.mockRejectedValueOnce(new Error('offline'));
       controller.pick(target(), { x: 5, y: 5 });
-      await controller.save('Again', { attachScreenshot: false, displayName: 'Dana' });
+      await controller.save('Again', { attachScreenshot: false, displayName: 'Capybara' });
       expect(controller.store.getState().pending).toEqual(
         expect.objectContaining({ element: target(), saving: false })
       );
@@ -311,27 +272,27 @@ describe('createCommentsController', () => {
     it('keeps reply drafts until sent, runs one write per comment at a time, and reports failures', async () => {
       const { api, services } = createHost();
       const controller = createCommentsController(services);
-      api.list.mockResolvedValueOnce([comment('a'), comment('b')]);
+      api.list.mockResolvedValueOnce([createComment('a'), createComment('b')]);
       controller.start();
       await flush();
 
       controller.setDraft('a', 'unsent');
       const update = deferred<Comment>();
       api.update.mockReturnValueOnce(update.promise);
-      const replying = controller.reply('a', 'unsent', 'Dana');
+      const replying = controller.reply('a', 'unsent', 'Capybara');
       await flush();
       expect(controller.store.getState().busyIds.has('a')).toBe(true);
       await controller.setResolved('a', true);
       expect(api.update).toHaveBeenCalledTimes(1);
 
-      update.resolve(comment('a', { replies: [] }));
+      update.resolve(createComment('a', { replies: [] }));
       await replying;
       expect(controller.store.getState().drafts).toEqual({});
       expect(controller.store.getState().busyIds.size).toBe(0);
 
       api.update.mockRejectedValueOnce(new Error('conflict'));
       controller.setDraft('b', 'kept');
-      await controller.reply('b', 'kept', 'Dana');
+      await controller.reply('b', 'kept', 'Capybara');
       expect(controller.store.getState().drafts).toEqual({ b: 'kept' });
       expect(controller.store.getState().notice?.message).toBe(
         'Could not post the reply: conflict'
@@ -344,7 +305,9 @@ describe('createCommentsController', () => {
       const { services } = createHost();
       const controller = createCommentsController(services);
       controller.start();
-      const elsewhere = comment('far', { route: { pageKey: '/app/two', path: '/app/two#/x' } });
+      const elsewhere = createComment('far', {
+        route: { pageKey: '/app/two', path: '/app/two#/x' },
+      });
       controller.store.setState({ comments: [elsewhere], active: true });
 
       await controller.guideTo(elsewhere);
@@ -364,14 +327,14 @@ describe('createCommentsController', () => {
 
       // The URL parser strips the tab and reads `//evil.example/app`.
       await controller.guideTo(
-        comment('evil', { route: { pageKey: '/app/two', path: '/\t/evil.example/app' } })
+        createComment('evil', { route: { pageKey: '/app/two', path: '/\t/evil.example/app' } })
       );
       expect(services.navigateToPath).not.toHaveBeenCalled();
       expect(controller.store.getState().guideId).toBeNull();
       expect(controller.store.getState().notice?.type).toBe('error');
 
       (services.navigateToPath as jest.Mock).mockRejectedValueOnce(new Error('no such app'));
-      await controller.guideTo(comment('gone', { route: { pageKey: '/x', path: '/x' } }));
+      await controller.guideTo(createComment('gone', { route: { pageKey: '/x', path: '/x' } }));
       expect(controller.store.getState().guideId).toBeNull();
       expect(controller.store.getState().notice?.message).toBe(
         'Could not open the page of the comment: no such app'

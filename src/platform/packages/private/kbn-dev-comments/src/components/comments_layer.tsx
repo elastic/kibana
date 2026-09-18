@@ -17,7 +17,7 @@ import { NoticeToast } from './notice_toast';
 import { PinsLayer } from './pins_layer';
 import { ResolvedAnchorsProvider } from './resolved_anchors';
 
-/** `⌘⇧K` / `Ctrl+Shift+K`; hosts that load the layer lazily listen for the same keys. */
+/** `⌘⇧K` / `Ctrl+Shift+K` */
 export const isToggleShortcut = (event: KeyboardEvent): boolean =>
   (event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === 'k';
 

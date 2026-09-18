@@ -7,27 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Comment, NewComment } from '../types';
+import { createComment, createNewComment } from '../test_helpers';
 import { createInMemoryCommentsApi } from './in_memory_api';
 
-const input: NewComment = {
-  author: { username: 'dana', displayName: 'Dana' },
-  text: 'Hello',
-  resolved: false,
-  replies: [],
-  route: { pageKey: '/app/demo', path: '/app/demo' },
-  anchor: { locators: [{ type: 'id', value: 'x' }], relativeX: 0.5, relativeY: 0.5 },
-  trail: [],
-};
+const input = createNewComment();
 
-const seeded: Comment = {
-  ...input,
-  id: 'comment-1',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  replies: [{ id: 'reply-1', author: input.author, text: 'Hi', createdAt: input.text }],
+const seeded = createComment('comment-1', {
+  replies: [
+    { id: 'reply-1', author: input.author, text: 'Hi', createdAt: '2026-01-01T00:00:00.000Z' },
+  ],
   snapshot: { mimeType: 'image/jpeg', width: 1, height: 1, image: 'AAAA' },
-};
+});
 
 describe('createInMemoryCommentsApi', () => {
   it('never hands out an id that a seeded comment already uses', async () => {

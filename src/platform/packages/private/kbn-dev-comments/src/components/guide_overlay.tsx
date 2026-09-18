@@ -42,7 +42,9 @@ interface GuideStep {
 /**
  * Latest click of the trail that has not been repeated yet and whose element can
  * be clicked right now. Trails are stored data, so each step is held to the
- * same standard as when recording: a disclosure control on the page itself.
+ * same standard as when recording: a disclosure control on the page itself,
+ * and the recorded one. An element that only stands where it stood, with other
+ * content, may be any control, so the guide does not ask for a click on it.
  */
 const findStep = (
   comment: Comment,
@@ -51,7 +53,8 @@ const findStep = (
 ): GuideStep | null => {
   for (let index = comment.trail.length - 1; index >= 0; index -= 1) {
     const { anchor, label } = comment.trail[index];
-    const element = done.has(index) ? undefined : resolveAnchor(anchor)?.element;
+    const resolved = done.has(index) ? null : resolveAnchor(anchor);
+    const element = resolved?.exact ? resolved.element : undefined;
     if (
       element &&
       isTrailControl(element) &&

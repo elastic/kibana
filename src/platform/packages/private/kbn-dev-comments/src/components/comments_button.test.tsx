@@ -11,72 +11,33 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
-import type { CommentsHostServices } from '../types';
+import { createHostServices, flush, mockLayout, query, renderPage } from '../test_helpers';
 import { CommentsButton } from './comments_button';
 
-const flush = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-
-const createServices = (overrides: Partial<CommentsHostServices> = {}): CommentsHostServices => ({
-  api: createInMemoryCommentsApi(),
-  location: { getPageKey: () => '/page', getPath: () => '/page', subscribe: () => () => {} },
-  navigateToPath: async () => {},
-  getCurrentUser: async () => ({ username: 'dana', fullName: 'Dana' }),
-  ...overrides,
-});
-
-const query = (selector: string): HTMLElement => {
-  const element = document.querySelector<HTMLElement>(selector);
-  if (!element) {
-    throw new Error(`No element matches ${selector}`);
-  }
-  return element;
-};
-
 describe('CommentsButton', () => {
-  const page = document.createElement('div');
-
-  beforeAll(() => {
-    // jsdom has no layout; every element gets a box so anchors resolve and pins are on screen.
-    Element.prototype.scrollIntoView = jest.fn();
-    jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
-      x: 10,
-      y: 10,
-      left: 10,
-      top: 10,
-      width: 100,
-      height: 20,
-      right: 110,
-      bottom: 30,
-      toJSON: () => {},
-    });
-  });
-
-  afterAll(() => jest.restoreAllMocks());
+  mockLayout();
 
   beforeEach(() => {
-    page.innerHTML = `
+    renderPage(`
       <button type="button" id="open" aria-expanded="false">Open details</button>
       <div id="details" hidden><button type="button" id="target">Target</button></div>
-    `;
-    document.body.appendChild(page);
+    `);
     query('#open').addEventListener('click', () => {
       query('#open').setAttribute('aria-expanded', 'true');
       query('#details').hidden = false;
     });
   });
 
-  afterEach(() => page.remove());
-
   it('records the clicks that revealed UI before comment mode was first switched on', async () => {
     const api = createInMemoryCommentsApi();
     render(
       <EuiThemeProvider>
         <div id="toolbar">
-          <CommentsButton services={createServices({ api, ignoreSelectors: ['#toolbar'] })} />
+          <CommentsButton services={createHostServices({ api, ignoreSelectors: ['#toolbar'] })} />
         </div>
       </EuiThemeProvider>
     );
-    await flush();
+    await act(flush);
 
     // The author opens the details, switches comment mode on only then, and
     // comments on an element that the click revealed.
@@ -104,13 +65,12 @@ describe('CommentsButton', () => {
   it('leaves comment mode from its own button without the host listing it in `ignoreSelectors`', async () => {
     render(
       <EuiThemeProvider>
-        <CommentsButton services={createServices()} />
+        <CommentsButton services={createHostServices()} />
       </EuiThemeProvider>
     );
-    await flush();
+    await act(flush);
     const button = screen.getByTestId('devCommentsButton');
 
-    // Real clicks have `detail` 1; on page UI, comment mode would swallow the click and pick the element.
     fireEvent.click(button, { detail: 1 });
     await screen.findByTestId('devCommentsPanel');
     expect(button).toHaveAttribute('aria-pressed', 'true');

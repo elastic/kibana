@@ -33,13 +33,13 @@ const seed: Comment[] = [
     id: 'comment-1',
     createdAt,
     updatedAt: createdAt,
-    author: { username: 'dana', displayName: 'Dana Designer' },
+    author: { username: 'capybara', displayName: 'Capybara Designer' },
     text: 'This primary action competes with the page title. Could it move into the header actions?',
     resolved: false,
     replies: [
       {
         id: 'reply-1',
-        author: { username: 'sam', displayName: 'Sam Engineer' },
+        author: { username: 'penguin', displayName: 'Penguin Engineer' },
         text: 'Agreed, moving it in the next iteration.',
         createdAt,
       },

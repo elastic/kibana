@@ -12,63 +12,36 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
 import { createCommentsController } from '../state/comments_controller';
+import {
+  anchorById,
+  createComment,
+  createHostServices,
+  createLocation,
+  deferred,
+  flush,
+  mockLayout,
+  query,
+  renderPage,
+} from '../test_helpers';
 import type { Comment, CommentsHostServices } from '../types';
 import { CommentsProvider } from './comments_context';
 import { CommentsLayer } from './comments_layer';
 
-const seeded: Comment = {
-  id: 'a',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  author: { username: 'dana', displayName: 'Dana' },
-  text: 'Seeded',
-  resolved: false,
-  replies: [],
-  route: { pageKey: '/page', path: '/page' },
-  anchor: { locators: [{ type: 'id', value: 'target' }], relativeX: 0.5, relativeY: 0.5 },
-  trail: [],
-};
-
-const flush = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+const seeded = createComment('a');
 
 const escape = () => fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
 
 describe('CommentsLayer', () => {
-  const page = document.createElement('div');
-
-  beforeAll(() => {
-    // jsdom has no layout; every element gets a box so anchors resolve and pins are on screen.
-    Element.prototype.scrollIntoView = jest.fn();
-    jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
-      x: 10,
-      y: 10,
-      left: 10,
-      top: 10,
-      width: 100,
-      height: 20,
-      right: 110,
-      bottom: 30,
-      toJSON: () => {},
-    });
-  });
-
-  afterAll(() => jest.restoreAllMocks());
+  mockLayout();
 
   beforeEach(() => {
-    page.innerHTML = `<button id="target">Target</button>`;
-    document.body.appendChild(page);
+    renderPage(`<button id="target">Target</button>`);
   });
 
-  afterEach(() => page.remove());
-
   const renderLayer = async (overrides: Partial<CommentsHostServices> = {}) => {
-    const controller = createCommentsController({
-      api: createInMemoryCommentsApi([seeded]),
-      location: { getPageKey: () => '/page', getPath: () => '/page', subscribe: () => () => {} },
-      navigateToPath: async () => {},
-      getCurrentUser: async () => ({ username: 'dana' }),
-      ...overrides,
-    });
+    const controller = createCommentsController(
+      createHostServices({ api: createInMemoryCommentsApi([seeded]), ...overrides })
+    );
     controller.start();
     render(
       <EuiThemeProvider>
@@ -77,17 +50,11 @@ describe('CommentsLayer', () => {
         </CommentsProvider>
       </EuiThemeProvider>
     );
-    await flush();
+    await act(flush);
     return controller;
   };
 
-  const target = (): HTMLElement => {
-    const element = document.getElementById('target');
-    if (!element) {
-      throw new Error('No target element');
-    }
-    return element;
-  };
+  const target = () => query('#target');
 
   it('returns focus to where it was when comment mode ends', async () => {
     const controller = await renderLayer();
@@ -144,20 +111,11 @@ describe('CommentsLayer', () => {
   });
 
   it('keeps the comment being written, text included, when the page changes under a save that then fails', async () => {
-    const listeners = new Set<() => void>();
-    let path = '/page';
-    let rejectCreate!: (error: Error) => void;
-    const api = createInMemoryCommentsApi([seeded]);
+    const { location, navigate } = createLocation();
+    const create = deferred<Comment>();
     const controller = await renderLayer({
-      api: { ...api, create: () => new Promise((_, reject) => (rejectCreate = reject)) },
-      location: {
-        getPageKey: () => path,
-        getPath: () => path,
-        subscribe: (listener) => {
-          listeners.add(listener);
-          return () => listeners.delete(listener);
-        },
-      },
+      api: { ...createInMemoryCommentsApi([seeded]), create: () => create.promise },
+      location,
     });
     act(() => controller.setActive(true));
     act(() => controller.pick(target(), { x: 20, y: 20 }));
@@ -167,14 +125,56 @@ describe('CommentsLayer', () => {
     fireEvent.click(screen.getByTestId('devCommentsComposerSubmit'));
     await waitFor(() => expect(controller.store.getState().pending?.saving).toBe(true));
 
-    act(() => {
-      path = '/other';
-      listeners.forEach((listener) => listener());
-    });
-    act(() => rejectCreate(new Error('offline')));
-    await flush();
+    act(() => navigate('/other'));
+    act(() => create.reject(new Error('offline')));
+    await act(flush);
 
     expect(controller.store.getState().pending?.saving).toBe(false);
     expect(screen.getByTestId('devCommentsComposerInput')).toHaveValue('Kept');
+  });
+
+  it('guides to the recorded control only, not to another one that took its place', async () => {
+    // The comment is on something the "Show details" button disclosed; the guide
+    // asks for that click. The button is stored by its structural path as well,
+    // which another control gets by standing where it stood after a UI change.
+    renderPage(
+      `<div id="toolbar"><button type="button" aria-expanded="false">Show details</button></div>`
+    );
+    const guided = createComment('guided', {
+      anchor: anchorById('details'),
+      trail: [
+        {
+          label: 'Show details',
+          anchor: {
+            locators: [
+              {
+                type: 'cssPath',
+                selector: '[id="toolbar"] > button',
+                fingerprint: 'button|Show details',
+              },
+            ],
+            relativeX: 0.5,
+            relativeY: 0.5,
+          },
+        },
+      ],
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([guided]) });
+    act(() => controller.setActive(true));
+    await act(() => controller.guideTo(guided));
+
+    expect(await screen.findByTestId('devCommentsGuideHighlight')).toBeInTheDocument();
+    expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent(
+      'Click “Show details” to get to the comment.'
+    );
+
+    act(() => {
+      query('#toolbar button').textContent = 'Delete everything';
+    });
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('devCommentsGuideHighlight')).not.toBeInTheDocument()
+    );
+    expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('Looking for the comment…');
   });
 });

@@ -8,66 +8,15 @@
  */
 
 import { IGNORE_ATTR } from '../constants';
-import type { CommentsLocationService } from '../types';
+import { createLocation, mockLayout, query, renderPage } from '../test_helpers';
 import { createTrailRecorder, isTrailControl, type TrailRecorder } from './trail';
 
-const render = (html: string) => {
-  const parsed = new DOMParser().parseFromString(html, 'text/html');
-  document.body.replaceChildren(...Array.from(parsed.body.childNodes));
-};
-
-// jsdom has no layout: elements get a box from `data-rect="x,y,width,height"` (default 10,10,100,20).
-const rectOf = (element: Element): DOMRect => {
-  const [x, y, width, height] = (element.getAttribute('data-rect') ?? '10,10,100,20')
-    .split(',')
-    .map(Number);
-  return { x, y, width, height, left: x, top: y, right: x + width, bottom: y + height } as DOMRect;
-};
-
-const query = (selector: string): HTMLElement => {
-  const element = document.querySelector<HTMLElement>(selector);
-  if (!element) {
-    throw new Error(`No element matches ${selector}`);
-  }
-  return element;
-};
-
-const createLocation = () => {
-  const listeners = new Set<() => void>();
-  let pageKey = '/app/one';
-  const location: CommentsLocationService = {
-    getPageKey: () => pageKey,
-    getPath: () => pageKey,
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-  };
-  return {
-    location,
-    navigate(next: string) {
-      pageKey = next;
-      listeners.forEach((listener) => listener());
-    },
-  };
-};
-
 describe('trail', () => {
+  mockLayout();
+
   let recording = true;
   let recorder: TrailRecorder;
-  const { location, navigate } = createLocation();
-
-  beforeAll(() => {
-    jest
-      .spyOn(Element.prototype, 'getBoundingClientRect')
-      .mockImplementation(function getBoundingClientRect(this: Element) {
-        return rectOf(this);
-      });
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
+  const { location, navigate } = createLocation('/app/one');
 
   beforeEach(() => {
     recording = true;
@@ -98,7 +47,7 @@ describe('trail', () => {
   };
 
   it('tells disclosure controls from form and selection controls', () => {
-    render(`
+    renderPage(`
       <a href="/x">link</a>
       <button type="button" aria-expanded="false">Open</button>
       <button type="submit">Save</button>
@@ -120,7 +69,7 @@ describe('trail', () => {
   });
 
   it('records a control once the page has handled the click, from the state before it', () => {
-    render(
+    renderPage(
       `<button type="button" aria-expanded="false" data-test-subj="details"><span>Show details</span></button>`
     );
     const button = query('button');
@@ -143,7 +92,7 @@ describe('trail', () => {
 
   it('records only clicks that disclosed something, right away or once lazily loaded UI appears', () => {
     jest.useFakeTimers();
-    render(`
+    renderPage(`
       <button type="button" id="flyout">Open flyout</button>
       <button type="button" id="acknowledge">Acknowledge</button>
       <button type="button" id="lazy">Open lazy flyout</button>
@@ -164,7 +113,7 @@ describe('trail', () => {
   });
 
   it('records a control that showed a dialog kept mounted while hidden, not one that left it hidden', () => {
-    render(`
+    renderPage(`
       <button type="button" id="show">Show</button>
       <button type="button" id="noop">Nothing</button>
       <div role="dialog" data-rect="0,0,0,0">Kept in the DOM while hidden</div>
@@ -181,7 +130,7 @@ describe('trail', () => {
 
   it('does not credit a click with what a later click disclosed', () => {
     jest.useFakeTimers();
-    render(`
+    renderPage(`
       <button type="button" id="delete">Delete</button>
       <button type="button" id="flyout">Open flyout</button>
       <button type="button" id="acknowledge">Acknowledge</button>
@@ -208,7 +157,7 @@ describe('trail', () => {
   });
 
   it('skips clicks the page swallowed, clicks that removed the control, and clicks on excluded UI', () => {
-    render(`
+    renderPage(`
       <button type="button" id="swallowed">Swallowed</button>
       <button type="button" id="closing">Close</button>
       <div id="host"><button type="button">Host action</button></div>
@@ -234,7 +183,7 @@ describe('trail', () => {
   });
 
   it('records nothing while not recording and forgets the steps on page change', () => {
-    render(
+    renderPage(
       `<button type="button" id="first">First</button><button type="button" id="second">Second</button>`
     );
     expandOnClick('#first');
@@ -251,7 +200,7 @@ describe('trail', () => {
   });
 
   it('listens once no matter how often it is started', () => {
-    render(`<button type="button">Once</button>`);
+    renderPage(`<button type="button">Once</button>`);
     expandOnClick('button');
 
     recorder.start();

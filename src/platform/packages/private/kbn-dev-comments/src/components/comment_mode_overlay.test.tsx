@@ -10,29 +10,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IGNORE_ATTR } from '../constants';
-import { createInMemoryCommentsApi } from '../lib/in_memory_api';
 import { createCommentsController } from '../state/comments_controller';
+import { createHostServices, query, renderPage } from '../test_helpers';
 import { CommentsProvider } from './comments_context';
 import { CommentModeOverlay } from './comment_mode_overlay';
-
-const createController = () =>
-  createCommentsController({
-    api: createInMemoryCommentsApi(),
-    location: { getPageKey: () => '/page', getPath: () => '/page', subscribe: () => () => {} },
-    navigateToPath: async () => {},
-    getCurrentUser: async () => ({ username: 'dana' }),
-    ignoreSelectors: ['#host'],
-  });
-
-const page = document.createElement('div');
-
-const query = (selector: string): HTMLElement => {
-  const element = page.querySelector<HTMLElement>(selector);
-  if (!element) {
-    throw new Error(`No element matches ${selector}`);
-  }
-  return element;
-};
 
 const keyDown = (element: Element, init: KeyboardEventInit) => {
   const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init });
@@ -42,25 +23,16 @@ const keyDown = (element: Element, init: KeyboardEventInit) => {
 
 describe('CommentModeOverlay', () => {
   beforeEach(() => {
-    const parsed = new DOMParser().parseFromString(
-      `
+    renderPage(`
       <button id="target">Target</button>
       <input id="field" value="before" />
       <div id="host"><button id="hostButton">Host</button></div>
       <div ${IGNORE_ATTR}="true"><textarea id="composer"></textarea></div>
-    `,
-      'text/html'
-    );
-    page.replaceChildren(...Array.from(parsed.body.childNodes));
-    document.body.appendChild(page);
-  });
-
-  afterEach(() => {
-    page.remove();
+    `);
   });
 
   const renderOverlay = () => {
-    const controller = createController();
+    const controller = createCommentsController(createHostServices({ ignoreSelectors: ['#host'] }));
     controller.pick = jest.fn();
     render(
       <CommentsProvider controller={controller}>

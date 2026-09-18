@@ -15,9 +15,6 @@ import { useComments, useCommentsState } from './comments_context';
 
 export const COMMENTS_BUTTON_TEST_SUBJ = 'devCommentsButton';
 
-// The button is layer UI like the portals are: in comment mode, clicks on anything
-// else are swallowed before they act, so a host that does not list the button in
-// `ignoreSelectors` could switch comment mode on with it but never off.
 const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
 
 const preventFocusChange = (event: MouseEvent) => {

@@ -7,47 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElementAnchor } from '../types';
+import { anchorById, mockLayout, query, renderPage } from '../test_helpers';
 import { MISS_RETRY_MS, createAnchorResolver } from './anchor_resolver';
 
-// jsdom has no layout: elements get a box from `data-rect="x,y,width,height"` (default 10,10,100,20).
-const rectOf = (element: Element): DOMRect => {
-  const [x, y, width, height] = (element.getAttribute('data-rect') ?? '10,10,100,20')
-    .split(',')
-    .map(Number);
-  return { x, y, width, height, left: x, top: y, right: x + width, bottom: y + height } as DOMRect;
-};
-
-const render = (html: string) => {
-  const parsed = new DOMParser().parseFromString(html, 'text/html');
-  document.body.replaceChildren(...Array.from(parsed.body.childNodes));
-};
-
-const query = (selector: string): Element => {
-  const element = document.querySelector(selector);
-  if (!element) {
-    throw new Error(`No element matches ${selector}`);
-  }
-  return element;
-};
-
-const byId = (id: string): ElementAnchor => ({
-  locators: [{ type: 'id', value: id }],
-  relativeX: 0.5,
-  relativeY: 0.5,
-});
-
 describe('anchor resolver', () => {
+  mockLayout();
+
   /** Document-wide searches made by the resolver. */
   let searches: jest.SpyInstance;
-
-  beforeAll(() => {
-    jest
-      .spyOn(Element.prototype, 'getBoundingClientRect')
-      .mockImplementation(function getBoundingClientRect(this: Element) {
-        return rectOf(this);
-      });
-  });
 
   beforeEach(() => {
     searches = jest.spyOn(document, 'querySelectorAll');
@@ -57,14 +24,10 @@ describe('anchor resolver', () => {
     searches.mockRestore();
   });
 
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   it('keeps an element found while it is on the page and visible, and searches again once it is not', () => {
-    render(`<button id="save">Save</button>`);
+    renderPage(`<button id="save">Save</button>`);
     const resolver = createAnchorResolver();
-    const anchors = [{ id: 'a', anchor: byId('save') }];
+    const anchors = [{ id: 'a', anchor: anchorById('save') }];
 
     const first = resolver.resolve(anchors, { tick: 1, now: 0 }).resolved.get('a');
     expect(first?.element).toBe(query('#save'));
@@ -77,16 +40,16 @@ describe('anchor resolver', () => {
     // Hidden, it is searched for again and missed; re-rendered, its replacement is found.
     query('#save').setAttribute('data-rect', '0,0,0,0');
     expect(resolver.resolve(anchors, { tick: 3, now: 32 }).resolved.get('a')).toBeNull();
-    render(`<button id="save">Save</button>`);
+    renderPage(`<button id="save">Save</button>`);
     const replaced = resolver.resolve(anchors, { tick: 4, now: 1000 }).resolved.get('a');
     expect(replaced?.element).toBe(query('#save'));
     expect(replaced).not.toBe(first);
   });
 
   it('puts off searching again for an element it did not find until the layout changed and a moment passed', () => {
-    render(`<div id="host"></div>`);
+    renderPage(`<div id="host"></div>`);
     const resolver = createAnchorResolver();
-    const anchors = [{ id: 'a', anchor: byId('late') }];
+    const anchors = [{ id: 'a', anchor: anchorById('late') }];
 
     expect(resolver.resolve(anchors, { tick: 1, now: 0 })).toEqual({
       resolved: new Map([['a', null]]),
@@ -111,17 +74,17 @@ describe('anchor resolver', () => {
   });
 
   it('resolves changed anchors and new comments right away, and forgets comments it is no longer given', () => {
-    render(`<button id="one">One</button><button id="two">Two</button>`);
+    renderPage(`<button id="one">One</button><button id="two">Two</button>`);
     const resolver = createAnchorResolver();
-    const one = { id: 'a', anchor: byId('one') };
+    const one = { id: 'a', anchor: anchorById('one') };
 
     resolver.resolve([one], { tick: 1, now: 0 });
     searches.mockClear();
 
     const { resolved } = resolver.resolve(
       [
-        { ...one, anchor: byId('two') },
-        { id: 'b', anchor: byId('two') },
+        { ...one, anchor: anchorById('two') },
+        { id: 'b', anchor: anchorById('two') },
       ],
       {
         tick: 1,

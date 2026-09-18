@@ -32,7 +32,6 @@ export const useComments = (): CommentsController => {
 export const useCommentsState = <S,>(selector: (state: CommentsState) => S): S =>
   useStore(useComments().store, selector);
 
-/** Comments made on the current page. */
 export const usePageComments = (): Comment[] => {
   const comments = useCommentsState((state) => state.comments);
   const pageKey = useCommentsState((state) => state.pageKey);
