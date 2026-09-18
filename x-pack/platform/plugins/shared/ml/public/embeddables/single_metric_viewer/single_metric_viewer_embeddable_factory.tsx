@@ -16,12 +16,14 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
+  getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeStateApi } from '@kbn/presentation-publishing';
@@ -136,6 +138,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
       );
 
       const SingleMetricViewerComponent = getSingleMetricViewerComponent(...services, api);
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       return {
         api,
@@ -146,7 +149,11 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           const { singleMetricViewerData, bounds, lastRefresh } =
             useStateFromPublishingSubject(singleMetricViewerData$);
-          const [isLoading, error] = useBatchedPublishingSubjects(dataLoading$, blockingError$);
+          const [isLoading, error, viewMode] = useBatchedPublishingSubjects(
+            dataLoading$,
+            blockingError$,
+            viewMode$
+          );
 
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
@@ -171,6 +178,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           return (
             <SingleMetricViewerComponent
               shouldShowForecastButton={true}
+              previewMode={viewMode === 'preview'}
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}

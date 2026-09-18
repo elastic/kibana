@@ -137,6 +137,7 @@ class TimeseriesChartIntl extends Component {
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool.isRequired,
+    previewMode: PropTypes.bool,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -546,7 +547,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', fcsWidth)
       .attr('height', focusZoomPanelHeight)
       .attr('class', 'chart-border');
-    this.createZoomInfoElements(zoomGroup, fcsWidth);
+    if (!this.props.previewMode) this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
     const annotateBrush = this.annotateBrush.bind(this);
@@ -654,6 +655,7 @@ class TimeseriesChartIntl extends Component {
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
+      previewMode,
       selectedJob,
       showAnnotations,
       showForecast,
@@ -857,15 +859,15 @@ class TimeseriesChartIntl extends Component {
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();
     // Create any new dots that are needed i.e. if number of chart points has increased.
-    dots
-      .enter()
-      .append('circle')
-      .attr('r', LINE_CHART_ANOMALY_RADIUS)
-      .on('click', function (d) {
+    const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
+    if (!previewMode) {
+      dot.on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;
         showAnomalyPopover(d, this);
-      })
+      });
+    }
+    dot
       .on('mouseover', function (d) {
         // Show the tooltip only if the actions menu isn't active
         if (that.state.popoverData === null) {
@@ -903,15 +905,18 @@ class TimeseriesChartIntl extends Component {
     multiBucketMarkers.exit().remove();
 
     // Add any new markers that are needed i.e. if number of multi-bucket points has increased.
-    multiBucketMarkers
+    const marker = multiBucketMarkers
       .enter()
       .append('path')
-      .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
-      .on('click', function (d) {
+      .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'));
+    if (!previewMode) {
+      marker.on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;
         showAnomalyPopover(d, this);
-      })
+      });
+    }
+    marker
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -1963,9 +1968,9 @@ class TimeseriesChartIntl extends Component {
       const anomalyMarker = chartElement.selectAll(
         '.focus-chart-markers .anomaly-marker.highlighted'
       );
-      if (anomalyMarker.length) {
-        showFocusChartTooltip(markerToSelect, anomalyMarker[0][0]);
-      }
+      // if (anomalyMarker.length) {
+      //   showFocusChartTooltip(markerToSelect, anomalyMarker[0][0]);
+      // }
     }
   }
 
@@ -2008,6 +2013,7 @@ class TimeseriesChartIntl extends Component {
   };
 
   render() {
+    console.log('RENDER', { state: this.state, props: this.props });
     return (
       <>
         <RuleEditorFlyout
