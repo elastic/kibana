@@ -1869,7 +1869,8 @@ paths:
                     access_control:
                       access_mode: private
                       entries:
-                        - id: u_bob_profile_uid
+                        - added_at: '2026-02-11T10:15:00.000Z'
+                          id: u_bob_profile_uid
                           role: user
                           type: user
                     permissions:
@@ -1880,10 +1881,12 @@ paths:
                     access_control:
                       access_mode: private
                       entries:
-                        - id: u_alice_profile_uid
+                        - added_at: '2026-02-11T10:15:00.000Z'
+                          id: u_alice_profile_uid
                           role: editor
                           type: user
-                        - id: u_bob_profile_uid
+                        - added_at: '2026-02-11T10:15:00.000Z'
+                          id: u_bob_profile_uid
                           role: user
                           type: user
                     permissions:
@@ -1950,7 +1953,7 @@ paths:
                 value:
                   entries: []
               updateAgentAccessControlRequestExample:
-                description: Example request granting two users access to the agent by their Kibana user profile uid — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent).
+                description: Example request granting two users access to the agent by their Kibana user profile uid — Alice as Editor (can update the agent configuration), Bob as User (can run the agent).
                 value:
                   entries:
                     - id: u_alice_profile_uid
@@ -2008,10 +2011,12 @@ paths:
                   value:
                     access_mode: private
                     entries:
-                      - id: u_alice_profile_uid
+                      - added_at: '2026-02-11T10:15:00.000Z'
+                        id: u_alice_profile_uid
                         role: editor
                         type: user
-                      - id: u_bob_profile_uid
+                      - added_at: '2026-02-11T10:15:00.000Z'
+                        id: u_bob_profile_uid
                         role: user
                         type: user
           description: Indicates a successful response
