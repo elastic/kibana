@@ -2300,5 +2300,6 @@
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0"
-  }
+  },
+  "packageManager": "pnpm@12.4.2"
 }
