@@ -191,7 +191,7 @@ interface DataAttributeProps {
  *
  * `onClick` is always `togglePopover`; `isSelected` is excluded because it applies
  * `aria-pressed`, which describes a toggle button — a popover trigger uses `aria-expanded`
- * instead, which EUI sets automatically.
+ * instead, which EUI sets automatically; `aria-haspopup` is always `"dialog"`.
  */
 type MenuTriggerOwnedProps =
   | 'children'
@@ -200,7 +200,8 @@ type MenuTriggerOwnedProps =
   | 'iconSide'
   | 'element'
   | 'onClick'
-  | 'isSelected';
+  | 'isSelected'
+  | 'aria-haspopup';
 
 /**
  * Props for the <FlyoutTemplate.Footer.PrimaryActionMenu> component.

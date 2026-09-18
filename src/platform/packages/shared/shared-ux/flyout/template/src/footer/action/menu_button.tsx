@@ -130,6 +130,8 @@ export const PrimaryActionMenuButton = ({
       button={
         <EuiButton
           {...triggerProps}
+          element="button"
+          isSelected={undefined}
           fill
           iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
           iconSide="right"

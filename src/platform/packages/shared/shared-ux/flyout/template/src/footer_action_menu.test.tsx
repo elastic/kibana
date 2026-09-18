@@ -323,6 +323,8 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
       fill: false,
       iconType: 'trash',
       iconSide: 'left',
+      element: 'span',
+      isSelected: true,
     } as Partial<React.ComponentProps<typeof FlyoutTemplate.Footer.PrimaryActionMenu>>;
 
     const { container } = renderMenu(owned);
@@ -330,6 +332,8 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
     expect(container.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
     expect(container.querySelector('[data-euiicon-type="trash"]')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /take action/i }).className).toContain('fill');
+    expect(screen.getByRole('button', { name: /take action/i }).tagName).toBe('BUTTON');
+    expect(screen.getByRole('button', { name: /take action/i })).not.toHaveAttribute('aria-pressed');
   });
 
   it('the popover panel gets a derived data-test-subj', async () => {
