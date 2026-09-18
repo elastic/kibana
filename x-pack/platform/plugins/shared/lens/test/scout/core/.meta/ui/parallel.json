@@ -1,5 +1,5 @@
 {
-  "sha1": "22d544cc064d8c4e85369f4af0d8e8103d8d5f24",
+  "sha1": "9fb70b75d8f6169b25a3a3ae4ce1c79dc160a41e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1507,7 +1507,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 59,
-        "column": 9
+        "column": 27
       }
     },
     {
@@ -1520,7 +1520,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 84,
-        "column": 18
+        "column": 22
       }
     },
     {
@@ -1533,7 +1533,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 110,
-        "column": 9
+        "column": 13
       }
     },
     {
@@ -1545,7 +1545,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 132,
+        "line": 135,
         "column": 4
       }
     },
@@ -1559,7 +1559,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 158,
-        "column": 25
+        "column": 20
       }
     },
     {
@@ -1572,7 +1572,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 187,
-        "column": 25
+        "column": 9
       }
     },
     {
@@ -1584,8 +1584,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 231,
-        "column": 31
+        "line": 233,
+        "column": 24
       }
     },
     {

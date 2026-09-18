@@ -18,8 +18,35 @@ import type {
   Proposal,
   ProposalWithMetadata,
 } from '@kbn/agentic-investigations-plugin/common';
+import { API_VERSIONS, ALERTZERO_PROPOSALS_URL } from '@kbn/alertzero-common';
+import type { GetProposalsListResponse } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './use_watches_api';
+
+export const DEFAULT_PROPOSALS_WINDOW_HOURS = 24;
+
+/**
+ * Proposals grouped by the category their action declares, plus a `closed`
+ * group of decisions made inside the window.
+ *
+ * Unlike `usePendingProposals` this is sorted `createdAt asc` server-side and
+ * does not filter expired proposals — an expired proposal is still visible and
+ * its Approve CTA is active (the API will reject it on submission).
+ */
+export const useProposalsList = (windowHours = DEFAULT_PROPOSALS_WINDOW_HOURS) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.proposals.grouped(windowHours),
+    queryFn: async (): Promise<GetProposalsListResponse> =>
+      services.http!.get<GetProposalsListResponse>(ALERTZERO_PROPOSALS_URL, {
+        version: API_VERSIONS.internal.v1,
+        query: { windowHours },
+      }),
+    keepPreviousData: true,
+    retry: retryOnTransientError,
+  });
+};
 
 /**
  * Pending proposals, already grouped and ranked by the API (category, then

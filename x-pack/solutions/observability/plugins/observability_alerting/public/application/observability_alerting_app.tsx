@@ -111,6 +111,11 @@ const ClassicRulesV1Route = ({
     coreStart,
     setBreadcrumbs,
     history: classicRulesHistory,
+    hideListBackButton: true,
+    host: {
+      app: OBSERVABILITY_ALERTING_APP_ID,
+      pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+    },
     tabs,
   });
 };

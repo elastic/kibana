@@ -7,8 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { nodeBuilder } from '@kbn/es-query';
 import {
   CONVERSATION_SCHEMA_VERSION,
+  ConversationParentRelation,
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
@@ -25,11 +27,14 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
 import type {
+  ConversationSearchOptions,
+  ConversationParentLink,
   ConversationTemplate,
   SerializedMetadataValue,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
+import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 import { createRound } from '../../../test_utils';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
@@ -92,6 +97,7 @@ describe.skip('ConversationClient', () => {
     rounds = [],
     attachments,
     workspaceId,
+    parentConversation,
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
     hasReadBy = true,
@@ -114,6 +120,7 @@ describe.skip('ConversationClient', () => {
     rounds?: unknown[];
     attachments?: unknown[];
     workspaceId?: string;
+    parentConversation?: ConversationParentLink;
     read?: boolean;
     readBy?: Array<{ userId: string }>;
     hasReadBy?: boolean;
@@ -140,6 +147,7 @@ describe.skip('ConversationClient', () => {
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(parentConversation ? { parent_conversation: parentConversation } : {}),
         ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
         ...(events !== undefined ? { events } : {}),
         access_control: {
@@ -521,6 +529,430 @@ describe.skip('ConversationClient', () => {
       // A plain term: { pinned: false } would silently exclude documents created
       // before the pinned field was added; must never be used.
       expect(filterArray).not.toContainEqual({ term: { pinned: false } });
+    });
+  });
+
+  describe('search', () => {
+    it('sends a match_bool_prefix on title as a must clause', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'sales rep' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.arrayContaining([
+                {
+                  bool: {
+                    should: [
+                      { match_bool_prefix: { title: { query: 'sales rep', operator: 'and' } } },
+                      {
+                        prefix: {
+                          'title.keyword': { value: 'sales rep', boost: 2, case_insensitive: true },
+                        },
+                      },
+                      {
+                        prefix: {
+                          'title.keyword': {
+                            value: 'sales rep ',
+                            boost: 5,
+                            case_insensitive: true,
+                          },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('omits the must clause for a whitespace-only query', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: '   ' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({ must: [] }),
+          }),
+        })
+      );
+    });
+
+    it('shares the same space, read-access, and sub-agent filters as list', async () => {
+      agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list();
+      const listFilter = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+
+      mockEsClient.search.mockClear();
+      await client.search({ query: 'anything' });
+      const searchFilter = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+
+      expect(searchFilter).toEqual(listFilter);
+    });
+
+    it('never sends a pinned filter', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything' });
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray).not.toContainEqual({ term: { pinned: true } });
+      expect(filterArray).not.toContainEqual({ bool: { must_not: { term: { pinned: true } } } });
+    });
+
+    it('sorts by _score, then updated_at, then created_at, all descending', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [
+            { _score: { order: 'desc' } },
+            { updated_at: { order: 'desc' } },
+            { created_at: { order: 'desc' } },
+          ],
+        })
+      );
+    });
+
+    it('sends from=0, size=50, and track_total_hits=10000 by default', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.search({ query: 'anything' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: 0,
+          size: 50,
+          track_total_hits: 10_000,
+          seq_no_primary_term: true,
+        })
+      );
+    });
+
+    it('computes from = (page - 1) * perPage', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.search({ query: 'anything', page: 3, perPage: 10 });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ from: 20, size: 10 })
+      );
+    });
+
+    it('returns total when hits.total is a plain number', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: 7 } });
+
+      const result = await client.search({ query: 'anything' });
+
+      expect(result.total).toBe(7);
+    });
+
+    it('returns total from hits.total.value when ES returns the object form', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 42, relation: 'eq' } },
+      });
+
+      const result = await client.search({ query: 'anything' });
+
+      expect(result.total).toBe(42);
+    });
+
+    it('caps total at 10000 when ES reports more via track_total_hits', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 99_999, relation: 'gte' } },
+      });
+
+      const result = await client.search({ query: 'anything' });
+
+      expect(result.total).toBe(10_000);
+    });
+
+    it('returns an empty result without querying conversations when the requested agent is inaccessible', async () => {
+      agentRegistry.getIds.mockResolvedValue(['agent-1']);
+
+      await expect(client.search({ query: 'anything', agentId: 'agent-2' })).resolves.toEqual({
+        results: [],
+        total: 0,
+      });
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty result when the user cannot access any underlying agents', async () => {
+      agentRegistry.getIds.mockResolvedValue([]);
+
+      await expect(client.search({ query: 'anything' })).resolves.toEqual({
+        results: [],
+        total: 0,
+      });
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('maps hits to conversations with permissions, and no rounds or read_by', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()], total: { value: 1, relation: 'eq' } },
+      });
+
+      const { results } = await client.search({ query: 'anything' });
+
+      expectNoReadByInList(results);
+      expectOwnerPermissionsInList(results);
+      expectNoRoundsInList(results);
+    });
+
+    // --- filter ---
+
+    const searchFilterClauses = async (options: ConversationSearchOptions): Promise<unknown[]> => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search(options);
+
+      return mockEsClient.search.mock.calls[0][0].query.bool.filter;
+    };
+
+    it('appends the compiled filter to the access filters', async () => {
+      const withoutFilter = await searchFilterClauses({ query: 'anything' });
+
+      mockEsClient.search.mockClear();
+      const withFilter = await searchFilterClauses({
+        query: 'anything',
+        filter: 'attachment_type: alert',
+      });
+
+      expect(withFilter).toEqual([
+        ...withoutFilter,
+        {
+          bool: {
+            should: [{ term: { 'attachments.type': { value: 'alert' } } }],
+            minimum_should_match: 1,
+          },
+        },
+      ]);
+    });
+
+    it('accepts a pre-built filter AST as well as a KQL string', async () => {
+      const fromString = await searchFilterClauses({ filter: 'attachment_type: alert' });
+
+      mockEsClient.search.mockClear();
+      const fromNode = await searchFilterClauses({
+        filter: nodeBuilder.is('attachment_type', 'alert'),
+      });
+
+      expect(fromNode).toEqual(fromString);
+    });
+
+    it('searches by filter alone, with no query', async () => {
+      const filterClauses = await searchFilterClauses({ filter: 'status: completed' });
+
+      expect(filterClauses).toContainEqual({
+        bool: {
+          should: [{ term: { status: { value: 'completed' } } }],
+          minimum_should_match: 1,
+        },
+      });
+      expect(mockEsClient.search.mock.calls[0][0].query.bool.must).toEqual([]);
+    });
+
+    it('sorts by the requested field alone when no query narrows relevance', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ filter: 'status: completed' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ updated_at: { order: 'desc' } }, { created_at: { order: 'desc' } }],
+        })
+      );
+    });
+
+    it('applies an explicit sort instead of relevance when a query is present', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything', sort: { field: 'created_at', order: 'asc' } });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ created_at: { order: 'asc' } }],
+        })
+      );
+    });
+
+    it('rejects an invalid filter before touching Elasticsearch', async () => {
+      await expect(client.search({ filter: 'space: default' })).rejects.toThrow(
+        /Invalid filter field "space"/
+      );
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkGet', () => {
+    it('keys results by conversation id, independently of the order hits come back in', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'conversation-2', title: 'Second' }),
+            createConversationDocument({ id: 'conversation-1', title: 'First' }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-1', 'conversation-2']);
+
+      expect(result.size).toBe(2);
+      expect(result.get('conversation-1')?.title).toBe('First');
+      expect(result.get('conversation-2')?.title).toBe('Second');
+    });
+
+    it('sends a single ids clause alongside the shared access filters', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1', 'conversation-2']);
+
+      const { query } = mockEsClient.search.mock.calls[0][0];
+      expect(query.bool.filter).toContainEqual({
+        ids: { values: ['conversation-1', 'conversation-2'] },
+      });
+      // Space scoping and read access still apply, on top of the ids clause.
+      expect(query.bool.filter).toHaveLength(3);
+    });
+
+    it('resolves sub-agent conversations, unlike the list surfaces', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1']);
+
+      const { query } = mockEsClient.search.mock.calls[0][0];
+      expect(query.bool.filter).not.toContainEqual({
+        bool: { must_not: [{ exists: { field: 'parent_conversation' } }] },
+      });
+    });
+
+    it('returns the parent link so callers can tell sub-agent conversations apart', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'conversation-parent' }),
+            createConversationDocument({
+              id: 'conversation-child',
+              parentConversation: {
+                id: 'conversation-parent',
+                relation: ConversationParentRelation.subagent,
+              },
+            }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-parent', 'conversation-child']);
+
+      expect(mockEsClient.search.mock.calls[0][0]._source).toContain('parent_conversation');
+      expect(result.get('conversation-child')?.parent_conversation).toEqual({
+        id: 'conversation-parent',
+        relation: ConversationParentRelation.subagent,
+      });
+      expect(result.get('conversation-parent')?.parent_conversation).toBeUndefined();
+    });
+
+    it('sizes the query to the id count and does not track totals', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1', 'conversation-2', 'conversation-3']);
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 3, track_total_hits: false })
+      );
+      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('from');
+    });
+
+    it('omits ids that did not resolve rather than erroring', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ id: 'conversation-1' })] },
+      });
+
+      const result = await client.bulkGet(['conversation-1', 'missing']);
+
+      expect(result.size).toBe(1);
+      expect(result.has('missing')).toBe(false);
+    });
+
+    it('returns an empty map for an empty id array without querying Elasticsearch', async () => {
+      await expect(client.bulkGet([])).resolves.toEqual(new Map());
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty map when the user cannot access any underlying agents', async () => {
+      agentRegistry.getIds.mockResolvedValue([]);
+
+      await expect(client.bulkGet(['conversation-1'])).resolves.toEqual(new Map());
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('rejects more ids than the maximum before touching Elasticsearch', async () => {
+      const ids = Array.from(
+        { length: CONVERSATION_BULK_GET_MAX_IDS + 1 },
+        (_, index) => `conversation-${index}`
+      );
+
+      await expect(client.bulkGet(ids)).rejects.toThrow(/Too many conversation ids/);
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns rounds-less rows carrying active attachment summaries', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              id: 'conversation-1',
+              attachments: [
+                { id: 'att-1', type: 'text', versions: [], current_version: 1 },
+                { id: 'att-2', type: 'esql', versions: [], current_version: 1, active: false },
+              ],
+            }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-1']);
+      const conversation = result.get('conversation-1');
+
+      expectNoRoundsInList([conversation]);
+      expect(conversation?.attachments).toEqual([{ id: 'att-1', type: 'text' }]);
+    });
+
+    it('requests attachment identity without version content in _source', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1']);
+
+      const { _source: sourceFields } = mockEsClient.search.mock.calls[0][0];
+      expect(sourceFields).toEqual(
+        expect.arrayContaining(['attachments.id', 'attachments.type', 'attachments.active'])
+      );
+      expect(sourceFields).not.toContain('attachments');
+      expect(sourceFields).not.toContain('conversation_rounds');
     });
   });
 

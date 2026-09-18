@@ -25,7 +25,7 @@ export const TemplateIdEnum = TemplateId.enum;
  * Brief bucket recommendation for an investigation
  */
 export const RecommendedAction = lazySchema(() =>
-  z.enum(['contain', 'escalate', 'investigate', 'tune'])
+  z.enum(['respond', 'investigate', 'configure', 'closed'])
 );
 export type RecommendedAction = z.infer<typeof RecommendedAction>;
 export type RecommendedActionEnum = typeof RecommendedAction.enum;
@@ -39,7 +39,7 @@ export type ProposalStatusEnum = typeof ProposalStatus.enum;
 export const ProposalStatusEnum = ProposalStatus.enum;
 
 export const WatchTier = lazySchema(() =>
-  z.enum(['floor', 'officer', 'dark', 'deep', 'detection'])
+  z.enum(['floor', 'officer', 'hunt', 'deep', 'detection'])
 );
 export type WatchTier = z.infer<typeof WatchTier>;
 export type WatchTierEnum = typeof WatchTier.enum;

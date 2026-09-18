@@ -43,7 +43,7 @@ main () {
 
   report_main_step "Bootstrapping Kibana"
 
-  .buildkite/scripts/bootstrap.sh
+  pnpm kbn bootstrap --force-install --no-frozen-lockfile --no-prebuilt
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
@@ -98,7 +98,7 @@ main () {
 
   git add $GIT_SCOPE
   if [ "$VERSION_BUMPED" == "true" ]; then
-    git add package.json yarn.lock
+    git add package.json pnpm-lock.yaml
   fi
   git commit -m "Update function metadata"
 
