@@ -96,26 +96,29 @@ apiTest.describe(
         // Out-of-band deletion is what the health badge exists for.
         await esClient.esql.deleteView({ name: viewName });
         const missing = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(missing).toHaveStatusCode(200);
         expect(missing.body.health).toBe('view_missing');
 
         const repaired = await updateSource(apiClient, manager.cookieHeader, source.id, body);
         expect(repaired).toHaveStatusCode(200);
         expect(repaired.body.source.esql_updated_at).toBe(source.esql_updated_at);
-        expect((await getSource(apiClient, manager.cookieHeader, source.id)).body.health).toBe(
-          'ok'
-        );
+        const repairedHealth = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(repairedHealth).toHaveStatusCode(200);
+        expect(repairedHealth.body.health).toBe('ok');
 
         await esClient.esql.putView({
           name: viewName,
           query: `FROM ${index} | WHERE status >= 400`,
         });
         const drifted = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(drifted).toHaveStatusCode(200);
         expect(drifted.body.health).toBe('view_drift');
 
-        await updateSource(apiClient, manager.cookieHeader, source.id, body);
-        expect((await getSource(apiClient, manager.cookieHeader, source.id)).body.health).toBe(
-          'ok'
-        );
+        const repairedDrift = await updateSource(apiClient, manager.cookieHeader, source.id, body);
+        expect(repairedDrift).toHaveStatusCode(200);
+        const driftRepairedHealth = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(driftRepairedHealth).toHaveStatusCode(200);
+        expect(driftRepairedHealth.body.health).toBe('ok');
         expect(await readView(esClient, viewName)).toStrictEqual({
           name: viewName,
           query: body.esql,
