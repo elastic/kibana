@@ -26,16 +26,17 @@ export const useEntityStoreRoutes = () => {
   const { http, notifications } = useKibana().services;
 
   return useMemo(() => {
-    const installPrebuiltWatchlists = async () =>
+    const installPrebuiltWatchlists = async (context?: KibanaExecutionContext) =>
       http.fetch<{ acknowledged: boolean }>(WATCHLISTS_PREBUILT_INSTALL_URL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
+        context,
       });
 
     // This is here while waiting for unified installs https://github.com/elastic/security-team/issues/16607
-    const tryInstallPrebuiltWatchlistsWithToast = async () => {
+    const tryInstallPrebuiltWatchlistsWithToast = async (context?: KibanaExecutionContext) => {
       try {
-        await installPrebuiltWatchlists();
+        await installPrebuiltWatchlists(context);
       } catch {
         notifications?.toasts?.addWarning({
           title: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TITLE,
@@ -54,7 +55,7 @@ export const useEntityStoreRoutes = () => {
       });
 
     const installEntityStore = async (context?: KibanaExecutionContext) => {
-      await tryInstallPrebuiltWatchlistsWithToast();
+      await tryInstallPrebuiltWatchlistsWithToast(context);
       return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
@@ -64,7 +65,7 @@ export const useEntityStoreRoutes = () => {
     };
 
     const startEntityStore = async (context?: KibanaExecutionContext) => {
-      await tryInstallPrebuiltWatchlistsWithToast();
+      await tryInstallPrebuiltWatchlistsWithToast(context);
       return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
         method: 'PUT',
         version: API_VERSIONS.public.v1,

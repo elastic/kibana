@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   fetchQueryAttacks,
@@ -107,6 +107,16 @@ export const useQueryAlerts = <Hit, Aggs>({
 
   const fetchAlerts = useTrackedFetchMethod(fetchMethod, queryName);
 
+  // Hold the latest executionContext in a ref so re-renders that pass a fresh
+  // literal (e.g. `executionContext: buildExecutionContext(...)` inline) don't
+  // change the effect dependency identity, which would abort the in-flight
+  // request and re-fetch on every render — an unbounded loop when the effect's
+  // own setState updates feed back into the same render cycle. The values here
+  // are pure trace labels; reading them at invocation time (not close-over
+  // time) is functionally equivalent.
+  const executionContextRef = useRef(executionContext);
+  executionContextRef.current = executionContext;
+
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -118,7 +128,7 @@ export const useQueryAlerts = <Hit, Aggs>({
         const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
-          context: executionContext,
+          context: executionContextRef.current,
         });
 
         if (isSubscribed) {
@@ -163,7 +173,7 @@ export const useQueryAlerts = <Hit, Aggs>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, indexName, skip, fetchAlerts, executionContext]);
+  }, [query, indexName, skip, fetchAlerts]);
 
   return { loading, ...alerts };
 };

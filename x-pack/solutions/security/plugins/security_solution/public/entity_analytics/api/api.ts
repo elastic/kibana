@@ -158,7 +158,7 @@ export const useEntityAnalyticsRoutes = () => {
   const isMaintainerRiskScoreV2Enabled = isEntityAnalyticsEntityStoreV2Enabled;
 
   return useMemo(() => {
-    const fetchEntityMaintainers = (ids?: string[]) =>
+    const fetchEntityMaintainers = (ids?: string[], context?: KibanaExecutionContext) =>
       http.fetch<GetEntityMaintainersResponse>(
         ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
         {
@@ -167,13 +167,14 @@ export const useEntityAnalyticsRoutes = () => {
             ...ENTITY_STORE_V2_QUERY,
             ...(ids && ids.length > 0 ? { ids } : {}),
           },
+          context,
         }
       );
 
-    const fetchRiskScoreMaintainer = async (): Promise<
-      EntityMaintainerResponseItem | undefined
-    > => {
-      const maintainers = await fetchEntityMaintainers([RISK_SCORE_MAINTAINER_ID]);
+    const fetchRiskScoreMaintainer = async (
+      context?: KibanaExecutionContext
+    ): Promise<EntityMaintainerResponseItem | undefined> => {
+      const maintainers = await fetchEntityMaintainers([RISK_SCORE_MAINTAINER_ID], context);
       return maintainers.maintainers[0];
     };
 
@@ -286,7 +287,7 @@ export const useEntityAnalyticsRoutes = () => {
       context?: KibanaExecutionContext;
     }) => {
       if (isMaintainerRiskScoreV2Enabled) {
-        const riskScoreMaintainer = await fetchRiskScoreMaintainer();
+        const riskScoreMaintainer = await fetchRiskScoreMaintainer(context);
         const riskEngineStatus = !riskScoreMaintainer
           ? 'NOT_INSTALLED'
           : riskScoreMaintainer.taskStatus === 'started'
