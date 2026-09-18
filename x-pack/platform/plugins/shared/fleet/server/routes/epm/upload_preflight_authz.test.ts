@@ -428,5 +428,4 @@ describe('checkUploadPackageAssetPrivileges', () => {
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
-
 });
