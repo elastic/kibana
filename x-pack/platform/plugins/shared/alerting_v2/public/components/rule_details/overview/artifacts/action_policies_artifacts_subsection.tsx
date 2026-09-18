@@ -19,10 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertingLocators } from '../../../../application/locator_context';
-import {
-  useLinkedActionPolicies,
-  LINKED_ACTION_POLICIES_FETCH_LIMIT,
-} from './use_linked_action_policies';
+import { useLinkedActionPolicies } from './use_linked_action_policies';
 import type { RuleSummarySectionProps } from '../../../rule/types';
 
 const openLinkLabel = i18n.translate(
@@ -68,8 +65,15 @@ const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
 
 export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const { actionPolicyLocators } = useAlertingLocators();
-  const { totalCount, catchAllCount, matchingCriteriaCount, isCountTruncated, isLoading, isError } =
-    useLinkedActionPolicies(rule.metadata.tags ?? []);
+  const {
+    totalCount,
+    catchAllCount,
+    matchingCriteriaCount,
+    evaluatedCount,
+    isCountTruncated,
+    isLoading,
+    isError,
+  } = useLinkedActionPolicies(rule.metadata.tags ?? []);
 
   const openNotificationPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
 
@@ -89,8 +93,8 @@ export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps
         'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.truncatedCountHint',
         {
           defaultMessage:
-            'This space has more than {fetchLimit} action policies, so this count may be low.',
-          values: { fetchLimit: LINKED_ACTION_POLICIES_FETCH_LIMIT },
+            'Only {evaluatedCount, plural, one {# action policy was} other {# action policies were}} evaluated, so this count may be low.',
+          values: { evaluatedCount },
         }
       )
     : null;
