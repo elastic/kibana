@@ -1611,24 +1611,32 @@ class OutputService {
     }
     const packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escaped}"`;
 
-    const [directPolicies, packagePolicySOs] = await Promise.all([
-      agentPolicyService.list(internalSoClient, {
-        kuery: agentPoliciesKuery,
-        perPage: SO_SEARCH_LIMIT,
-        spaceId: '*',
-        fields: ['id'],
-      }),
-      packagePolicyService.list(internalSoClient, {
-      packagePolicyService.list(internalSoClient, {
-        kuery: packagePoliciesKuery,
-        perPage: SO_SEARCH_LIMIT,
-        spaceId: '*',
-        fields: ['policy_ids'],
-      }),
+    // Iterate all pages so counts are correct beyond SO_SEARCH_LIMIT.
+    const directPolicyIds: string[] = [];
+    for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(internalSoClient, {
+      kuery: agentPoliciesKuery,
+      spaceId: '*',
+    })) {
+      directPolicyIds.push(...ids);
+    }
 
-    const directPolicyIds = directPolicies.items.map((p) => p.id);
-    const pkgDerivedIds = packagePolicySOs.items.flatMap((pp) =>
-    const pkgDerivedIds = packagePolicySOs.items.flatMap((pp) => pp.policy_ids);
+    const directPolicyIdSet = new Set(directPolicyIds);
+    const pkgDerivedIdSet = new Set<string>();
+    for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
+      kuery: packagePoliciesKuery,
+      fields: ['policy_ids'],
+      spaceIds: ['*'],
+    })) {
+      for (const pp of pkgPolicies) {
+        for (const id of pp.policy_ids) {
+          if (!directPolicyIdSet.has(id)) {
+            pkgDerivedIdSet.add(id);
+          }
+        }
+      }
+    }
+
+    const uniqueIds = [...directPolicyIdSet, ...pkgDerivedIdSet];
     const agentPolicyCount = uniqueIds.length;
 
     let agentCount = 0;
