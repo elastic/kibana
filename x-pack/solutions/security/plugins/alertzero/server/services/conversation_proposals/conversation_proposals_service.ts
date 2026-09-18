@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ConversationWithPermissions, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
@@ -39,6 +39,11 @@ export class ConversationProposalsService {
     private readonly agentBuilder: AgentBuilderPluginStart,
     private readonly logger: Logger
   ) {}
+
+  async get(conversationId: string, request: KibanaRequest): Promise<ConversationWithPermissions> {
+    const client = await this.agentBuilder.conversations.getScopedClient({ request });
+    return client.get(conversationId);
+  }
 
   /** Returns pending proposals for a single action category, newest first. */
   async listByCategory(

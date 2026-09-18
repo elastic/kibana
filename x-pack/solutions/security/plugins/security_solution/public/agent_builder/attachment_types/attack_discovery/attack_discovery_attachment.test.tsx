@@ -72,6 +72,15 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
 
     expect(element.type).toBe(AttackDiscoveryInlineContent);
   });
+
+  it('reuses AttackDiscoveryInlineContent for the conversation details flyout', () => {
+    const definition = createAttackDiscoveryAttachmentDefinition();
+    const element = definition.renderConversationDetailsContent?.({
+      attachment: makeAttachment({ details_markdown: 'd', summary_markdown: 's' }),
+    }) as React.ReactElement;
+
+    expect(element.type).toBe(AttackDiscoveryInlineContent);
+  });
 });
 
 describe('registerAttackDiscoveryAttachment', () => {

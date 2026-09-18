@@ -75,6 +75,7 @@ const makeAgentBuilder = (
           }
           return result;
         }),
+        get: jest.fn(),
       }),
     },
   } as unknown as AgentBuilderPluginStart);
@@ -381,5 +382,21 @@ describe('ConversationProposalsService', () => {
 
       expect(result.total).toBe(100);
     });
+  });
+
+  it('loads a conversation by id through the scoped client', async () => {
+    const conversation = { id: 'conv-1', title: 'Keychain' };
+    const get = jest.fn().mockResolvedValue(conversation);
+    const getScopedClient = jest.fn().mockResolvedValue({ get });
+    const agentBuilder = {
+      conversations: { getScopedClient },
+    } as unknown as AgentBuilderPluginStart;
+
+    const service = new ConversationProposalsService(makeProposalsService(), agentBuilder, logger);
+    const result = await service.get('conv-1', request);
+
+    expect(getScopedClient).toHaveBeenCalledWith({ request });
+    expect(get).toHaveBeenCalledWith('conv-1');
+    expect(result).toBe(conversation);
   });
 });
