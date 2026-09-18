@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  HuntReadinessRequestQuery,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
@@ -17,10 +20,6 @@ import type { RouteDependencies } from '../register_routes';
 export const HUNT_READINESS_URL = `${HUNT_INTERNAL_ROUTE_BASE}/readiness` as const;
 
 const HUNT_TECHNOLOGIES: HuntTechnology[] = ['aws_iam', 'fortigate'];
-
-const ReadinessRequestQuery = z.object({
-  technology: z.enum(['aws_iam', 'fortigate']).optional(),
-});
 
 /**
  * Readiness projection over A2's `resolveIndexScope`, one entry per
@@ -46,7 +45,7 @@ export const registerHuntReadinessRoute = ({ router, logger, getSpaceId }: Route
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ReadinessRequestQuery),
+            query: buildRouteValidationWithZod(HuntReadinessRequestQuery),
           },
         },
       },
