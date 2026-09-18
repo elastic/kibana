@@ -23,10 +23,7 @@ import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { ValidateCustomYaraSignatureResponse } from '@kbn/security-solution-plugin/common/api/endpoint/custom_yara_signatures';
-import {
-  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
-  MAXIMUM_RULE_IDENTIFIER_LENGTH,
-} from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
+import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -303,6 +300,8 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
             describe('Rule identifiers', () => {
+              const MAXIMUM_RULE_IDENTIFIER_LENGTH = 128;
+
               it('accepts multiple rules with unique identifiers', async () => {
                 await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                   customYaraSignatureApiCall.path
@@ -360,66 +359,11 @@ export default function ({ getService }: FtrProviderContext) {
                   )
                   .expect(400)
                   .expect(anEndpointArtifactError)
+                  .expect(anErrorMessageWith(/2 errors found:/))
+                  .expect(anErrorMessageWith(/\[line 3\] identifier too long/))
                   .expect(
                     anErrorMessageWith(
-                      new RegExp(
-                        `1 error found: \\[line 3\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
-                        )}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`
-                      )
-                    )
-                  );
-              });
-
-              it('returns "too long identifier" error for multiple rules with too long identifiers', async () => {
-                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-                  customYaraSignatureApiCall.path
-                )
-                  .set('kbn-xsrf', 'true')
-                  .send(
-                    customYaraSignatureApiCall.getBody(`
-                      rule rule1 { condition: true }
-
-                      // all identifiers are only 'a's to make sure the correct line number is reported on whole words
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 3)} { condition: true }
-                      rule rule2 { condition: true }
-
-                      // no space after the identifier intentionally
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 2)}{ condition: true }
-                      rule rule3 { condition: true }
-
-                      // line break after identifier intentionally
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 1)}
-                      { condition: true }`)
-                  )
-                  .expect(400)
-                  .expect(anEndpointArtifactError)
-                  .expect(anErrorMessageWith(/3 errors found:/))
-                  .expect(
-                    anErrorMessageWith(
-                      new RegExp(
-                        `\\[line 5\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 3
-                        )}"`
-                      )
-                    )
-                  )
-                  .expect(
-                    anErrorMessageWith(
-                      new RegExp(
-                        `\\[line 9\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 2
-                        )}"`
-                      )
-                    )
-                  )
-                  .expect(
-                    anErrorMessageWith(
-                      new RegExp(
-                        `\\[line 13\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
-                        )}"`
-                      )
+                      /\[line 3\] syntax error, unexpected end of file, expecting identifier/
                     )
                   );
               });
