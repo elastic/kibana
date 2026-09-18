@@ -20,14 +20,14 @@ steps:
   # Only Jest unit tests gate the queue.
   - command: |
       set -euxo pipefail
-      (.buildkite/scripts/steps/test/pick_test_group_run_order.sh > .buildkite/scripts/steps/test/test_group_run_order.txt) &
-      ptgro_pid=$!
-      echo "Picked test group run order running in background with PID $ptgro_pid, starting store cache..."
-      .buildkite/scripts/steps/store_cache.sh
-      echo "Store cache completed, waiting for test group run order to finish..."
-      wait $ptgro_pid
-      echo "Test group run order finished, printing results..."
-      cat .buildkite/scripts/steps/test/test_group_run_order.txt
+      (.buildkite/scripts/steps/store_cache.sh > .buildkite/scripts/steps/store_cache.txt) &
+      store_cache_pid=$!
+      echo "Store cache running in background with PID $store_cache_pid, picking test group run order..."
+      .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+      echo "Test group run order completed, waiting for store cache to finish..."
+      wait $store_cache_pid
+      echo "Store cache completed, printing results..."
+      cat .buildkite/scripts/steps/store_cache.txt
     label: 'Pick Test Group Run Order and Store Cache'
     agents:
       image: family/kibana-ubuntu-2404
