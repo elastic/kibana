@@ -1127,7 +1127,27 @@ describe('RuleBuilderAlertConditionStep', () => {
       );
 
       expect(screen.getByTestId('ruleBuilderSeverityReservedLabelCallout')).toBeInTheDocument();
+      expect(screen.getByText(/a stat is named "severity"/i)).toBeInTheDocument();
       expect(screen.queryByTestId('ruleBuilderSeverityEnable')).not.toBeInTheDocument();
+    });
+
+    it('names the group-by field in the reserved-label notice', () => {
+      const builderState = makeBuilderState({
+        groupByFields: ['severity'],
+        severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // The remediation is group-by specific (remove/change), not "rename a stat".
+      expect(screen.getByText(/group-by field named "severity"/i)).toBeInTheDocument();
     });
 
     it('clears severity when a stat is renamed to severity', () => {

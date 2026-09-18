@@ -62,6 +62,7 @@ import {
   reconcileSeverity,
   isSeveritySupported,
   hasReservedSeverityLabel,
+  getReservedSeverityLabelSources,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
@@ -72,6 +73,7 @@ import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
+  SEVERITY_RESERVED_LABEL_NOTICE,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
@@ -481,12 +483,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const severitySupported = isSeveritySupported(thresholdValues.alertConditions);
   // A stat/evaluation/group-by field named `severity` collides with the generated column, so
-  // severity is not configurable until it is renamed.
-  const severityLabelConflict = hasReservedSeverityLabel(
+  // severity is not configurable until it is renamed. Track the exact source(s) to name them.
+  const reservedSeverityLabelSources = getReservedSeverityLabelSources(
     thresholdValues.stats,
     thresholdValues.evaluations,
     thresholdValues.groupByFields
   );
+  const severityLabelConflict = reservedSeverityLabelSources.length > 0;
 
   return (
     <>
@@ -1027,13 +1030,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                       size="s"
                       color="primary"
                       iconType="info"
-                      title={i18n.translate(
-                        'xpack.alertingV2.ruleBuilder.severity.reservedLabelNotice',
-                        {
-                          defaultMessage:
-                            'Severity levels are not configurable while a stat or evaluation is named "severity". Rename it to enable them.',
-                        }
-                      )}
+                      title={SEVERITY_RESERVED_LABEL_NOTICE(reservedSeverityLabelSources)}
                       data-test-subj="ruleBuilderSeverityReservedLabelCallout"
                     />
                   </>

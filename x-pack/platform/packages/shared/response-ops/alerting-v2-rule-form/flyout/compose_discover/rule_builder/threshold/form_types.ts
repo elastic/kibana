@@ -252,20 +252,35 @@ export const isAscendingComparator = (comparator: Comparator): boolean =>
 /** The generated severity EVAL always emits this column name; the executor reads it. */
 export const SEVERITY_COLUMN = 'severity';
 
+/** Where a reserved `severity` label was found, so the UI can name the exact thing to fix. */
+export type ReservedSeverityLabelSource = 'stat' | 'evaluation' | 'groupBy';
+
 /**
- * Whether a stat, evaluation, or group-by field is named `severity`, which would collide with the
- * generated severity column: the generated `EVAL severity` overwrites the user's column (and for a
- * group-by field, the executor then hashes the overwritten value, collapsing distinct groups).
- * When true, severity is not configurable, so {@link reconcileSeverity} clears any existing config.
+ * Which inputs are named `severity` and therefore collide with the generated severity column: the
+ * generated `EVAL severity` overwrites the user's column (and for a group-by field, the executor
+ * then hashes the overwritten value, collapsing distinct groups).
+ */
+export const getReservedSeverityLabelSources = (
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[],
+  groupByFields: string[]
+): ReservedSeverityLabelSource[] => {
+  const sources: ReservedSeverityLabelSource[] = [];
+  if (stats.some((s) => s.label.trim() === SEVERITY_COLUMN)) sources.push('stat');
+  if (evaluations.some((e) => e.label.trim() === SEVERITY_COLUMN)) sources.push('evaluation');
+  if (groupByFields.some((f) => f.trim() === SEVERITY_COLUMN)) sources.push('groupBy');
+  return sources;
+};
+
+/**
+ * Whether any input is named `severity`. When true, severity is not configurable, so
+ * {@link reconcileSeverity} clears any existing config.
  */
 export const hasReservedSeverityLabel = (
   stats: StatDefinition[],
   evaluations: EvaluationDefinition[],
   groupByFields: string[]
-): boolean =>
-  [...stats.map((s) => s.label), ...evaluations.map((e) => e.label), ...groupByFields].some(
-    (label) => label.trim() === SEVERITY_COLUMN
-  );
+): boolean => getReservedSeverityLabelSources(stats, evaluations, groupByFields).length > 0;
 
 export const createDefaultSeverityConfig = (): SeverityConfig => ({
   mode: 'single',

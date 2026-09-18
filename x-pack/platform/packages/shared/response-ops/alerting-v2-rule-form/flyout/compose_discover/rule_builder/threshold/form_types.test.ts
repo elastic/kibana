@@ -11,6 +11,7 @@ import {
   areAllStatsValid,
   Comparator,
   compareSeverity,
+  getReservedSeverityLabelSources,
   getSeverityValidationError,
   hasReservedSeverityLabel,
   sortLevelsBySeverity,
@@ -438,6 +439,39 @@ describe('severity helpers', () => {
 
     it('is false when no stat/eval/group-by is named severity', () => {
       expect(hasReservedSeverityLabel([countStat], [], ['host.name'])).toBe(false);
+    });
+  });
+
+  describe('getReservedSeverityLabelSources', () => {
+    const countStat = { id: 's1', label: 'count', aggregation: Aggregation.COUNT };
+    const sevStat = { id: 's1', label: 'severity', aggregation: Aggregation.COUNT };
+
+    it('names the stat source', () => {
+      expect(getReservedSeverityLabelSources([sevStat], [], [])).toEqual(['stat']);
+    });
+
+    it('names the evaluation source', () => {
+      expect(
+        getReservedSeverityLabelSources([countStat], [{ id: 'e1', label: 'severity', expression: 'x' }], [])
+      ).toEqual(['evaluation']);
+    });
+
+    it('names the group-by source', () => {
+      expect(getReservedSeverityLabelSources([countStat], [], ['severity'])).toEqual(['groupBy']);
+    });
+
+    it('names every colliding source', () => {
+      expect(
+        getReservedSeverityLabelSources(
+          [sevStat],
+          [{ id: 'e1', label: 'severity', expression: 'x' }],
+          ['severity']
+        )
+      ).toEqual(['stat', 'evaluation', 'groupBy']);
+    });
+
+    it('is empty when nothing collides', () => {
+      expect(getReservedSeverityLabelSources([countStat], [], ['host.name'])).toEqual([]);
     });
   });
 
