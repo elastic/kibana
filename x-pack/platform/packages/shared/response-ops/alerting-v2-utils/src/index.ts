@@ -23,3 +23,10 @@ export {
 export { resolveEpisodeLabel, type ResolveEpisodeLabelParams } from './resolve_episode_label';
 export { buildRulePayload } from './rule_mappers';
 export { attachmentDataToActionPolicyPayload } from './action_policy_mappers';
+export {
+  isObservabilityContext,
+  resolveAlertingV2RuleLibraryHost,
+  OBSERVABILITY_RULE_LIBRARY_HOST,
+  OBSERVABILITY_RULE_LIBRARY_PATH,
+  type ObservabilityContextSignals,
+} from './resolve_rule_library_host';
