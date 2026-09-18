@@ -8,21 +8,40 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiFlyout } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import hjson from 'hjson';
+import { VegaSpecEditor } from '../components/vega_vis_editor';
+import { getNotifications } from '../services';
+import { createVegaEditorMenu } from './vega_editor_menu';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
-jest.mock('../components/vega_vis_editor', () => ({
-  VegaSpecEditor: ({
-    editorValue,
+// Exercise real flyout and focus behavior instead of EUI's simplified Jest components.
+jest.mock('@elastic/eui', () =>
+  jest.requireActual(require.resolve('@elastic/eui/package.json').replace('package.json', 'lib'))
+);
+jest.mock('@kbn/monaco', () => ({ XJsonLang: { ID: 'json' } }));
+jest.mock('../services', () => ({
+  getNotifications: jest.fn(() => ({ toasts: { addError: jest.fn() } })),
+  getDocLinks: () => ({ links: { visualize: { vega: 'https://elastic.co/vega-help' } } }),
+}));
+jest.mock('@kbn/code-editor', () => ({
+  HJSON_LANG_ID: 'hjson',
+  CodeEditor: ({
+    value,
     onChange,
+    languageId,
   }: {
-    editorValue: string;
+    value: string;
     onChange: (value: string) => void;
+    languageId: string;
   }) => (
     <textarea
       aria-label="Vega spec"
-      value={editorValue}
+      data-language={languageId}
+      value={value}
       onChange={(event) => onChange(event.target.value)}
     />
   ),
@@ -34,16 +53,26 @@ describe('VegaEditorFlyout', () => {
     const onRevert = jest.fn();
     const onPreview = jest.fn();
     const onSave = jest.fn();
+    const menuController = createVegaEditorMenu();
     const { unmount } = render(
-      <VegaEditorFlyout
-        ariaLabelledBy="vega-flyout-title"
-        closeFlyout={closeFlyout}
-        initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
-        isNewPanel={isNewPanel}
-        onPreview={onPreview}
-        onRevert={onRevert}
-        onSave={onSave}
-      />
+      <I18nProvider>
+        <EuiFlyout
+          aria-labelledby="vega-flyout-title"
+          onClose={closeFlyout}
+          flyoutMenuProps={menuController.flyoutMenuProps}
+        >
+          <VegaEditorFlyout
+            menuController={menuController}
+            ariaLabelledBy="vega-flyout-title"
+            closeFlyout={closeFlyout}
+            initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
+            isNewPanel={isNewPanel}
+            onPreview={onPreview}
+            onRevert={onRevert}
+            onSave={onSave}
+          />
+        </EuiFlyout>
+      </I18nProvider>
     );
     return { closeFlyout, onRevert, onPreview, onSave, unmount };
   };
@@ -136,5 +165,105 @@ describe('VegaEditorFlyout', () => {
     expect(onSave).not.toHaveBeenCalled();
     // Cancel only closes; the revert is driven by unmount, not the button.
     expect(onRevert).not.toHaveBeenCalled();
+  });
+
+  it('places gear then help in the flyout menu and opens only one popover', async () => {
+    renderFlyout();
+    const user = userEvent.setup();
+    const options = screen.getByRole('button', { name: 'Vega editor options' });
+    const help = screen.getByRole('button', { name: 'Vega help' });
+    expect(screen.getAllByRole('button').indexOf(options)).toBeLessThan(
+      screen.getAllByRole('button').indexOf(help)
+    );
+    expect(within(screen.getByTestId('vega-editor')).queryByRole('button')).not.toBeInTheDocument();
+    await user.click(options);
+    expect(screen.getByText('Reformat as HJSON')).toBeVisible();
+    await user.click(help);
+    expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument();
+    expect(await screen.findByRole('menuitem', { name: /Kibana Vega help/ })).toHaveAttribute(
+      'href',
+      'https://elastic.co/vega-help'
+    );
+    expect(screen.getByRole('menuitem', { name: /Vega-Lite documentation/ })).toHaveAttribute(
+      'href',
+      'https://vega.github.io/vega-lite/docs/'
+    );
+    expect(screen.getByRole('menuitem', { name: /Vega documentation/ })).toHaveAttribute(
+      'href',
+      'https://vega.github.io/vega/docs/'
+    );
+  });
+
+  it('opens with the keyboard and restores focus after Escape', async () => {
+    const { closeFlyout } = renderFlyout();
+    const user = userEvent.setup();
+    const options = screen.getByRole('button', { name: 'Vega editor options' });
+    act(() => options.focus());
+    await user.keyboard('{Enter}');
+    expect(screen.getByText('Reformat as HJSON')).toBeVisible();
+    await waitFor(() =>
+      expect(screen.getByRole('dialog', { name: 'Vega editor options' })).toContainElement(
+        document.activeElement as HTMLElement
+      )
+    );
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(options).toHaveFocus());
+    await waitFor(() => expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument());
+    expect(closeFlyout).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Reformat as HJSON', 'hjson'],
+    ['Reformat as JSON, delete comments', 'json'],
+  ])('formats the latest text with %s without previewing or saving', async (label, language) => {
+    const { onPreview, onSave } = renderFlyout();
+    const user = userEvent.setup();
+    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
+    await user.clear(editor);
+    await user.paste('{\n// comment\n"mark": "bar"\n}');
+    await user.click(screen.getByRole('button', { name: 'Vega editor options' }));
+    await user.click(screen.getByText(label));
+    const value = (editor as HTMLTextAreaElement).value;
+    expect(hjson.parse(value)).toEqual({ mark: 'bar' });
+    expect(editor).toHaveAttribute('data-language', language);
+    if (language === 'json') {
+      expect(JSON.parse(value)).toEqual({ mark: 'bar' });
+      expect(value).not.toContain('// comment');
+    } else {
+      expect(value).toContain('// comment');
+    }
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('reports invalid specs without changing text or language', async () => {
+    const addError = jest.fn();
+    jest.mocked(getNotifications).mockReturnValue({
+      ...getNotifications(),
+      toasts: { ...getNotifications().toasts, addError },
+    });
+    const { onPreview, onSave } = renderFlyout();
+    const user = userEvent.setup();
+    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
+    await user.clear(editor);
+    await user.paste('{ invalid');
+    await user.click(screen.getByRole('button', { name: 'Vega editor options' }));
+    await user.click(screen.getByText('Reformat as JSON, delete comments'));
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), { title: 'Error formatting spec' });
+    expect(editor).toHaveValue('{ invalid');
+    expect(editor).toHaveAttribute('data-language', 'hjson');
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('keeps overlay controls in the legacy editor by default', () => {
+    render(
+      <I18nProvider>
+        <VegaSpecEditor editorValue="{}" onChange={jest.fn()} />
+      </I18nProvider>
+    );
+    const editor = within(screen.getByTestId('vega-editor'));
+    expect(editor.getByRole('button', { name: 'Vega editor options' })).toBeVisible();
+    expect(editor.getByRole('button', { name: 'Vega help' })).toBeVisible();
   });
 });

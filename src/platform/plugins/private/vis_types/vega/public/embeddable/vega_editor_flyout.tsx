@@ -12,6 +12,8 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
+import type { VegaEditorMenuController } from './vega_editor_menu';
+import { VegaEditorMenu } from './vega_editor_menu';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 import type { VegaByValueState } from '../../server';
 
@@ -41,11 +43,13 @@ export const VegaEditorFlyout = ({
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
+  menuController,
   isNewPanel = false,
   onPreview,
   onRevert,
   onSave,
 }: {
+  menuController: VegaEditorMenuController;
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
@@ -95,6 +99,7 @@ export const VegaEditorFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyCss}>
         <VegaSpecEditor
+          renderControls={(actions) => <VegaEditorMenu controller={menuController} {...actions} />}
           editorValue={spec}
           initialFormat={initialSpec.format}
           onChange={setSpec}

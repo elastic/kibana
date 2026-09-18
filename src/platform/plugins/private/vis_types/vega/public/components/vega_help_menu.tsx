@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getDocLinks } from '../services';
 
-function VegaHelpMenu() {
+export function VegaHelpMenu() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
 
@@ -43,6 +43,28 @@ function VegaHelpMenu() {
     </EuiToolTip>
   );
 
+  return (
+    <EuiPopover
+      aria-label={i18n.translate('visTypeVega.editor.vegaHelpPopoverAriaLabel', {
+        defaultMessage: 'Vega help',
+      })}
+      id="helpMenu"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <VegaHelpMenuContent closePopover={closePopover} />
+    </EuiPopover>
+  );
+}
+
+export const VegaHelpMenuContent = ({
+  closePopover,
+}: {
+  closePopover: () => void;
+}): React.ReactElement => {
   const items = [
     <EuiContextMenuItem
       key="vegaHelp"
@@ -79,21 +101,5 @@ function VegaHelpMenu() {
     </EuiContextMenuItem>,
   ];
 
-  return (
-    <EuiPopover
-      aria-label={i18n.translate('visTypeVega.editor.vegaHelpPopoverAriaLabel', {
-        defaultMessage: 'Vega help',
-      })}
-      id="helpMenu"
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
-  );
-}
-
-export { VegaHelpMenu };
+  return <EuiContextMenuPanel items={items} />;
+};

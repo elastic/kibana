@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-interface VegaActionsMenuProps {
+export interface VegaActionsMenuProps {
   formatHJson(): void;
   formatJson(): void;
 }
@@ -56,21 +56,6 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
     </EuiToolTip>
   );
 
-  const items = [
-    <EuiContextMenuItem key="hjson" onClick={onHJsonCLick}>
-      <FormattedMessage
-        id="visTypeVega.editor.reformatAsHJSONButtonLabel"
-        defaultMessage="Reformat as HJSON"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="json" onClick={onJsonCLick}>
-      <FormattedMessage
-        id="visTypeVega.editor.reformatAsJSONButtonLabel"
-        defaultMessage="Reformat as JSON, delete comments"
-      />
-    </EuiContextMenuItem>,
-  ];
-
   return (
     <EuiPopover
       aria-label={i18n.translate('visTypeVega.editor.vegaEditorOptionsPopoverAriaLabel', {
@@ -83,9 +68,31 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} />
+      <VegaActionsMenuContent formatHJson={onHJsonCLick} formatJson={onJsonCLick} />
     </EuiPopover>
   );
 }
 
 export { VegaActionsMenu };
+
+export const VegaActionsMenuContent = ({
+  formatHJson,
+  formatJson,
+}: VegaActionsMenuProps): React.ReactElement => {
+  const items = [
+    <EuiContextMenuItem key="hjson" onClick={formatHJson}>
+      <FormattedMessage
+        id="visTypeVega.editor.reformatAsHJSONButtonLabel"
+        defaultMessage="Reformat as HJSON"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="json" onClick={formatJson}>
+      <FormattedMessage
+        id="visTypeVega.editor.reformatAsJSONButtonLabel"
+        defaultMessage="Reformat as JSON, delete comments"
+      />
+    </EuiContextMenuItem>,
+  ];
+
+  return <EuiContextMenuPanel items={items} />;
+};
