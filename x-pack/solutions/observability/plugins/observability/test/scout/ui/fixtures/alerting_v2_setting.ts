@@ -50,6 +50,45 @@ export const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promi
 };
 
 /**
+ * Unsets the space-scoped classic-table toggle on every Kibana space.
+ * Sequential spaceTest workers write this on `test-space-N`; a later config
+ * reuses those spaces on a shared Scout server.
+ */
+export const unsetAlertingV2ShowClassicAlertsTableSetting = async (
+  kbnClient: KbnClient
+): Promise<void> => {
+  const spaceIds = await listSpaceIds(kbnClient);
+
+  await Promise.all(
+    spaceIds.map((spaceId) =>
+      kbnClient.uiSettings.unset(ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID, {
+        space: spaceId === 'default' ? undefined : spaceId,
+      })
+    )
+  );
+};
+
+/**
+ * Restore both nav settings to their defaults and wait for the uiSettings
+ * cache so later suites on a shared Scout server observe the reset.
+ */
+export const resetAlertingV2NavSettings = async (kbnClient: KbnClient): Promise<void> => {
+  await unsetAlertingV2EnabledSetting(kbnClient);
+  await unsetAlertingV2ShowClassicAlertsTableSetting(kbnClient);
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
+};
+
+const listSpaceIds = async (kbnClient: KbnClient): Promise<string[]> => {
+  try {
+    const spaces = (await kbnClient.spaces.list()) as Array<{ id?: string }> | undefined;
+    const ids = (spaces ?? []).map((space) => space.id).filter((id): id is string => Boolean(id));
+    return ids.length > 0 ? ids : ['default'];
+  } catch {
+    return ['default'];
+  }
+};
+
+/**
  * Sets the global v2 flag and the space-scoped classic-page toggle, then waits
  * once so both writes are visible on every Kibana node before navigation.
  */

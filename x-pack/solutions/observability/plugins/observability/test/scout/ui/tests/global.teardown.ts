@@ -6,13 +6,13 @@
  */
 
 import { globalTeardownHook, tags } from '@kbn/scout-oblt';
-import { unsetAlertingV2EnabledSetting } from '../fixtures/alerting_v2_setting';
+import { resetAlertingV2NavSettings } from '../fixtures/alerting_v2_setting';
 
 globalTeardownHook(
-  'Reset alerting:v2:enabled',
+  'Reset alerting v2 nav settings',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ kbnClient, log }) => {
-    log.debug('[teardown] unsetting alerting:v2:enabled');
-    await unsetAlertingV2EnabledSetting(kbnClient);
+    log.debug('[teardown] resetting alerting v2 nav settings');
+    await resetAlertingV2NavSettings(kbnClient);
   }
 );

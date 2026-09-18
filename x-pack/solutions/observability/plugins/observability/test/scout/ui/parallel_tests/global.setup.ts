@@ -7,11 +7,20 @@
 
 import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
-
-const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+import { resetAlertingV2NavSettings } from '../fixtures/alerting_v2_setting';
+import { GENERATED_METRICS } from '../fixtures/constants';
 import { generateLogsData, generateMetricsData, generateRulesData } from '../fixtures/generators';
 
-import { GENERATED_METRICS } from '../fixtures/constants';
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+
+globalSetupHook(
+  'Reset alerting v2 nav settings',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ kbnClient, log }) => {
+    log.debug('[setup] resetting alerting v2 nav settings');
+    await resetAlertingV2NavSettings(kbnClient);
+  }
+);
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
