@@ -7,6 +7,7 @@
 
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/__mocks__/services.mock';
 import type { Services } from '../common/services';
@@ -73,5 +74,20 @@ describe('createNavigationTree', () => {
 
     expect(agentBuilderIndex).toBe(0);
     expect(contextEngineIndex).toBe(1);
+  });
+
+  it('includes Stack Rules in Stack Management > Alerts and Insights', () => {
+    const { footer } = createNavigationTree(
+      createServices(),
+      AIChatExperience.Classic
+    ) as NavigationTreeDefinition;
+    const stackManagement = footer?.find((item) => item.id === STACK_MANAGEMENT_NAV_ID);
+    const alertsSection = stackManagement?.children?.find((item) =>
+      item.children?.some((child) => child.link === 'management:triggersActions')
+    );
+
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ id: 'stackRules', link: 'management:triggersActions' })
+    );
   });
 });

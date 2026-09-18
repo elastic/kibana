@@ -35,13 +35,13 @@ const getAlertsAndInsightsLinks = async (): Promise<Array<string | undefined>> =
 };
 
 describe('Observability solution navigation tree', () => {
-  it('does not include Stack Alerts in Stack Management > Alerts and Insights', async () => {
+  it('does not include Stack Alerts or Stack Rules in Stack Management > Alerts and Insights', async () => {
     const alertsLinks = await getAlertsAndInsightsLinks();
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).not.toContain('management:triggersActions');
     expect(alertsLinks).toEqual(
       expect.arrayContaining([
-        'management:triggersActions',
         'management:triggersActionsConnectors',
         'management:maintenanceWindows',
       ])

@@ -582,9 +582,6 @@ function createNavTree({
             }),
             children: [
               {
-                link: 'management:triggersActions',
-              },
-              {
                 link: 'management:triggersActionsConnectors',
               },
               {

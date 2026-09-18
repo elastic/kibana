@@ -253,7 +253,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('does not include Stack Alerts in Admin and Settings > Alerts and insights', () => {
+  it('does not include Stack Alerts or Stack Rules in Admin and Settings > Alerts and insights', () => {
     const adminSettingsNode = getAdminSettingsNode({ core });
     const alertsSection = adminSettingsNode.children?.find(
       (item) => item.id === 'alerts_and_insights'
@@ -261,9 +261,9 @@ describe('Navigation Tree', () => {
     const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).not.toContain('management:triggersActions');
     expect(alertsLinks).toEqual(
       expect.arrayContaining([
-        'management:triggersActions',
         'management:triggersActionsConnectors',
         'management:maintenanceWindows',
       ])
