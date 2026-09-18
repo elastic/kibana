@@ -33,12 +33,6 @@ export const useConversation = () => {
   const cached = queryClient.getQueryData<Conversation>(queryKey);
   const isThisConversationStreaming = useIsCurrentConversationStreaming();
 
-  // A conversation is persisted once it has been fetched, or when nothing is streaming into it.
-  // The one unknown is a new conversation before its first SSE event: the app navigates to its
-  // URL before the request reaches the server, and a GET would 404. The stream's
-  // `execution_started` fetch puts it in the cache, after which it stays persisted.
-  const isPersisted = Boolean(cached) || !isThisConversationStreaming;
-
   // @todo: HITL guard (#291069), unchanged.
   const isAwaitingPrompt =
     cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
@@ -52,7 +46,7 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    enabled: Boolean(conversationId) && isPersisted && !isAwaitingPrompt,
+    enabled: Boolean(conversationId) && !isAwaitingPrompt,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -147,13 +141,11 @@ export const useConversationTitle = () => {
 export const useConversationReadOnly = () => {
   const conversationId = useConversationId();
   const { conversation, isFetching } = useConversation();
-  const isStreaming = useIsCurrentConversationStreaming();
 
   return {
     isReadOnly: conversation?.read_only ?? false,
-    // Not `isLoading`: v4 reports it for disabled queries too. A conversation this client is
-    // streaming into is not read-only, so its first fetch must not hide the input.
-    isLoading: Boolean(conversationId) && !conversation && isFetching && !isStreaming,
+    // Not `isLoading`: v4 reports it for disabled queries too.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
   };
 };
 
@@ -171,11 +163,6 @@ export const useHasActiveConversation = () => {
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
-};
-
-export const useIsUnpersistedConversation = (conversation?: Conversation) => {
-  const isConversationStreaming = useIsCurrentConversationStreaming();
-  return isConversationStreaming && !conversation;
 };
 
 export const useIsAwaitingPrompt = () => {

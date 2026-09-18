@@ -61,8 +61,8 @@ export const createConversationActions = ({
     );
   };
 
-  // `fetchQuery` rather than `invalidateQueries`: the byId observer is disabled for a new
-  // conversation until it is in the cache, and invalidating a disabled query does not fetch.
+  // `fetchQuery` rather than `invalidateQueries`: it fetches whether or not an observer is mounted
+  // and resolves with the response, which the completion release needs.
   const fetchConversation = () => {
     if (!conversationId) {
       return Promise.reject(new Error('Invalid conversation id'));
@@ -82,9 +82,6 @@ export const createConversationActions = ({
     },
 
     onExecutionStarted: () => {
-      if (!queryClient.getQueryData<Conversation>(queryKey)) {
-        fetchConversation().catch(() => {});
-      }
       refreshConversationList();
     },
 

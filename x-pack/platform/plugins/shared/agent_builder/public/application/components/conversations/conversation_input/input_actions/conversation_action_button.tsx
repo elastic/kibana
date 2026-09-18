@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { distinctUntilChanged, map, of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import React from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
-import { useConversationId } from '../../../../context/conversation/use_conversation_id';
-import { useConversationStreamService } from '../../../../context/streaming/streaming_context';
 
 interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
+  isSubmitting?: boolean;
   resetToPendingMessage: () => void;
 }
 
@@ -35,24 +32,11 @@ const labels = {
 export const ConversationActionButton: React.FC<ConversationActionButtonProps> = ({
   onSubmit,
   isSubmitDisabled,
+  isSubmitting = false,
   resetToPendingMessage,
 }) => {
   const { canCancel, cancel } = useConversationStream();
   const { euiTheme } = useEuiTheme();
-  const conversationId = useConversationId();
-  const conversationStreamService = useConversationStreamService();
-  // Stop button is enabled once the server has persisted the user_message_event.
-  const hasStarted$ = useMemo(
-    () =>
-      conversationId
-        ? conversationStreamService.getActiveStream$(conversationId).pipe(
-            map((draft) => Boolean(draft?.executionId)),
-            distinctUntilChanged()
-          )
-        : of(false),
-    [conversationStreamService, conversationId]
-  );
-  const hasStarted = useObservable(hasStarted$, false);
 
   const cancelButtonStyles = css`
     background-color: ${euiTheme.colors.backgroundLightText};
@@ -67,7 +51,6 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
         size="s"
         color="text"
         css={cancelButtonStyles}
-        isDisabled={!hasStarted}
         onClick={() => {
           cancel();
           resetToPendingMessage();
@@ -88,6 +71,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
         display="fill"
         size="s"
         disabled={isSubmitDisabled}
+        isLoading={isSubmitting}
         onClick={onSubmit}
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.pageContent,

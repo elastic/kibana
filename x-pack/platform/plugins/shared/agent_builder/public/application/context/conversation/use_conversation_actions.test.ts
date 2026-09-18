@@ -62,23 +62,14 @@ const awaitingPromptRound = () => ({
 });
 
 describe('createConversationActions execution lifecycle', () => {
-  it('onExecutionStarted fetches an uncached conversation and refreshes the list', () => {
+  it('onExecutionStarted refreshes the list only', () => {
     const { queryClient, actions, get } = buildActions();
     const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
 
     actions.onExecutionStarted();
 
-    expect(get).toHaveBeenCalledWith({ conversationId });
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.conversations.list });
-  });
-
-  it('onExecutionStarted does not fetch a conversation that is already cached', () => {
-    const { queryClient, actions, get } = buildActions();
-    queryClient.setQueryData<Conversation>(queryKey, cachedConversation);
-
-    actions.onExecutionStarted();
-
     expect(get).not.toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.conversations.list });
   });
 
   it('onExecutionTerminated refreshes the list only', () => {

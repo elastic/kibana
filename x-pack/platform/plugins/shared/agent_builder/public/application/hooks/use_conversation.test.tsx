@@ -20,11 +20,7 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { ConversationStreamService } from '../../services/events/conversation_stream_service';
 import { queryKeys } from '../query_keys';
-import {
-  useConversation,
-  useConversationReadOnly,
-  useIsUnpersistedConversation,
-} from './use_conversation';
+import { useConversation, useConversationReadOnly } from './use_conversation';
 
 jest.mock('../context/conversation/use_conversation_id', () => ({
   useConversationId: jest.fn(),
@@ -57,63 +53,6 @@ const stubConversationStreamService = new ConversationStreamService({
 const mockUseConversationId = jest.mocked(useConversationId);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseStreamRecord = jest.mocked(useStreamRecord);
-
-const createConversation = (roundIds: string[]) =>
-  ({
-    id: 'conversation-1',
-    rounds: roundIds.map((id) => ({ id })),
-  } as Conversation);
-
-const renderUseIsUnpersistedConversation = ({
-  conversation,
-  isStreaming = false,
-}: {
-  conversation?: Conversation;
-  isStreaming?: boolean;
-} = {}) => {
-  mockUseConversationId.mockReturnValue('conversation-1');
-  mockUseStreamingContext.mockReturnValue({
-    activeStreams: isStreaming ? new Map([['conversation-1', { type: 'send' }]]) : new Map(),
-    byConversationId: {},
-    conversationStreamService: stubConversationStreamService,
-    mutateSendMessage: jest.fn(),
-    mutateResumeRound: jest.fn(),
-    cancelStream: jest.fn(),
-    cancelAllStreams: jest.fn(),
-  });
-
-  return renderHook(() => useIsUnpersistedConversation(conversation));
-};
-
-describe('useIsUnpersistedConversation', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns true while a new conversation streams before it has been fetched', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: undefined,
-      isStreaming: true,
-    });
-
-    expect(result.current).toBe(true);
-  });
-
-  it('returns false during later streams on persisted conversations', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: createConversation(['round-1']),
-      isStreaming: true,
-    });
-
-    expect(result.current).toBe(false);
-  });
-
-  it('returns false when nothing is streaming', () => {
-    const { result } = renderUseIsUnpersistedConversation({ conversation: undefined });
-
-    expect(result.current).toBe(false);
-  });
-});
 
 const conversationId = 'conversation-1';
 
@@ -274,15 +213,14 @@ describe('useConversation polling', () => {
     });
   };
 
-  it('does not fetch a streaming conversation that has never been fetched', async () => {
+  it('fetches a streaming conversation like any other', async () => {
     setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
     const { queryClient, Wrapper } = createWrapper();
 
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
-    await advance(10_000);
-
-    expect(mockGet).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
 
     queryClient.clear();
   });
@@ -383,22 +321,6 @@ describe('useConversationReadOnly', () => {
     const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(true));
-    queryClient.clear();
-  });
-
-  it('does not report loading while this client streams into an unfetched conversation', async () => {
-    setStreaming(true);
-    mockGet.mockReturnValue(new Promise(() => {}));
-    const { queryClient, Wrapper } = createWrapper();
-    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
-
-    // The execution_started fetch runs through fetchQuery while the observer is disabled.
-    queryClient
-      .fetchQuery({ queryKey: queryKeys.conversations.byId(conversationId), queryFn: mockGet })
-      .catch(() => {});
-
-    await waitFor(() => expect(queryClient.isFetching()).toBe(1));
-    expect(result.current.isLoading).toBe(false);
     queryClient.clear();
   });
 });
