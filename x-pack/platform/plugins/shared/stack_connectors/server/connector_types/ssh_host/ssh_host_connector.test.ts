@@ -34,6 +34,7 @@ const mockExecFileSuccess = (stdout = '', stderr = '') => {
 describe('SshHostConnector', () => {
   const createConnector = (
     overrides: {
+      id?: string;
       host?: string;
       username?: string;
       authType?: (typeof AUTH_TYPE)[keyof typeof AUTH_TYPE];
@@ -49,7 +50,7 @@ describe('SshHostConnector', () => {
         authType: overrides.authType ?? AUTH_TYPE.PrivateKey,
         skipHostKeyVerification: overrides.skipHostKeyVerification ?? false,
       },
-      connector: { id: '1', type: CONNECTOR_ID },
+      connector: { id: overrides.id ?? '1', type: CONNECTOR_ID },
       secrets: {
         username: overrides.username ?? 'alice',
         sshPrivateKey:
@@ -182,16 +183,46 @@ describe('SshHostConnector', () => {
       ).rejects.toThrow(/sshpass is not installed on the Kibana host/);
     });
 
-    it('uses a short hashed ControlPath', async () => {
+    it('scopes ControlPath to the connector and persists the master for 10s', async () => {
       await createConnector({
+        id: 'conn-a',
         username: 'a'.repeat(256),
         host: `${'b'.repeat(200)}.example.com:22`,
       }).exec({ script: 'true' });
+      const pathA = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
+        arg.startsWith('ControlPath=')
+      );
 
-      const args = mockedExecFile.mock.calls[0][1] as string[];
-      const controlPath = args.find((arg) => arg.startsWith('ControlPath='));
-      expect(controlPath).toMatch(/^ControlPath=\/tmp\/kbn_cm_[a-f0-9]{12}$/);
-      expect(controlPath!.length).toBeLessThan(40);
+      mockedExecFile.mockClear();
+      mockExecFileSuccess();
+      await createConnector({
+        id: 'conn-b',
+        username: 'a'.repeat(256),
+        host: `${'b'.repeat(200)}.example.com:22`,
+      }).exec({ script: 'true' });
+      const pathB = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
+        arg.startsWith('ControlPath=')
+      );
+
+      mockedExecFile.mockClear();
+      mockExecFileSuccess();
+      await createConnector({
+        id: 'conn-a',
+        username: 'a'.repeat(256),
+        host: `${'b'.repeat(200)}.example.com:22`,
+      }).exec({ script: 'true' });
+      const pathAAgain = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
+        arg.startsWith('ControlPath=')
+      );
+      const persist = (mockedExecFile.mock.calls[0][1] as string[]).find((arg) =>
+        arg.startsWith('ControlPersist=')
+      );
+
+      expect(pathA).toMatch(/^ControlPath=\/tmp\/kbn_cm_[a-f0-9]{12}$/);
+      expect(pathA!.length).toBeLessThan(40);
+      expect(pathB).not.toBe(pathA);
+      expect(pathAAgain).toBe(pathA);
+      expect(persist).toBe('ControlPersist=10s');
     });
 
     it('writes the private key under mkdtemp', async () => {

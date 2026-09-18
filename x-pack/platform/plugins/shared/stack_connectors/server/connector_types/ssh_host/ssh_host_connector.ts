@@ -29,6 +29,7 @@ import {
 const MAX_BUFFER_BYTES = 100 * 1024 * 1024;
 const DEFAULT_SSH_PORT = 22;
 const DEFAULT_DOWNLOAD_MAX_BYTES = 10 * 1024 * 1024;
+const CONTROL_PERSIST = '10s';
 
 interface CommandTarget {
   bin: string;
@@ -323,7 +324,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       '-o',
       `ControlPath=${this.getControlPath()}`,
       '-o',
-      'ControlPersist=10s',
+      `ControlPersist=${CONTROL_PERSIST}`,
       portFlag,
       String(port),
     ];
@@ -351,7 +352,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
     const id = createHash('sha256')
-      .update(`${username}\0${hostname}\0${port}`)
+      .update(`${this.connector.id}\0${username}\0${hostname}\0${port}`)
       .digest('hex')
       .slice(0, 12);
     // OpenSSH ControlPath is capped around 104 chars; keep this under /tmp.
