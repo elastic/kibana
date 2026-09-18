@@ -285,6 +285,16 @@ describe('sliceTimelineRounds with failed executions', () => {
     expect(roundIds(sliceTimelineRounds(timeline, 0, 2))).toEqual(['f0', 'a', 'f1', 'b', 'f2']);
   });
 
+  it('when the cut removes every round, keeps only failures after the last removed round ended', () => {
+    // a summary covering all three rounds: f0, f1 and f2 are interleaved with removed rounds and
+    // must not be resurrected; a failure after round c ended survives
+    const late = failedExecutionEvents('f3', '2026-01-01T00:05:00.000Z');
+    const withLate = [...timeline, ...late];
+
+    expect(roundIds(sliceTimelineRounds(withLate, 3))).toEqual(['f3']);
+    expect(roundIds(sliceTimelineRounds(timeline, 3))).toEqual([]);
+  });
+
   it('preserves stored order (Round B → Failed F2 → Round C)', () => {
     const sliced = sliceTimelineRounds(timeline, 1, 3);
     expect(sliced.map((event) => event.id)).toEqual(

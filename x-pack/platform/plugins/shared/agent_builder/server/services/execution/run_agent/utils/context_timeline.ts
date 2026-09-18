@@ -233,14 +233,26 @@ export const sliceTimelineRounds = <E extends AnyTimelineEvent>(
 ): E[] => {
   const rounds = groupTimelineRounds(timeline);
   const kept = rounds.slice(start, end);
-  const lowerBound = start > 0 ? rounds[start]?.userMessage.created_at : undefined;
   const upperBound = end !== undefined ? rounds[end]?.userMessage.created_at : undefined;
+  // Failed entries survive when they are not older than the cut. The cut is the first kept
+  // round's user message; when the cut removes every round (a summary covering them all), it is
+  // the end of the last removed round, so nothing interleaved with removed rounds is resurrected.
+  const afterLower = (at: string): boolean => {
+    if (start <= 0) {
+      return true;
+    }
+    const firstKept = rounds[start];
+    if (firstKept) {
+      return at >= firstKept.userMessage.created_at;
+    }
+    const lastCut = rounds[Math.min(start, rounds.length) - 1];
+    return lastCut ? at > lastCut.terminated.created_at : true;
+  };
   const keptIds = new Set<string>(kept.flatMap((round) => round.events.map((event) => event.id)));
   for (const failed of groupTimelineFailedExecutions(timeline)) {
     const at = failed.userMessage.created_at;
-    const afterLower = lowerBound === undefined || at >= lowerBound;
     const beforeUpper = upperBound === undefined || at < upperBound;
-    if (afterLower && beforeUpper) {
+    if (afterLower(at) && beforeUpper) {
       failed.events.forEach((event) => keptIds.add(event.id));
     }
   }
