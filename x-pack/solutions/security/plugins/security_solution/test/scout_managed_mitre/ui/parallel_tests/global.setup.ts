@@ -16,16 +16,9 @@ import {
 } from '../fixtures/mitre_fixtures';
 import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_client';
 
-/**
- * Seeds synthetic MITRE ATT&CK entities (framework_version 99.0) into
- * `.kibana_security_solution` before any test worker starts.
- *
- * Version 99.0 sorts above any real MITRE release, so the managed API
- * resolves only the seeded set when the tests run. Seeding is done once
- * globally rather than per-worker because the mitre-attack-entity saved-object
- * type is space-agnostic (`namespaceType: 'agnostic'`) and the documents are
- * visible to all spaces and all workers.
- */
+// Seeds synthetic MITRE entities (version 99.0) into `.kibana_security_solution` once before
+// all workers start. Version 99.0 sorts above any real release so the managed API resolves
+// only the seeded set. Seeding is global because the saved-object type is space-agnostic.
 globalSetupHook(
   `Seed synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
   async ({ esClient, kbnClient, config, log }) => {
