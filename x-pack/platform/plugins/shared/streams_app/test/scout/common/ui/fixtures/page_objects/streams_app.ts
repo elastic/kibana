@@ -56,6 +56,7 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
   // Canvas
   public readonly canvasTab;
+  public readonly canvasViewport;
   public readonly canvasZoomControls;
   public readonly canvasZoomIn;
   public readonly canvasZoomOut;
@@ -123,6 +124,7 @@ export class StreamsApp {
     );
     // Canvas locators
     this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasViewport = this.canvasTab.locator('.react-flow__viewport');
     this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
     this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
     this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
@@ -220,23 +222,22 @@ export class StreamsApp {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
-  async getCanvasZoom(): Promise<number> {
-    const transform = await this.page
-      .locator('.react-flow__viewport')
-      .evaluate((element) => window.getComputedStyle(element).transform);
-
-    if (transform === 'none') {
-      return 1;
-    }
-
-    const [scaleX] = transform
-      .replace(/^matrix\(|\)$/g, '')
-      .split(',')
-      .map(Number);
-    return scaleX;
+  /**
+   * React Flow's viewport transform, which encodes both pan and zoom.
+   */
+  async getCanvasViewportTransform(): Promise<string> {
+    return this.canvasViewport.evaluate((element) => window.getComputedStyle(element).transform);
   }
 
-  /** Zooms in once and resolves after the zoom animation has settled. */
+  /** Current canvas zoom, read the way React Flow itself reads it (`@xyflow/system`). */
+  async getCanvasZoom(): Promise<number> {
+    return this.canvasViewport.evaluate((element) => {
+      const { transform } = window.getComputedStyle(element);
+      return transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).m22;
+    });
+  }
+
+  /** Zooms in once, resolving when the viewport reflects the higher zoom. */
   async zoomInCanvas() {
     const previousZoom = await this.getCanvasZoom();
     await this.canvasZoomIn.click();
