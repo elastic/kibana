@@ -21,11 +21,13 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
 const getActionPoliciesListMenu = ({
   onCreatePolicy,
   onCreateWithAgent,
+  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
   onCreatePolicy: () => void;
   onCreateWithAgent: () => void;
+  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
@@ -38,27 +40,29 @@ const getActionPoliciesListMenu = ({
     run: onCreatePolicy,
     testId: 'createActionPolicyButton',
     popoverTestId: 'createActionPolicyPopoverPanel',
-    splitButtonProps: {
-      iconType: 'chevronSingleDown',
-      secondaryButtonAriaLabel: i18n.translate(
-        'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
-        { defaultMessage: 'More create options' }
-      ),
-      items: [
-        {
-          id: 'createWithAgent',
-          label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
-            defaultMessage: 'Create with agent',
-          }),
-          iconType: 'sparkles' as const,
-          order: 0,
-          run: onCreateWithAgent,
-          testId: 'createActionPolicyWithAgentButton',
-          disableButton: createWithAgentDisabled,
-          tooltipContent: createWithAgentTooltipText,
-        },
-      ],
-    },
+    splitButtonProps: showCreateWithAgent
+      ? {
+          iconType: 'chevronSingleDown',
+          secondaryButtonAriaLabel: i18n.translate(
+            'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
+            { defaultMessage: 'More create options' }
+          ),
+          items: [
+            {
+              id: 'createWithAgent',
+              label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
+                defaultMessage: 'Create with agent',
+              }),
+              iconType: 'sparkles' as const,
+              order: 0,
+              run: onCreateWithAgent,
+              testId: 'createActionPolicyWithAgentButton',
+              disableButton: createWithAgentDisabled,
+              tooltipContent: createWithAgentTooltipText,
+            },
+          ],
+        }
+      : undefined,
   },
 });
 
@@ -66,6 +70,7 @@ export interface ActionPoliciesListHeaderProps {
   canWrite: boolean;
   onCreatePolicy: () => void;
   onCreateWithAgent: () => void;
+  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }
@@ -79,6 +84,7 @@ export const ActionPoliciesListHeader = ({
   canWrite,
   onCreatePolicy,
   onCreateWithAgent,
+  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: ActionPoliciesListHeaderProps) => {
@@ -91,6 +97,7 @@ export const ActionPoliciesListHeader = ({
         ? getActionPoliciesListMenu({
             onCreatePolicy,
             onCreateWithAgent,
+            showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
           })
@@ -99,6 +106,7 @@ export const ActionPoliciesListHeader = ({
       showHeaderMenu,
       onCreatePolicy,
       onCreateWithAgent,
+      showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
     ]

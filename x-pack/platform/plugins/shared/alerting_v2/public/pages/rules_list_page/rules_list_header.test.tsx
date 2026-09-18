@@ -66,6 +66,7 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeade
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
         onBuildSequence={onBuildSequence}
+        showBuildSequence={true}
         {...props}
       />
     </ListPageTestProviders>
@@ -165,6 +166,7 @@ describe('RulesListHeader', () => {
             onCreateEsqlRule={onCreateEsqlRule}
             onCreateWithAgent={onCreateWithAgent}
             onBuildSequence={onBuildSequence}
+            showBuildSequence={true}
           />
         </TabsProvider>
       </ListPageTestProviders>

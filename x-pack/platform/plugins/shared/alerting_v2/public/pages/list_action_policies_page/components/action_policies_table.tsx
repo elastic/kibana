@@ -31,6 +31,7 @@ import {
   useAgentBuilderSkillsRequirements,
 } from '../../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
+import { useAlertingV2ExperimentalFeatures } from '../../../hooks/use_alerting_v2_experimental_features';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
@@ -91,6 +92,7 @@ export const ActionPoliciesTable = () => {
   );
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
 
   const navigateToCreate = useCallback(() => {
@@ -186,22 +188,27 @@ export const ActionPoliciesTable = () => {
         onClick: navigateToCreate,
         'data-test-subj': 'createActionPolicyCard',
       },
-      {
-        id: 'create-with-agent',
-        iconType: 'productAgent',
-        title: CREATE_WITH_AGENT_OPTION_TITLE,
-        description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
-        onClick: navigateToAgentBuilder,
-        disabled: !areAgentBuilderSkillsAvailable,
-        tooltipText: createWithAgentTooltipText,
-        'data-test-subj': 'createActionPolicyWithAgentCard',
-      },
+      ...(showExperimentalFeatures
+        ? [
+            {
+              id: 'create-with-agent',
+              iconType: 'productAgent' as const,
+              title: CREATE_WITH_AGENT_OPTION_TITLE,
+              description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
+              onClick: navigateToAgentBuilder,
+              disabled: !areAgentBuilderSkillsAvailable,
+              tooltipText: createWithAgentTooltipText,
+              'data-test-subj': 'createActionPolicyWithAgentCard',
+            },
+          ]
+        : []),
     ],
     [
       navigateToCreate,
       navigateToAgentBuilder,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,
+      showExperimentalFeatures,
     ]
   );
 
@@ -272,6 +279,7 @@ export const ActionPoliciesTable = () => {
           canWrite={canWrite}
           onCreatePolicy={navigateToCreate}
           onCreateWithAgent={navigateToAgentBuilder}
+          showCreateWithAgent={showExperimentalFeatures}
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />

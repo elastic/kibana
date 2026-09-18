@@ -22,6 +22,7 @@ import {
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import {
   RuleCreateOptionsPanel,
   getCreateWithAgentTooltipText,
@@ -61,6 +62,7 @@ export const RulesListPage = () => {
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
   const { rulesLocators } = useAlertingLocators();
@@ -170,6 +172,7 @@ export const RulesListPage = () => {
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
           onBuildSequence={navigateToSequenceBuilder}
+          showBuildSequence={showExperimentalFeatures}
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />

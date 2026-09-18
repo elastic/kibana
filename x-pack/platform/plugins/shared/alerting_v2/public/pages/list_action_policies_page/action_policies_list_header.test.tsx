@@ -32,6 +32,7 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof ActionPolicies
         canWrite={true}
         onCreatePolicy={onCreatePolicy}
         onCreateWithAgent={onCreateWithAgent}
+        showCreateWithAgent={true}
         {...props}
       />
     </ListPageTestProviders>
