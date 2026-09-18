@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import {
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
@@ -17,7 +16,7 @@ import {
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MEMORY_WORKFLOW_IDS } from '../../lib/maintenance/managed_workflow_targets';
 import { createServerRoute } from '../../routes/create_server_route';
 import type {
@@ -26,13 +25,10 @@ import type {
   MemorySearchResult,
   MemoryVersionRecord,
 } from '../lib/memory';
-import { MemoryServiceImpl } from '../lib/memory';
+import { createMemoryService } from '../lib/memory';
 import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
 import { assertNotPaused } from '../../routes/utils/assert_not_paused';
-
-const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
-  new MemoryServiceImpl({ logger, esClient });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
@@ -42,7 +38,7 @@ const createEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -60,7 +56,11 @@ const createEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -83,7 +83,7 @@ const getEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -94,7 +94,11 @@ const getEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     return memory.get({ id: params.path.id });
   },
@@ -108,7 +112,7 @@ const getEntryByNameRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -119,7 +123,11 @@ const getEntryByNameRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
@@ -137,7 +145,7 @@ const updateEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -157,7 +165,11 @@ const updateEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -179,7 +191,7 @@ const deleteEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -196,7 +208,11 @@ const deleteEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -214,7 +230,7 @@ const searchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -237,7 +253,11 @@ const searchRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const results = await memory.search({
       query: params.body.query,
@@ -258,7 +278,7 @@ const getCategoryTreeRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -275,7 +295,11 @@ const getCategoryTreeRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     return memory.getCategoryTree();
   },
@@ -289,7 +313,7 @@ const getHistoryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -312,7 +336,11 @@ const getHistoryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const history = await memory.getHistory({
       entryId: params.path.id,
@@ -330,7 +358,7 @@ const getVersionRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -350,7 +378,11 @@ const getVersionRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     return memory.getVersion({
       entryId: params.path.id,
@@ -367,7 +399,7 @@ const recentChangesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -389,7 +421,11 @@ const recentChangesRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const changes = await memory.getRecentChanges({
       size: params.query?.size,
@@ -406,7 +442,7 @@ const createWorkflowTriggerRoute = (
   createServerRoute({
     endpoint,
     options: { access: 'internal', summary },
-    security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+    security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
     params: z.object({ body: z.object({}).passthrough().optional() }),
     handler: async ({
       request,
@@ -468,7 +504,7 @@ const consolidateMemoryRoute = createWorkflowTriggerRoute(
 const synthesizeMemoryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/_synthesize',
   options: { access: 'internal', summary: 'Trigger memory synthesis from significant events' },
-  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({ body: z.object({}).passthrough().optional() }),
   handler: async ({
     request,
@@ -508,7 +544,7 @@ const detectGapsRoute = createWorkflowTriggerRoute(
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/_workflows/enabled',
   options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
-  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.read] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   params: z.object({}),
   handler: async ({
     request,
@@ -544,7 +580,7 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
 const setMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/memory/_workflows/enabled',
   options: { access: 'internal', summary: 'Enable or disable all memory workflows' },
-  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({ body: z.object({ enabled: z.boolean() }) }),
   handler: async ({
     params,

@@ -38,3 +38,22 @@ export const renderScheduledWorkerYaml = (
     '__WORKER_SCHEDULE_INTERVAL__',
     values.scheduleInterval
   );
+
+/**
+ * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
+ * settings save re-renders YAML and the per-space Worker can pass them to the sweep.
+ */
+export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    analysisWindowDays: number;
+  };
+}
+
+export const renderRuleTuningWorkerYaml = (
+  yaml: string,
+  values: RuleTuningWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_ANALYSIS_WINDOW_DAYS__',
+    String(values.extras.analysisWindowDays)
+  );
