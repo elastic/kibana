@@ -128,21 +128,13 @@ export function createSavedObjectKibanaAsset(
     options?.installAsAdditionalSpace &&
     (asset.type === KibanaSavedObjectType.dashboard ||
       asset.type === KibanaSavedObjectType.alertingRuleTemplate);
-  // An asset may already carry an originId when it has been pre-processed by an earlier
-  // call to this function (e.g. replaceInMarkdown queues SavedObjectToBe values as
-  // ArchiveAsset). Preserve it so the origin chain is not lost on re-import.
-  const preExistingOriginId = (asset as SavedObjectToBe).originId;
 
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: rewriteId
       ? getSpaceScopedAssetId(asset.id, options?.spaceId ?? DEFAULT_SPACE_ID)
       : asset.id,
-    ...(rewriteId
-      ? { originId: asset.id }
-      : preExistingOriginId
-      ? { originId: preExistingOriginId }
-      : {}),
+    ...(rewriteId ? { originId: asset.id } : {}),
     attributes: asset.attributes,
     references: asset.references || [],
   };
@@ -696,23 +688,28 @@ export async function installKibanaSavedObjects({
 async function installKibanaSavedObjectsChunk({
   savedObjectsImporter,
   kibanaAssets,
+  preProcessedObjects,
   logger,
   refresh,
   options,
 }: {
-  kibanaAssets: ArchiveAsset[];
+  kibanaAssets?: ArchiveAsset[];
+  /** Pre-processed SavedObjectToBe values (e.g. from replaceInMarkdown) that bypass
+   * createSavedObjectKibanaAsset. Use this instead of kibanaAssets when the objects have
+   * already been reconstructed with the correct id/originId. */
+  preProcessedObjects?: SavedObjectToBe[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   refresh?: boolean | 'wait_for';
   options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }) {
-  if (!kibanaAssets.length) {
+  const toBeSavedObjects: SavedObjectToBe[] = preProcessedObjects
+    ? preProcessedObjects
+    : (kibanaAssets ?? []).map((asset) => createSavedObjectKibanaAsset(asset, options));
+
+  if (!toBeSavedObjects.length) {
     return [];
   }
-
-  const toBeSavedObjects = kibanaAssets.map((asset) =>
-    createSavedObjectKibanaAsset(asset, options)
-  );
 
   let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
@@ -1033,7 +1030,7 @@ async function replaceInMarkdown({
     return;
   }
 
-  let assetsToInstall = [] as ArchiveAsset[];
+  let assetsToInstall: SavedObjectToBe[] = [];
 
   async function flushAssetsToInstall() {
     if (assetsToInstall.length === 0) {
@@ -1043,7 +1040,7 @@ async function replaceInMarkdown({
     await installKibanaSavedObjectsChunk({
       logger,
       savedObjectsImporter,
-      kibanaAssets: assetsToInstall,
+      preProcessedObjects: assetsToInstall,
       refresh: false, // No need to wait for here as it's already been imported once
     });
 

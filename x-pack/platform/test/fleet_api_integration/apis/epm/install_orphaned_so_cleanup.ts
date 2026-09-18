@@ -212,7 +212,14 @@ export default function (providerContext: FtrProviderContext) {
 
         await installPackage().expect(200);
 
-        expect(await orphanExists('fleet-orphan-user-copy-1')).to.be(true);
+        // The object must still exist and remain unmanaged with its original attributes intact.
+        const doc = await es
+          .get({ index: '.kibana', id: 'tag:fleet-orphan-user-copy-1' })
+          .catch(() => null);
+        expect(doc).not.to.be(null);
+        expect((doc?._source as any)?.managed).to.be(false);
+        expect((doc?._source as any)?.tag?.name).to.equal('fleet-test-orphan-fleet-orphan-user-copy-1');
+
         await deleteOrphanedTag('fleet-orphan-user-copy-1');
       });
     });
@@ -369,7 +376,16 @@ export default function (providerContext: FtrProviderContext) {
 
         await installPackage(DASHBOARD_SPACE).expect(200);
 
-        expect(await dashboardOrphanExists('fleet-orphan-dash-user-copy-1')).to.be(true);
+        // The object must still exist and remain unmanaged with its original attributes intact.
+        const doc = await es
+          .get({ index: '.kibana_analytics', id: 'dashboard:fleet-orphan-dash-user-copy-1' })
+          .catch(() => null);
+        expect(doc).not.to.be(null);
+        expect((doc?._source as any)?.managed).to.be(false);
+        expect((doc?._source as any)?.dashboard?.title).to.equal(
+          'fleet-test-orphan-dashboard-fleet-orphan-dash-user-copy-1'
+        );
+
         await deleteOrphanedDashboard('fleet-orphan-dash-user-copy-1');
       });
     });
