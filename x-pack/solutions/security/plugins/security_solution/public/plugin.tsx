@@ -86,12 +86,16 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
+  registerAttackDiscoveryAttachment,
+  registerAttackDiscoveryVerdictAttachment,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerInvestigationTimelineAttachment,
+  registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -360,6 +364,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttackDiscoveryAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
+      registerAttackDiscoveryVerdictAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -416,6 +426,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getServices: () => this.getDiscoverFlyoutServices(coreSetup),
           getStore: () => this.getDiscoverFlyoutStore(coreSetup),
           spaces: plugins.spaces,
+        });
+      }
+      if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+        registerInvestigationTimelineAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+        registerInvestigationIocsAttachment({
+          attachments: plugins.agentBuilder.attachments,
         });
       }
     }
@@ -1010,6 +1028,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'cribl',
       view: 'package-policy-replace-define-step',
       Component: LazyCustomCriblExtension,
+      useWidePageLayout: true,
     });
   }
 
