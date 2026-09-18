@@ -40,7 +40,7 @@ export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCate
 
 export const matchedActionPolicySchema = z
   .object({
-    actionPolicy: actionPolicyResponseSchema.describe('The matched action policy.'),
+    action_policy: actionPolicyResponseSchema.describe('The matched action policy.'),
     category: matchedActionPolicyCategorySchema,
   })
   .describe('An action policy that matches a rule, along with the reason it matched.')

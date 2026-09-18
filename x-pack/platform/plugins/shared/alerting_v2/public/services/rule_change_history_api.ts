@@ -27,10 +27,13 @@ const buildRuleChangeHistoryPath = (id: string): string =>
   buildPath(ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH, { id });
 
 /**
- * Encodes the `id` and `eventId` path parameters safely for the detail route.
+ * Encodes the `id` and `event_id` path parameters safely for the detail route.
  */
 const buildRuleChangeHistoryEventPath = (id: string, eventId: string): string =>
-  buildPath(`${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`, { id, eventId });
+  buildPath(`${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{event_id}`, {
+    id,
+    event_id: eventId,
+  });
 
 export interface ListRuleChangesParams {
   /** The rule identifier. */
@@ -50,11 +53,8 @@ export interface GetRuleChangeEventParams {
   signal?: AbortSignal;
 }
 
-/**
- * HTTP client for the Alerting V2 rule change-history read API. Backs the
- * `@kbn/change-history-ui` adapter; response DTOs are structurally compatible
- * with the package's `ChangeHistoryListItem` / `ChangeHistoryDetail`.
- */
+/** HTTP client for the Alerting V2 rule change-history read API.
+ * Returns DTOs for the rule change-history UI adapter. */
 @injectable()
 export class RuleChangeHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}

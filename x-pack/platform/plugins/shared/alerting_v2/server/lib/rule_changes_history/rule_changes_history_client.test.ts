@@ -92,7 +92,7 @@ describe('RuleChangesHistoryClient', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0]).toMatchObject({
         id: 'event-2',
-        isCurrent: true,
+        is_current: true,
         changes: {
           count: 1,
           summary: { metadata: { name: 'A' } },
@@ -117,7 +117,7 @@ describe('RuleChangesHistoryClient', () => {
 
       const result = await client.listRuleChanges({ ruleId: 'rule-1', page: 2, perPage: 1 });
 
-      expect(result.items[0].isCurrent).toBeUndefined();
+      expect(result.items[0].is_current).toBeUndefined();
       expect(changeHistory.getHistory).toHaveBeenCalledWith('default', 'alerting_rule', 'rule-1', {
         from: 1,
         size: 2,
@@ -173,10 +173,10 @@ describe('RuleChangesHistoryClient', () => {
 
       expect(result).toMatchObject({
         id: 'event-2',
-        actor: { name: 'elastic', profileId: 'u_1' },
+        actor: { name: 'elastic', profile_id: 'u_1' },
         comment: 'renamed',
         reason: 'renamed',
-        isCurrent: true,
+        is_current: true,
         changes: {
           count: 1,
           summary: { metadata: { name: 'A' } },
@@ -243,7 +243,7 @@ describe('rule change history schemas', () => {
 
   it('parses detail path params', () => {
     expect(
-      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', eventId: 'event-1' })
-    ).toEqual({ id: 'rule-1', eventId: 'event-1' });
+      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', event_id: 'event-1' })
+    ).toEqual({ id: 'rule-1', event_id: 'event-1' });
   });
 });

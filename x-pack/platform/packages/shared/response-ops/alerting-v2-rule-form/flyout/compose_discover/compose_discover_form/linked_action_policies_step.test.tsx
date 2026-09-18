@@ -44,7 +44,7 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [
         {
-          actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
           category: 'catch-all',
         },
       ],
@@ -100,7 +100,7 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [
         {
-          actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
           category: 'catch-all',
         },
       ],
@@ -124,7 +124,7 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [
         {
-          actionPolicy: {
+          action_policy: {
             id: 'ap-2',
             name: 'Tag Policy',
             matcher: { tags: ['env:prod', 'team:sre'] },
@@ -151,7 +151,7 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [
         {
-          actionPolicy: {
+          action_policy: {
             id: 'ap-4',
             name: 'Combined Policy',
             matcher: { tags: ['env:prod'], expression: 'data.error_count > 0' },
@@ -179,7 +179,7 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [
         {
-          actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
           category: 'catch-all',
         },
       ],
