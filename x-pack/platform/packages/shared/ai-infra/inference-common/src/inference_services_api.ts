@@ -13,10 +13,13 @@ export enum FieldType {
   INTEGER = 'int',
   BOOLEAN = 'bool',
   MAP = 'map',
+  LIST = 'list',
 }
 
+export type ConfigValue = string | number | boolean | null | Record<string, string> | string[];
+
 export interface ConfigProperties {
-  default_value: string | number | boolean | null;
+  default_value: ConfigValue;
   description: string | null;
   label: string;
   required: boolean;

@@ -174,6 +174,7 @@ export {
 
 export {
   FieldType,
+  type ConfigValue,
   SERVICE_SETTINGS,
   TASK_SETTINGS,
   type ConfigProperties,

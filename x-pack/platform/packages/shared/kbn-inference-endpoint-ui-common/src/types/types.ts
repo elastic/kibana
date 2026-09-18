@@ -23,7 +23,7 @@ export interface ConfigEntryView extends ConfigEntry {
   value: ConfigValue;
 }
 
-export type { FieldsConfiguration, InferenceProvider } from '@kbn/inference-common';
+export type { InferenceProvider } from '@kbn/inference-common';
 export { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '@kbn/inference-common';
 
 interface AdaptiveAllocations {
