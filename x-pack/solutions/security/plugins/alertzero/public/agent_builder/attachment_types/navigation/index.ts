@@ -13,6 +13,8 @@ export {
 } from './constants';
 export { buildAlertDetailsPath, buildAlertDetailsUrl } from './build_alert_details_url';
 export { buildDiscoverEsqlUrl } from './build_discover_esql_url';
+export { DiscoverLink } from './discover_link';
+export type { DiscoverLinkProps } from './discover_link';
 export {
   buildAlertLookupEsql,
   buildEventLookupEsql,

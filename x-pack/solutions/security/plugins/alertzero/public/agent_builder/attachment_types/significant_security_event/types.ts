@@ -106,8 +106,12 @@ export interface ParsedSignificantSecurityEvent {
   alerts: string[];
   events: SignificantSecurityEventRef[];
   indicators: SecurityKnowledgeIndicator[];
+  evidenceFor: string[];
+  evidenceAgainst: string[];
   evidenceForCount: number;
   evidenceAgainstCount: number;
+  truncated?: boolean;
+  truncatedOriginalCount?: number;
 }
 
 export const parseSignificantSecurityEventData = (
@@ -116,6 +120,13 @@ export const parseSignificantSecurityEventData = (
   if (!candidate || typeof candidate !== 'object') return undefined;
   const record = candidate as Record<string, unknown>;
   if (typeof record.title !== 'string' || record.title.length === 0) return undefined;
+
+  const evidenceFor = Array.isArray(record.evidence_for)
+    ? record.evidence_for.filter((item): item is string => typeof item === 'string')
+    : [];
+  const evidenceAgainst = Array.isArray(record.evidence_against)
+    ? record.evidence_against.filter((item): item is string => typeof item === 'string')
+    : [];
 
   return {
     title: record.title,
@@ -138,9 +149,14 @@ export const parseSignificantSecurityEventData = (
     indicators: Array.isArray(record.security_knowledge_indicators)
       ? record.security_knowledge_indicators.filter(isValidIndicator)
       : [],
-    evidenceForCount: Array.isArray(record.evidence_for) ? record.evidence_for.length : 0,
-    evidenceAgainstCount: Array.isArray(record.evidence_against)
-      ? record.evidence_against.length
-      : 0,
+    evidenceFor,
+    evidenceAgainst,
+    evidenceForCount: evidenceFor.length,
+    evidenceAgainstCount: evidenceAgainst.length,
+    truncated: record.truncated === true ? true : undefined,
+    truncatedOriginalCount:
+      typeof record.truncated_original_count === 'number'
+        ? record.truncated_original_count
+        : undefined,
   };
 };
