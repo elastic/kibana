@@ -62,6 +62,7 @@ function createMockTaskManager() {
   return {
     bulkEnable: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
     bulkDisable: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
+    runSoon: jest.fn().mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
   };
 }
 
@@ -73,6 +74,7 @@ describe('HistorySnapshotClient', () => {
   const request = { headers: {} } as KibanaRequest;
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockInternalEsClient: jest.Mocked<ElasticsearchClient>;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let mockTaskManager: ReturnType<typeof createMockTaskManager>;
   let client: HistorySnapshotClient;
@@ -82,6 +84,7 @@ describe('HistorySnapshotClient', () => {
     return new HistorySnapshotClient({
       logger: mockLogger,
       esClient: mockEsClient,
+      internalEsClient: mockInternalEsClient,
       namespace,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
@@ -92,6 +95,7 @@ describe('HistorySnapshotClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockInternalEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockGlobalStateClient = createMockGlobalStateClient();
     mockTaskManager = createMockTaskManager();
     mockResolveLatestEntitiesIndexName.mockResolvedValue('.entities.v2.latest.default-00001');
@@ -274,13 +278,14 @@ describe('HistorySnapshotClient', () => {
       await client.enable(request);
 
       expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
-      // First call: enable only, no runSoon, so status update happens before any worker can claim
-      expect(mockTaskManager.bulkEnable).toHaveBeenNthCalledWith(1, [taskId], false, { request });
+      // Step 1: enable only, no runSoon — status is persisted before any worker can claim
+      expect(mockTaskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkEnable).toHaveBeenCalledWith([taskId], false, { request });
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: { status: 'started', frequency: '24h' },
       });
-      // Second call: schedule immediate run after status is persisted
-      expect(mockTaskManager.bulkEnable).toHaveBeenNthCalledWith(2, [taskId], true, { request });
+      // Step 3: runSoon
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(taskId);
     });
 
     it('throws and does not update status when the initial enable fails', async () => {
@@ -302,19 +307,7 @@ describe('HistorySnapshotClient', () => {
     });
 
     it('logs a warning but does not throw when runSoon fails', async () => {
-      // First call (enable) succeeds; second call (runSoon) returns an error
-      mockTaskManager.bulkEnable
-        .mockResolvedValueOnce({ tasks: [], errors: [] })
-        .mockResolvedValueOnce({
-          tasks: [],
-          errors: [
-            {
-              id: taskId,
-              type: 'task',
-              error: { statusCode: 500, message: 'conflict', error: 'Conflict' },
-            },
-          ],
-        });
+      mockTaskManager.runSoon.mockRejectedValueOnce(new Error('conflict'));
 
       await expect(client.enable(request)).resolves.toBeUndefined();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
@@ -366,8 +359,8 @@ describe('HistorySnapshotClient', () => {
           data_streams: [],
         });
         mockIndicesDelete = jest.fn().mockResolvedValue({});
-        mockEsClient = {
-          ...mockEsClient,
+        mockInternalEsClient = {
+          ...mockInternalEsClient,
           indices: { resolveIndex: mockResolveIndex, delete: mockIndicesDelete },
         } as unknown as jest.Mocked<ElasticsearchClient>;
         mockResolveHistorySnapshotIndexPatterns.mockResolvedValue([
@@ -401,7 +394,7 @@ describe('HistorySnapshotClient', () => {
         await flushPromises();
 
         expect(mockResolveHistorySnapshotIndexPatterns).toHaveBeenCalledWith(
-          mockEsClient,
+          mockInternalEsClient,
           namespace
         );
         expect(mockResolveIndex).toHaveBeenCalledWith({

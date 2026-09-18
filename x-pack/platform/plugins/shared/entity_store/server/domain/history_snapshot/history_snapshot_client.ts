@@ -49,6 +49,7 @@ const BATCH_CONCURRENCY_LIMIT = 10;
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
   namespace: string;
   globalStateClient: EntityStoreGlobalStateClient;
   taskManager: TaskManagerStartContract;
@@ -57,6 +58,7 @@ export interface HistorySnapshotClientDependencies {
 export class HistorySnapshotClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
+  private readonly internalEsClient: ElasticsearchClient;
   private readonly namespace: string;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
   private readonly taskManager: TaskManagerStartContract;
@@ -64,12 +66,14 @@ export class HistorySnapshotClient {
   constructor({
     logger,
     esClient,
+    internalEsClient,
     namespace,
     globalStateClient,
     taskManager,
   }: HistorySnapshotClientDependencies) {
     this.logger = logger;
     this.esClient = esClient;
+    this.internalEsClient = internalEsClient;
     this.namespace = namespace;
     this.globalStateClient = globalStateClient;
     this.taskManager = taskManager;
@@ -96,22 +100,13 @@ export class HistorySnapshotClient {
 
     // Step 3: Schedule an immediate run. Non-fatal if this fails — the task is enabled
     // and will execute at its next scheduled cadence.
-    const runSoonResult = await this.taskManager
-      .bulkEnable([taskId], true, { request })
-      .catch((err) => {
-        this.logger.warn(
-          `History snapshot task enabled but immediate run could not be scheduled: ${getErrorMessage(
-            err
-          )}`
-        );
-        return null;
-      });
-    const runSoonError = runSoonResult?.errors?.[0];
-    if (runSoonError) {
+    await this.taskManager.runSoon(taskId).catch((err) => {
       this.logger.warn(
-        `History snapshot enabled but runSoon failed; will run at next cadence: ${runSoonError?.error?.message}`
+        `History snapshot enabled but runSoon failed; will run at next cadence: ${getErrorMessage(
+          err
+        )}`
       );
-    }
+    });
 
     this.logger.debug(`Enabled history snapshot task ${taskId}`);
   }
@@ -151,10 +146,13 @@ export class HistorySnapshotClient {
   }
 
   private async clearSnapshotIndices(): Promise<number> {
-    const patterns = await resolveHistorySnapshotIndexPatterns(this.esClient, this.namespace);
+    const patterns = await resolveHistorySnapshotIndexPatterns(
+      this.internalEsClient,
+      this.namespace
+    );
     const resolvedPerPattern = await Promise.all(
       patterns.map(async (pattern) => {
-        const { indices } = await this.esClient.indices.resolveIndex({
+        const { indices } = await this.internalEsClient.indices.resolveIndex({
           name: pattern,
           ignore_unavailable: true,
           allow_no_indices: true,
@@ -167,7 +165,7 @@ export class HistorySnapshotClient {
       const limit = pLimit(BATCH_CONCURRENCY_LIMIT);
       await Promise.all(
         chunkByUrlLength(indices).map((chunk) =>
-          limit(() => this.esClient.indices.delete({ index: chunk }, { ignore: [404] }))
+          limit(() => this.internalEsClient.indices.delete({ index: chunk }, { ignore: [404] }))
         )
       );
       this.logger.debug(`Cleared history snapshot indices: ${indices.join(', ')}`);

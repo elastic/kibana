@@ -65,6 +65,7 @@ async function runHistorySnapshotTask({
   const historySnapshotClient = new HistorySnapshotClient({
     logger: taskLogger,
     esClient,
+    internalEsClient: esClient,
     namespace,
     globalStateClient,
     taskManager: plugins.taskManager,
