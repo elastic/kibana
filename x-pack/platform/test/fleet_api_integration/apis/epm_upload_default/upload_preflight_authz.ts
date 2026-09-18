@@ -196,6 +196,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'test-ml-rule-id-ok',
         type: 'security-rule',
         attributes: {
+          rule_id: 'test-ml-rule-ok',
           name: 'Test ML Rule',
           type: 'machine_learning',
           machine_learning_job_id: 'test-ml-job',
@@ -225,6 +226,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'test-ml-rule-id-deny',
         type: 'security-rule',
         attributes: {
+          rule_id: 'test-ml-rule-deny',
           name: 'Test ML Rule Deny',
           type: 'machine_learning',
           machine_learning_job_id: 'test-ml-job-deny',
