@@ -17,7 +17,6 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  Rule,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
@@ -64,11 +63,7 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
         return undefined;
       }
 
-      const maintenanceWindow = findMatchingMaintenanceWindow(
-        candidates,
-        episode,
-        rules.forEpisode(episode)
-      );
+      const maintenanceWindow = findMatchingMaintenanceWindow(candidates, episode);
       return maintenanceWindow ? maintenanceWindowReason(maintenanceWindow.id) : undefined;
     });
 
@@ -86,8 +81,7 @@ const maintenanceWindowReason = (id: string) => `${MAINTENANCE_WINDOW_REASON_PRE
 
 function findMatchingMaintenanceWindow(
   candidates: readonly ActiveMaintenanceWindow[],
-  episode: AlertEpisode,
-  rule?: Rule
+  episode: AlertEpisode
 ): ActiveMaintenanceWindow | undefined {
   const eventTime = Date.parse(episode.last_event_timestamp);
   if (Number.isNaN(eventTime)) return undefined;
@@ -105,7 +99,7 @@ function findMatchingMaintenanceWindow(
       return mw;
     }
 
-    context ??= createMatcherContext(episode, rule);
+    context ??= createMatcherContext(episode);
     if (evaluateKql(alertingV2.kql, context)) {
       return mw;
     }
