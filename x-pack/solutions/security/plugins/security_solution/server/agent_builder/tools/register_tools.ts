@@ -23,6 +23,7 @@ import {
 } from './migration_translated_rules_tools';
 import { migrationResourcesListTool } from './migration_resources_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -30,7 +31,10 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
  * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
  * the feature can ship dark and be enabled per environment.
  *
- * Read-only migration tools (search, get, list) are registered as registry tools.
+ * Read-only migration tools (search, get, list) are registered as registry tools
+ * and read through the canonical SIEM rule-migrations data client, which
+ * `siemMigrationsService` hands out per request (same index-name providers and
+ * query DSL as the migration HTTP routes).
  * Write operations (rule update, resource upsert) route through
  * `workflow_execute_step` + `kibana.request` targeting the canonical migration
  * HTTP routes, which apply license checks, audit logging, and validation
@@ -41,6 +45,7 @@ export const registerTools = async (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
+  siemMigrationsService: SiemMigrationsService,
   isServerless: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
@@ -61,9 +66,13 @@ export const registerTools = async (
 
   if (experimentalFeatures.automaticMigrationSkillsEnabled) {
     agentBuilder.tools.register(
-      migrationTranslatedRulesSearchTool(core, logger, experimentalFeatures)
+      migrationTranslatedRulesSearchTool(core, logger, experimentalFeatures, siemMigrationsService)
     );
-    agentBuilder.tools.register(migrationTranslatedRuleGetTool(core, logger, experimentalFeatures));
-    agentBuilder.tools.register(migrationResourcesListTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(
+      migrationTranslatedRuleGetTool(core, logger, experimentalFeatures, siemMigrationsService)
+    );
+    agentBuilder.tools.register(
+      migrationResourcesListTool(core, logger, experimentalFeatures, siemMigrationsService)
+    );
   }
 };

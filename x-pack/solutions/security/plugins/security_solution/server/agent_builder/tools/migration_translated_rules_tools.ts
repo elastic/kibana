@@ -12,16 +12,10 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
+import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import { getRuleMigrationsDataClient } from './util/get_rule_migrations_data_client';
 import { securityTool } from './constants';
-
-const TRANSLATED_RULES_INDEX_BASE = '.kibana-siem-rule-migrations-rules' as const;
-
-/**
- * Builds the per-space translated rules index name. Used only by the search
- * and get tools, which are read-only.
- */
-const getRulesIndexName = (spaceId: string) => `${TRANSLATED_RULES_INDEX_BASE}-${spaceId}`;
 
 const migrationIdField = z
   .string()
@@ -43,7 +37,7 @@ const searchSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional case-insensitive substring match against the rule name. Omit to list everything.'
+      'Optional rule-name search. Omit to list everything in the migration. Matches the translated rule name, and the original vendor rule name for rules whose translation failed.'
     ),
   max_results: z
     .number()
@@ -62,12 +56,13 @@ export const SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID = securityTool(
 export const migrationTranslatedRulesSearchTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  siemMigrationsService: SiemMigrationsService
 ): BuiltinToolDefinition<typeof searchSchema> => ({
   id: SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'List translated detection rules from a specific SIEM rule migration. Use this BEFORE editing a translated rule, to find the rule by name or to enumerate the migration. Optionally filter by name substring. Returns id, name, severity, risk_score, translation_result, and the elastic_rule.query for each hit.',
+    'List translated detection rules from a specific SIEM rule migration. Use this BEFORE editing a translated rule, to find the rule by name or to enumerate the migration. Optionally filter by rule name. Returns id, name, severity, risk_score, translation_result, and the elastic_rule.query for each hit.',
   schema: searchSchema,
   tags: ['security', 'siem-migrations', 'rules', 'list'],
   availability: {
@@ -85,45 +80,21 @@ export const migrationTranslatedRulesSearchTool = (
   },
   handler: async (
     { migration_id: migrationId, query, max_results: maxResults },
-    { esClient, spaceId }
+    { request, spaceId }
   ) => {
     try {
-      const index = getRulesIndexName(spaceId);
-
-      const must: Array<Record<string, unknown>> = [{ term: { migration_id: migrationId } }];
-      if (query) {
-        must.push({
-          wildcard: {
-            'elastic_rule.title': {
-              value: `*${query}*`,
-              case_insensitive: true,
-            },
-          },
-        });
-      }
-
-      const result = await esClient.asCurrentUser.search<Record<string, unknown>>({
-        index,
-        size: maxResults,
-        query: { bool: { must } },
-        _source: [
-          'migration_id',
-          'translation_result',
-          'status',
-          'elastic_rule.title',
-          'elastic_rule.severity',
-          'elastic_rule.risk_score',
-          'elastic_rule.query',
-          'elastic_rule.description',
-          'original_rule.title',
-          'original_rule.vendor',
-        ],
+      const rulesClient = await getRuleMigrationsDataClient({
+        core,
+        siemMigrationsService,
+        request,
+        spaceId,
+        experimentalFeatures,
       });
 
-      const rules = result.hits.hits.map((hit) => ({
-        id: hit._id,
-        ...(hit._source ?? {}),
-      }));
+      const { total, data } = await rulesClient.items.get(migrationId, {
+        filters: { searchTerm: query },
+        size: maxResults,
+      });
 
       return {
         results: [
@@ -131,8 +102,10 @@ export const migrationTranslatedRulesSearchTool = (
             type: ToolResultType.other,
             data: {
               migration_id: migrationId,
-              total: rules.length,
-              rules,
+              // Total matches in the migration, which can exceed `rules.length`
+              // when the page size truncates the listing.
+              total,
+              rules: data,
             },
           },
         ],
@@ -169,7 +142,8 @@ export const SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID = securityTool(
 export const migrationTranslatedRuleGetTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  siemMigrationsService: SiemMigrationsService
 ): BuiltinToolDefinition<typeof getSchema> => ({
   id: SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
   type: ToolType.builtin,
@@ -190,22 +164,29 @@ export const migrationTranslatedRuleGetTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async ({ migration_id: migrationId, rule_id: ruleId }, { esClient, spaceId }) => {
+  handler: async ({ migration_id: migrationId, rule_id: ruleId }, { request, spaceId }) => {
     try {
-      const index = getRulesIndexName(spaceId);
-      const result = await esClient.asCurrentUser.get<Record<string, unknown>>({
-        index,
-        id: ruleId,
+      const rulesClient = await getRuleMigrationsDataClient({
+        core,
+        siemMigrationsService,
+        request,
+        spaceId,
+        experimentalFeatures,
       });
 
-      const source = (result._source ?? {}) as { migration_id?: string };
-      if (source.migration_id !== migrationId) {
+      const { data } = await rulesClient.items.get(migrationId, {
+        filters: { ids: [ruleId] },
+        size: 1,
+      });
+      const rule = data[0];
+
+      if (!rule) {
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Rule ${ruleId} is not part of migration ${migrationId}.`,
+                message: `Rule ${ruleId} was not found in migration ${migrationId}.`,
               },
             },
           ],
@@ -216,10 +197,7 @@ export const migrationTranslatedRuleGetTool = (
         results: [
           {
             type: ToolResultType.other,
-            data: {
-              id: result._id,
-              ...source,
-            },
+            data: rule,
           },
         ],
       };

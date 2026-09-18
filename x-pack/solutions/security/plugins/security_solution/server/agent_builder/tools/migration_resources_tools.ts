@@ -12,12 +12,10 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
+import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import { getRuleMigrationsDataClient } from './util/get_rule_migrations_data_client';
 import { securityTool } from './constants';
-
-const RESOURCES_INDEX_BASE = '.kibana-siem-rule-migrations-resources' as const;
-
-const getResourcesIndexName = (spaceId: string) => `${RESOURCES_INDEX_BASE}-${spaceId}`;
 
 const migrationIdField = z
   .string()
@@ -52,7 +50,8 @@ export const SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID = securityTool('migration
 export const migrationResourcesListTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  siemMigrationsService: SiemMigrationsService
 ): BuiltinToolDefinition<typeof listSchema> => ({
   id: SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
   type: ToolType.builtin,
@@ -75,27 +74,21 @@ export const migrationResourcesListTool = (
   },
   handler: async (
     { migration_id: migrationId, type, max_results: maxResults },
-    { esClient, spaceId }
+    { request, spaceId }
   ) => {
     try {
-      const index = getResourcesIndexName(spaceId);
-
-      const must: Array<Record<string, unknown>> = [{ term: { migration_id: migrationId } }];
-      if (type) {
-        must.push({ term: { type } });
-      }
-
-      const result = await esClient.asCurrentUser.search<Record<string, unknown>>({
-        index,
-        size: maxResults,
-        query: { bool: { must } },
-        _source: ['migration_id', 'type', 'name', 'content', 'metadata', 'updated_at'],
+      const rulesClient = await getRuleMigrationsDataClient({
+        core,
+        siemMigrationsService,
+        request,
+        spaceId,
+        experimentalFeatures,
       });
 
-      const resources = result.hits.hits.map((hit) => ({
-        id: hit._id,
-        ...(hit._source ?? {}),
-      }));
+      const resources = await rulesClient.resources.get(migrationId, {
+        filters: { type },
+        size: maxResults,
+      });
 
       return {
         results: [

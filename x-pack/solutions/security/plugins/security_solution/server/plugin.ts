@@ -273,6 +273,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
+      this.siemMigrationsService,
       this.isServerless
     ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
