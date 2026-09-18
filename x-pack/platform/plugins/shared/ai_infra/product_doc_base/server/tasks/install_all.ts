@@ -18,6 +18,7 @@ import {
   chunkedTaskStateSchemaByVersion,
   getChunkedTaskState,
   isProductName,
+  resetChunkedTaskState,
   runInstallChunk,
   type InstallLockManager,
 } from './utils';
@@ -87,8 +88,6 @@ export const scheduleInstallAllTask = async ({
     ? INSTALL_ALL_TASK_ID
     : INSTALL_ALL_TASK_ID_MULTILINGUAL;
   try {
-    // `runSoon` below stamps a new `scheduledAt`, which makes an existing task drop its persisted
-    // plan and start over instead of absorbing the request
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: INSTALL_ALL_TASK_TYPE,
@@ -96,7 +95,9 @@ export const scheduleInstallAllTask = async ({
       state: {},
       scope: ['productDoc'],
     });
-
+    // An existing idle task drops its persisted plan and starts over for this request instead of
+    // absorbing it; the task itself is kept so waiting callers still find it
+    await resetChunkedTaskState({ taskManager, taskId });
     await taskManager.runSoon(taskId);
 
     logger.info(`Task ${taskId} scheduled to run soon`);

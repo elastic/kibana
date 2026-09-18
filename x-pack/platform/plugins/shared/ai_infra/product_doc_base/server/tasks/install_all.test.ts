@@ -22,12 +22,10 @@ import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 import { MAX_INSTALL_ITEM_RETRIES } from './utils';
 
 const allProducts = Object.values(DocumentationProduct);
-// Task Manager keeps `scheduledAt` at the original scheduling time and writes the `runAt` a run
-// returned (or the current time on `runSoon`) into `runAt`
 const originallyScheduledAt = '2026-09-17T09:00:00.000Z';
 const requestedAt = '2026-09-17T10:00:00.000Z';
 const nextRunAt = '2026-09-17T10:05:00.000Z';
-const continuation = (state: Record<string, unknown>) => ({ requestedAt, nextRunAt, ...state });
+const continuation = (state: Record<string, unknown>) => ({ requestedAt, ...state });
 
 interface RunOptions {
   runAt?: string;
@@ -80,36 +78,28 @@ describe('InstallAll task', () => {
       inferenceId: '.elser',
     });
     expect(result).toEqual({
-      state: { requestedAt, nextRunAt: expect.any(String), remaining: allProducts.slice(1) },
+      state: { requestedAt, remaining: allProducts.slice(1) },
       runAt: expect.any(Date),
     });
   });
 
-  it('continues the plan when run for the runAt it scheduled', async () => {
-    const result = await runTask(continuation({ remaining: ['security', 'observability'] }));
-
-    expect(installProduct).toHaveBeenCalledWith({ productName: 'security', inferenceId: '.elser' });
-    expect(result).toEqual({
-      state: { requestedAt, nextRunAt: expect.any(String), remaining: ['observability'] },
-      runAt: expect.any(Date),
-    });
-  });
-
-  it('continues the plan when Task Manager retries a failed run', async () => {
-    await runTask(continuation({ remaining: ['security'] }), {
+  it('continues a persisted plan regardless of runAt and attempts', async () => {
+    const result = await runTask(continuation({ remaining: ['security', 'observability'] }), {
       runAt: '2026-09-17T10:06:00.000Z',
       attempts: 2,
     });
 
     expect(installProduct).toHaveBeenCalledWith({ productName: 'security', inferenceId: '.elser' });
+    expect(result).toEqual({
+      state: { requestedAt, remaining: ['observability'] },
+      runAt: expect.any(Date),
+    });
   });
 
-  it('starts over when the task was requested again (runSoon) after the plan was persisted', async () => {
+  it('starts a new plan stamped with the runAt when the scheduler cleared the state', async () => {
     const newRequest = '2026-09-17T11:00:00.000Z';
 
-    const result = await runTask(continuation({ remaining: ['observability'], attempts: 3 }), {
-      runAt: newRequest,
-    });
+    const result = await runTask({}, { runAt: newRequest });
 
     expect(installProduct).toHaveBeenCalledWith({
       productName: allProducts[0],
@@ -121,11 +111,7 @@ describe('InstallAll task', () => {
       resourceType: ResourceTypes.productDoc,
     });
     expect(result).toEqual({
-      state: {
-        requestedAt: newRequest,
-        nextRunAt: expect.any(String),
-        remaining: allProducts.slice(1),
-      },
+      state: { requestedAt: newRequest, remaining: allProducts.slice(1) },
       runAt: expect.any(Date),
     });
   });
@@ -201,12 +187,7 @@ describe('InstallAll task', () => {
 
     expect(installProduct).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: {
-        requestedAt,
-        nextRunAt: expect.any(String),
-        remaining: ['kibana', 'security'],
-        attempts: 2,
-      },
+      state: { requestedAt, remaining: ['kibana', 'security'], attempts: 2 },
       runAt: expect.any(Date),
     });
   });
@@ -219,25 +200,15 @@ describe('InstallAll task', () => {
       state: Record<string, unknown>;
       runAt: Date;
     };
-    expect(first.state).toEqual({
-      requestedAt,
-      nextRunAt: first.runAt.toISOString(),
-      remaining: ['kibana', 'security'],
-      attempts: 1,
-    });
+    expect(first.state).toEqual({ requestedAt, remaining: ['kibana', 'security'], attempts: 1 });
     expect(first.runAt.getTime() - now).toBeGreaterThanOrEqual(30_000);
     expect(first.runAt.getTime() - now).toBeLessThan(60_000);
 
-    const third = (await runTask(
-      { ...first.state, attempts: 2 },
-      { runAt: first.runAt.toISOString() }
-    )) as { state: Record<string, unknown>; runAt: Date };
-    expect(third.state).toEqual({
-      requestedAt,
-      nextRunAt: third.runAt.toISOString(),
-      remaining: ['kibana', 'security'],
-      attempts: 3,
-    });
+    const third = (await runTask({ ...first.state, attempts: 2 })) as {
+      state: Record<string, unknown>;
+      runAt: Date;
+    };
+    expect(third.state).toEqual({ requestedAt, remaining: ['kibana', 'security'], attempts: 3 });
     expect(third.runAt.getTime() - now).toBeGreaterThanOrEqual(120_000);
     expect(logger.warn).toHaveBeenCalledTimes(2);
   });
@@ -258,14 +229,14 @@ describe('InstallAll task', () => {
     const result = await runTask(continuation({ remaining: ['kibana', 'security'], attempts: 2 }));
 
     expect(result).toEqual({
-      state: { requestedAt, nextRunAt: expect.any(String), remaining: ['security'] },
+      state: { requestedAt, remaining: ['security'] },
       runAt: expect.any(Date),
     });
   });
 });
 
 describe('scheduleInstallAllTask', () => {
-  it('ensures the task exists and runs it soon without deleting a task others may wait on', async () => {
+  it('ensures the task exists, clears its persisted plan and runs it soon', async () => {
     const taskManager = taskManagerMock.createStart();
 
     const taskId = await scheduleInstallAllTask({
@@ -282,6 +253,17 @@ describe('scheduleInstallAllTask', () => {
         params: { inferenceId: '.elser' },
         state: {},
       })
+    );
+    expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(
+      [INSTALL_ALL_TASK_ID],
+      expect.any(Function)
+    );
+    const [, resetState] = taskManager.bulkUpdateState.mock.calls[0];
+    expect(resetState({ requestedAt: 'x', remaining: ['security'] }, INSTALL_ALL_TASK_ID)).toEqual(
+      {}
+    );
+    expect(taskManager.bulkUpdateState.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManager.runSoon.mock.invocationCallOrder[0]
     );
     expect(taskManager.runSoon).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID);
   });

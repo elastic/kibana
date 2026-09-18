@@ -18,6 +18,7 @@ import {
   chunkedTaskStateSchemaByVersion,
   getChunkedTaskState,
   isProductName,
+  resetChunkedTaskState,
   runInstallChunk,
   type InstallLockManager,
 } from './utils';
@@ -135,8 +136,6 @@ export const scheduleEnsureUpToDateTask = async ({
 }) => {
   const taskId = getEnsureUpToDateTaskId({ inferenceId, forceUpdate });
   try {
-    // `runSoon` below stamps a new `scheduledAt`, which makes an existing task drop its persisted
-    // plan and start over instead of absorbing the request
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
@@ -144,7 +143,9 @@ export const scheduleEnsureUpToDateTask = async ({
       state: {},
       scope: ['productDoc'],
     });
-
+    // An existing idle task drops its persisted plan and starts over for this request instead of
+    // absorbing it; the task itself is kept so waiting callers still find it
+    await resetChunkedTaskState({ taskManager, taskId });
     await taskManager.runSoon(taskId);
 
     logger.info(`Task ${taskId} scheduled to run soon`);

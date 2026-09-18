@@ -26,7 +26,7 @@ const originallyScheduledAt = '2026-09-17T09:00:00.000Z';
 const requestedAt = '2026-09-17T10:00:00.000Z';
 const since = new Date(requestedAt);
 const nextRunAt = '2026-09-17T10:05:00.000Z';
-const continuation = (state: Record<string, unknown>) => ({ requestedAt, nextRunAt, ...state });
+const continuation = (state: Record<string, unknown>) => ({ requestedAt, ...state });
 
 describe('EnsureUpToDate task', () => {
   let updateProductIfNeeded: jest.Mock;
@@ -87,13 +87,13 @@ describe('EnsureUpToDate task', () => {
     });
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { requestedAt, nextRunAt: expect.any(String), remaining: ['security', 'openapi'] },
+      state: { requestedAt, remaining: ['security', 'openapi'] },
       runAt: expect.any(Date),
     });
   });
 
-  it('does not recompute the plan on a continuation run', async () => {
-    await runTask(continuation({ remaining: ['security', 'openapi'] }));
+  it('does not recompute the plan on a continuation run, whatever the runAt', async () => {
+    await runTask(continuation({ remaining: ['security', 'openapi'] }), '2026-09-17T11:00:00.000Z');
 
     expect(getProductsToUpdate).not.toHaveBeenCalled();
     expect(updateProductIfNeeded).toHaveBeenCalledWith(
@@ -101,21 +101,17 @@ describe('EnsureUpToDate task', () => {
     );
   });
 
-  it('recomputes the plan when the task was requested again after the plan was persisted', async () => {
+  it('computes a new plan stamped with the runAt once the scheduler cleared the state', async () => {
     const newRequest = '2026-09-17T11:00:00.000Z';
 
-    const result = await runTask(continuation({ remaining: ['openapi'] }), newRequest);
+    const result = await runTask({}, newRequest);
 
     expect(getProductsToUpdate).toHaveBeenCalledTimes(1);
     expect(updateProductIfNeeded).toHaveBeenCalledWith(
       expect.objectContaining({ productName: 'kibana', since: new Date(newRequest) })
     );
     expect(result).toEqual({
-      state: {
-        requestedAt: newRequest,
-        nextRunAt: expect.any(String),
-        remaining: ['security', 'openapi'],
-      },
+      state: { requestedAt: newRequest, remaining: ['security', 'openapi'] },
       runAt: expect.any(Date),
     });
   });
@@ -160,11 +156,7 @@ describe('EnsureUpToDate task', () => {
     expect(updateProductIfNeeded).not.toHaveBeenCalled();
     expect(ensureOpenApiSpecUpToDate).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: {
-        requestedAt,
-        nextRunAt: expect.any(String),
-        remaining: ['kibana', 'security', 'openapi'],
-      },
+      state: { requestedAt, remaining: ['kibana', 'security', 'openapi'] },
       runAt: expect.any(Date),
     });
   });
@@ -199,7 +191,7 @@ describe('EnsureUpToDate task', () => {
     const result = await runTask(continuation({ remaining: ['openapi'] }));
 
     expect(result).toEqual({
-      state: { requestedAt, nextRunAt: expect.any(String), remaining: ['openapi'], attempts: 1 },
+      state: { requestedAt, remaining: ['openapi'], attempts: 1 },
       runAt: expect.any(Date),
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[openapi] failed'));
@@ -207,7 +199,7 @@ describe('EnsureUpToDate task', () => {
 });
 
 describe('scheduleEnsureUpToDateTask', () => {
-  it('ensures the task exists and runs it soon without deleting a task others may wait on', async () => {
+  it('ensures the task exists, clears its persisted plan and runs it soon', async () => {
     const taskManager = taskManagerMock.createStart();
 
     const taskId = await scheduleEnsureUpToDateTask({
@@ -224,6 +216,13 @@ describe('scheduleEnsureUpToDateTask', () => {
         params: { inferenceId: '.elser', forceUpdate: undefined },
         state: {},
       })
+    );
+    expect(taskManager.bulkUpdateState).toHaveBeenCalledWith(
+      [ENSURE_DOC_UP_TO_DATE_TASK_ID],
+      expect.any(Function)
+    );
+    expect(taskManager.bulkUpdateState.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManager.runSoon.mock.invocationCallOrder[0]
     );
     expect(taskManager.runSoon).toHaveBeenCalledWith(ENSURE_DOC_UP_TO_DATE_TASK_ID);
   });
