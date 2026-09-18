@@ -1,6 +1,6 @@
 The fix — whether you are proposing one, writing the patch, or revising an existing one — must be **durable** and **well-researched**, and must **address the root cause**. Be unapologetically critical about fix quality: it is far better to spend extra time now and fix the flakiness for good than to whip up a lightly researched patch. Spending time learning the feature under test and the surrounding code (application and test) is expected and encouraged.
 
-Most of this is judgment, and a justified departure is fine. The items under **Keep the test honest** are not judgment calls: a patch that needs one of them isn't a fix. A departure from either the best practices below or this document must be justified in the PR description (not in code comments; a good fix is self-explanatory).
+Most of this is judgment, and a justified departure is fine. The items under **Don't hide the failure** are not judgment calls: a patch that needs one of them isn't a fix. A departure from either the best practices below or this document must be justified in the PR description (not in code comments; a good fix is self-explanatory).
 
 Again, be unapologetically critical about the fix quality.
 
@@ -32,7 +32,7 @@ Read these even when the surrounding test file predates them. They won't cover e
 - **Give a wait one owner.** Nesting an outer retry around a helper that already waits (`retry.tryForTime(20_000, () => existOrFail(x, { timeout: 5_000 }))`) makes the effective budget unclear — a `tryForTime` deadline is checked between attempts, not during one — so prefer a single direct bounded wait (`existOrFail(x, { timeout: 20_000 })`). Relatedly: hook time (`beforeEach` / `afterEach`) counts toward the Playwright test timeout, and an assertion timeout above the test timeout is ignored.
 - **A timeout bump shouldn't be the go-to fix.** It makes the test pass without explaining what was slow. Investigate what never happened: is the slow operation intrinsic to the product (e.g. index creation, a scheduled task), a missing wait upstream, or a product defect? If a bump is still the right call, justify it in the PR description and raise it well past the slowest run you observed — a one-second bump only moves the edge. (A slow Jest render is the one place a bump is a genuine fix; see below.)
 
-#### Keep the test honest
+#### Don't hide the failure
 
 - **Don't reduce coverage to make the failure go away.** Skipping the test (`describe.skip` / `it.skip`), stripping deployment tags, or excluding it from an environment because "it's flaky there" hides whatever the test was catching. Excluding it is legitimate only when there is documented evidence that the environment doesn't support what the test exercises — do the research and explain why.
 - **Don't bend the assertion or the product to the test.** Loosening an assertion, narrowing its scope, or changing product code just so the assertion passes hides what the test was catching. Correcting the assertion is different: when it expects something the product never promised (a fixed order, an exact count in a shared environment), the assertion is the bug and replacing it with the right expectation is the fix.

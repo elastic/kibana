@@ -226,7 +226,7 @@ max-ai-credits: 1200
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - a PR already addresses this root cause (open or merged) — see [Duplicate detection](#duplicate-detection), which runs first as step 1;
-- you cannot identify a credible fix within the [Fix guidelines](#fix-guidelines) — a patch that only works by departing from them without justification (e.g. by retrying or tolerating the failure instead of fixing it), or that needs an item under **Keep the test honest**, is not a credible fix;
+- you cannot identify a credible fix within the [Fix guidelines](#fix-guidelines) — a patch that only works by departing from them without justification (e.g. by retrying or tolerating the failure instead of fixing it), or that needs an item under **Don't hide the failure**, is not a credible fix;
 - the fix has to target a version branch (see "Fixes that must target a version branch"); or
 - the failing test is under `x-pack/solutions/security/test/security_solution_cypress/cypress/` and the doctor's action is one this fixer does not ship (migrate, a new Scout spec, or a new API/unit test) — see [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship).
 
