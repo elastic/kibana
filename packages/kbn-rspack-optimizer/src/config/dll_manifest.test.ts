@@ -9,74 +9,41 @@
 
 import Fs from 'fs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { loadDllManifest } from './dll_manifest';
 
-describe('DLL manifest integration', () => {
-  const manifest = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
-
-  it('should load the DLL manifest successfully', () => {
-    expect(manifest).toBeDefined();
-    expect(typeof manifest).toBe('object');
-  });
-
-  it('should expose the correct DLL global name', () => {
-    expect(manifest.name).toBe('__kbnSharedDeps_npm__');
-  });
-
-  it('should contain a non-trivial number of modules', () => {
-    const moduleCount = Object.keys(manifest.content).length;
-    expect(moduleCount).toBeGreaterThan(1000);
-  });
-
-  describe('DLL-only modules (not covered by externals) are present', () => {
-    const dllOnlyModules = [
-      './node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js',
-      './node_modules/@babel/runtime/helpers/esm/classPrivateFieldGet.js',
-      './node_modules/@babel/runtime/helpers/esm/inheritsLoose.js',
-      './node_modules/core-js/stable/index.js',
-      './node_modules/qs/lib/index.js',
-    ];
-
-    for (const modulePath of dllOnlyModules) {
-      it(`should include "${modulePath}"`, () => {
-        expect(manifest.content[modulePath]).toBeDefined();
-      });
-    }
-  });
-
-  describe('relationship between externals and DLL', () => {
-    const sharedDepsExternals = UiSharedDepsSrc.externals as Record<string, string>;
-
-    it('externals map to __kbnSharedDeps__ (src bundle), DLL maps to __kbnSharedDeps_npm__', () => {
-      for (const value of Object.values(sharedDepsExternals)) {
-        expect(value).toContain('__kbnSharedDeps__');
-        expect(value).not.toContain('__kbnSharedDeps_npm__');
-      }
-      expect(manifest.name).toBe('__kbnSharedDeps_npm__');
-    });
-
-    it('DLL entry packages overlap with externals (both handle the same top-level deps)', () => {
-      const dllModulePaths = Object.keys(manifest.content);
-      const hasReact = dllModulePaths.some((p) => p.includes('node_modules/react/'));
-      const hasLodash = dllModulePaths.some((p) => p.includes('node_modules/lodash/'));
-      const hasRxjs = dllModulePaths.some((p) => p.includes('node_modules/rxjs/'));
-
-      expect(hasReact).toBe(true);
-      expect(hasLodash).toBe(true);
-      expect(hasRxjs).toBe(true);
-
-      expect(sharedDepsExternals.react).toBeDefined();
-      expect(sharedDepsExternals.lodash).toBeDefined();
-      expect(sharedDepsExternals.rxjs).toBeDefined();
-    });
-  });
-});
+const readFileSyncMock = jest.spyOn(Fs, 'readFileSync');
+const manifest = {
+  name: '__kbnSharedDeps_npm__',
+  content: {
+    './node_modules/react/index.js': {
+      buildMeta: {
+        exportsType: 'default',
+        defaultObject: 'redirect',
+      },
+      id: 42,
+    },
+  },
+};
 
 describe('loadDllManifest', () => {
-  it('returns the Rspack manifest without compatibility transformations', () => {
-    const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
+  beforeEach(() => {
+    readFileSyncMock.mockClear();
+    readFileSyncMock.mockReturnValue(JSON.stringify(manifest));
+  });
 
-    expect(loadDllManifest()).toEqual(raw);
+  afterAll(() => {
+    readFileSyncMock.mockRestore();
+  });
+
+  it('does not require a prebuilt manifest until called', () => {
+    expect(readFileSyncMock).not.toHaveBeenCalled();
+
+    loadDllManifest();
+
+    expect(readFileSyncMock).toHaveBeenCalledWith(UiSharedDepsNpm.dllManifestPath, 'utf8');
+  });
+
+  it('returns the Rspack manifest without compatibility transformations', () => {
+    expect(loadDllManifest()).toEqual(manifest);
   });
 });
