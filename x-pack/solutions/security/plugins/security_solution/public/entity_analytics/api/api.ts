@@ -1005,7 +1005,7 @@ export const useEntityAnalyticsRoutes = () => {
       context,
     }: {
       signal?: AbortSignal;
-      params: { connectorId: string; maxLeads?: number };
+      params: { connectorId: string; };
       context?: KibanaExecutionContext;
     }) =>
       http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
