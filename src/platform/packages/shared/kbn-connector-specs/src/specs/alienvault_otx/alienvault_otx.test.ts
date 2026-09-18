@@ -24,6 +24,10 @@ describe('AlienVaultOTXConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(AlienVaultOTXConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('getIndicator action', () => {
     it('should retrieve indicator information', async () => {
       const mockResponse = {

@@ -30,7 +30,7 @@ describe('InboundWebhook', () => {
     expect(InboundWebhook.metadata.id).toBe('.inboundWebhook');
     expect(InboundWebhook.metadata.isTechnicalPreview).toBe(true);
     expect(InboundWebhook.metadata.supportedFeatureIds).toEqual(['workflows']);
-    expect(InboundWebhook.metadata.minimumLicense).toBe('gold');
+    expect(InboundWebhook.metadata.minimumLicense).toBe('enterprise');
     expect(InboundWebhook.metadata.icon).toBe('plugs');
     expect(Object.keys(InboundWebhook.actions)).toEqual([]);
     expect(InboundWebhook.test.enabled).toBe(false);

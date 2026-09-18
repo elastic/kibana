@@ -111,7 +111,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
       defaultMessage:
         'Invoke AWS Lambda functions, list available functions, and get function details',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
     // No dedicated docs page yet; empty string resolves to the connectors index via the
     // doc-links service (see getDocsUrlFromSpec), so it stays correct if the docs move.

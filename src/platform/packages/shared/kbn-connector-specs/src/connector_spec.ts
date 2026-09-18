@@ -367,8 +367,21 @@ export interface AuthTypeDef {
     // can override other Zod fields here in the future if needed
   };
 }
+export interface ConnectorAlertingHint {
+  /** Action key used as the default `subAction` in the alerting v1 rule form. */
+  defaultAction: string;
+  /** Key in `actions[defaultAction].input` that receives the rule's default message. */
+  messageField?: string;
+}
+
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
+
+  /**
+   * Used by the alerting v1 rule form to pick a default action and message field.
+   * Required when `metadata.supportedFeatureIds` includes `'alerting'`.
+   */
+  alerting?: ConnectorAlertingHint;
 
   auth?: {
     types: Array<string | AuthTypeDef>;
