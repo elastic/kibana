@@ -93,17 +93,9 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => ({
 
 // The stub echoes the props the page passes so tests can assert on them from the DOM, which keeps
 // the mock factory free of module scope references it cannot reach while jest hoists it.
-jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
-  RuleSummaryFlyoutContainer: ({
-    ruleId,
-    type,
-    onClose,
-  }: {
-    ruleId: string;
-    type?: string;
-    onClose: () => void;
-  }) => (
-    <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`} data-flyout-type={type}>
+jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
+  RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
+    <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`}>
       <button data-test-subj="mockRuleSummaryFlyoutClose" onClick={onClose} type="button">
         close
       </button>
@@ -670,11 +662,10 @@ describe('rule summary flyout', () => {
     });
   };
 
-  it('opens an overlay flyout for the clicked rule', async () => {
+  it('opens the rule summary flyout for the clicked rule', async () => {
     await openRuleFlyout();
 
-    const flyout = screen.getByTestId('mockRuleSummaryFlyout-rule1');
-    expect(flyout).toHaveAttribute('data-flyout-type', 'overlay');
+    expect(screen.getByTestId('mockRuleSummaryFlyout-rule1')).toBeInTheDocument();
   });
 
   it('closes the flyout without touching the table state', async () => {
