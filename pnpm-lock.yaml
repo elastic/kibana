@@ -116,8 +116,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4332,8 +4330,8 @@ importers:
         specifier: 9.0.2
         version: 9.0.2
       jsts:
-        specifier: 1.6.2
-        version: 1.6.2
+        specifier: 2.12.1
+        version: 2.12.1
       jszip:
         specifier: 3.10.1
         version: 3.10.1
@@ -4461,8 +4459,8 @@ importers:
         specifier: 5.5.3
         version: 5.5.3
       pbf:
-        specifier: 3.2.1
-        version: 3.2.1
+        specifier: 5.1.2
+        version: 5.1.2
       pdf-lib:
         specifier: 1.17.1
         version: 1.17.1
@@ -4573,13 +4571,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -5887,8 +5885,8 @@ importers:
         specifier: 2.0.7
         version: 2.0.7
       '@types/flot':
-        specifier: 0.0.31
-        version: 0.0.31
+        specifier: 0.0.36
+        version: 0.0.36
       '@types/geojson':
         specifier: 7946.0.10
         version: 7946.0.10
@@ -5986,8 +5984,8 @@ importers:
         specifier: 5.3.16
         version: 5.3.16
       '@types/pbf':
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 3.0.5
+        version: 3.0.5
       '@types/pdfmake':
         specifier: 0.2.12
         version: 0.2.12
@@ -14848,8 +14846,8 @@ packages:
   '@types/file-saver@2.0.7':
     resolution: {integrity: sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==}
 
-  '@types/flot@0.0.31':
-    resolution: {integrity: sha512-X+RcMQCqPlQo8zPT6cUFTd/PoYBShMQlHUeOXf05jWlfYnvLuRmluB9z+2EsOKFgUzqzZve5brx+gnFxBaHEUw==}
+  '@types/flot@0.0.36':
+    resolution: {integrity: sha512-xRo4MUIMnRPGXJCuQXAWvo+uKRmziRGHAy9LQHsLgbKanknpe5z3EThqVuYkVCC6ZWPZ/8pllBXnzQmGzFkJ/Q==}
 
   '@types/geojson-vt@3.2.5':
     resolution: {integrity: sha512-qDO7wqtprzlpe8FfQ//ClPV9xiuoh2nkIgiouIptON9w5jvD/fA4szvP9GBlDVdJ5dldAl0kX/sy3URbWwLx0g==}
@@ -15068,9 +15066,6 @@ packages:
 
   '@types/parse5@5.0.3':
     resolution: {integrity: sha512-kUNnecmtkunAoQ3CnjmMkzNU/gtxG8guhi+Fk2U/kOpIKjIMKnXGp4IJCgQJrXSgMsWYimYG4TGjz/UzbGEBTw==}
-
-  '@types/pbf@3.0.2':
-    resolution: {integrity: sha512-EDrLIPaPXOZqDjrkzxxbX7UlJSeQVgah3i0aA4pOSzmK9zq3BIh7/MZIQxED7slJByvKM4Gc6Hypyu2lJzh3SQ==}
 
   '@types/pbf@3.0.5':
     resolution: {integrity: sha512-j3pOPiEcWZ34R6a6mN07mUkM4o4Lwf6hPNt8eilOeZhTFbxFXmKhvXl9Y28jotFPaI1bpPDJsbCprUoNke6OrA==}
@@ -18678,6 +18673,9 @@ packages:
   fastest-stable-stringify@2.0.2:
     resolution: {integrity: sha512-bijHueCGd0LqqNK9b5oCMHc0MluJAx0cwqASgbWMvkO01lCYgIhacVRLcaDz3QnyYIRNJRDwMb41VuT6pHJ91Q==}
 
+  fastpriorityqueue@0.7.5:
+    resolution: {integrity: sha512-3Pa0n9gwy8yIbEsT3m2j/E9DXgWvvjfiZjjqcJ+AdNKTAlVMIuFYrYG5Y3RHEM8O6cwv9hOpOWY/NaMfywoQVA==}
+
   fastq@1.20.3:
     resolution: {integrity: sha512-XKv5nnLs6nLF71NgiKJLIZFLkPyIEuOselLG7ujZnGrRfQK8HpvY+WqKhAJUAdLomwVHErVS4LfxFlPq0/FTAw==}
 
@@ -20481,9 +20479,9 @@ packages:
     resolution: {integrity: sha512-gqXddjPqQ6G40VdnI6T6yObEC+pDNvyP95wdQhkWkg7crHH3km5qP1FsOXEkzEQwnz6gz5qGTn1c2Y52wP3OyQ==}
     engines: {'0': node >=0.6.0}
 
-  jsts@1.6.2:
-    resolution: {integrity: sha512-JNfDQk/fo5MeXx4xefvCyHZD22/DHowHr5K07FdgCJ81MEqn02HsDV5FQvYTz60ZIOv/+hhGbsVzXX5cuDWWlA==}
-    engines: {node: '>= 6'}
+  jsts@2.12.1:
+    resolution: {integrity: sha512-aaiCZeGfeU5o9TbrYF1KF0VvhGGLtG3w7vNynmaTjC8XRmS2v15lq+2Bxa8lMtprsFFJiIpAayJZguLruiHd0w==}
+    engines: {node: '>= 18'}
 
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
@@ -22183,12 +22181,12 @@ packages:
     resolution: {integrity: sha512-//nshmD55c46FuFw26xV/xFAaB5HF9Xdap7HJBBnrKdAd6/GxDBaNA1870O79+9ueg61cZLSVc+OaFlfmObYVQ==}
     engines: {node: '>= 14.16'}
 
-  pbf@3.2.1:
-    resolution: {integrity: sha512-ClrV7pNOn7rtmoQVF4TS1vyU0WhYRnP92fzbfF75jAIwpnzdJXf8iTd4CMEqO4yUenH6NDqLiwjqlh6QgZzgLQ==}
-    hasBin: true
-
   pbf@3.3.0:
     resolution: {integrity: sha512-XDF38WCH3z5OV/OVa8GKUNtLAyneuzbCisx7QUCF8Q6Nutx0WnJrQe5O+kOtBlLfRNUws98Y58Lblp+NJG5T4Q==}
+    hasBin: true
+
+  pbf@5.1.2:
+    resolution: {integrity: sha512-mnvGdvOrIvJOBGUEdGkrVXjN8E/VkIJCkf2eS1DH2yv82ORUlLttmDt0rWY38yYZmVwciZwBUvHM20qxBZf40w==}
     hasBin: true
 
   pbkdf2@3.1.6:
@@ -23276,12 +23274,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -29440,7 +29442,7 @@ snapshots:
       '@loaders.gl/schema': 3.4.7
       '@mapbox/vector-tile': 1.3.1
       '@math.gl/polygon': 3.6.3
-      pbf: 3.2.1
+      pbf: 3.3.0
 
   '@loaders.gl/json@3.4.7':
     dependencies:
@@ -30999,7 +31001,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -32357,7 +32359,7 @@ snapshots:
 
   '@types/file-saver@2.0.7': {}
 
-  '@types/flot@0.0.31':
+  '@types/flot@0.0.36':
     dependencies:
       '@types/jquery': 3.5.33
 
@@ -32489,7 +32491,7 @@ snapshots:
     dependencies:
       '@types/geojson': 7946.0.10
       '@types/mapbox__point-geometry': 1.0.87
-      '@types/pbf': 3.0.2
+      '@types/pbf': 3.0.5
 
   '@types/markdown-it@14.1.2':
     dependencies:
@@ -32586,8 +32588,6 @@ snapshots:
   '@types/parse-json@4.0.2': {}
 
   '@types/parse5@5.0.3': {}
-
-  '@types/pbf@3.0.2': {}
 
   '@types/pbf@3.0.5': {}
 
@@ -36804,6 +36804,8 @@ snapshots:
 
   fastest-stable-stringify@2.0.2: {}
 
+  fastpriorityqueue@0.7.5: {}
+
   fastq@1.20.3:
     dependencies:
       reusify: 1.1.0
@@ -39072,7 +39074,9 @@ snapshots:
       json-schema: 0.4.0
       verror: 1.10.0
 
-  jsts@1.6.2: {}
+  jsts@2.12.1:
+    dependencies:
+      fastpriorityqueue: 0.7.5
 
   jsx-ast-utils@3.3.5:
     dependencies:
@@ -41181,14 +41185,13 @@ snapshots:
 
   pathval@2.0.1: {}
 
-  pbf@3.2.1:
+  pbf@3.3.0:
     dependencies:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
-  pbf@3.3.0:
+  pbf@5.1.2:
     dependencies:
-      ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
   pbkdf2@3.1.6:
@@ -42454,17 +42457,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
@@ -45180,7 +45187,7 @@ snapshots:
     dependencies:
       '@mapbox/point-geometry': 0.1.0
       '@mapbox/vector-tile': 1.3.1
-      pbf: 3.2.1
+      pbf: 3.3.0
 
   w3c-xmlserializer@3.0.0:
     dependencies:
