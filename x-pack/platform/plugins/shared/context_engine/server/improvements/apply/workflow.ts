@@ -82,7 +82,10 @@ export const addWorkflow = async ({
   const workflowId = await workflows.create({ ...context, yaml });
 
   try {
-    await aiIndexService.addAutomation(aiIndexId, context.spaceId, { type: 'workflow', value: workflowId });
+    await aiIndexService.addAutomation(aiIndexId, context.spaceId, {
+      type: 'workflow',
+      value: workflowId,
+    });
     return workflowId;
   } catch (error) {
     try {
@@ -152,7 +155,10 @@ export const removeWorkflow = async ({
 
   // Detach before disabling: if detach fails the workflow stays enabled but linked (retriable),
   // whereas disabling first and then failing to detach leaves an orphaned disabled workflow.
-  await aiIndexService.removeAutomation(aiIndexId, context.spaceId, { type: 'workflow', value: workflowId });
+  await aiIndexService.removeAutomation(aiIndexId, context.spaceId, {
+    type: 'workflow',
+    value: workflowId,
+  });
 
   if (workflow.enabled) {
     await workflows.setEnabled({ ...context, workflowId, enabled: false });
