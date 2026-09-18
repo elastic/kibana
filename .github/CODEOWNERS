@@ -1189,6 +1189,7 @@ x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/search-ml-ux
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-discover
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/kibana-dashboards
+x-pack/platform/plugins/private/esql_views @elastic/kibana-management
 x-pack/platform/plugins/private/feedback @elastic/appex-sharedux
 x-pack/platform/plugins/private/file_upload @elastic/kibana-dashboards @elastic/search-ml-ux
 x-pack/platform/plugins/private/gen_ai_settings @elastic/search-ml-ux
