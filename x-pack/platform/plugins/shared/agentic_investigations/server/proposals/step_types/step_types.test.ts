@@ -561,7 +561,12 @@ describe('proposals.getProposal step', () => {
       id: 'proposal-1',
       status: 'failed',
       decision: 'approved',
-      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null, profileUid: 'uid-1' },
+      decidedBy: {
+        username: 'analyst',
+        fullName: 'Alice Analyst',
+        email: null,
+        profileUid: 'uid-1',
+      },
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
@@ -574,7 +579,12 @@ describe('proposals.getProposal step', () => {
     expect(result.output).toEqual({
       status: 'failed',
       decision: 'approved',
-      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null, profileUid: 'uid-1' },
+      decidedBy: {
+        username: 'analyst',
+        fullName: 'Alice Analyst',
+        email: null,
+        profileUid: 'uid-1',
+      },
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
