@@ -32,6 +32,9 @@ BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
+if [[ "${BOOTSTRAP_NO_FROZEN_LOCKFILE:-}" ]]; then
+  BOOTSTRAP_PARAMS+=(--no-frozen-lockfile)
+fi
 
 # Use the packages that are baked into the agent image, if they exist, as a cache
 # But only for agents not mounting the workspace on a local ssd or in memory
@@ -62,7 +65,8 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   rm -rf node_modules
 
   echo "--- pnpm install and bootstrap, attempt 2"
-  pnpm kbn bootstrap --force-install
+  BOOTSTRAP_PARAMS+=(--force-install)
+  pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
