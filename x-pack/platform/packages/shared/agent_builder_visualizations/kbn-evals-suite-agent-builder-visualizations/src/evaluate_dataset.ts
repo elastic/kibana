@@ -29,21 +29,35 @@ import { createChartCompatibleResultEvaluator } from './evaluators/chart_compati
 import { createChartTypeVsIntentEvaluator } from './evaluators/chart_type_vs_intent';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
+import {
+  extractGoldChartType,
+  extractGoldQuery,
+  extractGoldRenderer,
+  type VisualizationGoldConfig,
+} from './evaluators/gold_visualization_config';
 import { createRendererVsIntentEvaluator } from './evaluators/renderer_vs_intent';
 import { createVisualizationConfigValidityEvaluator } from './evaluators/visualization_config_validity';
+import { createVisualizationConfigVsIntentEvaluator } from './evaluators/visualization_config_vs_intent';
+
+export type { VisualizationGoldConfig };
 
 export type VisualizationDatasetExample = Example<
   {
     question: string;
   },
   {
-    /** Ground-truth ES|QL the generated visualization should be equivalent to. */
+    /**
+     * Partial Lens Config API (or Vega spec skeleton). Gold ES|QL lives in
+     * `data_source.query` / `layers[].data_source.query`. Chart type is `type`.
+     */
+    config?: VisualizationGoldConfig;
+    /** Ground-truth ES|QL fallback when it is not nested in `config`. */
     query?: string;
     /** Golden ordered tool path (e.g. `['load_skill', 'platform.core.create_visualization']`). */
     goldenToolPath?: string[];
     /**
-     * Expected Lens `chart_type` (or acceptable alternatives). Bar/line/area
-     * requests map to `xy`. Omit for Vega-only examples without a Lens type.
+     * Expected Lens `chart_type` fallback when `config.type` is omitted.
+     * Bar/line/area requests map to `xy`.
      */
     chartType?: string | string[];
     /** Expected renderer when the example intentionally forces Lens or Vega. */
@@ -134,7 +148,7 @@ export function createEvaluateDataset({
     inferenceClient,
     log,
     predictionExtractor: (output) => output.esql ?? '',
-    groundTruthExtractor: (expected) => expected?.query ?? '',
+    groundTruthExtractor: (expected) => extractGoldQuery(expected),
   });
 
   const chartTypeVsIntentEvaluator = createChartTypeVsIntentEvaluator<
@@ -142,7 +156,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     visualizationExtractor,
-    expectedChartTypeExtractor: (expected) => expected?.chartType,
+    expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
   });
 
   const rendererVsIntentEvaluator = createRendererVsIntentEvaluator<
@@ -150,7 +164,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     visualizationExtractor,
-    expectedRendererExtractor: (expected) => expected?.renderer,
+    expectedRendererExtractor: (expected) => extractGoldRenderer(expected),
   });
 
   const visualizationConfigValidityEvaluator = createVisualizationConfigValidityEvaluator<
@@ -160,13 +174,21 @@ export function createEvaluateDataset({
     visualizationExtractor,
   });
 
+  const visualizationConfigVsIntentEvaluator = createVisualizationConfigVsIntentEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    visualizationExtractor,
+    expectedConfigExtractor: (expected) => expected?.config,
+  });
+
   const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({
     esClient,
     visualizationExtractor,
-    expectedChartTypeExtractor: (expected) => expected?.chartType,
+    expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
   });
 
   const trajectoryEvaluator = createTrajectoryEvaluator({
@@ -208,6 +230,7 @@ export function createEvaluateDataset({
       chartTypeVsIntentEvaluator,
       rendererVsIntentEvaluator,
       visualizationConfigValidityEvaluator,
+      visualizationConfigVsIntentEvaluator,
       chartCompatibleResultEvaluator,
       trajectoryEvaluator,
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),

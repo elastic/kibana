@@ -7,11 +7,8 @@
 
 import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import {
-  cleanVisualizationDataStreams,
-  replayVisualizationDataStreams,
-  type LoadResult,
-} from '../../src/fixtures/replay';
+import { cleanHostLoadMetrics, seedHostLoadMetrics } from '../../src/fixtures/host_load_metrics';
+import { HOST_METRICS_EXAMPLE } from './host_metrics_example';
 
 const GOLDEN_TOOL_PATH = ['load_skill', 'platform.core.create_visualization'];
 
@@ -19,8 +16,6 @@ evaluate.describe(
   'Agent Builder Visualizations - Standalone Visualization Creation',
   { tag: tags.serverless.search },
   () => {
-    let replayResult: LoadResult;
-
     evaluate.beforeAll(async ({ fetch, esClient, log }) => {
       await Promise.all([
         fetch('/api/sample_data/logs', {
@@ -31,12 +26,12 @@ evaluate.describe(
           method: 'POST',
           version: '2023-10-31',
         }),
+        seedHostLoadMetrics(esClient, log),
       ]);
-      replayResult = await replayVisualizationDataStreams(esClient, log);
     });
 
     evaluate.afterAll(async ({ esClient, log }) => {
-      await cleanVisualizationDataStreams(esClient, replayResult, log);
+      await cleanHostLoadMetrics(esClient, log);
     });
 
     evaluate('standalone visualization ES|QL generation', async ({ evaluateDataset }) => {
@@ -44,7 +39,7 @@ evaluate.describe(
         dataset: {
           name: 'agent builder visualizations: standalone visualization creation',
           description:
-            'Standalone visualization requests over kibana_sample_data_logs, kibana_sample_data_ecommerce, and host metrics. Scores ES|QL validity/equivalence, chart type vs intent, config validity, and result shape.',
+            'Standalone visualization requests over kibana_sample_data_logs, kibana_sample_data_ecommerce, and host metrics. Scores ES|QL validity/equivalence, chart type vs intent, config vs intent, config validity, and result shape.',
           examples: [
             // --- logs: core chart types ---
             {
@@ -53,12 +48,24 @@ evaluate.describe(
                   'Create a bar chart of the number of requests by response code in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'xy',
+                  layers: [
+                    {
+                      type: ['bar', 'bar_horizontal'],
+                      data_source: {
+                        type: 'esql',
+                        query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY response.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                chartType: 'xy',
+                      },
+                      x: { column: 'response.keyword' },
+                      y: [{ column: 'Request Count' }],
+                    },
+                  ],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -68,10 +75,16 @@ evaluate.describe(
                   'Create a single metric visualization showing the total number of requests in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'metric',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Total Requests\` = COUNT(*)`,
-                chartType: 'metric',
+                  },
+                  metrics: [{ column: 'Total Requests' }],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -81,9 +94,21 @@ evaluate.describe(
                   'Create a line chart of total bytes over time in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'xy',
+                  layers: [
+                    {
+                      type: 'line',
+                      data_source: {
+                        type: 'esql',
+                        query: `FROM kibana_sample_data_logs
 | STATS \`Total Bytes\` = SUM(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
-                chartType: 'xy',
+                      },
+                      x: { column: 'Time Bucket' },
+                      y: [{ column: 'Total Bytes' }],
+                    },
+                  ],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -93,12 +118,19 @@ evaluate.describe(
                   'Create a pie chart of request counts by response code in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'pie',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY response.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                chartType: 'pie',
+                  },
+                  metrics: [{ column: 'Request Count' }],
+                  group_by: [{ column: 'response.keyword' }],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -108,12 +140,24 @@ evaluate.describe(
                   'Create a horizontal bar chart of the top operating systems by request count in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'xy',
+                  layers: [
+                    {
+                      type: 'bar_horizontal',
+                      data_source: {
+                        type: 'esql',
+                        query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY machine.os.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                chartType: 'xy',
+                      },
+                      x: { column: 'machine.os.keyword' },
+                      y: [{ column: 'Request Count' }],
+                    },
+                  ],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -123,12 +167,19 @@ evaluate.describe(
                   'Create a tag cloud of file extensions by request count in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'tag_cloud',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY extension.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                chartType: 'tag_cloud',
+                  },
+                  metric: { column: 'Request Count' },
+                  tag_by: { column: 'extension.keyword' },
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -138,12 +189,19 @@ evaluate.describe(
                   'Create a data table of the top 10 URLs by request count in kibana_sample_data_logs, including total bytes for each URL.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'data_table',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*), \`Total Bytes\` = SUM(bytes) BY url.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                chartType: 'data_table',
+                  },
+                  rows: [{ column: 'url.keyword' }],
+                  metrics: [{ column: 'Request Count' }, { column: 'Total Bytes' }],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -153,11 +211,19 @@ evaluate.describe(
                   'Create a heatmap of request counts by hour of day and response code in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'heatmap',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | EVAL hour = DATE_EXTRACT("HOUR_OF_DAY", @timestamp)
 | STATS \`Request Count\` = COUNT(*) BY hour, response.keyword`,
-                chartType: 'heatmap',
+                  },
+                  x: { column: 'hour' },
+                  y: { column: 'response.keyword' },
+                  metric: { column: 'Request Count' },
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -166,12 +232,19 @@ evaluate.describe(
                 question: 'Create a treemap of request counts by host in kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'treemap',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY host.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                chartType: 'treemap',
+                  },
+                  metrics: [{ column: 'Request Count' }],
+                  group_by: [{ column: 'host.keyword' }],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -180,10 +253,16 @@ evaluate.describe(
                 question: 'Show average bytes per request as a gauge for kibana_sample_data_logs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  type: 'gauge',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Average Bytes\` = AVG(bytes)`,
-                chartType: 'gauge',
+                  },
+                  metric: { column: 'Average Bytes' },
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -195,8 +274,13 @@ evaluate.describe(
               output: {
                 // Multi-series over time is valid as Lens xy or Vega; score ES|QL
                 // equivalence rather than forcing a single renderer/chart_type.
-                query: `FROM kibana_sample_data_logs
+                config: {
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | STATS \`Request Count\` = COUNT(*), \`Average Bytes\` = AVG(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+                  },
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -208,10 +292,16 @@ evaluate.describe(
                   'Create a metric visualization of total revenue (taxful_total_price) in kibana_sample_data_ecommerce.',
               },
               output: {
-                query: `FROM kibana_sample_data_ecommerce
+                config: {
+                  type: 'metric',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_ecommerce
 | WHERE order_date >= ?_tstart AND order_date < ?_tend
 | STATS \`Total Revenue\` = SUM(taxful_total_price)`,
-                chartType: 'metric',
+                  },
+                  metrics: [{ column: 'Total Revenue' }],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -221,12 +311,19 @@ evaluate.describe(
                   'Create a pie chart of order counts by category in kibana_sample_data_ecommerce.',
               },
               output: {
-                query: `FROM kibana_sample_data_ecommerce
+                config: {
+                  type: 'pie',
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_ecommerce
 | WHERE order_date >= ?_tstart AND order_date < ?_tend
 | STATS \`Order Count\` = COUNT(*) BY category.keyword
 | SORT \`Order Count\` DESC
 | LIMIT 10`,
-                chartType: 'pie',
+                  },
+                  metrics: [{ column: 'Order Count' }],
+                  group_by: [{ column: 'category.keyword' }],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -236,9 +333,21 @@ evaluate.describe(
                   'Create a line chart of total revenue over time in kibana_sample_data_ecommerce.',
               },
               output: {
-                query: `FROM kibana_sample_data_ecommerce
+                config: {
+                  type: 'xy',
+                  layers: [
+                    {
+                      type: 'line',
+                      data_source: {
+                        type: 'esql',
+                        query: `FROM kibana_sample_data_ecommerce
 | STATS \`Total Revenue\` = SUM(taxful_total_price) BY \`Time Bucket\` = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-                chartType: 'xy',
+                      },
+                      x: { column: 'Time Bucket' },
+                      y: [{ column: 'Total Revenue' }],
+                    },
+                  ],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -248,44 +357,57 @@ evaluate.describe(
                   'Create a bar chart of total quantity sold by manufacturer in kibana_sample_data_ecommerce.',
               },
               output: {
-                query: `FROM kibana_sample_data_ecommerce
+                config: {
+                  type: 'xy',
+                  layers: [
+                    {
+                      type: ['bar', 'bar_horizontal'],
+                      data_source: {
+                        type: 'esql',
+                        query: `FROM kibana_sample_data_ecommerce
 | WHERE order_date >= ?_tstart AND order_date < ?_tend
 | STATS \`Total Quantity\` = SUM(total_quantity) BY manufacturer.keyword
 | SORT \`Total Quantity\` DESC
 | LIMIT 10`,
-                chartType: 'xy',
+                      },
+                      x: { column: 'manufacturer.keyword' },
+                      y: [{ column: 'Total Quantity' }],
+                    },
+                  ],
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
 
-            // Host metrics from the GCS otel-demo snapshot: Beats system load data stream
-            // (`metrics-system.load-default` / `system.load.{1,5,15}`).
-            {
-              input: {
-                question:
-                  'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.',
-              },
-              output: {
-                query: `FROM metrics-system.load-default
-| STATS \`1-Minute Load\` = AVG(\`system.load.1\`), \`5-Minute Load\` = AVG(\`system.load.5\`), \`15-Minute Load\` = AVG(\`system.load.15\`) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
-                chartType: 'xy',
-                goldenToolPath: GOLDEN_TOOL_PATH,
-              },
-            },
+            // Host metrics from the synthtrace Beats load fixture.
+            HOST_METRICS_EXAMPLE,
 
             // Vega path: request a form Lens does not express (scatter with size).
+            // Prompt is unranked, so gold must not SORT before LIMIT.
             {
               input: {
                 question:
                   'Create a Vega-Lite scatter plot of average bytes vs request count by client IP in kibana_sample_data_logs, with point size encoding the number of unique URLs.',
               },
               output: {
-                query: `FROM kibana_sample_data_logs
+                renderer: 'vega',
+                config: {
+                  data_source: {
+                    type: 'esql',
+                    query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Average Bytes\` = AVG(bytes), \`Request Count\` = COUNT(*), \`Unique URLs\` = COUNT_DISTINCT(url.keyword) BY clientip
-| SORT \`Request Count\` DESC
 | LIMIT 100`,
-                renderer: 'vega',
+                  },
+                  spec: {
+                    mark: 'point',
+                    encoding: {
+                      x: { field: 'Average Bytes' },
+                      y: { field: 'Request Count' },
+                      size: { field: 'Unique URLs' },
+                    },
+                  },
+                },
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
