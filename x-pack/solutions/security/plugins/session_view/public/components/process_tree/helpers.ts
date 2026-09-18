@@ -279,6 +279,16 @@ export const collapseProcessTree = (node: Process) => {
   }
 };
 
+// recusively expands all children below provided node
+export const expandProcessTree = (node: Process) => {
+  if (node.children) {
+    node.children.forEach((child) => {
+      child.autoExpand = true;
+      expandProcessTree(child);
+    });
+  }
+};
+
 export const processNewEvents = (
   eventsProcessMap: ProcessMap,
   events: ProcessEvent[] | undefined,
