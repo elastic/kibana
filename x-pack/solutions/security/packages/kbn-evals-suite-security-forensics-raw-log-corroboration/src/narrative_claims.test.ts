@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getNarrativeText, countDistinctClaims } from './narrative_claims';
+import { getNarrativeText, countClaimUnits, splitClaimUnits } from './narrative_claims';
 
 describe('narrative_claims', () => {
   describe('getNarrativeText', () => {
@@ -29,7 +29,7 @@ describe('narrative_claims', () => {
       });
       expect(text).not.toContain('corroborating row');
       expect(text).toContain('Found corroborating evidence');
-      expect(countDistinctClaims(text, /corroborat\w*/gi)).toBe(1);
+      expect(countClaimUnits(text, /corroborat\w*/gi)).toBe(1);
     });
 
     it('handles string content and content-part arrays', () => {
@@ -45,29 +45,64 @@ describe('narrative_claims', () => {
     });
   });
 
-  describe('countDistinctClaims', () => {
-    it('collapses repeated headings case-insensitively (gapIdentification regression)', () => {
-      // Regression: "Gap", "gap", "Gaps" headings counted as 3+ mentions.
-      const text = '## Gaps\nGap 1: ...\n## gaps\ngap 2: ...';
-      expect(countDistinctClaims(text, /gap\w*/gi)).toBe(2); // "gaps", "gap"
+  describe('splitClaimUnits', () => {
+    it('splits on lines and on sentence boundaries within a line', () => {
+      expect(splitClaimUnits('One claim.\nAnother claim.')).toEqual([
+        'One claim.',
+        'Another claim.',
+      ]);
+      expect(splitClaimUnits('First. Second; Third!')).toEqual(['First.', 'Second; Third!']);
+      expect(splitClaimUnits('   \n\n  ')).toEqual([]);
+    });
+  });
+
+  describe('countClaimUnits', () => {
+    it('counts three stage bullets as three corroborated events (same verb form)', () => {
+      // Regression, false-failure direction: `corroborated` appears in three
+      // separate stage entries — three distinct corroborated events — but the
+      // old distinct-WORD-FORM count returned 1, so a correct report failed
+      // the dataset's `minCorroboratedCount`.
+      const text = [
+        '- Stage: initial-access — corroborated by outlook.exe spawning powershell.exe',
+        '- Stage: execution — corroborated by the encoded download cradle',
+        '- Stage: command-and-control — corroborated by the 192.168.1.50:443 beacon',
+      ].join('\n');
+
+      expect(countClaimUnits(text, /corroborat\w*/gi)).toBe(3);
+    });
+
+    it('counts one hedged sentence as one claim even when it uses three word forms', () => {
+      // Regression, false-pass direction: one sentence reusing
+      // corroborated/corroborating/corroboration scored 3 under the old metric,
+      // satisfying a depth bound the report did not actually meet.
+      const text = 'The corroborating evidence is limited; nothing was corroborated.';
+
+      expect(countClaimUnits(text, /corroborat\w*/gi)).toBe(1);
+      expect(countClaimUnits('corroborated, corroborating, corroboration', /corroborat\w*/gi)).toBe(
+        1
+      );
+    });
+
+    it('counts repeated gaps in one line separately, but a repeated heading once', () => {
+      // Two gap entries are two claims; a heading that repeats the word twice
+      // in the same unit is one.
+      expect(countClaimUnits('Gap 1: no WMI telemetry. Gap 2: no beacon.', /gap\w*/gi)).toBe(2);
+      expect(countClaimUnits('## Gaps and gaps', /gap\w*/gi)).toBe(1);
     });
 
     it('returns 0 on no matches', () => {
-      expect(countDistinctClaims('nothing here', /corroborat\w*/gi)).toBe(0);
+      expect(countClaimUnits('nothing here', /corroborat\w*/gi)).toBe(0);
+      expect(countClaimUnits('', /corroborat\w*/gi)).toBe(0);
     });
 
-    it('counts distinct corroborate-family terms separately', () => {
-      expect(
-        countDistinctClaims('corroborated, corroborating, corroboration', /corroborat\w*/gi)
-      ).toBe(3);
-    });
+    it('does not leak regex lastIndex between units (shared /g pattern)', () => {
+      const shared = /corroborat\w*/gi;
+      const text = 'corroborated A. corroborated B. corroborated C.';
 
-    it('deduplicates repeated identical claim terms (mutation guard: .length ≠ distinct)', () => {
-      // Regression: dedup is term-level — the same word repeated 4× is ONE
-      // distinct claim type; a plain substring count returns 4 here.
-      const text =
-        'corroborated A. corroborated A again. corroborated A once more. corroborated B.';
-      expect(countDistinctClaims(text, /corroborat\w*/gi)).toBe(1);
+      expect(countClaimUnits(text, shared)).toBe(3);
+      // Same pattern object, same answer — a stateful /g regex would drop
+      // alternating matches on the second call.
+      expect(countClaimUnits(text, shared)).toBe(3);
     });
   });
 });

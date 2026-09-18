@@ -22,7 +22,7 @@ import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import { SCENARIOS } from '../src/dataset';
 import { logScorecard } from '../src/scorecard_log';
 import { SKILL_ID, TOOL_IDS } from '../src/constants';
-import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { seedForensicTimeline, cleanupSeededData } from '../src/data_generators/forensic_data';
 
 evaluate.describe(
   'C3:L3 | Raw Log Corroboration — Composite pipeline',
@@ -35,7 +35,10 @@ evaluate.describe(
     });
 
     evaluate.afterAll(async ({ esClient }) => {
-      // Cleanup handled by seeder
+      // Seeder only bulk-indexes; all scenarios share the same `logs-*` indices.
+      for (const scenario of SCENARIOS) {
+        await cleanupSeededData(esClient, scenario.id);
+      }
     });
 
     const scenario = SCENARIOS.find((s) => s.id === 'full-corroboration') ?? SCENARIOS[0];
@@ -57,6 +60,13 @@ evaluate.describe(
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
           input: prompt,
+          // Pin the skill under test. This suite scores the raw-log corroboration
+          // worker's pipeline, not the agent's ability to route to it: without
+          // the override any path that makes two ES|QL calls and echoes the
+          // prompt vocabulary could satisfy the pipeline gates while never
+          // invoking the worker. Matches the runtime override the worker is
+          // launched with (see the sibling Watch suites' configurationOverrides).
+          configurationOverrides: { skillIds: [SKILL_ID] },
         });
 
         const toolCallSteps = getToolCallSteps(response);
@@ -97,11 +107,14 @@ evaluate.describe(
         const structuredOutput = hasCorroborated && hasGaps && hasConfidence;
         const pivotLogic = hasProcessQuery && (hasPersistenceCheck || hasLateralCheck);
 
-        const success = hasEsql && multiStep && structuredOutput && pivotLogic;
+        // `hasSkillInvoke` is a GATE, not a diagnostic. It was computed and then
+        // omitted from `success`, so the named-worker suite could go green
+        // without the worker under test ever being invoked.
+        const success = hasEsql && multiStep && structuredOutput && pivotLogic && hasSkillInvoke;
 
         log.info(
           `[L3] tools=${toolIds.size}, esql=${hasEsql}, multiStep=${multiStep}, ` +
-            `structured=${structuredOutput}, pivot=${pivotLogic}`
+            `structured=${structuredOutput}, pivot=${pivotLogic}, skill=${hasSkillInvoke}`
         );
 
         const scorecard = {
@@ -121,7 +134,7 @@ evaluate.describe(
           explanation:
             `Esql: ${hasEsql}. MultiStep: ${multiStep} (${toolCallSteps.length} calls). ` +
             `Structured: ${structuredOutput}. Pivot: ${pivotLogic}. ` +
-            `Discovery: ${hasDiscovery}, Search: ${hasSearch}, Skill: ${hasSkillInvoke}.`,
+            `Discovery: ${hasDiscovery}, Search: ${hasSearch}, Skill: ${hasSkillInvoke} (required).`,
           scorecard,
         };
       }

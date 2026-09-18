@@ -20,13 +20,11 @@
  */
 
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
-import {
-  DEEP_WATCH_TOOL_IDS,
-  DEEP_WATCH_FORENSICS_REPORTS_INDEX,
-  agentBuilderDefaultAgentId,
-} from '../src/constants';
+import { v4 as uuidv4 } from 'uuid';
+import { DEEP_WATCH_TOOL_IDS, agentBuilderDefaultAgentId } from '../src/constants';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 import { cleanupSeededData } from '../src/data_generators/cleanup';
+import { evaluateDurableReport, readBackReports } from '../src/gates/durable_outcome';
 
 evaluate.describe(
   'C3:L4 | Forensics Watch — Durable Outcome',
@@ -57,67 +55,57 @@ evaluate.describe(
     evaluate(
       'should persist draft report to the durable index',
       async ({ agentBuilderClient, esClient, log }) => {
+        // Per-run identity, echoed through the request. Without it the readback
+        // accepted ANY DRAFT report written in the last five minutes — an
+        // earlier spec, a retry, another model or a concurrent run could satisfy
+        // `persistedCount > 0` while this invocation persisted nothing.
+        const runId = `dwf-l4-${uuidv4()}`;
+        const runStartedAt = new Date().toISOString();
+
+        const messageWithRunId =
+          `${message} Run identifier: ${runId}. ` +
+          'Include this identifier verbatim in the draft report you persist.';
+
         const result = await agentBuilderClient.converse({
           agentId: agentBuilderDefaultAgentId,
-          input: message,
+          input: messageWithRunId,
         });
 
         const steps = getToolCallSteps(result);
         const toolIds = new Set(steps.map((s) => s.tool_id).filter(Boolean));
 
         const produceDraftCalled = toolIds.has(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);
-        log.info(`[L4] produceDraftCalled=${produceDraftCalled}`);
+        log.info(`[L4] produceDraftCalled=${produceDraftCalled} runId=${runId}`);
 
-        // ── Verify persistence ──────────────────────────────────────────────
-        let persistedCount = 0;
-        let hasEvaluationRecordShape = false;
+        // ── Verify persistence by reading it back, correlated to this run ────
+        let durable = evaluateDurableReport({ runId, runStartedAt, hits: [] });
 
         try {
-          const searchRes = await esClient.search({
-            index: DEEP_WATCH_FORENSICS_REPORTS_INDEX,
-            query: {
-              bool: {
-                must: [
-                  { match: { report_status: 'DRAFT' } },
-                  { range: { '@timestamp': { gte: 'now-5m' } } },
-                ],
-              },
-            },
-            size: 5,
-            sort: [{ '@timestamp': 'desc' }],
-          });
-
-          const hits = (searchRes.hits?.hits ?? []) as Array<{
-            _source: Record<string, unknown>;
-          }>;
-          persistedCount = hits.length;
-          log.info(`[L4] Persisted reports found: ${persistedCount}`);
-
-          if (persistedCount > 0) {
-            const record = hits[0]._source;
-            hasEvaluationRecordShape =
-              record.report_status !== undefined &&
-              record.timeline !== undefined &&
-              record.validated_iocs !== undefined &&
-              record.unresolved_questions !== undefined &&
-              record.confidence_assessment !== undefined;
-
-            log.info(`[L4] Evaluation Record shape valid: ${hasEvaluationRecordShape}`);
-          }
+          const hits = await readBackReports(esClient, { runStartedAt });
+          durable = evaluateDurableReport({ runId, runStartedAt, hits });
+          log.info(
+            `[L4] readback recent=${durable.recentCount} correlated=${durable.correlatedCount} ` +
+              `shapeValid=${durable.shapeValidCount}`
+          );
         } catch (e) {
           log.warning(`[L4] ES search failed: ${(e as Error).message}`);
         }
 
         return {
-          success: produceDraftCalled && persistedCount > 0,
+          success: produceDraftCalled && durable.success,
           explanation:
             `produce_draft called: ${produceDraftCalled}. ` +
-            `Persisted docs: ${persistedCount}. ` +
-            `Evaluation Record shape: ${hasEvaluationRecordShape}.`,
+            `DRAFT reports written since the run started: ${durable.recentCount}; ` +
+            `carrying run id ${runId}: ${durable.correlatedCount}; ` +
+            `with a complete Evaluation Record shape: ${durable.shapeValidCount} ` +
+            `(missing: ${durable.missingFields.join(', ') || 'none'}).`,
           scorecard: {
             produceDraft: produceDraftCalled ? 1 : 0,
-            persisted: persistedCount > 0 ? 1 : 0,
-            evaluationRecordShape: hasEvaluationRecordShape ? 1 : 0,
+            persistedCorrelatedToRun: durable.correlatedCount > 0 ? 1 : 0,
+            evaluationRecordShape: durable.shapeValidCount > 0 ? 1 : 0,
+            // Gated, not diagnostic: the shape check used to be computed and
+            // logged but left out of `success`.
+            durableOutcomeVerified: durable.success ? 1 : 0,
           },
         };
       }

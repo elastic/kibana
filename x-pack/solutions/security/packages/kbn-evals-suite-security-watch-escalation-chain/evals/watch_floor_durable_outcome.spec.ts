@@ -45,6 +45,7 @@ import { tags, evaluate } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WATCH_WORKFLOW_IDS } from '../src/constants';
 import { runWatchWorkflow } from '../src/workflow_task';
+import { pollUntil } from '../src/polling';
 
 const DETECTION_ALERTS_INDEX = '.alerts-security.alerts-default';
 const WORKER_EVAL_INDEX = 'pnd-worker-evaluations';
@@ -122,13 +123,14 @@ evaluate.describe(
 
           log.info(`[L4] Floor execution ${execution.executionId} → ${execution.status}`);
 
-          const executionOk = execution.status !== ExecutionStatus.FAILED;
+          const executionOk = execution.status === ExecutionStatus.COMPLETED;
 
-          // Give the orchestrator's on-failure:continue emit_proposal step a
-          // moment to finish its ES write after the top-level execution
-          // reports terminal (same rationale as escalation_chain_composite.spec.ts).
-          await new Promise((resolve) => setTimeout(resolve, 5_000));
-
+          // Poll for the orchestrator's `on-failure: continue` emit_proposal
+          // step: the top-level execution reports terminal BEFORE that step's ES
+          // write lands, so a single fixed-delay read races it. `pollUntil`
+          // retries until the record is visible and gives up with the reason
+          // instead of silently scoring `persisted=false` (same pattern as
+          // escalation_chain_composite.spec.ts).
           let record: Record<string, unknown> | undefined;
           try {
             // Floor mints `inv-floor-<alertId>` deterministically from
@@ -138,23 +140,34 @@ evaluate.describe(
             // escalates the SAME investigationId through Dark/Deep/Detection,
             // so a bare investigationId-only + latest-createdAt query would
             // pick up a downstream tier's record instead of Floor's own.
-            const searchRes = await esClient.search({
-              index: WORKER_EVAL_INDEX,
-              size: 1,
-              query: {
-                bool: {
-                  filter: [
-                    { term: { investigationId: `inv-floor-${alertId}` } },
-                    { term: { watch: 'watch-floor' } },
-                  ],
-                },
+            const found = await pollUntil<Record<string, unknown> | undefined>({
+              description: `WorkerEvaluationRecord for inv-floor-${alertId}`,
+              timeoutMs: 30_000,
+              intervalMs: 2_000,
+              until: (value) => value != null,
+              attempt: async () => {
+                const searchRes = await esClient.search({
+                  index: WORKER_EVAL_INDEX,
+                  size: 1,
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { investigationId: `inv-floor-${alertId}` } },
+                        { term: { watch: 'watch-floor' } },
+                      ],
+                    },
+                  },
+                  sort: [{ createdAt: { order: 'desc' as const } }],
+                });
+                const hit = searchRes.hits?.hits?.[0];
+                return hit?._source as Record<string, unknown> | undefined;
               },
-              sort: [{ createdAt: { order: 'desc' as const } }],
             });
-            const hit = searchRes.hits?.hits?.[0];
-            record = hit?._source as Record<string, unknown> | undefined;
+            record = found;
           } catch (e) {
-            log.warning(`[L4] pnd-worker-evaluations search failed: ${(e as Error).message}`);
+            // A poll timeout is reported, not swallowed: the gate below scores
+            // `persisted=false` and the explanation carries the reason.
+            log.warning(`[L4] pnd-worker-evaluations poll failed: ${(e as Error).message}`);
           }
 
           const persisted = record != null;

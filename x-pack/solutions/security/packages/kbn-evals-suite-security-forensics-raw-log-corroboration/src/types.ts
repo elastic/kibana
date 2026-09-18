@@ -79,5 +79,15 @@ export interface CorroborationScenario {
     maxCorroboratedCount: number;
     minGapCount: number;
     maxGapCount: number;
+    /**
+     * Floor for the confidence the report must state about its own findings.
+     *
+     * Uniform across scenarios on purpose. The worker emits prose, so the suite
+     * cannot define a calibrated per-scenario target; what this floor can
+     * honestly assert is that the report COMMITS to a non-trivial confidence.
+     * The gate extracts the value with `parseConfidence` and fails a report that
+     * states none (previously `minConfidence` existed as a field nothing read).
+     */
+    minConfidence: number;
   };
 }

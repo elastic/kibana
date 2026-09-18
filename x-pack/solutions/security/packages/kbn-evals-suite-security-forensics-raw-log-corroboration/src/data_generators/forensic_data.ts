@@ -5,14 +5,29 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { CorroborationScenario, NarrativeStage } from '../types';
 
 interface SeedParams {
-  esClient: { bulk: (params: { index: string; body: unknown[] }) => Promise<unknown> };
+  esClient: Client;
   scenario: CorroborationScenario;
 }
 
 const OUT_OF_SCOPE_OFFSET_MS = 24 * 60 * 60 * 1000;
+
+export const PROCESS_INDEX = 'logs-endpoint.events.process-default';
+export const NETWORK_INDEX = 'logs-endpoint.events.network-default';
+
+export interface PlannedSeedEvent {
+  index: string;
+  /** Deterministic id: `<scenarioId>-<stageId>-<proc|net>-<in-scope|decoy>`. */
+  id: string;
+  host: string;
+  timestamp: string;
+  /** True when the event is deliberately out of scope for its scenario. */
+  decoy: boolean;
+  document: Record<string, unknown>;
+}
 
 /**
  * Timestamp a stage's telemetry is seeded at.
@@ -30,18 +45,20 @@ const hostFor = (scenario: CorroborationScenario, stage: NarrativeStage): string
   stage.decoy?.host ?? scenario.scope.hosts[0];
 
 /**
- * Seed raw telemetry into logs-* so the corroboration worker has real ES|QL rows
- * to query.
+ * Pure seed plan for one scenario: which documents go where, and when.
  *
  * Seeding is driven by `scenario.stages`: a corroborated stage gets in-scope
  * telemetry, a `decoy` stage gets telemetry that is deliberately out of scope,
  * and every other stage gets none. Previously the same two events were written
  * for every scenario, so scenarios whose premise is "no telemetry" or "a gap
  * here" were run against data that contradicted them.
+ *
+ * Exported (and pure) so `dataset_invariants.test.ts` can assert that the plan
+ * respects each scenario's declared scope instead of re-deriving the seeder's
+ * behaviour from the dataset by hand.
  */
-export const seedForensicTimeline = async (params: SeedParams): Promise<void> => {
-  const { esClient, scenario } = params;
-  const events: unknown[] = [];
+export const planSeedEvents = (scenario: CorroborationScenario): PlannedSeedEvent[] => {
+  const planned: PlannedSeedEvent[] = [];
 
   const seededStages = scenario.stages.filter(
     (stage) => stage.corroborated || stage.decoy !== undefined
@@ -50,17 +67,17 @@ export const seedForensicTimeline = async (params: SeedParams): Promise<void> =>
   for (const stage of seededStages) {
     const host = hostFor(scenario, stage);
     const timestamp = timestampFor(scenario, stage);
-    const suffix = stage.decoy === undefined ? 'in-scope' : 'decoy';
+    const isDecoy = stage.decoy !== undefined;
+    const suffix = isDecoy ? 'decoy' : 'in-scope';
 
     // Process telemetry: powershell spawned by outlook, as in the narrative.
-    events.push(
-      {
-        index: {
-          _index: 'logs-endpoint.events.process-default',
-          _id: `${scenario.id}-${stage.id}-proc-${suffix}`,
-        },
-      },
-      {
+    planned.push({
+      index: PROCESS_INDEX,
+      id: `${scenario.id}-${stage.id}-proc-${suffix}`,
+      host,
+      timestamp,
+      decoy: isDecoy,
+      document: {
         '@timestamp': timestamp,
         host: { name: host },
         process: {
@@ -70,43 +87,55 @@ export const seedForensicTimeline = async (params: SeedParams): Promise<void> =>
           pid: 1234,
         },
         event: { category: 'process', type: ['start'] },
-      }
-    );
+      },
+    });
 
     // Network telemetry: the C2 beacon from the narrative.
-    events.push(
-      {
-        index: {
-          _index: 'logs-endpoint.events.network-default',
-          _id: `${scenario.id}-${stage.id}-net-${suffix}`,
-        },
-      },
-      {
+    planned.push({
+      index: NETWORK_INDEX,
+      id: `${scenario.id}-${stage.id}-net-${suffix}`,
+      host,
+      timestamp,
+      decoy: isDecoy,
+      document: {
         '@timestamp': timestamp,
         host: { name: host },
         source: { ip: '10.0.0.1' },
         destination: { ip: '192.168.1.50', port: 443 },
         network: { protocol: 'tcp' },
         event: { category: 'network', type: ['connection'] },
-      }
-    );
+      },
+    });
   }
 
-  if (events.length === 0) return;
-
-  await esClient.bulk({ index: 'logs-*', body: events });
+  return planned;
 };
 
-export const cleanupSeededData = async (
-  esClient: { deleteByQuery: (params: { index: string; body: unknown }) => Promise<unknown> },
-  scenarioId: string
-): Promise<void> => {
+/**
+ * Seed raw telemetry into logs-* so the corroboration worker has real ES|QL rows
+ * to query.
+ */
+export const seedForensicTimeline = async (params: SeedParams): Promise<void> => {
+  const { esClient, scenario } = params;
+  const planned = planSeedEvents(scenario);
+  if (planned.length === 0) return;
+
+  const events: unknown[] = planned.flatMap((event) => [
+    { index: { _index: event.index, _id: event.id } },
+    event.document,
+  ]);
+
+  // `refresh: true` is required, not cosmetic: the worker queries these rows
+  // through ES|QL seconds after seeding, and an unrefreshed bulk write is not
+  // searchable yet.
+  await esClient.bulk({ operations: events, refresh: true });
+};
+
+export const cleanupSeededData = async (esClient: Client, scenarioId: string): Promise<void> => {
   await esClient.deleteByQuery({
     index: 'logs-*',
-    body: {
-      query: {
-        prefix: { _id: scenarioId },
-      },
+    query: {
+      prefix: { _id: scenarioId },
     },
   });
 };

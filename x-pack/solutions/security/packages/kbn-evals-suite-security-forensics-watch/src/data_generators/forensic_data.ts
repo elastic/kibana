@@ -99,7 +99,7 @@ const os = (host: keyof typeof AGENT_IDS) =>
  * `expectedIocs: [...{ status: 'confirmed' }]` entries are actually present
  * so `buildIocValidationQuery()` can resolve them.
  */
-const EVENTS: ForensicEvent[] = [
+export const EVENTS: ForensicEvent[] = [
   // ── dwf-apt29-lateral-movement: DESKTOP-APT29 -> SERVER-DC01 ──────────────
   {
     offsetMinutes: 0,

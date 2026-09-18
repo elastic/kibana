@@ -56,11 +56,38 @@ export function getNarrativeText(response: ResponseLike): string {
 }
 
 /**
- * Counts distinct matched terms case-insensitively — "Gap", "gap", "Gaps" from
- * repeated headings collapse toward distinct claims rather than raw mentions.
+ * Splits narrative text into claim units: a bullet/line, or a sentence within
+ * a line. A unit is the smallest span that can carry one claim — sentence
+ * granularity, not clause: a semicolon-joined sentence is still one claim.
  */
-export function countDistinctClaims(text: string, pattern: RegExp): number {
-  const matches = text.match(pattern);
-  if (!matches) return 0;
-  return new Set(matches.map((m) => m.toLowerCase())).size;
-}
+export const splitClaimUnits = (text: string): string[] =>
+  text
+    .split(/\n+/)
+    .flatMap((line) => line.split(/(?<=[.!?])\s+/))
+    .map((unit) => unit.trim())
+    .filter((unit) => unit.length > 0);
+
+/**
+ * Counts distinct CLAIMS (claim units) that match `pattern`, not distinct word
+ * forms.
+ *
+ * A claim is a unit, so the same event described twice in one sentence is one
+ * claim and three stage bullets are three claims even when each uses the same
+ * verb. The previous metric — `new Set(matches.map(lowercase)).size` over
+ * `String.match` — counted lexical forms instead, which inverted the signal in
+ * both directions:
+ *
+ *   - "Corroborated: stage A / stage B / stage C" (three separate corroborated
+ *     events, same verb form) scored 1, so a correct report failed the depth
+ *     bound.
+ *   - One hedged sentence using "corroborated", "corroborating" and
+ *     "corroboration" scored 3, so a report that corroborated nothing passed it.
+ *
+ * Both directions are pinned in `narrative_claims.test.ts`.
+ */
+export const countClaimUnits = (text: string, pattern: RegExp): number => {
+  // Rebuild without the global flag: a shared /g regex carries `lastIndex`
+  // between `.test()` calls and would skip alternating units.
+  const matcher = new RegExp(pattern.source, pattern.flags.replace(/g/g, ''));
+  return splitClaimUnits(text).filter((unit) => matcher.test(unit)).length;
+};

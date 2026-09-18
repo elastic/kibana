@@ -49,6 +49,7 @@ import { tags, evaluate } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WATCH_WORKFLOW_IDS, buildSyntheticEscalation, PND_INDICES } from '../src/constants';
 import { runWatchWorkflow, readProposalsForInvestigation } from '../src/workflow_task';
+import { pollUntil, PollTimeoutError } from '../src/polling';
 
 evaluate.describe(
   'C-watch-chain:L3 | Watch escalation chain — Dark -> Deep -> Detection',
@@ -96,19 +97,39 @@ evaluate.describe(
           `[L3] Dark Watch execution ${darkExecution.executionId} → ${darkExecution.status}`
         );
 
-        // Give downstream fan-out (Deep, Detection x2, each their own
-        // workflow.execute child) a little settle time after Dark's own
-        // top-level execution reports terminal — those children run inside
-        // Dark's own execution but their proposal-emit steps are
-        // `on-failure: continue`, so a slow nested worker can still be
-        // writing after the parent step tree reports done.
-        await new Promise((resolve) => setTimeout(resolve, 5_000));
-
-        const proposals = await readProposalsForInvestigation({
-          esClient,
-          investigationId,
-          index: PND_INDICES.proposals,
-        });
+        // Downstream fan-out (Deep, Detection x2, each their own
+        // workflow.execute child) writes its proposals after Dark's own
+        // top-level execution reports terminal — those steps are
+        // `on-failure: continue`, so a slow nested worker can still be writing
+        // once the parent step tree is done. Poll to a deadline rather than
+        // sleeping once and reading once: a single read after a fixed 5s turned
+        // a legitimately-late Detection write into an intermittent failure,
+        // even though the suite has a 15-minute budget.
+        let proposals: Array<Record<string, unknown>> = [];
+        try {
+          proposals = await pollUntil({
+            description: `Detection Watch proposal for ${investigationId}`,
+            timeoutMs: 60_000,
+            intervalMs: 5_000,
+            attempt: () =>
+              readProposalsForInvestigation({
+                esClient,
+                investigationId,
+                index: PND_INDICES.proposals,
+              }),
+            until: (found) =>
+              found.some((p) =>
+                String(p.sourceWatchId ?? p.sourceWatch ?? '').includes('detection')
+              ),
+          });
+        } catch (e) {
+          if (!(e instanceof PollTimeoutError)) throw e;
+          // The chain genuinely never produced a Detection proposal (the bug #10
+          // symptom). Keep the partial read so the gates below fail with
+          // evidence rather than discarding the diagnosis.
+          proposals = (e.lastValue as Array<Record<string, unknown>> | undefined) ?? [];
+          log.warning(`[L3] ${e.message}; scoring ${proposals.length} proposal(s) read so far`);
+        }
 
         const investigationIds = new Set(proposals.map((p) => p.investigationId));
         const sourceWatches = proposals.map((p) => p.sourceWatchId ?? p.sourceWatch);
@@ -139,12 +160,12 @@ evaluate.describe(
           }`
         );
 
-        const darkExecutionOk = darkExecution.status !== ExecutionStatus.FAILED;
+        const darkExecutionOk = darkExecution.status === ExecutionStatus.COMPLETED;
 
         return {
           success: darkExecutionOk && allShareInvestigationId && detectionWatchFired,
           explanation:
-            `Dark execution status: ${darkExecution.status}. ` +
+            `Dark execution status: ${darkExecution.status} (healthy only when COMPLETED). ` +
             `Proposals persisted: ${proposals.length}. ` +
             `All share investigationId '${investigationId}': ${allShareInvestigationId}. ` +
             `Source watches: ${JSON.stringify(sourceWatches)}. ` +

@@ -38,6 +38,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/kbn-client';
 import { tags, evaluate } from '@kbn/evals';
+import { isPauseStatus, isTerminalStatus } from '../src/execution_status';
+import {
+  carriesAllPriorEvents,
+  missingPriorEvents as missingPriorEventSignatures,
+} from '../src/gates/timeline_carryover';
 import {
   PND_EMIT_PROPOSAL_PATH,
   PND_API_VERSION,
@@ -380,12 +385,14 @@ evaluate.describe(
           while (Date.now() < deadline) {
             const ex = await pollExecution();
             status = ex.status;
-            if (status === 'waiting_for_input' || status === 'waiting') break;
-            if (status === 'failed' || status === 'completed' || status === 'cancelled') break;
+            // Both pause spellings and every terminal state stop the poll; the
+            // classification lives in src/execution_status.ts so the pre-reject
+            // and post-reject checks cannot disagree.
+            if (isPauseStatus(status) || isTerminalStatus(status)) break;
             await new Promise((r) => setTimeout(r, 1500));
           }
           log.info(`[D4] run ${executionId} pre-reject status=${status}`);
-          const reachedPause = status === 'waiting_for_input' || status === 'waiting';
+          const reachedPause = isPauseStatus(status);
 
           // 4. REJECT the approval.
           await kbnClient.request({
@@ -419,11 +426,16 @@ evaluate.describe(
           // first write, so index *existence* is not a reliable signal of whether
           // the write ran (an auto-configured empty index could exist either way).
           // Zero marker documents is the honest assertion that the consequential
-          // write never executed. The run's terminal status may be completed /
-          // failed / cancelled depending on engine semantics for a rejected wait —
-          // the gate invariant is about the SIDE EFFECT, not the status label.
+          // write never executed.
+          //
+          // `halted` requires a TERMINAL status. It previously excluded only
+          // `waiting_for_input`, so an engine reporting the equivalent `waiting`
+          // state would have been read as halted while the execution was still
+          // parked — the gate could pass with zero marker documents for the wrong
+          // reason. Both spellings are classified together in
+          // src/execution_status.ts, which is unit-tested.
           const consequentialStepDidNotRun = markerDocs === 0;
-          const halted = finalStatus !== 'running' && finalStatus !== 'waiting_for_input';
+          const halted = isTerminalStatus(finalStatus);
 
           const success = reachedPause && consequentialStepDidNotRun && halted;
           return {
@@ -623,14 +635,17 @@ evaluate.describe(
           workerRun: workerRun({ alertId, investigationId }),
         });
 
-        // Snapshot the pre-fork timeline so carry-over can be compared exactly.
+        // Snapshot the pre-fork timeline so carry-over can be compared exactly:
+        // the events themselves, not just their number.
         let preForkEventCount = 0;
+        let preForkEvents: Array<{ type?: string; summary?: string }> = [];
         try {
-          const pre = await esClient.get<{ events?: unknown[] }>({
+          const pre = await esClient.get<{ events?: Array<{ type?: string; summary?: string }> }>({
             index: PND_INVESTIGATIONS_INDEX,
             id: investigationId,
           });
-          preForkEventCount = pre._source?.events?.length ?? 0;
+          preForkEvents = pre._source?.events ?? [];
+          preForkEventCount = preForkEvents.length;
         } catch (e) {
           log.warning(`[D7] pre-fork investigation read failed: ${(e as Error).message}`);
         }
@@ -665,6 +680,7 @@ evaluate.describe(
         // prior threads forward plus the promotion audit event.
         let incidentIsLineageLinked = false;
         let carriedAllPriorThreads = false;
+        let missingPriorEvents: string[] = [];
         let promotionAudited = false;
         try {
           const incidentDoc = await esClient.get<{
@@ -678,9 +694,13 @@ evaluate.describe(
             src?.template_id === 'incident' && src?.forkedFromInvestigationId === investigationId;
 
           const incidentEvents = src?.events ?? [];
-          // Lossless: every pre-fork event carried over, PLUS the fork event.
-          carriedAllPriorThreads =
-            preForkEventCount > 0 && incidentEvents.length === preForkEventCount + 1;
+          // Lossless: every pre-fork event present UNCHANGED, PLUS the fork event.
+          // The comparison lives in `gates/timeline_carryover.ts` (unit-tested):
+          // counting events alone passed a lossy fork that dropped one prior
+          // event and wrote another in its place.
+          missingPriorEvents = missingPriorEventSignatures(preForkEvents, incidentEvents);
+          carriedAllPriorThreads = carriesAllPriorEvents(preForkEvents, incidentEvents);
+
           promotionAudited = incidentEvents.some(
             (evt) =>
               evt?.type === 'decision' && (evt?.summary ?? '').includes('promoted to Incident')
@@ -692,7 +712,9 @@ evaluate.describe(
         log.info(
           `[D7] investigationSurvives=${investigationSurvives} ` +
             `incidentIsLineageLinked=${incidentIsLineageLinked} ` +
-            `carriedAllPriorThreads=${carriedAllPriorThreads} promotionAudited=${promotionAudited}`
+            `carriedAllPriorThreads=${carriedAllPriorThreads} ` +
+            `missingPriorEvents=${JSON.stringify(missingPriorEvents)} ` +
+            `promotionAudited=${promotionAudited}`
         );
 
         const success =

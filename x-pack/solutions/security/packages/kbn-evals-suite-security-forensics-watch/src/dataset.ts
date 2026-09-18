@@ -58,6 +58,7 @@ export const forensicDataset: ForensicExample[] = [
       minUnresolvedQuestions: 1,
       draftLabelRequired: true,
       noExecutionRequired: true,
+      minConfidenceLevel: 'medium',
     },
   },
   {
@@ -95,6 +96,7 @@ export const forensicDataset: ForensicExample[] = [
       minUnresolvedQuestions: 1,
       draftLabelRequired: true,
       noExecutionRequired: true,
+      minConfidenceLevel: 'medium',
     },
   },
   {
@@ -118,7 +120,12 @@ export const forensicDataset: ForensicExample[] = [
     output: {
       minTimelineEvents: 1,
       expectedIocs: [
-        { type: 'network_destination', value: '203.0.113.77', status: 'not_found' },
+        // The seeded DEV-WKS-07 telemetry contains an outbound TLS connection to
+        // 203.0.113.77 (see the supply-chain block in
+        // src/data_generators/forensic_data.ts), so a correct IoC validator
+        // returns `confirmed`. This expectation previously said `not_found`,
+        // which scored a CORRECT validator as wrong on the network_destination.
+        { type: 'network_destination', value: '203.0.113.77', status: 'confirmed' },
         { type: 'file_hash', value: 'd2a5b8e1c4f7a9b3d6e0f2c5a8b1d4e7', status: 'not_found' },
         {
           type: 'registry_key',
@@ -129,6 +136,7 @@ export const forensicDataset: ForensicExample[] = [
       minUnresolvedQuestions: 1,
       draftLabelRequired: true,
       noExecutionRequired: true,
+      minConfidenceLevel: 'medium',
     },
   },
 ];

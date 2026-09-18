@@ -83,5 +83,15 @@ export interface ForensicExample {
     draftLabelRequired: boolean;
     /** No execution claim must be present. */
     noExecutionRequired: boolean;
+    /**
+     * Floor for the report's stated overall confidence (FR-141 separates
+     * confidence from severity, so the report must state one).
+     *
+     * Conservative on purpose: `medium` is the floor for every scenario, so the
+     * gate fails a report that declines to assess (`insufficient`), states `low`
+     * on an escalation with seeded confirming telemetry, or states nothing —
+     * without pretending the suite can define a calibrated per-case target.
+     */
+    minConfidenceLevel: 'high' | 'medium' | 'low' | 'insufficient';
   };
 }

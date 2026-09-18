@@ -46,6 +46,7 @@
 import { tags, getToolCallSteps, type Example } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { FORENSIC_CASES } from '../src/dataset';
+import { evaluateIocGate, meetsConfidenceFloor } from '../src/gates/report_gates';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 import { cleanupSeededData } from '../src/data_generators/cleanup';
 import {
@@ -65,6 +66,14 @@ interface ForensicEvalExample extends Example {
     minUnresolvedQuestions: number;
     draftLabelRequired: boolean;
     noExecutionRequired: boolean;
+    /** Dataset-backed IoC expectations the report is scored against. */
+    expectedIocs: Array<{
+      type: string;
+      value: string;
+      status: 'confirmed' | 'not_found' | 'unable_to_validate';
+    }>;
+    /** Floor for the report's stated overall confidence. */
+    minConfidenceLevel: 'high' | 'medium' | 'low' | 'insufficient';
   };
   metadata?: {
     case_id: string;
@@ -101,6 +110,8 @@ const buildExamples = (): ForensicEvalExample[] =>
       minUnresolvedQuestions: example.output.minUnresolvedQuestions,
       draftLabelRequired: example.output.draftLabelRequired,
       noExecutionRequired: example.output.noExecutionRequired,
+      expectedIocs: example.output.expectedIocs,
+      minConfidenceLevel: example.output.minConfidenceLevel,
     },
     metadata: {
       case_id: example.id,
@@ -239,7 +250,9 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
 
         const timelineEvents = (draftData?.timeline_event_count as number | undefined) ?? 0;
         const validatedIocs =
-          (draftData?.validated_iocs as Array<{ status: string }> | undefined) ?? [];
+          (draftData?.validated_iocs as
+            | Array<{ type?: string; value?: string; status?: string }>
+            | undefined) ?? [];
         const unresolvedQuestions = (draftData?.unresolved_questions as string[] | undefined) ?? [];
         const confidenceOverall = (
           draftData?.confidence_assessment as { overall?: string } | undefined
@@ -267,13 +280,31 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
         const questionsOk = unresolvedQuestions.length >= example.output.minUnresolvedQuestions;
         const timelineOk = timelineEvents >= example.output.minTimelineEvents;
 
+        // Forensic-quality gates. These values were computed and reported but
+        // left OUT of `success`, so a run with zero timeline events, no validated
+        // IoC and no stated confidence could be green as long as it called the
+        // two tools and named an unresolved question — the advertised quality
+        // regression gate was measuring routing, not quality.
+        const iocGate = evaluateIocGate(example.output.expectedIocs, validatedIocs);
+        const confidenceOk = meetsConfidenceFloor(
+          confidenceOverall,
+          example.output.minConfidenceLevel
+        );
+        const esqlOk = esqlToolsCalled;
+        const persistenceOk = draftPersisted;
+
         const success =
           skillInvoked &&
           packageEvidenceCalled &&
           produceDraftCalled &&
           draftLabelOk &&
           noExecutionOk &&
-          questionsOk;
+          questionsOk &&
+          timelineOk &&
+          iocGate.success &&
+          confidenceOk &&
+          esqlOk &&
+          persistenceOk;
 
         return {
           success,
@@ -283,9 +314,13 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
             `Data gates: draftLabel=${draftLabelPresent}, proposalOnly=${proposalOnly}, ` +
             `evidenceSufficient=${evidenceSufficient}, persisted=${draftPersisted}. ` +
             `Timeline events: ${timelineEvents}/${example.output.minTimelineEvents}, ` +
-            `IoCs validated: ${validatedIocs.length}, ` +
+            `IoCs matched: ${iocGate.matchedCount}/${iocGate.expectedCount} ` +
+            `(missing confirmed: ${iocGate.missingConfirmed.join(', ') || 'none'}; ` +
+            `fabricated: ${iocGate.fabricatedConfirmed.join(', ') || 'none'}), ` +
             `unresolved questions: ${unresolvedQuestions.length}/${example.output.minUnresolvedQuestions}, ` +
-            `confidence: ${confidenceOverall ?? 'none'}. ` +
+            `confidence: ${confidenceOverall ?? 'none'} (floor ${
+              example.output.minConfidenceLevel
+            }). ` +
             `(Prose signals are diagnostic only: ${JSON.stringify(proseSignals)})`,
           scorecard: {
             skillInvoked: skillInvoked ? 1 : 0,
@@ -293,9 +328,10 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
             timelineDepth: timelineOk ? 1 : 0,
             guardrailCompliance: draftLabelOk && noExecutionOk ? 1 : 0,
             unresolvedQuestions: questionsOk ? 1 : 0,
-            confidenceLevels: confidenceOverall ? 1 : 0,
-            iocValidation: validatedIocs.length > 0 ? 1 : 0,
-            draftPersisted: draftPersisted ? 1 : 0,
+            confidenceLevels: confidenceOk ? 1 : 0,
+            iocValidation: iocGate.success ? 1 : 0,
+            esqlGrounded: esqlOk ? 1 : 0,
+            draftPersisted: persistenceOk ? 1 : 0,
           },
           evaluationDataset: {
             examples: [

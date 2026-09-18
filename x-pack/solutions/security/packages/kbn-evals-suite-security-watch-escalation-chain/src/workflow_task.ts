@@ -21,6 +21,44 @@ export interface WatchWorkflowExecution {
 }
 
 /**
+ * Thrown when a managed Watch workflow does not reach a terminal status within
+ * the caller's deadline.
+ *
+ * Callers must not treat a non-terminal status as a finished run: a still
+ * `running`/`waiting` execution has partial side effects, so every gate
+ * downstream of this call would score an unfinished chain as healthy. Returning
+ * the status with a log warning is what made that possible.
+ */
+export class WatchWorkflowTimeoutError extends Error {
+  public readonly workflowId: string;
+  public readonly executionId: string;
+  public readonly lastStatus: ExecutionStatus;
+  public readonly maxWaitMs: number;
+
+  constructor({
+    workflowId,
+    executionId,
+    lastStatus,
+    maxWaitMs,
+  }: {
+    workflowId: string;
+    executionId: string;
+    lastStatus: ExecutionStatus;
+    maxWaitMs: number;
+  }) {
+    super(
+      `${workflowId} execution ${executionId} did not reach a terminal status within ${maxWaitMs}ms ` +
+        `(last status: ${lastStatus})`
+    );
+    this.name = 'WatchWorkflowTimeoutError';
+    this.workflowId = workflowId;
+    this.executionId = executionId;
+    this.lastStatus = lastStatus;
+    this.maxWaitMs = maxWaitMs;
+  }
+}
+
+/**
  * Starts a managed Watch orchestrator workflow and polls until it reaches a
  * terminal status. Used to drive Dark/Deep/Detection directly with a
  * synthetic `escalation` (or `detectionChangeSignal`/`ruleTuningTrigger`)
@@ -71,9 +109,15 @@ export const runWatchWorkflow = async ({
   }
 
   if (!isTerminal(execution.status)) {
-    log.warning(
-      `${workflowId} execution ${workflowExecutionId} did not reach terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
-    );
+    // Fail loudly. Returning the non-terminal status let a caller whose success
+    // predicate was `status !== FAILED` score a still-running (or timed-out)
+    // chain as healthy, with only part of its side effects written.
+    throw new WatchWorkflowTimeoutError({
+      workflowId,
+      executionId: workflowExecutionId,
+      lastStatus: execution.status,
+      maxWaitMs,
+    });
   }
 
   return { executionId: workflowExecutionId, status: execution.status, error: execution.error };

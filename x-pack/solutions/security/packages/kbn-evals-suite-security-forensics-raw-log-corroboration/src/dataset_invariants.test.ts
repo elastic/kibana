@@ -6,6 +6,7 @@
  */
 
 import { SCENARIOS } from './dataset';
+import { planSeedEvents } from './data_generators/forensic_data';
 
 /**
  * Dataset invariants for the raw-log corroboration suite.
@@ -125,6 +126,94 @@ describe('raw_log_corroboration dataset invariants', () => {
     // silently rename eval cases and break comparison.
     for (const scenario of SCENARIOS) {
       expect(scenario.id).toMatch(/^[a-z0-9-]+$/);
+    }
+  });
+
+  // ── Scenario isolation ─────────────────────────────────────────────────────
+  // Every scenario is seeded into the same `logs-*` indices before any of them
+  // runs, so the scope the prompt hands the agent is the only thing separating
+  // one scenario's telemetry from another's. Both axes are pinned here.
+
+  it('no host appears in two scenarios, so host scoping isolates them', () => {
+    const hostsToScenarios = new Map<string, string[]>();
+    for (const scenario of SCENARIOS) {
+      for (const host of scenario.scope.hosts) {
+        hostsToScenarios.set(host, [...(hostsToScenarios.get(host) ?? []), scenario.id]);
+      }
+    }
+
+    const shared = [...hostsToScenarios.entries()].filter(([, ids]) => ids.length > 1);
+    expect(shared).toEqual([]);
+  });
+
+  it('scenario time windows are pairwise disjoint, so time scoping isolates them', () => {
+    const windows = SCENARIOS.map((scenario) => ({
+      id: scenario.id,
+      from: Date.parse(scenario.scope.timeRange.from),
+      to: Date.parse(scenario.scope.timeRange.to),
+    }));
+
+    for (let i = 0; i < windows.length; i++) {
+      for (let j = i + 1; j < windows.length; j++) {
+        const overlaps = windows[i].from <= windows[j].to && windows[j].from <= windows[i].to;
+        expect({
+          pair: [windows[i].id, windows[j].id],
+          overlaps,
+        }).toEqual({ pair: [windows[i].id, windows[j].id], overlaps: false });
+      }
+    }
+  });
+
+  it('the seed plan puts every in-scope event inside its own scenario scope', () => {
+    // The invariant that makes the two above load-bearing: an in-scope event
+    // that lands outside its scenario's hosts/window is exactly what let the
+    // "no raw telemetry" premise be answered from another scenario's documents.
+    for (const scenario of SCENARIOS) {
+      const from = Date.parse(scenario.scope.timeRange.from);
+      const to = Date.parse(scenario.scope.timeRange.to);
+
+      for (const event of planSeedEvents(scenario)) {
+        const at = Date.parse(event.timestamp);
+        expect(Number.isNaN(at)).toBe(false);
+
+        if (event.decoy) {
+          const outOfScope = !scenario.scope.hosts.includes(event.host) || at < from || at > to;
+          expect({ id: event.id, outOfScope }).toEqual({ id: event.id, outOfScope: true });
+        } else {
+          expect(scenario.scope.hosts).toContain(event.host);
+          expect(at).toBeGreaterThanOrEqual(from);
+          expect(at).toBeLessThanOrEqual(to);
+        }
+      }
+    }
+  });
+
+  it('seeds exactly the corroborated stages in scope and the decoy stages out of it', () => {
+    for (const scenario of SCENARIOS) {
+      const plan = planSeedEvents(scenario);
+      const inScopeStages = scenario.stages.filter(
+        (stage) => stage.corroborated && stage.decoy === undefined
+      );
+      const decoyStages = scenario.stages.filter((stage) => stage.decoy !== undefined);
+
+      expect(plan.filter((event) => !event.decoy)).toHaveLength(inScopeStages.length * 2);
+      expect(plan.filter((event) => event.decoy)).toHaveLength(decoyStages.length * 2);
+      // Deterministic ids — cleanup deletes by `<scenarioId>` prefix.
+      expect(new Set(plan.map((event) => event.id)).size).toBe(plan.length);
+      for (const event of plan) {
+        expect(event.id.startsWith(`${scenario.id}-`)).toBe(true);
+      }
+    }
+  });
+
+  it('declares a usable confidence floor for every scenario', () => {
+    // The L2 gate reads this field; a missing/NaN/out-of-range floor would make
+    // `confidenceOk` silently false (or vacuously true) for that scenario.
+    for (const scenario of SCENARIOS) {
+      const floor = scenario.expected.minConfidence;
+      expect(Number.isFinite(floor)).toBe(true);
+      expect(floor).toBeGreaterThan(0);
+      expect(floor).toBeLessThanOrEqual(1);
     }
   });
 });

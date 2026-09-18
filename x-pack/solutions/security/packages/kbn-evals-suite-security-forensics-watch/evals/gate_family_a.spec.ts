@@ -156,7 +156,7 @@ evaluate.describe(
           input: 'forensic investigation with no details whatsoever',
         });
 
-        const steps = getToolCallSteps(result.steps);
+        const steps = getToolCallSteps(result);
         const toolIds = new Set(steps.map((s) => s.tool_id).filter(Boolean));
 
         const draftProduced = toolIds.has(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);
@@ -197,7 +197,7 @@ evaluate.describe(
           input: message,
         });
 
-        const steps = getToolCallSteps(result.steps);
+        const steps = getToolCallSteps(result);
         const toolIds = new Set(steps.map((s) => s.tool_id).filter(Boolean));
 
         const draftProduced = toolIds.has(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);

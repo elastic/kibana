@@ -15,13 +15,15 @@
  */
 
 import { tags, getToolCallSteps, type Example } from '@kbn/evals';
-import { getNarrativeText, countDistinctClaims } from '../src/narrative_claims';
+import { getNarrativeText, countClaimUnits } from '../src/narrative_claims';
+import { parseConfidence } from '../src/confidence';
 import { logScorecard } from '../src/scorecard_log';
 import { selectShard } from '../src/select_shard';
+import { buildCorroborationPrompt } from '../src/prompt';
 import { evaluate as base } from '../src/evaluate';
 import { SCENARIOS } from '../src/dataset';
 import { SKILL_ID, TOOL_IDS } from '../src/constants';
-import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { seedForensicTimeline, cleanupSeededData } from '../src/data_generators/forensic_data';
 
 interface RawLogEvalExample extends Example {
   input: {
@@ -32,6 +34,7 @@ interface RawLogEvalExample extends Example {
     maxCorroboratedCount: number;
     minGapCount: number;
     maxGapCount: number;
+    minConfidence: number;
   };
   metadata?: {
     case_id: string;
@@ -39,24 +42,18 @@ interface RawLogEvalExample extends Example {
   };
 }
 
-const toPrompt = (narrative: string, hosts: string[]): string =>
-  `Corroborate the following alert narrative against raw telemetry.\n\n` +
-  `Narrative: ${narrative}\n` +
-  `Hosts in scope: ${hosts.join(', ')}\n\n` +
-  `For each stage in the narrative, query logs-* indices to confirm or identify gaps. ` +
-  `Report corroborated events, gap events, confidence, and unresolved questions.`;
-
 const buildExamples = (): RawLogEvalExample[] =>
   SCENARIOS.map((scenario) => ({
     id: `raw-log-${scenario.id}`,
     input: {
-      question: toPrompt(scenario.narrative, scenario.scope.hosts),
+      question: buildCorroborationPrompt(scenario),
     },
     output: {
       minCorroboratedCount: scenario.expected.minCorroboratedCount,
       maxCorroboratedCount: scenario.expected.maxCorroboratedCount,
       minGapCount: scenario.expected.minGapCount,
       maxGapCount: scenario.expected.maxGapCount,
+      minConfidence: scenario.expected.minConfidence,
     },
     metadata: {
       case_id: scenario.id,
@@ -83,7 +80,13 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
   });
 
   base.afterAll(async ({ esClient }) => {
-    // Cleanup handled by seeder
+    // The seeder does NOT clean up after itself (it only bulk-indexes), and all
+    // scenarios share the same `logs-*` indices. Without this teardown, seeded
+    // documents outlive the run and contaminate the next one — including
+    // sharded/repeated runs of this same suite.
+    for (const scenario of SCENARIOS) {
+      await cleanupSeededData(esClient, scenario.id);
+    }
   });
 
   examples.forEach((example) => {
@@ -110,15 +113,15 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
               (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
           );
 
-        // Corroboration quality. Count narrative claims in the model's own
-        // message text only — NOT over the full response envelope, whose tool
-        // outputs (ES|QL result payloads) can contain hundreds of incidental
-        // substring matches and inflate the count. Gap claims are deduplicated
-        // case-insensitively so repeated headings/boilerplate don't count as
-        // distinct identified gaps.
+        // Corroboration quality. Count narrative CLAIMS (line/sentence units)
+        // in the model's own message text only — NOT over the full response
+        // envelope, whose tool outputs (ES|QL result payloads) can contain
+        // hundreds of incidental substring matches and inflate the count. A
+        // claim unit counts once however many verb forms it uses, so three
+        // stage entries score 3 and one hedged sentence scores 1.
         const narrativeText = getNarrativeText(response);
-        const corroboratedCount = countDistinctClaims(narrativeText, /corroborat\w*/gi);
-        const gapCount = countDistinctClaims(narrativeText, /gap\w*/gi);
+        const corroboratedCount = countClaimUnits(narrativeText, /corroborat\w*/gi);
+        const gapCount = countClaimUnits(narrativeText, /gap\w*/gi);
 
         // Groundedness
         const hasQueryReferences =
@@ -143,6 +146,14 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
         const gapDetection = gapCount >= example.output.minGapCount;
         const gapRestraint = gapCount <= example.output.maxGapCount;
 
+        // Confidence gate. `minConfidence` is declared per scenario in the
+        // dataset; before this it was a field nothing read, so a report that
+        // stated no confidence scored the same as a confident one. A report that
+        // states none fails: the prompt requires the `Confidence: <0-1>` line.
+        const statedConfidence = parseConfidence(narrativeText);
+        const confidenceOk =
+          statedConfidence !== undefined && statedConfidence >= example.output.minConfidence;
+
         // `success` is the AND of every dimension the scorecard reports, so a
         // reported 0 can never coexist with a green result.
         const success =
@@ -152,6 +163,7 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
           corroborationPrecision &&
           gapDetection &&
           gapRestraint &&
+          confidenceOk &&
           hasQueryReferences;
 
         const scorecard = {
@@ -161,6 +173,7 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
           corroborationPrecision: corroborationPrecision ? 1 : 0,
           gapDetection: gapDetection ? 1 : 0,
           gapRestraint: gapRestraint ? 1 : 0,
+          confidenceStated: confidenceOk ? 1 : 0,
           groundedness: hasQueryReferences ? 1 : 0,
         };
 
@@ -177,6 +190,9 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
             `Search tool called: ${searchToolCalled}. ` +
             `Corroborated: ${corroboratedCount} (expected ${example.output.minCorroboratedCount}-${example.output.maxCorroboratedCount}). ` +
             `Gaps: ${gapCount} (expected ${example.output.minGapCount}-${example.output.maxGapCount}). ` +
+            `Confidence: ${statedConfidence ?? 'not stated'} (floor ${
+              example.output.minConfidence
+            }). ` +
             `Grounded: ${hasQueryReferences}.`,
           scorecard,
         };

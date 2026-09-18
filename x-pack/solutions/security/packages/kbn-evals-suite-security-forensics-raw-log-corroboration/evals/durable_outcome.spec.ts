@@ -12,28 +12,47 @@
  * whose findings exist only in an ephemeral tool/chat response has no L4."
  *
  * Verifies that the corroboration report is persisted to the Investigation
- * timeline via the emit_corroboration route, making the findings durable
- * and replayable for Evaluation Record scoring.
+ * timeline, making the findings durable and replayable for Evaluation Record
+ * scoring.
+ *
+ * The persistence check READS PERSISTED STATE. It previously inferred
+ * durability from the response text — `hasPersistedRef` was true when any
+ * response content contained "investigation", "timeline" or "persisted", all
+ * three of which are in the prompt — so an ephemeral or hallucinated report
+ * scored as durable. It now searches the Investigation timeline through
+ * `esClient` and only counts a record that is correlated to THIS run: the
+ * per-run id echoed through the request must appear in the stored document, and
+ * the document must not predate the run. The correlation logic is unit-tested in
+ * `src/gates/durable_outcome.test.ts`.
  */
 
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
+import { v4 as uuidv4 } from 'uuid';
 import { SCENARIOS } from '../src/dataset';
 import { logScorecard } from '../src/scorecard_log';
 import { SKILL_ID } from '../src/constants';
-import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { buildCorroborationPrompt } from '../src/prompt';
+import { seedForensicTimeline, cleanupSeededData } from '../src/data_generators/forensic_data';
+import {
+  buildInvestigationReadbackSearch,
+  evaluateDurableOutcome,
+  type ReadbackHit,
+} from '../src/gates/durable_outcome';
 
 evaluate.describe(
   'C3:L4 | Raw Log Corroboration — Durable Outcome',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient }) => {
       for (const scenario of SCENARIOS) {
         await seedForensicTimeline({ esClient, scenario });
       }
     });
 
     evaluate.afterAll(async ({ esClient }) => {
-      // Cleanup handled by seeder
+      for (const scenario of SCENARIOS) {
+        await cleanupSeededData(esClient, scenario.id);
+      }
     });
 
     const scenario = SCENARIOS.find((s) => s.id === 'partial-gap') ?? SCENARIOS[0];
@@ -41,15 +60,20 @@ evaluate.describe(
     evaluate(
       'should persist corroboration findings to investigation timeline',
       { tag: tags.stateful.classic },
-      async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        const prompt =
-          `Corroborate the following alert narrative against raw telemetry.\n\n` +
-          `Narrative: ${scenario.narrative}\n` +
-          `Hosts: ${scenario.scope.hosts.join(', ')}\n\n` +
-          `Query logs-* indices. Report corroborated events, gap events, confidence, ` +
-          `and unresolved questions. Persist findings to the investigation timeline.`;
+      async ({ agentBuilderClient, esClient, log }) => {
+        // Per-run identity. Without it the readback accepted ANY report written
+        // in the last few minutes — an earlier spec, a retry, or a concurrent
+        // run could satisfy the gate even when this invocation persisted
+        // nothing.
+        const runId = `raw-log-l4-${uuidv4()}`;
+        const runStartedAt = new Date().toISOString();
 
-        log.info('[L4] Starting durable outcome test');
+        const prompt = buildCorroborationPrompt(scenario, {
+          runId,
+          requirePersistence: true,
+        });
+
+        log.info(`[L4] Starting durable outcome test (runId=${runId})`);
 
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
@@ -62,39 +86,41 @@ evaluate.describe(
         // Skill invocation gate
         const skillInvoked = [...toolIds].some((id) => (id as string).includes(SKILL_ID));
 
-        // Durable write: check if emit_corroboration was called or if
-        // the investigation timeline was updated
+        // Durable write: the persistence tool was invoked. Kept as a separate
+        // dimension from the readback — calling the tool is not evidence that
+        // anything was stored.
         const hasEmitCorroboration = [...toolIds].some(
           (id) =>
             (id as string).includes('emit_corroboration') ||
             (id as string).includes('recordDeepWatch')
         );
 
-        // Verify persisted data in ES
-        const responseText = JSON.stringify(response);
-        const hasPersistedRef =
-          responseText.includes('investigation') ||
-          responseText.includes('timeline') ||
-          responseText.includes('persisted');
+        // Read persisted state back, correlated to this run.
+        let durable = evaluateDurableOutcome({ runId, runStartedAt, hits: [] });
+        try {
+          const searchRes = await esClient.search(
+            buildInvestigationReadbackSearch({ runStartedAt })
+          );
+          durable = evaluateDurableOutcome({
+            runId,
+            runStartedAt,
+            hits: (searchRes.hits?.hits ?? []) as unknown as ReadbackHit[],
+          });
+          log.info(
+            `[L4] readback: recent=${durable.recentCount}, correlated=${durable.correlatedCount}, ` +
+              `content=${durable.corroborationContentStored}`
+          );
+        } catch (e) {
+          log.warning(`[L4] ES readback failed: ${(e as Error).message}`);
+        }
 
-        // Structured report fields
-        const hasCorroborated = responseText.toLowerCase().includes('corroborat');
-        const hasGaps = responseText.toLowerCase().includes('gap');
-        const hasUnresolved = responseText.toLowerCase().includes('unresolved');
-
-        const reportComplete = hasCorroborated && hasGaps && hasUnresolved;
-        const success = skillInvoked && hasEmitCorroboration && hasPersistedRef;
-
-        log.info(
-          `[L4] skillInvoked=${skillInvoked}, durableWrite=${hasEmitCorroboration}, ` +
-            `persisted=${hasPersistedRef}, complete=${reportComplete}`
-        );
+        const success = skillInvoked && durable.success;
 
         const scorecard = {
           skillInvoked: skillInvoked ? 1 : 0,
           durableWriteCalled: hasEmitCorroboration ? 1 : 0,
-          durableOutcomeVerified: hasPersistedRef ? 1 : 0,
-          reportCompleteness: reportComplete ? 1 : 0,
+          durableOutcomeVerified: durable.success ? 1 : 0,
+          persistedCorrelatedToRun: durable.correlatedCount > 0 ? 1 : 0,
         };
 
         logScorecard(log, { level: 'L4', exampleId: scenario.id, scorecard });
@@ -103,9 +129,10 @@ evaluate.describe(
           success,
           explanation:
             `Skill invoked: ${skillInvoked}. ` +
-            `Durable write: ${hasEmitCorroboration}. ` +
-            `Persisted ref: ${hasPersistedRef}. ` +
-            `Report complete: ${reportComplete}.`,
+            `Persistence tool called: ${hasEmitCorroboration}. ` +
+            `Records written since the run started: ${durable.recentCount}; ` +
+            `of those carrying run id ${runId}: ${durable.correlatedCount}; ` +
+            `stored content mentions corroboration: ${durable.corroborationContentStored}.`,
           scorecard,
         };
       }

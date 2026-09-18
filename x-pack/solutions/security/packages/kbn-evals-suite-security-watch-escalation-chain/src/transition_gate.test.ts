@@ -10,36 +10,119 @@
 // The chain has NO converse router surface — it is driven by `workflow.execute`
 // — so a classic L0 routing-smoke (does the agent pick the right tool?) is N/A
 // by design. But the chain's ENTRYPOINT still has a deterministic control-flow
-// decision that a real L0 must pin: the Floor orchestrator's `escalate_to_dark`
-// step (`watch_floor_orchestrator.yaml`) fires the Floor -> Dark hop iff
+// decision that a real L0 must pin: the Floor -> Dark hop fires iff
 //
 //     classification == 'true_positive' AND confidence >= escalateThreshold
 //
 // This is exactly the layer-below decision that, if wrong, makes every L1/L3/L4
 // score meaningless (the chain never starts, or starts on the wrong verdict).
-// We mirror the predicate from `FLOOR_ESCALATION_POLICY` (kept in sync with the
-// YAML) and assert:
-//   1. the synthetic fixture the L3/L4 specs drive the chain with actually
-//      trips the gate (positive control — the chain is reachable),
-//   2. sub-threshold confidence does NOT escalate (no spurious Dark runs),
-//   3. a non-true_positive classification does NOT escalate (verdict gating),
-//   4. the gate's escalation target matches the fixture's `toWatch` hop.
+//
+// The predicate is production code (`./transition_gate`), and the policy it
+// reads is bound — below — to the Floor worker's managed definition
+// (`floor_alert_triage.yaml`): the triggering verdict must be one of the
+// classifications that definition's structured output can emit, and the
+// threshold must sit inside the confidence range it declares. Restating both
+// the predicate and the expected numbers inside this file (as it used to) meant
+// a change to the production contract left every assertion green.
 //
 // Deterministic, no LLM, no Kibana boot — the same T0 discipline as the gate
 // tests in the pnd plugin.
 
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'yaml';
 import { buildSyntheticEscalation, FLOOR_ESCALATION_POLICY } from './constants';
+import { shouldEscalateToDark } from './transition_gate';
 
 /**
- * Pure mirror of the Floor orchestrator `escalate_to_dark` predicate. Keep this
- * in lockstep with `watch_floor_orchestrator.yaml`'s `if:` expression and
- * `FLOOR_ESCALATION_POLICY`. A drift in either is caught here.
+ * The Floor worker's managed workflow definition, relative to the repo root.
+ *
+ * `watch_floor_orchestrator.yaml` — the file this gate's comment used to name as
+ * its source — does not exist in this repository (`git grep` finds only the
+ * comments referencing it). The orchestrator that would own the
+ * `escalate_to_dark` step is not in-tree, so the binding that CAN be enforced
+ * here is to the contract the predicate consumes: the Floor worker's declared
+ * verdict schema.
  */
-const shouldEscalateToDark = (workerRun: { classification: string; confidence: number }): boolean =>
-  workerRun.classification === FLOOR_ESCALATION_POLICY.triggeringClassification &&
-  workerRun.confidence >= FLOOR_ESCALATION_POLICY.escalateThreshold;
+const FLOOR_DEFINITION_PATH = path.resolve(
+  __dirname,
+  '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/floor_alert_triage.yaml'
+);
+
+interface FloorVerdictSchema {
+  classificationEnum: string[];
+  confidenceMinimum: number;
+  confidenceMaximum: number;
+}
+
+const readFloorVerdictSchema = (): FloorVerdictSchema => {
+  if (!fs.existsSync(FLOOR_DEFINITION_PATH)) {
+    throw new Error(
+      `Floor alert-triage managed definition not found at ${FLOOR_DEFINITION_PATH}. ` +
+        `This gate binds FLOOR_ESCALATION_POLICY to that definition; if the file moved, update the path here.`
+    );
+  }
+
+  const definition = parse(fs.readFileSync(FLOOR_DEFINITION_PATH, 'utf8')) as {
+    steps?: Array<{
+      type?: string;
+      with?: {
+        schema?: {
+          properties?: {
+            classification?: { enum?: string[] };
+            confidence_score?: { minimum?: number; maximum?: number };
+          };
+        };
+      };
+    }>;
+  };
+
+  const step = (definition.steps ?? []).find((s) => s?.with?.schema?.properties?.classification);
+  const properties = step?.with?.schema?.properties;
+  const classificationEnum = properties?.classification?.enum;
+  const confidenceMinimum = properties?.confidence_score?.minimum;
+  const confidenceMaximum = properties?.confidence_score?.maximum;
+
+  if (!classificationEnum || confidenceMinimum === undefined || confidenceMaximum === undefined) {
+    throw new Error(
+      'floor_alert_triage.yaml no longer declares a classification enum plus a confidence_score ' +
+        'range; the Floor -> Dark gate cannot be bound to it any more.'
+    );
+  }
+
+  return { classificationEnum, confidenceMinimum, confidenceMaximum };
+};
+
+const verdictsOtherThanTrigger = (): string[] =>
+  readFloorVerdictSchema().classificationEnum.filter(
+    (verdict) => verdict !== FLOOR_ESCALATION_POLICY.triggeringClassification
+  );
 
 describe('Watch escalation chain — L0 transition gate (Floor -> Dark)', () => {
+  describe('bound to the Floor worker managed definition', () => {
+    it('the triggering classification is one the Floor verdict schema can emit', () => {
+      expect(readFloorVerdictSchema().classificationEnum).toContain(
+        FLOOR_ESCALATION_POLICY.triggeringClassification
+      );
+    });
+
+    it('the escalation threshold sits inside the declared confidence_score range', () => {
+      const { confidenceMinimum, confidenceMaximum } = readFloorVerdictSchema();
+      expect(FLOOR_ESCALATION_POLICY.escalateThreshold).toBeGreaterThanOrEqual(confidenceMinimum);
+      expect(FLOOR_ESCALATION_POLICY.escalateThreshold).toBeLessThanOrEqual(confidenceMaximum);
+    });
+
+    it('the negative verdicts asserted below are real verdicts, not invented strings', () => {
+      const { classificationEnum } = readFloorVerdictSchema();
+      // Distinct from the triggering verdict, or the negative cases would be
+      // asserting the positive case backwards.
+      expect(verdictsOtherThanTrigger().length).toBeGreaterThan(0);
+      for (const verdict of ['false_positive', 'inconclusive']) {
+        expect(classificationEnum).toContain(verdict);
+      }
+    });
+  });
+
   it('escalates a high-confidence true_positive (chain is reachable)', () => {
     expect(shouldEscalateToDark({ classification: 'true_positive', confidence: 0.93 })).toBe(true);
   });
@@ -60,11 +143,10 @@ describe('Watch escalation chain — L0 transition gate (Floor -> Dark)', () => 
     ).toBe(true);
   });
 
-  it('does NOT escalate a non-true_positive verdict even at high confidence', () => {
-    expect(shouldEscalateToDark({ classification: 'false_positive', confidence: 0.99 })).toBe(
-      false
-    );
-    expect(shouldEscalateToDark({ classification: 'inconclusive', confidence: 0.99 })).toBe(false);
+  it('does NOT escalate any other verdict the Floor schema can emit, even at high confidence', () => {
+    for (const verdict of verdictsOtherThanTrigger()) {
+      expect(shouldEscalateToDark({ classification: verdict, confidence: 0.99 })).toBe(false);
+    }
   });
 
   it('the synthetic fixture trips the gate and targets the policy hop', () => {
