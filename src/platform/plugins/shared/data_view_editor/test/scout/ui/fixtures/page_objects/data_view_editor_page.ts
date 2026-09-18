@@ -39,16 +39,33 @@ export class DataViewEditorPage {
   }
 
   // Fills the title field and waits for async validation to settle.
+  // Retries: title validation can race its debounced index lookup and get stuck invalid.
   async setTitle(title: string): Promise<void> {
-    await this.titleInput.fill(title);
-    await this.waitForValidTitle(title);
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const isLastAttempt = attempt === maxAttempts;
+
+      if (attempt > 1) {
+        await this.titleInput.fill(''); // force a real value change to re-trigger validation
+      }
+      await this.titleInput.fill(title);
+
+      try {
+        await this.waitForValidTitle(title, isLastAttempt ? 30_000 : 5_000);
+        return;
+      } catch (error) {
+        if (isLastAttempt) {
+          throw error;
+        }
+      }
+    }
   }
 
-  private async waitForValidTitle(title: string): Promise<void> {
+  private async waitForValidTitle(title: string, timeout = 30_000): Promise<void> {
     await expect(this.titleInput).toHaveValue(title);
-    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout: 30_000 });
-    await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true');
-    await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout: 30_000 });
+    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout });
+    await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true', { timeout });
+    await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout });
   }
 
   // Returns the timestamp field combo box value after the field finishes loading.

@@ -1148,6 +1148,124 @@ describe('updatePackRoute', () => {
       expect(responseBody.data.rrule_schedule).toEqual(rruleValue);
       expect(responseBody.data).not.toHaveProperty('interval');
     });
+
+    // Regression guard for #279946: duplicated prebuilt pack has stale per-query
+    // intervals. After the user sets a pack-level interval (120s), convergence must
+    // drop the bare intervals so the wire emits only default_native_schedule, not
+    // per-query overrides that would shadow it.
+    // Uses distinct non-default values (80/100) to make the drop observable.
+    it('legacy→interval transition: duplicated prebuilt pack — bare stale intervals stripped from SO and wire', async () => {
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          // No pack-level schedule_type: legacy state, as a duplicated prebuilt pack starts.
+          schedule_type: undefined,
+          interval: undefined,
+          rrule_schedule: null,
+          queries: [
+            {
+              id: 'forensic-1',
+              name: 'forensic-1',
+              query: 'SELECT * FROM users;',
+              interval: 80, // stale from prebuilt pack — no explicit schedule_type
+              schedule_id: 'sched-f1',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+            {
+              id: 'forensic-2',
+              name: 'forensic-2',
+              query: 'SELECT * FROM processes;',
+              interval: 100,
+              schedule_id: 'sched-f2',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { schedule_type: 'interval', interval: 120 },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+
+      // SO write: bare intervals stripped, schedule_id/start_date preserved.
+      const writtenQueries = patchedAttributes.queries as Array<Record<string, unknown>>;
+      const f1 = writtenQueries.find((q) => q.id === 'forensic-1')!;
+      const f2 = writtenQueries.find((q) => q.id === 'forensic-2')!;
+      expect(f1).not.toHaveProperty('interval');
+      expect(f1).not.toHaveProperty('schedule_type');
+      expect(f1.schedule_id).toBe('sched-f1');
+      expect(f2).not.toHaveProperty('interval');
+      expect(f2.schedule_id).toBe('sched-f2');
+
+      // Pack-level schedule written.
+      expect(patchedAttributes.schedule_type).toBe('interval');
+      expect(patchedAttributes.interval).toBe(120);
+    });
+
+    // API convergence: a PUT with an already-interval-mode pack and a marker-less
+    // per-query interval should converge (drop the bare interval) even without
+    // a mode transition.
+    it('interval-mode pack: marker-less per-query interval converged on non-transition update', async () => {
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          schedule_type: 'interval' as const,
+          interval: 120,
+          rrule_schedule: null,
+          queries: [],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      // PUT with interval mode preserved, bare per-query interval (no marker).
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          schedule_type: 'interval',
+          interval: 120,
+          queries: {
+            q1: { query: 'SELECT 1', interval: 80 }, // marker-less — should be converged away
+            q2: { query: 'SELECT 2', interval: 100, schedule_type: 'interval' }, // explicit — must be preserved
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const writtenQueries = updateCall[2].queries as Array<Record<string, unknown>>;
+      const q1 = writtenQueries.find((q) => q.id === 'q1')!;
+      const q2 = writtenQueries.find((q) => q.id === 'q2')!;
+
+      // Marker-less bare interval dropped.
+      expect(q1).not.toHaveProperty('interval');
+      // Explicit override preserved.
+      expect(q2.interval).toBe(100);
+      expect(q2.schedule_type).toBe('interval');
+    });
   });
 
   describe('schedule-validation error response shape', () => {

@@ -14,7 +14,7 @@ export const LIST_RULES_RESPONSE: FindRulesResponse = {
   items: [RULE_RESPONSE],
   total: 1,
   page: 1,
-  perPage: 20,
+  per_page: 20,
 };
 
 export const listRulesOasExamples = (): AlertingOasOperationObject =>

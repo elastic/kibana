@@ -37,7 +37,7 @@ const formatActionPolicyDescription = (
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
   const matcherSnippet = data.matcher ? `"${data.matcher}"` : 'match all (catch-all)';
-  const grouping = data.groupingMode ?? 'per_episode';
+  const grouping = data.grouping_mode ?? 'per_episode';
   const throttle = data.throttle?.strategy ?? 'none';
 
   return `Action Policy "${data.name}" (actionPolicyAttachment.id: "${attachmentId}")
@@ -102,10 +102,10 @@ export const createActionPolicyAttachmentType = ({
     try {
       const client = getActionPolicyClient(context);
       const policy = await client.getActionPolicy({ id: attachment.origin });
-      if (Date.parse(policy.updatedAt) > Date.parse(attachment.origin_snapshot_at)) {
+      if (Date.parse(policy.updated_at) > Date.parse(attachment.origin_snapshot_at)) {
         const latestVersion = getLatestVersion(attachment);
         if (!latestVersion) return false;
-        return policy.updatedAt !== latestVersion.data.updatedAt;
+        return policy.updated_at !== latestVersion.data.updated_at;
       }
       return false;
     } catch (error) {

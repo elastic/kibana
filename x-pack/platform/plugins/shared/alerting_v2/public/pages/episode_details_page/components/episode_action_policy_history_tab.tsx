@@ -84,7 +84,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
   );
 
   const items = data?.items ?? [];
-  const totalEvents = data?.totalEvents ?? 0;
+  const totalEvents = data?.total_events ?? 0;
   const isFiltered = searchParam !== undefined || outcome !== DEFAULT_OUTCOME;
 
   return (

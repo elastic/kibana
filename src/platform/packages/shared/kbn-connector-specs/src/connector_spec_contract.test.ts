@@ -65,7 +65,8 @@ describe('connector spec contracts', () => {
 
       const registeredAuthType = registeredAuthTypes.find(({ id }) => id === authType.type);
       for (const defaultField of Object.keys(authType.defaults)) {
-        if (!registeredAuthType || !(defaultField in registeredAuthType.schema.shape)) {
+        const inSchema = registeredAuthType && defaultField in registeredAuthType.schema.shape;
+        if (!inSchema) {
           violations.push(`${authType.type}.${defaultField} is not defined by the auth type`);
         }
       }

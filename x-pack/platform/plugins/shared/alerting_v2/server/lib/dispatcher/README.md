@@ -61,16 +61,17 @@ Those anchors, plus persisted action history, let the dispatcher decide which ep
 The pipeline then moves through these phases:
 
 1. Wait for plugin resources to be ready
-2. Fetch candidate episodes
+2. Fetch candidate episodes (keys-only scan — no `data` payload)
 3. Fetch suppression facts
 4. Split into dispatchable vs suppressed episodes
-5. Load rule metadata for dispatchable episodes
-6. Load enabled action policies
-7. Evaluate policy matchers
-8. Build action groups
-9. Apply throttling
-10. Dispatch eligible groups
-11. Store final actions and reasons
+5. Hydrate `data` payload for dispatchable episodes only
+6. Load rule metadata for dispatchable episodes
+7. Load enabled action policies
+8. Evaluate policy matchers
+9. Build action groups
+10. Apply throttling
+11. Dispatch eligible groups
+12. Store final actions and reasons
 
 ### Decision outcomes written to `.alert-actions`
 
@@ -107,9 +108,10 @@ DispatcherService
 DispatcherPipeline
    |
    +--> WaitForResourcesStep
-   +--> FetchEpisodesStep
+   +--> FetchEpisodesStep          (keys-only scan)
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
+   +--> HydrateEpisodeDataStep     (lazy data fetch for survivors)
    +--> FetchRulesStep
    +--> FetchPoliciesStep
    +--> EvaluateMatchersStep
@@ -158,6 +160,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `episodes` | `FetchEpisodesStep` | Candidate `AlertEpisode` rows. |
 | `suppressions` | `FetchSuppressionsStep` | Suppression facts from `.alert-actions`. |
 | `dispatchable` / `suppressed` | `ApplySuppressionStep` | Split of episodes that may continue vs those that must not notify. |
+| `dispatchable` (with `data`) | `HydrateEpisodeDataStep` | Replaces `dispatchable` with the same episodes enriched with their `data` payload. |
 | `rules` | `FetchRulesStep` | Rule metadata keyed by rule id. |
 | `policies` | `FetchPoliciesStep` | Enabled action policies keyed by id. |
 | `matched` | `EvaluateMatchersStep` | Concrete `(episode, policy)` matches. |
@@ -171,16 +174,17 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | # | Step | Responsibility |
 | --- | --- | --- |
 | 1 | `WaitForResourcesStep` | Block the run until the dispatcher's required plugin resources are ready. |
-| 2 | `FetchEpisodesStep` | Load episodes that should be considered in this run. |
+| 2 | `FetchEpisodesStep` | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result. |
 | 3 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
 | 4 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
-| 5 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
-| 6 | `FetchPoliciesStep` | Load enabled action policies for the space. |
-| 7 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
-| 8 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
-| 9 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
-| 10 | `DispatchStep` | Perform delivery side effects for eligible groups. |
-| 11 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
+| 5 | `HydrateEpisodeDataStep` | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
+| 6 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
+| 7 | `FetchPoliciesStep` | Load enabled action policies for the space. |
+| 8 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
+| 9 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
+| 10 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
+| 11 | `DispatchStep` | Perform delivery side effects for eligible groups. |
+| 12 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
 
 ## Halt reasons
 

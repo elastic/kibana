@@ -22,6 +22,7 @@ import {
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
+import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
 import {
@@ -32,6 +33,7 @@ import {
 } from './step_components';
 
 const DEPLOY_SETTINGS_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'deploy-settings');
+const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
 export interface StepComponentProps {
   onContinue: () => void;
@@ -67,10 +69,17 @@ export function OnboardingShell() {
     }
   }, [meta, history]);
 
-  const { completedSteps, markStepComplete, firstIncompleteStepId } = useStepState(integrationId);
+  const { completedSteps, markStepComplete, markStepsIncomplete, firstIncompleteStepId } =
+    useStepState(integrationId);
 
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
+
+  useInvalidateDownstreamSteps({
+    selectedServiceIds,
+    downstreamStepIds: DOWNSTREAM_OF_SERVICES_STEP_IDS,
+    markStepsIncomplete,
+  });
 
   const needsDeploySettingsStep = useMemo(
     () =>

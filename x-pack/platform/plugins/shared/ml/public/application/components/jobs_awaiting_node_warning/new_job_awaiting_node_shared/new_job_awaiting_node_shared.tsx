@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 
-import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -100,15 +101,13 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarningShared.title"
             defaultMessage="Awaiting machine learning node"
           />
         }
-        color="primary"
-        iconType="info"
       >
         <div>
           <FormattedMessage
@@ -167,7 +166,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
               />
             ))}
         </div>
-      </EuiCallOut>
+      </KbnInfoCallout>
       <EuiSpacer size="m" />
     </>
   );

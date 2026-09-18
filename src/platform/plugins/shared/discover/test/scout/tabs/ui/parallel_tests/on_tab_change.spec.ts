@@ -33,7 +33,7 @@ const LOGSTASH_TIME_RANGE = {
 const QUERY_WITH_TIME_FIELD =
   'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | LIMIT 50';
 const QUERY_WITHOUT_TIME_FIELD = 'FROM kibana_sample_data_flights';
-const DEFAULT_ESQL_QUERY = 'FROM logstash-*';
+const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
 const expectDisabledAllTimeState = async (
   pageObjects: PageObjects,

@@ -18,6 +18,7 @@ import {
 import {
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+  SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
   SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
@@ -143,6 +144,7 @@ Use this skill when:
 - The user **explicitly** asks to **show**, **open**, **view**, or **walk through** the **Entity Analytics** **home**, **overview**, **landing**, or **built-in Entity Analytics dashboard** (the **product page** / same IA as Security → Entity Analytics navigation) → \`security.entity_analytics_dashboard\` after gathering entity data.
 - They want **one entity's details / card / profile / flyout-style** view → \`security.get_entity\` (which emits the \`security.entity\` attachment as a single-entity card).
 - They want to **see the relationship graph** for an entity or **how an entity is connected** to other entities/events/alerts → \`security.get_entity_graph\` (which emits the \`security.entity_graph\` attachment as an inline graph preview that links out to the full graph investigation).
+- They ask **when** a relationship was first/last seen, whether an entity **ever** related to another, or which targets it touched in a **time window** → \`security.entity_relationship_history\` (metadata event log). This is **not** \`security.get_entity\` profile_history and **not** the graph preview.
 - They want a **list / table / ranking** of entities (plural or set framing) → \`security.search_entities\` (which emits the \`security.entity\` attachment as an entities table when 2+ rows are returned).
 - One message names **several entity kinds** to compare or rank (e.g. **riskiest hosts and users**) → run \`security.search_entities\` per type (or with multiple \`entityTypes\`), and the tool will emit an aggregate \`security.entity\` attachment.
 - Investigating the current behavior of a specific entity using its ID (EUID).
@@ -219,6 +221,19 @@ When \`security.get_entity_graph\` resolves exactly one entity, its \`other\` re
       1. Call \`security.get_watchlist_id\` with \`{ identifier: <the watchlist name> }\` to resolve the \`watchlistId\` (relay its error if the name is unknown/ambiguous).
       2. Call \`security.search_entities\` with \`watchlists: [<watchlistId>]\` to list the members; the aggregate \`security.entity\` attachment that tool emits is the user-facing answer.
     **Do NOT** use this tool to find out which watchlists a specific entity belongs to — that is already on the entity's profile from \`security.get_entity\` as \`entity.attributes.watchlists\`. To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill (\`security.list_watchlists\`).
+
+### Entity Relationship History Tool
+- \`security.entity_relationship_history\` - Query the **temporal relationship event log** (\`event.action: relationship_observed\` in the entity metadata datastream) for a single entity. Use this for **first-seen / last-seen / ever related to / what did they touch after X** questions — for example: "when did user:alice@local first access host:laptopA?", "has this user ever communicated with host:laptopA?", "what hosts did this user touch in the last 30 days?".
+    - **Not** \`security.get_entity\` \`profile_history\` — that is coarse periodic full-profile snapshots (risk / criticality / behavior trends over an interval). Relationship history is per-observation events with \`{ kind, target, timestamp, source }\`.
+    - **Not** \`security.get_entity_graph\` — that renders an interactive graph preview, not a timestamped event list.
+    - Pass \`entityId\` (prefixed EUID, canonical name, or full name) — same resolution as \`security.get_entity\` / \`security.get_entity_graph\`. When a \`security.entity\` attachment identifies the subject, copy its prefixed entity id into \`entityId\`. Optional \`entityType\` helps disambiguate.
+    - **Ambiguous / not found:** when the subject or optional \`target\` id/name cannot be resolved (not found, ambiguous, or no identity), the result has an error or \`message\` + \`candidateEntityIds\` (no history). Ask the user to pick the exact EUID and call again, or omit \`target\` if they want unfiltered history.
+    - Optional filters: \`kind\` (one of accesses_frequently, accesses_infrequently, communicates_with, administers, depends_on, owns, supervises), \`target\` (EUID or name — resolved like \`entityId\`; optional \`targetType\` helps disambiguate), \`from\` / \`to\` (Kibana date-math, e.g. \`now-30d\` / \`now\`, or ISO).
+    - Size: \`maxResults\` (default 50, max 100) — same idea as \`security.search_entities\`. There is no \`page\` param; do not page-walk.
+    - First-seen: \`sortOrder: "asc"\` + \`maxResults: 1\`. Last-seen: \`sortOrder: "desc"\` + \`maxResults: 1\` (default sort is desc).
+    - List / time-window asks ("what hosts in the last 30 days"): omit \`maxResults\` or raise it; if the result has \`truncated: true\` (or \`total\` > returned records), say the answer is partial and optionally raise \`maxResults\` up to 100 or narrow with \`kind\` / \`target\` / \`from\`.
+    - Empty history is a successful \`{ total: 0, records: [] }\` — say no relationship observations were found; do not invent events.
+    - No rich attachment — summarize timestamps, kinds, and targets in prose.
 
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.
@@ -453,11 +468,12 @@ Steps:
 3. Copy the \`renderTag\` string verbatim from \`get_entity\`'s \`other\` result onto its own line in your reply. Skip the render tag on the \`search_entities\` result — the follow-up \`get_entity\` bumps the same attachment pill with the richer card payload, so rendering both would duplicate the pill.
 4. Summarize in prose why this host is the riskiest among hosts in scope.
 
-### Example 7: "Details / profile" vs "List / compare" vs "Graph / connected" wording
+### Example 7: "Details / profile" vs "List / compare" vs "Graph / connected" vs "Relationship history" wording
 
 - User: "**Details** on the riskiest host", "**more about** that host", "**profile** / **deep dive** for this user" → treat like Example 6: one winner, \`security.get_entity\` emits the single-entity card. Render the tag from \`get_entity\`.
 - User: "**List** the **five** riskiest hosts", "**compare** these hosts", "**who are** the riskiest users", "**show** risky **hosts**" → \`security.search_entities\` with matching \`maxResults\`; the tool emits the aggregate \`security.entity\` attachment (entities table) when 2+ rows are returned. Render the tag from \`search_entities\`.
 - User: "**graph** for that host", "how is this user **connected**", "show the **relationships** for host:server1" → \`security.get_entity_graph\` emits the \`security.entity_graph\` attachment (see Example 7c). Render the tag from \`get_entity_graph\`. This is distinct from "details / card": the ask is about **connections / relationships**, not the entity's profile fields — do NOT substitute \`security.get_entity\`.
+- User: "**when** did this user **first access** host:laptopA", "**has** this user **ever communicated with** that host", "**what hosts** did they **touch** in the last 30 days" → \`security.entity_relationship_history\` (see Example 7d). Do **not** use \`security.get_entity\` \`interval\`/\`profile_history\` for these — that is profile snapshot history, not relationship observations.
 
 ### Example 7c: Relationship graph for an entity
 
@@ -468,6 +484,19 @@ Steps:
 2. Copy the \`renderTag\` string verbatim from the tool's \`other\` result onto its own line — the renderer shows the compact graph preview inline.
 3. In 1–3 sentences of prose, describe what the graph shows and what to investigate next. Do NOT dump the raw nodes/edges as JSON or a table, and do NOT try to embed the full interactive investigation — the preview links out to it via **Open full graph**.
 4. If the id/name resolves to multiple candidates, the \`other\` result has no \`renderTag\` (only a \`message\` and \`candidateEntityIds\`). Do NOT emit a render tag — ask the user to pick the exact entity id (EUID) and call the tool again.
+
+### Example 7d: Temporal relationship history
+
+User query: "When did user:alice@local first access host:laptopA?" / "Has Alice ever communicated with host:laptopA?" / "What hosts did user:alice@local touch in the last 30 days?"
+
+Steps:
+1. Call \`security.entity_relationship_history\` with \`entityId\` for the host/user (prefixed EUID or name). If a \`security.entity\` attachment identifies the subject, copy its prefixed entity id into \`entityId\`.
+   - First-seen against a known target: \`target\` (EUID or name; optionally \`targetType: "host"\`), \`sortOrder: "asc"\`, \`maxResults: 1\` (optionally \`kind: "accesses_frequently"\` / \`accesses_infrequently\` when the ask is about access).
+   - Ever communicated with: \`kind: "communicates_with"\` and/or \`target\` (resolved like \`entityId\`).
+   - Time-window touch list: pass \`from: "now-30d"\` (optionally \`to: "now"\`); leave \`maxResults\` at the default (or raise toward 100). Summarize distinct targets from \`records\`. If \`truncated\` is true, say more observations exist.
+2. If the subject id/name is ambiguous, the result has \`candidateEntityIds\` and no history — ask the user to pick an exact EUID and call again.
+3. Summarize timestamps, kinds, and targets in prose. Empty \`records\` means no observations were found — do not invent relationship events.
+4. Do **not** route risk/profile trend questions ("has risk changed over 90 days?") here — those use \`security.get_entity\` with \`interval\`.
 
 ### Example 8: List question with only one matching entity
 
@@ -656,9 +685,9 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, temporal relationship history (first/last seen, ever related to), resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
-      'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
+      'Risk history, alert contributions, watchlists, behaviors, discovering risky entities, relationship event history.',
     content: `
 # Entity Analysis Guide
 
@@ -675,6 +704,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         ? [
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+            SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
             SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
             SECURITY_GET_WATCHLIST_ID_TOOL_ID,

@@ -44,10 +44,30 @@ export function useStepState(integrationId: string) {
     setState(buildDefaultState());
   }, [setState]);
 
+  const markStepsIncomplete = useCallback(
+    (stepIds: string[]) => {
+      if (stepIds.length === 0) return;
+      const current = stateRef.current ?? buildDefaultState();
+      // No-op guard: avoid a setState (→ render → sessionStorage write) when
+      // nothing actually changed. This keeps reactive callers stable.
+      if (!stepIds.some((id) => current[id] === 'complete')) return;
+      const next = { ...current };
+      for (const id of stepIds) next[id] = 'incomplete';
+      setState(next);
+    },
+    [setState]
+  );
+
   const firstIncompleteStepId = useMemo(() => {
     const step = ONBOARDING_STEPS.find((s) => !completedSteps.has(s.id));
     return step?.id ?? ONBOARDING_STEPS[0].id;
   }, [completedSteps]);
 
-  return { completedSteps, markStepComplete, resetSteps, firstIncompleteStepId };
+  return {
+    completedSteps,
+    markStepComplete,
+    markStepsIncomplete,
+    resetSteps,
+    firstIncompleteStepId,
+  };
 }

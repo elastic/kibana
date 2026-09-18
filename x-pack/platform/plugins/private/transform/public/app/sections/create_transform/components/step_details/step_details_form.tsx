@@ -56,6 +56,7 @@ import {
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
+import { isProjectScopedSourceIndexUnavailableError } from '../../../../hooks/use_transform_config_data';
 import type { EsIndexName } from './common';
 import {
   isContinuousModeDelay,
@@ -184,7 +185,13 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     }, [transformsError]);
 
     useEffect(() => {
-      if (transformsPreviewError !== null) {
+      if (
+        transformsPreviewError !== null &&
+        !isProjectScopedSourceIndexUnavailableError(
+          transformsPreviewError,
+          stepDefineState.projectRouting
+        )
+      ) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
             defaultMessage: 'An error occurred fetching the transform preview',

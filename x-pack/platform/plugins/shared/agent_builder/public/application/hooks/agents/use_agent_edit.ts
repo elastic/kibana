@@ -39,7 +39,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+  access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',

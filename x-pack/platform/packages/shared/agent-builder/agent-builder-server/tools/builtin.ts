@@ -20,7 +20,43 @@ import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
+import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolHandlerFn } from './handler';
+
+/**
+ * MCP tool annotations for builtin tools exposed via the Agent Builder MCP server.
+ *
+ * All five fields are required so tool authors must make an explicit classification
+ * choice. The type is derived from the MCP SDK's ToolAnnotations to stay in sync
+ * with the spec — if the SDK renames or removes a field, TypeScript will surface
+ * the break here.
+ *
+ * Annotation guide (copy these values directly):
+ *
+ * Pure read (search, list, get):
+ *   readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false
+ *
+ * Create / upsert (non-destructive write):
+ *   readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false
+ *
+ * Delete / irreversible overwrite:
+ *   readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false
+ *
+ * Calls external API / webhook / email (combine with one of the above):
+ *   openWorldHint: true
+ *
+ * Rules:
+ * - readOnlyHint and destructiveHint must not both be true.
+ * - Read-only tools should always set idempotentHint: true.
+ *
+ * See: https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations
+ */
+export type McpToolAnnotations = Required<
+  Pick<
+    ToolAnnotations,
+    'title' | 'readOnlyHint' | 'destructiveHint' | 'idempotentHint' | 'openWorldHint'
+  >
+>;
 
 /**
  * Information exposed to the {@link ToolAvailabilityHandler}.
@@ -163,6 +199,12 @@ export interface BuiltinToolDefinition<
    * Refer to {@link ToolAvailabilityConfig}
    */
   availability?: ToolAvailabilityConfig;
+  /**
+   * MCP annotations for this tool. Required for all builtin tools exposed via the MCP server.
+   * Optional during the rollout period — will become required once all tools have been annotated.
+   * See {@link McpToolAnnotations} for the full guide.
+   */
+  annotations?: McpToolAnnotations;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &

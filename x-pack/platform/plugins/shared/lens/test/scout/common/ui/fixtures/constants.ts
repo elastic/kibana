@@ -126,6 +126,10 @@ export const DASHBOARD_TITLES = {
   },
 } as const;
 
+export const AVERAGE_OF_BYTES = 'Average of bytes' as const;
+export const MAX_BYTES_LABEL = 'Maximum of bytes' as const;
+export const TOP_VALUES_OF_IP = 'Top 3 values of ip' as const;
+
 export const DATA_TEST_SUBJECTS = {
   OPEN_IN_LENS_ACTION: 'embeddablePanelAction-ACTION_EDIT_IN_LENS',
 } as const;

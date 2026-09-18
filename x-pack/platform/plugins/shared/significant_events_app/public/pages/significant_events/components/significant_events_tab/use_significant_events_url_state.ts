@@ -44,5 +44,16 @@ export const useSignificantEventsUrlState = () => {
     });
   }, [router]);
 
-  return { selectedEventId, openEvent, closeEvent };
+  const toggleEvent = useCallback(
+    (eventId: string) => {
+      if (queryRef.current?.selectedEvent === eventId) {
+        closeEvent();
+      } else {
+        openEvent(eventId);
+      }
+    },
+    [openEvent, closeEvent]
+  );
+
+  return { selectedEventId, openEvent, closeEvent, toggleEvent };
 };

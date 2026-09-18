@@ -19,9 +19,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import type { ServiceChipState } from '../onboarding_flow_context';
+import { SERVICE_SETTINGS_SESSION_KEY } from './service_settings_step/use_service_settings';
+import type { ServiceInstance } from './service_settings_step/use_service_settings';
 
 const CHIP_COLORS: Record<ServiceChipState, string> = {
   instantiating: 'default',
@@ -38,13 +41,31 @@ interface DeployAndDetectStepProps {
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
   const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
-  const { isDeploying, serviceStatuses, failedPackages, deployErrors } = deployAndDetectStep;
+  const { isDeploying, serviceStatuses, failedInstances, deployErrors } = deployAndDetectStep;
+
+  const [serviceSettings] = useSessionStorage<{ instances?: ServiceInstance[] }>(
+    SERVICE_SETTINGS_SESSION_KEY,
+    {}
+  );
+  const instancesById = React.useMemo(() => {
+    const map = new Map<string, ServiceInstance>();
+    for (const inst of serviceSettings?.instances ?? []) {
+      map.set(inst.instanceId, inst);
+    }
+    return map;
+  }, [serviceSettings?.instances]);
+
+  const getChipLabel = (instanceId: string): string => {
+    const inst = instancesById.get(instanceId);
+    if (inst) return inst.name;
+    return AWS_SERVICES_MAP.get(instanceId)?.name ?? instanceId;
+  };
 
   const hasStarted = Object.keys(serviceStatuses).length > 0;
   const allSucceeded =
     hasStarted &&
     !isDeploying &&
-    failedPackages.length === 0 &&
+    failedInstances.length === 0 &&
     Object.values(serviceStatuses).some((s) => s === 'receiving');
 
   return (
@@ -75,16 +96,14 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
         <>
           {isDeploying && <EuiSpacer size="m" />}
           <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
-            {Object.entries(serviceStatuses).map(([serviceId, state]) => (
-              <EuiFlexItem grow={false} key={serviceId}>
-                <EuiBadge color={CHIP_COLORS[state]}>
-                  {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                </EuiBadge>
+            {Object.entries(serviceStatuses).map(([instanceId, state]) => (
+              <EuiFlexItem grow={false} key={instanceId}>
+                <EuiBadge color={CHIP_COLORS[state]}>{getChipLabel(instanceId)}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
 
-          {!isDeploying && failedPackages.length > 0 && (
+          {!isDeploying && failedInstances.length > 0 && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
@@ -99,16 +118,16 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                 announceOnMount
                 data-test-subj="deployAndDetectStep-errorCallout"
               >
-                {failedPackages.map((pkg) => (
-                  <EuiText key={pkg} size="s">
-                    {deployErrors[pkg] ?? pkg}
+                {failedInstances.map((instanceId) => (
+                  <EuiText key={instanceId} size="s">
+                    {deployErrors[instanceId] ?? getChipLabel(instanceId)}
                   </EuiText>
                 ))}
                 <EuiSpacer size="s" />
                 <EuiButton
                   size="s"
                   color="danger"
-                  onClick={() => retryDeploy(failedPackages)}
+                  onClick={() => retryDeploy(failedInstances)}
                   data-test-subj="deployAndDetectStep-retryButton"
                 >
                   <FormattedMessage

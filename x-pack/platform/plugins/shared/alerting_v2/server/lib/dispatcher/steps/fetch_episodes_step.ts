@@ -6,11 +6,9 @@
  */
 
 import moment from 'moment';
-import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
-  AlertEpisodeData,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
@@ -32,7 +30,6 @@ interface RawAlertEpisode {
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
-  data_json: string | null;
   severity: AlertEventSeverity | null;
 }
 
@@ -73,25 +70,8 @@ export class FetchEpisodesStep implements DispatcherStep {
 }
 
 export function parseAlertEpisodes(raw: RawAlertEpisode[]): AlertEpisode[] {
-  return raw.map(({ data_json, severity, ...rest }) => ({
+  return raw.map(({ severity, ...rest }) => ({
     ...rest,
     ...(severity ? { severity } : {}),
-    ...(data_json ? { data: parseDataJson(data_json) } : {}),
   }));
-}
-
-export function parseDataJson(json: string): AlertEpisodeData {
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
-    const result: AlertEpisodeData = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        set(result, key.split('.'), value);
-      }
-    }
-    return result;
-  } catch {
-    return {};
-  }
 }

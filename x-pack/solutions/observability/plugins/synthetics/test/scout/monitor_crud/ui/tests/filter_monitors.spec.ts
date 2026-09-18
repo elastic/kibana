@@ -46,23 +46,8 @@ test.describe.skip('FilterMonitors', { tag: [...tags.stateful.classic] }, () => 
       await pageObjects.syntheticsApp.refreshOverview();
     });
 
-    // EuiSelectable re-renders the option list on each selection, and a positional
-    // click on the next option can miss if it lands during a re-render. This helper
-    // re-checks state before clicking, so it won't toggle off an already-selected
-    // option — safe to retry until aria-checked settles on "true".
-    const selectTagOption = async (tagName: string) => {
-      const option = page.getByRole('option', { name: tagName });
-      await expect
-        .poll(
-          async () => {
-            if ((await option.getAttribute('aria-checked')) === 'true') return 'true';
-            await option.click();
-            return option.getAttribute('aria-checked');
-          },
-          { timeout: 15_000, intervals: [250, 500, 1000] }
-        )
-        .toBe('true');
-    };
+    const selectTagOption = (tagName: string) =>
+      page.components.selectable('o11yFieldValueSelectionSelectable').selectOption(tagName);
 
     await test.step('filter by tags with AND', async () => {
       await page.getByLabel('expands filter group for Tags filter').click();

@@ -9,6 +9,7 @@ import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { get, isEmpty, pickBy } from 'lodash';
 import type {
+  CaseAssignee,
   CaseAssignees,
   CaseCustomField,
   CaseCustomFields,
@@ -289,13 +290,26 @@ export class UserActionPersister {
     return fieldUserAction ? [fieldUserAction] : [];
   }
 
-  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
+  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseAssignee>) {
     const createPayload: CreatePayloadFunction<
       CaseUserProfile,
       typeof UserActionTypes.assignees
     > = (items: CaseAssignees) => ({ assignees: items });
 
-    return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.assignees);
+    // assigneeIdentity persists username/full_name/email on the SO; client PATCHes uid-only.
+    // Diff by uid so retained assignees are not recorded as delete+add.
+    const toUidOnly = (assignees: CaseAssignee[]): CaseUserProfile[] =>
+      assignees.map(({ uid }) => ({ uid }));
+
+    return this.buildAddDeleteUserActions(
+      {
+        ...params,
+        originalValue: toUidOnly(params.originalValue),
+        newValue: toUidOnly(params.newValue),
+      },
+      createPayload,
+      UserActionTypes.assignees
+    );
   }
 
   private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {

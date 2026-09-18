@@ -17,6 +17,8 @@ export interface CuratedTile {
   description: string;
   icon: ReactElement;
   href?: string;
+  /** Anchor `target`, for example `_blank` for external destinations. */
+  target?: string;
   onClick?: MouseEventHandler;
   'data-test-subj'?: string;
 }
@@ -33,5 +35,17 @@ export interface MiniTile {
   icon: ReactElement;
   href?: string;
   onClick?: MouseEventHandler;
+  'data-test-subj'?: string;
+}
+
+/** Host-built view-model for one documentation and support link. */
+export interface DocsLink {
+  id: string;
+  title: string;
+  description: string;
+  linkLabel: string;
+  href?: string;
+  icon: ReactElement;
+  linkAriaLabel?: string;
   'data-test-subj'?: string;
 }

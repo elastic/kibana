@@ -21,7 +21,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ requestAuth, apmSynthtraceEsClient }) => {
       const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
       headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
-      range = testData.getRecentTimerange(2);
+      range = testData.getRecentTimerange(2, 30);
 
       await apmSynthtraceEsClient.index(
         generateServicesLogsOnlyData({ ...range, instanceCount: 1, servicesPerHost: 2 })

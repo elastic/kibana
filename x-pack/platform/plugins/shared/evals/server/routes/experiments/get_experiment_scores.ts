@@ -20,6 +20,16 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
+// example.input, example.metadata, task.output, and evaluator.metadata are
+// unbounded (additionalProperties: true, no ingest-time size limit) and can
+// hold ~100KB+ of raw data per document
+export const UNBOUNDED_SCORE_FIELDS = [
+  'task.output',
+  'example.input',
+  'example.metadata',
+  'evaluator.metadata',
+];
+
 export const registerGetExperimentScoresRoute = ({
   router,
   logger,
@@ -64,6 +74,7 @@ export const registerGetExperimentScoresRoute = ({
             query,
             sort: SCORES_SORT_ORDER,
             size: 10000,
+            _source_excludes: UNBOUNDED_SCORE_FIELDS,
           });
 
           const hits = searchResponse.hits?.hits ?? [];

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Cheap smoke test that the search_examples partial-results
+ * demo (fibonacciStrategy + progress bar) still works. Also migrate/remove the serverless twin noted below.
+ */
+
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/search_examples/partial_results_example.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';

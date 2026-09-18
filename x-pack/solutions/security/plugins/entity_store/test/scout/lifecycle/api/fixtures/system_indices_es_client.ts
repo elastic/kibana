@@ -23,8 +23,14 @@ const systemIndicesSuperuser = {
  * system indices such as `.kibana` from tests.
  *
  * - On stateful: provisions the role and user idempotently.
- * - On serverless: the user is preconfigured by `@kbn/es` serverless
- *   resources, so no role/user mutations are performed.
+ * - On locally-managed serverless: the user is preconfigured by `@kbn/es`
+ *   serverless resources (bind-mounted file realm), so no role/user mutations
+ *   are performed.
+ * - On Cloud serverless (MKI): the file-realm user does not exist and cannot
+ *   be provisioned — do not call this on Cloud serverless targets. Tag suites
+ *   that use it with `@local-serverless-security_complete` (not the full
+ *   `tags.serverless.security.complete` which includes `@cloud-*`), or guard
+ *   tests with `apiTest.skip(config.isCloud && config.serverless, ...)`.
  *
  * Mirrors agent_builder's `createSystemIndicesEsClient`; candidate for lifting
  * into `@kbn/scout` as shared infrastructure.

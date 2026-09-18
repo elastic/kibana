@@ -26,14 +26,39 @@ import { AppMenuBadge } from './components/app_menu_badge';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
+  AppMenuEbtAttrs,
   AppMenuItemCommon,
   AppMenuItemType,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuSwitch,
 } from './types';
-import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { APP_MENU_EBT_ELEMENT, APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
+
+/**
+ * Maps AppMenu EBT config to `data-ebt-*` DOM attributes for core click tracking.
+ * Always sets `data-ebt-element` to {@link APP_MENU_EBT_ELEMENT}.
+ */
+export const getAppMenuEbtDomProps = (
+  ebt?: AppMenuEbtAttrs
+):
+  | {
+      'data-ebt-action': string;
+      'data-ebt-element': string;
+      'data-ebt-detail'?: string;
+    }
+  | undefined => {
+  if (!ebt) {
+    return undefined;
+  }
+
+  return {
+    'data-ebt-action': ebt.action,
+    'data-ebt-element': APP_MENU_EBT_ELEMENT,
+    ...(ebt.detail ? { 'data-ebt-detail': ebt.detail } : {}),
+  };
+};
 
 const isModifiedEvent = (event: MouseEvent) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
@@ -275,6 +300,7 @@ export const mapAppMenuItemToPanelItem = (
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton) || loading,
     'data-test-subj': itemTestSubj,
+    ...getAppMenuEbtDomProps(item.ebt),
     toolTipContent: content,
     toolTipProps: {
       title,

@@ -204,9 +204,12 @@ export class QueryRuleOrchestrator {
       });
       return;
     }
+    // `features` never travel on the upsert wire contract, so preserve the stored ones rather
+    // than dropping them on a metadata-only update (e.g. a durability toggle).
+    const next: StreamQuery = { ...query, features: query.features ?? existing.query.features };
     await this.syncQueries(
       definition,
-      scopedLinks.map((l) => (l.query.id === query.id ? query : queryFromLink(l))),
+      scopedLinks.map((l) => (l.query.id === query.id ? next : queryFromLink(l))),
       { currentLinks: scopedLinks }
     );
   }

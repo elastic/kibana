@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const MAX_SHORT_STRING_LENGTH = 255;
+export const MAX_MEDIUM_STRING_LENGTH = 512;
 export const MAX_ID_LENGTH = 255;
 export const MAX_RULE_NAME_LENGTH = 255;
 export const MAX_TITLE_LENGTH = 512;

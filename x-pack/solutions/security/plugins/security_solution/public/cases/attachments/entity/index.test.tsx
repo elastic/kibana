@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { AttachmentActionType, SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { EntityAttachmentPayload } from '../../../../common/cases/attachments/entity';
 import { EntityAttachmentPayloadSchema } from '../../../../common/cases/attachments/entity';
 import { getEntityAttachment } from '.';
@@ -67,6 +67,28 @@ describe('Entity attachment', () => {
 
     it('falls back to the globe icon when the entity type is missing', () => {
       expect(getIconType(undefined)).toBe('globe');
+    });
+  });
+
+  describe('getActions', () => {
+    it('returns a primary custom action when metadata is present', () => {
+      const attachment = getEntityAttachment();
+      const actions = attachment.getAttachmentViewObject(baseProps).getActions?.(baseProps);
+      expect(actions).toHaveLength(1);
+      expect(actions?.[0]).toMatchObject({
+        type: AttachmentActionType.CUSTOM,
+        isPrimary: true,
+        render: expect.any(Function),
+      });
+    });
+
+    it('returns no actions when metadata is missing', () => {
+      const attachment = getEntityAttachment();
+      const propsWithoutMetadata = { ...baseProps, metadata: undefined } as unknown as Props;
+      const actions = attachment
+        .getAttachmentViewObject(propsWithoutMetadata)
+        .getActions?.(propsWithoutMetadata);
+      expect(actions).toHaveLength(0);
     });
   });
 });

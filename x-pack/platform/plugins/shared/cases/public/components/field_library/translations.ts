@@ -184,6 +184,14 @@ export const FIELD_DEFINITION_YAML_HELP_TEXT = i18n.translate(
   { defaultMessage: 'Define one reusable field. Validation updates as you type.' }
 );
 
+export const FIELD_DEFINITION_YAML_HELP_TEXT_CREATE = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionYamlHelpTextCreate',
+  {
+    defaultMessage:
+      'Define one reusable field. Validation updates as you type. The name and type become the permanent key for case data and Cases analytics and cannot be changed after creation.',
+  }
+);
+
 export const FIELD_DEFINITION_YAML_INVALID = i18n.translate(
   'xpack.cases.fieldLibrary.fieldDefinitionYamlInvalid',
   { defaultMessage: 'Complete the required field properties and correct invalid values.' }
@@ -316,3 +324,35 @@ export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Field definitions',
   }
 );
+
+export const FIELD_IDENTITY_NAME_LABEL = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldIdentityNameLabel',
+  { defaultMessage: 'Name (field key)' }
+);
+
+export const FIELD_IDENTITY_TYPE_LABEL = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldIdentityTypeLabel',
+  { defaultMessage: 'Type' }
+);
+
+export const FIELD_IDENTITY_HELP_TEXT = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldIdentityHelpText',
+  {
+    defaultMessage:
+      'This is the permanent key used to access this field in case data and Cases analytics. It cannot be changed after creation.',
+  }
+);
+
+export const FIELD_IDENTITY_CHANGED_ERROR = (name: string, type: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldIdentityChangedError', {
+    defaultMessage:
+      'The field name and type are permanent. Restore the name to "{name}" and the type to "{type}" to save your changes.',
+    values: { name, type },
+  });
+
+export const FIELD_IDENTITY_NAME_CHANGED_ERROR = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldIdentityNameChangedError', {
+    defaultMessage:
+      'The field name is permanent. Restore the name to "{name}" to save your changes.',
+    values: { name },
+  });

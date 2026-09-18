@@ -16,7 +16,11 @@ import {
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
 } from '@kbn/alerting-v2-constants';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_object_types';
+import {
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from './saved_object_types';
 
 type ValueOf<T> = T[keyof T];
 type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{
@@ -137,8 +141,10 @@ export const ALERTING_V2_FEATURES = {
         api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
+          // Templates are Fleet-installed catalog objects — grant read only so
+          // rules.all cannot mutate them through the SO client.
           all: [RULE_SAVED_OBJECT_TYPE],
-          read: [],
+          read: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
       read: {
@@ -146,7 +152,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [],
-          read: [RULE_SAVED_OBJECT_TYPE],
+          read: [RULE_SAVED_OBJECT_TYPE, RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
     },

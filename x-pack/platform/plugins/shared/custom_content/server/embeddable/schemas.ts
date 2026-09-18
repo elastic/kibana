@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import {
-  CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
-  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
-} from '../../common/constants';
-
-export const customContentStateSchema = z.object({
-  prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),
-  esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
-  template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
-});
+import { customContentStateSchema } from '@kbn/custom-content-common';
 
 export const customContentEmbeddableSchema = z.object({
   ...customContentStateSchema.shape,
   ...serializedTitlesSchema.shape,
 });
 
-export type CustomContentState = z.output<typeof customContentStateSchema>;
 export type CustomContentEmbeddableState = z.output<typeof customContentEmbeddableSchema>;

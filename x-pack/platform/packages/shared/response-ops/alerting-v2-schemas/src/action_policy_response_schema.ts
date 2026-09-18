@@ -21,12 +21,12 @@ export const actionPolicyResponseSchema = z.object({
   enabled: z.boolean().describe('Whether the action policy is enabled.'),
   destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
   matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
-  groupBy: z
+  group_by: z
     .array(z.string())
     .nullable()
     .describe('The fields used to group alerts, or null for no grouping.'),
   tags: z.array(z.string()).nullable().describe('Tags associated with the action policy.'),
-  groupingMode: groupingModeSchema
+  grouping_mode: groupingModeSchema
     .nullable()
     .describe('The grouping mode for alert notifications.'),
   throttle: z
@@ -40,22 +40,22 @@ export const actionPolicyResponseSchema = z.object({
     })
     .nullable()
     .describe('The throttle configuration for notifications.'),
-  snoozedUntil: z
+  snoozed_until: z
     .string()
     .nullable()
     .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
   auth: z
     .object({
       owner: z.string().describe('The owner of the action policy.'),
-      createdByUser: z
+      created_by_user: z
         .boolean()
         .describe('Whether this policy was created by a user (vs system-generated).'),
     })
     .describe('Authentication and ownership information.'),
-  createdBy: z.string().nullable().describe('The user ID who created the action policy.'),
-  createdAt: z.string().describe('The ISO datetime when the action policy was created.'),
-  updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
-  updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
+  created_by: z.string().nullable().describe('The user ID who created the action policy.'),
+  created_at: z.string().describe('The ISO datetime when the action policy was created.'),
+  updated_by: z.string().nullable().describe('The user ID who last updated the action policy.'),
+  updated_at: z.string().describe('The ISO datetime when the action policy was last updated.'),
 });
 
 export type ActionPolicyResponse = z.infer<typeof actionPolicyResponseSchema>;
@@ -65,7 +65,7 @@ export const findActionPoliciesResponseSchema = z
     items: z.array(actionPolicyResponseSchema).describe('The list of action policies.'),
     total: z.number().describe('The total number of action policies matching the query.'),
     page: z.number().describe('The current page number.'),
-    perPage: z.number().describe('The number of action policies per page.'),
+    per_page: z.number().describe('The number of action policies per page.'),
   })
   .describe('Paginated list of action policies.');
 

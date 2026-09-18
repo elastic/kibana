@@ -112,6 +112,14 @@ describe('agent access-control authorization', () => {
         })
       ).toBe(AgentAccessControlRole.Editor);
     });
+
+    it('treats a missing access control as public so built-in agents stay usable', () => {
+      const args = { accessControl: undefined, owner, currentUser: bob, isAdmin: false };
+
+      expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.Editor);
+      expect(hasAgentReadAccess(args)).toBe(true);
+      expect(hasAgentUseAccess(args)).toBe(true);
+    });
   });
 
   describe('hierarchy checks', () => {

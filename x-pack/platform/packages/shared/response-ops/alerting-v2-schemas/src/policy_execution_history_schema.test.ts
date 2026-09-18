@@ -30,7 +30,7 @@ const validItem = {
   episode_count: 2,
   action_group_count: 1,
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
-  totalRuleCount: 1,
+  total_rule_count: 1,
   workflows: [{ id: 'workflow-1', name: 'Workflow 1' }],
 };
 
@@ -452,37 +452,37 @@ describe('policy_execution_history_schema', () => {
   });
 
   describe('listPolicyExecutionHistoryResponseSchema', () => {
-    it('accepts a valid empty page with searchMatches=null', () => {
+    it('accepts a valid empty page with search_matches=null', () => {
       const parsed = listPolicyExecutionHistoryResponseSchema.parse({
         items: [],
         page: 1,
-        perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
-        totalEvents: 0,
-        searchMatches: null,
+        per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+        total_events: 0,
+        search_matches: null,
       });
       expect(parsed.items).toEqual([]);
-      expect(parsed.searchMatches).toBeNull();
+      expect(parsed.search_matches).toBeNull();
     });
 
-    it('accepts a page of items with populated searchMatches', () => {
+    it('accepts a page of items with populated search_matches', () => {
       const parsed = listPolicyExecutionHistoryResponseSchema.parse({
         items: [validItem],
         page: 1,
-        perPage: 20,
-        totalEvents: 1,
-        searchMatches: { policies: 1, rules: 1, cap: 100 },
+        per_page: 20,
+        total_events: 1,
+        search_matches: { policies: 1, rules: 1, cap: 100 },
       });
       expect(parsed.items).toHaveLength(1);
     });
 
-    it('accepts perPage=0 for a count-only read', () => {
+    it('accepts per_page=0 for a count-only read', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
           page: 1,
-          perPage: 0,
-          totalEvents: 42,
-          searchMatches: null,
+          per_page: 0,
+          total_events: 42,
+          search_matches: null,
         }).success
       ).toBe(true);
     });
@@ -492,33 +492,33 @@ describe('policy_execution_history_schema', () => {
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
           page: 0,
-          perPage: 20,
-          totalEvents: 0,
-          searchMatches: null,
+          per_page: 20,
+          total_events: 0,
+          search_matches: null,
         }).success
       ).toBe(false);
     });
 
-    it('rejects a negative perPage', () => {
+    it('rejects a negative per_page', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
           page: 1,
-          perPage: -1,
-          totalEvents: 0,
-          searchMatches: null,
+          per_page: -1,
+          total_events: 0,
+          search_matches: null,
         }).success
       ).toBe(false);
     });
 
-    it('rejects a negative totalEvents', () => {
+    it('rejects a negative total_events', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
           page: 1,
-          perPage: 20,
-          totalEvents: -1,
-          searchMatches: null,
+          per_page: 20,
+          total_events: -1,
+          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -529,9 +529,9 @@ describe('policy_execution_history_schema', () => {
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [badItem],
           page: 1,
-          perPage: 20,
-          totalEvents: 1,
-          searchMatches: null,
+          per_page: 20,
+          total_events: 1,
+          search_matches: null,
         }).success
       ).toBe(false);
     });

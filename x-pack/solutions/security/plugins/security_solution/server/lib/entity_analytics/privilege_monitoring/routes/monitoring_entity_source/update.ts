@@ -26,6 +26,7 @@ import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
+import { validateIndexPermissions } from '../../../watchlists/entity_sources/entity_source_api_key';
 
 export const updateMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -63,6 +64,17 @@ export const updateMonitoringEntitySourceRoute = (
           try {
             const secSol = await context.securitySolution;
             const client = secSol.getMonitoringEntitySourceDataClient();
+
+            const { elasticsearch } = await context.core;
+            const effectiveIndexPattern =
+              request.body.indexPattern ?? (await client.get(request.params.id))?.indexPattern;
+            if (effectiveIndexPattern) {
+              await validateIndexPermissions(
+                elasticsearch.client.asCurrentUser,
+                effectiveIndexPattern
+              );
+            }
+
             const body = await client.update({ ...request.body, id: request.params.id });
 
             const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();

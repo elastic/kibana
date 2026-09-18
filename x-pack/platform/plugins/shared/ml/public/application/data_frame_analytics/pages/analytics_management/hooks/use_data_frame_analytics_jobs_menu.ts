@@ -41,7 +41,7 @@ export const useDataFrameAnalyticsJobsMenu = ({
         label: i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
           defaultMessage: 'Create job',
         }),
-        iconType: 'plusInCircle' as const,
+        iconType: 'plusCircle' as const,
         run: navigateToSourceSelection,
         testId: 'mlAnalyticsButtonCreate',
         disableButton: !canCreateDataFrameAnalytics,

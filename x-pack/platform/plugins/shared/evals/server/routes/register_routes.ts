@@ -8,8 +8,9 @@
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter, EvalsWorkflowsManagementSetup } from '../types';
+import type { SpaceDependencies } from './shared/resolve_dataset_spaces';
 import type { EvaluatorRegistry } from '../evaluators/types';
 import type { TaskProviderRegistry } from '../task_providers/types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
@@ -28,6 +29,7 @@ import { registerAddExamplesRoute } from './datasets/add_examples';
 import { registerUpdateExampleRoute } from './datasets/update_example';
 import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
+import { registerResolveDatasetRoute } from './datasets/resolve_dataset';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
@@ -45,7 +47,7 @@ import {
   registerCancelExperimentExecutionRoute,
 } from './experiments/experiment_executions';
 
-export interface RouteDependencies {
+export interface RouteDependencies extends SpaceDependencies {
   router: EvalsRouter;
   logger: Logger;
   canEncrypt: boolean;
@@ -53,8 +55,6 @@ export interface RouteDependencies {
   getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
-  getSpaceId?: (request: KibanaRequest) => Promise<string>;
-  checkManageEvalsPrivileges?: (request: KibanaRequest, spaceIds: string[]) => Promise<boolean>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
@@ -72,6 +72,9 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerIngestScoresRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
+  // Registered before the `{datasetId}` route it would otherwise read as an id.
+  // Order is for the reader: hapi matches the literal path first regardless.
+  registerResolveDatasetRoute(dependencies);
   registerGetDatasetRoute(dependencies);
   registerUpdateDatasetRoute(dependencies);
   registerDeleteDatasetRoute(dependencies);

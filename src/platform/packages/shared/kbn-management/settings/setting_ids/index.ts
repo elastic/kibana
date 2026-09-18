@@ -59,8 +59,6 @@ export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
-export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
-  'agentBuilder:uiamOAuthClientManagement';
 export const AGENT_BUILDER_TRACING_ENABLED_SETTING_ID = 'agentBuilder:tracing:enabled';
 export const AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID =
   'agentBuilder:tracing:includeUserPrompts';
@@ -73,6 +71,9 @@ export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
 export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
 export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
+
+// Alerting settings
+export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
@@ -88,12 +89,19 @@ export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
+// Custom branding settings
+export const XPACK_CUSTOM_BRANDING_LOGO_ID = 'xpackCustomBranding:logo';
+export const XPACK_CUSTOM_BRANDING_CUSTOMIZED_LOGO_ID = 'xpackCustomBranding:customizedLogo';
+export const XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID = 'xpackCustomBranding:faviconPNG';
+export const XPACK_CUSTOM_BRANDING_FAVICON_SVG_ID = 'xpackCustomBranding:faviconSVG';
+
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
 export const CONTEXT_STEP_ID = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_ID = 'context:tieBreakerFields';
 export const DEFAULT_COLUMNS_ID = 'defaultColumns';
 export const ENABLE_ESQL_ID = 'enableESQL';
+export const DISCOVER_DEFAULT_ESQL_QUERY_ID = 'discover:defaultEsqlQuery';
 export const DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID = 'discover:maxDocFieldsDisplayed';
 export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwitch';
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';

@@ -32,7 +32,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath } from '../../../data_view_manager/utils/paths';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;

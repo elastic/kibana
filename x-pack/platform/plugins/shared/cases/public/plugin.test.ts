@@ -120,8 +120,6 @@ describe('Cases Ui Plugin', () => {
       expect(setup).toMatchInlineSnapshot(`
         Object {
           "attachmentFramework": Object {
-            "registerExternalReference": [Function],
-            "registerPersistableState": [Function],
             "registerUnified": [Function],
           },
         }

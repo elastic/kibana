@@ -66,6 +66,7 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();

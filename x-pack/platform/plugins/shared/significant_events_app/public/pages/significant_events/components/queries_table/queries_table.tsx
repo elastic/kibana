@@ -38,6 +38,7 @@ import {
   DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
   useFetchDiscoveryQueriesOccurrences,
 } from '../../../../hooks/use_fetch_discovery_queries_occurrences';
+import { useIsCpsMultiProject } from '../../../../hooks/use_is_cps_multi_project';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import { getFormattedError } from '../../../../util/errors';
@@ -56,6 +57,7 @@ import {
   CHART_TITLE,
   DELETE_QUERY_ERROR_TOAST_TITLE,
   DETAILS_BUTTON_ARIA_LABEL,
+  DETECTION_SCOPE_HELP_TEXT,
   IMPACT_COLUMN,
   LAST_OCCURRED_COLUMN,
   NO_ITEMS_MESSAGE,
@@ -100,6 +102,7 @@ export function QueriesTable() {
     },
   } = useKibana();
   const { timeState } = useTimefilter();
+  const isCpsMultiProject = useIsCpsMultiProject();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [pagination, setPagination] = useState<{
@@ -398,6 +401,17 @@ export function QueriesTable() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      {isCpsMultiProject && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="significant_events_detection_scope_help_text"
+          >
+            <p>{DETECTION_SCOPE_HELP_TEXT}</p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <SignificantEventsSearchBar
           isLoading={queriesLoading}

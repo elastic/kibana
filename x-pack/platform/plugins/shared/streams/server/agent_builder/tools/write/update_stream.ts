@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/server';
+import type { StreamlangDSL } from '@kbn/streamlang';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -256,8 +257,7 @@ export const createUpdateStreamTool = ({
                 ...updatedIngest,
                 processing: {
                   ...updatedIngest.processing,
-                  steps:
-                    changes.processing as unknown as Streams.ingest.all.Definition['ingest']['processing']['steps'],
+                  steps: changes.processing as unknown as StreamlangDSL['steps'],
                 },
               };
               applied.push('processing');

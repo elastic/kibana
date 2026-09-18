@@ -34,7 +34,7 @@ export interface Props extends DivProps {
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
-export const Item = React.forwardRef<HTMLDivElement, Props>(
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
@@ -194,14 +194,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     );
   }
 );
-
-export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
-  // The `labs:dashboard:deferBelowFold` setting is intentionally not honored: its deferred
-  // (below-the-fold) loading behavior is currently broken, so panels are always rendered
-  // eagerly. The advanced setting remains available but has no effect until it is fixed
-  // (https://github.com/elastic/kibana/issues/150459)
-  return <Item ref={ref} {...props} />;
-});
 
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>

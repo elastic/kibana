@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import { DATE_WITH_HOSTS_DATA, EXTENDED_TIMEOUT } from '../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../fixtures/constants';
 import {
   cleanHostsFlyoutSynthtraceData,
   cleanNonTsdsSystemTemplate,
@@ -19,6 +19,9 @@ import {
 const SOURCE_ID = 'default';
 const SOURCE_CONFIG_PATH = `/api/metrics/source/${SOURCE_ID}`;
 const MODIFIED_SOURCE_NAME = 'Modified Source';
+const METRICS_SOURCE_DATA_FROM = '2024-04-05T18:20:00.000Z';
+const METRICS_SOURCE_DATA_TO = '2024-04-05T18:21:00.000Z';
+const METRICS_SOURCE_DATE_WITH_DATA = '04/05/2024 6:20:59 PM';
 
 // String literals mirroring InfraRuleType.MetricThreshold / Aggregators.AVERAGE /
 // COMPARATORS.GREATER_THAN — kept inline so the Scout test package does not need to
@@ -55,7 +58,10 @@ test.describe('Infrastructure source configuration', { tag: tags.stateful.classi
     // Ingest fixed-date host metrics so the inventory waffle map can render.
     await ensureNonTsdsSystemTemplate(esClient, log);
     await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
-    await ingestHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
+    await ingestHostsFlyoutSynthtraceData(
+      { esClient, kbnUrl, log, config },
+      { from: METRICS_SOURCE_DATA_FROM, to: METRICS_SOURCE_DATA_TO }
+    );
 
     // Capture the persisted defaults so every test can restore them afterwards.
     const { data } = await kbnClient.request<SourceConfigurationResponse>({
@@ -92,7 +98,7 @@ test.describe('Infrastructure source configuration', { tag: tags.stateful.classi
     { tag: tags.serverless.observability.complete },
     async ({ pageObjects: { inventoryPage } }) => {
       await inventoryPage.goToPage();
-      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
+      await inventoryPage.goToTime(METRICS_SOURCE_DATE_WITH_DATA);
       await expect(inventoryPage.waffleMap).toBeVisible();
     }
   );

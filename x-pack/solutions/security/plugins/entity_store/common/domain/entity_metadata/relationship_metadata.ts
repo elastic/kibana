@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const RELATIONSHIP_OBSERVED_ACTION = 'relationship_observed' as const;
+
 export const RELATIONSHIP_KINDS = [
   'accesses_frequently',
   'accesses_infrequently',
@@ -28,7 +30,7 @@ export interface RelationshipMetadataMaintainer {
 export type RelationshipMetadataDoc = {
   '@timestamp': string;
   'event.kind': 'event';
-  'event.action': 'relationship_observed';
+  'event.action': typeof RELATIONSHIP_OBSERVED_ACTION;
   'event.ingested'?: string;
   'entity.id': string;
   'entity.source': string;
@@ -37,4 +39,22 @@ export type RelationshipMetadataDoc = {
   Maintainer: RelationshipMetadataMaintainer;
 } & {
   [K in RelationshipTargetKey]?: string;
+};
+
+/**
+ * Projects a raw metadata doc into `{ kind, target, timestamp, source }`.
+ * Returns `undefined` when the doc has no recognized relationship target field.
+ */
+export const normalizeRelationshipRecord = (doc: RelationshipMetadataDoc) => {
+  for (const kind of RELATIONSHIP_KINDS) {
+    const target = doc[`entity.relationships.${kind}.target`];
+    if (target) {
+      return {
+        kind,
+        target,
+        timestamp: doc['@timestamp'],
+        source: doc['entity.source'],
+      };
+    }
+  }
 };

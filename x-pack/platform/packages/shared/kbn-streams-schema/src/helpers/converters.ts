@@ -8,6 +8,12 @@
 import { omit } from 'lodash';
 import { Streams } from '../models/streams';
 import { QueryStream } from '../models/query';
+import type {
+  IngestStreamProcessing,
+  IngestStreamProcessingUpsert,
+  StreamlangIngestStreamProcessing,
+  StreamlangIngestStreamProcessingUpsert,
+} from '../models/ingest/processing';
 
 /**
  * Parses a stream upsert request and converts it into the corresponding stream definition.
@@ -34,7 +40,7 @@ export const convertUpsertRequestIntoDefinition = (
         processing: {
           ...request.stream.ingest.processing,
           updated_at: now,
-        },
+        } as StreamlangIngestStreamProcessing,
       },
     };
   }
@@ -49,7 +55,7 @@ export const convertUpsertRequestIntoDefinition = (
         processing: {
           ...request.stream.ingest.processing,
           updated_at: now,
-        },
+        } as IngestStreamProcessing,
       },
     };
   }
@@ -90,7 +96,10 @@ export const convertGetResponseIntoUpsertRequest = (
         ...omit(getResponse.stream, ['name', 'updated_at']),
         ingest: {
           ...getResponse.stream.ingest,
-          processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
+          processing: omit(
+            getResponse.stream.ingest.processing,
+            'updated_at'
+          ) as StreamlangIngestStreamProcessingUpsert,
         },
       },
     };
@@ -104,7 +113,10 @@ export const convertGetResponseIntoUpsertRequest = (
         ...omit(getResponse.stream, ['name', 'updated_at']),
         ingest: {
           ...getResponse.stream.ingest,
-          processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
+          processing: omit(
+            getResponse.stream.ingest.processing,
+            'updated_at'
+          ) as IngestStreamProcessingUpsert,
         },
       },
     };

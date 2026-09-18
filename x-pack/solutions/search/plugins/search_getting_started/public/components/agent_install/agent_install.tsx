@@ -19,9 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
-import anthropicIcon from '../../assets/anthropic.svg';
-import cursorIcon from '../../assets/cursor.svg';
-import vsCodeIcon from '../../assets/visual-studio-code.svg';
+import { anthropicIcon, cursorIcon, visualStudioCodeIcon } from '@kbn/custom-icons';
 
 import { useKibana } from '../../hooks/use_kibana';
 import { PromptModal } from './prompt_modal';
@@ -152,7 +150,7 @@ export const AgentInstallSection = () => {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <BrandIcon
-                          icon={vsCodeIcon}
+                          icon={visualStudioCodeIcon}
                           title={i18n.translate(
                             'xpack.searchGettingStarted.agentInstall.vsCodeIcon.title',
                             {

@@ -776,7 +776,7 @@ describe('tab_state actions', () => {
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
-        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
+        esql: 'FROM the-data-view-title | SORT @timestamp DESC | WHERE KQL("""foo: \'bar\'""")',
       });
       expect(tab.appState.sort).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);

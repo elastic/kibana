@@ -31,10 +31,13 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
+import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
+
+export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
 export type AlertingServerSetup = void;
 
@@ -50,6 +53,15 @@ export interface AlertingServerStart {
     request: KibanaRequest,
     spaceId: string
   ): Promise<ActionPolicyClientApi>;
+
+  /**
+   * Returns an AlertEventsClient scoped to the request's credentials.
+   * NOTE: AlertEventsClient writes via the internal ES user, so callers are
+   * responsible for enforcing write-privilege checks before calling mutating
+   * methods. HTTP routes must check via their own authz; workflow steps must
+   * check via PrivilegeChecker before invoking the client.
+   */
+  getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

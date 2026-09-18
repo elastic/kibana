@@ -27,7 +27,7 @@ export const READ_KEY = 'notificationCenter:read';
 export const READ_ALL_BEFORE_DEFAULT = '1970-01-01T00:00:00.000Z';
 
 /** Ceiling for the array of read ids */
-const MAX_READ_IDS = 500;
+export const MAX_READ_IDS = 500;
 
 export const readAllBeforeSchema = z.iso.datetime();
 export const readSchema = z.array(z.string()).max(MAX_READ_IDS);

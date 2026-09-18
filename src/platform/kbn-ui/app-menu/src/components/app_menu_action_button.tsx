@@ -13,6 +13,7 @@ import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   createReturnFocus,
+  getAppMenuEbtDomProps,
   getIsSelectedColor,
   getLinkProps,
   getTooltip,
@@ -40,6 +41,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     htmlId,
     label,
     testId,
+    ebt,
     iconType,
     disableButton,
     href,
@@ -113,6 +115,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     ...linkProps,
     id: htmlId,
     'data-test-subj': testId || getAppMenuActionButtonTestSubj(id),
+    ...getAppMenuEbtDomProps(ebt),
     iconType,
     isDisabled: isDisabled(disableButton),
     href,

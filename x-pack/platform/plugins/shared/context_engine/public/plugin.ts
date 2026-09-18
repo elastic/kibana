@@ -21,6 +21,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type {
+  ChatOpener,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -46,10 +47,20 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
+  /**
+   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered. A
+   * getter over this field is threaded into the app so the button reacts to an opener registered
+   * after mount, rather than a value snapshotted once at mount time.
+   */
+  private chatOpener?: ChatOpener;
+
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
     const startServices = core.getStartServices();
+    // Captured in a closure so `mount` (where `this` is the app config) can read the opener
+    // registered on `start`.
+    const getChatOpener = () => this.chatOpener;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -85,6 +96,7 @@ export class ContextEnginePlugin
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
+          getChatOpener,
         });
       },
     });
@@ -93,7 +105,11 @@ export class ContextEnginePlugin
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {};
+    return {
+      registerChatOpener: (opener: ChatOpener) => {
+        this.chatOpener = opener;
+      },
+    };
   }
 
   stop() {}

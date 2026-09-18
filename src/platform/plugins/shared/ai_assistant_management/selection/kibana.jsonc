@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/ai-assistant-management-plugin",
   "owner": [
-    "@elastic/appex-ai-infra"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "shared",

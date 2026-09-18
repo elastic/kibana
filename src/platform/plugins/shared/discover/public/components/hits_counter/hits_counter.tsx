@@ -86,6 +86,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
       className="eui-textTruncate eui-textNoWrap"
       css={hitsCounterCss}
       data-test-subj="discoverQueryTotalHits"
+      data-fetch-status={hitsStatus}
     >
       <EuiFlexItem grow={false} aria-live="polite" css={hitsCounterTextCss}>
         <EuiText className="eui-textTruncate" size="s">

@@ -89,7 +89,7 @@ spaceTest.describe('Discover new search action', { tag: '@local-stateful-classic
 
     await discover.clickNewSearch();
 
-    expect(await discover.getEsqlQueryValue()).toBe('FROM logstash-*');
+    expect(await discover.getEsqlQueryValue()).toBe('FROM logstash-* | SORT @timestamp DESC');
     expect(await discover.getHistogramSuggestionType()).toBe('histogramForESQL');
     expect(await discover.getHitCount()).toBe('1,000');
   });
@@ -108,7 +108,7 @@ spaceTest.describe('Discover new search action', { tag: '@local-stateful-classic
 
     await discover.clickNewSearch();
 
-    expect(await discover.getEsqlQueryValue()).toBe('FROM logstash-*');
+    expect(await discover.getEsqlQueryValue()).toBe('FROM logstash-* | SORT @timestamp DESC');
     expect(await discover.getHitCount()).toBe('1,000');
   });
 });

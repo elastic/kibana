@@ -74,7 +74,7 @@ touch the Feature Flags service themselves.
    } as const;
    ```
 2. Open a PR against [`elastic/kibana-feature-flags`](https://github.com/elastic/kibana-feature-flags)
-   adding a YAML file under `feature-flags/search/search-kibana/` that defines the
+   adding a YAML file under `feature-flags/search/search-ml-ux/` that defines the
    flag with the same key:
    ```yaml
    notificationCenter.types.inference.modelStatus:
@@ -85,7 +85,7 @@ touch the Feature Flags service themselves.
      variations:
        - true # ON
        - false # OFF (default)
-     team-owner: '@elastic/search-kibana'
+     team-owner: '@elastic/search-ml-ux'
      deprecate-by: unknown
      evaluation-rules: {}
    ```

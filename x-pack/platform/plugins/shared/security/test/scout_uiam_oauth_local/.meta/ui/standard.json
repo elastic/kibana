@@ -1,5 +1,5 @@
 {
-  "sha1": "c82d85a201138b4e7123991a7078161633137180",
+  "sha1": "8c5061bb157a14ef3ad0dd1fe8fcc4df2aa1b6fe",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 98,
-        "column": 9
+        "line": 113,
+        "column": 76
       }
     },
     {
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 118,
-        "column": 9
+        "line": 121,
+        "column": 15
       }
     },
     {
@@ -40,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 140,
+        "column": 73
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 149,
-        "column": 9
+        "line": 151,
+        "column": 25
       }
     },
     {
@@ -66,8 +66,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 168,
+        "column": 18
+      }
+    },
+    {
+      "id": "adc95c83352db02-997f8e09f19dfe3",
+      "title": "[NON-MKI] Security — Application Connections management deletes an individual revoked connection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 195,
+        "column": 65
+      }
+    },
+    {
+      "id": "adc95c83352db02-883b502a0ad9601",
+      "title": "[NON-MKI] Security — Application Connections management bulk deletes multiple selected revoked connections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 203,
+        "column": 7
       }
     }
   ]

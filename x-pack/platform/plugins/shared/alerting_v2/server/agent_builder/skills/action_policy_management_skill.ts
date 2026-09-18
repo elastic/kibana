@@ -17,6 +17,11 @@ import {
   generateActionPolicyOperationsDoc,
   generateActionPolicySchemaDoc,
   generateActionPolicyWorkflowPayloadDoc,
+  generateGroupingModesDoc,
+  generateThrottleStrategiesDoc,
+  getEpisodeStatusValues,
+  formatEnumValuesList,
+  generateThrottleGroupingCompatibilityDoc,
 } from './schema_to_skill_docs';
 
 export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
@@ -50,7 +55,7 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | Field | Description |
 |---|---|
 | \`episode_id\` | The episode UUID |
-| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, or \`recovering\` |
+| \`episode_status\` | ${formatEnumValuesList(getEpisodeStatusValues())} |
 | \`group_hash\` | Hash of the grouping fields |
 | \`last_event_timestamp\` | Timestamp of the most recent event |
 | \`rule.id\` | The rule's saved object ID |
@@ -58,16 +63,9 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`rule.tags\` | The rule's tags array |
 | \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
 
-### Grouping Modes
-- \`per_episode\` (default): one notification per alert episode lifecycle.
-- \`all\`: a single notification for all matching episodes.
-- \`per_field\`: group by specified \`groupBy\` fields.
+${generateGroupingModesDoc()}
 
-### Throttle Strategies
-- \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
-- \`per_status_interval\`: notify on transitions and at regular intervals.
-- \`time_interval\`: notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).
-- \`every_time\`: notify on every evaluation cycle (high volume).
+${generateThrottleStrategiesDoc()}
 
 ---
 
@@ -153,11 +151,15 @@ When a user asks about existing action policies:
 - Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
 - To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
-- After attaching, use the returned \`attachment_id\` for subsequent ${ALERTING_TOOL_IDS.manageActionPolicy} calls.
+- After attaching, use the returned \`attachment_id\` for subsequent ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } calls.
 
 ## Composing and Modifying Action Policies
 
-Build the request for ${ALERTING_TOOL_IDS.manageActionPolicy} as an ordered \`operations\` array. Operations run in sequence.
+Build the request for ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } as an ordered \`operations\` array. Operations run in sequence.
 
 For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`.
 
@@ -167,22 +169,21 @@ Refer to the [action-policy-operations-schema reference](./references/action-pol
 
 Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the concepts reference.
 
-### Throttle / Grouping Compatibility
-
-The throttle strategy must be compatible with the grouping mode:
-- For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
-- For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
-- \`per_status_interval\` and \`time_interval\` require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).
+${generateThrottleGroupingCompatibilityDoc()}
 
 If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool validates compatibility after all operations run.
 
 ## Final Validation
 
-Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageActionPolicy} call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+Always include \`{ operation: "validate" }\` as the **last operation** in the final ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Action Policy Persistence
 
-The ${ALERTING_TOOL_IDS.manageActionPolicy} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create policy** — create a new action policy from the in-memory attachment.
 - **Update Policy** — push changes back to the origin policy (only for attached saved policies).
@@ -191,7 +192,9 @@ Never attempt to create, update, delete, enable, or disable action policies dire
 
 After composing or modifying an action policy, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool result.
 
 ---
 
@@ -277,7 +280,9 @@ Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order:
 
 Render the action policy inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool result.
 
 ## Save Order Reminder
 

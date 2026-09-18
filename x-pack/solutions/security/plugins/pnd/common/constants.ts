@@ -24,3 +24,9 @@ export {
 
 /** API privilege for read-only PND internal routes. */
 export const PND_API_PRIVILEGE_READ = 'pnd_read' as const;
+
+/**
+ * API privilege for PND internal routes that mutate state. Only granted by the `all` feature
+ * privilege, and every route requiring it is additionally gated on `xpack.pnd.ui.useMockData`.
+ */
+export const PND_API_PRIVILEGE_WRITE = 'pnd_write' as const;

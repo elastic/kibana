@@ -8,6 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { contentListQueryClient } from '@kbn/content-list-provider';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,7 +17,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { ContextLandingPage } from './context_landing_page';
-import { AI_INDICES_PER_PAGE } from './hooks/use_ai_index_list_state';
+import { AI_INDICES_PER_PAGE } from './utils/ai_index_content_list_utils';
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
@@ -31,6 +32,22 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+const AI_INDEX_LISTING_PAGE_SIZE_KEY = 'contentList:pageSize:context-engine-ai-indices-listing';
+
+const createCore = () => {
+  const core = coreMock.createStart();
+  core.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
+  core.uiSettings.get.mockImplementation((key: string) => {
+    if (key === 'savedObjects:perPage') {
+      return AI_INDICES_PER_PAGE;
+    }
+    return undefined;
+  });
+  return core;
+};
 
 const renderWithProviders = (core: CoreStart) =>
   render(
@@ -48,13 +65,11 @@ const renderWithProviders = (core: CoreStart) =>
   );
 
 describe('ContextLandingPage', () => {
-  const createCore = () => {
-    const core = coreMock.createStart();
-    core.application.getUrlForApp.mockImplementation(
-      (appId, options) => `/app/${appId}${options?.path ?? ''}`
-    );
-    return core;
-  };
+  beforeEach(async () => {
+    localStorage.removeItem(AI_INDEX_LISTING_PAGE_SIZE_KEY);
+    await contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
+  });
 
   it('renders the header and a create button in the empty prompt when there are no indexes', async () => {
     const core = createCore();
@@ -63,11 +78,11 @@ describe('ContextLandingPage', () => {
     renderWithProviders(core);
 
     expect(screen.getByTestId('contextLandingPage')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
 
     const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
     expect(createButtons).toHaveLength(1);
     expect(createButtons[0]).toHaveTextContent('Create AI Index');
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
 
     await waitFor(() => expect(core.http.get).toHaveBeenCalled());
   });
@@ -95,6 +110,7 @@ describe('ContextLandingPage', () => {
 
     expect(screen.getAllByTestId('contextAiIndexCardSkeleton')).toHaveLength(3);
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeInTheDocument();
   });
 
   it('renders a card per AI index returned by the list API and links to its detail page', async () => {
@@ -142,7 +158,9 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+    await waitFor(() =>
+      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1)
+    );
   });
 
   it('renders an error prompt when the list API fails', async () => {
@@ -153,6 +171,7 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsError')).toBeInTheDocument();
     expect(screen.getByText('Boom')).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeInTheDocument();
   });
 
   it('marks managed AI indexes as owned by Elastic instead of showing a modified date', async () => {
@@ -174,7 +193,7 @@ describe('ContextLandingPage', () => {
     renderWithProviders(core);
 
     await screen.findByTestId('contextAiIndexCardsEmpty');
-    expect(screen.queryByTestId('contextAiIndexListSearch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexList-searchBox')).not.toBeInTheDocument();
   });
 
   describe('search and filters', () => {
@@ -201,11 +220,11 @@ describe('ContextLandingPage', () => {
     it('narrows the cards to the ones matching the search term', async () => {
       await renderWithAiIndexes();
 
-      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+      fireEvent.change(screen.getByTestId('contextAiIndexList-searchBox'), {
         target: { value: 'escalation' },
       });
 
-      expect(cardTitles()).toHaveLength(1);
+      await waitFor(() => expect(cardTitles()).toHaveLength(1));
       expect(cardTitles()[0]).toContain('support-tickets');
       expect(screen.getByTestId('contextAiIndexListCount')).toHaveTextContent('1 AI Index');
     });
@@ -214,7 +233,7 @@ describe('ContextLandingPage', () => {
       await renderWithAiIndexes();
 
       fireEvent.click(screen.getByTestId('contextAiIndexListOwnerFilter'));
-      fireEvent.click(await screen.findByTestId('contextAiIndexListOwnerFilterOption-managed'));
+      fireEvent.click(await screen.findByTestId('aiIndexOwner-searchbar-option-managed'));
 
       await waitFor(() => expect(cardTitles()).toHaveLength(1));
       expect(cardTitles()[0]).toContain('elastic');
@@ -224,7 +243,7 @@ describe('ContextLandingPage', () => {
       await renderWithAiIndexes();
 
       fireEvent.click(screen.getByTestId('contextAiIndexListTypeFilter'));
-      fireEvent.click(await screen.findByTestId('contextAiIndexListTypeFilterOption-data_stream'));
+      fireEvent.click(await screen.findByTestId('aiIndexType-searchbar-option-data_stream'));
 
       await waitFor(() => expect(cardTitles()).toHaveLength(2));
       expect(cardTitles().some((title) => title?.includes('support-tickets'))).toBe(true);
@@ -235,11 +254,11 @@ describe('ContextLandingPage', () => {
     it('narrows to the intersection when search and filters are combined', async () => {
       await renderWithAiIndexes();
 
-      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+      fireEvent.change(screen.getByTestId('contextAiIndexList-searchBox'), {
         target: { value: 'escalation' },
       });
       fireEvent.click(screen.getByTestId('contextAiIndexListOwnerFilter'));
-      fireEvent.click(await screen.findByTestId('contextAiIndexListOwnerFilterOption-user'));
+      fireEvent.click(await screen.findByTestId('aiIndexOwner-searchbar-option-user'));
 
       await waitFor(() => expect(cardTitles()).toHaveLength(1));
       expect(cardTitles()[0]).toContain('support-tickets');
@@ -248,7 +267,7 @@ describe('ContextLandingPage', () => {
     it('matches the search term against the destination value', async () => {
       await renderWithAiIndexes();
 
-      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+      fireEvent.change(screen.getByTestId('contextAiIndexList-searchBox'), {
         target: { value: 'logs-custom-index' },
       });
 
@@ -259,16 +278,16 @@ describe('ContextLandingPage', () => {
     it('offers a way back when nothing matches', async () => {
       await renderWithAiIndexes();
 
-      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+      fireEvent.change(screen.getByTestId('contextAiIndexList-searchBox'), {
         target: { value: 'nothing-matches-this' },
       });
 
-      expect(screen.getByTestId('contextAiIndexCardsNoMatches')).toBeInTheDocument();
+      expect(await screen.findByTestId('contextAiIndexCardsNoMatches')).toBeInTheDocument();
       expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('contextAiIndexListClearFilters'));
 
-      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(3);
+      await waitFor(() => expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(3));
     });
   });
 
@@ -295,13 +314,14 @@ describe('ContextLandingPage', () => {
 
       fireEvent.click(screen.getByLabelText('Page 2 of 2'));
 
-      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(1);
+      await waitFor(() => expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(1));
     });
 
-    it('hides the pagination when everything fits on one page', async () => {
+    it('shows the content list footer when everything fits on one page', async () => {
       await renderPagedAiIndexes(AI_INDICES_PER_PAGE);
 
-      expect(screen.queryByTestId('contextAiIndexListPagination')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextAiIndexListFooter')).toBeInTheDocument();
+      expect(screen.getByTestId('contentListFooter-pagination')).toBeInTheDocument();
     });
   });
 });

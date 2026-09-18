@@ -106,3 +106,81 @@ describe('EvidenceList', () => {
     expect(screen.getAllByTestId('investigationEvidenceQueryLink')).toHaveLength(1);
   });
 });
+
+describe('EvidenceList code references', () => {
+  const linkableCode = {
+    source: 'github_connector' as const,
+    repo: 'elastic/otel-demo-scenario',
+    path: 'src/recommendationservice/recommendation_server.py',
+    host: 'github.com',
+    ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
+  };
+
+  it('links a code reference without needing any consumer wiring', () => {
+    renderEvidence([{ description: 'The acquire path has no timeout.', code: linkableCode }]);
+
+    const link = screen.getByTestId('investigationEvidenceCodeLink');
+
+    expect(link).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/otel-demo-scenario/blob/f07c1da942b0c555fab6cf4eab612df1997b1329/src/recommendationservice/recommendation_server.py'
+    );
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveTextContent('recommendation_server.py');
+  });
+
+  it('renders an unlinkable reference as text rather than guessing a host', () => {
+    const { host, ...withoutHost } = linkableCode;
+
+    renderEvidence([{ description: 'The acquire path has no timeout.', code: withoutHost }]);
+
+    expect(screen.queryByTestId('investigationEvidenceCodeLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationEvidenceCodeText')).toHaveTextContent(
+      'elastic/otel-demo-scenario/src/recommendationservice/recommendation_server.py @ f07c1da'
+    );
+  });
+
+  it('links a GitHub Enterprise host', () => {
+    renderEvidence([
+      {
+        description: 'The acquire path has no timeout.',
+        code: { ...linkableCode, host: 'github.acme.com' },
+      },
+    ]);
+
+    expect(screen.getByTestId('investigationEvidenceCodeLink')).toHaveAttribute(
+      'href',
+      'https://github.acme.com/elastic/otel-demo-scenario/blob/f07c1da942b0c555fab6cf4eab612df1997b1329/src/recommendationservice/recommendation_server.py'
+    );
+  });
+
+  it('renders a code_search reference as text, whatever else it carries', () => {
+    renderEvidence([
+      {
+        description: 'The acquire path has no timeout.',
+        code: { ...linkableCode, source: 'code_search' },
+      },
+    ]);
+
+    expect(screen.queryByTestId('investigationEvidenceCodeLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationEvidenceCodeText')).toBeInTheDocument();
+  });
+
+  it('renders both links when one observation rests on a query and a file', () => {
+    renderEvidence(
+      [
+        {
+          description: 'Errors spike at 08:40 and the handler re-raises.',
+          esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
+          time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
+          code: linkableCode,
+        },
+      ],
+      queryHref
+    );
+
+    expect(screen.getByTestId('investigationEvidenceQueryLink')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationEvidenceCodeLink')).toBeInTheDocument();
+    expect(screen.getAllByTestId('investigationEvidenceItem')).toHaveLength(1);
+  });
+});

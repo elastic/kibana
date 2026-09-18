@@ -145,8 +145,11 @@ Use operations[] to:
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
         logger.debug({
-          message: () => `Invalid manage_rule input: ${message}`,
-          labels: { space_id: spaceId },
+          message: 'Invalid manage_rule input',
+          labels: {
+            space_id: spaceId,
+            ...(ruleId != null ? { rule_id: ruleId } : {}),
+          },
         });
       } else {
         logger.warn({

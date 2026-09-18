@@ -132,6 +132,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: 130
           preemptible: true
         retry:
           automatic:
@@ -383,6 +384,37 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Attack Discovery Agent Builder'
+        key: kbn-evals-weekly-attack-discovery-agent-builder
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'attack-discovery-agent-builder'
+          EVAL_FANOUT: '1'
+          EVAL_GREP: 'golden |non-golden'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_attack_discovery_agent_builder'
+        # This suite ships as a baseline measurement point. The default-agent
+        # routing + main skill prose is intentionally not hardened yet — expect
+        # live-retrieval and multiple-alert-sets cases to fail on trajectory
+        # and cost evaluators. soft_fail keeps the suite informational until
+        # the follow-up skill-hardening PR lands.
+        soft_fail: true
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

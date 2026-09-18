@@ -146,6 +146,32 @@ describe('ApmMainTemplate', () => {
     expect(mockRegisterAppMenu).not.toHaveBeenCalled();
   });
 
+  it('lets page-local primaryActionItem replace Add data on the title row', async () => {
+    mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
+
+    renderTemplate(
+      <ApmMainTemplate
+        header={{
+          title: 'My group',
+          menu: {
+            primaryActionItem: {
+              id: 'editServiceGroup',
+              label: 'Edit group',
+              iconType: 'pencil',
+              testId: 'apmEditButtonEditGroupButton',
+              run: () => {},
+            },
+          },
+        }}
+      >
+        <div>body</div>
+      </ApmMainTemplate>
+    );
+
+    expect(await screen.findByTestId('apmEditButtonEditGroupButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('apmAddDataHeaderLink')).not.toBeInTheDocument();
+  });
+
   it('registers the app menu with chrome on the legacy pageHeader path', () => {
     mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
 

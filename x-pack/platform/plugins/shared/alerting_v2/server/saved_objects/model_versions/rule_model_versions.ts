@@ -9,7 +9,9 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
+  ruleSavedObjectAttributesSchemaV3,
 } from '../schemas/rule_saved_object_attributes';
+import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -55,6 +57,23 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV2,
+    },
+  },
+  '4': {
+    // Introduce the structured `artifacts[].data` record, backfilled from the
+    // legacy `artifacts[].value`. `value` is gone from the schema and is never
+    // written again, but the backfill leaves the existing one on disk so a
+    // rollback to model version 3 — whose schema still requires it — can read
+    // migrated rules.
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: migrateRuleArtifactsToData,
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV3,
     },
   },
 };

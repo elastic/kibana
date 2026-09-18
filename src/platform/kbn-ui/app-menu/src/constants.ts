@@ -16,3 +16,9 @@
  */
 export const APP_MENU_ITEM_LIMIT = 3;
 export const DEFAULT_POPOVER_WIDTH = 200;
+
+/** Fixed `data-ebt-element` for all AppMenu controls. */
+export const APP_MENU_EBT_ELEMENT = 'appMenu';
+
+/** Fixed `data-ebt-action` for the built-in AppMenu overflow ("More") button. */
+export const APP_MENU_EBT_OPEN_MORE_ACTION = 'openMoreMenu';

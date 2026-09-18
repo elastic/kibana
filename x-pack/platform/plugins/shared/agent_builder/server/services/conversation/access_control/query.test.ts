@@ -15,7 +15,7 @@ const user: UserIdAndName = {
 
 describe('conversation access control query', () => {
   describe('buildReadAccessFilter', () => {
-    it('matches public conversations and conversations owned by the user for accessible agents', () => {
+    it('matches public, owned and shared conversations for accessible agents', () => {
       expect(buildReadAccessFilter({ user, agentIds: ['agent-1', 'agent-2'] })).toEqual({
         bool: {
           filter: [
@@ -39,6 +39,20 @@ describe('conversation access control query', () => {
                       minimum_should_match: 1,
                     },
                   },
+                  {
+                    nested: {
+                      path: 'access_control.entries',
+                      ignore_unmapped: true,
+                      query: {
+                        bool: {
+                          filter: [
+                            { term: { 'access_control.entries.type': 'user' } },
+                            { term: { 'access_control.entries.id': user.id } },
+                          ],
+                        },
+                      },
+                    },
+                  },
                 ],
                 minimum_should_match: 1,
               },
@@ -49,7 +63,7 @@ describe('conversation access control query', () => {
       });
     });
 
-    it('omits the user_id clause when the caller has no id but still matches id-less conversations', () => {
+    it('omits the shared clause entirely when the caller has no id', () => {
       expect(
         buildReadAccessFilter({ user: { username: user.username }, agentIds: ['agent-1'] })
       ).toEqual({

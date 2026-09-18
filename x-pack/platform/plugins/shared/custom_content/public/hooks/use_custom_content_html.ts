@@ -8,7 +8,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
@@ -38,6 +39,10 @@ export interface UseCustomContentHtmlParams {
   generationVersion: number;
   savedTemplate: string | undefined;
   colorMode: EuiThemeColorModeStandard;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   onTemplateChange: (template: string) => void;
 }
 
@@ -56,6 +61,10 @@ export function useCustomContentHtml({
   generationVersion,
   savedTemplate,
   colorMode,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
   onTemplateChange,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [html, setHtml] = useState('');
@@ -67,11 +76,15 @@ export function useCustomContentHtml({
   // wrote so we can skip the echo re-run without also skipping intentional version bumps.
   const selfWrittenRef = useRef<string | undefined>(undefined);
 
-  // Track the last-rendered timeRange and generationVersion so that timepicker changes and
-  // explicit refresh clicks still trigger a re-fetch even when savedTemplate hasn't changed
-  // (which would otherwise trip the echo-skip guard below).
+  // Track the last-rendered fetch inputs so that any change in unified search context
+  // (timeRange, filters, query, isApproximate, projectRouting, generationVersion) still
+  // triggers a re-fetch even when savedTemplate hasn't changed.
   const lastRenderedTimeRangeRef = useRef<TimeRange | undefined>(undefined);
   const lastRenderedGenerationVersionRef = useRef(generationVersion);
+  const lastRenderedIsApproximateRef = useRef(isApproximate);
+  const lastRenderedProjectRoutingRef = useRef<ProjectRouting | undefined>(projectRouting);
+  const lastRenderedQueryRef = useRef<Query | AggregateQuery | undefined>(query);
+  const lastRenderedFiltersRef = useRef<Filter[] | undefined>(filters);
 
   const colorModeRef = useRef(colorMode);
   useEffect(() => {
@@ -92,11 +105,27 @@ export function useCustomContentHtml({
     const generationVersionSame = generationVersion === lastRenderedGenerationVersionRef.current;
     lastRenderedGenerationVersionRef.current = generationVersion;
 
+    const isApproximateSame = isApproximate === lastRenderedIsApproximateRef.current;
+    lastRenderedIsApproximateRef.current = isApproximate;
+
+    const projectRoutingSame = projectRouting === lastRenderedProjectRoutingRef.current;
+    lastRenderedProjectRoutingRef.current = projectRouting;
+
+    const querySame = JSON.stringify(query) === JSON.stringify(lastRenderedQueryRef.current);
+    lastRenderedQueryRef.current = query;
+
+    const filtersSame = JSON.stringify(filters) === JSON.stringify(lastRenderedFiltersRef.current);
+    lastRenderedFiltersRef.current = filters;
+
     if (
       savedTemplate !== undefined &&
       savedTemplate === selfWrittenRef.current &&
       timeRangeSame &&
-      generationVersionSame
+      generationVersionSame &&
+      isApproximateSame &&
+      projectRoutingSame &&
+      querySame &&
+      filtersSame
     ) {
       return;
     }
@@ -115,12 +144,19 @@ export function useCustomContentHtml({
     let acc = '';
 
     const { core, search } = getServices();
+    const fetchOptions = {
+      isApproximate,
+      projectRouting,
+      query,
+      filters,
+      esQueryConfig: getEsQueryConfig(core.uiSettings),
+    };
 
     // Fast path — ES|QL panel with stored template: fetch data client-side and render, no LLM.
     if (template && esqlQuery) {
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal, fetchOptions)
         .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -192,7 +228,8 @@ export function useCustomContentHtml({
             core.http,
             esqlQuery,
             timeRange,
-            controller.signal
+            controller.signal,
+            fetchOptions
           );
         } catch (err) {
           if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
@@ -270,7 +307,18 @@ export function useCustomContentHtml({
     return () => {
       controller.abort();
     };
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate]);
+  }, [
+    embeddableId,
+    prompt,
+    esqlQuery,
+    timeRange,
+    generationVersion,
+    savedTemplate,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+  ]);
 
   return { html, isLoading, error, isAiUnavailable };
 }

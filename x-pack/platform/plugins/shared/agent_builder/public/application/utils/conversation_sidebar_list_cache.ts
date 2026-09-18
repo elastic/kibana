@@ -26,7 +26,7 @@ const buildSidebarConversationListRow = (p: {
     title: p.title,
     created_at: t,
     updated_at: t,
-    permissions: { rename: true, delete: true },
+    permissions: { rename: true, delete: true, update_access_control: true },
   };
 };
 

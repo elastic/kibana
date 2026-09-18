@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-} from './constants';
+} from '@kbn/custom-content-common';
 
 export const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_context';
 
