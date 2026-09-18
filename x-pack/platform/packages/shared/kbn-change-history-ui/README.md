@@ -121,7 +121,7 @@ Adapter DTO types (`ChangeHistoryListItem`, `ChangeHistoryDetail`, error codes, 
 From the repo root (with dependencies bootstrapped):
 
 ```bash
-yarn storybook change_history_ui
+pnpm storybook change_history_ui
 ```
 
 Stories use the in-memory mock adapter — no Kibana server required.

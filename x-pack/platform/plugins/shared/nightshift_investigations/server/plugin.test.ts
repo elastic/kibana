@@ -11,7 +11,11 @@ import { NightshiftInvestigationsPlugin } from './plugin';
 
 const createPlugin = () =>
   new NightshiftInvestigationsPlugin(
-    coreMock.createPluginInitializerContext({ enabled: true, sandbox: undefined })
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      sandbox: undefined,
+      cortex: { enabled: false },
+    })
   );
 
 const createSetupDeps = () =>
