@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import type { Improvement } from '../../../common/http_api/improvements';
+import { MAX_IMPROVEMENTS_PAGE_SIZE } from '../../../common/constants';
 import { useFeedbackLoopEnabled } from './use_feedback_loop_enabled';
 import { useImprovements } from './use_improvements';
 
@@ -26,7 +27,13 @@ export const useScopedImprovements = ({
   actions: readonly ImprovementAction[];
 }): Improvement[] => {
   const feedbackLoopEnabled = useFeedbackLoopEnabled();
-  const { improvements } = useImprovements({ aiIndexId, enabled: feedbackLoopEnabled });
+  // Request the maximum page to avoid silently dropping panel-specific items when there are
+  // more than DEFAULT_IMPROVEMENTS_PAGE_SIZE open suggestions in total.
+  const { improvements } = useImprovements({
+    aiIndexId,
+    size: MAX_IMPROVEMENTS_PAGE_SIZE,
+    enabled: feedbackLoopEnabled,
+  });
 
   return useMemo(
     () => improvements.filter(({ action }) => (actions as readonly string[]).includes(action)),

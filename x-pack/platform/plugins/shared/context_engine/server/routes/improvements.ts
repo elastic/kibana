@@ -188,7 +188,10 @@ export const registerImprovementRoutes = ({
       },
       gate(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        // Improvements are recorded by the workflow, which always runs in the default space
+        // (SCHEDULE_SPACE_ID). Reading from the caller's active space would return nothing for
+        // non-default spaces, so pin the store to 'default' regardless of who is asking.
+        const spaceId = 'default';
         const { status, from, size } = request.query;
 
         const body: ListImprovementsResponse = await getImprovementsService(esClient, spaceId).list(
@@ -233,8 +236,9 @@ export const registerImprovementRoutes = ({
             })
           );
 
+        // Improvements are stored in the default space (written by the workflow runner).
         const spaceId = resolveSpaceId(await getSpaces(), request);
-        const improvements = getImprovementsService(esClient, spaceId);
+        const improvements = getImprovementsService(esClient, 'default');
         const improvement = await improvements.get(improvementId);
 
         if (!improvement || improvement.ai_index_id !== aiIndexId) {
@@ -322,8 +326,8 @@ export const registerImprovementRoutes = ({
         const auditLogger = core.security.audit.logger;
         const { aiIndexId, improvementId } = request.params;
 
-        const spaceId = resolveSpaceId(await getSpaces(), request);
-        const improvements = getImprovementsService(esClient, spaceId);
+        // Improvements are stored in the default space (written by the workflow runner).
+        const improvements = getImprovementsService(esClient, 'default');
         const improvement = await improvements.get(improvementId);
 
         if (!improvement || improvement.ai_index_id !== aiIndexId) {
