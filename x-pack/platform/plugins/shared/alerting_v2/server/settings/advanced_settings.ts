@@ -16,8 +16,9 @@ import {
   type AlertingAdvancedSettingValueMap,
 } from '@kbn/alerting-v2-constants';
 
-// Mirrors `ALERTING_CATEGORY` in `kbn-management/settings/utilities/category/const.ts`,
+// Mirrors the category identifiers in `kbn-management/settings/utilities/category/const.ts`,
 // a `shared-browser` package not consumable from plugin server code.
+const ALERTING_V2_CATEGORY = 'alertingV2';
 const ALERTING_CATEGORY = 'alerting';
 
 type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId> = {
@@ -27,7 +28,7 @@ type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId>
 // Global — gates the alerting v2 APIs and UI.
 export const alertingGlobalAdvancedSettings = {
   [ALERTING_V2_ENABLED_SETTING_ID]: {
-    category: [ALERTING_CATEGORY],
+    category: [ALERTING_V2_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.enabledSettingName', {
       defaultMessage: 'Alerting V2',
     }),

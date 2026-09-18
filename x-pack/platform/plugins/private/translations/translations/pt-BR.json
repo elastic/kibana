@@ -6983,6 +6983,7 @@
     "management.settings.badge.readOnly.text": "Somente leitura",
     "management.settings.badge.readOnly.tooltip": "Não é possível salvar as configurações avançadas",
     "management.settings.categoryNames.accessibilityLabel": "Acessibilidade",
+    "management.settings.categoryNames.alertingV2Label": "Alerting V2",
     "management.settings.categoryNames.autocompleteLabel": "Autocompletar",
     "management.settings.categoryNames.bannerLabel": "Banner",
     "management.settings.categoryNames.devToolsLabel": "Ferramentas para desenvolvedores",

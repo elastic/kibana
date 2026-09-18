@@ -6,7 +6,10 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/alerting-v2-constants';
 import {
   alertingGlobalAdvancedSettings,
   alertingSpaceAdvancedSettings,
@@ -29,6 +32,12 @@ describe('registerAlertingAdvancedSettings', () => {
         category: ['alerting'],
         value: false,
       })
+    );
+  });
+
+  it('registers the global setting in the Alerting V2 category', () => {
+    expect(alertingGlobalAdvancedSettings[ALERTING_V2_ENABLED_SETTING_ID]).toEqual(
+      expect.objectContaining({ category: ['alertingV2'] })
     );
   });
 });
