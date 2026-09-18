@@ -84,6 +84,10 @@ export const createTrajectoryFetcher = ({
     }
 
     type Read = ToolCalls & { joinedOn: string };
+    const sameRead = (a: Read, b: Read) =>
+      a.joinedOn === b.joinedOn &&
+      a.toolNames.length === b.toolNames.length &&
+      a.toolNames.every((name, i) => name === b.toolNames[i]);
     let last: Read | undefined;
     for (let poll = 1; poll <= maxPolls; poll++) {
       let current: Read | undefined;
@@ -102,7 +106,7 @@ export const createTrajectoryFetcher = ({
           );
         }
       }
-      if (current && last && current.toolNames.length === last.toolNames.length) {
+      if (current && last && sameRead(current, last)) {
         return { available: true, ...current, settled: true };
       }
       last = current ?? last;

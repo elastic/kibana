@@ -140,6 +140,23 @@ describe('createTrajectoryFetcher', () => {
     expect(query).toHaveBeenCalledTimes(3);
   });
 
+  it('does not treat two same-sized reads with different sequences as settled', async () => {
+    const byPoll: Record<number, string[]> = { 1: [SKILL, LABS], 2: [SKILL, CREATE] };
+    const { client } = esWith((_q, call) => rows(byPoll[call] ?? [SKILL, CREATE]));
+    const t = await fetcher(client)(result());
+    expect(t).toMatchObject({ available: true, settled: true, toolNames: [SKILL, CREATE] });
+    expect((client.esql.query as jest.Mock).mock.calls.length).toBe(3);
+  });
+
+  it('does not treat reads from different join keys as settled', async () => {
+    const { client } = esWith((q, call) =>
+      call === 1 && q.includes('trace.id') ? rows([]) : rows([SKILL, CREATE])
+    );
+    const t = await fetcher(client)(result());
+    expect(t).toMatchObject({ available: true, settled: true, joinedOn: 'workflow trace id' });
+    expect((client.esql.query as jest.Mock).mock.calls.length).toBe(4);
+  });
+
   it('reports an unsettled trajectory when the span count keeps growing', async () => {
     const { client } = esWith((_q, call) => rows(Array(call).fill(CREATE)));
     const t = await fetcher(client, { maxPolls: 3 })(result());
