@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ConversationWithPermissions } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type {
@@ -28,6 +29,11 @@ export class ConversationProposalsService {
     private readonly agentBuilder: AgentBuilderPluginStart,
     private readonly logger: Logger
   ) {}
+
+  async get(conversationId: string, request: KibanaRequest): Promise<ConversationWithPermissions> {
+    const client = await this.agentBuilder.conversations.getScopedClient({ request });
+    return client.get(conversationId);
+  }
 
   async list(
     query: ProposalsQuery,

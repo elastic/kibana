@@ -98,6 +98,9 @@ export const createAttackDiscoveryAttachmentDefinition =
   (): AttachmentUIDefinition<AttackDiscoveryAttachment> => ({
     getIcon: () => 'sparkles',
     getLabel: (attachment) => attachment.data?.title ?? DEFAULT_LABEL,
+    renderConversationDetailsContent: ({ attachment }) => (
+      <AttackDiscoveryInlineContent attachment={attachment} isSidebar={false} />
+    ),
     renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
   });
 

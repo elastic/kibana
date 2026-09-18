@@ -173,6 +173,9 @@ export const createAttackDiscoveryVerdictAttachmentDefinition =
       };
     },
 
+    renderConversationDetailsContent: ({ attachment }) => (
+      <AttackDiscoveryVerdictInlineContent attachment={attachment} isSidebar={false} />
+    ),
     renderInlineContent: (props) => <AttackDiscoveryVerdictInlineContent {...props} />,
   });
 

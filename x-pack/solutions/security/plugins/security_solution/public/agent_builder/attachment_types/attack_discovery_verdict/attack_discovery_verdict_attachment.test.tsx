@@ -137,6 +137,14 @@ describe('createAttackDiscoveryVerdictAttachmentDefinition', () => {
 
     expect(element.type).toBe(AttackDiscoveryVerdictInlineContent);
   });
+
+  it('reuses AttackDiscoveryVerdictInlineContent for the conversation details flyout', () => {
+    const element = definition.renderConversationDetailsContent?.({
+      attachment: makeAttachment({ summary_markdown: 's', verdict: 'true_positive' }),
+    }) as React.ReactElement;
+
+    expect(element.type).toBe(AttackDiscoveryVerdictInlineContent);
+  });
 });
 
 describe('registerAttackDiscoveryVerdictAttachment', () => {
