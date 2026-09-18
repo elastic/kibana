@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { remoteHostUploadFileStepCommonDefinition } from '../../../common/steps/remote_host';
 import { SshConnectorTypeId as SSH_CONNECTOR_ID } from '@kbn/connector-schemas';
+import { remoteHostUploadFileStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createPublicStepDefinition } from '../../step_registry/types';
 
 export const remoteHostUploadFileStepDefinition = createPublicStepDefinition({

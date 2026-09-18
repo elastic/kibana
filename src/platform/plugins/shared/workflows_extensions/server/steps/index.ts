@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   dataAggregateStepDefinition,
   dataConcatStepDefinition,
@@ -19,11 +20,10 @@ import {
   dataRegexReplaceStepDefinition,
   dataStringifyJsonStepDefinition,
 } from './data';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
+  createRemoteHostDownloadFileStepDefinition,
   createRemoteHostRunCommandStepDefinition,
   createRemoteHostUploadFileStepDefinition,
-  createRemoteHostDownloadFileStepDefinition,
 } from './remote_host';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 
