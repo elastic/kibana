@@ -26,6 +26,7 @@ export const createMockEsqlSource = (
     title: 'mock',
     name: 'mock',
     timeFieldName,
+    datasetKey: `esql:mock:${timeFieldName ?? ''}`,
     references: [],
     fields: [],
     resultColumns,

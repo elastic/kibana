@@ -99,6 +99,48 @@ describe('EsqlSource', () => {
       expect(a.id).not.toBe(b.id);
     });
 
+    it('keeps the same datasetKey when the query changes but FROM and time field do not', async () => {
+      const sort = await EsqlSource.create({
+        query: 'FROM logs-* | SORT @timestamp DESC',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const where = await EsqlSource.create({
+        query: 'FROM logs-* | WHERE bytes > 0',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const evalQuery = await EsqlSource.create({
+        query: 'FROM logs-* | EVAL extra = 1',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      expect(sort.id).not.toBe(where.id);
+      expect(sort.datasetKey).toBe('esql:logs-*:@timestamp');
+      expect(sort.datasetKey).toBe(where.datasetKey);
+      expect(sort.datasetKey).toBe(evalQuery.datasetKey);
+    });
+
+    it('uses a different datasetKey when the FROM or time field changes', async () => {
+      const logs = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const metrics = await EsqlSource.create({
+        query: 'FROM metrics-*',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const otherTime = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [],
+        timeFieldName: 'event.created',
+      });
+      expect(logs.datasetKey).not.toBe(metrics.datasetKey);
+      expect(logs.datasetKey).not.toBe(otherTime.datasetKey);
+    });
+
     it('produces a different id when projectRouting differs', async () => {
       const a = await EsqlSource.create({
         query: 'FROM logs-*',

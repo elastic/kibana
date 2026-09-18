@@ -80,6 +80,11 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT @timestamp DESC');
   });
 
+  it('should not add a time WHERE when fields are empty and timeFieldName is @timestamp', () => {
+    const dataView = getDataView('logs*', [] as unknown as DataView['fields'], '@timestamp');
+    expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT @timestamp DESC');
+  });
+
   it('should add SORT by timeFieldName when @timestamp exists even if timeFieldName differs', () => {
     const fields = [
       {

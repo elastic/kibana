@@ -74,7 +74,7 @@ export class DataViewSource implements DataSourceBase {
   }
 
   public isTimeBased(): boolean {
-    return !!this.dataView.timeFieldName;
+    return this.dataView.isTimeBased();
   }
 
   public isRollup(): boolean {

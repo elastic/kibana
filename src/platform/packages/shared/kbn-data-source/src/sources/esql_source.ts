@@ -192,6 +192,18 @@ export class EsqlSource implements DataSourceBase {
     EsqlSource.instanceCache.clear();
   }
 
+  /**
+   * Dataset identity for the FROM target + time field, independent of query-instance {@link id}.
+   * SORT / WHERE / EVAL keep the same key; a different FROM or time field does not.
+   */
+  public static getDatasetKey(title: string, timeFieldName?: string): string {
+    return `esql:${title}:${timeFieldName ?? ''}`;
+  }
+
+  public get datasetKey(): string {
+    return EsqlSource.getDatasetKey(this.title, this.timeFieldName);
+  }
+
   public get name(): string {
     return this.title;
   }

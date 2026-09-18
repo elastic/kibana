@@ -58,6 +58,7 @@ import {
   deriveLensSuggestionFromLensAttributes,
   type QueryParams,
   injectESQLQueryIntoLensLayers,
+  isPreferredEsqlVisCompatibleWithCurrentQuery,
   TIMESTAMP_COLUMN,
 } from '../utils/external_vis_context';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
@@ -520,12 +521,11 @@ export class LensVisService {
       }
     }
 
-    if (preferredVisAttributes) {
-      const dataSource = preferredVisAttributes.state.datasourceStates?.textBased;
-      const layers = Object.values(dataSource?.layers ?? {});
-      if (!layers.some((layer) => layer.index === dataView.id)) {
-        preferredVisAttributes = undefined;
-      }
+    if (
+      preferredVisAttributes &&
+      !isPreferredEsqlVisCompatibleWithCurrentQuery(preferredVisAttributes, query, timeFieldName)
+    ) {
+      preferredVisAttributes = undefined;
     }
 
     if (
@@ -578,7 +578,8 @@ export class LensVisService {
             {
               esql: esqlQuery,
             },
-            dateFieldLabel
+            dateFieldLabel,
+            dataView.id
           )
         : undefined;
 
@@ -674,7 +675,12 @@ export class LensVisService {
     let visAttributes = preferredVisAttributes;
 
     if (preferredVisAttributes) {
-      visAttributes = injectESQLQueryIntoLensLayers(preferredVisAttributes, query);
+      visAttributes = injectESQLQueryIntoLensLayers(
+        preferredVisAttributes,
+        query,
+        undefined,
+        dataView.id
+      );
     }
 
     const context = {

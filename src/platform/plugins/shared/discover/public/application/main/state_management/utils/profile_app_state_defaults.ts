@@ -92,7 +92,7 @@ export const getProfileAppStateDefaults = ({
         const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
         const isValidColumn = getIsValidColumn(postFetchDataSource);
         const validColumns = uniqBy(
-          (defaultState.columns ?? []).concat(mappedDefaultColumns).filter(isValidColumn),
+          defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
           'name'
         );
 

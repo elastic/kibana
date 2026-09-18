@@ -27,16 +27,20 @@ function makeDataViewMock(
   } = {}
 ): DataView {
   const fields = overrides.fields ?? [];
+  const fieldsApi = {
+    getAll: jest.fn(() => fields),
+    getByName: jest.fn((n: string) => fields.find((f) => f.name === n)),
+  };
+  const timeFieldName = overrides.timeFieldName;
   return {
     id: 'id' in overrides ? overrides.id : 'dv-id',
-    timeFieldName: overrides.timeFieldName,
+    timeFieldName,
     getName: jest.fn(() => overrides.name ?? 'My Data View'),
     getIndexPattern: jest.fn(() => overrides.indexPattern ?? 'logs-*'),
     isPersisted: jest.fn(() => overrides.persisted ?? true),
-    fields: {
-      getAll: jest.fn(() => fields),
-      getByName: jest.fn((n: string) => fields.find((f) => f.name === n)),
-    },
+    getTimeField: jest.fn(() => fields.find((f) => f.name === timeFieldName)),
+    isTimeBased: jest.fn(() => !!timeFieldName && !!fields.find((f) => f.name === timeFieldName)),
+    fields: fieldsApi,
   } as unknown as DataView;
 }
 
@@ -124,8 +128,13 @@ describe('DataViewSource', () => {
   });
 
   describe('isTimeBased', () => {
-    it('returns true when the DataView has a timeFieldName', () => {
-      const source = new DataViewSource(makeDataViewMock({ timeFieldName: '@timestamp' }));
+    it('returns true when the time field exists on the DataView', () => {
+      const source = new DataViewSource(
+        makeDataViewMock({
+          timeFieldName: '@timestamp',
+          fields: [{ name: '@timestamp', type: 'date' }],
+        })
+      );
       expect(source.isTimeBased()).toBe(true);
     });
 
@@ -134,13 +143,11 @@ describe('DataViewSource', () => {
       expect(source.isTimeBased()).toBe(false);
     });
 
-    it('does not introspect the fields array', () => {
-      const dv = makeDataViewMock({ timeFieldName: '@timestamp', fields: [] });
-      const source = new DataViewSource(dv);
-
-      expect(source.isTimeBased()).toBe(true);
-      expect(dv.fields.getAll).not.toHaveBeenCalled();
-      expect(dv.fields.getByName).not.toHaveBeenCalled();
+    it('returns false when timeFieldName is set but the time field is missing', () => {
+      const source = new DataViewSource(
+        makeDataViewMock({ timeFieldName: '@timestamp', fields: [] })
+      );
+      expect(source.isTimeBased()).toBe(false);
     });
   });
 

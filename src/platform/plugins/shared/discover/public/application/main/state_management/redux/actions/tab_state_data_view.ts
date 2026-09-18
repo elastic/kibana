@@ -15,7 +15,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import { DataViewSource } from '@kbn/data-source';
+import { DataViewSource, isSameDataset } from '@kbn/data-source';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   internalStateSlice,
@@ -50,8 +50,12 @@ export const setDataView: InternalStateThunkActionCreator<
       runtimeStateManager,
       tabId
     );
+    const currentSource = currentDataSource$.getValue();
+    const nextSource =
+      services.dataSourceService.fromDataView(dataView) ??
+      (dataView.type !== ESQL_TYPE ? new DataViewSource(dataView) : undefined);
 
-    if (dataView.id !== currentDataView$.getValue()?.id) {
+    if (!isSameDataset(currentSource, nextSource)) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
@@ -62,13 +66,8 @@ export const setDataView: InternalStateThunkActionCreator<
       return;
     }
 
-    const resolved = services.dataSourceService.fromDataView(dataView);
-    if (resolved) {
-      currentDataSource$.next(resolved);
-    } else if (dataView.type !== ESQL_TYPE) {
-      // Unregistered ES|QL shims must not become DataViewSource. Classic
-      // DataViews wrap as usual.
-      currentDataSource$.next(new DataViewSource(dataView));
+    if (nextSource) {
+      currentDataSource$.next(nextSource);
     }
   };
 
