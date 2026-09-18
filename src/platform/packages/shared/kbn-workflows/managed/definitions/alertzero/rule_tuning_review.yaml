@@ -208,6 +208,9 @@ steps:
           **On approval**
           The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
         impact: low
+        # No action, so no inherited category, and the queue drops an
+        # uncategorised proposal. Grouped with the tuning proposal that follows.
+        category: configure
 
   - name: record_entry
     type: data.set
@@ -611,21 +614,13 @@ steps:
         {% endif %}
         {% endif %}
 
-  # One fork, four exclusive arms: the change type the agent chose decides which
-  # proposal reaches the gate. Every arm is a single call to the same gate
-  # workflow, differing only in the action it names, the input it hands over and
-  # the impact it declares. Separate arms rather than one templated call because
-  # a YAML object cannot be assembled conditionally. Guarded on the
-  # investigation, since without one there is nowhere to propose. No default arm:
-  # a review with no diagnosis, or an unknown change type, proposes nothing, its
-  # alerts stay untagged, and the next sweep retries it.
+  # One switch, four exclusive arms, one gate call each. Separate arms because a
+  # YAML object cannot be assembled conditionally. No default arm: an unknown
+  # change type proposes nothing, and the next sweep retries the alerts.
   #
-  # The proposal gate records the recommendation on the investigation, parks on
-  # the analyst's decision for up to 72h, and on approval runs the named action
-  # as the approver. A gate timeout fails the gate, which fails this run before
-  # the tag steps: the alerts stay unreviewed and the next sweep proposes the rule
-  # again with a fresh diagnosis, while the investigation stays open because
-  # nobody decided.
+  # The gate parks on the analyst's decision for up to 72h and on approval runs
+  # the named action as the approver. A gate timeout fails this run before the
+  # tag steps, so the alerts stay unreviewed and the next sweep retries the rule.
   - name: propose_tuning
     type: switch
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -649,10 +644,7 @@ steps:
                 # Query edits always wait for an analyst; matches the action's approvalPolicy.
                 autoApprove: false
 
-      # Same edit-rule action as the query arm, carrying a different set of
-      # fields. The action patches only what it is given, so the query, schedule
-      # and exceptions are untouched. The impact differs: re-ranking an alert
-      # cannot lose a detection.
+      # Same action as the query arm; it patches only the fields it is given.
       - match: risk_score
         steps:
           - name: propose_risk_score
@@ -665,22 +657,14 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
-                  # `${{ }}` so the risk score reaches the action as a number: the
-                  # gate validates actionInput against the action's schema at
-                  # creation, and a stringified integer is rejected there rather
-                  # than at apply time.
+                  # `${{ }}` keeps the score a number; the gate validates the input at creation.
                   risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
                   severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
-                # Lower than a query edit. The action declares no impact of its
-                # own, so this is what the queue records and shows.
                 impact: low
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-                # Settings edits always wait for an analyst; matches the action's approvalPolicy.
                 autoApprove: false
 
-      # Not a rule edit: this creates an exception item on the rule's own list,
-      # so it has its own action rather than a field on the patch. The rule keeps
-      # its logic and its coverage outside the exception's conditions.
+      # Not a rule edit: an exception item has its own action.
       - match: exception
         steps:
           - name: propose_exception
@@ -695,13 +679,10 @@ steps:
                   rule_id: "{{ inputs.rule_uuid }}"
                   name: "Tuning: {{ steps.fetch_rule.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
-                  # `${{ }}` so the entries arrive as real objects. The plain
-                  # form renders them as a string, which the action's schema
-                  # rejects at proposal creation.
+                  # `${{ }}` keeps the entries as objects.
                   entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
                 impact: low
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-                # Exceptions always wait for an analyst; matches the action's approvalPolicy.
                 autoApprove: false
 
       # Same gate without an action: the analyst carries the change out
@@ -716,6 +697,8 @@ steps:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 impact: low
+                # No action, so no inherited category; see the entry gate.
+                category: configure
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
   # The gate reports its outcome on two independent axes: `decision` is what the
@@ -724,17 +707,10 @@ steps:
   # when there was nothing to run, `expired` when nobody answered). Spelled out
   # per outcome rather than derived from a single flag so a run that never
   # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
-  # Exactly one of the four proposal steps runs per review, so these or-chains
-  # never see two outcomes at once.
+  # A dismissal always carries `status: no_action`, so it is read off `decision`.
   #
-  # A dismissal is read off `decision`, because every dismissed proposal reports
-  # `status: no_action` whatever its action was. Applied is read off `status`,
-  # because only `succeeded` means the action actually ran.
-  #
-  # NOTE: `approved` reads `succeeded` for the three action paths, so a change
-  # the analyst approved but whose apply failed counts as not approved here. The
-  # decision axis can now tell those apart; left as-is because this change only
-  # migrates the renamed values.
+  # NOTE: `approved` reads `succeeded` for the action paths, so an approved
+  # change whose apply failed counts as not approved here.
   - name: record_proposal_action_decision
     type: data.set
     with:
@@ -787,10 +763,6 @@ steps:
     on-failure:
       continue: true
 
-  # No per-change-type apply flags: every change now runs inside the gate's
-  # action, and only the query, risk score and exception paths carry one, so
-  # `applied` already means "a change landed on the rule". The manual path has no
-  # action and can never set it.
   - name: mark_alerts_dismissed
     type: security.setAlertTags
     if: "${{ steps.record_proposal_action_decision.output.dismissed == true }}"
@@ -863,7 +835,5 @@ steps:
     status: completed
     with:
       rule_uuid: "{{ inputs.rule_uuid }}"
-      # One approval source now that every change type decides on the
-      # investigation: the proposal gate.
       approved: "${{ steps.record_proposal_action_decision.output.approved == true }}"
       applied: "${{ steps.record_proposal_action_decision.output.applied == true }}"

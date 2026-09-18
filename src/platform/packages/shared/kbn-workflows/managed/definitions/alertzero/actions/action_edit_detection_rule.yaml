@@ -16,11 +16,7 @@ consts:
   # proposal referencing this workflow is created or rendered. Metadata has to
   # live under `consts`: unknown top-level keys are stripped by the schema.
   #
-  # `impact` is deliberately absent. The service reads
-  # `metadata.impact ?? params.impact`, so leaving it out lets each caller
-  # declare the impact of the specific edit it is proposing: rewriting a query
-  # is not the same risk as lowering a severity. An action that pinned `impact`
-  # here would override every caller.
+  # No `impact`: the caller's value wins, and each edit declares its own.
   actionMetadata:
     name: Edit detection rule
     description: Changes the given fields of an existing detection rule. Fields that are not supplied are left exactly as they are.
@@ -35,15 +31,8 @@ triggers:
           type: object
           description: >
             The edit to apply. `id` identifies the rule; every other property is
-            an optional field to change, and anything not supplied is left
-            alone. This object is handed to the patch step as a whole, which is
-            what makes a partial edit possible: a literal YAML object cannot omit
-            a key conditionally, so spelling the fields out in the step would
-            force every caller to supply all of them and blank whatever it left
-            unset.
-
-            To support editing another field, add it here. No new action, and no
-            change to the step below, is needed.
+            optional, and fields not supplied are left unchanged. To make another
+            field editable, add it here.
           properties:
             id:
               type: string
@@ -66,8 +55,6 @@ triggers:
               description: New severity, which should stay consistent with the risk score.
           required:
             - id
-          # Rejects a field this action does not know how to edit, at proposal
-          # creation time rather than at apply time.
           additionalProperties: false
       required:
         - actionInput
@@ -84,9 +71,8 @@ outputs:
   - name: severity
     type: string
 steps:
-  # The whole `actionInput` object is the patch body. The API applies only the
-  # keys it receives, so an edit that carries just `risk_score` leaves the
-  # query, schedule and exceptions exactly as they were.
+  # The whole object is the patch body: the API changes only the keys it
+  # receives, and a YAML object cannot omit a key conditionally.
   - name: patch_rule
     type: security.patchRule
     with:

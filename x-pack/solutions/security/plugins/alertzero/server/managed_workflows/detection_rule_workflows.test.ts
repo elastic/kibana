@@ -181,19 +181,14 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // Every change type decides on the investigation as a proposal, and the gate
-    // workflow runs the matching action as the approver. No in-run gate is left.
-    // The gate types actionInput as an object and a YAML object cannot be
-    // assembled conditionally, so each change type gets its own call rather than
-    // one call with a computed input.
+    // Every change type decides at the proposal gate, which runs the action as
+    // the approver.
     it('gates the review through the investigation proposal workflow', () => {
       const { steps } = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
       const all = flattenSteps(steps as unknown as NestedStep[]);
 
-      // An in-run gate would decide outside the queue and apply the change as
-      // whoever the review runs as, which is the whole thing this replaced.
       expect(all.map(({ type }) => type)).not.toContain('waitForApproval');
       expect(all.map(({ type }) => type)).not.toContain('waitForInput');
 
@@ -222,6 +217,8 @@ describe('detection rule workflows', () => {
       expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
       expect(entryInputs).not.toHaveProperty('actionWorkflowId');
       expect(entryInputs).not.toHaveProperty('actionInput');
+      // No action, so no inherited category; the queue drops an uncategorised proposal.
+      expect(entryInputs.category).toBe('configure');
       const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
       const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
       expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
@@ -234,37 +231,31 @@ describe('detection rule workflows', () => {
         id: '{{ inputs.rule_uuid }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
-      // The same edit-rule action as the query path, carrying different fields.
-      // One action per editable field group would mean a new action for every
-      // future field; the action patches only what it is given instead.
+      // Same edit-rule action as the query path; it patches only the fields it is given.
       expect(settingsInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(settingsInputs.actionWorkflowId).toBe(actionInputs.actionWorkflowId);
       expect(settingsInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
-        // `${{ }}` keeps the score a number, which the gate's creation-time
-        // input validation requires.
+        // `${{ }}` keeps the score a number.
         risk_score: '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}',
         severity: '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}',
       });
-      // An exception is not a rule patch, so it has its own action rather than a
-      // field on the edit-rule input.
+      // An exception is not a rule patch, so it has its own action.
       expect(exceptionInputs.actionWorkflowId).toBe(
         ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID
       );
       const exceptionActionInput = exceptionInputs.actionInput as Record<string, string>;
       expect(exceptionActionInput.rule_id).toBe('{{ inputs.rule_uuid }}');
-      // `${{ }}` so the entries arrive as real objects; the plain form renders
-      // them as a string and the action's schema rejects it at creation.
+      // `${{ }}` keeps the entries as objects.
       expect(exceptionActionInput.entries).toBe(
         '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
       );
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
+      // Same reason as the entry gate.
+      expect(manualInputs.category).toBe('configure');
 
-      // The four tuning proposals are the arms of one switch on the change type,
-      // so the graph draws the fork and exclusivity is structural: the engine
-      // runs the first matching arm and no other. The investigation guard lives
-      // on the switch, once, rather than repeated on every arm.
+      // One switch on the change type: the engine runs the first matching arm only.
       const fork = all.find(({ name }) => name === 'propose_tuning')!;
       expect(fork.type).toBe('switch');
       expect(fork.if).toContain('steps.create_investigation.output.conversation_id != null');
@@ -275,7 +266,6 @@ describe('detection rule workflows', () => {
         'exception',
         'manual',
       ]);
-      // One call per arm, and the arm's step is the proposal the tests above read.
       expect(
         (fork.cases ?? []).map(({ steps: armSteps }) => armSteps.map(({ name }) => name))
       ).toEqual([
@@ -284,13 +274,11 @@ describe('detection rule workflows', () => {
         ['propose_exception'],
         ['propose_manual'],
       ]);
-      // No default arm: a review with no diagnosis, or an unknown change type,
-      // proposes nothing and leaves its alerts for a later sweep.
+      // No default arm: an unknown change type proposes nothing.
       expect(fork).not.toHaveProperty('default');
 
-      // The entry gate is outside the fork and keeps its own guard.
       expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The arms carry no guard of their own: the switch already decided.
+      // The switch already guards the arms.
       for (const proposal of [action, settings, exception, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
@@ -302,14 +290,11 @@ describe('detection rule workflows', () => {
           '{{ steps.compose_proposal.output.comment }}'
         );
       }
-      // Every action proposal must stay fail-closed: the actions declare
-      // `approvalPolicy: always-gate`, so a caller-side auto-approve would
-      // contradict the catalog.
+      // The actions declare always-gate, so no caller-side auto-approve.
       for (const proposal of [action, settings, exception]) {
         expect((proposal.with?.inputs as Record<string, unknown>).autoApprove).toBe(false);
       }
-      // Impact is per change, not per action: the edit-rule action declares none,
-      // so the caller's value is what the queue records and shows.
+      // The edit-rule action declares no impact, so the caller's value is shown.
       expect(actionInputs.impact).toBe('medium');
       expect(settingsInputs.impact).toBe('low');
     });
@@ -537,9 +522,7 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        // One dismissal source now that every change type decides at the gate.
-        // Missing it leaves alerts unreviewed and the next sweep re-proposes the
-        // same rule.
+        // One dismissal source: the gate.
         expect(dismissed.if).toContain(
           'steps.record_proposal_action_decision.output.dismissed == true'
         );
@@ -555,8 +538,6 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        // `applied` already means a change landed: only the three action-bearing
-        // proposals can set it, and the manual path has no action.
         expect(applied.if).toContain(
           'steps.record_proposal_action_decision.output.applied == true'
         );
@@ -581,12 +562,9 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The gate reports on two axes. `status` is how far it got, so only
-      // `succeeded` means the action ran. `decision` is what the analyst
-      // concluded, and it is the only reliable read for a dismissal, because
-      // every dismissed proposal reports `status: no_action` whatever its action
-      // was. Reading a dismissal off `status` would silently stop matching and
-      // leave the alerts untagged forever.
+      // `status` says how far the gate got; `decision` says what the analyst
+      // concluded. A dismissal always carries `status: no_action`, so it is read
+      // off `decision`.
       it('derives every decision flag from the right gate axis', () => {
         const decision = reviewSteps.find(
           ({ name }) => name === 'record_proposal_action_decision'
@@ -602,8 +580,7 @@ describe('detection rule workflows', () => {
             `steps.${proposal}.output.decision == 'dismissed'`
           );
         }
-        // The manual proposal carries no action, so its status is always
-        // `no_action` and only the decision axis says what was concluded.
+        // The manual proposal has no action, so only `decision` is meaningful.
         expect(String(flags.approved)).toContain(
           "steps.propose_manual.output.decision == 'approved'"
         );
@@ -611,21 +588,17 @@ describe('detection rule workflows', () => {
           "steps.propose_manual.output.decision == 'dismissed'"
         );
         expect(String(flags.applied)).not.toContain('propose_manual');
-        // A dismissal never reads the status axis, on any path.
         expect(String(flags.dismissed)).not.toContain('.output.status');
-        // Only one proposal step runs per review, so every flag stays a plain
-        // or-chain; an `and` here would make one gate's status gate another's.
+        // Only one proposal step runs per review, so every flag is a plain or-chain.
         for (const flag of [flags.applied, flags.approved, flags.dismissed]) {
           expect(String(flag)).not.toContain(' and ');
         }
 
-        // The per-change-type apply flags are gone: `applied` already means a
-        // change landed, so nothing needs to re-derive it per branch.
+        // The per-change-type apply flags are gone.
         for (const name of ['record_apply_results', 'record_outcome']) {
           expect(reviewSteps.some((step) => step.name === name)).toBe(false);
         }
 
-        // One approval source now that every change type decides at the gate.
         const emit = reviewSteps.find(({ name }) => name === 'emit_result')!;
         const emitInputs = emit.with as Record<string, string>;
         expect(String(emitInputs.approved)).toContain(
@@ -639,9 +612,7 @@ describe('detection rule workflows', () => {
           expect(String(value)).not.toContain(' and ');
         }
 
-        // The review changes no rule itself any more. Every change runs inside the
-        // gate's action workflow, so it is attributed to the approver rather than
-        // to whoever the review runs as.
+        // The review changes no rule itself; the gate's action does, as the approver.
         for (const type of ['security.patchRule', 'security.createRuleException']) {
           expect(reviewSteps.filter((step) => step.type === type)).toEqual([]);
         }
@@ -654,10 +625,7 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The whole actionInput is the patch body. That is what makes one action
-      // cover every editable field: a literal object in the step cannot omit a key
-      // conditionally, so spelling the fields out there would force every caller
-      // to send all of them and blank whatever it left unset.
+      // The whole object is the patch body, so one action covers any field.
       it('passes the whole edit through as one patch, so one action covers any field', () => {
         const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
         const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
@@ -665,17 +633,13 @@ describe('detection rule workflows', () => {
 
         expect(patchStep.with?.patch).toBe('${{ inputs.actionInput }}');
 
-        // Impact is deliberately absent so each caller declares the impact of the
-        // edit it proposes. The service reads `metadata.impact ?? params.impact`,
-        // so pinning it here would override every caller.
+        // No impact on the action: the caller's value wins.
         const metadata = (yaml.consts as Record<string, Record<string, unknown>>).actionMetadata;
         expect(metadata).not.toHaveProperty('impact');
         expect(metadata.approvalPolicy).toBe('always-gate');
       });
 
-      // The proposals service validates actionInput against this schema when the
-      // proposal is created, so a mismatch is not a failed apply. The proposal
-      // never reaches the analyst at all.
+      // The gate validates actionInput against this schema at proposal creation.
       it('accepts any subset of editable fields but still checks their values', () => {
         const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
         const [trigger] = yaml.triggers as unknown as Array<{
@@ -687,23 +651,18 @@ describe('detection rule workflows', () => {
         const accepts = (actionInput: Record<string, unknown>) =>
           schema.safeParse(actionInput).success;
 
-        // Any subset, so a new editable field never needs a new action.
         expect(accepts({ id: 'r', query: 'a: b' })).toBe(true);
         expect(accepts({ id: 'r', risk_score: 21, severity: 'low' })).toBe(true);
         expect(accepts({ id: 'r', query: 'a: b', risk_score: 21 })).toBe(true);
-        // The rule has to be identified.
         expect(accepts({ query: 'a: b' })).toBe(false);
-        // Values are still checked, which is what the split into one action per
-        // field group used to buy.
+        // Values are still checked.
         expect(accepts({ id: 'r', risk_score: '21' })).toBe(false);
         expect(accepts({ id: 'r', risk_score: 500 })).toBe(false);
         expect(accepts({ id: 'r', severity: 'informational' })).toBe(false);
-        // A field this action cannot edit is refused rather than silently dropped.
         expect(accepts({ id: 'r', enabled: false })).toBe(false);
       });
 
-      // An exception is not a rule patch, so it gets its own action. Its entries
-      // are a union of three shapes, and they must arrive as real objects.
+      // An exception is not a rule patch, so it has its own action.
       it('creates the exception from entries the review passes as objects', () => {
         const yaml = parse(
           getManagedYaml(ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID)
@@ -726,13 +685,10 @@ describe('detection rule workflows', () => {
         expect(accepts([{ field: 'user.name', operator: 'is', value: 'svc' }])).toBe(true);
         expect(accepts([{ field: 'host.name', operator: 'is_one_of', values: ['a'] }])).toBe(true);
         expect(accepts([{ field: 'a.b', operator: 'exists' }])).toBe(true);
-        // A single-value operator with no value would create an exception that
-        // matches nothing, so it is refused at creation.
         expect(accepts([{ field: 'user.name', operator: 'is' }])).toBe(false);
         expect(accepts([{ field: 'user.name', operator: 'bogus', value: 'x' }])).toBe(false);
-        // An exception with no conditions would silence the whole rule.
         expect(accepts([])).toBe(false);
-        // The plain template form renders to a string; only `${{ }}` keeps objects.
+        // Only `${{ }}` keeps objects; `{{ }}` renders a string.
         expect(
           accepts('${{ steps.diagnose_rule.output.structured_output.exception_entries }}')
         ).toBe(false);
@@ -803,14 +759,8 @@ describe('detection rule workflows', () => {
         expect(comment).toContain('not previewed or applied automatically');
       });
 
-      // Exactly one proposal step runs per review, so the others are skipped and
-      // leave no execution record. A skipped step renders as nil, and Liquid's
-      // `nil == 'succeeded'` is false, so the surviving branch decides alone. A run
-      // that never proposed at all matches nothing and leaves its alerts untagged
-      // for a later sweep.
-      //
-      // The pairs below are the gate's real contract: a dismissal always carries
-      // `status: no_action`, so reading a dismissal off `status` matches nothing.
+      // A skipped step renders as nil, so `nil == 'succeeded'` is false and the
+      // step that ran decides alone. A dismissal always carries `status: no_action`.
       it.each([
         ['query applied', 'propose_query', 'succeeded', 'approved', true, false],
         ['settings applied', 'propose_risk_score', 'succeeded', 'approved', true, false],
@@ -829,7 +779,6 @@ describe('detection rule workflows', () => {
             ({ name }) => name === 'record_proposal_action_decision'
           )!;
           const flags = decision.with as Record<string, string>;
-          // Only the step that ran has an output; the rest are absent.
           const steps: Record<string, unknown> =
             whichStep === 'none'
               ? {}

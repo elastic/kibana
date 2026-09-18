@@ -19,8 +19,6 @@ consts:
     name: Add detection rule exception
     description: Adds a scoped exception to a detection rule's own exception list, narrowing what the rule alerts on without changing its logic.
     category: configure
-    # Narrower than a rule edit: the rule keeps its logic and coverage for
-    # everything outside the exception's conditions.
     impact: low
     reversible: true
     approvalPolicy: always-gate
@@ -31,17 +29,12 @@ triggers:
         actionInput:
           type: object
           description: >
-            The exception item to create. Separate from the edit-rule action
-            because this is not a rule patch: it creates an exception object on
-            the rule's own default exception list rather than changing a rule
-            field.
+            The exception item to create on the rule's default exception list.
           properties:
             rule_id:
               type: string
               maxLength: 36
-              description: >-
-                Saved-object id of the rule. The step's own schema caps this at
-                36 characters because it takes the rule UUID, not a signature id.
+              description: Saved-object id of the rule, a UUID.
             name:
               type: string
               maxLength: 256
@@ -54,10 +47,7 @@ triggers:
               type: array
               minItems: 1
               maxItems: 20
-              description: >-
-                Conditions the exception matches on. ALL entries must match for
-                an event to be excluded, so each entry narrows the exception
-                further. Alternative conditions need separate exception items.
+              description: Conditions that must all match for an event to be excluded.
               items:
                 oneOf:
                   - type: object
@@ -112,8 +102,7 @@ outputs:
   - name: outcome
     type: string
 steps:
-  # Entries are passed as a whole array. `${{ }}` keeps them real objects: the
-  # step's input schema would reject the rendered string the plain form produces.
+  # `${{ }}` keeps the entries as objects; `{{ }}` would render a string.
   - name: create_exception
     type: security.createRuleException
     with:
@@ -129,5 +118,4 @@ steps:
     status: completed
     with:
       id: "{{ steps.create_exception.output.id }}"
-      # `created`, `skipped` or `overwritten`, per the step's own contract.
       outcome: "{{ steps.create_exception.output.outcome }}"
