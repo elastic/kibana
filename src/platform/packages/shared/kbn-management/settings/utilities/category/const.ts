@@ -10,7 +10,7 @@
 export const GENERAL_CATEGORY = 'general';
 export const PRESENTATION_LAB_CATEGORY = 'Presentation Labs';
 export const ACCESSIBILITY_CATEGORY = 'accessibility';
-export const ALERTING_V2_CATEGORY = 'alertingV2';
+export const ALERTING_CATEGORY = 'alerting';
 export const AUTOCOMPLETE_CATEGORY = 'autocomplete';
 export const BANNER_CATEGORY = 'banner';
 export const DISCOVER_CATEGORY = 'discover';
@@ -30,7 +30,7 @@ export const CATEGORY_ORDER = [
   GENERAL_CATEGORY,
   PRESENTATION_LAB_CATEGORY,
   ACCESSIBILITY_CATEGORY,
-  ALERTING_V2_CATEGORY,
+  ALERTING_CATEGORY,
   AUTOCOMPLETE_CATEGORY,
   BANNER_CATEGORY,
   DISCOVER_CATEGORY,

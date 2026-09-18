@@ -23,10 +23,10 @@ describe('registerAlertingAdvancedSettings', () => {
     expect(uiSettings.register).toHaveBeenCalledWith(alertingSpaceAdvancedSettings);
   });
 
-  it('registers experimental features in the Alerting V2 category with a false default', () => {
+  it('registers experimental features in the Alerting category with a false default', () => {
     expect(alertingSpaceAdvancedSettings[ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]).toEqual(
       expect.objectContaining({
-        category: ['alertingV2'],
+        category: ['alerting'],
         value: false,
       })
     );

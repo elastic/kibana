@@ -16,9 +16,9 @@ import {
   type AlertingAdvancedSettingValueMap,
 } from '@kbn/alerting-v2-constants';
 
-// Mirrors `ALERTING_V2_CATEGORY` in `kbn-management/settings/utilities/category/const.ts`,
+// Mirrors `ALERTING_CATEGORY` in `kbn-management/settings/utilities/category/const.ts`,
 // a `shared-browser` package not consumable from plugin server code.
-const ALERTING_V2_CATEGORY = 'alertingV2';
+const ALERTING_CATEGORY = 'alerting';
 
 type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId> = {
   [P in K]: UiSettingsParams<AlertingAdvancedSettingValueMap[P]>;
@@ -27,7 +27,7 @@ type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId>
 // Global — gates the alerting v2 APIs and UI.
 export const alertingGlobalAdvancedSettings = {
   [ALERTING_V2_ENABLED_SETTING_ID]: {
-    category: [ALERTING_V2_CATEGORY],
+    category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.enabledSettingName', {
       defaultMessage: 'Alerting V2',
     }),
@@ -45,7 +45,7 @@ export const alertingGlobalAdvancedSettings = {
 // Gates experimental Alerting V2 features independently for each Kibana space.
 export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
-    category: [ALERTING_V2_CATEGORY],
+    category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
       defaultMessage: 'Alerting V2: Experimental Features',
     }),
