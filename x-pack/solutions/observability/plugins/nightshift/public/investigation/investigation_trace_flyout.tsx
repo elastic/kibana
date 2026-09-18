@@ -11,11 +11,11 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiLoadingSpinner,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -70,14 +70,21 @@ export function InvestigationTraceFlyout({
   conversationId,
   onClose,
 }: InvestigationTraceFlyoutProps): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
   const { http, data, spaces } = useKibana().services;
 
-  const [spaceId, setSpaceId] = useState<string>(DEFAULT_SPACE_ID);
+  // The traces index is space-scoped, so when the Spaces plugin is present the active space must
+  // resolve before we query — otherwise we could read another space's agent traces. Leave the id
+  // unresolved until then (the query stays disabled), and surface a resolution failure rather than
+  // falling back to a different space. Without Spaces there is only the default space.
+  const [spaceId, setSpaceId] = useState<string | undefined>(spaces ? undefined : DEFAULT_SPACE_ID);
+  const [hasSpaceError, setHasSpaceError] = useState(false);
   useEffect(() => {
     if (!spaces) {
       return;
     }
     let cancelled = false;
+    setHasSpaceError(false);
     spaces
       .getActiveSpace()
       .then((space) => {
@@ -86,7 +93,9 @@ export function InvestigationTraceFlyout({
         }
       })
       .catch(() => {
-        // Fall back to the default space; the trace query just uses a less specific index.
+        if (!cancelled) {
+          setHasSpaceError(true);
+        }
       });
     return () => {
       cancelled = true;
@@ -108,7 +117,10 @@ export function InvestigationTraceFlyout({
   const traceId = useMemo(() => resolveTraceId(conversation?.rounds), [conversation]);
 
   const fetchTrace = useMemo(
-    () => createEsTraceFetcher(data.search.search, { index: buildTracesIndexPattern(spaceId) }),
+    () =>
+      createEsTraceFetcher(data.search.search, {
+        index: spaceId ? buildTracesIndexPattern(spaceId) : '',
+      }),
     [data.search.search, spaceId]
   );
   const {
@@ -116,7 +128,92 @@ export function InvestigationTraceFlyout({
     durationMs,
     isLoading: areSpansLoading,
     error: spansError,
-  } = useTraceSpans(traceId, { fetchTrace, enabled: Boolean(traceId) });
+  } = useTraceSpans(traceId, {
+    fetchTrace,
+    // Only query once we know which space's traces index to hit.
+    enabled: Boolean(traceId) && spaceId !== undefined && !hasSpaceError,
+  });
+
+  const isResolvingSpace = spaceId === undefined && !hasSpaceError;
+
+  const renderBody = () => {
+    if (hasSpaceError) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.nightshift.investigationTraceFlyout.spaceError', {
+            defaultMessage: 'Unable to determine the current space for the trace lookup',
+          })}
+        />
+      );
+    }
+
+    if (isConversationLoading || isResolvingSpace) {
+      return (
+        <EuiFlexGroup justifyContent="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (conversationError) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.nightshift.investigationTraceFlyout.loadError', {
+            defaultMessage: 'Unable to load the investigation trace',
+          })}
+        />
+      );
+    }
+
+    if (!traceId) {
+      return (
+        <EuiEmptyPrompt
+          iconType="chartWaterfall"
+          title={
+            <h3>
+              {i18n.translate('xpack.nightshift.investigationTraceFlyout.noTraceTitle', {
+                defaultMessage: 'No trace available',
+              })}
+            </h3>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.nightshift.investigationTraceFlyout.noTraceBody', {
+                defaultMessage:
+                  'This investigation has no recorded trace. Tracing may be disabled or the run predates it.',
+              })}
+            </p>
+          }
+        />
+      );
+    }
+
+    // The waterfall sizes itself to its parent, so give it a flex child that fills the body.
+    return (
+      <EuiFlexItem
+        grow={true}
+        css={css`
+          min-block-size: 0;
+        `}
+      >
+        <TraceWaterfall
+          spans={spans}
+          traceId={traceId}
+          durationMs={durationMs}
+          isLoading={areSpansLoading}
+          error={spansError}
+        />
+      </EuiFlexItem>
+    );
+  };
 
   return (
     <EuiFlyoutResizable
@@ -127,15 +224,6 @@ export function InvestigationTraceFlyout({
       minWidth={400}
       maxWidth={1200}
       ownFocus={false}
-      css={css`
-        .euiFlyoutBody__overflowContent {
-          height: 100%;
-          padding: 0;
-        }
-        .euiFlyoutBody__overflow {
-          overflow: hidden;
-        }
-      `}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -144,67 +232,18 @@ export function InvestigationTraceFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {isConversationLoading ? (
-          <EuiFlexGroup
-            justifyContent="center"
-            responsive={false}
-            css={css`
-              padding: 16px;
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : conversationError ? (
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            iconType="warning"
-            css={css`
-              margin: 16px;
-            `}
-            title={i18n.translate('xpack.nightshift.investigationTraceFlyout.loadError', {
-              defaultMessage: 'Unable to load the investigation trace',
-            })}
-          />
-        ) : !traceId ? (
-          <EuiEmptyPrompt
-            iconType="chartWaterfall"
-            title={
-              <h3>
-                {i18n.translate('xpack.nightshift.investigationTraceFlyout.noTraceTitle', {
-                  defaultMessage: 'No trace available',
-                })}
-              </h3>
-            }
-            body={
-              <p>
-                {i18n.translate('xpack.nightshift.investigationTraceFlyout.noTraceBody', {
-                  defaultMessage:
-                    'This investigation has no recorded trace. Tracing may be disabled or the run predates it.',
-                })}
-              </p>
-            }
-          />
-        ) : (
-          <div
-            css={css`
-              height: 100%;
-              padding: 16px;
-            `}
-          >
-            <TraceWaterfall
-              spans={spans}
-              traceId={traceId}
-              durationMs={durationMs}
-              isLoading={areSpansLoading}
-              error={spansError}
-            />
-          </div>
-        )}
-      </EuiFlyoutBody>
+      {/* Own flex column so the waterfall can fill available height without styling EuiFlyoutBody internals. */}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        css={css`
+          flex: 1 1 auto;
+          min-block-size: 0;
+          padding: ${euiTheme.size.base};
+        `}
+      >
+        {renderBody()}
+      </EuiFlexGroup>
     </EuiFlyoutResizable>
   );
 }
