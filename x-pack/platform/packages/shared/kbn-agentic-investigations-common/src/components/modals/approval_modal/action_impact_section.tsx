@@ -8,20 +8,20 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { BlastRadiusItem, type BlastRadiusItemProps } from './blast_radius_item';
+import { ActionImpactItem, type ActionImpactItemProps } from './action_impact_item';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
-/** The content union passed to {@link BlastRadiusSection}. */
-export type BlastRadiusContent =
-  | { variant: 'list'; items: BlastRadiusItemProps['item'][] }
+/** The content union passed to {@link ActionImpactSection}. */
+export type ActionImpactContent =
+  | { variant: 'list'; items: ActionImpactItemProps['item'][] }
   | { variant: 'description'; description: React.ReactNode };
 
-export interface BlastRadiusSectionProps {
-  content: BlastRadiusContent;
+export interface ActionImpactSectionProps {
+  content: ActionImpactContent;
   defaultItemIconColor?: string;
 }
 
-export const BlastRadiusSection = memo<BlastRadiusSectionProps>(
+export const ActionImpactSection = memo<ActionImpactSectionProps>(
   ({ content, defaultItemIconColor }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -36,7 +36,7 @@ export const BlastRadiusSection = memo<BlastRadiusSectionProps>(
             color: euiTheme.colors.textSubdued,
           })}
         >
-          {APPROVAL_MODAL_TRANSLATIONS.blastRadiusTitle}
+          {APPROVAL_MODAL_TRANSLATIONS.actionImpactTitle}
         </EuiText>
         <EuiSpacer size="s" />
         {content.variant === 'list' ? (
@@ -49,7 +49,7 @@ export const BlastRadiusSection = memo<BlastRadiusSectionProps>(
           >
             {content.items.map((item) => (
               <EuiFlexItem key={item.id} grow={false}>
-                <BlastRadiusItem item={item} defaultIconColor={defaultItemIconColor} />
+                <ActionImpactItem item={item} defaultIconColor={defaultItemIconColor} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -63,4 +63,4 @@ export const BlastRadiusSection = memo<BlastRadiusSectionProps>(
   }
 );
 
-BlastRadiusSection.displayName = 'BlastRadiusSection';
+ActionImpactSection.displayName = 'ActionImpactSection';

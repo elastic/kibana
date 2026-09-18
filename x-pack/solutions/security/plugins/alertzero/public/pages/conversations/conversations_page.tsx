@@ -24,7 +24,7 @@ import {
   type RecommendedAction,
   InvestigationDetailsFlyout,
   InvestigationActionModals,
-  BlastRadius,
+  Impact,
 } from '@kbn/agentic-investigations-common';
 import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -322,7 +322,7 @@ export const ConversationsPage: React.FC = () => {
           <ProposalsTrendChartRow />
         </EuiFlexItem>
         <EuiFlexItem>
-          <BlastRadius
+          <Impact
             investigations={sortedConversations}
             surfaceFilter={surfaceFilter}
             onSurfaceFilterChange={setSurfaceFilter}

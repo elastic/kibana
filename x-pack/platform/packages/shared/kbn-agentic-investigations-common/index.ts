@@ -63,7 +63,7 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
+export { Impact } from './src/components/filters/impact/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';
@@ -82,9 +82,9 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/components/modals/approval_modal/approval_content';
-export { type BlastRadiusItemProps } from './src/components/modals/approval_modal/blast_radius_item';
+export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
 export {
-  BlastRadiusSection,
-  type BlastRadiusContent,
-  type BlastRadiusSectionProps,
-} from './src/components/modals/approval_modal/blast_radius_section';
+  ActionImpactSection,
+  type ActionImpactContent,
+  type ActionImpactSectionProps,
+} from './src/components/modals/approval_modal/action_impact_section';
