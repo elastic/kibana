@@ -19,6 +19,8 @@ import {
   GetLatestOutputHealthRequestSchema,
   GetLatestOutputHealthResponseSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
+  GetOutputAgentPolicyCountResponseSchema,
   GetOutputsRequestSchema,
   GetOutputsResponseSchema,
   OutputResponseSchema,
@@ -36,6 +38,7 @@ import {
   putOutputHandler,
   postLogstashApiKeyHandler,
   getLatestOutputHealth,
+  getOutputAgentPolicyCountHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -312,5 +315,43 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getLatestOutputHealth
+    );
+
+  router.versioned
+    .get({
+      path: OUTPUT_API_ROUTES.GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+        },
+      },
+      summary: 'Get output agent and policy count',
+      description: 'Get the number of agent policies and active agents using an output by ID.',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetOutputAgentPolicyCountRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetOutputAgentPolicyCountResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            404: {
+              description: 'Not found.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getOutputAgentPolicyCountHandler
     );
 };

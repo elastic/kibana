@@ -68,3 +68,18 @@ export const GetLatestOutputHealthResponseSchema = schema.object({
     },
   }),
 });
+
+export const GetOutputAgentPolicyCountRequestSchema = {
+  params: schema.object({
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
+  }),
+};
+
+export const GetOutputAgentPolicyCountResponseSchema = schema.object({
+  agentPolicyCount: schema.number({
+    meta: { description: 'Number of agent policies using this output' },
+  }),
+  agentCount: schema.number({
+    meta: { description: 'Number of active agents assigned to those policies' },
+  }),
+});

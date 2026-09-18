@@ -12,6 +12,7 @@ import type {
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
@@ -175,4 +176,22 @@ export const getLatestOutputHealth: RequestHandler<
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const outputHealth = await outputService.getLatestOutputHealth(esClient, request.params.outputId);
   return response.ok({ body: outputHealth });
+};
+
+export const getOutputAgentPolicyCountHandler: RequestHandler<
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.params>
+> = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  try {
+    const output = await outputService.get(request.params.outputId);
+    const counts = await outputService.getAgentAndPolicyCountForOutput(esClient, output);
+    return response.ok({ body: counts });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
+    }
+    throw error;
+  }
 };

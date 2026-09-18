@@ -88,6 +88,7 @@ import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -1587,6 +1588,25 @@ class OutputService {
         concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
       }
     );
+  }
+
+  async getAgentAndPolicyCountForOutput(
+    esClient: ElasticsearchClient,
+    output: Output
+  ): Promise<{ agentPolicyCount: number; agentCount: number }> {
+    const agentPolicies = await getAgentPoliciesPerOutput(output.id, output.is_default, {
+      fields: ['id'],
+    });
+    const agentPolicyIds = (agentPolicies ?? []).map((p) => p.id);
+    const agentPolicyCount = agentPolicyIds.length;
+
+    let agentCount = 0;
+    if (agentPolicyCount > 0) {
+      const counts = await getAgentCountForAgentPolicies(esClient, agentPolicyIds);
+      agentCount = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    }
+
+    return { agentPolicyCount, agentCount };
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {

@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import type {
+  GetOutputAgentPolicyCountResponse,
   GetOutputHealthResponse,
   GetRemoteSyncedIntegrationsStatusResponse,
 } from '../../../common/types';
@@ -98,6 +99,14 @@ export function sendGetOutputHealth(outputId: string) {
   return sendRequest<GetOutputHealthResponse>({
     method: 'get',
     path: outputRoutesService.getOutputHealthPath(outputId),
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendGetOutputAgentPolicyCount(outputId: string) {
+  return sendRequest<GetOutputAgentPolicyCountResponse>({
+    method: 'get',
+    path: outputRoutesService.getOutputAgentPolicyCountPath(outputId),
     version: API_VERSIONS.public.v1,
   });
 }
