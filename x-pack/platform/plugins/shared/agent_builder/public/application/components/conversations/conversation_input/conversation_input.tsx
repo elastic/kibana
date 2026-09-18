@@ -121,7 +121,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     resetInitialMessage,
   } = useConversationContext();
-  const submitMessage = useSubmitMessage();
+  const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
   const isExperimentalEnabled = useExperimentalFeatures();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
@@ -141,6 +141,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     messageEditorController.isEmpty ||
     isResponseLoading ||
     isSendingUserMessage ||
+    isCreatingConversation ||
     !isAgentIdValid ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
@@ -277,6 +278,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
+          isSubmitting={isCreatingConversation}
           resetToPendingMessage={() => {
             if (pendingMessage) {
               messageEditorController.setContent(pendingMessage);

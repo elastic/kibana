@@ -180,7 +180,7 @@ describe('ConversationInput', () => {
       },
     } as never);
     mockedUseExperimentalFeatures.mockReturnValue(true);
-    mockedUseSubmitMessage.mockReturnValue(submitMessage);
+    mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
     mockedUseSendUserMessage.mockReturnValue({
       mutateAsync: sendUserMessage,

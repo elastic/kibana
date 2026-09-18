@@ -16,6 +16,7 @@ import { useConversationStream } from '../../../../hooks/use_conversation_stream
 interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
+  isSubmitting?: boolean;
   resetToPendingMessage: () => void;
 }
 
@@ -31,6 +32,7 @@ const labels = {
 export const ConversationActionButton: React.FC<ConversationActionButtonProps> = ({
   onSubmit,
   isSubmitDisabled,
+  isSubmitting = false,
   resetToPendingMessage,
 }) => {
   const { canCancel, cancel } = useConversationStream();
@@ -69,6 +71,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
         display="fill"
         size="s"
         disabled={isSubmitDisabled}
+        isLoading={isSubmitting}
         onClick={onSubmit}
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.pageContent,

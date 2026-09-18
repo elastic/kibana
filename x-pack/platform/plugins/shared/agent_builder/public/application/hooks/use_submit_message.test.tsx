@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { PropsWithChildren } from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -23,6 +23,7 @@ jest.mock('../context/conversation/conversation_context', () => ({
 }));
 jest.mock('../context/conversation/use_conversation_id', () => ({ useConversationId: jest.fn() }));
 jest.mock('./use_agent_builder_service', () => ({ useAgentBuilderServices: jest.fn() }));
+jest.mock('./use_conversation', () => ({ useAgentId: () => 'agent-1' }));
 jest.mock('./use_conversation_stream', () => ({ useConversationStream: jest.fn() }));
 jest.mock('./use_navigation', () => ({ useNavigation: jest.fn() }));
 jest.mock('./use_toasts', () => ({ useToasts: jest.fn() }));
@@ -48,7 +49,6 @@ const setState = ({
   jest.mocked(useConversationContext).mockReturnValue({
     isEmbeddedContext,
     setConversationId,
-    agentId: 'agent-1',
   } as never);
   jest.mocked(useAgentBuilderServices).mockReturnValue({
     conversationsService: { create },
@@ -75,7 +75,7 @@ describe('useSubmitMessage', () => {
     const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });
 
-    await act(() => result.current('hello'));
+    await act(() => result.current.submitMessage('hello'));
 
     expect(create).toHaveBeenCalledWith({ agentId: 'agent-1' });
     expect(queryClient.getQueryData(queryKeys.conversations.byId('conv-1'))).toEqual(created);
@@ -86,11 +86,30 @@ describe('useSubmitMessage', () => {
     );
   });
 
+  it('reports that the conversation is being created while the request is in flight', async () => {
+    setState({});
+    let resolveCreate: (value: typeof created) => void = () => {};
+    create.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)));
+    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
+
+    let pending: Promise<void>;
+    act(() => {
+      pending = result.current.submitMessage('hello');
+    });
+    await waitFor(() => expect(result.current.isCreatingConversation).toBe(true));
+
+    resolveCreate(created);
+    await act(() => pending);
+
+    await waitFor(() => expect(result.current.isCreatingConversation).toBe(false));
+    expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'conv-1' });
+  });
+
   it('switches the embedded conversation by state instead of navigating', async () => {
     setState({ isEmbeddedContext: true });
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });
 
-    await act(() => result.current('hello'));
+    await act(() => result.current.submitMessage('hello'));
 
     expect(setConversationId).toHaveBeenCalledWith('conv-1');
     expect(navigateToAgentBuilderUrl).not.toHaveBeenCalled();
@@ -100,7 +119,7 @@ describe('useSubmitMessage', () => {
     setState({ conversationId: 'existing' });
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });
 
-    await act(() => result.current('hello'));
+    await act(() => result.current.submitMessage('hello'));
 
     expect(create).not.toHaveBeenCalled();
     expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'existing' });
@@ -112,7 +131,7 @@ describe('useSubmitMessage', () => {
     create.mockRejectedValue(new Error('boom'));
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });
 
-    await act(() => result.current('hello'));
+    await act(() => result.current.submitMessage('hello'));
 
     expect(addErrorToast).toHaveBeenCalledWith({ title: 'boom' });
     expect(sendMessage).not.toHaveBeenCalled();

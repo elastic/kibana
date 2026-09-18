@@ -26,6 +26,7 @@ const runAgentLabel = i18n.translate('xpack.agentBuilder.conversationInput.runAg
 interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
+  isSubmitting: boolean;
   resetToPendingMessage: () => void;
   showTriggerModeToggle: boolean;
   triggerMode: ChatTriggerMode;
@@ -35,6 +36,7 @@ interface InputActionsProps {
 export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
+  isSubmitting,
   resetToPendingMessage,
   showTriggerModeToggle,
   triggerMode,
@@ -70,6 +72,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
             <ConversationActionButton
               onSubmit={onSubmit}
               isSubmitDisabled={isSubmitDisabled}
+              isSubmitting={isSubmitting}
               resetToPendingMessage={resetToPendingMessage}
             />
           </EuiFlexItem>
