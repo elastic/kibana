@@ -606,4 +606,65 @@ describe('checkUploadPackageAssetPrivileges', () => {
       expect.anything()
     );
   });
+
+  it('checks privileges when benign archive would remove gated asset in an additional Space', async () => {
+    // Regression: installed_kibana (primary Space) has no security_rule, but
+    // additional_spaces_installed_kibana['space-a'] does. A primary-space benign
+    // upload fans out to space-a and cleanUpUnusedKibanaAssetsStep would delete
+    // the security-rule SO there. Preflight must detect this and require rules-all.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'my-dashboard', type: 'dashboard', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'old-rule', type: 'security-rule', version: 1 }],
+        },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+    );
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      expect.arrayContaining([mockSpaceId, 'space-a']),
+      expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
+    );
+    expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a']));
+  });
+
+  it('skips privilege check when benign archive and additional Space refs are all non-gated', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'dash-1', type: 'dashboard', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'dash-2', type: 'dashboard', version: 1 }],
+        },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+    );
+
+    expect(result).toEqual([]);
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
 });

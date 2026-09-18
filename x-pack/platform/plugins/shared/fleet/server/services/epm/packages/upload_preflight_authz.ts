@@ -97,13 +97,24 @@ export function buildRequiredActions(
   return [...privilegeNames].map((name) => security.authz.actions.api.get(name));
 }
 
-function detectGatedTypesInExistingInstall(
-  installation: SavedObject<Installation> | undefined
+function detectGatedTypesInDestinationSpaces(
+  installation: SavedObject<Installation> | undefined,
+  destinationSpaces: string[],
+  effectivePrimarySpace: string
 ): Set<KibanaAssetType> {
   const found = new Set<KibanaAssetType>();
-  for (const ref of installation?.attributes?.installed_kibana ?? []) {
-    const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type as KibanaSavedObjectType);
-    if (assetType) found.add(assetType);
+  if (!installation) return found;
+
+  for (const space of destinationSpaces) {
+    const refs =
+      space === effectivePrimarySpace
+        ? installation.attributes.installed_kibana
+        : installation.attributes.additional_spaces_installed_kibana?.[space];
+
+    for (const ref of refs ?? []) {
+      const assetType = SO_TYPE_TO_ASSET_TYPE.get(ref.type);
+      if (assetType) found.add(assetType);
+    }
   }
   return found;
 }
@@ -118,31 +129,8 @@ export async function checkUploadPackageAssetPrivileges(
 ): Promise<string[]> {
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
-  // Union gated types from the new archive with gated types present in the existing
-  // install so that removing privileged assets requires the same authz as adding them.
-  const gatedTypesFromExisting = detectGatedTypesInExistingInstall(installation);
-  const effectiveGatedTypes = new Set([...signals.gatedTypesFound, ...gatedTypesFromExisting]);
-
-  if (effectiveGatedTypes.size === 0 && !signals.hasMlSecurityRules) {
-    // No gated asset types in archive or existing install; skip privilege check.
-    return [];
-  }
-
-  // Preflight authz requires the security plugin. Kibana deployments with security
-  // disabled have no authz model to mirror, so uploads affecting gated asset types
-  // are blocked in that configuration.
-  const security = appContextService.getSecurity();
-  if (!security) {
-    throw new FleetUnauthorizedError(
-      'Uploading packages with privileged asset types requires the security plugin to be enabled'
-    );
-  }
-
-  const actions = buildRequiredActions(
-    { ...signals, gatedTypesFound: effectiveGatedTypes },
-    security
-  );
-
+  // Compute destination spaces first — needed for both the existing-asset scan
+  // and the privilege check, so the two are always consistent.
   const effectivePrimarySpace =
     installation?.attributes?.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
   const isAdditionalSpaceInstall = !!installation && effectivePrimarySpace !== spaceId;
@@ -162,6 +150,38 @@ export async function checkUploadPackageAssetPrivileges(
       ]),
     ];
   }
+
+  // Union gated types from the new archive with gated types in the existing install,
+  // scanned only for the destination spaces. This prevents a caller from removing
+  // privileged assets in any destination by uploading a benign replacement: if the
+  // new archive omits a gated type that exists in an installed Space (including an
+  // additional Space), the cleanup step would delete it without a privilege check.
+  const gatedTypesFromExisting = detectGatedTypesInDestinationSpaces(
+    installation,
+    destinationSpaces,
+    effectivePrimarySpace
+  );
+  const effectiveGatedTypes = new Set([...signals.gatedTypesFound, ...gatedTypesFromExisting]);
+
+  if (effectiveGatedTypes.size === 0 && !signals.hasMlSecurityRules) {
+    // No gated asset types in archive or existing destination spaces; skip privilege check.
+    return [];
+  }
+
+  // Preflight authz requires the security plugin. Kibana deployments with security
+  // disabled have no authz model to mirror, so uploads affecting gated asset types
+  // are blocked in that configuration.
+  const security = appContextService.getSecurity();
+  if (!security) {
+    throw new FleetUnauthorizedError(
+      'Uploading packages with privileged asset types requires the security plugin to be enabled'
+    );
+  }
+
+  const actions = buildRequiredActions(
+    { ...signals, gatedTypesFound: effectiveGatedTypes },
+    security
+  );
 
   const checkResult = await security.authz
     .checkPrivilegesWithRequest(request)
