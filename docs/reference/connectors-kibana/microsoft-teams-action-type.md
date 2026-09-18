@@ -9,7 +9,7 @@ applies_to:
 
 # Microsoft Teams connector [microsoft-teams-connector]
 
-The Microsoft Teams connector enables Workplace AI to send messages to channels and chats, search conversations, and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth authorization code, and OAuth client credentials.
+The Microsoft Teams connector enables Workplace AI to send messages to channels and chats, search conversations, and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API. It supports four authentication methods: Quick Connect OAuth 2.0 (recommended), bearer token, OAuth authorization code, and OAuth client credentials.
 
 ## Create connectors in {{kib}} [define-microsoft-teams-ui]
 
