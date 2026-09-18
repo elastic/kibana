@@ -94,4 +94,26 @@ describe('dense profile live-retrieval dataset', () => {
     );
     expect(taggedAlerts).toHaveLength(AD2_DENSE_TARGET_ALERTS);
   });
+
+  // The Criteria evaluator hands `expected.criteria` straight to the LLM judge
+  // (`attack_discovery_criteria_evaluator.ts`): an empty array returns N/A and
+  // skips the check entirely, and a shortened array silently drops whatever
+  // criterion was lost — which is how the 4th entry below went missing once,
+  // caught only by a human reading the diff. Every other invariant of this
+  // module is pinned; this one is the annotation the judge actually reads.
+  it('annotates the judge with all four criteria, including the benign vendor update', () => {
+    const criteria = example.output?.criteria ?? [];
+    // `?? []` keeps this non-vacuous: an absent annotation fails the length
+    // rather than passing an empty `.every()`.
+    expect(criteria).toHaveLength(4);
+
+    // The escalated background chain (`bg-vendor-update`) carries the same
+    // severities as the four reference chains, so severity alone no longer
+    // separates target from noise. Assert the distinguishing content rather
+    // than the whole sentence, so a wording tweak survives and a deletion does
+    // not: the class has to be named, and the severity explicitly discounted.
+    const benignVendorUpdate = criteria[3];
+    expect(benignVendorUpdate).toMatch(/vendor-signed|management agent/);
+    expect(benignVendorUpdate).toMatch(/severity/);
+  });
 });
