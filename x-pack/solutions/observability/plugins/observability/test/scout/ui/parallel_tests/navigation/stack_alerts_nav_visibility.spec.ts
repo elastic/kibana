@@ -9,7 +9,7 @@ import { spaceTest as test, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 test.describe(
-  'Stack Alerts and Stack Rules visibility in Observability project nav',
+  'Stack Alerts visibility in Observability project nav',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ config, scoutSpace }) => {
@@ -24,7 +24,7 @@ test.describe(
       await pageObjects.observabilityNavigation.waitForLoad();
     });
 
-    test('hides Stack Alerts and Stack Rules under Alerts and Insights', async ({
+    test('hides Stack Alerts and keeps Stack Rules while alerting v2 is disabled', async ({
       config,
       pageObjects,
     }) => {
@@ -38,13 +38,11 @@ test.describe(
       const panel = nav.sidePanel(panelId);
       await expect(panel).toBeVisible();
 
-      // Connectors stays as the control that the panel finished resolving deep links.
-      await expect(
-        panel.locator('[data-test-subj~="nav-item-id-management:triggersActionsConnectors"]')
-      ).toBeVisible();
+      // Rules stays as the control that the panel finished resolving deep links.
+      // The default Scout server leaves alerting:v2:enabled unpinned (false).
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActions"]')
-      ).toHaveCount(0);
+      ).toBeVisible();
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActionsAlerts"]')
       ).toHaveCount(0);

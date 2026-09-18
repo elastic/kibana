@@ -7,7 +7,7 @@
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getAlertsNavPanel } from './get_alerts_nav_panel';
+import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './get_alerts_nav_panel';
 
 const FULL_V2_CAPABILITIES = {
   alerting_v2_alerts: { read: true },
@@ -73,6 +73,13 @@ describe('getAlertsNavPanel', () => {
       })
     );
     expect(result[0]).not.toHaveProperty('renderAs');
+  });
+
+  it('includes Stack Management Rules only while alerting v2 is disabled', () => {
+    expect(shouldIncludeStackManagementRules(core)).toBe(true);
+
+    enableV2(core);
+    expect(shouldIncludeStackManagementRules(core)).toBe(false);
   });
 
   it('returns a full Alerting panel when the user has v1 and v2 read capabilities', () => {

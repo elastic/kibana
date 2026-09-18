@@ -17,7 +17,7 @@ import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
-import { getAlertsNavPanel } from './nav/get_alerts_nav_panel';
+import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -581,6 +581,13 @@ function createNavTree({
               defaultMessage: 'Alerts and Insights',
             }),
             children: [
+              ...(shouldIncludeStackManagementRules(coreStart)
+                ? [
+                    {
+                      link: 'management:triggersActions' as const,
+                    },
+                  ]
+                : []),
               {
                 link: 'management:triggersActionsConnectors',
               },

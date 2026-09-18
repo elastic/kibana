@@ -150,6 +150,13 @@ const getOperationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => 
   );
 };
 
+/**
+ * While v2 is off, `getAlertsNavPanel` only returns the classic Alerts link.
+ * Stack Management Rules is then the only project-nav path to the Rules page.
+ */
+export const shouldIncludeStackManagementRules = (core: CoreStart): boolean =>
+  !isAlertingV2Enabled(core);
+
 export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
   if (!isAlertingV2Enabled(core)) {
     return [{ link: ALERTS_LINK, icon: ALERTS_ICON, getIsActive: getAlertsIsActive }];

@@ -237,6 +237,9 @@ test.describe(
       await expect(
         nav.sidePanel(settingsPanelId).getByText('Alerting V2 Preview', { exact: true })
       ).not.toBeVisible();
+      await expect(
+        nav.navItemInPanelById(settingsPanelId, 'management:triggersActions')
+      ).toHaveCount(0);
     });
 
     test('opens an Alerts panel without Alerts V1 when v2 is on and the classic table is off', async ({

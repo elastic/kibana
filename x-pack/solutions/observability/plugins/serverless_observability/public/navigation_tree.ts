@@ -16,7 +16,11 @@ import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
-import { getAlertsNavPanel, NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
+import {
+  getAlertsNavPanel,
+  NightshiftNavigationIcon,
+  shouldIncludeStackManagementRules,
+} from '@kbn/observability-plugin/public';
 
 export function filterForFeatureAvailability<
   T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
@@ -542,6 +546,9 @@ export const createNavigationTree = ({
             ),
             breadcrumbStatus: 'hidden',
             children: [
+              ...(shouldIncludeStackManagementRules(core)
+                ? [{ link: 'management:triggersActions' as const }]
+                : []),
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],

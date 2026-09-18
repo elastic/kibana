@@ -253,7 +253,26 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('does not include Stack Alerts or Stack Rules in Admin and Settings > Alerts and insights', () => {
+  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const alertsSection = adminSettingsNode.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    );
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
+        'management:triggersActions',
+        'management:triggersActionsConnectors',
+        'management:maintenanceWindows',
+      ])
+    );
+  });
+
+  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
     const adminSettingsNode = getAdminSettingsNode({ core });
     const alertsSection = adminSettingsNode.children?.find(
       (item) => item.id === 'alerts_and_insights'
