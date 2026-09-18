@@ -27,6 +27,7 @@ import {
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertCondition, SeverityConfig, SeverityLevel } from './form_types';
 import {
+  compareSeverity,
   createDefaultSeverityConfig,
   generateId,
   getSeverityValidationError,
@@ -86,23 +87,32 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
   const toggleEnabled = (enabled: boolean) =>
     onChange(enabled ? createDefaultSeverityConfig() : undefined);
 
-  // Adding a second level promotes single → multi: the current single severity becomes the
-  // least-severe band (at the condition threshold) and a more-severe band is seeded one step
-  // beyond it, so both start out valid for the breach direction.
+  // Adding a second level promotes single → multi. The two severities are ordered least-to-most
+  // severe (the current single severity may be more or less severe than the seeded one, e.g. when
+  // it is already `critical`), then the least-severe band is seeded at the condition threshold and
+  // the more-severe one a step beyond it — so both start out valid for the breach direction.
   const promoteToMulti = () => {
     if (!severity || !condition) return;
-    const base: SeverityLevel = {
+    const singleSeverity = severity.singleLevelSeverity;
+    const [leastSeverity, mostSeverity] = [
+      singleSeverity,
+      nextSeverityLevel([{ id: '', severity: singleSeverity, threshold: 0 }]),
+    ].sort(compareSeverity);
+    const least: SeverityLevel = {
       id: generateId(),
-      severity: severity.singleLevelSeverity,
-      threshold: nextSeverityThreshold([], severity.singleLevelSeverity, condition),
+      severity: leastSeverity,
+      threshold: nextSeverityThreshold([], leastSeverity, condition),
     };
-    const bandSeverity = nextSeverityLevel([base]);
-    const band: SeverityLevel = {
+    const most: SeverityLevel = {
       id: generateId(),
-      severity: bandSeverity,
-      threshold: nextSeverityThreshold([base], bandSeverity, condition),
+      severity: mostSeverity,
+      threshold: nextSeverityThreshold([least], mostSeverity, condition),
     };
-    onChange({ ...severity, mode: 'multi', levels: [base, band] });
+
+    // Preserve the original order
+    const levels = least.severity === singleSeverity ? [least, most] : [most, least];
+
+    onChange({ ...severity, mode: 'multi', levels });
   };
 
   const setSingleLevel = (level: AlertEventSeverity) => {
@@ -236,8 +246,8 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                         label={
                           idx === 0
                             ? i18n.translate('xpack.alertingV2.ruleBuilder.severity.levelLabel', {
-                                defaultMessage: 'Severity level',
-                              })
+                              defaultMessage: 'Severity level',
+                            })
                             : undefined
                         }
                         fullWidth
@@ -259,9 +269,9 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                         label={
                           idx === 0
                             ? i18n.translate(
-                                'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
-                                { defaultMessage: 'Threshold' }
-                              )
+                              'xpack.alertingV2.ruleBuilder.severity.thresholdLabel',
+                              { defaultMessage: 'Threshold' }
+                            )
                             : undefined
                         }
                         fullWidth

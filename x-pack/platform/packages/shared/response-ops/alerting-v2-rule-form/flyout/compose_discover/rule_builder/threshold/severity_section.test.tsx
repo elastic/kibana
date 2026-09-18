@@ -9,7 +9,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SeveritySection } from './severity_section';
-import { Comparator, type AlertCondition, type SeverityConfig } from './form_types';
+import {
+  Comparator,
+  getSeverityValidationError,
+  type AlertCondition,
+  type SeverityConfig,
+} from './form_types';
 
 const condition = (overrides: Partial<AlertCondition> = {}): AlertCondition => ({
   id: 'c1',
@@ -82,6 +87,22 @@ describe('SeveritySection', () => {
     // seeds a more-severe band one step beyond it — both valid for the `>` breach direction.
     expect(next.levels.map((l) => l.severity)).toEqual(['high', 'critical']);
     expect(next.levels.map((l) => l.threshold)).toEqual([0.8, 1.8]);
+  });
+
+  it('promotes a top-severity single to a valid, distinct pair of bands', () => {
+    const { onChange } = renderSection({
+      alertConditions: [condition({ comparator: Comparator.GT, threshold: [0.8] })],
+      severity: { mode: 'single', singleLevelSeverity: 'critical', levels: [] },
+    });
+    fireEvent.click(screen.getByTestId('ruleBuilderAddSeverityLevel'));
+    const next = onChange.mock.calls[0][0] as SeverityConfig;
+
+    // Preserve the original order: the single severity remains the first band.
+    expect(next.levels.map((l) => l.severity)).toEqual(['critical', 'info']);
+    expect(next.levels.map((l) => l.threshold)).toEqual([1.8, 0.8]);
+
+    // The seeded config must be valid (no duplicate/ordering error).
+    expect(getSeverityValidationError(next, condition({ threshold: [0.8] }))).toBeNull();
   });
 
   it('hides the add-level button and explains why for range comparators', () => {
