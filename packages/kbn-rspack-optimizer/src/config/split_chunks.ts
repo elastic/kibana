@@ -12,12 +12,29 @@ import type { OptimizationSplitChunksOptions } from '@rspack/core';
 type CacheGroups = NonNullable<OptimizationSplitChunksOptions['cacheGroups']>;
 
 /**
+ * jQuery and the Flot plugin package are only used by Canvas, Stack Monitoring,
+ * and vislib. Those apps already load this code from nested `import()`s. If they
+ * land in a *named* cache group (`vendors`, `shared-packages`, `shared-misc`)
+ * ChunkPreloadManifestPlugin puts that chunk on every Kibana bootstrap.
+ *
+ * `name: false` creates an unnamed async chunk that is fetched only when those
+ * apps load. Keep this regex in sync with the exclusions on `vendors`,
+ * `sharedPackages`, and `default`.
+ */
+export const JQUERY_FLOT_MODULE =
+  /[\\/]node_modules[\\/]jquery(?:[\\/]|$)|[\\/]packages[\\/]shared[\\/]kbn-flot-charts[\\/]/;
+
+const isJqueryFlotModule = (name: string | null | undefined): boolean =>
+  typeof name === 'string' && JQUERY_FLOT_MODULE.test(name);
+
+/**
  * Return the splitChunks cache groups used by the unified single-compilation
  * build.  Extracted here so that both the build config and the limits
  * validation code can derive the set of named shared chunk names from the
  * same source of truth.
  *
  * CACHE GROUP PRIORITY ORDER (highest wins):
+ *   50: jqueryFlot       - jquery + kbn-flot-charts (unnamed, not preloaded)
  *   45: vendorsHeavy     - specific heavy node_modules
  *   40: vendors          - /node_modules/ (minChunks: 3)
  *   35: sharedPlugins    - /plugins/  (all cross-plugin shared code)
@@ -27,8 +44,10 @@ type CacheGroups = NonNullable<OptimizationSplitChunksOptions['cacheGroups']>;
  *   29: rootPackages     - /packages/kbn-/  (repo root + x-pack/packages)
  *  -20: default          - catch-all (minChunks: 3, name: 'shared-misc')
  *
- * All groups use category-level static names.  No maxSize — benchmarked
- * at 500K/1M/6M/10M/20M (global and per-group); all caused regressions.
+ * Named groups use category-level static names so they can be preloaded and
+ * tracked as page-load metrics. `jqueryFlot` is the exception (`name: false`)
+ * so it stays an on-demand async chunk. No maxSize — benchmarked at
+ * 500K/1M/6M/10M/20M (global and per-group); all caused regressions.
  */
 export const getSplitChunksCacheGroups = (): CacheGroups => ({
   // Disable rspack's built-in defaultVendors group (test: /node_modules/i,
@@ -37,10 +56,22 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
   // unnecessary small vendor chunks via the hidden default.
   defaultVendors: false,
 
-  // --- Vendor cache groups (highest priority) ---
-  // Vendors are evaluated first so that any module inside node_modules/
-  // is always routed to a vendor chunk, even if its path happens to
-  // contain segments like /plugins/ or /packages/ that match internal groups.
+  // Canvas / Monitoring / vislib share jquery + Flot. Must win over `vendors`
+  // and `sharedPackages`. `name: false` keeps the chunk out of bootstrap.
+  jqueryFlot: {
+    test: JQUERY_FLOT_MODULE,
+    name: false,
+    chunks: 'async' as const,
+    priority: 50,
+    minChunks: 2,
+    minSize: 0,
+    reuseExistingChunk: true,
+  },
+
+  // --- Vendor cache groups (highest priority among named groups) ---
+  // Named vendor groups beat /plugins/ and /packages/ path matches so
+  // node_modules never leak into those chunks. jquery is excluded here
+  // and handled by `jqueryFlot` above.
   vendorsHeavy: {
     test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
     name: 'vendors-heavy',
@@ -54,7 +85,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
   // Shared vendors -- all node_modules shared by 3+ chunks,
   // consolidated into a single 'vendors' chunk.
   vendors: {
-    test: /[\\/]node_modules[\\/]/,
+    test: /[\\/]node_modules[\\/](?!jquery(?:[\\/]|$))/,
     name: 'vendors',
     priority: 40,
     minChunks: 3,
@@ -97,7 +128,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
   // (kbn-palettes, shared-ux, kbn-field-types, etc.).
   // Merged into a single 'shared-packages' chunk.
   sharedPackages: {
-    test: /[\\/]packages[\\/](?:shared|private)[\\/]/,
+    test: /[\\/]packages[\\/](?:shared|private)[\\/](?!kbn-flot-charts[\\/])/,
     name: 'shared-packages',
     chunks: 'async' as const,
     priority: 31,
@@ -136,6 +167,7 @@ export const getSplitChunksCacheGroups = (): CacheGroups => ({
   // Catch-all for shared async code not matched by named groups above.
   // Static name merges all remaining modules into a single chunk.
   default: {
+    test: (module) => !isJqueryFlotModule(module.identifier()),
     minChunks: 3,
     priority: -20,
     reuseExistingChunk: true,
