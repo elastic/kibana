@@ -468,7 +468,11 @@ describe('severity helpers', () => {
 
     it('names the evaluation source', () => {
       expect(
-        getReservedSeverityLabelSources([countStat], [{ id: 'e1', label: 'severity', expression: 'x' }], [])
+        getReservedSeverityLabelSources(
+          [countStat],
+          [{ id: 'e1', label: 'severity', expression: 'x' }],
+          []
+        )
       ).toEqual(['evaluation']);
     });
 
