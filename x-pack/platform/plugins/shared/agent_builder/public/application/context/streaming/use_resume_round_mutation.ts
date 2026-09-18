@@ -10,7 +10,15 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import type { PromptResponseEvent } from '@kbn/agent-builder-common';
+import {
+  EventActorType,
+  TimelineEventType,
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
+  parseExecutionId,
+  promptResponseEventId,
+} from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -22,8 +30,40 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 
+/**
+ * The id the server will give the `prompt_response` event that resumes this paused run. The
+ * resume is the next execution of the same round, and the id follows from that.
+ */
+const savedPromptResponseId = (pausedExecutionId: string): string | undefined => {
+  const paused = parseExecutionId(pausedExecutionId);
+  return paused ? promptResponseEventId(paused.roundId, paused.index + 1) : undefined;
+};
+
+const localPromptResponseEvent = ({
+  id,
+  promptRequestedEventId,
+  prompts,
+}: {
+  id: string;
+  promptRequestedEventId: string;
+  prompts: Record<string, PromptResponse>;
+}): PromptResponseEvent => ({
+  id,
+  type: TimelineEventType.promptResponse,
+  created_at: new Date().toISOString(),
+  actor: { type: EventActorType.user, id: '' },
+  data: {
+    prompt_requested_event_id: promptRequestedEventId,
+    responses: prompts,
+  },
+});
+
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
+  /** The `execution_terminated` event that paused, which this answer joins back to. */
+  promptRequestedEventId: string;
+  /** The execution that paused; the resume is the next execution of its round. */
+  pausedExecutionId: string;
   conversationId: string;
   agentId: string;
   connectorId?: string;
@@ -77,11 +117,17 @@ export const useResumeRoundMutation = ({
       const executionId = uuidv4();
       controllersRef.current.set(vars.conversationId, { controller, executionId });
 
-      // Optimistically populate ask_user_question step answers before clearing the prompt —
-      // pending_prompts is needed to reconstruct the step, so this must come first.
-      streamActions.setAskUserQuestionAnswers(vars.prompts);
-      // Drop pending prompts from the round — the user has answered, the round is back in progress.
-      streamActions.clearPendingPrompts();
+      const localAnswerId = savedPromptResponseId(vars.pausedExecutionId);
+      if (localAnswerId) {
+        conversationStreamService.recordPromptResponse(
+          vars.conversationId,
+          localPromptResponseEvent({
+            id: localAnswerId,
+            promptRequestedEventId: vars.promptRequestedEventId,
+            prompts: vars.prompts,
+          })
+        );
+      }
 
       let timelineExecutionId: string | undefined;
 
@@ -115,6 +161,11 @@ export const useResumeRoundMutation = ({
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
         }).catch(() => {});
+
+        // The resume never started, so nothing will ever save this answer: take it back.
+        if (localAnswerId && !timelineExecutionId) {
+          conversationStreamService.clearPromptResponse(vars.conversationId, localAnswerId);
+        }
 
         clearActiveStream(vars.conversationId);
         await releaseLocalContent({

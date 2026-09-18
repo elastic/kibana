@@ -18,9 +18,12 @@ import { createExecutionFailedEvent } from './items/execution_failed_event.facto
 import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
+import {
+  createConfirmationPrompt,
+  createExecutionPausedEvent,
+} from './items/execution_paused_event.factory';
 import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 
 const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e) => [e.id, e]));
@@ -170,14 +173,10 @@ describe('groupTimelineEvents', () => {
     }
   });
 
-  it('renders prompt_response as its own promptResponse item', () => {
-    const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
+  it('gives an answer no item of its own', () => {
+    const events = [createPromptResponseEvent({ id: 'pr-1' })];
 
-    const events = [promptResponse];
-    const items = groupTimelineEvents(events, makeEventsById(events));
-
-    expect(items).toHaveLength(1);
-    expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
+    expect(groupTimelineEvents(events, makeEventsById(events))).toEqual([]);
   });
 
   it('handles execution_aborted as aborted status', () => {
@@ -223,22 +222,6 @@ describe('groupTimelineEvents while a run streams', () => {
     }
   });
 
-  it('moves the turn to awaiting_prompt once prompts are pending', () => {
-    const prompts: PromptRequest[] = [
-      { id: 'p1', type: AgentPromptType.ask_user_question, questions: [] },
-    ];
-    const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
-    const events = [started, streamingEvent({ message: 'thinking', pending_prompts: prompts })];
-
-    const [turn] = groupTimelineEvents(events, makeEventsById(events));
-
-    expect(turn.kind).toBe('agentTurn');
-    if (turn.kind === 'agentTurn') {
-      expect(turn.status).toBe('awaiting_prompt');
-      expect(turn.pendingPrompts).toEqual(prompts);
-    }
-  });
-
   it('lets the real terminal replace the streaming answer', () => {
     const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-live' });
@@ -250,6 +233,240 @@ describe('groupTimelineEvents while a run streams', () => {
     if (turn.kind === 'agentTurn') {
       expect(turn.status).toBe('completed');
       expect(turn.terminal).toBe(terminated);
+    }
+  });
+});
+
+describe('groupTimelineEvents for a paused run', () => {
+  const PAUSE_ID = 'round-1::execution_terminated';
+
+  const pausedRun = () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-1' });
+    const paused = createExecutionPausedEvent({ id: PAUSE_ID, execution_id: 'exec-1' });
+    return { started, paused };
+  };
+
+  it('keeps a saved pause open, so a reload shows the same prompt', () => {
+    const { started, paused } = pausedRun();
+    const events = [started, paused];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+      expect(turn.terminal).toBe(paused);
+    }
+  });
+
+  it('closes the pause once an answer joins back to it', () => {
+    const { started, paused } = pausedRun();
+    const answer = createPromptResponseEvent({
+      id: 'round-1::prompt_response::1',
+      data: { prompt_requested_event_id: PAUSE_ID, responses: { 'prompt-1': { allow: true } } },
+    });
+    const events = [started, paused, answer];
+
+    const items = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(items).toHaveLength(1);
+    const [turn] = items;
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('completed');
+      expect(turn.pendingPrompts).toBeUndefined();
+    }
+  });
+
+  it('ignores an answer pointing at a different pause', () => {
+    const { started, paused } = pausedRun();
+    const answer = createPromptResponseEvent({
+      data: { prompt_requested_event_id: 'some-other-pause', responses: {} },
+    });
+    const events = [started, paused, answer];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+    }
+  });
+});
+
+describe('groupTimelineEvents for an answered question', () => {
+  // Shapes taken from a real conversation: the question step is saved without answers, and the
+  // answers only exist on the prompt_response that resumed the run.
+  const ROUND_ID = 'round-1';
+  const PROMPT_ID = 'prompt-66199c65';
+  const PAUSE_ID = `${ROUND_ID}::execution_terminated`;
+
+  const questionStep = {
+    type: ConversationRoundStepType.askUserQuestion,
+    prompt_id: PROMPT_ID,
+    questions: [
+      {
+        question: 'Which Kibana app are you most interested in exploring today?',
+        options: [{ label: 'Discover' }, { label: 'Dashboard' }],
+        multi_select: false,
+      },
+    ],
+  } as const;
+
+  const answeredQuestionEvents = () => [
+    createExecutionStartedEvent({ execution_id: `${ROUND_ID}::execution` }),
+    createExecutionStepEvent({
+      id: `${ROUND_ID}::step::0`,
+      execution_id: `${ROUND_ID}::execution`,
+      data: { step: questionStep, sequence: 0 },
+    }),
+    createExecutionPausedEvent({
+      id: PAUSE_ID,
+      execution_id: `${ROUND_ID}::execution`,
+      data: {
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: PROMPT_ID, questions: [] }],
+        },
+      } as never,
+    }),
+    createPromptResponseEvent({
+      id: `${ROUND_ID}::prompt_response::1`,
+      data: {
+        prompt_requested_event_id: PAUSE_ID,
+        responses: { [PROMPT_ID]: { answers: [{ choice: [0] }] } },
+      },
+    }),
+  ];
+
+  it('joins the answers onto the question step so the turn can show them', () => {
+    const events = answeredQuestionEvents();
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('completed');
+      expect(turn.steps).toEqual([{ ...questionStep, answers: [{ choice: [0] }] }]);
+    }
+  });
+
+  it('adds no item of its own for the answer, the step already shows it', () => {
+    const events = answeredQuestionEvents();
+
+    const items = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(items.map((item) => item.kind)).toEqual(['agentTurn']);
+  });
+});
+
+describe('groupTimelineEvents across a pause and its resume', () => {
+  const ROUND = 'round-1';
+  const PAUSE_ID = `${ROUND}::execution_terminated`;
+  const question = {
+    type: ConversationRoundStepType.askUserQuestion,
+    prompt_id: 'prompt-1',
+    questions: [{ question: 'Which app?', options: [{ label: 'Discover' }], multi_select: false }],
+  } as const;
+
+  const firstRun = () => [
+    createExecutionStartedEvent({
+      id: `${ROUND}::execution_started`,
+      execution_id: `${ROUND}::execution`,
+      trigger_event_id: `${ROUND}::user_message`,
+    }),
+    createExecutionStepEvent({
+      id: `${ROUND}::step::0`,
+      execution_id: `${ROUND}::execution`,
+      data: { step: question, sequence: 0 },
+    }),
+    createExecutionPausedEvent({
+      id: PAUSE_ID,
+      execution_id: `${ROUND}::execution`,
+      data: {
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: 'prompt-1', questions: [] }],
+        },
+      } as never,
+    }),
+  ];
+
+  const answer = () =>
+    createPromptResponseEvent({
+      id: `${ROUND}::prompt_response::1`,
+      data: {
+        prompt_requested_event_id: PAUSE_ID,
+        responses: { 'prompt-1': { answers: [{ choice: [0] }] } },
+      },
+    });
+
+  const resumeStart = () =>
+    createExecutionStartedEvent({
+      id: `${ROUND}::execution::1::execution_started`,
+      execution_id: `${ROUND}::execution::1`,
+      trigger_event_id: `${ROUND}::prompt_response::1`,
+    });
+
+  const resumeEnd = () =>
+    createExecutionTerminatedEvent({
+      id: `${ROUND}::execution::1::execution_terminated`,
+      execution_id: `${ROUND}::execution::1`,
+      trigger_event_id: `${ROUND}::prompt_response::1`,
+    });
+
+  it('renders the whole round as one turn, keyed by the round', () => {
+    const events = [...firstRun(), answer(), resumeStart(), resumeEnd()];
+
+    const items = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(items).toHaveLength(1);
+    const [turn] = items;
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.key).toBe(ROUND);
+      expect(turn.status).toBe('completed');
+      // The question and the final answer live in the same bubble.
+      expect(turn.steps).toEqual([{ ...question, answers: [{ choice: [0] }] }]);
+      expect(turn.response).toEqual({ message: 'Here is a summary of your active hosts.' });
+    }
+  });
+
+  it('keeps the turn running while the resume streams, not completed by the pause', () => {
+    const events = [...firstRun(), answer(), resumeStart()];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('running');
+      expect(turn.terminal).toBeUndefined();
+      expect(turn.executionId).toBe(`${ROUND}::execution::1`);
+    }
+  });
+
+  it('waits on the pause until an answer arrives', () => {
+    const events = firstRun();
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.executionId).toBe(`${ROUND}::execution`);
+    }
+  });
+
+  it('keeps the round trigger as the turn author, not the answer that resumed it', () => {
+    const userMessage = createUserMessageEvent({ id: `${ROUND}::user_message` });
+    const events = [userMessage, ...firstRun(), answer(), resumeStart(), resumeEnd()];
+
+    const [, turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.triggerEventId).toBe(`${ROUND}::user_message`);
     }
   });
 });

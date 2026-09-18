@@ -12,7 +12,6 @@ import { createUserMessageEvent } from './items/user_message_event.factory';
 import { Timeline } from './timeline';
 
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
-jest.mock('./items/prompt_response_event', () => ({ PromptResponseEvent: () => null }));
 jest.mock('./agent_turn', () => ({ AgentTurn: () => null }));
 
 describe('Timeline', () => {

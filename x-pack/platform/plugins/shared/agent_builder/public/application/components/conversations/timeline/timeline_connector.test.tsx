@@ -137,7 +137,7 @@ describe('TimelineConnector', () => {
     // `execution_started` renames the local copy to the id the server gave it.
     expect(renderedItems()).toEqual([
       'userMessage:round-1::user_message:',
-      'agentTurn:round-1::execution:completed',
+      'agentTurn:round-1:completed',
     ]);
   });
 
@@ -154,7 +154,7 @@ describe('TimelineConnector', () => {
 
     expect(renderedItems()).toEqual([
       'userMessage:round-1::user_message:',
-      'agentTurn:round-1::execution:completed',
+      'agentTurn:round-1:completed',
     ]);
   });
 
@@ -177,9 +177,9 @@ describe('TimelineConnector', () => {
 
     expect(renderedItems()).toEqual([
       'userMessage:round-0::user_message:',
-      'agentTurn:round-0::execution:completed',
+      'agentTurn:round-0:completed',
       'userMessage:round-1::user_message:',
-      'agentTurn:round-1::execution:completed',
+      'agentTurn:round-1:completed',
     ]);
   });
 
@@ -244,7 +244,7 @@ describe('TimelineConnector', () => {
 
     expect(renderedItems()).toEqual([
       'userMessage:round-1::user_message:',
-      'agentTurn:round-1::execution:running',
+      'agentTurn:round-1:running',
     ]);
   });
 });

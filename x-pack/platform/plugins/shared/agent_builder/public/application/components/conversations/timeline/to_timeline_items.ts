@@ -6,11 +6,20 @@
  */
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, parseExecutionId } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
-import type { ExecutionAccumulator, TimelineItem, UserEntry } from './types';
+import type { TurnAccumulator, TimelineItem, UserEntry } from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
+import { answeredPauseIds } from './outstanding_prompt';
+import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
+
+/**
+ * The turn an execution belongs to. Every execution of a round shares one turn, so a pause and
+ * the resume that answers it render as a single bubble.
+ */
+const turnIdOf = (executionId: string): string =>
+  parseExecutionId(executionId)?.roundId ?? executionId;
 
 export const groupTimelineEvents = (
   events: TimelineDisplayEvent[],
@@ -18,26 +27,37 @@ export const groupTimelineEvents = (
   /** Id of the locally-built user message that has no saved twin yet. */
   pendingUserMessageId?: string
 ): TimelineItem[] => {
-  const ordered: Array<UserEntry | ExecutionAccumulator> = [];
-  const accMap = new Map<string, ExecutionAccumulator>();
+  const ordered: Array<UserEntry | TurnAccumulator> = [];
+  const accMap = new Map<string, TurnAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
+  const answeredPauses = answeredPauseIds(events);
+  const questionAnswers = answersByPromptId(events);
 
   const getOrCreateAcc = (
     executionId: string,
     createdAt: string,
     triggerEventId?: string
-  ): ExecutionAccumulator => {
-    let acc = accMap.get(executionId);
+  ): TurnAccumulator => {
+    const turnId = turnIdOf(executionId);
+    const acc = accMap.get(turnId);
     if (!acc) {
-      acc = {
+      const created: TurnAccumulator = {
+        turnId,
         executionId,
         startedAt: createdAt,
         triggerEventId,
         steps: [],
         attachmentRefs: Array.from(seenAttachmentRefs.values()),
       };
-      accMap.set(executionId, acc);
-      ordered.push(acc);
+      accMap.set(turnId, created);
+      ordered.push(created);
+      return created;
+    }
+    if (acc.executionId !== executionId) {
+      // A resume continues the turn, and its own outcome replaces the pause it answered.
+      acc.executionId = executionId;
+      acc.terminal = undefined;
+      acc.streaming = undefined;
     }
     return acc;
   };
@@ -54,9 +74,10 @@ export const groupTimelineEvents = (
         });
         break;
 
+      // An answer is not a timeline item of its own: a question answer shows on its
+      // `ask_user_question` step, and a yes/no decision is not worth a bubble.
       case TimelineEventType.promptResponse:
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
-        ordered.push({ kind: 'promptResponse', key: event.id, event });
         break;
 
       case TimelineEventType.executionStarted:
@@ -67,7 +88,7 @@ export const groupTimelineEvents = (
       case TimelineEventType.executionStep: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.steps.push(event.data.step);
+        acc.steps.push(withQuestionAnswers(event.data.step, questionAnswers));
         break;
       }
 
@@ -93,7 +114,8 @@ export const groupTimelineEvents = (
   }
 
   return ordered.map(
-    (entry): TimelineItem => ('executionId' in entry ? accumulatorToItem(entry, eventsById) : entry)
+    (entry): TimelineItem =>
+      'turnId' in entry ? accumulatorToItem(entry, eventsById, answeredPauses) : entry
   );
 };
 

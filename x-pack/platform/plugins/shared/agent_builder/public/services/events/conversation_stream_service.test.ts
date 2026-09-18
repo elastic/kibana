@@ -11,6 +11,7 @@ import {
   TimelineEventType,
   EventActorType,
   type ChatEvent,
+  type PromptResponseEvent,
 } from '@kbn/agent-builder-common';
 import { ConversationStreamService, type ChatEventSource } from './conversation_stream_service';
 import {
@@ -77,6 +78,19 @@ const executionTerminatedEvent = (executionId = EXECUTION_ID): ChatEvent =>
       outcome: { type: 'responded', response: { message: 'done' } },
     },
   } as ChatEvent);
+
+const SAVED_ANSWER_ID = `${ROUND_ID}::prompt_response::1`;
+
+const promptResponseEvent = (): PromptResponseEvent => ({
+  id: SAVED_ANSWER_ID,
+  type: TimelineEventType.promptResponse,
+  created_at: '2026-01-01T00:00:00.000Z',
+  actor: { type: EventActorType.user, id: '' },
+  data: {
+    prompt_requested_event_id: `${ROUND_ID}::execution_terminated`,
+    responses: { 'prompt-1': { allow: true } },
+  },
+});
 
 const hasTerminal = (events: TimelineDisplayEvent[]): boolean =>
   events.some((event) => event.type === TimelineEventType.executionTerminated);
@@ -390,6 +404,60 @@ describe('ConversationStreamService', () => {
     getSubject('A').next(executionTerminatedEvent('exec-2'));
     service.clearPersistedExecution('A', 'exec-1');
     expect(hasTerminal(state ?? [])).toBe(true);
+  });
+
+  it('recordPromptResponse puts the human answer on the timeline right away', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: TimelineDisplayEvent[] | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    service.recordPromptResponse('A', promptResponseEvent());
+
+    expect(state).toEqual([promptResponseEvent()]);
+  });
+
+  it('recordPromptResponse leaves the streaming run alone', () => {
+    const { source, getSubject } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: TimelineDisplayEvent[] | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+    getSubject('A').next(executionStartedEvent());
+    getSubject('A').next(messageChunkEvent('running'));
+
+    service.recordPromptResponse('A', promptResponseEvent());
+
+    expect(messageOf(state ?? [])).toBe('running');
+    expect(state?.some((event) => event.id === SAVED_ANSWER_ID)).toBe(true);
+  });
+
+  it('clearPromptResponse takes the answer back and keeps everything else', () => {
+    const { source, getSubject } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: TimelineDisplayEvent[] | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+    getSubject('A').next(executionStartedEvent());
+    service.recordPromptResponse('A', promptResponseEvent());
+
+    service.clearPromptResponse('A', SAVED_ANSWER_ID);
+
+    expect(state?.some((event) => event.id === SAVED_ANSWER_ID)).toBe(false);
+    expect(state?.some((event) => event.execution_id === EXECUTION_ID)).toBe(true);
+  });
+
+  it('clearPromptResponse ignores an id that is not there', () => {
+    const { source } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    service.getActiveStream$('A').subscribe(() => {});
+    service.recordPromptResponse('A', promptResponseEvent());
+
+    service.clearPromptResponse('A', 'never-recorded');
+
+    expect(service.getSnapshot('A')).toEqual([promptResponseEvent()]);
   });
 
   it('clearPersistedExecution tears the stream down when nobody observes it', () => {

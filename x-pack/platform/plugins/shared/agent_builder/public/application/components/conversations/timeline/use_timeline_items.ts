@@ -20,6 +20,7 @@ import {
   useConversationStreamService,
 } from '../../../context/streaming/streaming_context';
 import { buildItems } from './to_timeline_items';
+import { mergeEventsById } from './merge_events';
 import type { TimelineItem } from './types';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
@@ -41,10 +42,12 @@ const savedUserMessageId = (liveEvents: TimelineDisplayEvent[]): string | undefi
 const isSentMessageStillMissingItsRefs = (
   event: TimelineDisplayEvent,
   sentMessageId: string
-): event is UserMessageEvent =>
-  event.id === sentMessageId &&
-  event.type === TimelineEventType.userMessage &&
-  !event.data.attachment_refs?.length;
+): event is UserMessageEvent => {
+  if (event.id !== sentMessageId || event.type !== TimelineEventType.userMessage) {
+    return false;
+  }
+  return !event.data.attachment_refs?.length;
+};
 
 const withStagedAttachments = (
   event: UserMessageEvent,
@@ -101,26 +104,16 @@ export const useTimelineItems = (): TimelineItem[] => {
     !!pendingMessage && !docEvents?.some((event) => event.id === pendingUserMessageId);
 
   const events = useMemo(() => {
-    // The saved copy wins: every live event gets a saved twin with the same id after the refetch,
-    // so the live list stops mattering on its own. Saved events keep their order; live-only events
-    // belong to the run in flight, so they go last.
-    const byId = new Map<string, TimelineDisplayEvent>(
-      (docEvents ?? []).map((event) => [event.id, event])
+    // The pending message goes in before the live events: it is what started the run they describe.
+    const merged = mergeEventsById(
+      docEvents ?? [],
+      pendingUserMessage ? [pendingUserMessage] : [],
+      liveEvents
     );
-    // The message goes in before the live events: it is what started the run they describe.
-    if (pendingUserMessage && !byId.has(pendingUserMessage.id)) {
-      byId.set(pendingUserMessage.id, pendingUserMessage);
-    }
-    for (const event of liveEvents) {
-      if (!byId.has(event.id)) {
-        byId.set(event.id, event);
-      }
-    }
-
     if (!pendingAttachments) {
-      return [...byId.values()];
+      return merged;
     }
-    return [...byId.values()].map((event) =>
+    return merged.map((event) =>
       isSentMessageStillMissingItsRefs(event, pendingUserMessageId)
         ? withStagedAttachments(event, pendingAttachments)
         : event

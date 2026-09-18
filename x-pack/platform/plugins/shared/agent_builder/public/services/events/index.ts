@@ -11,6 +11,7 @@ export { ConversationStreamService } from './conversation_stream_service';
 export {
   EXECUTION_STREAMING_EVENT_TYPE,
   isExecutionStreamingEvent,
+  upsertEvent,
   type ExecutionStreamingEvent,
   type ExecutionStreamingEventData,
   type LiveEventsState,

@@ -7,7 +7,6 @@
 
 import type {
   UserMessageEvent,
-  PromptResponseEvent,
   ExecutionTerminatedEvent,
   ExecutionFailedEvent,
   ExecutionAbortedEvent,
@@ -26,6 +25,7 @@ export type TerminalEvent = ExecutionTerminatedEvent | ExecutionFailedEvent | Ex
 export interface AgentTurnItem {
   kind: 'agentTurn';
   key: string;
+  /** The newest execution of the turn; a resume adds one and takes over. */
   executionId?: string;
   triggerEventId?: string;
   status: AgentTurnStatus;
@@ -44,22 +44,25 @@ export interface AgentTurnItem {
 
 export type TimelineItem =
   | { kind: 'userMessage'; key: string; event: UserMessageEvent; isPending?: boolean }
-  | { kind: 'promptResponse'; key: string; event: PromptResponseEvent }
   | AgentTurnItem;
 
 /** A timeline item that speaks for a human, not for a run. */
-export type UserEntry =
-  | Extract<TimelineItem, { kind: 'userMessage' }>
-  | Extract<TimelineItem, { kind: 'promptResponse' }>;
+export type UserEntry = Extract<TimelineItem, { kind: 'userMessage' }>;
 
-/** One run, collected from its events before it becomes an {@link AgentTurnItem}. */
-export interface ExecutionAccumulator {
+/**
+ * One turn, collected from its events before it becomes an {@link AgentTurnItem}. A turn spans
+ * every execution of one round, so a pause and the resume that answers it share a turn.
+ */
+export interface TurnAccumulator {
+  /** The round the turn belongs to; the map key. */
+  turnId: string;
+  /** The newest execution seen; it owns the turn's outcome. */
   executionId: string;
   startedAt: string;
   triggerEventId?: string;
   steps: ConversationRoundStep[];
   terminal?: TerminalEvent;
-  /** The half-written answer, while the run is still streaming. */
+  /** The half-written answer, while the newest execution is still streaming. */
   streaming?: ExecutionStreamingEventData;
   attachmentRefs?: AttachmentVersionRef[];
 }

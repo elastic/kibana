@@ -12,9 +12,11 @@ import type {
   ExecutionAbortedEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
-import type { AgentTurnItem, AgentTurnStatus, ExecutionAccumulator, TerminalEvent } from './types';
+import type { AgentTurnItem, AgentTurnStatus, TurnAccumulator, TerminalEvent } from './types';
+import { pausePrompts } from './outstanding_prompt';
 
 const finalResponse = (terminal: TerminalEvent | undefined) =>
   terminal?.type === TimelineEventType.executionTerminated &&
@@ -38,30 +40,52 @@ export const foldAttachmentRefs = (
   }
 };
 
-export const resolveStatus = ({ terminal, streaming }: ExecutionAccumulator): AgentTurnStatus => {
-  if (!terminal) {
-    return streaming?.pending_prompts?.length ? 'awaiting_prompt' : 'running';
+/** The prompts this turn still waits on; an answered pause waits on nothing. */
+export const promptsAwaitingAnswer = (
+  { terminal }: TurnAccumulator,
+  answeredPauseIds: Set<string>
+): PromptRequest[] => {
+  if (!terminal || answeredPauseIds.has(terminal.id)) {
+    return [];
   }
-  if (terminal.type === TimelineEventType.executionTerminated) return 'completed';
-  if (terminal.type === TimelineEventType.executionFailed) return 'failed';
-  return 'aborted';
+  return pausePrompts(terminal);
+};
+
+export const resolveStatus = (
+  acc: TurnAccumulator,
+  answeredPauseIds: Set<string>
+): AgentTurnStatus => {
+  const { terminal } = acc;
+  if (terminal?.type === TimelineEventType.executionFailed) return 'failed';
+  if (terminal?.type === TimelineEventType.executionAborted) return 'aborted';
+  if (promptsAwaitingAnswer(acc, answeredPauseIds).length > 0) return 'awaiting_prompt';
+  return terminal ? 'completed' : 'running';
 };
 
 export const accumulatorToItem = (
-  acc: ExecutionAccumulator,
-  eventsById: Map<string, TimelineDisplayEvent>
+  acc: TurnAccumulator,
+  eventsById: Map<string, TimelineDisplayEvent>,
+  answeredPauseIds: Set<string>
 ): AgentTurnItem => {
-  const { executionId, startedAt, triggerEventId, steps, terminal, streaming, attachmentRefs } =
-    acc;
+  const {
+    turnId,
+    executionId,
+    startedAt,
+    triggerEventId,
+    steps,
+    terminal,
+    streaming,
+    attachmentRefs,
+  } = acc;
   const trigger = triggerEventId ? eventsById.get(triggerEventId) : undefined;
   const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
   const triggerAttachmentRefs =
     trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
   const item: AgentTurnItem = {
     kind: 'agentTurn',
-    key: executionId,
+    key: turnId,
     executionId,
-    status: resolveStatus(acc),
+    status: resolveStatus(acc, answeredPauseIds),
     startedAt,
     steps,
   };
@@ -78,10 +102,12 @@ export const accumulatorToItem = (
     item.response = { message: streaming.message };
   }
 
-  const stillStreaming = terminal ? undefined : streaming;
-  if (stillStreaming?.pending_prompts?.length) {
-    item.pendingPrompts = stillStreaming.pending_prompts;
+  const pendingPrompts = promptsAwaitingAnswer(acc, answeredPauseIds);
+  if (pendingPrompts.length > 0) {
+    item.pendingPrompts = pendingPrompts;
   }
+
+  const stillStreaming = terminal ? undefined : streaming;
   if (stillStreaming?.time_to_first_token !== undefined) {
     item.timeToFirstToken = stillStreaming.time_to_first_token;
   }
@@ -102,3 +128,8 @@ export const isAbortedTurn = (
   item: AgentTurnItem
 ): item is AgentTurnItem & { status: 'aborted'; terminal: ExecutionAbortedEvent } =>
   item.status === 'aborted';
+
+export const isAwaitingPromptTurn = (
+  item: AgentTurnItem
+): item is AgentTurnItem & { status: 'awaiting_prompt'; pendingPrompts: PromptRequest[] } =>
+  item.status === 'awaiting_prompt' && (item.pendingPrompts?.length ?? 0) > 0;

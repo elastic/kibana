@@ -7,8 +7,9 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, defer, finalize, map } from 'rxjs';
+import type { PromptResponseEvent } from '@kbn/agent-builder-common';
 import type { LiveEventsState, TimelineDisplayEvent } from './sse_to_events';
-import { emptyLiveEventsState, sseToEvents } from './sse_to_events';
+import { emptyLiveEventsState, sseToEvents, upsertEvent } from './sse_to_events';
 import type { EventsService } from './events_service';
 
 export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
@@ -77,6 +78,31 @@ export class ConversationStreamService {
   /** Non-reactive snapshot: the live events accumulated so far for this conversation. */
   getSnapshot(conversationId: string): TimelineDisplayEvent[] {
     return this.streams.get(conversationId)?.state$.getValue().events ?? [];
+  }
+
+  /**
+   * Shows a human's answer to a pause right away. The event carries the id the server will give
+   * its saved copy, so the saved one replaces it by id like every other live event.
+   */
+  recordPromptResponse(conversationId: string, event: PromptResponseEvent) {
+    const stream = this.ensure(conversationId);
+    const current = stream.state$.getValue();
+    stream.state$.next({ ...current, events: upsertEvent(current.events, event) });
+  }
+
+  /** Drops a local answer whose resume never reached the server, so the prompt comes back. */
+  clearPromptResponse(conversationId: string, eventId: string) {
+    const stream = this.streams.get(conversationId);
+    const current = stream?.state$.getValue();
+    if (!stream || !current) {
+      return;
+    }
+    const remaining = current.events.filter((event) => event.id !== eventId);
+    if (remaining.length === current.events.length) {
+      return;
+    }
+    stream.state$.next({ ...current, events: remaining });
+    this.maybeTeardown(conversationId);
   }
 
   /**

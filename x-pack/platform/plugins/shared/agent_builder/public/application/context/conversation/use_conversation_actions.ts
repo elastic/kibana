@@ -7,18 +7,8 @@
 
 import { useMemo } from 'react';
 import type { QueryClient } from '@kbn/react-query';
-import produce, { type Draft } from 'immer-v9';
-import type { ConversationRound, Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import {
-  createAskUserQuestionStep,
-  isAskUserQuestionStep,
-} from '@kbn/agent-builder-common/chat/conversation';
-import type { PromptResponse } from '@kbn/agent-builder-common/agents';
-import {
-  isAskUserQuestionPrompt,
-  isAskUserQuestionPromptResponse,
-} from '@kbn/agent-builder-common/agents';
+import produce from 'immer-v9';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 
@@ -27,8 +17,6 @@ export interface ConversationActions {
   onExecutionStarted: () => void;
   onExecutionTerminated: () => void;
   refetchConversation: () => Promise<Conversation>;
-  clearPendingPrompts: () => void;
-  setAskUserQuestionAnswers: (prompts: Record<string, PromptResponse>) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
 }
@@ -47,20 +35,6 @@ export const createConversationActions = ({
   onDeleteConversation,
 }: UseConversationActionsParams): ConversationActions => {
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
-    queryClient.setQueryData<Conversation>(queryKey, updater);
-  };
-  const setCurrentRound = (updater: (conversationRound: Draft<ConversationRound>) => void) => {
-    setConversation(
-      produce((draft) => {
-        const round = draft?.rounds?.at(-1);
-        if (round) {
-          updater(round);
-        }
-      })
-    );
-  };
-
   // `fetchQuery` rather than `invalidateQueries`: it fetches whether or not an observer is mounted
   // and resolves with the response, which the completion release needs.
   const fetchConversation = () => {
@@ -93,38 +67,6 @@ export const createConversationActions = ({
     // returned by `fetchQuery` as-is; cancel it so the response reflects the completed execution.
     refetchConversation: () => queryClient.cancelQueries({ queryKey }).then(fetchConversation),
 
-    clearPendingPrompts: () => {
-      setCurrentRound((round) => {
-        round.pending_prompts = undefined;
-        round.status = ConversationRoundStatus.inProgress;
-      });
-    },
-    setAskUserQuestionAnswers: (prompts: Record<string, PromptResponse>) => {
-      setCurrentRound((round) => {
-        for (const [promptId, response] of Object.entries(prompts)) {
-          if (!isAskUserQuestionPromptResponse(response)) continue;
-          const existing = round.steps.find(
-            (s) => isAskUserQuestionStep(s) && s.prompt_id === promptId
-          );
-          if (existing && isAskUserQuestionStep(existing)) {
-            existing.answers = response.answers;
-          } else {
-            const pendingPrompt = round.pending_prompts?.find(
-              (p) => isAskUserQuestionPrompt(p) && p.id === promptId
-            );
-            if (pendingPrompt && isAskUserQuestionPrompt(pendingPrompt)) {
-              round.steps.push(
-                createAskUserQuestionStep({
-                  prompt_id: promptId,
-                  questions: pendingPrompt.questions,
-                  answers: response.answers,
-                })
-              );
-            }
-          }
-        }
-      });
-    },
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
 

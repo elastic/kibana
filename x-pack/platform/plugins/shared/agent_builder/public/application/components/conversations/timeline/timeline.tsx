@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
-import { PromptResponseEvent } from './items/prompt_response_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
@@ -42,9 +41,6 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
                   conversationAttachments={conversationAttachments}
                 />
               );
-              break;
-            case 'promptResponse':
-              content = <PromptResponseEvent event={item.event} />;
               break;
             case 'agentTurn':
               content = (

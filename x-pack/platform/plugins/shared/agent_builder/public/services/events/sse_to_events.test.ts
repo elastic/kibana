@@ -142,17 +142,47 @@ describe('sseToEvents', () => {
     expect(afterTerminal.events).toEqual(state.events);
   });
 
-  it('puts time_to_first_token and pending prompts on the streaming event', () => {
-    const prompt = { id: 'p1', type: 'confirmation', message: 'ok?' };
-    const state = fold(
+  it('puts time_to_first_token on the streaming event', () => {
+    const state = fold(executionStarted(), {
+      type: ChatEventType.thinkingComplete,
+      data: { time_to_first_token: 42 },
+    } as ChatEvent);
+
+    expect(streamingEvent(state)?.data).toMatchObject({ time_to_first_token: 42 });
+  });
+
+  it('ignores a tool result for a call it never saw, as on a resume that resolves one', () => {
+    const resolved = fold(
       executionStarted(),
-      { type: ChatEventType.thinkingComplete, data: { time_to_first_token: 42 } } as ChatEvent,
-      { type: ChatEventType.promptRequest, data: { prompt } } as ChatEvent
+      toolCall('t1'),
+      executionTerminated(),
+      executionStarted(RESUME_EXECUTION_ID),
+      {
+        type: ChatEventType.toolResult,
+        data: { tool_call_id: 't1', results: [{ type: 'other', data: {} }] },
+      } as ChatEvent
     );
 
-    expect(streamingEvent(state)?.data).toMatchObject({
-      time_to_first_token: 42,
-      pending_prompts: [prompt],
-    });
+    expect(resolved.steps).toEqual([]);
+  });
+
+  it('ignores tool progress for a call it never saw', () => {
+    const state = fold(executionStarted(RESUME_EXECUTION_ID), {
+      type: ChatEventType.toolProgress,
+      data: { tool_call_id: 'gone', message: 'working' },
+    } as ChatEvent);
+
+    expect(state.steps).toEqual([]);
+  });
+
+  it('leaves a prompt request to the terminal event, which states the outcome', () => {
+    const prompt = { id: 'p1', type: 'confirmation', message: 'ok?' };
+
+    const state = fold(executionStarted(), {
+      type: ChatEventType.promptRequest,
+      data: { prompt },
+    } as ChatEvent);
+
+    expect(state.events.map((event) => event.id)).toEqual([`${EXECUTION_ID}::execution_started`]);
   });
 });
