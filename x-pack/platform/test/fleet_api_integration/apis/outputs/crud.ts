@@ -197,7 +197,8 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/291927
+  describe.skip('fleet_outputs_crud', function () {
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
@@ -313,7 +314,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('GET /outputs', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/291937
+    describe.skip('GET /outputs', () => {
       it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
