@@ -3757,6 +3757,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_obj
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 
+# Team: obs-signals-ai-o11y
+# GenAI tab shared component — sub-path override, no separate kibana.jsonc
+src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs-signals-ai-o11y
+
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
 
