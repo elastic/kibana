@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-oblt';
+import { AppMenu, type ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { RULE_DETAILS_TEST_SUBJECTS, BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../constants';
 
 export class RuleDetailsPage {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly appMenu: AppMenu;
+
+  constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
+  }
 
   /**
    * Navigates to the rule details page by rule ID
@@ -136,10 +140,7 @@ export class RuleDetailsPage {
    * Opens the actions menu
    */
   async openActionsMenu() {
-    await expect(this.actionsButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
-    await this.actionsButton.click();
-    // `Edit rule` is a primary action rendered inline, so detect the open popover via an
-    // overflow-only action (`Delete rule`).
+    await this.appMenu.revealItem(this.deleteRuleButton);
     await expect(this.deleteRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
 

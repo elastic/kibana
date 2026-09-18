@@ -153,6 +153,8 @@ export default function ({ getService }: FtrProviderContext) {
         `--embeddingClusterUrl=${embeddingClusterUrl}`,
         `--embeddingClusterUsername=${embeddingClusterUsername}`,
         `--embeddingClusterPassword=${embeddingClusterPassword}`,
+        // Match security_labs.ts: pin output so CI upload finds zips under build/kb-artifacts
+        `--targetFolder=${kbArtifactsDir}`,
       ];
 
       const commands = [
@@ -270,6 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
           `--embedding-cluster-username=${embeddingClusterUsername}`,
           `--embedding-cluster-password=${embeddingClusterPassword}`,
           `--inference-id=${openApiInferenceId}`,
+          `--targetFolder=${kbArtifactsDir}`,
         ];
 
         const cmd = `${nodeBin} ${openApiArgs.join(' ')}`;

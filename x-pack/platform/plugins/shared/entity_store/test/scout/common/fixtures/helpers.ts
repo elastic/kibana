@@ -161,6 +161,7 @@ interface SeedUserEntityOptions {
   namespace: string;
   email: string | string[];
   userName?: string;
+  userId?: string | string[];
   timestamp?: string;
 }
 
@@ -175,7 +176,7 @@ interface SeedUserEntityOptions {
  */
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, userName, timestamp }: SeedUserEntityOptions
+  { entityId, namespace, email, userName, userId, timestamp }: SeedUserEntityOptions
 ) => {
   const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
@@ -197,6 +198,7 @@ export const seedUserEntity = async (
       user: {
         email,
         name: userName ?? entityId,
+        ...(userId !== undefined ? { id: userId } : {}),
       },
       '@timestamp': ts,
     },
@@ -307,17 +309,23 @@ export const assertNotResolved = async (
   entityId: string,
   timeoutMs = 10_000
 ): Promise<void> => {
+  const existing = await fetchEntitySource(esClient, entityId);
+  if (!existing) {
+    throw new Error(`Entity '${entityId}' was not found — cannot assert it stayed unresolved`);
+  }
+
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
     const source = await fetchEntitySource(esClient, entityId);
-    if (source) {
-      const resolvedTo = readResolvedTo(source);
-      if (resolvedTo != null) {
-        throw new Error(
-          `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
-        );
-      }
+    if (!source) {
+      throw new Error(`Entity '${entityId}' disappeared while asserting it stayed unresolved`);
+    }
+    const resolvedTo = readResolvedTo(source);
+    if (resolvedTo != null) {
+      throw new Error(
+        `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
+      );
     }
 
     await new Promise((resolve) => setTimeout(resolve, 200));

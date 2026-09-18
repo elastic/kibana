@@ -4541,6 +4541,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      expand_role_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersLabel',
+          {
+            defaultMessage: 'Expand role members',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, ServiceNow role members are written individually onto each document's access control list. Disable this for large tenants to store compact role tokens on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
     },
     features: {
       [SYNC_RULES]: {
@@ -4962,6 +4993,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      expand_site_group_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersLabel',
+          {
+            defaultMessage: 'Expand site group members',
+          }
+        ),
+        options: [],
+        order: 17,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, SharePoint site group members are written individually onto each document's access control list. Disable this for large site groups to store a compact site group token on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
           }
         ),
         type: BOOLEAN,

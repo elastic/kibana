@@ -16,10 +16,12 @@ export const createMockStepContext = ({
   input,
   esClient,
   abortController = new AbortController(),
+  spaceId = 'default',
 }: {
   input: unknown;
   esClient: unknown;
   abortController?: AbortController;
+  spaceId?: string;
 }): StepHandlerContext => {
   return {
     input,
@@ -28,7 +30,11 @@ export const createMockStepContext = ({
     contextManager: {
       getScopedEsClient: jest.fn().mockReturnValue(esClient),
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
-      getContext: jest.fn(),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId, version: 3 },
+        execution: { id: 'exec-1', isTestRun: false, startedAt: new Date(), url: '' },
+        kibanaUrl: '',
+      }),
       renderInputTemplate: jest.fn(),
     },
     logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
@@ -43,6 +49,11 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
   ({
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
+
+export const mockKiWriter = {
+  uri: 'workflow://wf-1',
+  metadata: { version: 3, run_id: 'exec-1', space_id: 'default' },
+};
 
 /** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
 export const mockKiStepTelemetry = () => ({

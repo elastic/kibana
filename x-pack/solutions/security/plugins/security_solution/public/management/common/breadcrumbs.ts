@@ -8,6 +8,7 @@
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { AdministrationSubTab } from '../types';
 import {
+  CUSTOM_YARA_SIGNATURES_TAB,
   ENDPOINT_EXCEPTIONS_TAB,
   ENDPOINTS_TAB,
   EVENT_FILTERS_TAB,
@@ -34,6 +35,7 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.eventFilters]: EVENT_FILTERS_TAB,
   [AdministrationSubTab.hostIsolationExceptions]: HOST_ISOLATION_EXCEPTIONS,
   [AdministrationSubTab.blocklist]: BLOCKLIST,
+  [AdministrationSubTab.customYaraSignatures]: CUSTOM_YARA_SIGNATURES_TAB,
   [AdministrationSubTab.responseActionsHistory]: RESPONSE_ACTIONS_HISTORY,
   [AdministrationSubTab.scriptLibrary]: SCRIPT_LIBRARY,
   [AdministrationSubTab.protectionUpdates]: PROTECTION_UPDATES,

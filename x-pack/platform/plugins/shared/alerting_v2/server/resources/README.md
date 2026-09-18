@@ -187,6 +187,10 @@ ES|QL views are registered as `optional: true`, which lets Kibana start even on 
 
 Definitions live in `esql_views/`. The richest example is `esql_views/alert_episodes.ts`.
 
+### `$.alert-episodes` cardinality bound
+
+Its `INLINE STATS ... BY episode.id` grows with total episode count, so the definition starts with `WHERE @timestamp > NOW() - 90 days`. Do not remove it: an unbounded scan exceeds the ES|QL sub-plan size limit (~20.4 MB) and returns a non-retryable HTTP 400 (`sub-plan execution results too large`).
+
 ## Changing a datastream schema safely
 
 Schema evolution must be backward compatible.

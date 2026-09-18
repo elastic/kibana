@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type {
   SmlContext,
-  SmlDocument,
   SmlEntry,
   SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
+  SmlDocument,
+  SmlWriter,
   SmlTypeDefinition,
 } from './types';
 
-import { createSmlStorage, smlIndexName } from './sml_storage';
+import { INGESTION_METHOD_FIELD, smlIndexName } from './sml_storage';
+import { smlEntryId, smlEntryIdFromOriginUri, smlOriginUri } from './sml_origin';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -246,15 +247,24 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
-    await this.deleteEntry({ originUri, esClient });
+    if (smlEntry.type !== attachmentType) {
+      this.logger.warn(
+        `SML indexer: skipping origin '${originId}': the '${attachmentType}' type returned an entry with type '${smlEntry.type}', which must match. The existing entry is unchanged.`
+      );
+      return;
+    }
+
+    const entryId = smlEntryId(attachmentType, originId);
+    const creation = await this.readCreation({ entryId, esClient });
 
     const indexOp = this.buildIndexOp({
-      entryId: uuidv4(),
+      entryId,
       entry: smlEntry,
       originId,
       spaces,
       ingestionMethod: 'crawled',
       resolvedPermissions,
+      ...creation,
     });
 
     if (!indexOp) {
@@ -310,6 +320,31 @@ class SmlIndexerImpl implements SmlIndexer {
     return { kibana: { privileges: { name: [] } } };
   }
 
+  /** Reads the existing entry's creation time and creator. */
+  private async readCreation({
+    entryId,
+    esClient,
+  }: {
+    entryId: string;
+    esClient: ElasticsearchClient;
+  }): Promise<{ createdAt?: string; createdBy?: SmlWriter }> {
+    const response = await esClient.get<Pick<SmlDocument, '@timestamp' | 'governance'>>(
+      {
+        index: smlIndexName,
+        id: entryId,
+        _source_includes: ['@timestamp', 'governance.provenance.created_by'],
+      },
+      { ignore: [404] }
+    );
+    if (!response.found || !response._source) {
+      return {};
+    }
+    return {
+      createdAt: response._source['@timestamp'],
+      createdBy: response._source.governance?.provenance?.created_by,
+    };
+  }
+
   private buildIndexOp({
     entryId,
     entry,
@@ -318,6 +353,7 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod,
     resolvedPermissions,
     createdAt,
+    createdBy,
   }: {
     entryId: string;
     entry: SmlEntry;
@@ -326,6 +362,7 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod: SmlIngestionMethod;
     resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
+    createdBy?: SmlWriter;
   }) {
     const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
 
@@ -346,16 +383,24 @@ class SmlIndexerImpl implements SmlIndexer {
       .map((space) => ({ space, name: actions, count: actions.length }));
 
     const now = new Date().toISOString();
+    const writer: SmlWriter = {
+      uri: entry.user_id !== undefined ? `user://${entry.user_id}` : 'crawler://sml',
+      metadata: { ingestion_method: ingestionMethod },
+    };
+
     const document: SmlDocument = {
+      '@timestamp': createdAt || now,
       id: entryId,
       type: entry.type,
       title: entry.title,
-      origin: { uri: `${entry.type}://${originId}` },
       content: entry.content,
-      created_at: createdAt || now,
       updated_at: now,
+      references: [
+        { uri: smlOriginUri(entry.type, originId), relation: 'derived_from' },
+        ...(entry.references ?? []),
+      ],
+      governance: { provenance: { created_by: createdBy ?? writer, updated_by: writer } },
       permissions: { kibana: { privileges } },
-      ingestion_method: ingestionMethod,
     };
     if (entry.description !== undefined) {
       document.description = entry.description;
@@ -363,14 +408,8 @@ class SmlIndexerImpl implements SmlIndexer {
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
     }
-    if (entry.extended_attrs !== undefined) {
-      document.extended_attrs = entry.extended_attrs;
-    }
-    if (entry.user_id !== undefined) {
-      document.user_id = entry.user_id;
-    }
-    if (entry.references !== undefined) {
-      document.references = entry.references;
+    if (entry.attributes !== undefined) {
+      document.attributes = entry.attributes;
     }
     return {
       index: {
@@ -389,16 +428,14 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
-    const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
-
     this.logger.debug(
       `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
     );
     try {
-      const response = await smlClient.bulk({
+      const response = await esClient.bulk({
+        index: smlIndexName,
         refresh: 'wait_for',
-        operations: [indexOp],
+        operations: [{ index: { _id: indexOp.index._id } }, indexOp.index.document],
       });
 
       if (response.errors) {
@@ -440,8 +477,8 @@ class SmlIndexerImpl implements SmlIndexer {
         query: {
           bool: {
             filter: [
-              { term: { 'origin.uri': originUri } },
-              { term: { ingestion_method: 'manual' } },
+              { term: { id: smlEntryIdFromOriginUri(originUri) } },
+              { term: { [INGESTION_METHOD_FIELD]: 'manual' } },
             ],
           },
         },
@@ -483,9 +520,11 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
   }): Promise<void> {
-    const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
+    const filter: Array<Record<string, unknown>> = [
+      { term: { id: smlEntryIdFromOriginUri(originUri) } },
+    ];
     if (ingestionMethod) {
-      filter.push({ term: { ingestion_method: ingestionMethod } });
+      filter.push({ term: { [INGESTION_METHOD_FIELD]: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
       // Space scoping is a direct term match on the nested `.space` field
