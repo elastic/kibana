@@ -24,6 +24,14 @@ import { TimelineConnector } from './timeline_connector';
 jest.mock('../../../hooks/use_conversation', () => ({
   useConversation: jest.fn(),
   useAgentId: () => 'agent-1',
+  useConversationReadOnly: () => ({ isReadOnly: false, isLoading: false }),
+}));
+jest.mock('../../../hooks/use_conversation_stream', () => ({
+  useConversationStream: () => ({
+    resumeRound: jest.fn(),
+    isResuming: false,
+    isStreaming: false,
+  }),
 }));
 jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
   useAgentBuilderAgentById: () => ({ agent: null }),

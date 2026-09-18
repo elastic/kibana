@@ -12,6 +12,7 @@ import type {
   BackgroundAgentCompleteStep,
   TodosStep,
   ExecutionTerminatedEvent,
+  PromptResponseEvent,
 } from '@kbn/agent-builder-common';
 import {
   isMessageChunkEvent,
@@ -34,10 +35,12 @@ import {
   isExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import {
+  createAskUserQuestionStep,
   createReasoningStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 
 export interface ActiveExecutionDraft {
   status: 'running' | 'awaiting_prompt' | 'completed';
@@ -54,6 +57,7 @@ export interface ActiveExecutionDraft {
   startedAt?: string;
   /** Terminal event stored when the draft is sealed (status === 'completed'). */
   terminalEvent?: ExecutionTerminatedEvent;
+  promptResponse?: PromptResponseEvent;
 }
 
 const emptyActiveExecution = (): ActiveExecutionDraft => ({
@@ -62,12 +66,22 @@ const emptyActiveExecution = (): ActiveExecutionDraft => ({
   message: '',
 });
 
+export const withPromptResponse = (
+  state: ActiveExecutionDraft | null,
+  promptResponse: PromptResponseEvent
+): ActiveExecutionDraft => ({ ...(state ?? emptyActiveExecution()), promptResponse });
+
 export const activeExecutionReducer = (
   state: ActiveExecutionDraft | null,
   event: ChatEvent
 ): ActiveExecutionDraft | null => {
-  // Reset when a new run starts while a sealed draft is still present.
-  const draft = state === null || state.status === 'completed' ? emptyActiveExecution() : state;
+  const draft =
+    state === null || state.status === 'completed'
+      ? {
+          ...emptyActiveExecution(),
+          ...(state?.promptResponse ? { promptResponse: state.promptResponse } : {}),
+        }
+      : state;
 
   if (isReasoningEvent(event)) {
     if (event.data.transient) {
@@ -145,10 +159,17 @@ export const activeExecutionReducer = (
   }
 
   if (isPromptRequestEvent(event)) {
+    const { prompt } = event.data;
     return {
       ...draft,
       status: 'awaiting_prompt',
-      pendingPrompts: [...(draft.pendingPrompts ?? []), event.data.prompt],
+      pendingPrompts: [...(draft.pendingPrompts ?? []), prompt],
+      steps: isAskUserQuestionPrompt(prompt)
+        ? [
+            ...draft.steps,
+            createAskUserQuestionStep({ prompt_id: prompt.id, questions: prompt.questions }),
+          ]
+        : draft.steps,
     };
   }
 
@@ -210,10 +231,13 @@ export const activeExecutionReducer = (
   }
 
   if (isExecutionTerminatedEvent(event)) {
+    const pendingPrompts =
+      event.data.outcome.type === 'prompt_requested' ? event.data.outcome.prompts : undefined;
     return {
       ...draft,
       status: 'completed',
       terminalEvent: event,
+      pendingPrompts,
       ...(draft.executionId ? {} : event.execution_id ? { executionId: event.execution_id } : {}),
       ...(draft.triggerEventId
         ? {}

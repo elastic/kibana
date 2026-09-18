@@ -33,7 +33,8 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
-const vars = { prompts: {}, conversationId, agentId: 'agent-1' };
+const promptRequestedEventId = 'round-1::execution::execution_terminated';
+const vars = { prompts: {}, conversationId, agentId: 'agent-1', promptRequestedEventId };
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
 const setup = () => {
@@ -79,15 +80,37 @@ describe('useResumeRoundMutation', () => {
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
   });
 
-  it('ends a stream that errors like a completed one: refetch, then release', async () => {
-    const { bindings, source, result } = setup();
+  it('ends a stream that errors like a completed one: refetch, release, and roll back the unpersisted optimistic answer', async () => {
+    const { bindings, source, result, conversationStreamService } = setup();
+    const clearPromptResponse = jest.spyOn(conversationStreamService, 'clearPromptResponse');
     mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });
 
     act(() => result.current.mutate(vars));
     await waitFor(() => expect(mockResume).toHaveBeenCalled());
     act(() => source.error(new Error('boom')));
 
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockGet).toHaveBeenCalled());
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    await waitFor(() =>
+      expect(clearPromptResponse).toHaveBeenCalledWith(conversationId, promptRequestedEventId)
+    );
+  });
+
+  it('keeps the optimistic answer when the failed resume was actually persisted', async () => {
+    const { source, result, conversationStreamService } = setup();
+    const clearPromptResponse = jest.spyOn(conversationStreamService, 'clearPromptResponse');
+    const persistedResponse = {
+      id: 'round-1::prompt_response::1',
+      type: 'prompt_response',
+      data: { prompt_requested_event_id: promptRequestedEventId, responses: {} },
+    };
+    mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [persistedResponse] });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    act(() => source.error(new Error('boom')));
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalled());
+    expect(clearPromptResponse).not.toHaveBeenCalled();
   });
 });

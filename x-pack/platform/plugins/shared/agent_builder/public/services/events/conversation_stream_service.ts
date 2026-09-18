@@ -7,8 +7,9 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, defer, finalize } from 'rxjs';
+import type { PromptResponseEvent } from '@kbn/agent-builder-common';
 import type { ActiveExecutionDraft } from './active_execution_reducer';
-import { activeExecutionReducer } from './active_execution_reducer';
+import { activeExecutionReducer, withPromptResponse } from './active_execution_reducer';
 import type { EventsService } from './events_service';
 
 export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
@@ -82,6 +83,25 @@ export class ConversationStreamService {
 
   getSnapshot(conversationId: string): ActiveExecutionDraft | null {
     return this.streams.get(conversationId)?.state$.getValue() ?? null;
+  }
+
+  recordPromptResponse(conversationId: string, promptResponse: PromptResponseEvent) {
+    const { state$ } = this.ensure(conversationId);
+    state$.next(withPromptResponse(state$.getValue(), promptResponse));
+  }
+
+  clearPromptResponse(conversationId: string, promptRequestedEventId: string) {
+    const stream = this.streams.get(conversationId);
+    const current = stream?.state$.getValue();
+    if (!stream || !current?.promptResponse) {
+      return;
+    }
+    if (current.promptResponse.data.prompt_requested_event_id !== promptRequestedEventId) {
+      return;
+    }
+    const { promptResponse, ...rest } = current;
+    stream.state$.next(rest);
+    this.maybeTeardown(conversationId);
   }
 
   /** Drops a completed draft once its saved replacement is in the cache. */

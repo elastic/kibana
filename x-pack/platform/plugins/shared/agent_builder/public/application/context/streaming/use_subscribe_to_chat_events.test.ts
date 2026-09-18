@@ -16,8 +16,7 @@ const buildActionsMock = (): jest.Mocked<ConversationActions> =>
     invalidateConversation: jest.fn(),
     onExecutionStarted: jest.fn(),
     onExecutionTerminated: jest.fn(),
-    clearPendingPrompts: jest.fn(),
-    setAskUserQuestionAnswers: jest.fn(),
+
     deleteConversation: jest.fn(),
     renameConversation: jest.fn(),
   } as unknown as jest.Mocked<ConversationActions>);

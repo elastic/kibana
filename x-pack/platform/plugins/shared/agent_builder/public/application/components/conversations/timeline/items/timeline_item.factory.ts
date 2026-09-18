@@ -6,30 +6,23 @@
  */
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { AgentTurnItem, TimelineItem } from '../to_timeline_items';
 import { createUserMessageEvent } from './user_message_event.factory';
-import { createPromptResponseEvent } from './prompt_response_event.factory';
-import { createExecutionTerminatedEvent } from './execution_terminated_event.factory';
+import {
+  createExecutionTerminatedEvent,
+  createPromptRequestedTerminatedEvent,
+} from './execution_terminated_event.factory';
 import { createExecutionFailedEvent } from './execution_failed_event.factory';
 import { createExecutionAbortedEvent } from './execution_aborted_event.factory';
 
 type UserMessageItem = Extract<TimelineItem, { kind: 'userMessage' }>;
-type PromptResponseItem = Extract<TimelineItem, { kind: 'promptResponse' }>;
 
 export const createUserMessageItem = (overrides?: Partial<UserMessageItem>): UserMessageItem => ({
   kind: 'userMessage',
   key: 'event-1',
   event: createUserMessageEvent(),
-  ...overrides,
-});
-
-export const createPromptResponseItem = (
-  overrides?: Partial<PromptResponseItem>
-): PromptResponseItem => ({
-  kind: 'promptResponse',
-  key: 'event-3',
-  event: createPromptResponseEvent(),
   ...overrides,
 });
 
@@ -78,11 +71,17 @@ export const createAwaitingPromptTurnItem = (
   status: 'awaiting_prompt',
   startedAt: '2026-09-03T11:17:39.000Z',
   steps: [
-    {
-      type: ConversationRoundStepType.reasoning,
-      reasoning: 'Need user confirmation before proceeding.',
-    },
+    createToolCallStep({
+      tool_call_id: 'tc-awaiting-1',
+      tool_id: 'delete_indices',
+      params: {},
+      results: [],
+    }),
   ],
+  terminal: createPromptRequestedTerminatedEvent({
+    id: 'term-awaiting-1',
+    execution_id: 'execution-awaiting-1',
+  }),
   pendingPrompts: [
     {
       type: AgentPromptType.confirmation,

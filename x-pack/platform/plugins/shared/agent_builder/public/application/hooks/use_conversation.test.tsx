@@ -20,6 +20,7 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { ConversationStreamService } from '../../services/events/conversation_stream_service';
 import { queryKeys } from '../query_keys';
+import { createPromptRequestedTerminatedEvent } from '../components/conversations/timeline/items/execution_terminated_event.factory';
 import {
   useConversation,
   useConversationReadOnly,
@@ -322,13 +323,16 @@ describe('useConversation polling', () => {
     queryClient.clear();
   });
 
-  it('does not poll while the last round is awaiting a prompt', async () => {
+  it('does not poll while the latest event terminal is an unanswered prompt', async () => {
     const { queryClient, Wrapper } = createWrapper();
     queryClient.setQueryData(queryKeys.conversations.byId(conversationId), {
       id: conversationId,
       access_control: publicAcl,
       rounds: [{ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt }],
-    } as Conversation);
+      events: [
+        createPromptRequestedTerminatedEvent({ id: 'term-1', execution_id: 'round-1::execution' }),
+      ],
+    } as unknown as Conversation);
 
     renderHook(() => useConversation(), { wrapper: Wrapper });
 

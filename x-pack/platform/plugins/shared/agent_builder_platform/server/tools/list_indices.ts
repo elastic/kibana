@@ -43,6 +43,12 @@ ES|QL ("FROM <dataset_name>"); they do not support _search.`,
       openWorldHint: false,
     },
     schema: listIndicesSchema,
+    confirmation: {
+      getConfirmation: () => ({
+        title: `Allow \`${platformCoreTools.listIndices}\` to run?`,
+        message: 'Lists all indices, aliases and datastreams from your Elasticsearch cluster.',
+      }),
+    },
     handler: async ({ pattern }, { esClient, experimentalFeatures, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
       const includeDatasets = experimentalFeatures.datasets;

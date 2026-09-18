@@ -7,16 +7,8 @@
 
 import { QueryClient } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import {
-  isAskUserQuestionStep,
-  createAskUserQuestionStep,
-} from '@kbn/agent-builder-common/chat/conversation';
-import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import type { AskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
-import { createNewRound } from '../../utils/new_conversation';
 import { createConversationActions } from './use_conversation_actions';
 
 const conversationId = 'conv-1';
@@ -39,27 +31,6 @@ const cachedConversation = {
   agent_id: 'agent-1',
   rounds: [],
 } as unknown as Conversation;
-const conversationWithRound = (round = createNewRound({ userMessage: 'hello' })) =>
-  ({ ...cachedConversation, rounds: [round] } as Conversation);
-
-const promptId = 'prompt-1';
-const questions = [
-  { question: 'Choose one:', options: [{ label: 'A' }, { label: 'B' }], multi_select: false },
-];
-const answers = [{ choice: [0] }];
-const askUserQuestionResponse = { answers };
-
-const pendingPrompt: AskUserQuestionPrompt = {
-  type: AgentPromptType.ask_user_question,
-  id: promptId,
-  questions,
-};
-
-const awaitingPromptRound = () => ({
-  ...createNewRound({ userMessage: 'hello' }),
-  status: ConversationRoundStatus.awaitingPrompt,
-  pending_prompts: [pendingPrompt],
-});
 
 describe('createConversationActions execution lifecycle', () => {
   it('onExecutionStarted fetches an uncached conversation and refreshes the list', () => {
@@ -118,54 +89,5 @@ describe('createConversationActions execution lifecycle', () => {
 
     await expect(actions.refetchConversation()).rejects.toThrow('boom');
     expect(queryClient.getQueryData<Conversation>(queryKey)?.title).toBe('kept');
-  });
-});
-
-describe('createConversationActions.setAskUserQuestionAnswers', () => {
-  it('back-fills answers onto an existing AskUserQuestionStep (update-existing)', () => {
-    const { queryClient, actions } = buildActions();
-    queryClient.setQueryData<Conversation>(
-      queryKey,
-      conversationWithRound(
-        createNewRound({
-          userMessage: 'hello',
-          steps: [createAskUserQuestionStep({ prompt_id: promptId, questions })],
-        })
-      )
-    );
-
-    actions.setAskUserQuestionAnswers({ [promptId]: askUserQuestionResponse });
-
-    const result = queryClient.getQueryData<Conversation>(queryKey);
-    const step = result?.rounds.at(-1)?.steps.find(isAskUserQuestionStep);
-    expect(step?.answers).toEqual(answers);
-    expect(step?.prompt_id).toBe(promptId);
-    expect(result?.rounds.at(-1)?.steps).toHaveLength(1);
-  });
-
-  it('reconstructs an AskUserQuestionStep from pending_prompts when no step exists (reconstruct-from-pending)', () => {
-    const { queryClient, actions } = buildActions();
-    queryClient.setQueryData<Conversation>(queryKey, conversationWithRound(awaitingPromptRound()));
-
-    actions.setAskUserQuestionAnswers({ [promptId]: askUserQuestionResponse });
-
-    const result = queryClient.getQueryData<Conversation>(queryKey);
-    const step = result?.rounds.at(-1)?.steps.find(isAskUserQuestionStep);
-    expect(step).toBeDefined();
-    expect(step?.prompt_id).toBe(promptId);
-    expect(step?.answers).toEqual(answers);
-  });
-
-  it('silently drops answers when pending_prompts are cleared before setAskUserQuestionAnswers (ordering invariant)', () => {
-    const { queryClient, actions } = buildActions();
-    queryClient.setQueryData<Conversation>(queryKey, conversationWithRound(awaitingPromptRound()));
-
-    // Wrong order: clear before setting answers — the reconstruct branch cannot find the prompt
-    actions.clearPendingPrompts();
-    actions.setAskUserQuestionAnswers({ [promptId]: askUserQuestionResponse });
-
-    const result = queryClient.getQueryData<Conversation>(queryKey);
-    const step = result?.rounds.at(-1)?.steps.find(isAskUserQuestionStep);
-    expect(step).toBeUndefined();
   });
 });

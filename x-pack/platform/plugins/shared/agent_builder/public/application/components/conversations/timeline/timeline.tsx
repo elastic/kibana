@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
-import { PromptResponseEvent } from './items/prompt_response_event';
+import type { PromptResumeProps } from './agent_turn';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './to_timeline_items';
 
-interface TimelineProps {
+interface TimelineProps extends PromptResumeProps {
   items: TimelineItem[];
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
@@ -24,7 +24,14 @@ interface TimelineProps {
 const itemDate = (item: TimelineItem): string =>
   item.kind === 'agentTurn' ? item.startedAt : item.event.created_at;
 
-export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAttachments }) => {
+export const Timeline: React.FC<TimelineProps> = ({
+  items,
+  agent,
+  conversationAttachments,
+  onResumePrompt,
+  isResuming,
+  isPromptDisabled,
+}) => {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -43,14 +50,14 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
                 />
               );
               break;
-            case 'promptResponse':
-              content = <PromptResponseEvent event={item.event} />;
-              break;
             case 'agentTurn':
               content = (
                 <AgentTurn
                   item={item}
                   agent={agent}
+                  onResumePrompt={onResumePrompt}
+                  isResuming={isResuming}
+                  isPromptDisabled={isPromptDisabled}
                   conversationAttachments={conversationAttachments}
                 />
               );

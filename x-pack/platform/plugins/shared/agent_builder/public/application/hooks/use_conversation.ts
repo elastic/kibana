@@ -7,20 +7,21 @@
 
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
-import {
-  ConversationRoundStatus,
-  isSharedConversation,
-  type Conversation,
-} from '@kbn/agent-builder-common';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { isSharedConversation, type Conversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { useConversationStreamService } from '../context/streaming/streaming_context';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+import { activeExecutionToItem } from '../components/conversations/timeline/to_timeline_items';
+import { isEventsAwaitingPrompt } from '../../services/events/is_events_awaiting_prompt';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -39,9 +40,7 @@ export const useConversation = () => {
   // `execution_started` fetch puts it in the cache, after which it stays persisted.
   const isPersisted = Boolean(cached) || !isThisConversationStreaming;
 
-  // @todo: HITL guard (#291069), unchanged.
-  const isAwaitingPrompt =
-    cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
+  const isAwaitingPrompt = isEventsAwaitingPrompt(cached?.events ?? []);
 
   const {
     data: conversation,
@@ -179,7 +178,18 @@ export const useIsUnpersistedConversation = (conversation?: Conversation) => {
 };
 
 export const useIsAwaitingPrompt = () => {
-  const conversationRounds = useConversationRounds();
-  const lastRound = conversationRounds.at(-1);
-  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+  const conversationId = useConversationId();
+  const { conversation } = useConversation();
+  const conversationStreamService = useConversationStreamService();
+
+  const activeStream$ = useMemo(
+    () => (conversationId ? conversationStreamService.getActiveStream$(conversationId) : of(null)),
+    [conversationStreamService, conversationId]
+  );
+  const activeExecution = useObservable(activeStream$, null);
+
+  if (activeExecution && activeExecutionToItem(activeExecution).status === 'awaiting_prompt') {
+    return true;
+  }
+  return isEventsAwaitingPrompt(conversation?.events ?? [], activeExecution?.promptResponse);
 };

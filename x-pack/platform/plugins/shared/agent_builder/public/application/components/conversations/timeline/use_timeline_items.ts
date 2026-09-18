@@ -54,10 +54,11 @@ export const useTimelineItems = (): TimelineItem[] => {
   );
 
   const persistedEvents = conversation?.events;
+  const localPromptResponse = activeExecution?.promptResponse;
   const triggerEventId = activeExecution?.triggerEventId;
 
   const savedItems = useMemo(() => {
-    const items = buildSavedItems(persistedEvents ?? []);
+    const items = buildSavedItems(persistedEvents ?? [], localPromptResponse);
     if (!pendingAttachments || !triggerEventId) {
       return items;
     }
@@ -80,7 +81,7 @@ export const useTimelineItems = (): TimelineItem[] => {
           }
         : item
     );
-  }, [persistedEvents, pendingAttachments, triggerEventId]);
+  }, [persistedEvents, localPromptResponse, pendingAttachments, triggerEventId]);
 
   const liveItems = useMemo(
     () => buildLiveItems({ pendingUserMessage, activeExecution }),
