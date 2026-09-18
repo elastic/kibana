@@ -45,6 +45,10 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   const [disableEditbutton, setDisableEditButton] = useState(false);
 
   const filters = useMemo(() => api.filters$?.value, [api]);
+  const esqlStatements = useMemo(
+    () => (api.esql$?.value ?? []).map((query) => query.esql),
+    [api]
+  );
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
   const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
 
@@ -147,6 +151,28 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
           >
             <EuiFlexGroup wrap={true} gutterSize="xs">
               <FilterItems filters={filters} indexPatterns={dataViews ?? []} readOnly={true} />
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
+        {esqlStatements.length > 0 && (
+          <EuiFormRow
+            label={dashboardFilterNotificationActionStrings.getEsqlTitle()}
+            data-test-subj={'filtersNotificationModal__esql'}
+            display="rowCompressed"
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {esqlStatements.map((statement, i) => (
+                <EuiFlexItem key={i}>
+                  <EuiCodeBlock
+                    language="esql"
+                    paddingSize="s"
+                    aria-labelledby={`${dashboardFilterNotificationActionStrings.getEsqlTitle()}: ${statement}`}
+                    tabIndex={0}
+                  >
+                    {statement}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              ))}
             </EuiFlexGroup>
           </EuiFormRow>
         )}

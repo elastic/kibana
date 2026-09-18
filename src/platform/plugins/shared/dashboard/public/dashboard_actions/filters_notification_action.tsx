@@ -17,11 +17,16 @@ import type {
   HasParentApi,
   HasUniqueId,
   PublishesDataViews,
+  PublishesEsql,
   PublishesUnifiedSearch,
   CanLockHoverActions,
   CanAccessViewMode,
 } from '@kbn/presentation-publishing';
-import { apiPublishesPartialUnifiedSearch, apiHasUniqueId } from '@kbn/presentation-publishing';
+import {
+  apiPublishesEsql,
+  apiPublishesPartialUnifiedSearch,
+  apiHasUniqueId,
+} from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
@@ -32,12 +37,16 @@ import { ACTION_FILTERS_NOTIFICATION } from './constants';
 
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
+  Partial<PublishesEsql> &
   Partial<HasParentApi<Partial<PublishesDataViews>>> &
   Partial<CanLockHoverActions> &
   Partial<CanAccessViewMode>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
-  Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));
+  Boolean(
+    apiHasUniqueId(api) &&
+      (apiPublishesPartialUnifiedSearch(api) || apiPublishesEsql(api))
+  );
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   if (!isApiCompatible(api)) return false;
@@ -45,7 +54,8 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (
     (api.filters$?.value ?? []).length > 0 ||
     (isOfQueryType(query) && query.query !== '') ||
-    isOfAggregateQueryType(query)
+    isOfAggregateQueryType(query) ||
+    (api.esql$?.value ?? []).length > 0
   );
 };
 
@@ -84,13 +94,17 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesPartialUnifiedSearch(embeddable);
+    return apiPublishesPartialUnifiedSearch(embeddable) || apiPublishesEsql(embeddable);
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return;
+    // Subjects are optional — filter out undefined before spreading into merge(),
+    // which would throw if passed undefined.
     return merge(
-      ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
+      ...[embeddable.query$, embeddable.filters$, embeddable.esql$].filter((value) =>
+        Boolean(value)
+      )
     ).pipe(map(() => undefined));
   }
 
