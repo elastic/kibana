@@ -9,10 +9,8 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
-  NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
-  NIGHTSHIFT_MEMORY_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_MEMORY_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/deductive_investigator.md.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
@@ -55,14 +53,14 @@ export const getDeductiveInvestigationAgentType = ({
   memoryEnabled?: boolean;
   telemetryConnectorId?: string;
 }): AgentTypeDefinition => {
-  const hydrateIds = [
-    ...(sandboxEnabled && cortexEnabled ? [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] : []),
-    ...(sandboxEnabled && memoryEnabled ? [NIGHTSHIFT_MEMORY_HYDRATE_WORKFLOW_ID] : []),
-  ];
-  const optimizeIds = [
-    ...(cortexEnabled ? [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] : []),
-    ...(memoryEnabled ? [NIGHTSHIFT_MEMORY_OPTIMIZE_WORKFLOW_ID] : []),
-  ];
+  // One beforeAgent and one afterExecution workflow: Agent Builder runs those
+  // lists in series. Obtain runs first in each; cortex + memory then run in
+  // parallel against the same sandbox_id the bash tools derive.
+  const hydrateIds =
+    sandboxEnabled && (cortexEnabled || memoryEnabled)
+      ? [NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID]
+      : [];
+  const optimizeIds = cortexEnabled || memoryEnabled ? [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] : [];
 
   return {
     id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,

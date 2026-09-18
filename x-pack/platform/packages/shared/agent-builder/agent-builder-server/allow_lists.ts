@@ -118,10 +118,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
-  'nightshift_sandbox_bash',
-  'nightshift_sandbox_view_file',
-  'nightshift_sandbox_str_replace',
-  'nightshift_sandbox_write_file',
+  'bash',
+  'view_file',
+  'str_replace',
+  'write_file',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,

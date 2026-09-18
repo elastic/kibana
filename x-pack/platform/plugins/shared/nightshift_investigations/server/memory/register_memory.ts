@@ -13,7 +13,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/sign
 import { i18n } from '@kbn/i18n';
 import { MEMORY_AI_INDEX_DEST, MEMORY_AI_INDEX_ID } from '../../common/memory';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
-import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { materializeMemory, readRecalledIds } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
@@ -57,16 +57,14 @@ export const registerMemoryAiIndex = (
 };
 
 export const hydrateMemoryWorkspace = async ({
-  apiClient,
-  conversationId,
+  session,
   esClient,
   spaceId,
   query,
   signal,
   logger,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   query?: string;
@@ -74,25 +72,23 @@ export const hydrateMemoryWorkspace = async ({
   logger: Logger;
 }): Promise<void> => {
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
-  await materializeMemory({ apiClient, conversationId, store, logger, query });
+  await materializeMemory({ session, store, logger, query });
 };
 
 const loadRecalledIds = async ({
-  apiClient,
-  conversationId,
+  session,
   logger,
 }: {
-  apiClient?: SandboxApiClient;
-  conversationId?: string;
+  session?: SandboxSession;
   logger: Logger;
 }): Promise<string[]> => {
-  if (!apiClient || !conversationId) {
+  if (!session) {
     logger.debug('Memory optimizer has no sandbox conversation — recalled set is empty');
     return [];
   }
 
   try {
-    return await readRecalledIds({ apiClient, conversationId });
+    return await readRecalledIds({ session });
   } catch (err) {
     logger.debug(`Memory optimizer could not read .recalled.json: ${(err as Error).message}`);
     return [];
@@ -104,8 +100,7 @@ export const runMemoryOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
-  conversationId,
-  apiClient,
+  session,
   esClient,
   spaceId,
   signal,
@@ -117,8 +112,7 @@ export const runMemoryOptimize = async ({
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
-  conversationId?: string;
-  apiClient?: SandboxApiClient;
+  session?: SandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
@@ -150,7 +144,7 @@ export const runMemoryOptimize = async ({
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   const inferenceClient = inference.getClient({ request });
-  const recalledIds = await loadRecalledIds({ apiClient, conversationId, logger });
+  const recalledIds = await loadRecalledIds({ session, logger });
   await optimizeMemory({
     store,
     recalledIds,

@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import type { MemoryPageStore } from './page_store';
 import { toMemoryDisplayTelemetry } from './page_store';
 import { rankForMode, type RankedArm, type SampleBeta } from './ranking';
@@ -34,13 +35,11 @@ export const parseRecalledSidecar = (raw: string): string[] => {
 };
 
 export const readRecalledIds = async ({
-  apiClient,
-  conversationId,
+  session,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
 }): Promise<string[]> => {
-  const [result] = await apiClient.readFiles(conversationId, [
+  const [result] = await session.readFiles([
     { path: MEMORY_RECALLED_PATH, maxReadBytes: MEMORY_RECALLED_MAX_BYTES },
   ]);
   if (!result?.success) {
@@ -54,7 +53,7 @@ const README_CONTENT = `# Semantic Memories
 Past investigation observations and learnings. Read relevant files at the start of
 every investigation to find prior context.
 
-Start here, then open \`INDEX.md\` and read pages with \`nightshift_sandbox_view_file\`.
+Start here, then open \`INDEX.md\` and read pages with \`${SANDBOX_VIEW_FILE_TOOL_ID}\`.
 Memories are historical observations — independently verify all claims against current
 data before relying on them. Do not edit these pages yourself — a parallel optimizer
 evaluates useful pages after the run.
@@ -66,7 +65,7 @@ const renderIndex = (pages: MemoryPage[], nowSec: number): string => {
   const lines = [
     '# Memory index',
     '',
-    'Open a page with `nightshift_sandbox_view_file` using the path in parentheses.',
+    `Open a page with \`${SANDBOX_VIEW_FILE_TOOL_ID}\` using the path in parentheses.`,
     'This is the ranked recall set for this round, not the full wiki.',
     '',
   ];
@@ -112,8 +111,7 @@ const renderPage = (page: MemoryPage, nowSec: number): string => {
 };
 
 export const materializeMemory = async ({
-  apiClient,
-  conversationId,
+  session,
   store,
   logger,
   query,
@@ -121,8 +119,7 @@ export const materializeMemory = async ({
   now = () => Date.now() / 1000,
   keepCount = MEMORY_KEEP_COUNT,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
   store: MemoryPageStore;
   logger: Logger;
   query?: string;
@@ -159,17 +156,16 @@ export const materializeMemory = async ({
     .filter((page): page is MemoryPage => page !== undefined);
   const recalledIds = pages.map((page) => page.id);
 
-  await apiClient.mkdirs(conversationId, [MEMORY_WORKSPACE_ROOT]);
+  await session.mkdirs([MEMORY_WORKSPACE_ROOT]);
 
-  await apiClient.writeFiles(
-    conversationId,
+  await session.writeFiles(
     pages.map((page) => ({
       path: pagePath(page),
       content: Buffer.from(renderPage(page, nowSec), 'utf8'),
     }))
   );
 
-  await apiClient.writeFiles(conversationId, [
+  await session.writeFiles([
     { path: `${MEMORY_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
     {
       path: `${MEMORY_WORKSPACE_ROOT}/INDEX.md`,
@@ -181,8 +177,6 @@ export const materializeMemory = async ({
     },
   ]);
 
-  logger.info(
-    `Materialized ${pages.length} Semantic Memory page(s) into sandbox conversation ${conversationId}`
-  );
+  logger.info(`Materialized ${pages.length} Semantic Memory page(s) into the sandbox workspace`);
   return recalledIds;
 };

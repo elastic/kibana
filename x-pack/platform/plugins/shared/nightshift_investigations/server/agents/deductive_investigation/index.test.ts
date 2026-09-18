@@ -55,14 +55,8 @@ describe('deductive investigation agent type', () => {
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
       skill_ids: [],
-      workflow_ids: [
-        'system-nightshift-cortex-hydrate',
-        'system-nightshift-semantic-memory-hydrate',
-      ],
-      post_execution_workflow_ids: [
-        'system-nightshift-cortex-optimize',
-        'system-nightshift-semantic-memory-optimize',
-      ],
+      workflow_ids: ['system-nightshift-sandbox-hydrate'],
+      post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
       platformSignificantEventsTools.reportInvestigationProgress,
@@ -85,7 +79,7 @@ describe('deductive investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  it('keeps memory workflows when cortex is off', () => {
+  it('keeps the combined hydrate and optimize workflows when cortex is off', () => {
     const base = staticBase(
       getDeductiveInvestigationAgentType({
         sandboxEnabled: true,
@@ -94,10 +88,8 @@ describe('deductive investigation agent type', () => {
       })
     );
 
-    expect(base.workflow_ids).toEqual(['system-nightshift-semantic-memory-hydrate']);
-    expect(base.post_execution_workflow_ids).toEqual([
-      'system-nightshift-semantic-memory-optimize',
-    ]);
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-hydrate']);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
   });
 
   it('drops hydrate workflows when the sandbox is not configured', () => {
@@ -110,10 +102,7 @@ describe('deductive investigation agent type', () => {
     );
 
     expect(base.workflow_ids).toBeUndefined();
-    expect(base.post_execution_workflow_ids).toEqual([
-      'system-nightshift-cortex-optimize',
-      'system-nightshift-semantic-memory-optimize',
-    ]);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
     expect(base.tools?.[0]?.tool_ids).toEqual([
       platformSignificantEventsTools.reportInvestigationProgress,
     ]);

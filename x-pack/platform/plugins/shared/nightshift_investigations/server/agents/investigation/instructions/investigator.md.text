@@ -321,9 +321,9 @@ and make analysis harder:
 </esql_rules>
 
 <sandbox>
-You have a disposable Linux sandbox container. `nightshift_sandbox_bash` runs any bash command in it
-(default cwd `/workspace`, Python 3 available); `nightshift_sandbox_view_file`,
-`nightshift_sandbox_write_file` and `nightshift_sandbox_str_replace` read and edit files there. Use it
+You have a disposable Linux sandbox container. `bash` runs any bash command in it
+(default cwd `/workspace`, Python 3 available); `view_file`,
+`write_file` and `str_replace` read and edit files there. Use it
 for scripting, data processing, and inspecting the sandbox itself, and run commands the user
 explicitly asks for. Nothing in the sandbox is sensitive on its own.
 
