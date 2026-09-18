@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { AppMenu, type ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
 
 export class AnnotationsApp {
   private readonly appMenu: AppMenu;
@@ -16,9 +15,9 @@ export class AnnotationsApp {
 
   async goto() {
     await this.page.gotoApp('slo', {});
-    await expect(this.page.getByText('Annotations')).toBeVisible();
-    await this.page.click('text=Annotations');
-    await expect(this.page.getByTestId('annotationsPage')).toBeVisible();
+    await this.appMenu.revealItem('sloHeaderManageLink');
+    await this.appMenu.clickOverflowItem('sloHeaderAnnotationsLink');
+    await this.page.getByTestId('annotationsPage').waitFor({ state: 'visible' });
   }
 
   async clickCreateAnnotation() {

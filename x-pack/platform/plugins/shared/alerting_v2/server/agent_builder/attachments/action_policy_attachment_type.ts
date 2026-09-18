@@ -14,24 +14,17 @@ import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   actionPolicyAttachmentDataSchema,
   type ActionPolicyAttachmentData,
-  type PolicyMatcher,
 } from '@kbn/alerting-v2-schemas';
 import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
+import { formatMatcher } from '../common/format_matcher';
 
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
 }
-
-const formatMatcher = (matcher: PolicyMatcher): string => {
-  const parts: string[] = [];
-  if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
-  if (matcher.expression?.trim()) parts.push(`expression: "${matcher.expression.trim()}"`);
-  return parts.join(' AND ') || '{}';
-};
 
 const formatActionPolicyDescription = (
   attachmentId: string,
