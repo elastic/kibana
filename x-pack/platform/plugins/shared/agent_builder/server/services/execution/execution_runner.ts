@@ -81,9 +81,6 @@ import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
 
-// Re-exported for the execution service, task handler and callback delivery.
-export { serializeExecutionError } from './utils';
-
 /**
  * Dependencies needed to build and run an agent event stream.
  * Shared between the Task Manager handler and the local execution path.

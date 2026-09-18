@@ -15,9 +15,9 @@ import { createAgentExecutionClient, type AgentExecutionClient } from '../persis
 import {
   handleAgentExecution,
   collectAndWriteEvents,
-  serializeExecutionError,
   type AgentExecutionDeps,
 } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';

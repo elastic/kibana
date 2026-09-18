@@ -19,14 +19,12 @@ import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
 import type { CallbackDeliveryService } from '../callback/callback_delivery_service';
 import { deliverCallbackEvents } from '../callback/deliver_callback_events';
-import {
-  collectAndWriteEvents,
-  handleAgentExecution,
-  serializeExecutionError,
-} from '../execution_runner';
+import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
 
 jest.mock('../execution_runner');
+jest.mock('../utils/serialize_execution_error');
 jest.mock('../persistence');
 jest.mock('../callback/deliver_callback_events');
 

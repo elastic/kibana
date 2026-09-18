@@ -24,7 +24,7 @@ import {
   type ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { serializeExecutionError } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
 /**
