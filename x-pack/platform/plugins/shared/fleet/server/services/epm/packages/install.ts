@@ -938,21 +938,6 @@ async function installPackageByUpload({
       }
     }
 
-    let authorizedSpaces: string[] = [];
-    if (
-      !isBundledPackage &&
-      request &&
-      !appContextService.getConfig()?.internal?.skipUploadPackageValidation
-    ) {
-      authorizedSpaces = await checkUploadPackageAssetPrivileges(
-        request,
-        archiveBuffer,
-        contentType,
-        spaceId,
-        savedObjectsClient
-      );
-    }
-
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
@@ -969,6 +954,22 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    let authorizedSpaces: string[] = [];
+    if (
+      !isBundledPackage &&
+      request &&
+      !appContextService.getConfig()?.internal?.skipUploadPackageValidation
+    ) {
+      authorizedSpaces = await checkUploadPackageAssetPrivileges(
+        request,
+        archiveBuffer,
+        contentType,
+        spaceId,
+        pkgName,
+        installedPkg
+      );
+    }
 
     const { paths, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,

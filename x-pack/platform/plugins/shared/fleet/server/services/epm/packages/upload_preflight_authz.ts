@@ -5,41 +5,38 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import { KibanaAssetType, KibanaSavedObjectType } from '../../../types';
+import { KibanaAssetType, KibanaSavedObjectType, type Installation } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { getPathParts } from '../archive';
 import { createArchiveIterator } from '../archive/archive_iterator';
-import { getInstallationObject } from './get';
 import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './install';
 
-const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
-  KibanaAssetType.securityRule,
-  KibanaAssetType.securityAIPrompt,
-]);
+// Single source of truth: asset type → required Kibana API privileges.
+// GATED_ASSET_TYPES is derived from the keys so the two stay in sync structurally.
+const GATED_TYPE_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string[]>> = {
+  [KibanaAssetType.securityRule]: ['rules-all'],
+  [KibanaAssetType.securityAIPrompt]: ['elasticAssistant'],
+};
 
-// Maps the saved-object type stored in installed_kibana refs back to the KibanaAssetType used
-// for privilege decisions. Used to detect gated types being removed by a replacement upload.
+const GATED_ASSET_TYPES = new Set(
+  Object.keys(GATED_TYPE_REQUIRED_PRIVILEGES) as KibanaAssetType[]
+);
+
+// Maps SO types stored in installed_kibana refs back to KibanaAssetType for privilege decisions.
 const SO_TYPE_TO_ASSET_TYPE = new Map<KibanaSavedObjectType, KibanaAssetType>([
   [KibanaSavedObjectType.securityRule, KibanaAssetType.securityRule],
   [KibanaSavedObjectType.securityAIPrompt, KibanaAssetType.securityAIPrompt],
 ]);
 
-const ASSET_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string[]>> = {
-  [KibanaAssetType.securityRule]: ['rules-all'],
-  [KibanaAssetType.securityAIPrompt]: ['elasticAssistant'],
-};
-
 export interface ArchiveSignals {
   gatedTypesFound: Set<KibanaAssetType>;
-  blockedTypes: KibanaAssetType[];
   hasMlSecurityRules: boolean;
-  pkgName: string | undefined;
 }
 
 export async function collectArchiveSignals(
@@ -48,27 +45,15 @@ export async function collectArchiveSignals(
 ): Promise<ArchiveSignals> {
   const iterator = createArchiveIterator(archiveBuffer, contentType);
   const gatedTypesFound = new Set<KibanaAssetType>();
-  const blockedTypes: KibanaAssetType[] = [];
   let hasMlSecurityRules = false;
-  let pkgName: string | undefined;
 
   await iterator.traverseEntries(
     async (entry) => {
       const parts = getPathParts(entry.path);
 
-      if (!pkgName && parts.pkgkey) {
-        const match = parts.pkgkey.match(/^(.+)-(\d+\.\d+\.\d+.*)$/);
-        if (match) pkgName = match[1];
-      }
-
       if (parts.service !== 'kibana') return;
       const assetType = parts.type as KibanaAssetType;
       if (!GATED_ASSET_TYPES.has(assetType)) return;
-
-      if (!ASSET_REQUIRED_PRIVILEGES[assetType]) {
-        blockedTypes.push(assetType);
-        return;
-      }
 
       gatedTypesFound.add(assetType);
 
@@ -89,7 +74,7 @@ export async function collectArchiveSignals(
     }
   );
 
-  return { gatedTypesFound, blockedTypes, hasMlSecurityRules, pkgName };
+  return { gatedTypesFound, hasMlSecurityRules };
 }
 
 export function buildRequiredActions(
@@ -99,7 +84,7 @@ export function buildRequiredActions(
   const privilegeNames = new Set<string>();
 
   for (const assetType of signals.gatedTypesFound) {
-    const privileges = ASSET_REQUIRED_PRIVILEGES[assetType];
+    const privileges = GATED_TYPE_REQUIRED_PRIVILEGES[assetType];
     if (privileges) {
       privileges.forEach((p) => privilegeNames.add(p));
     }
@@ -113,7 +98,7 @@ export function buildRequiredActions(
 }
 
 function detectGatedTypesInExistingInstall(
-  installation: Awaited<ReturnType<typeof getInstallationObject>>
+  installation: SavedObject<Installation> | undefined
 ): Set<KibanaAssetType> {
   const found = new Set<KibanaAssetType>();
   for (const ref of installation?.attributes?.installed_kibana ?? []) {
@@ -128,29 +113,10 @@ export async function checkUploadPackageAssetPrivileges(
   archiveBuffer: Buffer,
   contentType: string,
   spaceId: string,
-  savedObjectsClient: SavedObjectsClientContract
+  pkgName: string | undefined,
+  installation: SavedObject<Installation> | undefined
 ): Promise<string[]> {
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
-
-  if (signals.blockedTypes.length > 0) {
-    throw new FleetUnauthorizedError(
-      `Package contains asset types that cannot be authorized for upload: ${[
-        ...new Set(signals.blockedTypes),
-      ].join(', ')}`
-    );
-  }
-
-  // Load the existing installation before the early-return check. This is needed both
-  // to detect gated types being *removed* by the new archive (a Fleet-only caller must
-  // not strip security_rule/security_ai_prompt SOs via cleanUpUnusedKibanaAssetsStep)
-  // and to determine destination Spaces for the privilege check.
-  const installation = signals.pkgName
-    ? await getInstallationObject({
-        savedObjectsClient,
-        pkgName: signals.pkgName,
-        failOnUnexpectedError: true,
-      })
-    : undefined;
 
   // Union gated types from the new archive with gated types present in the existing
   // install so that removing privileged assets requires the same authz as adding them.
@@ -184,7 +150,7 @@ export async function checkUploadPackageAssetPrivileges(
   // Streaming packages write only to the request Space regardless of primary/additional logic.
   // Mirror that here so we only check privileges for the Spaces that will actually be written.
   let destinationSpaces: string[];
-  if (signals.pkgName && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(signals.pkgName)) {
+  if (pkgName && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName)) {
     destinationSpaces = [spaceId];
   } else if (isAdditionalSpaceInstall) {
     destinationSpaces = [spaceId];

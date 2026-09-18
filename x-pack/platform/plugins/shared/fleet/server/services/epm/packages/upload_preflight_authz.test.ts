@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { KibanaAssetType } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { createArchiveIterator } from '../archive/archive_iterator';
-import { getInstallationObject } from './get';
 
 import {
   checkUploadPackageAssetPrivileges,
@@ -30,10 +29,6 @@ jest.mock('../archive/archive_iterator', () => ({
   createArchiveIterator: jest.fn(),
 }));
 
-jest.mock('./get', () => ({
-  getInstallationObject: jest.fn(),
-}));
-
 jest.mock('./install', () => ({
   PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
 }));
@@ -42,7 +37,6 @@ const mockRequest = {} as KibanaRequest;
 const mockSpaceId = 'default';
 const mockArchiveBuffer = Buffer.from('fake-archive');
 const mockContentType = 'application/zip';
-const mockSavedObjectsClient = {} as SavedObjectsClientContract;
 
 function makeAssetBuffer(attributes: Record<string, unknown>): Buffer {
   return Buffer.from(JSON.stringify({ type: 'security-rule', attributes }));
@@ -96,7 +90,6 @@ describe('collectArchiveSignals', () => {
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
     expect(signals.gatedTypesFound.size).toBe(0);
-    expect(signals.blockedTypes).toHaveLength(0);
     expect(signals.hasMlSecurityRules).toBe(false);
   });
 
@@ -108,7 +101,6 @@ describe('collectArchiveSignals', () => {
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
     expect(signals.gatedTypesFound.has('security_rule' as any)).toBe(true);
-    expect(signals.blockedTypes).toHaveLength(0);
     expect(signals.hasMlSecurityRules).toBe(false);
   });
 
@@ -174,7 +166,6 @@ describe('collectArchiveSignals', () => {
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
     expect(signals.gatedTypesFound.size).toBe(0);
-    expect(signals.blockedTypes).toHaveLength(0);
   });
 });
 
@@ -184,9 +175,7 @@ describe('buildRequiredActions', () => {
   it('returns rules-all for security_rule type', () => {
     const signals = {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
-      blockedTypes: [],
       hasMlSecurityRules: false,
-      pkgName: undefined,
     };
 
     expect(buildRequiredActions(signals, security as any)).toContain('api:rules-all');
@@ -195,9 +184,7 @@ describe('buildRequiredActions', () => {
   it('adds ml:canCreateJob when hasMlSecurityRules is true', () => {
     const signals = {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
-      blockedTypes: [],
       hasMlSecurityRules: true,
-      pkgName: undefined,
     };
 
     const actions = buildRequiredActions(signals, security as any);
@@ -208,9 +195,7 @@ describe('buildRequiredActions', () => {
   it('does not add ml:canCreateJob for non-ML security_rule', () => {
     const signals = {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
-      blockedTypes: [],
       hasMlSecurityRules: false,
-      pkgName: undefined,
     };
 
     const actions = buildRequiredActions(signals, security as any);
@@ -221,9 +206,7 @@ describe('buildRequiredActions', () => {
   it('returns elasticAssistant for security_ai_prompt', () => {
     const signals = {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityAIPrompt]),
-      blockedTypes: [],
       hasMlSecurityRules: false,
-      pkgName: undefined,
     };
 
     expect(buildRequiredActions(signals, security as any)).toContain('api:elasticAssistant');
@@ -235,9 +218,7 @@ describe('buildRequiredActions', () => {
         KibanaAssetType.securityRule,
         KibanaAssetType.securityAIPrompt,
       ]),
-      blockedTypes: [],
       hasMlSecurityRules: true,
-      pkgName: undefined,
     };
 
     const actions = buildRequiredActions(signals, security as any);
@@ -250,7 +231,6 @@ describe('buildRequiredActions', () => {
 describe('checkUploadPackageAssetPrivileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (getInstallationObject as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('allows upload when archive contains no gated asset types', async () => {
@@ -266,11 +246,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        mockSavedObjectsClient
+        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
       )
     ).resolves.toEqual([]);
 
@@ -289,11 +265,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -322,11 +294,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -351,11 +319,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        mockSavedObjectsClient
+        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -370,11 +334,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        mockSavedObjectsClient
+        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -388,11 +348,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -416,11 +372,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -444,11 +396,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        mockSavedObjectsClient
+        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', undefined
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -460,23 +408,16 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
-        // Primary space matches the request space, so this is a primary-space upgrade.
         installed_kibana_space_id: mockSpaceId,
-        additional_spaces_installed_kibana: {
-          'space-a': [],
-          'space-b': [],
-        },
+        additional_spaces_installed_kibana: { 'space-a': [], 'space-b': [] },
       },
-    });
+    } as any;
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -493,25 +434,16 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: 'primary-space',
-        additional_spaces_installed_kibana: {
-          'space-x': [],
-          'space-y': [],
-        },
+        additional_spaces_installed_kibana: { 'space-x': [], 'space-y': [] },
       },
-    });
+    } as any;
 
-    // Request from 'space-x', which is an additional space (not the primary).
-    // installKibanaAssetsAndReferencesMultispace only writes to 'space-x' in this case,
-    // so the privilege check must not require privileges in unrelated spaces.
     await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      'space-x',
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, 'space-x', 'mypackage', installation
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -522,50 +454,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
   });
 
-  it('passes failOnUnexpectedError: true to getInstallationObject so SO errors abort preflight', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue(undefined);
-
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
-    );
-
-    expect(getInstallationObject).toHaveBeenCalledWith(
-      expect.objectContaining({ failOnUnexpectedError: true })
-    );
-  });
-
-  it('propagates SO error from getInstallationObject and aborts preflight (fail-closed)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
-    const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockRejectedValue(new Error('SO store unavailable'));
-
-    await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        mockSavedObjectsClient
-      )
-    ).rejects.toThrow('SO store unavailable');
-
-    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
-  });
-
   it('returns all destination spaces for a primary-space upgrade (used to cap propagation)', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
@@ -573,23 +461,16 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: mockSpaceId,
-        additional_spaces_installed_kibana: {
-          'space-a': [],
-          'space-b': [],
-        },
+        additional_spaces_installed_kibana: { 'space-a': [], 'space-b': [] },
       },
-    });
+    } as any;
 
-    // Request from primary space → fan-out: result includes request space + all additional spaces.
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
     );
 
     expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']));
@@ -603,51 +484,39 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: 'primary-space',
-        additional_spaces_installed_kibana: {
-          'space-x': [],
-          'space-y': [],
-        },
+        additional_spaces_installed_kibana: { 'space-x': [], 'space-y': [] },
       },
-    });
+    } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      'space-x',
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, 'space-x', 'mypackage', installation
     );
 
     expect(result).toEqual(['space-x']);
   });
 
   it('checks privileges when archive has no gated types but existing install has security_rule refs (gated-to-benign removal)', async () => {
-    // A Fleet-only caller uploads a benign replacement that omits security_rule assets.
-    // cleanUpUnusedKibanaAssetsStep would delete the existing security-rule SOs.
-    // Preflight must still require rules-all here.
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
     );
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: mockSpaceId,
         installed_kibana: [{ id: 'old-rule', type: 'security-rule', version: 1 }],
         additional_spaces_installed_kibana: {},
       },
-    });
+    } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
     );
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
@@ -666,21 +535,18 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(false, ['api:rules-all']);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: mockSpaceId,
         installed_kibana: [{ id: 'old-rule', type: 'security-rule', version: 1 }],
         additional_spaces_installed_kibana: {},
       },
-    });
+    } as any;
 
     await expect(
       checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        mockSavedObjectsClient
+        mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -692,20 +558,17 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: mockSpaceId,
         installed_kibana: [{ id: 'my-dashboard', type: 'dashboard', version: 1 }],
         additional_spaces_installed_kibana: {},
       },
-    });
+    } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
     );
 
     expect(result).toEqual([]);
@@ -713,8 +576,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks only the request space for a streaming package even when installed in additional spaces', async () => {
-    // security_detection_engine uses streaming install (installKibanaAssetsWithStreaming),
-    // which writes only to the request Space regardless of primary/additional.
+    // security_detection_engine uses streaming install, which writes only to the request Space.
     // Preflight must mirror that — do not require privileges in the other Spaces.
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'security_detection_engine-1.0.0/kibana/security_rule/my-rule.json' }])
@@ -722,22 +584,17 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (getInstallationObject as jest.Mock).mockResolvedValue({
+
+    const installation = {
       attributes: {
         installed_kibana_space_id: mockSpaceId,
-        additional_spaces_installed_kibana: {
-          'space-a': [],
-          'space-b': [],
-        },
+        additional_spaces_installed_kibana: { 'space-a': [], 'space-b': [] },
       },
-    });
+    } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      mockSavedObjectsClient
+      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId,
+      'security_detection_engine', installation
     );
 
     expect(result).toEqual([mockSpaceId]);

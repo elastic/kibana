@@ -55,9 +55,21 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      // Wait out the process-wide upload rate-limit (10 s) that may have been set by
-      // fleetAndAgents.setup() or by the preceding upload suite.
-      await new Promise((resolve) => setTimeout(resolve, 10000));
+      // Poll until the process-wide upload rate-limit (10 s) has expired.
+      // The probe uses a deliberately invalid zip so it fails before the
+      // setLastUploadInstallCache() call — each probe leaves the rate-limit
+      // slot unchanged. A 429 means the window is still open; any other status
+      // means it has cleared and we can proceed.
+      const probe = Buffer.from('not-a-zip');
+      for (let i = 0; i < 15; i++) {
+        const { status } = await supertest
+          .post('/api/fleet/epm/packages')
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(probe);
+        if (status !== 429) break;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     });
 
     afterEach(async () => {
