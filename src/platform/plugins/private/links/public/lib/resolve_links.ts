@@ -41,7 +41,7 @@ export async function resolveLinkInfo(
   link: Link
 ): Promise<{ title: string; label?: string; description?: string; error?: Error }> {
   if (link.type === EXTERNAL_LINK_TYPE) {
-    const info = { title: link.label ?? link.destination };
+    const info = { title: link.destination };
     const { valid, message } = validateUrl(link.destination);
     if (valid) {
       return info;
