@@ -13,6 +13,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllVariables } from './collect_all_variables';
 import { validateVariables } from './validate_variables';
 import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+import { createStepContextResolver } from '../context/step_context_resolver';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -47,9 +48,8 @@ steps:
 
     const variableItems = collectAllVariables(yaml, yamlDocument, lineCounter, workflowGraph);
     const results = validateVariables(
-      emptyRegistry,
+      createStepContextResolver(emptyRegistry, workflowDefinition, workflowGraph, yamlDocument),
       variableItems,
-      workflowGraph,
       workflowDefinition,
       yamlDocument,
       yaml

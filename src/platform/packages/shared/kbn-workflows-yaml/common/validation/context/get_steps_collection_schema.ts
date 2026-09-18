@@ -16,12 +16,8 @@ import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import type { WorkflowContextRegistry } from './registry';
 
-/**
- * `steps.<id>` entries depend only on the registry and the node, so share one per
- * (registry, node) pair across all step contexts instead of allocating a fresh one
- * per context (quadratic in step count).
- * Foreach entries close over the resolving step's context and are not shareable.
- */
+// Share entries across step contexts to avoid quadratic allocations.
+// Foreach entries depend on the resolving context and cannot be shared.
 const stepEntrySchemaCache = new WeakMap<
   WorkflowContextRegistry,
   WeakMap<GraphNodeUnion, z.ZodTypeAny>
@@ -94,7 +90,7 @@ function addNodesToStepsSchema(
 
 export interface StepsCollectionSchema {
   schema: z.ZodObject;
-  /** Entry count, so callers can test emptiness without forcing zod to materialise `.shape`. */
+  /** Tests emptiness without materializing Zod's lazy shape. */
   size: number;
 }
 

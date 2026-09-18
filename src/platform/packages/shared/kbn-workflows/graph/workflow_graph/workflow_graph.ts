@@ -34,7 +34,6 @@ export class WorkflowGraph {
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
   private innerStepIdsCache = new Map<string, Set<string>>();
-  private predecessorsCache = new Map<string, GraphNodeUnion[]>();
 
   constructor(graph: WorkflowGraphType) {
     this.graph = graph;
@@ -86,14 +85,17 @@ export class WorkflowGraph {
     return undefined;
   }
 
-  public getNodeStack(nodeId: string): string[] {
+  public getNodeStack(
+    nodeId: string,
+    precomputedPredecessors?: readonly GraphNodeUnion[]
+  ): string[] {
     const currentNode = this.getNode(nodeId);
 
     if (!currentNode) {
       throw new Error(`Node not found for node id: ${nodeId}`);
     }
 
-    const predecessors = this.getAllPredecessors(nodeId).toReversed();
+    const predecessors = (precomputedPredecessors ?? this.getAllPredecessors(nodeId)).toReversed();
 
     const stack: string[] = [];
 
@@ -199,13 +201,7 @@ export class WorkflowGraph {
     return undefined;
   }
 
-  /** All transitive predecessors of `nodeId`. Cached; treat the result as read-only. */
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
-    const cached = this.predecessorsCache.get(nodeId);
-    if (cached) {
-      return cached;
-    }
-
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
       if (visited.has(predNodeId)) {
@@ -220,9 +216,7 @@ export class WorkflowGraph {
 
     const directPredecessors = this.graph.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
-    const predecessors = Array.from(visited).map((id) => this.graph.node(id));
-    this.predecessorsCache.set(nodeId, predecessors);
-    return predecessors;
+    return Array.from(visited).map((id) => this.graph.node(id));
   }
 
   /** Inner stepIds for a compound step (excluding that step). Cached. */
