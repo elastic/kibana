@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useMutation, useQuery } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -14,7 +14,12 @@ import {
   buildInvestigationUrl,
 } from '@kbn/alertzero-common';
 import type { GetInvestigationResponse, ListInvestigationsResponse } from '@kbn/alertzero-common';
-import type { ListProposalsResponse } from '@kbn/agentic-investigations-plugin/common';
+import type {
+  ListProposalsResponse,
+  UpdateAssigneesRequest,
+  UpdateAssigneesResponse,
+} from '@kbn/agentic-investigations-plugin/common';
+import { AGENTIC_INVESTIGATIONS_API_VERSION } from '@kbn/agentic-investigations-plugin/common';
 import { queryKeys } from '../query_keys';
 
 const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
@@ -78,5 +83,27 @@ export const useInvestigationProposals = (investigationId: string | undefined) =
     },
     enabled: Boolean(investigationId),
     retry: retryOnTransientError,
+  });
+};
+
+/**
+ * Replaces the assignees on an investigation (overwrite semantics).
+ * An empty array removes all assignees.
+ *
+ * Routes through the agentic_investigations plugin at
+ * PATCH /internal/investigations/{id}/assignees.
+ */
+export const useUpdateAssignees = (investigationId: string) => {
+  const { services } = useKibana();
+
+  return useMutation({
+    mutationFn: async (body: UpdateAssigneesRequest): Promise<UpdateAssigneesResponse> =>
+      services.http!.patch<UpdateAssigneesResponse>(
+        `/internal/investigations/${encodeURIComponent(investigationId)}/assignees`,
+        {
+          body: JSON.stringify(body),
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        }
+      ),
   });
 };

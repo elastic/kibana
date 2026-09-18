@@ -25,6 +25,10 @@ import type { ResolveProposalUser } from './proposals/services/resolve_proposal_
 import { registerProposalAttachment } from './proposals/attachments';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
+import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { InvestigationsService } from './investigations/services/investigations_service';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -46,6 +50,8 @@ export class AgenticInvestigationsPlugin
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private escalationsService?: EscalationsService;
+  private investigationsService?: InvestigationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -91,12 +97,26 @@ export class AgenticInvestigationsPlugin
       }),
     });
 
+    const router = coreSetup.http.createRouter();
+
     registerRoutes({
-      router: coreSetup.http.createRouter(),
+      router,
       logger: this.logger,
       getProposalsService: () => this.requireProposalsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+    });
+
+    registerEscalationRoutes({
+      router,
+      logger: this.logger,
+      getEscalationsService: () => this.requireEscalationsService(),
+    });
+
+    registerInvestigationRoutes({
+      router,
+      logger: this.logger,
+      getInvestigationsService: () => this.requireInvestigationsService(),
     });
 
     return {};
@@ -126,6 +146,20 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
+    this.escalationsService = new EscalationsService({
+      logger: this.logger,
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
+      conversationTemplates: plugins.agentBuilder.conversationTemplates,
+    });
+
+    this.investigationsService = new InvestigationsService({
+      logger: this.logger,
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
+      userProfile: coreStart.userProfile,
+    });
+
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
@@ -139,6 +173,8 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getEscalationsService: () => this.requireEscalationsService(),
+      getInvestigationsService: () => this.requireInvestigationsService(),
     };
   }
 
@@ -158,6 +194,24 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.proposalsService;
+  }
+
+  private requireEscalationsService(): EscalationsService {
+    if (!this.escalationsService) {
+      throw new Error(
+        'Escalations service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.escalationsService;
+  }
+
+  private requireInvestigationsService(): InvestigationsService {
+    if (!this.investigationsService) {
+      throw new Error(
+        'Investigations service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

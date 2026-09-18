@@ -38,7 +38,17 @@ export interface ConversationCreatePublicRequest {
 }
 
 /**
- * A conversation client exposing get, bulk get, list, search, and create operations.
+ * Input for updating a conversation's title. Metadata writes must go through
+ * patchMetadata so the update is validated against the conversation's template.
+ */
+export interface ConversationUpdatePublicRequest {
+  id: string;
+  /** Capped at CONVERSATION_TITLE_MAX_LENGTH server-side. */
+  title: string;
+}
+
+/**
+ * A conversation client exposing get, bulk get, list, search, create, patchMetadata, and update operations
  */
 export interface ConversationPublicClient {
   /**
@@ -62,4 +72,17 @@ export interface ConversationPublicClient {
    * Create a new empty conversation (without triggering an execution).
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
+  /**
+   * Validate updates against the conversation's template and merge them into its metadata.
+   * Requires the caller to be the conversation owner. The conversation must have a template applied.
+   */
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, MetadataFieldValue>
+  ): Promise<{ conversation: ConversationWithPermissions; changedFields: string[] }>;
+  /**
+   * Update the conversation's title. Requires the caller to be the conversation owner.
+   * Metadata writes must go through patchMetadata so they are validated against the template.
+   */
+  update(request: ConversationUpdatePublicRequest): Promise<ConversationWithPermissions>;
 }

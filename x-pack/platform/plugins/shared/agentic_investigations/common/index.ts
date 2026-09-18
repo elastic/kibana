@@ -76,3 +76,39 @@ export type {
   ProposalUser,
   ProposalWithMetadata,
 } from './proposals';
+
+export {
+  ESCALATION_BY_ID_URL,
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_TEMPLATE_ID,
+  ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  createEscalationRequestSchema,
+  escalationVisibilitySchema,
+  updateEscalationRequestSchema,
+} from './escalations';
+
+export type {
+  CreateEscalationRequest,
+  EscalationConversation,
+  EscalationVisibility,
+  UpdateEscalationRequest,
+} from './escalations';
+
+export {
+  INVESTIGATION_ASSIGNEES_URL,
+  INVESTIGATION_BY_ID_URL,
+  INVESTIGATION_TEMPLATE_ID,
+  INVESTIGATIONS_INTERNAL_URL,
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+  investigationIdParamsSchema,
+  updateAssigneesRequestSchema,
+} from './investigations';
+
+export type {
+  InvestigationIdParams,
+  UpdateAssigneesRequest,
+  UpdateAssigneesResponse,
+} from './investigations';

@@ -23,7 +23,8 @@ export interface InvestigationHeaderBlocksProps {
  * internal HTTP route, which is on neither its public start contract nor a package constant.
  */
 export const InvestigationHeaderBlocks = ({ investigation }: InvestigationHeaderBlocksProps) => {
-  const { status, assignee } = investigation;
+  const { status, assignees } = investigation;
+  const primaryAssignee = assignees[0] ?? null;
 
   const items = useMemo<InfoBlockItem[]>(
     () => [
@@ -35,8 +36,8 @@ export const InvestigationHeaderBlocks = ({ investigation }: InvestigationHeader
       {
         id: 'assignees',
         title: TEMPLATE_UI_LABELS.assignees,
-        value: assignee ? (
-          <EuiAvatar size="s" name={assignee} />
+        value: primaryAssignee ? (
+          <EuiAvatar size="s" name={primaryAssignee} />
         ) : (
           <EuiText size="s" color="subdued">
             {TEMPLATE_UI_LABELS.unassigned}
@@ -44,7 +45,7 @@ export const InvestigationHeaderBlocks = ({ investigation }: InvestigationHeader
         ),
       },
     ],
-    [status, assignee]
+    [status, primaryAssignee]
   );
 
   return <InfoBlocks items={items} maxColumns={2} data-test-subj="investigationHeaderBlocks" />;

@@ -69,16 +69,34 @@ const setupPlugin = () => {
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   const coreStart = coreMock.createStart();
   const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
+  const agentBuilder = {
+    conversations: {
+      getScopedClient: jest.fn().mockReturnValue({
+        get: jest.fn(),
+        bulkGet: jest.fn(),
+        list: jest.fn(),
+        search: jest.fn(),
+        create: jest.fn(),
+        patchMetadata: jest.fn(),
+        update: jest.fn(),
+      }),
+    },
+    conversationTemplates: {
+      get: jest.fn().mockResolvedValue(undefined),
+      list: jest.fn().mockResolvedValue([]),
+    },
+  };
 
   const contract = plugin.start(
     coreStart as never,
     {
       workflowsExtensions,
       spaces: undefined,
+      agentBuilder,
     } as never
   );
 
-  return { coreStart, contract, workflowsExtensions };
+  return { coreStart, contract, workflowsExtensions, agentBuilder };
 };
 
 /** The single registered feature config, for assertions on its shape. */

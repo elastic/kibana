@@ -31,7 +31,8 @@ export interface Investigation {
   watch_execution_id: string;
   watch_tier?: string;
   severity?: string;
-  assignee?: string | null;
+  /** User profile UIDs assigned to this investigation. Empty when nobody is assigned. */
+  assignees: string[];
   status?: string;
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;
