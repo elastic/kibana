@@ -207,21 +207,24 @@ export const useTopNavLinks = ({
 
     if (!services.embeddableEditor.isEmbeddedEditor()) {
       const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
-        isEsqlMode && currentDataView.type === ESQL_TYPE
+        isEsqlMode && currentDataView?.type === ESQL_TYPE
           ? { query: { esql: getInitialESQLQuery(currentDataView) } }
           : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
-        : currentDataView.isPersisted()
+        : currentDataView?.isPersisted()
         ? { dataViewId: currentDataView.id }
-        : { dataViewSpec: currentDataView.toMinimalSpec() };
+        : currentDataView
+        ? { dataViewSpec: currentDataView.toMinimalSpec() }
+        : { query: { esql: '' } };
       const newSearchMenuItem = getNewSearchAppMenuItem({
         newSearchUrl: services.locator.getRedirectUrl(locatorParams),
         onNewSearch: () => {
           const defaultState: DiscoverAppState = defaultEsqlState ?? {
-            dataSource: currentDataView.id
+            dataSource: currentDataView?.id
               ? createDataViewDataSource({ dataViewId: currentDataView.id })
               : undefined,
+            ...(currentDataView ? {} : { query: { esql: '' } }),
           };
           services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
         },

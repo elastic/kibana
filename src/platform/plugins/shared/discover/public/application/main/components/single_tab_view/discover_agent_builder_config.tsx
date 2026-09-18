@@ -205,6 +205,11 @@ export const DiscoverAgentBuilderConfig = () => {
       return;
     }
 
+    if (!dataView) {
+      agentBuilder.clearChatConfig();
+      return;
+    }
+
     const normalizedTimeRange = timeRange ? { from: timeRange.from, to: timeRange.to } : undefined;
 
     const attachments: AttachmentInput[] = [
