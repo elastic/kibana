@@ -155,4 +155,50 @@ describe('ActionPolicyActionsMenu', () => {
       expect(onSnooze.mock.calls[0][0]).toBe('policy-1');
     });
   });
+
+  describe('anchorId mode', () => {
+    it('renders nothing when anchorId is set but the anchor element does not exist in the DOM', () => {
+      renderMenu({ anchorId: 'nonexistent-anchor', isOpen: true, onOpenChange: jest.fn() });
+      // No popover content should be visible
+      expect(screen.queryByTestId('editActionPolicy-policy-1')).not.toBeInTheDocument();
+    });
+
+    it('renders the menu via EuiWrappingPopover when anchorId is set and the anchor element exists', () => {
+      const anchor = document.createElement('button');
+      anchor.id = 'test-take-action-anchor';
+      document.body.appendChild(anchor);
+
+      renderMenu({
+        onEdit: jest.fn(),
+        anchorId: 'test-take-action-anchor',
+        isOpen: true,
+        onOpenChange: jest.fn(),
+      });
+
+      expect(screen.getByTestId('editActionPolicy-policy-1')).toBeInTheDocument();
+
+      anchor.remove();
+    });
+
+    it('renders the snooze modal even when the anchor element does not exist', () => {
+      // First open the menu with a real anchor so the snooze item appears,
+      // then simulate its click; the modal must still render without the anchor.
+      const anchor = document.createElement('button');
+      anchor.id = 'test-anchor-for-snooze';
+      document.body.appendChild(anchor);
+
+      renderMenu({
+        onSnooze: jest.fn(),
+        onCancelSnooze: jest.fn(),
+        anchorId: 'test-anchor-for-snooze',
+        isOpen: true,
+        onOpenChange: jest.fn(),
+      });
+
+      fireEvent.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
+      anchor.remove();
+
+      expect(screen.getByTestId('actionPolicySnoozeModal')).toBeInTheDocument();
+    });
+  });
 });
