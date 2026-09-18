@@ -75,6 +75,12 @@ const ESCALATION_TEMPLATE = {
 
 const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
+  // bulkGet returns a Map<id, conversation>; default resolves each id as a valid investigation.
+  bulkGet: jest.fn().mockImplementation(async (ids: string[]) => {
+    return new Map(
+      ids.map((id) => [id, { ...MOCK_INVESTIGATION, id, template_id: INVESTIGATION_TEMPLATE_ID }])
+    );
+  }),
   list: jest.fn(),
   search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
   create: jest.fn().mockResolvedValue(MOCK_ESCALATION),

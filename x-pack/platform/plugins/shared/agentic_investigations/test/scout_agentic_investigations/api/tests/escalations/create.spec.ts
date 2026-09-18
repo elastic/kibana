@@ -13,7 +13,6 @@ import {
   PUBLIC_HEADERS,
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
-  AB_CONVERSATION_BY_ID_PATH,
   expectCreated,
   deleteConversations,
 } from '../../fixtures';

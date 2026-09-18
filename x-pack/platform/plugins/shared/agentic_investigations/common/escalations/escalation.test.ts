@@ -145,10 +145,12 @@ describe('updateEscalationRequestSchema', () => {
     ).not.toThrow();
   });
 
-  it('accepts both title and linked_investigations together', () => {
+  it('rejects combining title and linked_investigations in one request', () => {
+    // The two fields map to separate storage writes; until agent_builder exposes an atomic
+    // combined mutation the schema rejects the combination so clients send separate PATCHes.
     expect(() =>
       updateEscalationRequestSchema.parse({ title: 'Renamed', linked_investigations: ['inv-2'] })
-    ).not.toThrow();
+    ).toThrow(/title and linked_investigations cannot be updated in the same request/);
   });
 
   it('rejects an empty body (neither field provided)', () => {

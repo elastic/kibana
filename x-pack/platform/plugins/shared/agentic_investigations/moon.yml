@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-platform-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/agentic-investigations-common'

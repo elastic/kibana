@@ -104,9 +104,7 @@ export const updateEscalationRequestSchema = z
   )
   .refine(
     (value) =>
-      !(
-        value.title !== undefined && value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined
-      ),
+      !(value.title !== undefined && value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined),
     {
       message:
         'title and linked_investigations cannot be updated in the same request; send separate PATCH calls',

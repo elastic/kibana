@@ -54,16 +54,24 @@ const setupPlugin = () => {
   };
   const workflowsManagement = { management: { getWorkflow: jest.fn() } };
 
+  const agentBuilder = {
+    attachments: { registerType: jest.fn() },
+  };
+  // agentBuilderPlatform is a required dep for ordering; it exposes no API used at setup time.
+  const agentBuilderPlatform = {};
+
   plugin.setup(
     coreSetup as never,
     {
       features,
+      agentBuilder,
+      agentBuilderPlatform,
       workflowsExtensions,
       workflowsManagement,
     } as never
   );
 
-  return { plugin, coreSetup, features, workflowsExtensions, workflowsManagement };
+  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions, workflowsManagement };
 };
 
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
