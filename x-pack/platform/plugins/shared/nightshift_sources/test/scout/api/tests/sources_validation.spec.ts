@@ -17,8 +17,10 @@ import {
   deleteSource,
   deleteTestIndex,
   getSource,
+  readView,
   testIndexName,
   uniqueSuffix,
+  updateSource,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-validation';
@@ -115,9 +117,46 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
 
       const fetched = await getSource(apiClient, manager.cookieHeader, response.body.source.id);
+      expect(fetched).toHaveStatusCode(200);
       expect(fetched.body.health).toBe('ok');
 
       await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
     });
+
+    apiTest(
+      'rejects STATS on PUT and leaves the stored source unchanged',
+      async ({ apiClient, esClient }) => {
+        const body = {
+          title: `${TITLE_PREFIX}-${suffix}-put`,
+          tags: [],
+          esql: `FROM ${index}`,
+        };
+        const created = await createSource(apiClient, manager.cookieHeader, body);
+        expect(created).toHaveStatusCode(200);
+        const { source } = created.body;
+
+        const disallowed = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: `FROM ${index} | STATS c = COUNT(*)`,
+        });
+        expect(disallowed).toHaveStatusCode(400);
+
+        const unresolved = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: `FROM ${index} | WHERE nope_field > 1`,
+        });
+        expect(unresolved).toHaveStatusCode(400);
+
+        const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(fetched).toHaveStatusCode(200);
+        expect(fetched.body.source.esql).toBe(body.esql);
+        expect(await readView(esClient, source.view_name)).toStrictEqual({
+          name: source.view_name,
+          query: body.esql,
+        });
+
+        await deleteSource(apiClient, manager.cookieHeader, source.id);
+      }
+    );
   }
 );

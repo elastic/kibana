@@ -10,15 +10,19 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
+  createSourceRequestSchema,
   getNightshiftSourceViewName,
   hasMultipleSourceIndices,
+  updateSourceRequestSchema,
+  type CreateSourceRequest,
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
-  type SourceInput,
   type SourceWithHealth,
+  type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
-import { notFound } from '@hapi/boom';
+import { z } from '@kbn/zod/v4';
+import { badRequest, notFound } from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -48,18 +52,29 @@ const toSource = (id: string, attributes: NightshiftSourceAttributes): Nightshif
   ...attributes,
 });
 
+// HTTP Zod never runs for `getSourcesClient()`. Parse here so engines cannot persist a blank
+// title (or other wire-invalid attributes) that PUT repair would then refuse.
+const parseSourceWrite = <T>(schema: z.ZodType<T>, input: unknown): T => {
+  const parsed = schema.safeParse(input);
+  if (!parsed.success) {
+    throw badRequest(z.prettifyError(parsed.error));
+  }
+  return parsed.data;
+};
+
 export class SourcesClient {
   constructor(private readonly deps: SourcesClientDependencies) {}
 
-  async create(input: SourceInput): Promise<NightshiftSource> {
+  async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
-    validateSourceQuery(input.esql);
-    await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: input.esql });
+    const parsed = parseSourceWrite(createSourceRequestSchema, input);
+    validateSourceQuery(parsed.esql);
+    await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
 
     const id = uuidv4();
     const now = new Date().toISOString();
     const attributes: NightshiftSourceAttributes = {
-      ...input,
+      ...parsed,
       view_name: getNightshiftSourceViewName(id),
       enabled: true,
       created_by: username,
@@ -84,14 +99,15 @@ export class SourcesClient {
     return toSource(id, attributes);
   }
 
-  async update(id: string, input: SourceInput): Promise<NightshiftSource> {
+  async update(id: string, input: UpdateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
+    const parsed = parseSourceWrite(updateSourceRequestSchema, input);
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
-    const esqlChanged = !hasSameEsql(input.esql, previous.esql);
-    validateSourceQuery(input.esql);
+    const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
+    validateSourceQuery(parsed.esql);
     if (esqlChanged) {
-      await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: input.esql });
+      await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
     }
 
     const now = new Date().toISOString();
@@ -99,10 +115,10 @@ export class SourcesClient {
     // which a spread of `input` would leave in place.
     const attributes: NightshiftSourceAttributes = {
       ...previous,
-      title: input.title,
-      description: input.description,
-      tags: input.tags,
-      esql: input.esql,
+      title: parsed.title,
+      description: parsed.description,
+      tags: parsed.tags,
+      esql: parsed.esql,
       updated_at: now,
       esql_updated_at: esqlChanged ? now : previous.esql_updated_at,
     };

@@ -45,8 +45,7 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       // keyword rather than text: the list endpoint sorts on it.
       title: { type: 'keyword', ignore_above: 1024 },
       enabled: { type: 'boolean' },
-      tags: { type: 'keyword', ignore_above: 1024 },
-      view_name: { type: 'keyword', ignore_above: 1024 },
+      // tags and view_name stay in `_source`; list only filters/sorts title and enabled.
     },
   },
   management: {

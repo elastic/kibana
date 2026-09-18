@@ -182,12 +182,14 @@ apiTest.describe(
         manager.cookieHeader,
         `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=false`
       );
+      expect(onlyDisabled).toHaveStatusCode(200);
       expect(listedIds(onlyDisabled.body)).toContain(source.id);
       const onlyEnabled = await listSources(
         apiClient,
         manager.cookieHeader,
         `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=true`
       );
+      expect(onlyEnabled).toHaveStatusCode(200);
       expect(listedIds(onlyEnabled.body)).not.toContain(source.id);
 
       const enabled = await setSourceEnabled(apiClient, manager.cookieHeader, source.id, true);
@@ -199,12 +201,14 @@ apiTest.describe(
         manager.cookieHeader,
         `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=true`
       );
+      expect(enabledAgain).toHaveStatusCode(200);
       expect(listedIds(enabledAgain.body)).toContain(source.id);
       const disabledGone = await listSources(
         apiClient,
         manager.cookieHeader,
         `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=false`
       );
+      expect(disabledGone).toHaveStatusCode(200);
       expect(listedIds(disabledGone.body)).not.toContain(source.id);
 
       await deleteSource(apiClient, manager.cookieHeader, source.id);

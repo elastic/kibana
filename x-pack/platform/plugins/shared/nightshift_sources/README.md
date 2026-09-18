@@ -39,6 +39,7 @@ without going through HTTP. It returns the same client the routes use and does n
 `read_nightshift` / `manage_nightshift`. The hidden saved-object type already excludes the
 security extension, so a check here would not restore SO authorization (that path rejects
 everyone but superusers). Call it from a route that already requires those privileges.
+`create` and `update` parse the same wire schemas as HTTP, so a blank title still 400s.
 
 ## Query validation
 
@@ -114,9 +115,11 @@ project type in `config/serverless.yml` and back on for Observability Complete i
 ## Known limitations
 
 - `PUT`, `_enable` and `_disable` pass the saved-object `version` they just read, so a concurrent
-  write 409s. `DELETE` cannot: Core's `soClient.delete` has no version option. A concurrent `PUT`
-  can recreate the view after `DELETE` has removed it and still delete the catalog row, leaving
-  an orphaned view.
+  write 409s. That OCC covers the saved object, not the view write that follows: two overlapping
+  `PUT`s can land query B on the catalog and query A on the view. `GET` reports `view_drift`; a
+  `PUT` of the current values repairs it. `DELETE` cannot take a version: Core's `soClient.delete`
+  has no version option. A concurrent `PUT` can recreate the view after `DELETE` has removed it
+  and still delete the catalog row, leaving an orphaned view.
 - Deleting a space removes the saved objects but leaves their views behind. Nothing cleans
   orphaned `$.nightshift.sources.*` views yet. ES|QL views are cluster-global; the Spaces
   boundary is the saved object, not the view name.

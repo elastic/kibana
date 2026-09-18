@@ -248,6 +248,17 @@ describe('SourcesClient', () => {
       );
     });
 
+    it('rejects a blank title before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: '   ', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('rejects an invalid query before touching saved objects or ES', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
 
@@ -341,6 +352,40 @@ describe('SourcesClient', () => {
   });
 
   describe('update', () => {
+    it('rejects a disallowed command without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-* | STATS c = COUNT(*)',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unresolvable field without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withColumns);
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-* | WHERE nope > 1',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('bumps esql_updated_at only when the normalized query changes', async () => {
       const { client, soClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
