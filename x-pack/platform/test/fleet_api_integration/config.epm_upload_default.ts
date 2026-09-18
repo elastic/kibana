@@ -13,9 +13,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseFleetApiConfig.getAll(),
     testFiles: [
+      require.resolve('./apis/epm_upload_default/upload_preflight_authz'),
       require.resolve('./apis/epm_upload_default/install_by_upload_registry_name'),
       require.resolve('./apis/epm_upload_default/install_by_upload_live_stream'),
-      require.resolve('./apis/epm_upload_default/upload_preflight_authz'),
     ],
     junit: {
       reportName: 'X-Pack EPM Upload Default API Integration Tests',

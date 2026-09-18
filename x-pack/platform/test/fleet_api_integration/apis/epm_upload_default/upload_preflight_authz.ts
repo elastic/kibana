@@ -41,6 +41,8 @@ export default function (providerContext: FtrProviderContext) {
         `categories: []`,
         `conditions:`,
         `  kibana.version: "^8.0.0"`,
+        `owner:`,
+        `  github: elastic/fleet`,
       ].join('\n')
     );
     zip.file(`${pkgKey}/kibana/${assetType}/test-asset.json`, JSON.stringify(assetContent));
@@ -116,6 +118,32 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
       expect(installRecord.hits.total).to.equal(0);
+    });
+
+    it('allows upload of package with security_rule asset for user with Fleet + SIEM all — 200', async () => {
+      const securityRuleAsset = {
+        id: 'test-rule-id',
+        type: 'security-rule',
+        attributes: {
+          name: 'Test Rule',
+          type: 'query',
+          query: 'event.action: *',
+          language: 'kuery',
+          enabled: false,
+          risk_score: 50,
+          severity: 'medium',
+          version: 1,
+        },
+      };
+      const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
+
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_all_int_all_siem_all.username, testUsers.fleet_all_int_all_siem_all.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
     });
   });
 }

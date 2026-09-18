@@ -131,6 +131,7 @@ import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
+import { getLastUploadInstallCache } from '../../services/epm/packages/utils';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 import { getPackageKnowledgeBase } from '../../services/epm/packages';
 
@@ -701,7 +702,11 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const installSource = 'upload';
 
-  if (!appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+  const lastUpload = getLastUploadInstallCache();
+  const wouldBeRateLimited =
+    !!lastUpload && Date.now() - lastUpload < UPLOAD_RETRY_AFTER_MS;
+
+  if (!wouldBeRateLimited && !appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
     await checkUploadPackageAssetPrivileges(request, archiveBuffer, contentType, spaceId);
   }
 

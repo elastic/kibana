@@ -204,6 +204,18 @@ export const testUsers: {
     username: 'integr_all',
     password: 'changeme',
   },
+  fleet_all_int_all_siem_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        siemV2: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all_siem_all',
+    password: 'changeme',
+  },
 };
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
