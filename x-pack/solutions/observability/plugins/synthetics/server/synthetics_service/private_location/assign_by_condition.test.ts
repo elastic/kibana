@@ -8,8 +8,10 @@
 import {
   agentIdCondition,
   agentIdFromCondition,
+  assignedAgentIdForMonitorLocation,
   assignAgentById,
   balanceAgentsByCost,
+  countMonitorsByAssignedAgent,
   isConditionShardedLocation,
   isEqlSafeLiteral,
   UNASSIGNED_CONDITION,
@@ -105,6 +107,106 @@ describe('assignAgentById', () => {
         expect(now).toBe(before.get(id));
       }
     }
+  });
+});
+
+describe('countMonitorsByAssignedAgent', () => {
+  const locationId = 'loc-1';
+
+  it('counts unique monitors per stamped agent id and skips unassigned', () => {
+    const counts = countMonitorsByAssignedAgent(
+      [
+        { id: `mon-a-${locationId}`, condition: agentIdCondition('agent-a') },
+        { id: `mon-b-${locationId}`, condition: agentIdCondition('agent-a') },
+        { id: `mon-c-${locationId}`, condition: agentIdCondition('agent-b') },
+        { id: `mon-d-${locationId}`, condition: UNASSIGNED_CONDITION },
+        { id: `mon-e-${locationId}`, condition: null },
+      ],
+      locationId
+    );
+
+    expect(counts.get('agent-a')).toBe(2);
+    expect(counts.get('agent-b')).toBe(1);
+    expect(counts.has('__synthetics_unassigned__')).toBe(false);
+    expect(counts.size).toBe(2);
+  });
+
+  it('counts a new-format policy and its leftover legacy twin as one monitor', () => {
+    const counts = countMonitorsByAssignedAgent(
+      [
+        { id: `mon-1-${locationId}`, condition: agentIdCondition('agent-a') },
+        { id: `mon-1-${locationId}-default`, condition: agentIdCondition('agent-a') },
+        { id: `mon-2-${locationId}`, condition: agentIdCondition('agent-b') },
+      ],
+      locationId
+    );
+
+    expect(counts.get('agent-a')).toBe(1);
+    expect(counts.get('agent-b')).toBe(1);
+    expect(counts.size).toBe(2);
+  });
+
+  it('prefers the new-format policy when a twin is pinned to a different agent', () => {
+    const counts = countMonitorsByAssignedAgent(
+      [
+        { id: `mon-1-${locationId}-default`, condition: agentIdCondition('legacy-agent') },
+        { id: `mon-1-${locationId}`, condition: agentIdCondition('new-agent') },
+      ],
+      locationId
+    );
+
+    expect(counts.get('new-agent')).toBe(1);
+    expect(counts.has('legacy-agent')).toBe(false);
+  });
+});
+
+describe('assignedAgentIdForMonitorLocation', () => {
+  it('prefers the new-format package policy over a legacy space-suffixed id', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [
+        { id: 'mon-1-loc-1-default', condition: agentIdCondition('legacy-agent') },
+        { id: 'mon-1-loc-1', condition: agentIdCondition('new-agent') },
+      ],
+      'mon-1',
+      'loc-1',
+      'default'
+    );
+
+    expect(agentId).toBe('new-agent');
+  });
+
+  it('falls back to a legacy space-suffixed policy when the new id is absent', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [{ id: 'mon-1-loc-1-default', condition: agentIdCondition('legacy-agent') }],
+      'mon-1',
+      'loc-1',
+      'default'
+    );
+
+    expect(agentId).toBe('legacy-agent');
+  });
+
+  it('does not treat a prefix-matching unrelated policy as the legacy twin', () => {
+    expect(
+      assignedAgentIdForMonitorLocation(
+        [{ id: 'mon-1-loc-1-other-space', condition: agentIdCondition('other-agent') }],
+        'mon-1',
+        'loc-1',
+        'default'
+      )
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when no matching policy is assigned', () => {
+    expect(assignedAgentIdForMonitorLocation([], 'mon-1', 'loc-1', 'default')).toBeUndefined();
+    expect(
+      assignedAgentIdForMonitorLocation(
+        [{ id: 'mon-1-loc-1', condition: UNASSIGNED_CONDITION }],
+        'mon-1',
+        'loc-1',
+        'default'
+      )
+    ).toBeUndefined();
   });
 });
 

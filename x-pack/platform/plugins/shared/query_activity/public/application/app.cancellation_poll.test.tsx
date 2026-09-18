@@ -7,11 +7,19 @@
 
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { cleanup, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { RunningQuery } from '../../common/types';
 import { QueryActivityApp } from './app';
 import { useQueryActivityAppContext, type QueryActivityAppContextValue } from './app_context';
+
+const renderApp = () =>
+  renderWithKibanaRenderContext(
+    <MockAppHeaderProvider>
+      <QueryActivityApp />
+    </MockAppHeaderProvider>
+  );
 import { markStopRequestedTask } from '../lib/stop_requested_tasks_storage';
 import { CANCELLATION_POLL_INTERVAL_MS } from '../../common/constants';
 
@@ -105,7 +113,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     });
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
     await screen.findByText(query.taskId);
 
     await act(async () => {
@@ -138,7 +146,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     });
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
     await screen.findByText(taskId);
 
     await act(async () => {
@@ -170,7 +178,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     });
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
     await screen.findByText(taskId);
 
     await act(async () => {
@@ -202,7 +210,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     });
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
     await screen.findByText(taskId);
 
     await act(async () => {
@@ -234,7 +242,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     });
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
     await screen.findByText(taskId);
 
     // First tick — task confirmed gone, pendingCancellations becomes empty
@@ -275,7 +283,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     });
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
 
     await user.click(await screen.findByLabelText('Cancel query'));
     await user.click(await screen.findByRole('button', { name: 'Cancel the query' }));

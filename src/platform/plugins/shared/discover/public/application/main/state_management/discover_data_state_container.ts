@@ -580,6 +580,14 @@ export function getDataStateContainer({
             },
           });
 
+          if (!abortController.signal.aborted) {
+            internalState.dispatch(
+              injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+                isWarningCalloutDismissed: false,
+              })
+            );
+          }
+
           fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

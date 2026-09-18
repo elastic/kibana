@@ -92,12 +92,12 @@ spaceTest.describe(
 
         await spaceTest.step('enable trendline', async () => {
           await page.getByTestId('lnsMetric_background_chart_line').click();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(lens.metric.trendline).toBeVisible();
         });
 
         await spaceTest.step('disable trendline and verify Color stays set to Panel', async () => {
           await page.getByTestId('lnsMetric_background_chart_none').click();
-          await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+          await expect(lens.metric.trendline).toHaveCount(0);
 
           // Switching background chart always sets applyColorTo to 'background',
           // so after disabling trendline the Color button group shows "Panel" as selected.
@@ -130,7 +130,7 @@ spaceTest.describe(
           await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
 
           await page.getByTestId('lnsMetric_background_chart_line').click();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(lens.metric.trendline).toBeVisible();
 
           await lens.workspace.secondaryFlyoutBackButton.click();
         });
@@ -147,7 +147,7 @@ spaceTest.describe(
             await page.getByTestId('ESQLEditor-run-query-button').click();
 
             // Wait for the trendline to re-render with the new data
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible({ timeout: 30000 });
+            await expect(lens.metric.trendline).toBeVisible({ timeout: 30000 });
             await expect(page.getByTestId('mtrVis')).toBeVisible();
           }
         );

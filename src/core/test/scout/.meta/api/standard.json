@@ -1,8 +1,7 @@
 {
-  "sha1": "8d6bb7f46bc0c31f65d7cf1528364327fbbf3cb2",
+  "sha1": "0963f5b1de87594c99f747894644562d0c2af19f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -288,7 +287,7 @@
     {
       "id": "2392b373cc723ee-ab33734347ca58f",
       "title": "kibana status api returns version, status and metrics fields",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -301,7 +300,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/status.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 11
       }
     },
@@ -321,8 +320,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 27,
+        "column": 38
       }
     },
     {
@@ -341,8 +340,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 38,
-        "column": 5
+        "line": 43,
+        "column": 12
       }
     },
     {
@@ -361,8 +360,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 62,
-        "column": 26
+        "line": 55,
+        "column": 14
       }
     },
     {

@@ -60,7 +60,7 @@ describe('useWorkpadPersist', () => {
   test('initial render does not persist state', () => {
     renderHook(useWorkpadPersist);
 
-    expect(mockUpdateWorkpad).not.toBeCalled();
+    expect(mockUpdateWorkpad).not.toHaveBeenCalled();
   });
 
   test('changes to workpad cause a workpad update', () => {

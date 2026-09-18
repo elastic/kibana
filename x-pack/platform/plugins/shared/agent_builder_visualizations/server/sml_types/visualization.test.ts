@@ -260,10 +260,10 @@ describe('visualizationSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:lens/get privilege (via kibanaSavedObjectPermissions helper)', () => {
+    it('returns the ai_index:visualization/read action (via the kibanaPermissions helper)', () => {
       const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        kibana: { privileges: { name: ['ai_index:visualization/read'] } },
       });
     });
   });
@@ -297,7 +297,7 @@ describe('visualizationSmlType', () => {
       });
 
       await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
         createContext() as never
       );
 
@@ -332,7 +332,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
         createContext() as never
       );
 
@@ -366,7 +366,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
         createContext() as never
       );
 
@@ -384,7 +384,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
         createContext() as never
       );
 
@@ -396,7 +396,7 @@ describe('visualizationSmlType', () => {
 
       await expect(
         visualizationSmlType.toAttachment!(
-          { origin_id: 'viz-1' } as never,
+          { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
           createContext() as never
         )
       ).rejects.toThrow('Connection failed');
@@ -429,7 +429,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
         createContext() as never
       );
 

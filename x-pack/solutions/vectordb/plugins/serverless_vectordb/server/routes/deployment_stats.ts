@@ -10,10 +10,9 @@ import { AuthzDisabled } from '@kbn/core-security-server';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
 import { fetchDashboardsCount } from '../lib/dashboards';
 import {
-  INDEX_STATS_UNAVAILABLE,
   fetchApiKeysStats,
   fetchIndexStats,
-  hasIndexManagePrivilege,
+  fetchMonitorPrivileges,
 } from '../lib/deployment_stats';
 
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
@@ -23,7 +22,7 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
       validate: false,
       security: {
         authz: AuthzDisabled.fromReason(
-          'Index stats are read with elevated privileges, so the handler checks the caller holds the Elasticsearch `manage` index privilege before returning cluster-wide totals; the dashboard count is authorized by the saved objects client'
+          'All counts, except the vector count, are scoped to the caller. The vector count is gated by a handler that checks the caller holds the `monitor` privilege on all indices before returning that cluster-wide total. The newest-index lookup is gated on the caller holding the cluster `monitor` privilege. The dashboard count is authorized by the saved objects client'
         ),
       },
     },
@@ -33,14 +32,17 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
+        const { canMonitorAllIndices, canMonitorCluster } = await fetchMonitorPrivileges(
+          client,
+          logger
+        );
+
         const [
-          { indicesCount, storeSizeBytes, vectorCount, documentsCount },
+          { indicesCount, storeSizeBytes, vectorCount, documentsCount, newIndex },
           dashboardsCount,
           { total: apiKeysCount, expiring: expiringApiKeysCount },
         ] = await Promise.all([
-          hasIndexManagePrivilege(client, logger).then((isPrivileged) =>
-            isPrivileged ? fetchIndexStats(client, logger) : INDEX_STATS_UNAVAILABLE
-          ),
+          fetchIndexStats(client, logger, { canMonitorAllIndices, canMonitorCluster }),
           fetchDashboardsCount(savedObjectsClient, logger),
           fetchApiKeysStats(client, logger),
         ]);
@@ -54,6 +56,7 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
             dashboardsCount,
             apiKeysCount,
             expiringApiKeysCount,
+            newIndex,
           },
         });
       } catch (error) {

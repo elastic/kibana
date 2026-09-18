@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/fleet-plugin",
-  "owner": ["@elastic/fleet"],
+  "owner": ["@elastic/streams-ui"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {

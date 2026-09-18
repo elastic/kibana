@@ -15,7 +15,7 @@ import { getEsqlColumns } from '@kbn/esql-utils';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { FormValues } from '../../../form/types';
-import { EsqlQuerySummarySection } from './esql_query_summary_section';
+import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useComposeDiscoverTimeField } from '../use_compose_discover_time_field';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
@@ -51,6 +51,12 @@ export function AlertConditionStep({
   );
 
   const { timeFieldOptions, isTimeFieldResolved } = useComposeDiscoverTimeField();
+
+  // Time field and grouping depend on a resolved query. Disable them until a
+  // non-empty query is committed (no committed query, or committed-but-empty).
+  const summaryState = getEsqlSummaryState(state.queryCommitted, query);
+  const hasUsableQuery = summaryState !== 'before_apply' && summaryState !== 'empty';
+  const queryDependentFieldsDisabled = state.childOpen || !hasUsableQuery;
 
   // When the current field isn't on the index (no date fields, or a stored
   // `@timestamp` that doesn't exist), show a blank selection + invalid state so
@@ -165,7 +171,7 @@ export function AlertConditionStep({
           hasNoInitialSelection={!currentTimeFieldIsOption}
           isInvalid={!isTimeFieldResolved}
           onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
-          disabled={state.childOpen}
+          disabled={queryDependentFieldsDisabled}
           data-test-subj="composeDiscoverTimeField"
         />
       </EuiFormRow>
@@ -179,6 +185,7 @@ export function AlertConditionStep({
         <EuiComboBox
           compressed
           fullWidth
+          isDisabled={queryDependentFieldsDisabled}
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>

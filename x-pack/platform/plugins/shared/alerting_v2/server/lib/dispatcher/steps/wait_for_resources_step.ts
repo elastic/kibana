@@ -23,11 +23,11 @@ export class WaitForResourcesStep implements DispatcherStep {
     _: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    logger.debug({ message: `Waiting for resources to be ready` });
+    logger.debug({ message: 'Waiting for resources to be ready' });
 
     await this.resourceManager.waitUntilReady();
 
-    logger.debug({ message: `Resources ready` });
+    logger.debug({ message: 'Resources ready' });
 
     return { type: 'continue' };
   }

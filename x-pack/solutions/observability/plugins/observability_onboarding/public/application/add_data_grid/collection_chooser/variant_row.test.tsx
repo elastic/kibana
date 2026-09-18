@@ -33,17 +33,28 @@ describe('VariantRow', () => {
     expect(row.querySelector('a')).toHaveAttribute('href', '/app/integrations/detail/nginx');
   });
 
-  // One line turned "Nginx Ingress Controller Logs" and "…Metrics" into the same
-  // truncated string, leaving nothing to choose between.
+  // One line truncated "Nginx Ingress Controller Logs" and "…Metrics" to the same string.
   it('gives titles two lines so variants sharing a prefix stay distinguishable', () => {
-    const { container } = render(
+    render(
       <VariantRow
         variant={{ ...variant, title: 'Nginx Ingress Controller OpenTelemetry Metrics' }}
       />
     );
 
-    expect(container.firstChild).toHaveStyleRule('-webkit-line-clamp', '2', {
-      target: '.euiCard__title',
-    });
+    expect(screen.getByTestId('collectionVariantTitle')).toHaveStyleRule('-webkit-line-clamp', '2');
+  });
+
+  it('keeps the host badge beside the title, outside the title clamp', () => {
+    render(
+      <VariantRow
+        variant={{ ...variant, badge: <span data-test-subj="badgeStub">Recommended</span> }}
+      />
+    );
+
+    const title = screen.getByTestId('collectionVariantTitle');
+    const badge = screen.getByTestId('badgeStub');
+    expect(title).toHaveTextContent('Nginx');
+    expect(title).not.toContainElement(badge);
+    expect(title.parentElement).toContainElement(badge);
   });
 });

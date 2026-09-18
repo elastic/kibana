@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -200,19 +201,21 @@ describe('dashboardSmlType', () => {
 
     const result = await dashboardSmlType.toAttachment(
       {
-        id: 'chunk-1',
         type: 'dashboard',
         title: 'System Overview',
-        origin_id: 'dashboard-1',
-        origin: { uri: 'dashboard://dashboard-1' },
         content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
-        updated_at: '2025-01-01T00:00:00.000Z',
-        spaces: ['default'],
-        permissions: {
-          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        attributes: {
+          id: 'chunk-1',
+          origin: { uri: 'dashboard://dashboard-1' },
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          ingestion_method: 'crawled',
         },
-        ingestion_method: 'crawled',
+        permissions: {
+          kibana: {
+            privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
+          },
+        },
       },
       {
         request: {} as never,
@@ -261,19 +264,21 @@ describe('dashboardSmlType', () => {
 
     const result = await dashboardSmlType.toAttachment(
       {
-        id: 'chunk-2',
         type: 'dashboard',
         title: 'API Lens Dashboard',
-        origin_id: 'dashboard-2',
-        origin: { uri: 'dashboard://dashboard-2' },
         content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
-        updated_at: '2025-01-01T00:00:00.000Z',
-        spaces: ['default'],
-        permissions: {
-          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        attributes: {
+          id: 'chunk-2',
+          origin: { uri: 'dashboard://dashboard-2' },
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          ingestion_method: 'crawled',
         },
-        ingestion_method: 'crawled',
+        permissions: {
+          kibana: {
+            privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
+          },
+        },
       },
       {
         request: {} as never,
@@ -304,7 +309,7 @@ describe('dashboardSmlType', () => {
     ]);
   });
 
-  it('getPermissions returns the saved_object:dashboard/get privilege', () => {
+  it('getPermissions returns the ai_index:dashboard/read action', () => {
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () => createDashboardClient(),
     });
@@ -316,7 +321,7 @@ describe('dashboardSmlType', () => {
     } as never);
 
     expect(permissions).toEqual({
-      kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+      kibana: { privileges: { name: ['ai_index:dashboard/read'] } },
     });
   });
 

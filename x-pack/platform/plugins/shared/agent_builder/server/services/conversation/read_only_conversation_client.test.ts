@@ -53,12 +53,13 @@ describe('createConversationPublicClient', () => {
       createEmptyConversation({ id: 'conv-1' }),
       createEmptyConversation({ id: 'conv-2' }),
     ].map(({ rounds, ...withoutRounds }) => withoutRounds);
-    internalClient.list.mockResolvedValue(conversations);
+    const listResult = { results: conversations, total: conversations.length };
+    internalClient.list.mockResolvedValue(listResult);
 
     const result = await publicClient.list({ agentId: 'agent-1' });
 
     expect(internalClient.list).toHaveBeenCalledWith({ agentId: 'agent-1' });
-    expect(result).toEqual(conversations);
+    expect(result).toEqual(listResult);
   });
 
   describe('create()', () => {

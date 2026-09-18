@@ -39,7 +39,10 @@ describe('AppHeader adapter', () => {
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
     chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
-    renderAppHeader(<AppHeaderView back="/base-other/app" />, chrome);
+    renderAppHeader(
+      <AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />,
+      chrome
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
@@ -52,7 +55,10 @@ describe('AppHeader adapter', () => {
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
     chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
-    renderAppHeader(<AppHeaderView back="/base/app/dashboards" />, chrome);
+    renderAppHeader(
+      <AppHeaderView back={{ href: '/base/app/dashboards', label: 'Dashboards' }} />,
+      chrome
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
@@ -219,22 +225,37 @@ describe('AppHeader adapter', () => {
     expect(mount).not.toHaveBeenCalled();
   });
 
-  it('claims the inline app-header slot for AppHeader and releases it on unmount', () => {
+  it('registers its initial title, updates it once, and unregisters', () => {
     const chrome = chromeServiceMock.createStartContract();
-    const { unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
+    const emissions: Array<{ title?: unknown } | undefined> = [];
+    const subscription = chrome.inlineAppHeader.get$().subscribe((value) => emissions.push(value));
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    const { rerender, unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
 
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith('Dashboard');
+    expect(chrome.appHeader.set).not.toHaveBeenCalled();
+
+    rerender(
+      <ChromeServiceProvider value={{ chrome }}>
+        <AppHeader title="Updated dashboard" />
+      </ChromeServiceProvider>
+    );
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(emissions).toEqual([
+      undefined,
+      { title: 'Dashboard' },
+      { title: 'Updated dashboard' },
+      undefined,
+    ]);
+    subscription.unsubscribe();
   });
 
   it('does not claim the slot when only the view is rendered', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderAppHeader(<AppHeaderView title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.register).not.toHaveBeenCalled();
   });
 
   it('claims the inline slot for DiscoverAppHeader', () => {
@@ -244,11 +265,11 @@ describe('AppHeader adapter', () => {
       chrome
     );
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith('Discover');
     expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledTimes(1);
   });
 });

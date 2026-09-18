@@ -106,7 +106,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
           }
 
           return res.ok<z.output<typeof lensSearchResponseBodySchema>>({
-            body: {
+            body: lensSearchResponseBodySchema.parse({
               data: hits.map((item) => {
                 return getLensResponseItem(builder, item);
               }),
@@ -115,7 +115,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
                 per_page: perPage,
                 total: pagination.total,
               },
-            },
+            }),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {

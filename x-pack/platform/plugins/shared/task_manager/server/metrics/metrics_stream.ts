@@ -17,6 +17,7 @@ import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   isTaskManagerStatEvent,
   isTaskManagerMetricEvent,
+  isTaskManagerBackpressureEvent,
   isTaskPollingCycleEvent,
   isTaskRunEvent,
 } from '../task_events';
@@ -27,6 +28,8 @@ import type { TaskRunMetric } from './task_run_metrics_aggregator';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import type { TaskBackpressureMetric } from './task_backpressure_metrics_aggregator';
+import { TaskBackpressureMetricsAggregator } from './task_backpressure_metrics_aggregator';
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 
@@ -36,6 +39,7 @@ export interface Metrics {
     task_claim?: Metric<TaskClaimMetric>;
     task_run?: Metric<TaskRunMetric>;
     task_overdue?: Metric<TaskOverdueMetric>;
+    task_backpressure?: Metric<TaskBackpressureMetric>;
   };
 }
 
@@ -81,6 +85,14 @@ export function createMetricsAggregators({
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
         metricsAggregator: new TaskRunMetricsAggregator(debugLogger),
+      }),
+      createAggregator({
+        key: 'task_backpressure',
+        events$: taskPollingLifecycle.events,
+        config,
+        reset$,
+        eventFilter: (event: TaskLifecycleEvent) => isTaskManagerBackpressureEvent(event),
+        metricsAggregator: new TaskBackpressureMetricsAggregator(),
       })
     );
   }

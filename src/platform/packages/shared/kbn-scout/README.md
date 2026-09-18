@@ -536,6 +536,7 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 - **`--arch`**: `stateful` or `serverless`.
 - **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
 - **`--preserveEsData`**: Reuse existing serverless ES object store data on startup instead of cleaning it (useful when restarting after crashes).
+- **Rspack HMR**: Disabled by default. Set `KBN_HMR=true` before starting the servers to enable it.
 
 This command is useful for manual testing or running tests via an IDE.
 
@@ -833,6 +834,26 @@ On merge commits, Scout tests run in a non-blocking mode.
 | 1         | Missing configuration (e.g. SCOUT_CONFIG_GROUP_KEY and SCOUT_CONFIG_GROUP_TYPE environment variables not set) |
 | 2         | No tests in Playwright config                                                                                 |
 | 10        | Tests failed                                                                                                  |
+
+#### Finding flaky tests
+
+Test events from every framework (Jest, FTR, Cypress and Scout/Playwright) are shipped to the AppEx QA cluster. The `discover-flaky-tests` command aggregates them into a ranked list of flaky and consistently failing tests and stores it under `.scout/flaky_tests.json`:
+
+```bash
+# Last 7 days of kibana-on-merge, all frameworks
+node scripts/scout discover-flaky-tests
+
+# Include PR builds, widen the window, restrict to Jest and FTR
+node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
+
+# Flaky tests only, leaving consistently failing tests out of the report
+node scripts/scout discover-flaky-tests --classifications flaky
+
+# Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
+node scripts/scout discover-flaky-tests --summaryLimit 25
+```
+
+The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.
 
 ### AI prompts to help you migrate from FTR
 

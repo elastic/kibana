@@ -374,13 +374,10 @@ describe('connectorSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:action/get Kibana privilege', () => {
-      // The actions plugin gates connector reads on saved-object read access for the `action`
-      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
-      // so a regression to a non-existent privilege name fails loudly.
+    it('returns the ai_index:connector/read action', () => {
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
+        kibana: { privileges: { name: ['ai_index:connector/read'] } },
       });
     });
   });
@@ -395,7 +392,7 @@ describe('connectorSmlType', () => {
       });
 
       const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
+        { attributes: { origin: { uri: 'connector://conn-1' } } } as never,
         createAttachmentContext() as never
       );
 
@@ -413,7 +410,7 @@ describe('connectorSmlType', () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
 
       const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'missing-conn' } as never,
+        { attributes: { origin: { uri: 'connector://missing-conn' } } } as never,
         createAttachmentContext() as never
       );
 
@@ -432,7 +429,7 @@ describe('connectorSmlType', () => {
       });
 
       const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
+        { attributes: { origin: { uri: 'connector://conn-1' } } } as never,
         createAttachmentContext() as never
       );
 

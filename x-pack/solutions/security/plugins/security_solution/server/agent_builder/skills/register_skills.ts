@@ -25,9 +25,13 @@ import { siemReadinessSkill } from './siem_readiness';
 import {
   automaticMigrationRulesStartMigrationSkill,
   automaticMigrationRulesSummarizeSkill,
+  automaticMigrationRulesStopMigrationSkill,
+  automaticMigrationRulesUpdateMigrationSkill,
+  automaticMigrationRulesDeleteMigrationSkill,
 } from './siem_migration';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { createDetectionCoverageSkill } from './detection_coverage';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
@@ -81,6 +85,10 @@ export const registerSkills = async ({
     );
   }
 
+  if (experimentalFeatures.dexAiSkillDetectionCoverage) {
+    await agentBuilder.skills.register(createDetectionCoverageSkill());
+  }
+
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
@@ -103,6 +111,9 @@ export const registerSkills = async ({
   ) {
     await agentBuilder.skills.register(automaticMigrationRulesSummarizeSkill);
     await agentBuilder.skills.register(automaticMigrationRulesStartMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesStopMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesUpdateMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesDeleteMigrationSkill);
   }
 
   if (experimentalFeatures.leadGenerationEnabled) {

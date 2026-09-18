@@ -127,7 +127,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           name: 'policy-1',
           description: 'policy-1 description',
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
-          matcher: "env == 'production'",
+          matcher: { expression: "env == 'production'" },
           group_by: ['service.name', 'environment'],
           throttle: { interval: '5m' },
           tags: [AGENT_BUILDER_TAG],

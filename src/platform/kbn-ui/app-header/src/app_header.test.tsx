@@ -10,14 +10,24 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import '@emotion/jest';
-import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/ui-app-menu';
 import type { AppHeaderMetadataItems } from './types';
 import { AppHeaderView } from './app_header';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
+let mockApplicationBreakpoint: string | undefined;
+
+jest.mock('@kbn/ui-chrome-layout', () => ({
+  useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
+}));
+
 describe('AppHeaderView', () => {
+  beforeEach(() => {
+    mockApplicationBreakpoint = undefined;
+  });
+
   it('renders an explicit share action in the title row only', () => {
     const onClick = jest.fn();
 
@@ -165,6 +175,74 @@ describe('AppHeaderView', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Add to Starred' })).toBeDisabled();
+  });
+
+  it('renders when the only content is an experimental dashboard AI action', () => {
+    const onClick = jest.fn();
+    render(<AppHeaderView experimentalDashboardAiAction={{ onClick }} />);
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.enhance)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enhance' })).toBeInTheDocument();
+  });
+
+  it('renders Enhance after Share and Favorite and calls onClick with returnFocus', () => {
+    const onClick = jest.fn();
+    const onToggle = jest.fn();
+
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        share={{ onClick: jest.fn() }}
+        favorite={{ status: 'unfavorited', onToggle }}
+        experimentalDashboardAiAction={{ onClick }}
+      />
+    );
+
+    const titleActions = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleActions);
+    const buttons = within(titleActions).getAllByRole('button');
+    expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Share',
+      'Add to Starred',
+      'Enhance',
+    ]);
+
+    fireEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.enhance));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(typeof onClick.mock.calls[0][0].returnFocus).toBe('function');
+  });
+
+  it('disables the enhance button when isDisabled is set', () => {
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), isDisabled: true }}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Enhance' })).toBeDisabled();
+  });
+
+  it('renders the enhance action as icon-only at the s application breakpoint', () => {
+    mockApplicationBreakpoint = 's';
+
+    render(
+      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+    );
+
+    const button = screen.getByRole('button', { name: 'Enhance' });
+    expect(button).toBeInTheDocument();
+    expect(button).not.toHaveTextContent('Enhance');
+  });
+
+  it('renders the enhance action with a label at the m application breakpoint', () => {
+    mockApplicationBreakpoint = 'm';
+
+    render(
+      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+    );
+
+    expect(screen.getByRole('button', { name: 'Enhance' })).toHaveTextContent('Enhance');
   });
 
   it('renders a description with a Learn more link', () => {
@@ -316,6 +394,40 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
   });
 
+  it('uses a larger no-back title offset in compact spacing', () => {
+    const { result } = renderHook(() => useEuiTheme());
+    const { rerender } = render(<AppHeaderView title="Dashboard" sticky={false} />);
+
+    const titleOffsetBox = () => screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title).closest('div');
+
+    expect(titleOffsetBox()).toHaveStyleRule(
+      'padding-inline-start',
+      result.current.euiTheme.size.xs
+    );
+
+    rerender(<AppHeaderView title="Dashboard" sticky={false} spacing="compact" />);
+    expect(titleOffsetBox()).toHaveStyleRule(
+      'padding-inline-start',
+      result.current.euiTheme.size.s
+    );
+  });
+
+  it('does not apply the no-back title offset when a back button is present', () => {
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        sticky={false}
+        spacing="compact"
+        back={{ href: '/app/dashboards', label: 'Dashboards' }}
+      />
+    );
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title).closest('div')).not.toHaveStyleRule(
+      'padding-inline-start',
+      expect.any(String)
+    );
+  });
+
   it('renders tab badge and test subject metadata', () => {
     render(
       <AppHeaderView
@@ -395,7 +507,7 @@ describe('AppHeaderView', () => {
   });
 
   it('uses back hrefs as final targets without rewriting them', () => {
-    render(<AppHeaderView back="/base-other/app" />);
+    render(<AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',

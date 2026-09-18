@@ -70,7 +70,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
   it('should call useDiscoverHistogramMock with correct arguments', async () => {
     await renderUseUnifiedHistogramRuntimeState();
 
-    expect(useDiscoverHistogramMock).toBeCalledWith(
+    expect(useDiscoverHistogramMock).toHaveBeenCalledWith(
       expect.objectContaining({
         initialLayoutProps: undefined,
       })
@@ -95,7 +95,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
 
     await renderUseUnifiedHistogramRuntimeState({ toolkit });
 
-    expect(useDiscoverHistogramMock).toBeCalledWith(
+    expect(useDiscoverHistogramMock).toHaveBeenCalledWith(
       expect.objectContaining({
         initialLayoutProps: { topPanelHeight: 123 },
       })
@@ -124,7 +124,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
       localStorageKeyPrefix,
     });
 
-    expect(useDiscoverHistogramMock).toBeCalledWith(
+    expect(useDiscoverHistogramMock).toHaveBeenCalledWith(
       expect.objectContaining({
         initialLayoutProps: { topPanelHeight: 456 },
       })

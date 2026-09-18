@@ -30,7 +30,7 @@ Use \`set_matcher\` to limit which alert episodes this policy notifies on. An em
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_matcher\\" | required |  |
-| \`matcher\` | string \\\\| null | required | A KQL query to match alert episodes, or null for a catch-all. |
+| \`matcher\` | object \\\\| null | required | Structured matcher for alert episodes, or null for a catch-all. |
 
 #### \`operation: \\"set_grouping\\"\`
 
@@ -71,7 +71,7 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 | \`name\` | string | required | The name of the action policy. (min length: 1, max length: 256) |
 | \`description\` | string | required | A description of the action policy. (max length: 1024) |
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
-| \`matcher\` | string | optional | A KQL query string to match alerts. (max length: 4096) |
+| \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. When \`matcher\` is \`null\`, or when both \`tags\` and \`expression\` are empty, the policy applies to all alerts. |
 | \`group_by\` | string[] | optional | The fields used to group alerts. (max items: 16) |
 | \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
 | \`grouping_mode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. |
@@ -384,6 +384,24 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 | \`recovering_timeframe\` | string | optional | Time window for recovering evaluation, e.g. 5m, 15m. |
 | \`operation\` | \\"set_state_transition\\" | required |  |
 
+#### \`operation: \\"set_dashboards\\"\`
+
+Use \`set_dashboards\` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a \`dashboard\` artifact (\`{ id, type: \\"dashboard\\", data: { dashboard_id } }\`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_dashboards\\" | required |  |
+| \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
+
+#### \`operation: \\"set_runbook\\"\`
+
+Use \`set_runbook\` to attach investigation markdown to the rule. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`), matching the create/update API. Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Content longer than 50000 characters is rejected.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_runbook\\" | required |  |
+| \`content\` | string \\\\| null | required | Markdown investigation steps. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`). Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Max 50000 characters. |
+
 #### \`operation: \\"validate\\"\`
 
 Use \`validate\` as the last operation to confirm the rule is complete and ready to save.
@@ -409,7 +427,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 | \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional | How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query. |
 | \`state_transition\` | object \\\\| null | optional |  |
 | \`grouping\` | object | optional | Grouping configuration. |
-| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`. (max items: 100) |
+| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboard_id\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |
 
 ## Query Formats
 

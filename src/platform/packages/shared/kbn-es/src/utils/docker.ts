@@ -1041,15 +1041,18 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ),
       });
       return node.name;
-    }).concat(
-      options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
-          )
-        : []
-    )
+    })
   );
   log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
+
+  // UIAM containers must start sequentially: uiam-cosmosdb first, then uiam.
+  // Starting them in parallel risks uiam connecting to CosmosDB before the
+  // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
+  if (options.uiam) {
+    for (const container of getUiamContainers({ includeOAuth: options.uiamOAuth })) {
+      nodeNames.push(await runUiamContainer(log, container));
+    }
+  }
 
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
