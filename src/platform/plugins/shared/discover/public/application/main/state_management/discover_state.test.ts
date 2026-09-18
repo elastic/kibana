@@ -1264,6 +1264,7 @@ describe('Discover state', () => {
           "sampleSize": undefined,
           "sharingSavedObjectProps": undefined,
           "sort": Array [],
+          "tabTypeState": undefined,
           "tags": undefined,
           "timeRange": undefined,
           "timeRestore": false,
