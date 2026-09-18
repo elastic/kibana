@@ -282,6 +282,24 @@ describe('actionTypeRegistry', () => {
       expect(specType?.subActions).toEqual(['checkIp', 'reportIp']);
     });
 
+    test('returns icon from connectorSpec metadata when present', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-connector',
+          name: 'Spec connector',
+          connectorSpec: {
+            metadata: { icon: 'data:image/svg+xml;base64,abc' },
+            actions: { checkIp: {} },
+          },
+        })
+      );
+
+      const specType = actionTypeRegistry.list().find((type) => type.id === 'spec-connector');
+      expect(specType?.icon).toBe('data:image/svg+xml;base64,abc');
+    });
+
     test('returns list of connector types with parameter schema', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const connectorTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);

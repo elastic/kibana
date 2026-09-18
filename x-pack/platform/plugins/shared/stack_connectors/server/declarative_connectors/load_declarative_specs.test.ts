@@ -9,7 +9,12 @@ import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_c
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { getContentHash } from './icon';
 import { loadDeclarativeConnectorSpec } from './load_declarative_specs';
-import { ABUSE_IPDB_SPEC_FIXTURE, CONNECTOR_ICON_FIXTURE } from './test_fixtures';
+import {
+  ABUSE_IPDB_SPEC_FIXTURE,
+  CONNECTOR_ICON_FIXTURE,
+  LIVE_OKTA_1_0_0_YAML,
+  LIVE_OKTA_ICON,
+} from './test_fixtures';
 
 const matchingIconHash = getContentHash(CONNECTOR_ICON_FIXTURE);
 
@@ -36,6 +41,20 @@ describe('loadDeclarativeConnectorSpec', () => {
         defaults: { headerField: 'Key' },
       }),
     ]);
+  });
+
+  it('materializes the live Okta catalog definition with its icon', () => {
+    const spec = loadDeclarativeConnectorSpec({
+      yamlPath: '/connectors/okta/1.0.0.yaml',
+      yaml: LIVE_OKTA_1_0_0_YAML,
+      icon: LIVE_OKTA_ICON,
+    });
+
+    expect(spec.metadata.id).toBe('.okta');
+    expect(spec.metadata.displayName).toBe('Okta (Declarative PoC)');
+    expect(Object.keys(spec.actions)).toEqual(['listUsers', 'getLogs']);
+    expect(spec.metadata.icon).toMatch(/^data:image\/svg\+xml;base64,/);
+    expect(spec.test.enabled).toBe(true);
   });
 
   it('rejects an icon whose content hash does not match', () => {

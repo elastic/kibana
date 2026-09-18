@@ -28,6 +28,7 @@ describe('transformConnectorTypesResponse', () => {
         is_experimental: true,
         is_testable: true,
         sub_actions: ['checkIp', 'reportIp'],
+        icon: 'data:image/svg+xml;base64,abc',
       },
       {
         id: 'actionType2Id',
@@ -60,6 +61,7 @@ describe('transformConnectorTypesResponse', () => {
         isExperimental: true,
         isTestable: true,
         subActions: ['checkIp', 'reportIp'],
+        icon: 'data:image/svg+xml;base64,abc',
       },
       {
         id: 'actionType2Id',

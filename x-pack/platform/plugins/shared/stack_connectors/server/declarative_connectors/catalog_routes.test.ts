@@ -14,13 +14,16 @@ const healthy = (): DeclarativeCatalogHealth => ({
   enabled: true,
   ready: true,
   sourceUrl: 'http://127.0.0.1:8089',
-  activeCatalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
-  versions: [{ id: '.abuseipdb', version: '1.1.0', status: 'active' }],
-  registeredTypeIds: ['.abuseipdb'],
-  skipped: [{ id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' }],
+  activeCatalogVersion: 'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95',
+  versions: [
+    { id: '.abuseipdb', version: '1.1.0', status: 'active' },
+    { id: '.okta', version: '1.0.0', status: 'active' },
+  ],
+  registeredTypeIds: ['.abuseipdb', '.okta'],
+  skipped: [],
   lastRefreshAt: '2026-09-17T12:00:00.000Z',
   indexReady: true,
-  indexCatalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
+  indexCatalogVersion: 'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95',
 });
 
 const createService = (
@@ -138,7 +141,7 @@ describe('registerDeclarativeCatalogRoutes', () => {
       body: expect.objectContaining({
         ready: true,
         indexReady: true,
-        registeredTypeIds: ['.abuseipdb'],
+        registeredTypeIds: ['.abuseipdb', '.okta'],
         lastError: expect.objectContaining({ message: 'connect ECONNREFUSED' }),
       }),
     });

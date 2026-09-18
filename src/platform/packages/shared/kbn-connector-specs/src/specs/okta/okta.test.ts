@@ -40,11 +40,8 @@ describe('Okta', () => {
     expect(Okta).toBeDefined();
   });
 
-  it('should be discoverable via getConnectorSpec (all_specs wiring)', () => {
-    const spec = getConnectorSpec('.okta');
-    expect(spec).toBe(Okta);
-    expect(spec?.actions.getUser).toBeDefined();
-    expect(spec?.actions.suspendUser.isTool).toBe(true);
+  it('is not registered in all_specs because it is catalog-owned', () => {
+    expect(getConnectorSpec('.okta')).toBeUndefined();
   });
 
   it('should have correct metadata', () => {

@@ -182,7 +182,7 @@ export const ActionTypeMenu = ({
     .map(([id, actionType]) => {
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
         return {
-          iconClass: getConnectorIcon(actionType.id),
+          iconClass: actionType.icon ?? getConnectorIcon(actionType.id),
           selectMessage: actionType.description ?? '',
           actionType,
           name: actionType.name,

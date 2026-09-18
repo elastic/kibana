@@ -7,7 +7,11 @@
 
 import { materializeDeclarativeConnectorSpec } from './materialize_spec';
 import { parseDeclarativeCatalogManifest, parseDeclarativeConnectorSpec } from './parse_spec';
-import { ABUSE_IPDB_SPEC_FIXTURE, LIVE_CATALOG_MANIFEST } from './test_fixtures';
+import {
+  ABUSE_IPDB_SPEC_FIXTURE,
+  LIVE_CATALOG_MANIFEST,
+  LIVE_OKTA_1_0_0_YAML,
+} from './test_fixtures';
 
 describe('declarative connector parsing', () => {
   it('parses and materializes the AbuseIPDB catalog definition', () => {
@@ -25,6 +29,27 @@ describe('declarative connector parsing', () => {
       baseUrl: 'http://127.0.0.1:8090',
     });
     expect(() => materialized.actions.checkIp.input.parse({ ipAddress: 'not-an-ip' })).toThrow();
+  });
+
+  it('parses and materializes the Okta catalog definition', () => {
+    const parsed = parseDeclarativeConnectorSpec(LIVE_OKTA_1_0_0_YAML);
+    const materialized = materializeDeclarativeConnectorSpec(parsed);
+
+    expect(materialized.metadata.id).toBe('.okta');
+    expect(parsed.metadata.icon).toEqual({
+      path: '1.0.0.svg',
+      contentHash: 'sha256:61285080a6b979ac58e3a9f3c07ed506ee9075db01bd088bfdeaa1a57bdb9f84',
+    });
+    expect(Object.keys(materialized.actions)).toEqual(['listUsers', 'getLogs']);
+    expect(materialized.schema?.parse({})).toEqual({
+      orgUrl: 'http://127.0.0.1:8090',
+    });
+    expect(materialized.auth?.types).toEqual([
+      expect.objectContaining({
+        type: 'api_key_header',
+        defaults: { headerField: 'Authorization' },
+      }),
+    ]);
   });
 
   it('accepts any auth type registered by connectors v2', () => {
@@ -128,11 +153,11 @@ describe('parseDeclarativeCatalogManifest', () => {
 
     expect(manifest.schemaVersion).toBe(1);
     expect(manifest.catalogVersion).toBe(
-      'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403'
+      'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95'
     );
     expect(manifest.activeVersions).toEqual({
       '.abuseipdb': '1.1.0',
-      '.declarative-okta': '1.0.0',
+      '.okta': '1.0.0',
     });
     expect(manifest.connectors).toEqual(
       expect.arrayContaining([
@@ -141,6 +166,12 @@ describe('parseDeclarativeCatalogManifest', () => {
           version: '1.1.0',
           definitionUrl: 'connectors/abuseipdb/1.1.0.yaml',
           contentHash: 'sha256:e548e6566772e664d7770415f6be588a22d24608e6821c534835307cef7a06f2',
+        }),
+        expect.objectContaining({
+          id: '.okta',
+          version: '1.0.0',
+          definitionUrl: 'connectors/okta/1.0.0.yaml',
+          contentHash: 'sha256:e6ccf241026f7522068eb86cec5b13e06be9208741b8b7db8df510817a790591',
         }),
       ])
     );

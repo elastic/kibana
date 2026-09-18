@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "snapshot:abuseipdb-1.1.0",
+  "catalogVersion": "snapshot:abuseipdb-1.1.0+okta-1.0.0",
   "activeVersions": {
-    ".abuseipdb": "1.1.0"
+    ".abuseipdb": "1.1.0",
+    ".okta": "1.0.0"
   },
   "connectors": [
     {
@@ -10,6 +11,12 @@
       "version": "1.1.0",
       "definitionUrl": "abuseipdb.yaml",
       "contentHash": "sha256:9365bb3b9f22afa3ac5b4aaaf4d720a2f3faf0b6189e06b0c7665c1c256f6221"
+    },
+    {
+      "id": ".okta",
+      "version": "1.0.0",
+      "definitionUrl": "okta.yaml",
+      "contentHash": "sha256:5c45d20e6083b963c6464187fcba00e5eb4b407355b10d09b17f073f162fcaaa"
     }
   ]
 }

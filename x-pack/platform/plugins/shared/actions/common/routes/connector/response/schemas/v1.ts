@@ -170,6 +170,14 @@ export const connectorTypeResponseSchema = schema.object(
         },
       })
     ),
+    icon: schema.maybe(
+      schema.string({
+        maxLength: 65536,
+        meta: {
+          description: 'Optional icon key or data URL for this connector type in the UI.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_type_response' } }
 );

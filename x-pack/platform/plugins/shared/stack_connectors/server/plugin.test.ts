@@ -202,6 +202,11 @@ describe('Stack Connectors Plugin', () => {
           id: '.abuseipdb',
         })
       );
+      expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '.okta',
+        })
+      );
 
       // SubAction Connectors
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
@@ -420,6 +425,9 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSpecProvider).toHaveBeenCalledTimes(1);
       expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: '.abuseipdb' })
+      );
+      expect(actionsSetup.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: '.okta' })
       );
 
       const actionsStart = actionsMock.createStart();

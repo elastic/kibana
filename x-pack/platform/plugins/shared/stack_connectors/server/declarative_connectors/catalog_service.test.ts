@@ -25,10 +25,11 @@ const KIBANA_MINOR = '9.3';
 const esClient = {} as ElasticsearchClient;
 
 const liveSnapshot = (overrides: Partial<CatalogSnapshot> = {}): CatalogSnapshot => ({
-  catalogVersion: 'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
+  catalogVersion: 'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95',
   versions: [
     { id: '.abuseipdb', version: '1.1.0', status: 'active' },
     { id: '.abuseipdb', version: '1.0.0', status: 'published' },
+    { id: '.okta', version: '1.0.0', status: 'active' },
   ],
   assets: [
     {
@@ -37,7 +38,7 @@ const liveSnapshot = (overrides: Partial<CatalogSnapshot> = {}): CatalogSnapshot
       icon: LIVE_ABUSEIPDB_ICON,
     },
   ],
-  skipped: [{ id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' }],
+  skipped: [],
   ...overrides,
 });
 
@@ -100,7 +101,7 @@ const storedView = (
 });
 
 describe('DeclarativeCatalogService', () => {
-  it('registers exactly .abuseipdb from the live 1.1.0 payload and keeps .declarative-* skipped', async () => {
+  it('registers .abuseipdb from the live 1.1.0 payload', async () => {
     const registerSpec = jest.fn();
     const storage = createStorage();
     const service = createService(
@@ -120,10 +121,10 @@ describe('DeclarativeCatalogService', () => {
         enabled: true,
         ready: true,
         registeredTypeIds: ['.abuseipdb'],
-        skipped: [{ id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' }],
+        skipped: [],
         indexReady: true,
         indexCatalogVersion:
-          'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403',
+          'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95',
       })
     );
   });

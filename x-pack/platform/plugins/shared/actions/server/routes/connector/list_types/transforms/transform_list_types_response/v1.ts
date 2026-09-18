@@ -29,6 +29,7 @@ export const transformListTypesResponse = (
       isExperimental,
       isTestable,
       subActions,
+      icon,
     }) => ({
       id,
       name,
@@ -46,6 +47,7 @@ export const transformListTypesResponse = (
       is_experimental: isExperimental,
       is_testable: Boolean(isTestable),
       ...(subActions ? { sub_actions: subActions } : {}),
+      ...(icon !== undefined ? { icon } : {}),
     })
   );
 };

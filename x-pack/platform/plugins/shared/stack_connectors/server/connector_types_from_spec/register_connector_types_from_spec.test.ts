@@ -29,6 +29,7 @@ describe('registerConnectorTypesFromSpecs', () => {
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).not.toContain('.inboundWebhook');
     expect(ids).not.toContain('.abuseipdb');
+    expect(ids).not.toContain('.okta');
     expect(ids).toHaveLength(
       Object.values(connectorsSpecs).filter((spec) => !isInboundOnlyConnectorSpec(spec)).length
     );
@@ -42,6 +43,7 @@ describe('registerConnectorTypesFromSpecs', () => {
     const ids = registeredIds(actions.registerType as jest.Mock);
     expect(ids).toContain('.inboundWebhook');
     expect(ids).not.toContain('.abuseipdb');
+    expect(ids).not.toContain('.okta');
     expect(ids).toHaveLength(Object.values(connectorsSpecs).length);
   });
 });

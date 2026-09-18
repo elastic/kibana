@@ -66,7 +66,7 @@ test:
 
 export const OKTA_SPEC_FIXTURE = `
 schemaVersion: 1
-id: .declarative-okta
+id: .okta
 version: 1.0.0
 metadata:
   displayName: Okta
@@ -110,6 +110,7 @@ export const LIVE_ABUSEIPDB_1_1_0_YAML = liveFixture('abuseipdb_1.1.0.yaml');
 export const LIVE_ABUSEIPDB_1_0_0_YAML = liveFixture('abuseipdb_1.0.0.yaml');
 export const LIVE_ABUSEIPDB_ICON = liveFixture('abuseipdb_1.1.0.svg');
 export const LIVE_OKTA_1_0_0_YAML = liveFixture('okta_1.0.0.yaml');
+export const LIVE_OKTA_ICON = liveFixture('okta_1.0.0.svg');
 
 export const LIVE_CATALOG_PATHS = {
   manifest: '/catalog.json',
@@ -117,6 +118,7 @@ export const LIVE_CATALOG_PATHS = {
   abuseipdbPublishedDefinition: '/connectors/abuseipdb/1.0.0.yaml',
   abuseipdbIcon: '/connectors/abuseipdb/1.1.0.svg',
   oktaDefinition: '/connectors/okta/1.0.0.yaml',
+  oktaIcon: '/connectors/okta/1.0.0.svg',
 } as const;
 
 export interface FetchDoubleResponse {
@@ -158,5 +160,6 @@ export const createLiveCatalogFetchDouble = (overrides: Record<string, FetchDoub
     [LIVE_CATALOG_PATHS.abuseipdbPublishedDefinition]: { body: LIVE_ABUSEIPDB_1_0_0_YAML },
     [LIVE_CATALOG_PATHS.abuseipdbIcon]: { body: LIVE_ABUSEIPDB_ICON },
     [LIVE_CATALOG_PATHS.oktaDefinition]: { body: LIVE_OKTA_1_0_0_YAML },
+    [LIVE_CATALOG_PATHS.oktaIcon]: { body: LIVE_OKTA_ICON },
     ...overrides,
   });

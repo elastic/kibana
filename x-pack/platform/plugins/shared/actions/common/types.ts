@@ -38,6 +38,8 @@ export interface ActionType {
   isTestable?: boolean;
   /** Action names from a spec-sourced connector type; omitted for classic connectors. */
   subActions?: string[];
+  /** Spec metadata icon: EUI icon name or data/HTTP URL. */
+  icon?: string;
 }
 
 export enum InvalidEmailReason {

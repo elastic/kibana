@@ -276,33 +276,37 @@ export class ActionTypeRegistry {
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
       })
-      .map(([actionTypeId, actionType]) => ({
-        id: actionTypeId,
-        name: actionType.name,
-        minimumLicenseRequired: actionType.minimumLicenseRequired,
-        enabled: this.isActionTypeEnabled(actionTypeId),
-        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-        supportedFeatureIds: actionType.supportedFeatureIds,
-        isSystemActionType: !!actionType.isSystemActionType,
-        source: actionType.source || ACTION_TYPE_SOURCES.stack,
-        subFeature: actionType.subFeature,
-        ...(exposeValidation === true && actionType.validate.params
-          ? {
-              validate: {
-                params: actionType.validate.params,
-              },
-            }
-          : {}),
-        isDeprecated: !!actionType.isDeprecated,
-        allowMultipleSystemActions: actionType.allowMultipleSystemActions,
-        description: actionType.description,
-        isExperimental: actionType.isExperimental,
-        isTestable: Boolean(actionType.isTestable),
-        ...(actionType.connectorSpec
-          ? { subActions: Object.keys(actionType.connectorSpec.actions) }
-          : {}),
-      }));
+      .map(([actionTypeId, actionType]) => {
+        const specIcon = actionType.connectorSpec?.metadata?.icon;
+        return {
+          id: actionTypeId,
+          name: actionType.name,
+          minimumLicenseRequired: actionType.minimumLicenseRequired,
+          enabled: this.isActionTypeEnabled(actionTypeId),
+          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+          supportedFeatureIds: actionType.supportedFeatureIds,
+          isSystemActionType: !!actionType.isSystemActionType,
+          source: actionType.source || ACTION_TYPE_SOURCES.stack,
+          subFeature: actionType.subFeature,
+          ...(exposeValidation === true && actionType.validate.params
+            ? {
+                validate: {
+                  params: actionType.validate.params,
+                },
+              }
+            : {}),
+          isDeprecated: !!actionType.isDeprecated,
+          allowMultipleSystemActions: actionType.allowMultipleSystemActions,
+          description: actionType.description,
+          isExperimental: actionType.isExperimental,
+          isTestable: Boolean(actionType.isTestable),
+          ...(actionType.connectorSpec
+            ? { subActions: Object.keys(actionType.connectorSpec.actions) }
+            : {}),
+          ...(typeof specIcon === 'string' ? { icon: specIcon } : {}),
+        };
+      });
   }
 
   /**

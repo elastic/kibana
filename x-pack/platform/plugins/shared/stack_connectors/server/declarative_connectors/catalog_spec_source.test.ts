@@ -15,6 +15,8 @@ import {
   LIVE_ABUSEIPDB_ICON,
   LIVE_CATALOG_MANIFEST,
   LIVE_CATALOG_PATHS,
+  LIVE_OKTA_1_0_0_YAML,
+  LIVE_OKTA_ICON,
 } from './test_fixtures';
 
 jest.mock('node-fetch');
@@ -33,36 +35,70 @@ describe('CatalogSpecSource', () => {
     mockedFetch.mockReset();
   });
 
-  it('returns one asset for the active AbuseIPDB version and skips reserved and published rows', async () => {
+  it('returns active AbuseIPDB and Okta assets and skips published rows', async () => {
     mockedFetch.mockImplementation(createLiveCatalogFetchDouble() as unknown as typeof fetch);
 
     const snapshot = await createSource().loadSnapshot();
 
     expect(snapshot.catalogVersion).toBe(
-      'sha256:dd864d3dc6f3cd562d2fb72f102f777e88061d253e60712521fda1b054e41403'
+      'sha256:72f5f754750fbdc435db7567e208a1ebffebe4dff5633f401457fea29d2e8e95'
     );
-    expect(snapshot.assets).toHaveLength(1);
+    expect(snapshot.assets).toHaveLength(2);
     expect(snapshot.assets[0].yaml).toBe(LIVE_ABUSEIPDB_1_1_0_YAML);
     expect(snapshot.assets[0].icon).toBe(LIVE_ABUSEIPDB_ICON);
     expect(snapshot.assets[0].yamlPath).toBe(
       'http://127.0.0.1:8089/connectors/abuseipdb/1.1.0.yaml'
     );
+    expect(snapshot.assets[1].yaml).toBe(LIVE_OKTA_1_0_0_YAML);
+    expect(snapshot.assets[1].icon).toBe(LIVE_OKTA_ICON);
+    expect(snapshot.assets[1].yamlPath).toBe('http://127.0.0.1:8089/connectors/okta/1.0.0.yaml');
     expect(snapshot.versions).toEqual([
       { id: '.abuseipdb', version: '1.1.0', status: 'active' },
       { id: '.abuseipdb', version: '1.0.0', status: 'published' },
+      { id: '.okta', version: '1.0.0', status: 'active' },
     ]);
-    expect(snapshot.skipped).toEqual([
-      { id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' },
-    ]);
+    expect(snapshot.skipped).toEqual([]);
 
     const requestedPaths = mockedFetch.mock.calls.map(([url]) => new URL(String(url)).pathname);
     expect(requestedPaths).toEqual([
       LIVE_CATALOG_PATHS.manifest,
       LIVE_CATALOG_PATHS.abuseipdbDefinition,
       LIVE_CATALOG_PATHS.abuseipdbIcon,
+      LIVE_CATALOG_PATHS.oktaDefinition,
+      LIVE_CATALOG_PATHS.oktaIcon,
     ]);
     expect(requestedPaths).not.toContain(LIVE_CATALOG_PATHS.abuseipdbPublishedDefinition);
-    expect(requestedPaths).not.toContain(LIVE_CATALOG_PATHS.oktaDefinition);
+  });
+
+  it('skips connector ids reserved with the .declarative- prefix', async () => {
+    const manifest = {
+      schemaVersion: 1,
+      catalogVersion: 'sha256:reserved',
+      activeVersions: { '.declarative-okta': '1.0.0' },
+      connectors: [
+        {
+          id: '.declarative-okta',
+          version: '1.0.0',
+          definitionUrl: 'connectors/okta/1.0.0.yaml',
+          contentHash: 'sha256:e6ccf241026f7522068eb86cec5b13e06be9208741b8b7db8df510817a790591',
+        },
+      ],
+    };
+    mockedFetch.mockImplementation(
+      createLiveCatalogFetchDouble({
+        [LIVE_CATALOG_PATHS.manifest]: { body: JSON.stringify(manifest) },
+      }) as unknown as typeof fetch
+    );
+
+    const snapshot = await createSource().loadSnapshot();
+
+    expect(snapshot.assets).toHaveLength(0);
+    expect(snapshot.versions).toEqual([]);
+    expect(snapshot.skipped).toEqual([
+      { id: '.declarative-okta', version: '1.0.0', reason: 'reserved_prefix' },
+    ]);
+    const requestedPaths = mockedFetch.mock.calls.map(([url]) => new URL(String(url)).pathname);
+    expect(requestedPaths).toEqual([LIVE_CATALOG_PATHS.manifest]);
   });
 
   it('rejects a YAML hash mismatch', async () => {
@@ -78,7 +114,9 @@ describe('CatalogSpecSource', () => {
 
     const snapshot = await createSource().loadSnapshot();
 
-    expect(snapshot.assets).toHaveLength(0);
+    expect(snapshot.assets.map((asset) => asset.yamlPath)).toEqual([
+      'http://127.0.0.1:8089/connectors/okta/1.0.0.yaml',
+    ]);
     expect(snapshot.skipped).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -100,7 +138,9 @@ describe('CatalogSpecSource', () => {
 
     const snapshot = await createSource().loadSnapshot();
 
-    expect(snapshot.assets).toHaveLength(0);
+    expect(snapshot.assets.map((asset) => asset.yamlPath)).toEqual([
+      'http://127.0.0.1:8089/connectors/okta/1.0.0.yaml',
+    ]);
     expect(snapshot.skipped).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

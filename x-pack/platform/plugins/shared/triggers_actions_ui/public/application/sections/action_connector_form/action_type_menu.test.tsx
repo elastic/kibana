@@ -397,6 +397,39 @@ describe('connector_add_flyout', () => {
       expect(screen.getByText('Send data via spec connector')).toBeInTheDocument();
     });
 
+    it('renders a spec connector icon from the list types response', async () => {
+      const onActionTypeChange = jest.fn();
+      const icon = 'data:image/svg+xml;base64,YWJj';
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Spec Connector',
+          description: 'Send data via spec connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+          icon,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      expect(await screen.findByTestId('my-spec-connector-card')).toBeInTheDocument();
+      expect(screen.getByTestId('my-spec-connector-card').querySelector('[data-euiicon-type]')).toHaveAttribute(
+        'data-euiicon-type',
+        icon
+      );
+    });
+
     it('does not render a spec connector when enabledInConfig is false', async () => {
       const onActionTypeChange = jest.fn();
       loadActionTypes.mockResolvedValue([

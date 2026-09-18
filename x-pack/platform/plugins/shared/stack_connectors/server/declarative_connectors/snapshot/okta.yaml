@@ -5,7 +5,7 @@ metadata:
   displayName: Okta (Declarative PoC)
   description: Read-only Okta users and System Log actions from a catalog-loaded YAML definition
   icon:
-    path: 1.0.0.svg
+    path: okta.svg
     contentHash: sha256:61285080a6b979ac58e3a9f3c07ed506ee9075db01bd088bfdeaa1a57bdb9f84
   minimumLicense: enterprise
   isTechnicalPreview: true

@@ -127,6 +127,38 @@ describe('listTypesRoute', () => {
     });
   });
 
+  it('maps icon from spec metadata onto the list types response', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listTypesRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+    const icon = 'data:image/svg+xml;base64,abc';
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce([
+      createMockConnectorType({
+        id: '.abuseipdb',
+        name: 'AbuseIPDB',
+        source: 'spec',
+        icon,
+      }),
+    ]);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        expect.objectContaining({
+          id: '.abuseipdb',
+          icon,
+        }),
+      ],
+    });
+  });
+
   it('passes feature_id if provided as query parameter', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
