@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { AnnotationIcon } from '.';
@@ -23,15 +23,15 @@ export function NewLineAnnotation({
   slo?: SLOWithSummaryResponse;
   isCreateOpen: boolean;
 }) {
-  const { watch, getValues } = useFormContext<CreateAnnotationParams>();
-  const eventEnd = watch('event.end');
+  const { control, getValues } = useFormContext<CreateAnnotationParams>();
+  const eventEnd = useWatch({ control, name: 'event.end' });
+  const annotationStyle = useWatch({ control, name: 'annotation.style' });
+  const annotationType = useWatch({ control, name: 'annotation.type' });
 
   if (eventEnd || !isCreateOpen) {
     return null;
   }
   const values = getValues();
-  const annotationStyle = watch('annotation.style');
-  const annotationType = watch('annotation.type');
 
   return (
     <ObsLineAnnotation
