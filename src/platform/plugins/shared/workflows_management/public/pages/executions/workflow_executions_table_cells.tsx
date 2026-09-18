@@ -77,6 +77,7 @@ export const getWorkflowExecutionActionContextFromDto = (
   executionId: execution.id,
   workflowId: execution.workflowId,
   context: execution.context,
+  isTestRun: execution.isTestRun,
 });
 
 export const WorkflowExecutionWorkflowCell = ({

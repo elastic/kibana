@@ -8,8 +8,8 @@
 /**
  * Detection Watch Worker settings, owned by the Detection Watch team. Adding a Rule Tuning setting
  * means: add the field to `RuleTuningWorkerExtras` in `detection_watch_settings.schema.yaml`, add
- * its default here, forward it in the Rule Tuning workflow template, and build its control in the
- * Watch page's Detection custom settings component. Nothing outside Detection-owned code changes.
+ * its default here, forward it in the Rule Tuning workflow template, and build its control under
+ * the Watch page's `custom_settings/rule_tuning/`. Nothing outside Detection-owned code changes.
  */
 
 import {

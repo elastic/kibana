@@ -25,7 +25,6 @@ import { optionalLabel } from './components/optional_label';
 import { PolicyScopeDescription } from './components/policy_scope_description';
 import { RuleTagsSelector } from './components/rule_tags_selector';
 import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
-import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
 
@@ -105,21 +104,6 @@ export const ActionPolicyForm = () => {
                 )}
                 rows={3}
               />
-            </EuiFormRow>
-          )}
-        />
-        <Controller
-          name="tags"
-          control={control}
-          render={({ field }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.actionPolicy.form.tags', {
-                defaultMessage: 'Tags',
-              })}
-              labelAppend={optionalLabel}
-              fullWidth
-            >
-              <TagsInput value={field.value} onChange={field.onChange} />
             </EuiFormRow>
           )}
         />
