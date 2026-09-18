@@ -55,7 +55,7 @@ describe('Endpoint analysis run', () => {
   });
 
   // The dispatching Worker re-sends a pending indicator every tick until this run
-  // marks it processed, so the key has to be the indicator.
+  // retires it, so the key has to be the indicator.
   it('collapses repeat dispatches of the same indicator', () => {
     expect(definition.settings?.concurrency).toEqual({
       key: 'endpoint-analysis-{{ inputs.ki_id }}',
@@ -80,17 +80,79 @@ describe('Endpoint analysis run', () => {
     );
   });
 
-  it('marks the indicator processed only after a valid request', () => {
+  it('marks the indicator processed only after a valid request that wrote something', () => {
     const mark = stepByName('mark_processed');
     expect(mark?.type).toBe('context-engine.updateKi');
     expect(mark?.if).toContain('attack_discovery_alert_id');
     expect(mark?.if).toContain('investigation_id');
+    expect(mark?.if).toContain('steps.resolve_run_outcome.output.attached == true');
     expect(mark?.with).toEqual(
       expect.objectContaining({
         ai_index_id: '{{ inputs.ai_index_id }}',
         ki_id: '{{ inputs.ki_id }}',
       })
     );
+  });
+
+  // Every attach step continues on failure, so a run can resolve a host, analyze it,
+  // and still land nothing on the investigation — a rejected payload, or a principal
+  // without OWNER access on the conversation. `processed` would then retire the
+  // indicator for work that never arrived, and nothing would ever say so.
+  describe('a run that writes nothing to the investigation', () => {
+    it('is retired as failed rather than processed', () => {
+      const markFailed = stepByName('mark_failed');
+      expect(markFailed?.type).toBe('context-engine.updateKi');
+      expect(markFailed?.if).toContain('steps.resolve_run_outcome.output.attached != true');
+      expect(markFailed?.with).toEqual({
+        ai_index_id: '{{ inputs.ai_index_id }}',
+        ki_id: '{{ inputs.ki_id }}',
+        ki: {
+          attributes: {
+            status: 'failed',
+            failure_reason:
+              'Nothing could be attached to investigation {{ steps.resolve_request.output.investigation_id }}',
+          },
+        },
+      });
+    });
+
+    // Both outcomes write a terminal status. Leaving either path without one would put
+    // the indicator back in the sweep's selector and start a 15m agent run per minute.
+    it('leaves no valid request on a status the sweep still selects', () => {
+      const statuses = ['mark_processed', 'mark_failed', 'mark_invalid'].map(
+        (name) => (stepByName(name)?.with?.ki as { attributes?: { status?: string } })?.attributes
+      );
+      expect(statuses.map((attributes) => attributes?.status)).toEqual([
+        'processed',
+        'failed',
+        'invalid',
+      ]);
+      expect(stepByName('mark_processed')?.if).toContain('attached == true');
+      expect(stepByName('mark_failed')?.if).toContain('attached != true');
+    });
+
+    // The guard is only as good as the list it checks, so a new attachment that is not
+    // in it would reopen exactly the hole this closes.
+    it('accounts for every attachment the valid path can write', () => {
+      const attached = String(stepByName('resolve_run_outcome')?.with?.attached);
+      const validPathAttachments = allSteps
+        .filter(({ type }) => type === 'ai.attachment.add')
+        .map(({ name }) => name)
+        // The malformed-indicator note belongs to the `mark_invalid` path, which is
+        // terminal on its own and never reaches this decision.
+        .filter((name) => name !== 'attach_invalid_request');
+
+      expect(validPathAttachments).not.toHaveLength(0);
+      for (const name of validPathAttachments) {
+        expect(attached).toContain(`steps.${name}.output.attachment_id`);
+      }
+    });
+
+    it('reports whether anything was attached so a handoff can be desk-tested', () => {
+      expect(stepByName('emit_result')?.with?.attachments_written).toBe(
+        '${{ steps.resolve_run_outcome.output.attached == true }}'
+      );
+    });
   });
 
   // A malformed indicator stays `pending` unless something retires it, and the sweep

@@ -87,6 +87,15 @@ describe('Endpoint analysis worker', () => {
     expect(query).toContain('{{ workflow.spaceId }}');
   });
 
+  // The AI index only exists once something has written an indicator into it, so a
+  // Worker switched on before the first handoff would otherwise fail a step every
+  // minute against an index that is merely empty.
+  it('treats a missing AI index as an empty one', () => {
+    const search = stepByName('search_pending_indicators');
+    expect(search?.with?.ignore_unavailable).toBe(true);
+    expect(search?.with?.allow_no_indices).toBe(true);
+  });
+
   it('dispatches the global analysis asynchronously and writes no indicators', () => {
     const start = stepByName('start_run');
     expect(start?.type).toBe('workflow.executeAsync');
@@ -94,13 +103,23 @@ describe('Endpoint analysis worker', () => {
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID
     );
     expect(start?.with?.inputs).toEqual({
-      ki_id: '{{ foreach.item._id }}',
+      ki_id: '{{ foreach.item._source.id | default: foreach.item._id }}',
       ai_index_id: '{{ inputs.ai_index_id | default: consts.ai_index_id }}',
     });
 
     expect(allSteps.some(({ type }) => type === 'context-engine.updateKi')).toBe(false);
     expect(allSteps.some(({ type }) => type === 'context-engine.createKi')).toBe(false);
     expect(allSteps.some(({ type }) => type === 'ai.agent')).toBe(false);
+  });
+
+  // `updateKi` resolves a write on the `id` field and only falls back to `_id` for
+  // documents that have none, so the dispatch has to carry `id` for the child's
+  // terminal write to land. The search is what has to fetch it.
+  it('fetches the indicator id the child needs to retire it', () => {
+    expect(stepByName('search_pending_indicators')?.with?._source).toEqual(['id']);
+    expect(stepByName('start_run')?.with?.inputs).toMatchObject({
+      ki_id: expect.stringContaining('_source.id'),
+    });
   });
 
   it('starts up to two analyses per sweep', () => {

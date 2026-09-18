@@ -13,8 +13,8 @@ tags:
 
 settings:
   # One run per indicator. The per-space worker re-dispatches an indicator on every
-  # tick until `mark_processed` lands, so this is what collapses those repeats into
-  # the run already in flight instead of re-analyzing the same host.
+  # tick until this run retires it, so this is what collapses those repeats into the
+  # run already in flight instead of re-analyzing the same host.
   concurrency:
     key: "endpoint-analysis-{{ inputs.ki_id }}"
     strategy: drop
@@ -48,11 +48,13 @@ outputs:
       type: string
     ki_processed:
       type: boolean
+    attachments_written:
+      type: boolean
 
 steps:
   # Fail closed: if the read errors, the run fails, the indicator stays pending,
   # and the next sweep starts a new run. Zero hits continue into resolve_request
-  # with blank ids; mark_processed is skipped.
+  # with blank ids, where neither terminal write applies.
   - name: read_ki
     type: elasticsearch.search
     with:
@@ -532,15 +534,31 @@ steps:
               status: invalid
               invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
 
-    # Only `attributes.status` is written. `attributes` merges on update; `tags`
-    # is a list and a partial update would replace the full list.
+  # Whether anything at all reached the investigation. Every attach step continues on
+  # failure, so without this a run whose every write was rejected still reports success
+  # and retired the indicator with nothing to show for it. A problem note counts: "here
+  # is why this could not run" is a real result on the investigation. Silence is not.
+  - name: resolve_run_outcome
+    type: data.set
+    with:
+      attached: >-
+        ${{ steps.attach_timeline.output.attachment_id != blank
+          or steps.attach_iocs.output.attachment_id != blank
+          or steps.attach_rationale.output.attachment_id != blank
+          or steps.attach_no_host.output.attachment_id != blank
+          or steps.attach_fetch_alert_problem.output.attachment_id != blank
+          or steps.attach_extract_host_problem.output.attachment_id != blank }}
+
+  # Only `attributes.status` is written. `attributes` merges on update; `tags`
+  # is a list and a partial update would replace the full list.
   - name: mark_processed
     type: context-engine.updateKi
     on-failure:
       continue: true
     if: >-
       ${{ steps.resolve_request.output.attack_discovery_alert_id != blank
-        and steps.resolve_request.output.investigation_id != blank }}
+        and steps.resolve_request.output.investigation_id != blank
+        and steps.resolve_run_outcome.output.attached == true }}
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -548,9 +566,34 @@ steps:
         attributes:
           status: processed
 
+  # The run resolved a valid request and then wrote nothing. Retired rather than left
+  # pending because a forensic run can be costly and the sweep would start a
+  # fresh one every minute for the rest of the lookback window; what lands here — no
+  # OWNER access on the conversation, a deleted investigation, a payload the attachment
+  # type rejects — is not what a retry fixes. The status is distinct from `processed` so
+  # the indicator reads as what it is rather than passing for work that was done.
+  - name: mark_failed
+    type: context-engine.updateKi
+    on-failure:
+      continue: true
+    if: >-
+      ${{ steps.resolve_request.output.attack_discovery_alert_id != blank
+        and steps.resolve_request.output.investigation_id != blank
+        and steps.resolve_run_outcome.output.attached != true }}
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: "Nothing could be attached to investigation {{ steps.resolve_request.output.investigation_id }}"
+
   - name: emit_result
     type: workflow.output
     status: completed
     with:
       ki_id: "{{ inputs.ki_id }}"
       ki_processed: "${{ steps.mark_processed.output.result != null }}"
+      # Reported so a run that analyzed a host but landed nothing on the investigation
+      # is visible from its own output, which is what makes the handoff desk-testable.
+      attachments_written: "${{ steps.resolve_run_outcome.output.attached == true }}"

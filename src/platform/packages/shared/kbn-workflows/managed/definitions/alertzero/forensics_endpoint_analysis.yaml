@@ -82,9 +82,15 @@ steps:
       continue: true
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+      ignore_unavailable: true
+      allow_no_indices: true
       size: "${{ steps.resolve_batch_size.output.size }}"
+      # The KI's own id, which is what `context-engine.updateKi` resolves a write on.
+      # It happens to equal `_id` for the index-backed AI index `createKi` creates by
+      # default, but not for a data-stream-backed one, where `_id` identifies a single
+      # revision. Carrying it keeps the dispatch correct either way.
       _source:
-        - attributes.space_id
+        - id
       sort:
         - "@timestamp":
             order: asc
@@ -129,7 +135,12 @@ steps:
         with:
           workflow-id: system-security-forensics-run-endpoint-analysis
           inputs:
-            ki_id: "{{ foreach.item._id }}"
+            # The KI's own id, falling back to `_id` for a document written before
+            # `createKi` stamped one. `updateKi` resolves on the `id` field and only
+            # falls back to `_id` for documents that have none, so handing it the
+            # revision `_id` of a data-stream-backed index would leave every write
+            # unresolved and the indicator pending forever.
+            ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
 
   - name: emit_result
