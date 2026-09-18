@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV3 } from './v3';
 
@@ -16,9 +15,8 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV3 } 
  * - `query` gains `base` and an optional `breach.segment`, which is all a
  *   reader needs. A rule is a `base` query plus an optional breach condition.
  * - `recovery_strategy` / `no_data_strategy` become the `recovery` / `no_data`
- *   objects, each a discriminated union that owns its query. They are required
- *   for `kind: alert` and rejected for `kind: signal`, so no reader has to
- *   interpret absence.
+ *   objects, each a discriminated union that owns its query. Alert rules always
+ *   carry both and signal rules never do, so no reader has to interpret absence.
  * - `state_transition` nests its six prefixed scalars under `pending` and
  *   `recovering`.
  *
@@ -107,20 +105,14 @@ const stateTransitionSchema = schema.object({
   recovering_timeframe: schema.maybe(schema.string()),
 });
 
-/** Required for alert rules and rejected for signal rules, which have no episodes to transition. */
-const lifecycleObject = <T>(attributeSchema: Type<T>) =>
-  schema.conditional(
-    schema.siblingRef('kind'),
-    schema.literal('alert'),
-    attributeSchema,
-    schema.never()
-  );
-
 export const ruleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV3.extends({
   recovery_strategy: legacyRecoveryStrategy,
   no_data_strategy: legacyNoDataStrategy,
   query: querySchema,
-  recovery: lifecycleObject(recoverySchema),
-  no_data: lifecycleObject(noDataSchema),
+  // Present for alert rules and absent for signal rules. The registry deep-freezes
+  // every type, and `schema.conditional` mutates its branches on first validate, so
+  // the alert/signal requirement is enforced by the request schemas instead.
+  recovery: schema.maybe(recoverySchema),
+  no_data: schema.maybe(noDataSchema),
   state_transition: schema.maybe(stateTransitionSchema),
 });

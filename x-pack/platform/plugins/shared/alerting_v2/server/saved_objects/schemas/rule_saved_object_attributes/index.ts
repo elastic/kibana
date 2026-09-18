@@ -20,17 +20,8 @@ export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttribute
  */
 export type RuleSavedObjectAttributesV3 = TypeOf<typeof ruleSavedObjectAttributesSchemaV3>;
 
-type RuleSavedObjectAttributesV4 = TypeOf<typeof ruleSavedObjectAttributesSchemaV4>;
-
-/**
- * Latest attributes shape, introduced by model version 6.
- *
- * `recovery` and `no_data` are present exactly when `kind` is `alert`, which the
- * schema enforces through a `kind` sibling ref but `TypeOf` flattens to
- * required, so they are widened back to optional here.
- */
-export type RuleSavedObjectAttributes = Omit<RuleSavedObjectAttributesV4, 'recovery' | 'no_data'> &
-  Partial<Pick<RuleSavedObjectAttributesV4, 'recovery' | 'no_data'>>;
+/** Latest attributes shape, introduced by model version 6. */
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV4>;
 
 export {
   ruleSavedObjectAttributesSchemaV1,
