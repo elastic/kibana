@@ -89,12 +89,15 @@ export class DatastreamInitializer implements IResourceInitializer {
       return;
     }
 
-    await this.esClient.ingest.putPipeline({
+    const { acknowledged } = await this.esClient.ingest.putPipeline({
       id,
       version,
       processors,
       _meta: { managed: true },
     });
+    if (!acknowledged) {
+      throw new Error(`Ingest pipeline ${id} v${version} install was not acknowledged.`);
+    }
   }
 
   private async getDeployedPipelineVersion(id: string): Promise<number | undefined> {
@@ -115,10 +118,16 @@ export class DatastreamInitializer implements IResourceInitializer {
    * the replica patch this failure must block initialization.
    */
   private async updateExistingIndicesFinalPipeline(): Promise<void> {
-    await this.esClient.indices.putSettings({
-      index: this.resourceDefinition.dataStreamName,
-      settings: { 'index.final_pipeline': this.resourceDefinition.ingestPipeline.id },
+    const { dataStreamName, ingestPipeline } = this.resourceDefinition;
+    const { acknowledged } = await this.esClient.indices.putSettings({
+      index: dataStreamName,
+      settings: { 'index.final_pipeline': ingestPipeline.id },
     });
+    if (!acknowledged) {
+      throw new Error(
+        `Applying index.final_pipeline to existing ${dataStreamName} indices was not acknowledged.`
+      );
+    }
   }
 
   /**

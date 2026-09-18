@@ -109,6 +109,14 @@ describe('DatastreamInitializer', () => {
       expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
     });
 
+    it('fails initialization when the pipeline install is not acknowledged', async () => {
+      esClient.ingest.putPipeline.mockResolvedValue({ acknowledged: false });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await expect(initializer.initialize()).rejects.toThrow(/not acknowledged/);
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
     it('re-throws non-404 errors when reading the deployed pipeline', async () => {
       esClient.ingest.getPipeline.mockRejectedValue(
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
@@ -140,6 +148,15 @@ describe('DatastreamInitializer', () => {
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
       await expect(initializer.initialize()).rejects.toThrow();
+    });
+
+    it('fails initialization when applying index.final_pipeline to existing indices is not acknowledged', async () => {
+      esClient.indices.putSettings.mockImplementation(async ({ settings }) => ({
+        acknowledged: !(settings && 'index.final_pipeline' in settings),
+      }));
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await expect(initializer.initialize()).rejects.toThrow(/not acknowledged/);
     });
   });
 
