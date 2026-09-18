@@ -186,6 +186,7 @@ const mockKibana = () => {
           hasQuerySuggestions: () => {},
         },
       },
+      inspector: { open: jest.fn() },
       executionContext: {
         get: () => ({
           name: 'slo',
@@ -315,7 +316,7 @@ describe('SLOs Page', () => {
         render(<SlosPage />);
       });
 
-      expect(screen.getByText('Create SLO')).toBeTruthy();
+      expect(await screen.findByText('Create SLO')).toBeTruthy();
     });
 
     describe('when API has returned results', () => {
@@ -373,7 +374,9 @@ describe('SLOs Page', () => {
           button.click();
         });
 
-        expect(mockNavigate).toBeCalledWith(`${paths.sloEdit(sloList.results.at(0)?.id || '')}`);
+        expect(mockNavigate).toHaveBeenCalledWith(
+          `${paths.sloEdit(sloList.results.at(0)?.id || '')}`
+        );
       });
 
       it('allows creating a new rule for an SLO', async () => {
@@ -403,7 +406,7 @@ describe('SLOs Page', () => {
           button.click();
         });
 
-        expect(mockLocator).toBeCalled();
+        expect(mockLocator).toHaveBeenCalled();
       });
 
       it('allows deleting an SLO', async () => {
@@ -422,7 +425,7 @@ describe('SLOs Page', () => {
           (await screen.findByTestId('observabilitySolutionSloDeleteModalConfirmButton')).click();
         });
 
-        expect(mockDeleteSlo).toBeCalledWith({
+        expect(mockDeleteSlo).toHaveBeenCalledWith({
           id: sloList.results.at(0)?.id,
           name: sloList.results.at(0)?.name,
         });
@@ -442,7 +445,7 @@ describe('SLOs Page', () => {
 
         await waitFor(() => {
           const slo = sloList.results.at(0);
-          expect(mockNavigate).toBeCalledWith(
+          expect(mockNavigate).toHaveBeenCalledWith(
             paths.sloCreateWithEncodedForm(
               encodeURIComponent(encode(transformSloToCloneState(slo!)))
             )

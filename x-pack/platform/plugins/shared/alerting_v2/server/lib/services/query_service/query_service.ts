@@ -6,14 +6,22 @@
  */
 
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, PluginInitializerContext } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
+import { PluginInitializer } from '@kbn/core-di-server';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ExecutionContext } from '../../execution_context';
-import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
+import {
+  createExecutionContext,
+  isRuleExecutionCancellationError,
+  toRuleExecutionCancellationError,
+} from '../../execution_context';
+import type { PluginConfig } from '../../../config';
+import { toRows } from './row_coercion';
+import type { EsqlFormatRequest, EsqlFormatRequestOptions, EsqlRowBatchSource } from './formats';
+import { getEsqlResponseFormat } from './formats';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -36,7 +44,9 @@ const DROP_NULL_COLUMNS = true;
 export class QueryService implements QueryServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(PluginInitializer('config'))
+    private readonly pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {}
 
   async executeQuery({
@@ -47,7 +57,7 @@ export class QueryService implements QueryServiceContract {
     maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
-      message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
+      message: 'QueryService: Executing query',
     });
 
     try {
@@ -78,138 +88,118 @@ export class QueryService implements QueryServiceContract {
 
   async executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]> {
     const response = await this.executeQuery(params);
-    return this.toRows<T>(response);
+    return toRows<T>(response);
   }
 
-  async *executeQueryStream<T = Record<string, unknown>>({
-    query,
-    filter,
-    params,
-    abortSignal,
-    maxResponseSize,
-  }: ExecuteQueryParams): AsyncIterable<T[]> {
-    const context = createExecutionContext(abortSignal ?? new AbortController().signal);
+  /**
+   * Streams query results through the configured response format. The format is
+   * resolved per call because `xpack.alerting_v2.esql.responseFormat` is a
+   * dynamic setting operators can flip at runtime.
+   */
+  async *executeQueryStream<T = Record<string, unknown>>(
+    params: ExecuteQueryParams
+  ): AsyncIterable<T[]> {
+    const { responseFormat } = this.pluginConfigAccessor.get<PluginConfig>().esql;
+    const format = getEsqlResponseFormat(responseFormat);
+    const context = createExecutionContext(params.abortSignal ?? new AbortController().signal);
 
     this.logger.debug({
-      message: () => `QueryService: Executing streaming query`,
+      message: () => `QueryService: Executing streaming query (${format.name})`,
     });
 
-    let reader: AsyncRecordBatchStreamReader | undefined;
+    let source: EsqlRowBatchSource | undefined;
 
     try {
       context.throwIfAborted();
 
-      // Note: Arrow streaming uses chunked transfer encoding so the transport's
-      // maxResponseSize guard (which checks Content-Length) will not fire.
-      // The per-run alerts.max row limit acts as the primary guardrail here.
-      reader = await this.esClient.helpers
-        .esql(
-          {
-            query,
-            drop_null_columns: DROP_NULL_COLUMNS,
-            filter,
-            params,
-          },
-          { signal: context.signal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
-        )
-        .toArrowReader();
+      source = await format.open(
+        this.esClient,
+        buildFormatRequest(params),
+        buildFormatRequestOptions(context, params)
+      );
 
-      if (!reader) {
-        throw new Error('toArrowReader returned undefined');
-      }
+      context.throwIfAborted();
 
-      yield* this.iterateReader<T>(reader, context);
+      yield* this.iterateBatches<T>(source, context);
 
       this.logger.debug({
-        message: `QueryService: Streaming query completed successfully`,
+        message: `QueryService: Streaming query completed successfully (${format.name})`,
       });
     } catch (error) {
-      if (isRuleExecutionCancellationError(error)) {
+      if (this.isCancellation(error, context)) {
         this.logger.debug({
-          message: 'QueryService: Streaming query aborted',
+          message: `QueryService: Streaming query aborted (${format.name})`,
         });
-      } else {
-        this.logger.error({
-          error,
-          code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
-        });
+
+        throw toRuleExecutionCancellationError(error);
       }
+
+      this.logger.error({
+        error,
+        code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+      });
 
       throw error;
     } finally {
-      await this.closeReader(reader);
+      await this.closeSource(source);
     }
   }
 
-  private async *iterateReader<T>(
-    reader: AsyncRecordBatchStreamReader,
+  private async *iterateBatches<T>(
+    source: EsqlRowBatchSource,
     context: ExecutionContext
   ): AsyncIterable<T[]> {
     try {
-      for await (const batch of reader) {
+      for await (const batch of source.batches) {
         context.throwIfAborted();
 
-        if (batch.numRows === 0) {
+        if (batch.length === 0) {
           continue;
         }
 
-        const rows = batch.toArray().map((row) => coerceBigInts(row.toJSON()) as T);
-        yield rows;
+        yield batch as T[];
       }
     } catch (error) {
       if (isRuleExecutionCancellationError(error)) {
         throw error;
       }
 
-      // Arrow parse failures during iteration (e.g. truncated stream).
-      // The initial server-error case is already handled by the helper.
+      // Decode failures during iteration (e.g. a truncated Arrow stream).
+      // The initial server-error case already surfaced from `format.open`.
       throw this.buildParseError(error);
     }
   }
 
-  private async closeReader(reader: AsyncRecordBatchStreamReader | undefined): Promise<void> {
-    if (!reader || reader.closed) {
-      return;
-    }
-
+  private async closeSource(source: EsqlRowBatchSource | undefined): Promise<void> {
     try {
-      await reader.cancel();
+      await source?.close?.();
     } catch {
       // Cleanup is best-effort; the primary error has already been
       // propagated through the iteration above.
     }
   }
 
+  private isCancellation(error: unknown, context: ExecutionContext): boolean {
+    return isRuleExecutionCancellationError(error) || context.signal.aborted;
+  }
+
   private buildParseError(error: unknown): Error {
     const message = error instanceof Error ? error.message : String(error);
     return new Error(`Failed to parse ES|QL response. Error: ${message}`);
   }
-
-  private toRows<T>(response: EsqlQueryResponse): T[] {
-    const columnNames = response.columns.map((column) => column.name);
-    return response.values.map((valueRow) => {
-      const row = columnNames.reduce<Record<string, unknown>>((acc, columnName, index) => {
-        acc[columnName] = valueRow[index];
-        return acc;
-      }, {});
-
-      return coerceBigInts(row) as T;
-    });
-  }
 }
 
-/**
- * Apache Arrow returns BigInt for integer/long columns.
- * JSON.stringify cannot serialize BigInt, so we coerce to Number
- * at the parsing boundary. ES|QL integer values are within safe
- * Number range.
- */
-const coerceBigInts = (row: Record<string, unknown>): Record<string, unknown> => {
-  const coerced: Record<string, unknown> = {};
+const buildFormatRequest = ({ query, filter, params }: ExecuteQueryParams): EsqlFormatRequest => ({
+  query,
+  drop_null_columns: DROP_NULL_COLUMNS,
+  filter,
+  params,
+});
 
-  for (const [key, value] of Object.entries(row)) {
-    coerced[key] = typeof value === 'bigint' ? Number(value) : value;
-  }
-
-  return coerced;
-};
+const buildFormatRequestOptions = (
+  context: ExecutionContext,
+  { maxResponseSize }: ExecuteQueryParams
+): EsqlFormatRequestOptions => ({
+  signal: context.signal,
+  ...(maxResponseSize !== undefined ? { maxResponseSize } : {}),
+});

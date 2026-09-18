@@ -10,6 +10,7 @@ import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-bu
 import {
   extractOrderedToolCalls,
   extractToolCallIds,
+  isToolId,
   summarizePersistenceCalls,
 } from '../../utils/tool_usage';
 import type { DiscoveryEvaluator } from '../../types';
@@ -31,16 +32,127 @@ export interface ToolUsageScore {
   explanation: string;
 }
 
+const isTool = isToolId;
+
+const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
+  [...calledTools].some((toolId) => isTool(toolId, canonical));
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const hasSchemaValidationFailure = ({
+  results,
+}: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
+  results.some(
+    (result) =>
+      isRecord(result) &&
+      isRecord(result.data) &&
+      typeof result.data.message === 'string' &&
+      result.data.message.includes('Received tool input did not match expected schema')
+  );
+
+const hasCompletedItems = ({
+  params,
+}: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
+  Array.isArray(params.items) && params.items.length > 0;
+
+const isSerializationRecovery = (
+  eventWrites: Array<ReturnType<typeof extractOrderedToolCalls>[number]>
+): boolean => {
+  const [failedWrite, recoveredWrite] = eventWrites;
+  return (
+    eventWrites.length === 2 &&
+    failedWrite !== undefined &&
+    !hasCompletedItems(failedWrite) &&
+    recoveredWrite !== undefined &&
+    hasCompletedItems(recoveredWrite) &&
+    !hasSchemaValidationFailure(recoveredWrite)
+  );
+};
+
+const findDuplicateEventWriteRule = (
+  eventWrites: Array<ReturnType<typeof extractOrderedToolCalls>[number]>
+): { ruleUuid: string; firstItemIndex: number; secondItemIndex: number } | undefined => {
+  const ruleOwners = new Map<string, number>();
+
+  for (const { params } of eventWrites) {
+    if (!Array.isArray(params.items)) {
+      continue;
+    }
+    for (const [itemIndex, item] of params.items.entries()) {
+      if (!isRecord(item) || !Array.isArray(item.signals)) {
+        continue;
+      }
+      for (const signal of item.signals) {
+        if (!isRecord(signal) || !isRecord(signal.metadata)) {
+          continue;
+        }
+        const ruleUuid = signal.metadata.rule_uuid;
+        if (typeof ruleUuid !== 'string') {
+          continue;
+        }
+        const firstItemIndex = ruleOwners.get(ruleUuid);
+        if (firstItemIndex !== undefined) {
+          return { ruleUuid, firstItemIndex, secondItemIndex: itemIndex };
+        }
+        ruleOwners.set(ruleUuid, itemIndex);
+      }
+    }
+  }
+};
+
 /** Require events_write and reject workflow-owned discovery stamping. */
 const scoreOutputTool = (
   calledTools: Set<string>,
   steps: ConverseStep[]
 ): ToolUsageScore | null => {
-  if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
+  if (!calledCanonical(calledTools, TOOL_ID_EVENTS_WRITE)) {
     return {
       score: 0,
       label: `missing-${TOOL_ID_EVENTS_WRITE}`,
       explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to persist the decision`,
+    };
+  }
+
+  const eventWrites = extractOrderedToolCalls(steps).filter(({ toolId }) =>
+    isTool(toolId, TOOL_ID_EVENTS_WRITE)
+  );
+  const duplicateRule = findDuplicateEventWriteRule(eventWrites);
+  if (duplicateRule) {
+    return {
+      score: 0,
+      label: 'duplicate-rule-across-items',
+      explanation: `${TOOL_ID_EVENTS_WRITE} assigns rule UUID ${duplicateRule.ruleUuid} to items ${duplicateRule.firstItemIndex} and ${duplicateRule.secondItemIndex}; merge those components before writing`,
+    };
+  }
+  const schemaFailureIndex = eventWrites.findIndex(hasSchemaValidationFailure);
+  if (schemaFailureIndex !== -1) {
+    if (schemaFailureIndex === 0 && isSerializationRecovery(eventWrites)) {
+      return null;
+    }
+
+    const retriedAfterSchemaFailure = eventWrites.length > schemaFailureIndex + 1;
+    return {
+      score: 0,
+      label: retriedAfterSchemaFailure
+        ? 'events-write-schema-validation-retry'
+        : 'events-write-schema-validation-failure',
+      explanation: retriedAfterSchemaFailure
+        ? `${TOOL_ID_EVENTS_WRITE} retried after a schema-validation failure instead of correcting ownership before its single write`
+        : `${TOOL_ID_EVENTS_WRITE} rejected the completed payload during schema validation`,
+    };
+  }
+
+  const invalidWrite = eventWrites.some(
+    ({ params, toolId }) =>
+      isTool(toolId, TOOL_ID_EVENTS_WRITE) &&
+      (!Array.isArray(params.items) || params.items.length === 0)
+  );
+  if (invalidWrite) {
+    return {
+      score: 0,
+      label: 'invalid-events-write-payload',
+      explanation: `${TOOL_ID_EVENTS_WRITE} requires a non-empty items array`,
     };
   }
 
@@ -55,15 +167,12 @@ const scoreOutputTool = (
   return null;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
 const didRuleSearchReturnNoCandidates = ({
   params,
   results,
   toolId,
 }: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
-  toolId === TOOL_ID_EVENT_SEARCH &&
+  isTool(toolId, TOOL_ID_EVENT_SEARCH) &&
   Array.isArray(params.rule_uuids) &&
   params.rule_uuids.length > 0 &&
   results.some(
@@ -75,7 +184,7 @@ const didRuleSearchReturnNoCandidates = ({
   );
 
 const writesTopology = ({ params, toolId }: ReturnType<typeof extractOrderedToolCalls>[number]) =>
-  toolId === TOOL_ID_EVENTS_WRITE &&
+  isTool(toolId, TOOL_ID_EVENTS_WRITE) &&
   Array.isArray(params.items) &&
   params.items.some(
     (item) =>
@@ -106,33 +215,36 @@ export const scoreToolUsage = ({
         };
   }
 
+  const orderedCalls = extractOrderedToolCalls(steps);
+
   const outputCheck = scoreOutputTool(calledTools, steps);
   if (outputCheck) {
     return outputCheck;
   }
 
-  const orderedCalls = extractOrderedToolCalls(steps);
   const hasQueryKiSearch = orderedCalls.some(
     ({ toolId, params }) =>
-      toolId === TOOL_ID_KI_SEARCH && Array.isArray(params.kind) && params.kind.includes('query')
+      isTool(toolId, TOOL_ID_KI_SEARCH) &&
+      Array.isArray(params.kind) &&
+      params.kind.includes('query')
   );
   if (!hasQueryKiSearch) {
     return {
       score: 0,
       label: `missing-${TOOL_ID_KI_SEARCH}`,
-      explanation: `${TOOL_ID_KI_SEARCH} was not called — required to decide whether ES|QL is available`,
+      explanation: `${TOOL_ID_KI_SEARCH} was not called`,
     };
   }
 
   const ruleSearchFoundNoCandidates = orderedCalls.some(didRuleSearchReturnNoCandidates);
   const hasTopologySearch = orderedCalls.some(
     ({ params, toolId }) =>
-      toolId === TOOL_ID_EVENT_SEARCH &&
+      isTool(toolId, TOOL_ID_EVENT_SEARCH) &&
       Array.isArray(params.topology_feature_ids) &&
       params.topology_feature_ids.length > 0
   );
   if (
-    !allowNewEventTopologyWrite &&
+    !(allowNewEventTopologyWrite && !ruleSearchFoundNoCandidates) &&
     ruleSearchFoundNoCandidates &&
     orderedCalls.some(writesTopology) &&
     !hasTopologySearch
@@ -145,12 +257,9 @@ export const scoreToolUsage = ({
     };
   }
 
-  const expected = [TOOL_ID_EVENT_SEARCH, TOOL_ID_KI_SEARCH, TOOL_ID_EXECUTE_ESQL];
-  const missing = expected.filter((t) => !calledTools.has(t));
+  const expected = [TOOL_ID_EXECUTE_ESQL, TOOL_ID_KI_SEARCH, TOOL_ID_EVENT_SEARCH];
+  const missing = expected.filter((t) => !calledCanonical(calledTools, t));
   const score = (expected.length - missing.length) / expected.length;
-  // Graded score (0 / 1/3 / 2/3 / 1) keeps the per-tool signal for prompt tuning; a distinct label
-  // per failure mode makes the miss attributable/aggregatable across an eval run (free-text
-  // explanation is not). The label enumerates exactly which expected tools were skipped.
   const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
   return {
     score,
@@ -159,6 +268,8 @@ export const scoreToolUsage = ({
       score === 1
         ? persistenceCalls.retriedPartialFailure
           ? 'Correctly called all tools and retried only failed event items'
+          : persistenceCalls.retriedSchemaFailure
+          ? 'Correctly called all tools and retried after a schema or tool error'
           : 'Correctly called all tools'
         : `Missing tools: ${missing.join(', ')}`,
   };
@@ -167,10 +278,14 @@ export const scoreToolUsage = ({
 export const createDiscoveryToolUsageEvaluator = (): DiscoveryEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ input, output }) => {
     const detections = output.inputDetections ?? input.detections ?? [];
     return Promise.resolve(
-      scoreToolUsage({ steps: output.steps ?? [], detectionCount: detections.length })
+      scoreToolUsage({
+        steps: output.steps ?? [],
+        detectionCount: detections.length,
+      })
     );
   },
 });
@@ -190,10 +305,11 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
       allowNewEventTopologyWrite: cycleIndex === 0 && cycle.expectReuse !== false,
     });
     if (
+      cycleIndex > 0 &&
       cycle.expectTopologyEventSearch &&
       !extractOrderedToolCalls(steps).some(
         ({ toolId, params }) =>
-          toolId === TOOL_ID_EVENT_SEARCH &&
+          isTool(toolId, TOOL_ID_EVENT_SEARCH) &&
           Array.isArray(params.topology_feature_ids) &&
           params.topology_feature_ids.length > 0
       )
@@ -219,5 +335,6 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
 export const continuationTrajectoryEvaluator: ContinuationEvaluator = {
   name: 'trajectory',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreToolUsageContinuation(output.cycles ?? [])),
 };

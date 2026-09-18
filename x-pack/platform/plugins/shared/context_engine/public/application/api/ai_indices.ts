@@ -11,15 +11,17 @@ import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
   aiIndexByIdPath,
-  aiIndexKiSummaryPath,
+  aiIndexFeedbackAnalysisPath,
   aiIndexPath,
 } from '../../../common/constants';
 import type {
+  AiIndexFeedbackAnalysis,
   AiIndexProperties,
   CreateAiIndexResponse,
-  GetAiIndexKiSummaryResponse,
+  DeleteAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
+  PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
 } from '../../../common/http_api/ai_indices';
 
@@ -50,20 +52,6 @@ export const getAiIndex = (
 ): Promise<GetAiIndexResponse> =>
   http.get<GetAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
-    ...(signal ? { signal } : {}),
-  });
-
-interface GetAiIndexKiSummaryArgs {
-  aiIndexId: string;
-  signal?: AbortSignal;
-}
-
-export const getAiIndexKiSummary = (
-  http: HttpStart,
-  { aiIndexId, signal }: GetAiIndexKiSummaryArgs
-): Promise<GetAiIndexKiSummaryResponse> =>
-  http.get<GetAiIndexKiSummaryResponse>(buildPath(aiIndexKiSummaryPath, { aiIndexId }), {
-    version: AI_INDEX_INTERNAL_API_VERSION,
     ...(signal ? { signal } : {}),
   });
 
@@ -99,4 +87,43 @@ export const putAiIndex = (
   http.put<PutAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     body: JSON.stringify(properties),
+  });
+
+interface PutAiIndexFeedbackAnalysisArgs {
+  aiIndexId: string;
+  feedbackAnalysis: AiIndexFeedbackAnalysis;
+}
+
+/**
+ * Replaces the feedback analysis configuration without touching the rest of the
+ * AI index. Unlike {@link putAiIndex} this also works on managed AI indices.
+ */
+export const putAiIndexFeedbackAnalysis = (
+  http: HttpStart,
+  { aiIndexId, feedbackAnalysis }: PutAiIndexFeedbackAnalysisArgs
+): Promise<PutAiIndexFeedbackAnalysisResponse> =>
+  http.put<PutAiIndexFeedbackAnalysisResponse>(
+    buildPath(aiIndexFeedbackAnalysisPath, { aiIndexId }),
+    {
+      version: AI_INDEX_INTERNAL_API_VERSION,
+      body: JSON.stringify(feedbackAnalysis),
+    }
+  );
+
+interface DeleteAiIndexArgs {
+  aiIndexId: string;
+  deleteKnowledgeIndicators?: boolean;
+  deleteAutomations?: boolean;
+}
+
+export const deleteAiIndex = (
+  http: HttpStart,
+  { aiIndexId, deleteKnowledgeIndicators = false, deleteAutomations = false }: DeleteAiIndexArgs
+): Promise<DeleteAiIndexResponse> =>
+  http.delete<DeleteAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+    version: AI_INDEX_API_VERSION,
+    query: {
+      delete_knowledge_indicators: deleteKnowledgeIndicators,
+      delete_automations: deleteAutomations,
+    },
   });

@@ -7,8 +7,9 @@
 
 import type { DebugState } from '@elastic/charts';
 import { encode as encodeRison } from '@kbn/rison';
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { LOGSTASH_IN_RANGE_DATES } from '../../constants';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -43,12 +44,11 @@ export class LensWorkspace {
   readonly inlineEditor;
   readonly discardChangesModal;
   readonly autoApplyToggle;
+  readonly noResults;
 
   private readonly goBackToAppButton;
   private readonly confirmModalConfirmButton;
   private readonly messageListTrigger;
-  private readonly settingsButton;
-  private readonly settingsMenu;
   private readonly emptyWorkspacePrompt;
   private readonly applyChangesPrompt;
   private readonly suggestionPanelToggle;
@@ -56,8 +56,14 @@ export class LensWorkspace {
   readonly currentSuggestionError;
   readonly shareButton;
   readonly exportButton;
+  /** Top-nav "Explore in Discover" control (`lnsApp_openInDiscover`). */
+  readonly openInDiscoverButton;
+  /** Dimension Filter-by popover trigger (`indexPattern-filters-existingFilterTrigger`). */
+  readonly dimensionFilterTrigger;
+  private readonly dimensionFilterQueryInput;
   private readonly shareModal;
   private readonly copyShareUrlButton;
+  private readonly appMenu;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
@@ -69,12 +75,13 @@ export class LensWorkspace {
     this.inlineEditor = this.page.getByTestId('customizeLens');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
     this.autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
+    this.noResults = this.page.testSubj
+      .locator('lnsVisualizationContainer')
+      .getByText('No results found', { exact: true });
 
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     this.messageListTrigger = this.page.testSubj.locator('lens-message-list-trigger');
-    this.settingsButton = this.page.testSubj.locator('lnsApp_settingsButton');
-    this.settingsMenu = this.page.testSubj.locator('lnsApp__settingsMenu');
     this.emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
     this.applyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
@@ -83,8 +90,16 @@ export class LensWorkspace {
     );
     this.shareButton = this.page.testSubj.locator('lnsApp_shareButton');
     this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
+    this.openInDiscoverButton = this.page.testSubj.locator('lnsApp_openInDiscover');
+    this.dimensionFilterTrigger = this.page.testSubj.locator(
+      'indexPattern-filters-existingFilterTrigger'
+    );
+    this.dimensionFilterQueryInput = this.page.testSubj.locator(
+      'indexPattern-filters-queryStringInput'
+    );
     this.shareModal = this.page.testSubj.locator('shareContextModal');
     this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
+    this.appMenu = new AppMenu(page);
   }
 
   async openFullEditor() {
@@ -176,6 +191,44 @@ export class LensWorkspace {
       .locator('indexPattern-filters-queryStringInput')
       .pressSequentially(queryString, { delay: 20 });
     await this.page.testSubj.click('indexPattern-filters-existingFilterTrigger');
+  }
+
+  /**
+   * Commits a Filter-by query on an already-open dimension filter popover.
+   *
+   * `QueryInput` uses `useDebouncedValue` (~256ms). Closing the popover or the
+   * dimension editor before that flush leaves `inputFilter` empty, so Discover
+   * receives no global filter. `fill()` is used instead of `pressSequentially`
+   * so operators like `>` are not dropped mid-type. Caller must have the
+   * popover open (`enableFilter`).
+   */
+  async setDimensionFilterQuery(query: string) {
+    await this.dimensionFilterQueryInput.waitFor({ state: 'visible' });
+    await this.dimensionFilterQueryInput.fill(query);
+    await this.page.waitForFunction(
+      (expected) => {
+        const root = document.querySelector(
+          '[data-test-subj="indexPattern-filters-queryStringInput"]'
+        );
+        if (!root) {
+          return false;
+        }
+        const field =
+          root instanceof HTMLTextAreaElement || root instanceof HTMLInputElement
+            ? root
+            : root.querySelector('textarea, input');
+        return field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement
+          ? field.value === expected
+          : false;
+      },
+      query,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+
+    const committedTrigger = this.dimensionFilterTrigger.filter({ hasText: query });
+    await committedTrigger.waitFor({ state: 'visible' });
+    await committedTrigger.click();
+    await this.dimensionFilterQueryInput.waitFor({ state: 'hidden' });
   }
 
   /** Reads the current title displayed in the Lens editor header. */
@@ -287,6 +340,25 @@ export class LensWorkspace {
     return JSON.parse(debugJson) as DebugState;
   }
 
+  /**
+   * Reads `@elastic/charts` debug state from a chart rendered inside a dashboard panel.
+   * Unlike {@link getCurrentChartDebugState}, it does not scope its locators under
+   * `lnsWorkspace`, which does not exist on dashboards. Requires `enableElasticChartDebug`
+   * (or equivalent init script) before navigation.
+   */
+  async getDashboardChartDebugState(chartTestSubj: string): Promise<DebugState> {
+    const chart = this.page.testSubj.locator(chartTestSubj);
+    // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
+    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+      state: 'attached',
+    });
+    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+    if (!debugJson) {
+      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
+    }
+    return JSON.parse(debugJson) as DebugState;
+  }
+
   async openMessageList() {
     await this.messageListTrigger.click();
   }
@@ -322,29 +394,23 @@ export class LensWorkspace {
       .count();
   }
 
-  /** Opens the Lens settings menu (auto-apply toggle lives here). */
+  /** Ensures the AppMenu auto-apply switch is visible (no settings popover anymore). */
   async openSettingsMenu() {
-    await this.settingsButton.click();
-    await this.settingsMenu.waitFor({ state: 'visible' });
+    await this.autoApplyToggle.waitFor({ state: 'visible' });
   }
+
+  /** No-op — auto-apply is an inline AppMenu switch, not a settings popover. */
+  async closeSettingsMenu() {}
 
   /**
    * Opens the Share modal. Waits until the share button is enabled (can lag after save).
    * Dismisses save toasts first — they sit over the top nav and intercept the click.
+   * Toasts must be closed before opening overflow; closing them afterward dismisses the menu.
    */
   async openShareModal() {
-    await this.page.waitForFunction(
-      () => {
-        const btn = document.querySelector(
-          '[data-test-subj="lnsApp_shareButton"]'
-        ) as HTMLButtonElement | null;
-        return Boolean(btn && !btn.disabled);
-      },
-      undefined,
-      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
-    );
-
     await this.page.components.toast().closeAll();
+    await this.appMenu.openOverflow();
+    await expect(this.shareButton).toBeEnabled({ timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
     await this.shareButton.click();
     await this.shareModal.waitFor({ state: 'visible' });
     await this.copyShareUrlButton.waitFor({ state: 'visible' });
@@ -377,13 +443,7 @@ export class LensWorkspace {
     await this.shareModal.waitFor({ state: 'hidden' });
   }
 
-  /** Closes the Lens settings menu. */
-  async closeSettingsMenu() {
-    await this.settingsButton.click();
-    await this.settingsMenu.waitFor({ state: 'hidden' });
-  }
-
-  /** Toggles the auto-apply setting. Requires the settings menu to be open. */
+  /** Toggles the auto-apply setting. */
   async toggleAutoApply() {
     await this.autoApplyToggle.click();
   }
@@ -461,8 +521,16 @@ export class LensWorkspace {
     await tag.dispatchEvent('click');
   }
 
-  async setInputValue(testSubj: string, value: string) {
-    const input = this.page.locator(`input[data-test-subj="${testSubj}"]`);
+  /**
+   * Fills a controlled Lens input and waits for React to accept the value.
+   *
+   * Pass `inputType` when the test-subj is not unique: `EuiRange` with `showInput` stamps it on
+   * both the range slider and the number input, so the bare selector is a strict-mode violation.
+   */
+  async setInputValue(testSubj: string, value: string, options?: { inputType?: string }) {
+    const typeSelector = options?.inputType ? `[type="${options.inputType}"]` : '';
+    const selector = `input[data-test-subj="${testSubj}"]${typeSelector}`;
+    const input = this.page.locator(selector);
     await input.waitFor({ state: 'visible' });
     await input.scrollIntoViewIfNeeded();
     // fill() clears first (avoids "07747" from incomplete selection on number inputs).
@@ -483,24 +551,22 @@ export class LensWorkspace {
     // Sync until React controlled value matches (readiness wait — assertions stay in specs).
     // waitForFunction has no Scout default (unlike expect/actionTimeout).
     await this.page.waitForFunction(
-      ({ subj, expected }) => {
-        const el = document.querySelector(
-          `input[data-test-subj="${subj}"]`
-        ) as HTMLInputElement | null;
+      ({ sel, expected }) => {
+        const el = document.querySelector(sel) as HTMLInputElement | null;
         return el?.value === expected;
       },
-      { subj: testSubj, expected: value },
+      { sel: selector, expected: value },
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await input.press('Tab');
     // Blur completed — callers must poll a UI side effect (chart debug, dimension label)
     // before closing flyouts; useDebouncedValue (~256ms) has no DOM readiness hook here.
     await this.page.waitForFunction(
-      (subj) => {
-        const el = document.querySelector(`input[data-test-subj="${subj}"]`);
+      (sel) => {
+        const el = document.querySelector(sel);
         return el != null && document.activeElement !== el;
       },
-      testSubj,
+      selector,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }

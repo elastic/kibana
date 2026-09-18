@@ -95,7 +95,10 @@ const resolveApiKeyOwnerProfileUid = async ({
 
     return response.api_keys?.[0]?.profile_uid;
   } catch (error) {
-    if (error instanceof errors.ResponseError && error.statusCode === 403) {
+    if (
+      error instanceof errors.ResponseError &&
+      (error.statusCode === 403 || error.statusCode === 404)
+    ) {
       return undefined;
     }
     throw error;
@@ -126,6 +129,8 @@ export const getUserFromRequest = async ({
   esClient: ElasticsearchClient;
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
+  const isAdmin = await isAdminFromRequest({ esClient });
+
   if (authUser?.username) {
     return {
       id: await toStableUserId({
@@ -133,6 +138,7 @@ export const getUserFromRequest = async ({
         resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
       }),
       username: authUser.username,
+      isAdmin,
     };
   }
 
@@ -140,6 +146,7 @@ export const getUserFromRequest = async ({
   return {
     id: authUser?.profile_uid,
     username: authResponse.username,
+    isAdmin,
   };
 };
 

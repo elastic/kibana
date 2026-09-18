@@ -4,35 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ScoutPage, ScoutTestConfig } from '@kbn/scout-oblt';
+import {
+  AppMenu,
+  ObservabilityNavigation,
+  type ScoutPage,
+  type ScoutTestConfig,
+} from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 export class SLOApp {
-  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {}
+  private readonly appMenu: AppMenu;
+  private readonly nav: ObservabilityNavigation;
 
-  /** Navigate to SLO app (main list). Waits for "Manage SLOs" header link. */
-  async goto() {
-    await this.page.gotoApp('slo');
-    await expect(this.page.getByText('Manage SLOs')).toBeVisible();
+  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {
+    this.appMenu = new AppMenu(page);
+    this.nav = new ObservabilityNavigation(page);
   }
 
-  /** Navigate to SLO Management page (Actions > Health scan). Clicks "Manage SLOs" link from the list view. */
+  /** Navigate to SLO app (main list). Waits for the Manage SLOs header item. */
+  async goto() {
+    await this.page.gotoApp('slo');
+    await this.appMenu.revealItem('sloHeaderManageLink');
+  }
+
+  /** Navigate to SLO Management page (Actions > Health scan). Clicks Manage SLOs from the list view. */
   async gotoManagement() {
     await this.page.gotoApp('slo');
-    await expect(this.page.getByRole('link', { name: 'Manage SLOs' })).toBeVisible({
-      timeout: 15000,
-    });
-    await this.page.getByRole('link', { name: 'Manage SLOs' }).click();
+    await this.appMenu.clickItem('sloHeaderManageLink');
     await expect(this.page.getByTestId('headerControlActionsButton')).toBeVisible({
       timeout: 15000,
     });
   }
 
   async openFromSideMenu() {
-    if (this.config.isCloud) {
-      await this.page.testSubj.hover('kbnChromeNav-moreMenuTrigger');
-      await this.page.testSubj.waitForSelector('side-nav-popover-More');
-      await this.page.locator('#slo').click();
+    if (this.config.serverless || this.config.isCloud) {
+      // New chrome nav: the shared helper resolves whether SLOs render in the
+      // primary nav or the "More" overflow menu.
+      await this.nav.clickBodyNavItemByDeepLinkId('slo');
     } else {
       await this.page.getByTestId('observability-nav-slo-slos').click();
     }

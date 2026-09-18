@@ -28,7 +28,6 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 import {
   ChromeComponentsProvider,
@@ -85,7 +84,6 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications, // Keep for test assertions
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
   };
 
   if (availableApps) {
@@ -204,7 +202,7 @@ describe('start', () => {
   it('does not add legacy browser warning if browser supports CSP', async () => {
     const { startDeps } = await start();
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
@@ -213,7 +211,7 @@ describe('start', () => {
       cspConfigMock: { warnLegacyBrowsers: false },
     });
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('calls handleSystemColorModeChange() with the correct parameters', async () => {
@@ -635,7 +633,7 @@ describe('start', () => {
 
       service.stop();
 
-      expect(docTitleResetSpy).toBeCalledTimes(1);
+      expect(docTitleResetSpy).toHaveBeenCalledTimes(1);
       await expect(promises).resolves.toMatchInlineSnapshot(`
                       Array [
                         Array [
@@ -723,6 +721,124 @@ describe('start', () => {
         service.stop();
       });
     });
+  });
+
+  describe('controls and help', () => {
+    it('observes control registrations', async () => {
+      const { chrome, service } = await start();
+      const search = { onClick: () => {} };
+
+      chrome.controls.globalSearch.set(search);
+      expect(await firstValueFrom(chrome.controls.globalSearch.get$())).toBe(search);
+
+      chrome.controls.globalSearch.set(undefined);
+      expect(await firstValueFrom(chrome.controls.globalSearch.get$())).toBeUndefined();
+
+      service.stop();
+    });
+
+    it('unregisters AI buttons', async () => {
+      const { chrome, service } = await start();
+      const button = { content: <div /> };
+
+      const unregister = chrome.controls.aiButton.register(button);
+      expect(await firstValueFrom(chrome.controls.aiButton.get$())).toEqual([button]);
+
+      unregister();
+      expect(await firstValueFrom(chrome.controls.aiButton.get$())).toEqual([]);
+
+      service.stop();
+    });
+
+    it('unregisters help handlers', async () => {
+      const { chrome, service } = await start();
+      const feedback = () => {};
+      const newsfeed = { open: () => {}, hasNew$: new Rx.BehaviorSubject(false) };
+
+      const unregisterFeedback = chrome.help.registerFeedbackHandler(feedback);
+      expect(await firstValueFrom(chrome.help.getFeedbackHandler$())).toBe(feedback);
+      unregisterFeedback();
+      expect(await firstValueFrom(chrome.help.getFeedbackHandler$())).toBeUndefined();
+
+      const unregisterNewsfeed = chrome.help.registerNewsfeedHandler(newsfeed);
+      expect(await firstValueFrom(chrome.help.getNewsfeedHandler$())).toBe(newsfeed);
+      unregisterNewsfeed();
+      expect(await firstValueFrom(chrome.help.getNewsfeedHandler$())).toBeUndefined();
+
+      service.stop();
+    });
+  });
+
+  describe('app header', () => {
+    it('observes registrations', async () => {
+      const { chrome, service } = await start();
+      const config = { title: 'Dashboards' };
+
+      const unregister = chrome.appHeader.set(config);
+      expect(await firstValueFrom(chrome.appHeader.get$())).toEqual(config);
+
+      unregister();
+      expect(await firstValueFrom(chrome.appHeader.get$())).toBeUndefined();
+
+      service.stop();
+    });
+  });
+});
+
+describe('componentDeps.docTitleParts$', () => {
+  it('exposes initial, changed, and reset title parts', async () => {
+    document.title = 'Kibana';
+    const { chrome, service } = await start();
+    const titles: Array<readonly string[]> = [];
+    const subscription = chrome.componentDeps.docTitleParts$.subscribe((parts) =>
+      titles.push(parts)
+    );
+
+    chrome.docTitle.change('Dashboard');
+    chrome.docTitle.reset();
+
+    expect(titles).toEqual([['Kibana'], ['Dashboard', 'Kibana'], ['Kibana']]);
+
+    subscription.unsubscribe();
+    service.stop();
+  });
+});
+
+describe('inline app header', () => {
+  it('clears inline state on app change and ignores the previous registration', async () => {
+    const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+    const { chrome, service } = await start({ startDeps });
+    const values: Array<{ title?: unknown } | undefined> = [];
+    const subscription = chrome.inlineAppHeader.get$().subscribe((value) => values.push(value));
+
+    const registration = chrome.inlineAppHeader.register('First');
+    startDeps.application.navigateToApp('alpha');
+    registration.update('Stale');
+    registration.unregister();
+
+    expect(values).toContainEqual({ title: 'First' });
+    expect(values).not.toContainEqual({ title: 'Stale' });
+    expect(values[values.length - 1]).toBeUndefined();
+
+    subscription.unsubscribe();
+    service.stop();
+  });
+
+  it('does not let a stale registration update or clear a newer one', async () => {
+    const { chrome, service } = await start();
+    const first = chrome.inlineAppHeader.register('First');
+    const second = chrome.inlineAppHeader.register('Second');
+
+    first.update('Stale');
+    first.unregister();
+
+    await expect(firstValueFrom(chrome.inlineAppHeader.get$())).resolves.toEqual({
+      title: 'Second',
+    });
+
+    second.unregister();
+    await expect(firstValueFrom(chrome.inlineAppHeader.get$())).resolves.toBeUndefined();
+    service.stop();
   });
 });
 

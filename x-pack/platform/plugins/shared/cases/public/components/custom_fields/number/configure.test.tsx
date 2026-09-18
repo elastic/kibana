@@ -40,7 +40,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, true);
+      expect(onSubmit).toHaveBeenCalledWith({}, true);
     });
   });
 
@@ -57,7 +57,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ defaultValue: '123' }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ defaultValue: '123' }, true);
     });
   });
 
@@ -75,7 +75,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           required: true,
           defaultValue: '123',
@@ -97,7 +97,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           required: true,
         },

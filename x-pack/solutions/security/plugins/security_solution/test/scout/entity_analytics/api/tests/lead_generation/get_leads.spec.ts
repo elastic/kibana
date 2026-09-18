@@ -68,8 +68,8 @@ apiTest.describe(
     });
 
     apiTest('returns leads with default pagination shape', async ({ apiClient, esClient }) => {
-      await seedLead(esClient);
-      await seedLead(esClient);
+      await seedLead(esClient, { entityName: 'alice' });
+      await seedLead(esClient, { entityName: 'bob' });
 
       const response = await apiClient.get(LEAD_GENERATION_ROUTES.GET_LEADS, {
         headers: defaultHeaders,
@@ -86,9 +86,9 @@ apiTest.describe(
     apiTest(
       'filters leads by status=active and excludes dismissed leads',
       async ({ apiClient, esClient }) => {
-        await seedLead(esClient, { status: 'active' });
-        await seedLead(esClient, { status: 'active' });
-        await seedLead(esClient, { status: 'dismissed' });
+        await seedLead(esClient, { status: 'active', entityName: 'alice' });
+        await seedLead(esClient, { status: 'active', entityName: 'bob' });
+        await seedLead(esClient, { status: 'dismissed', entityName: 'carol' });
 
         const response = await apiClient.get(`${LEAD_GENERATION_ROUTES.GET_LEADS}?status=active`, {
           headers: defaultHeaders,
@@ -107,8 +107,8 @@ apiTest.describe(
     apiTest(
       'filters leads by status=dismissed and excludes active leads',
       async ({ apiClient, esClient }) => {
-        await seedLead(esClient, { status: 'active' });
-        await seedLead(esClient, { status: 'dismissed' });
+        await seedLead(esClient, { status: 'active', entityName: 'alice' });
+        await seedLead(esClient, { status: 'dismissed', entityName: 'bob' });
 
         const response = await apiClient.get(
           `${LEAD_GENERATION_ROUTES.GET_LEADS}?status=dismissed`,
@@ -122,9 +122,9 @@ apiTest.describe(
     );
 
     apiTest('respects perPage pagination parameter', async ({ apiClient, esClient }) => {
-      await seedLead(esClient);
-      await seedLead(esClient);
-      await seedLead(esClient);
+      await seedLead(esClient, { entityName: 'alice' });
+      await seedLead(esClient, { entityName: 'bob' });
+      await seedLead(esClient, { entityName: 'carol' });
 
       const response = await apiClient.get(`${LEAD_GENERATION_ROUTES.GET_LEADS}?perPage=1`, {
         headers: defaultHeaders,
@@ -139,9 +139,9 @@ apiTest.describe(
 
     apiTest('returns the correct page using page parameter', async ({ apiClient, esClient }) => {
       // Seed 3 leads with distinct priorities so sort order is deterministic.
-      await seedLead(esClient, { priority: 9 });
-      await seedLead(esClient, { priority: 5 });
-      await seedLead(esClient, { priority: 1 });
+      await seedLead(esClient, { priority: 9, entityName: 'alice' });
+      await seedLead(esClient, { priority: 5, entityName: 'bob' });
+      await seedLead(esClient, { priority: 1, entityName: 'carol' });
 
       const page1 = await apiClient.get(
         `${LEAD_GENERATION_ROUTES.GET_LEADS}?perPage=1&page=1&sortField=priority&sortOrder=desc`,
@@ -161,9 +161,9 @@ apiTest.describe(
     apiTest(
       'sorts by priority descending (default) — highest priority first',
       async ({ apiClient, esClient }) => {
-        await seedLead(esClient, { priority: 2 });
-        await seedLead(esClient, { priority: 8 });
-        await seedLead(esClient, { priority: 5 });
+        await seedLead(esClient, { priority: 2, entityName: 'alice' });
+        await seedLead(esClient, { priority: 8, entityName: 'bob' });
+        await seedLead(esClient, { priority: 5, entityName: 'carol' });
 
         const response = await apiClient.get(
           `${LEAD_GENERATION_ROUTES.GET_LEADS}?sortField=priority&sortOrder=desc`,
@@ -181,9 +181,9 @@ apiTest.describe(
     apiTest(
       'sorts by priority ascending — lowest priority first',
       async ({ apiClient, esClient }) => {
-        await seedLead(esClient, { priority: 8 });
-        await seedLead(esClient, { priority: 2 });
-        await seedLead(esClient, { priority: 5 });
+        await seedLead(esClient, { priority: 8, entityName: 'alice' });
+        await seedLead(esClient, { priority: 2, entityName: 'bob' });
+        await seedLead(esClient, { priority: 5, entityName: 'carol' });
 
         const response = await apiClient.get(
           `${LEAD_GENERATION_ROUTES.GET_LEADS}?sortField=priority&sortOrder=asc`,
@@ -202,8 +202,8 @@ apiTest.describe(
       const older = new Date(Date.now() - 10_000).toISOString();
       const newer = new Date().toISOString();
 
-      await seedLead(esClient, { timestamp: older });
-      await seedLead(esClient, { timestamp: newer });
+      await seedLead(esClient, { timestamp: older, entityName: 'alice' });
+      await seedLead(esClient, { timestamp: newer, entityName: 'bob' });
 
       const response = await apiClient.get(
         `${LEAD_GENERATION_ROUTES.GET_LEADS}?sortField=timestamp&sortOrder=desc`,

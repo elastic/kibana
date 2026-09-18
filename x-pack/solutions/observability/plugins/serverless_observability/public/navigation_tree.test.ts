@@ -38,7 +38,8 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Observability',
+      title: 'Overview',
+      icon: 'home',
       link: 'observability-overview',
     });
   });
@@ -92,6 +93,11 @@ describe('Navigation Tree', () => {
         },
       ])
     );
+    expect(navigation.body[0]).toMatchObject({
+      title: 'Get started',
+      icon: 'rocket',
+      link: 'observabilityOnboarding',
+    });
   });
 
   it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
@@ -99,9 +105,11 @@ describe('Navigation Tree', () => {
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const contextEngineNode = body.find((item) => item.link === 'context_engine');
 
     expect(aiAssistantNode).toBeDefined();
     expect(agentsNode).toBeUndefined();
+    expect(contextEngineNode).toMatchObject({ icon: 'tableSparkles', link: 'context_engine' });
   });
 
   it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
@@ -112,9 +120,14 @@ describe('Navigation Tree', () => {
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const contextEngineNode = body.find((item) => item.link === 'context_engine');
+    const agentsIndex = body.findIndex((item) => item.link === 'agent_builder');
+    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
+    expect(contextEngineNode).toMatchObject({ icon: 'tableSparkles', link: 'context_engine' });
+    expect(contextEngineIndex).toBe(agentsIndex + 1);
   });
 
   it('hides GenAI Settings in admin settings when unavailable', () => {
@@ -157,6 +170,23 @@ describe('Navigation Tree', () => {
         link: 'observability-overview:alerts',
         icon: 'warning',
       })
+    );
+  });
+
+  it('does not include Stack Alerts in Admin and Settings > Alerts and insights', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const alertsSection = adminSettingsNode.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    );
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
+        'management:triggersActions',
+        'management:triggersActionsConnectors',
+        'management:maintenanceWindows',
+      ])
     );
   });
 

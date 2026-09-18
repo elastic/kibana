@@ -13,7 +13,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
-    "@kbn/monaco",
+    "@kbn/code-editor",
     "@kbn/std",
     "@kbn/core-ui-settings-browser",
     "@kbn/presentation-publishing",

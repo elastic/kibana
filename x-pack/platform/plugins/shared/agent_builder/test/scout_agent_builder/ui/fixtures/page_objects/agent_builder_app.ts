@@ -494,7 +494,7 @@ export class AgentBuilderApp {
   async selectAgentLabel(label: string) {
     const contentSelector = subj('agentBuilderAgentsListContent');
     const labelsButtonSelector = `${contentSelector} button[type="button"][aria-label="Labels Selection"]`;
-    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"][title="${label}"]`;
+    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"] span[title="${label}"]`;
     await this.page.locator(labelsButtonSelector).click();
     await this.page.locator(optionSelector).click();
   }
@@ -545,16 +545,7 @@ export class AgentBuilderApp {
   async getAgentLabels(agentId: string) {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
     const labelsCell = row.getByTestId('agentBuilderAgentsListLabels');
-    const labelTexts = await labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-    const viewMore = labelsCell.getByTestId('agentBuilderLabelsViewMoreButton');
-    if (await viewMore.isVisible()) {
-      await viewMore.click();
-      const popover = this.page.testSubj.locator('agentBuilderLabelsViewMorePopover');
-      const hidden = await popover.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-      labelTexts.push(...hidden);
-      await viewMore.click();
-    }
-    return labelTexts;
+    return labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
   }
 
   async navigateToAgentOverview(agentId: string) {

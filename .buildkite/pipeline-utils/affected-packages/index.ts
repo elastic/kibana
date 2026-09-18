@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findModuleForPath } from './module_lookup';
-import { getAffectedModulesGit } from './strategy_git';
-import { getAffectedProjectsMoon } from './strategy_moon';
+import { findModuleForPath } from './module_lookup.ts';
+import { getAffectedModulesGit } from './strategy_git.ts';
+import { getAffectedProjectsMoon } from './strategy_moon.ts';
 
-export * from './const';
-export * from './utils';
-export { listChangedFiles } from './strategy_git';
-export { getAffectedProjectsMoon } from './strategy_moon';
+export * from './const.ts';
+export * from './utils.ts';
+export { listChangedFiles } from './strategy_git.ts';
+export { getAffectedProjectsMoon } from './strategy_moon.ts';
 
 export interface AffectedPackagesConfig {
   strategy?: 'git' | 'moon';
@@ -22,6 +22,8 @@ export interface AffectedPackagesConfig {
   /** Glob patterns for changed files to exclude before module resolution (git strategy only). */
   ignorePatterns?: string[];
   ignoreUncategorizedChanges?: boolean;
+  /** Classify these paths instead of running git diff. */
+  changedFiles?: string[];
 }
 
 /**
@@ -32,7 +34,7 @@ export async function getAffectedPackages(
   mergeBase: string | undefined,
   configArgs: AffectedPackagesConfig = getConfigFromEnv()
 ): Promise<Set<string>> {
-  if (!mergeBase) {
+  if (!configArgs.changedFiles && !mergeBase) {
     throw new Error('No merge base found');
   }
 
@@ -44,15 +46,24 @@ export async function getAffectedPackages(
   };
 
   try {
-    const affectedPackages =
-      config.strategy === 'git'
-        ? getAffectedModulesGit({
-            mergeBase,
-            includeDownstream: config.includeDownstream,
-            ignorePatterns: config.ignorePatterns,
-            ignoreUncategorizedChanges: config.ignoreUncategorizedChanges,
-          })
-        : getAffectedProjectsMoon(mergeBase, config.includeDownstream);
+    let affectedPackages: Set<string>;
+    if (configArgs.changedFiles) {
+      affectedPackages = getAffectedModulesGit({
+        includeDownstream: config.includeDownstream,
+        ignorePatterns: config.ignorePatterns,
+        ignoreUncategorizedChanges: config.ignoreUncategorizedChanges,
+        changedFiles: configArgs.changedFiles,
+      });
+    } else if (config.strategy === 'git') {
+      affectedPackages = getAffectedModulesGit({
+        mergeBase,
+        includeDownstream: config.includeDownstream,
+        ignorePatterns: config.ignorePatterns,
+        ignoreUncategorizedChanges: config.ignoreUncategorizedChanges,
+      });
+    } else {
+      affectedPackages = getAffectedProjectsMoon(mergeBase!, config.includeDownstream);
+    }
 
     if (affectedPackages.size === 0) {
       console.warn('Warning: No affected packages found');

@@ -9,13 +9,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
-
-const CONNECTOR_SML_TYPE = 'connector';
 
 interface ConnectorSmlTypeDeps {
   /**
@@ -37,7 +36,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
   const { getActionSavedObjectsClient, logger } = deps;
 
   return {
-    id: CONNECTOR_SML_TYPE,
+    id: CONNECTOR_KI_TYPE,
 
     async *list(context) {
       const finder = context.savedObjectsClient.createPointInTimeFinder({
@@ -86,10 +85,9 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         ];
 
         return {
-          type: CONNECTOR_SML_TYPE,
+          type: CONNECTOR_KI_TYPE,
           title: name,
           content: contentParts.join('\n'),
-          discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_SML_TYPE}/${name}` }],
         };
       } catch (error) {
         context.logger.warn(
@@ -101,12 +99,12 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
     requiredHiddenTypes: ['action'],
 
-    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
+    getPermissions: () => kibanaPermissions({ kiType: CONNECTOR_KI_TYPE }),
 
     toAttachment: async (item, context) => {
+      const originId = getSmlOriginId(item);
       try {
         const soClient = await getActionSavedObjectsClient(context.request);
-        const originId = item.origin_id ?? '';
         const so = await soClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
         const connectorName = attrs.name ?? originId;
@@ -124,7 +122,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         };
       } catch (error) {
         logger.warn(
-          `SML connector: failed to convert '${item.origin_id}' to attachment: ${
+          `SML connector: failed to convert '${originId}' to attachment: ${
             (error as Error).message
           }`
         );

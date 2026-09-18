@@ -12,7 +12,15 @@ import type { GetPersistedAiSummaryResponse } from '@kbn/entity-store/common';
 import { useFetchPersistedAiSummary } from './use_fetch_persisted_ai_summary';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
+const mockAddError = jest.fn();
+
 jest.mock('../../../api/api');
+
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({
+    addError: mockAddError,
+  }),
+}));
 
 describe('useFetchPersistedAiSummary', () => {
   const fetchPersistedAiSummary = jest.fn();

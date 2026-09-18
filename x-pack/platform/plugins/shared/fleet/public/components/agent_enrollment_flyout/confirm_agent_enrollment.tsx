@@ -7,18 +7,21 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  EuiCallOut,
-  EuiButton,
   EuiText,
   EuiLink,
-  EuiLoadingSpinner,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { sendGetAgents, useLink, useStartServices } from '../../hooks';
 import { AGENTS_PREFIX } from '../../constants';
+import { AGENT_TYPE_OPAMP } from '../../../common/constants';
+
 interface Props {
   policyId?: string;
   troubleshootLink: string;
@@ -127,7 +130,10 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
 
   const onButtonClick = () => {
     if (onClickViewAgents) onClickViewAgents();
-    const href = getHref('agent_list');
+    const href = getHref(
+      'agent_list',
+      isCollector ? { kuery: `${AGENTS_PREFIX}.type:${AGENT_TYPE_OPAMP}` } : {}
+    );
     application.navigateToUrl(href);
   };
 
@@ -149,28 +155,33 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   if (showLoading && !agentCount) {
     return (
       <>
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="m"
-          color="primary"
-          iconType={EuiLoadingSpinner}
           title={
-            isLongEnrollment ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
-                defaultMessage="Listening for agent... this can take several minutes"
-              />
-            ) : isCollector ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeningCollector"
-                defaultMessage="Listening for collector"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listening"
-                defaultMessage="Listening for agent"
-              />
-            )
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {isLongEnrollment ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
+                    defaultMessage="Listening for agent... this can take several minutes"
+                  />
+                ) : isCollector ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listeningCollector"
+                    defaultMessage="Listening for collector"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listening"
+                    defaultMessage="Listening for agent"
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         />
         <EuiSpacer size="m" />
@@ -195,7 +206,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiCallOut
+    <KbnSuccessCallout
       data-test-subj="ConfirmAgentEnrollmentCallOut"
       title={
         isCollector
@@ -214,24 +225,23 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
               },
             })
       }
-      color="success"
-      iconType="check"
-    >
-      {showViewAgents && (
-        <EuiButton
-          onClick={onButtonClick}
-          color="success"
-          data-test-subj="ConfirmAgentEnrollmentButton"
-        >
-          {isCollector
-            ? i18n.translate('xpack.fleet.agentEnrollment.confirmation.buttonCollector', {
-                defaultMessage: 'View connected collectors',
-              })
-            : i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
-                defaultMessage: 'View enrolled agents',
-              })}
-        </EuiButton>
-      )}
-    </EuiCallOut>
+      actionProps={
+        showViewAgents
+          ? {
+              primary: {
+                onClick: onButtonClick,
+                'data-test-subj': 'ConfirmAgentEnrollmentButton',
+                children: isCollector
+                  ? i18n.translate('xpack.fleet.agentEnrollment.confirmation.buttonCollector', {
+                      defaultMessage: 'View connected collectors',
+                    })
+                  : i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
+                      defaultMessage: 'View enrolled agents',
+                    }),
+              },
+            }
+          : undefined
+      }
+    />
   );
 };
