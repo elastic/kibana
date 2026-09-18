@@ -432,6 +432,22 @@ describe('CasesWorkflowRunService', () => {
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
+    // SECURITY REGRESSION TEST: documentIds are expanded server-side, and case membership is only
+    // checked for pre-expanded documents, so a case run must never accept them — otherwise a run
+    // could pull in documents unrelated to the case it is audited against.
+    it('rejects documentIds inputs', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a'],
+          inputs: {
+            event: { triggerType: 'document', documentIds: [{ _id: 'd-1', _index: 'logs' }] },
+          },
+          origin: { type: 'cases.case', caseId: 'case-a' },
+        })
+      ).rejects.toThrow('inputs.event.documentIds cannot be used with a case workflow run.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
+
     it('rejects observable inputs when origin is absent (no silent drop)', async () => {
       // observableIds is a server-owned key that gets stripped by SERVER_OWNED_EVENT_KEYS.
       // Without the guard, a bulk run carrying observableIds would silently receive an empty

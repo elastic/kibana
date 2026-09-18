@@ -95,6 +95,26 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): Docume
 };
 
 /**
+ * Rejects `inputs.event.documentIds` on a case workflow run.
+ *
+ * Case membership is only validated for `inputs.event.documents` (see
+ * `parseSelectedDocumentPairs`), while the server expands `documentIds` into documents itself.
+ * Accepting them would let a case-scoped run pull in documents never checked against the case
+ * while the audit trail still reads "ran workflow from case X". No Cases caller has ever sent
+ * `documentIds`, so rejecting breaks nothing.
+ *
+ * Pre-expanded `inputs.event.documents` are deliberately not rejected here: they are validated
+ * against the case's attached documents and forwarded verbatim to the workflow engine.
+ */
+export const rejectDocumentIdSelections = (inputs: Record<string, unknown>): void => {
+  const { documentIds } = getRecord(inputs.event) ?? {};
+
+  if (documentIds !== undefined && documentIds !== null) {
+    throw Boom.badRequest('inputs.event.documentIds cannot be used with a case workflow run.');
+  }
+};
+
+/**
  * Reads the (id, index) pairs from `inputs.event.documents`.
  *
  * Unlike alerts, documents are not re-fetched by `preprocessAlertInputs` (which early-returns for
