@@ -384,7 +384,6 @@ export class ActionPolicyClient {
     params: MatchActionPoliciesForRuleParams
   ): Promise<MatchActionPoliciesForRuleResponse> {
     const { ruleTags = [] } = params;
-    const ruleTagSet = new Set(ruleTags);
 
     const items: MatchedActionPolicy[] = [];
 
@@ -392,13 +391,13 @@ export class ActionPolicyClient {
     for (const actionPolicy of allPolicies.items) {
       const { matcher } = actionPolicy;
 
-      if (PolicyMatcher.of(matcher).isCatchAll()) {
+      const policyMatcher = PolicyMatcher.of(matcher);
+      if (policyMatcher.isCatchAll()) {
         items.push({ actionPolicy, category: 'catch-all' });
         continue;
       }
 
-      const matcherTags = matcher?.tags ?? [];
-      if (matcherTags.some((tag) => ruleTagSet.has(tag))) {
+      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
         items.push({ actionPolicy, category: 'tags' });
       }
     }
