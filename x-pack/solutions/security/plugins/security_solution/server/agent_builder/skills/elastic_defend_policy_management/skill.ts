@@ -115,7 +115,7 @@ metadata or a tool error. Never fabricate a proposed change to obtain assess.
 
 ### Restate only returned live-read facts
 For get, including baseline get, compare, including a returned compare row with a baseline side, rollout status, assess, and apply, reports may restate returned identities, rows, paths,
-and values. Apply may restate returned before, after, appliedChanges, sideEffects, residual, and enrollment. Boolean, mode, and path-name restatements are allowed categories. A boolean, mode,
+and values. Apply may restate returned before, after, requestedChanges, sideEffects, residual, and enrollment. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state. \`after\` and \`residual\` describe the policy Fleet returned. Boolean, mode, and path-name restatements are allowed categories. A boolean, mode,
 or path name does not entail its behavioural meaning. Before answering, remove any provider,
 other-product, blocking, coverage, warning, eligibility, or other consequence not explicitly
 returned.
@@ -208,7 +208,7 @@ After a successful assessment, if the user requests applying the same policy ope
 
 The assessment report is assess-only and uses no extra inline or knowledge tool; that restriction ends when the user subsequently requests the gated apply. Apply is not a readiness or rollout claim.
 
-Always report returned before and after version and revision. Report returned appliedChanges, sideEffects, residual, and apply enrollment as observed facts only. Report returned rows and values only, disclose independent section and per-value truncation, and never reconstruct historical residuals from a later get. Do not claim safe, unsafe, recommended, ready, or host rollout. Unchanged since assessment is allowed only after a successful apply whose before.version matches the assessed expected version, and only for that pre-write interval.
+Always report returned before and after version and revision. Report returned requestedChanges, sideEffects, residual, and apply enrollment as observed facts only. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state, while \`after\` and \`residual\` describe the policy Fleet returned. Report returned rows and values only, disclose independent section and per-value truncation, and never reconstruct historical residuals from a later get. Do not claim safe, unsafe, recommended, ready, or host rollout. Unchanged since assessment is allowed only after a successful apply whose before.version matches the assessed expected version, and only for that pre-write interval.
 
 A version_conflict means this apply invocation made no write. Report the conflict and stop the apply workflow. Do not reassess, call apply again, or present another confirmation card unless the user makes a new request to apply after seeing the conflict. That later request requires a new successful assessment and fresh confirmation. A write_unverified outcome is unknown; any observed identity is current identity, not success or attribution. Read the original policy id and reassess only to report current observed state; if that read fails, stop. Do not call apply again or present another confirmation card unless the user then makes a new request to apply. Never retry automatically.
 

@@ -288,7 +288,7 @@ describe('apply policy change', () => {
       version: EXPECTED_VERSION,
     });
     expect(result.after.version).toBe('WzIsMV0=');
-    expect(result.appliedChanges).toEqual(preview.assessment.changes);
+    expect(result.requestedChanges).toEqual(preview.assessment.changes);
     expect(result.residual).toEqual([]);
   });
 

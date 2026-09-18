@@ -77,7 +77,7 @@ export type PreparedApplyPolicyChange = ApplyPolicyChangePreview & {
 export type ApplyPolicyChangeResult = Readonly<{
   before: PolicyWriteIdentity;
   after: PolicyWriteIdentity;
-  appliedChanges: PolicyChangeAssessment['changes'];
+  requestedChanges: PolicyChangeAssessment['changes'];
   sideEffects: PolicyChangeAssessment['sideEffects'];
   residual: readonly PolicyDiffEntry[];
   enrollment: EndpointCountResult;
@@ -282,7 +282,7 @@ const persistPreparedApply = async (
   return {
     before: policy,
     after: toIdentityPick(usable.snapshot.identity),
-    appliedChanges: assessment.changes,
+    requestedChanges: assessment.changes,
     sideEffects: assessment.sideEffects,
     residual: diffPolicyConfig(normalize(assessment.proposedConfig), usable.normalizedConfig),
     enrollment,

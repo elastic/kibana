@@ -118,7 +118,7 @@ const createPreview = (): ApplyPolicyChangePreview => {
 const createApplyResult = (): ApplyPolicyChangeResult => ({
   before: IDENTITY,
   after: { ...IDENTITY, revision: 5 },
-  appliedChanges: [],
+  requestedChanges: [],
   sideEffects: [],
   residual: [],
   enrollment: ENROLLMENT,

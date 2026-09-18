@@ -104,7 +104,7 @@ const createResult = (operations: readonly PolicyChangeOperation[]) => {
         revision: identity.revision + 1,
         version: 'WzIsMV0=',
       },
-      appliedChanges: assessment.changes,
+      requestedChanges: assessment.changes,
       sideEffects: assessment.sideEffects,
       residual: [],
       enrollment: ENROLLMENT,
@@ -139,7 +139,7 @@ const createResidualResult = () => {
   return {
     before: identity,
     after: { ...identity, revision: identity.revision + 1, version: 'WzIsMV0=' },
-    appliedChanges: assessment.changes,
+    requestedChanges: assessment.changes,
     sideEffects: assessment.sideEffects,
     residual: diffPolicyConfig(assessment.proposed, normalize(returnedNormalized.normalizedConfig)),
     enrollment: ENROLLMENT,
@@ -191,7 +191,7 @@ const createOversizedWindowsAdvancedResidualResult = () => {
         revision: identity.revision + 1,
         version: 'WzIsMV0=',
       },
-      appliedChanges: assessment.changes,
+      requestedChanges: assessment.changes,
       sideEffects: assessment.sideEffects,
       residual,
       enrollment: ENROLLMENT,
@@ -230,7 +230,7 @@ describe('presentApplyPolicyChangeResult', () => {
 
     const presented = presentApplyPolicyChangeResult(result);
     const firstChange = assessment.changes[0];
-    const firstPresented = presented.appliedChanges[0];
+    const firstPresented = presented.requestedChanges[0];
     const firstSideEffect = assessment.sideEffects[0];
 
     if (
@@ -239,7 +239,7 @@ describe('presentApplyPolicyChangeResult', () => {
       firstSideEffect === undefined
     ) {
       throw new Error(
-        'expected a reachable assessment to include applied changes and side effects'
+        'expected a reachable assessment to include requested changes and side effects'
       );
     }
 
@@ -256,7 +256,7 @@ describe('presentApplyPolicyChangeResult', () => {
       version: result.after.version,
     });
     expect(presented.enrollment).toEqual(ENROLLMENT);
-    expect(presented.appliedChanges).toHaveLength(assessment.changes.length);
+    expect(presented.requestedChanges).toHaveLength(assessment.changes.length);
     expect(firstPresented).toEqual(
       expect.objectContaining({
         path: firstChange.path,
@@ -278,7 +278,7 @@ describe('presentApplyPolicyChangeResult', () => {
     );
     expect(presented.residual).toEqual([]);
     expect(presented).not.toHaveProperty('side_effects_value_truncated');
-    expect(presented).not.toHaveProperty('applied_changes_value_truncated');
+    expect(presented).not.toHaveProperty('requested_changes_value_truncated');
     expect(presented).not.toHaveProperty('residual_value_truncated');
   });
   it('drops an oversized schema-backed windows.advanced residual that misses the guarded envelope', () => {
@@ -322,9 +322,9 @@ describe('presentApplyPolicyChangeResult', () => {
     expect(presented.residual).toEqual([]);
     expect(presented.residual_value_truncated).toBe(true);
     expect(presented.residual_value_total).toBe(residual.length);
-    expect(presented.appliedChanges).toEqual([]);
-    expect(presented.applied_changes_value_truncated).toBe(true);
-    expect(presented.applied_changes_value_total).toBe(assessment.changes.length);
+    expect(presented.requestedChanges).toEqual([]);
+    expect(presented.requested_changes_value_truncated).toBe(true);
+    expect(presented.requested_changes_value_total).toBe(assessment.changes.length);
     expect(presented.sideEffects).toEqual([]);
     expect(presented.side_effects_value_truncated).toBe(true);
     expect(presented.side_effects_value_total).toBe(assessment.sideEffects.length);

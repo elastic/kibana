@@ -65,7 +65,8 @@ export const createApplyPolicyChangeTool = ({
     description:
       'Apply one previously assessed tier-1 change set to one Elastic Defend endpoint policy in the current space after the user confirms the rendered change card. ' +
       'Requires expectedVersion from the matching successful assessment of the same policy and the same operations in this conversation; never a revision and never a version from a later policy read. ' +
-      'Returns before and after bounded identities, appliedChanges, sideEffects, residual differences between the proposal and the policy Fleet returns, and enrollment as observed during handler preparation; confirmation-card enrollment is an earlier preview-time observation and may differ. ' +
+      'Returns before and after bounded identities, requestedChanges, sideEffects, residual differences between the proposal and the policy Fleet returns, and enrollment as observed during handler preparation; confirmation-card enrollment is an earlier preview-time observation and may differ. ' +
+      'requestedChanges are the assessed and confirmed proposal rows submitted to Fleet and sideEffects are assessment-predicted effects; neither proves final state. after and residual describe the policy Fleet returned. ' +
       'Each returned section can be bounded; when a section is truncated its *_value_truncated is true and *_value_total is the complete count, and an empty truncated section is neither a no-op nor evidence of no impact. ' +
       'A from_truncation or to_truncation summary on a row means that displayed value is partial, with truncation sites listed at paths relative to that value, string, array, and object truncation distinguished, and entries capped at 50 with entries_truncated true disclosing further sites and entries_total reporting the complete count. ' +
       'Reports use returned rows only and never reconstruct omitted values. ' +

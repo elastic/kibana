@@ -23,21 +23,21 @@ import {
 
 const APPLY_POLICY_CHANGE_MAX_RESULT_TOKENS = 12_000;
 
-type PresentedAppliedChange = Omit<PresentedPolicyChangeFact, 'registry'>;
+type PresentedRequestedChange = Omit<PresentedPolicyChangeFact, 'registry'>;
 
 type PresentedApplyPolicyChangeResult = Readonly<{
   before: PresentedPolicyIdentity<
     Pick<PolicyWriteIdentity, 'id' | 'name' | 'revision' | 'version'>
   >;
   after: PresentedPolicyIdentity<Pick<PolicyWriteIdentity, 'id' | 'name' | 'revision' | 'version'>>;
-  appliedChanges: readonly PresentedAppliedChange[];
+  requestedChanges: readonly PresentedRequestedChange[];
   sideEffects: readonly PresentedSideEffect[];
   residual: readonly PresentedNormalizedDiff[];
   enrollment: ApplyPolicyChangeResult['enrollment'];
   side_effects_value_truncated?: true;
   side_effects_value_total?: number;
-  applied_changes_value_truncated?: true;
-  applied_changes_value_total?: number;
+  requested_changes_value_truncated?: true;
+  requested_changes_value_total?: number;
   residual_value_truncated?: true;
   residual_value_total?: number;
 }>;
@@ -65,9 +65,9 @@ const presentFromToWithNulls = (
 };
 
 const presentChange = (
-  change: ApplyPolicyChangeResult['appliedChanges'][number],
+  change: ApplyPolicyChangeResult['requestedChanges'][number],
   limits: TrimLimits
-): PresentedAppliedChange => {
+): PresentedRequestedChange => {
   const { kind: originKind, ...origin } = change.origin;
   const { kind: registryKind } = change.registry;
   return {
@@ -113,7 +113,7 @@ const sectionMarker = (prefix: string, kept: number, total: number) =>
 export const presentApplyPolicyChangeResult = (
   result: ApplyPolicyChangeResult
 ): PresentedApplyPolicyChangeResult => {
-  const { appliedChanges, sideEffects, residual } = result;
+  const { requestedChanges, sideEffects, residual } = result;
   const identity = {
     before: presentIdentity(result.before),
     after: presentIdentity(result.after),
@@ -122,14 +122,14 @@ export const presentApplyPolicyChangeResult = (
 
   const build = (
     keepSideEffects: boolean,
-    keepAppliedChanges: boolean,
+    keepRequestedChanges: boolean,
     residualKeep: number
   ): PresentedApplyPolicyChangeResult => {
     const presentedSideEffects = keepSideEffects
       ? sideEffects.map((entry) => presentSideEffect(entry, DEFAULT_TRIM_LIMITS))
       : [];
-    const presentedAppliedChanges = keepAppliedChanges
-      ? appliedChanges.map((entry) => presentChange(entry, DEFAULT_TRIM_LIMITS))
+    const presentedRequestedChanges = keepRequestedChanges
+      ? requestedChanges.map((entry) => presentChange(entry, DEFAULT_TRIM_LIMITS))
       : [];
     const presentedResidual = residual
       .slice(0, residualKeep)
@@ -139,8 +139,12 @@ export const presentApplyPolicyChangeResult = (
       ...identity,
       sideEffects: presentedSideEffects,
       ...sectionMarker('side_effects', presentedSideEffects.length, sideEffects.length),
-      appliedChanges: presentedAppliedChanges,
-      ...sectionMarker('applied_changes', presentedAppliedChanges.length, appliedChanges.length),
+      requestedChanges: presentedRequestedChanges,
+      ...sectionMarker(
+        'requested_changes',
+        presentedRequestedChanges.length,
+        requestedChanges.length
+      ),
       residual: presentedResidual,
       ...sectionMarker('residual', presentedResidual.length, residual.length),
     };
@@ -159,9 +163,9 @@ export const presentApplyPolicyChangeResult = (
     return withoutSideEffects;
   }
 
-  const withoutAppliedChanges = tryFit(build(false, false, residual.length));
-  if (withoutAppliedChanges !== undefined) {
-    return withoutAppliedChanges;
+  const withoutRequestedChanges = tryFit(build(false, false, residual.length));
+  if (withoutRequestedChanges !== undefined) {
+    return withoutRequestedChanges;
   }
 
   for (let keep = residual.length - 1; keep >= 0; keep -= 1) {
