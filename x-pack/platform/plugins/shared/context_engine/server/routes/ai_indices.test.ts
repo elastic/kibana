@@ -628,7 +628,7 @@ describe('ai indices routes', () => {
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 429,
-        body: { message: 'es_rejected_execution_exception' },
+        body: { message: 'es_rejected_execution_exception: too many requests' },
       });
     });
   });

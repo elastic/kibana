@@ -94,6 +94,7 @@ import { getKis } from '../ai_indices/ki_list';
 import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
+import { formatErrorMessage } from '../utils/format_es_error';
 import { resolveSpaceId } from '../utils/resolve_space_id';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -367,10 +368,12 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   ) {
     return response.conflict({ body: { message: error.message } });
   }
-  const message = error instanceof Error ? error.message : String(error);
-  logger.error(error instanceof Error ? error.stack ?? error.message : message);
+  logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
   const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
-  return response.customError({ statusCode, body: { message } });
+  return response.customError({
+    statusCode,
+    body: { message: formatErrorMessage(error) },
+  });
 };
 
 const deleteAiIndexQuerySchema = schema.object({
