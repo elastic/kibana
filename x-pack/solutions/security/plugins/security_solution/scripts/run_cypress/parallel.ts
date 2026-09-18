@@ -45,6 +45,7 @@ import { getFTRConfig } from './get_ftr_config';
 import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 import { recordCypressResult } from './cypress_result_report';
+import { routeGroupFailure } from './group_failure_routing';
 
 const filterCompletedSpecs = async (
   specFiles: string[],
@@ -656,29 +657,20 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           } catch (error) {
             log.error(error);
 
-            // Seed both arrays unconditionally for every spec in the group.
-            // If startup throws before the inner loop above seeds
-            // `failedSpecFilePaths`, the previous membership guard collapsed to
-            // false for every spec, leaving both arrays empty, no
-            // `runner_failure` record written, and `stillFailing` false at the
-            // final exit check — i.e. the same false-green checkpoint pathway
-            // this PR is closing, just triggered by an early-startup throw
-            // instead of a malformed run result.
+            // Seed both arrays unconditionally for every spec in the group:
+            // gating on prior membership of `failedSpecFilePaths` collapses to a
+            // no-op whenever the throw precedes the per-spec loop, which is the
+            // false-green pathway this PR closes. Invariant and tests live in
+            // `group_failure_routing.ts`.
             const message = error instanceof Error ? error.message : String(error);
-            for (const filePath of group.specFilePaths) {
-              if (!failedSpecFilePaths.includes(filePath)) {
-                failedSpecFilePaths.push(filePath);
-              }
-              if (!infraFailedSpecFilePaths.includes(filePath)) {
-                infraFailedSpecFilePaths.push(filePath);
-              }
-              recordCypressResult({
-                spec: filePath,
-                kind: 'runner_failure',
-                status: 'thrown',
-                message,
-                isRetryRun,
-              });
+            for (const record of routeGroupFailure({
+              specFilePaths: group.specFilePaths,
+              failedSpecFilePaths,
+              infraFailedSpecFilePaths,
+              message,
+              isRetryRun,
+            })) {
+              recordCypressResult(record);
             }
 
             results.push({
