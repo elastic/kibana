@@ -375,7 +375,7 @@ describe('Outputs handler', () => {
     it('returns agentPolicyCount and agentCount on success', async () => {
       const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
         mockContext,
-        { params: { outputId: 'output1' } } as any,
+        { params: { outputId: 'output1' }, query: {} } as any,
         mockResponse as any
       );
 
@@ -384,13 +384,45 @@ describe('Outputs handler', () => {
       expect(res).toEqual({ body: { agentPolicyCount: 3, agentCount: 7 } });
     });
 
+    it('applies pending isDefault query param over persisted value', async () => {
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'output1', is_default: false } as any);
+
+      await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' }, query: { isDefault: true } } as any,
+        mockResponse as any
+      );
+
+      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as jest.Mock).mock
+        .lastCall![1];
+      expect(passedOutput.is_default).toBe(true);
+    });
+
+    it('applies pending isDefaultMonitoring query param over persisted value', async () => {
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'output1', is_default_monitoring: false } as any);
+
+      await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' }, query: { isDefaultMonitoring: true } } as any,
+        mockResponse as any
+      );
+
+      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as jest.Mock).mock
+        .lastCall![1];
+      expect(passedOutput.is_default_monitoring).toBe(true);
+    });
+
     it('returns 404 when output does not exist', async () => {
       const boomNotFound = { isBoom: true, output: { statusCode: 404 } };
       jest.spyOn(outputService, 'get').mockRejectedValueOnce(boomNotFound);
 
       await getOutputAgentPolicyCountHandlerWithErrorHandler(
         mockContext,
-        { params: { outputId: 'missing-output' } } as any,
+        { params: { outputId: 'missing-output' }, query: {} } as any,
         mockResponse as any
       );
 
@@ -409,7 +441,7 @@ describe('Outputs handler', () => {
 
       const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
         mockContext,
-        { params: { outputId: 'output1' } } as any,
+        { params: { outputId: 'output1' }, query: {} } as any,
         mockResponse as any
       );
 

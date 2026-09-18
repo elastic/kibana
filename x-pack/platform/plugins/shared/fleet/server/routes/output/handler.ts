@@ -179,11 +179,16 @@ export const getLatestOutputHealth: RequestHandler<
 };
 
 export const getOutputAgentPolicyCountHandler: RequestHandler<
-  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.params>
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.params>,
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.query>
 > = async (context, request, response) => {
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     const output = await outputService.get(request.params.outputId);
+    // Apply pending flyout values so counts reflect state after save, not before.
+    const { isDefault, isDefaultMonitoring } = request.query;
+    if (isDefault !== undefined) output.is_default = isDefault;
+    if (isDefaultMonitoring !== undefined) output.is_default_monitoring = isDefaultMonitoring;
     const counts = await outputService.getAgentAndPolicyCountForOutput(esClient, output);
     return response.ok({ body: counts });
   } catch (error) {

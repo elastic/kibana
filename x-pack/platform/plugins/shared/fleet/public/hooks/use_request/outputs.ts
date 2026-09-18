@@ -103,11 +103,19 @@ export function sendGetOutputHealth(outputId: string) {
   });
 }
 
-export function sendGetOutputAgentPolicyCount(outputId: string) {
+export function sendGetOutputAgentPolicyCount(
+  outputId: string,
+  pendingFlags?: { isDefault?: boolean; isDefaultMonitoring?: boolean }
+) {
+  const query: Record<string, boolean> = {};
+  if (pendingFlags?.isDefault !== undefined) query.isDefault = pendingFlags.isDefault;
+  if (pendingFlags?.isDefaultMonitoring !== undefined)
+    query.isDefaultMonitoring = pendingFlags.isDefaultMonitoring;
   return sendRequest<GetOutputAgentPolicyCountResponse>({
     method: 'get',
     path: outputRoutesService.getOutputAgentPolicyCountPath(outputId),
     version: API_VERSIONS.public.v1,
+    query,
   });
 }
 

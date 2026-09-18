@@ -9,7 +9,10 @@ import { sendGetOutputAgentPolicyCount } from '../../../hooks';
 import type { Output } from '../../../types';
 
 export async function getAgentAndPolicyCountForOutput(output: Output) {
-  const result = await sendGetOutputAgentPolicyCount(output.id);
+  const result = await sendGetOutputAgentPolicyCount(output.id, {
+    isDefault: output.is_default,
+    isDefaultMonitoring: output.is_default_monitoring,
+  });
 
   if (result.error || !result.data) {
     throw result.error ?? new Error('No data returned from agent policy count endpoint');
