@@ -94123,6 +94123,9 @@ components:
         id:
           description: The identifier for the connector.
           type: string
+        inbound_events_enabled:
+          description: Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.
+          type: boolean
         is_connector_type_deprecated:
           description: Indicates whether the connector type is deprecated.
           type: boolean
@@ -94170,6 +94173,9 @@ components:
         id:
           description: The identifier for the connector.
           type: string
+        inbound_events_enabled:
+          description: Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.
+          type: boolean
         is_connector_type_deprecated:
           description: Indicates whether the connector type is deprecated.
           type: boolean
@@ -107543,6 +107549,9 @@ components:
         connector_type_id:
           description: The type of connector.
           type: string
+        inbound_events_enabled:
+          description: When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.
+          type: boolean
         name:
           description: The display name for the connector.
           type: string
@@ -115590,6 +115599,9 @@ components:
     Kibana_HTTP_APIs_update_connector:
       additionalProperties: false
       properties:
+        inbound_events_enabled:
+          description: Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.
+          type: boolean
         name:
           description: The display name for the connector.
           type: string
