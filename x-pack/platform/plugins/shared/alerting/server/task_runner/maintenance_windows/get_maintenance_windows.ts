@@ -29,11 +29,11 @@ export const filterMaintenanceWindows = ({
   withScopedQuery,
 }: FilterMaintenanceWindowsOpts): MaintenanceWindow[] => {
   const filteredMaintenanceWindows = maintenanceWindows.filter(({ scope }) => {
-    const a = scope?.alerting;
+    const alertingScope = scope?.alerting;
     // enabled absent or false → v1 not selected; never applies to v1.
-    if (!a?.enabled) return false;
+    if (!alertingScope?.enabled) return false;
     // enabled=true, no kql and no filters → no filter → !withScopedQuery bucket.
-    if (!a.kql && !a.filters?.length) return !withScopedQuery;
+    if (!alertingScope.kql && !alertingScope.filters?.length) return !withScopedQuery;
     // enabled=true with kql → has filter → withScopedQuery bucket.
     return withScopedQuery;
   });

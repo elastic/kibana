@@ -4,18 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import moment from 'moment';
-import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  FIELD_TYPES,
-  Form,
-  getUseField,
-  useForm,
-  useFormData,
-  UseMultiFields,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -33,26 +21,38 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import type { Filter } from '@kbn/es-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  FIELD_TYPES,
+  Form,
+  getUseField,
+  useForm,
+  useFormData,
+  UseMultiFields,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
+import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
+import moment from 'moment';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isScopedQueryError } from '../../common';
+import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
+import { useCreateMaintenanceWindow } from '../hooks/use_create_maintenance_window';
+import { useGetRuleTypes } from '../hooks/use_get_rule_types';
+import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_window';
+import * as i18n from '../translations';
+import { useUiSetting } from '../utils/kibana_react';
+import { EpisodeMatcherInput } from './episode_matcher_input';
+import { DatePickerRangeField } from './fields/date_picker_range_field';
+import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import * as i18n from '../translations';
-import { SubmitButton } from './submit_button';
-import { useCreateMaintenanceWindow } from '../hooks/use_create_maintenance_window';
-import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_window';
-import { useGetRuleTypes } from '../hooks/use_get_rule_types';
-import { useUiSetting } from '../utils/kibana_react';
-import { DatePickerRangeField } from './fields/date_picker_range_field';
-import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 import { ScopeSection } from './scope_section';
-import { EpisodeMatcherInput } from './episode_matcher_input';
+import { SubmitButton } from './submit_button';
 
 const UseField = getUseField({ component: Field });
 
@@ -104,14 +104,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const { defaultTimezone } = useDefaultTimezone();
 
   // v1 (alerting) scope state
-  const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(
+  const [isAlertingV1Enabled, setIsAlertingV1Enabled] = useState(
     initialValue?.scope?.alerting !== undefined
   );
   const [query, setQuery] = useState<string>(initialValue?.scope?.alerting?.kql || '');
   const [filters, setFilters] = useState<Filter[]>(
     (initialValue?.scope?.alerting?.filters as Filter[]) || []
   );
-  const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
+  const [alertingV1Errors, setAlertingV1Errors] = useState<string[]>([]);
 
   // v2 (alertingV2) scope state
   const [isAlertingV2Enabled, setIsAlertingV2Enabled] = useState(
@@ -128,14 +128,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     (error: IHttpFetchError<KibanaServerError>) => {
       if (!error.body?.message) return;
       if (isScopedQueryError(error.body.message)) {
-        if (isAlertingV2Enabled && !isScopedQueryEnabled) {
+        if (isAlertingV2Enabled && !isAlertingV1Enabled) {
           setAlertingV2Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
         } else {
-          setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+          setAlertingV1Errors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
         }
       }
     },
-    [isAlertingV2Enabled, isScopedQueryEnabled]
+    [isAlertingV2Enabled, isAlertingV1Enabled]
   );
 
   const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
@@ -149,7 +149,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
 
   // Derived scope payloads — computed inline (cheap derivation from local state).
-  const scopedQueryPayload = isScopedQueryEnabled
+  const alertingV1Payload = isAlertingV1Enabled
     ? !query && !filters.length
       ? null
       : { kql: query, filters: transformQueryFilters(filters) }
@@ -157,11 +157,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
-      if (!isValid || scopedQueryErrors.length !== 0 || alertingV2Errors.length !== 0) {
+      if (!isValid || alertingV1Errors.length !== 0 || alertingV2Errors.length !== 0) {
         return;
       }
 
-      const hasAnyScope = isScopedQueryEnabled || isAlertingV2Enabled;
+      const hasAnyScope = isAlertingV1Enabled || isAlertingV2Enabled;
       if (!hasAnyScope) {
         if (userConfirmedSaveWithoutScopeRef.current) {
           userConfirmedSaveWithoutScopeRef.current = false;
@@ -175,7 +175,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const endDate = moment(formData.endDate);
 
       // Inline payload computation so submit always uses the latest state values.
-      const sqPayload = isScopedQueryEnabled
+      const sqPayload = isAlertingV1Enabled
         ? !query && !filters.length
           ? null
           : { kql: query, filters: transformQueryFilters(filters) }
@@ -188,7 +188,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
       // Build scope: key absent = not selected; { enabled: true } = selected, no filter.
       const scope: Record<string, unknown> = {};
-      if (isScopedQueryEnabled) {
+      if (isAlertingV1Enabled) {
         scope.alerting = { enabled: true, ...(sqPayload ?? {}) };
       }
       if (isAlertingV2Enabled) {
@@ -220,9 +220,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       }
     },
     [
-      scopedQueryErrors.length,
+      alertingV1Errors.length,
       alertingV2Errors.length,
-      isScopedQueryEnabled,
+      isAlertingV1Enabled,
       isAlertingV2Enabled,
       query,
       filters,
@@ -257,8 +257,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   }, [ruleTypes, mounted]);
 
   const onScopeQueryToggle = (isEnabled: boolean) => {
-    setIsScopedQueryEnabled(isEnabled);
-    if (scopedQueryErrors.length) setScopedQueryErrors([]);
+    setIsAlertingV1Enabled(isEnabled);
+    if (alertingV1Errors.length) setAlertingV1Errors([]);
   };
 
   const onAlertingV2Toggle = (isEnabled: boolean) => {
@@ -267,7 +267,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   };
 
   const onQueryChange = (newQuery: string) => {
-    if (scopedQueryErrors.length) setScopedQueryErrors([]);
+    if (alertingV1Errors.length) setAlertingV1Errors([]);
     setQuery(newQuery);
   };
 
@@ -399,7 +399,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             title={i18n.ALERTS_SCOPE_TITLE}
             description={i18n.ALERTS_SCOPE_DESCRIPTION}
             switchLabel={i18n.ALERTS_SCOPE_TITLE}
-            switchChecked={isScopedQueryEnabled}
+            switchChecked={isAlertingV1Enabled}
             onSwitchChange={onScopeQueryToggle}
             switchDataTestSubj="maintenanceWindowScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_ALERTS_SUBTITLE}
@@ -409,8 +409,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               query={query}
               filters={filters}
               isLoading={isLoadingRuleTypes}
-              isEnabled={isScopedQueryEnabled}
-              errors={scopedQueryErrors}
+              isEnabled={isAlertingV1Enabled}
+              errors={alertingV1Errors}
               onQueryChange={onQueryChange}
               onFiltersChange={setFilters}
             />
@@ -447,7 +447,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </EuiFormRow>
           </ScopeSection>
         </EuiFlexGroup>
-        {(isScopedQueryEnabled && !!scopedQueryPayload) || showMultipleSolutionsWarning ? (
+        {(isAlertingV1Enabled && !!alertingV1Payload) || showMultipleSolutionsWarning ? (
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
             <EuiCallOut
