@@ -230,6 +230,20 @@ describe('apply policy change', () => {
     expect(countSpy).not.toHaveBeenCalled();
   });
 
+  it('refuses a managed policy through the blocked-change path before enrollment or Fleet update', async () => {
+    const { deps, getById, update } = createWriteDeps();
+    const policy = createEndpointPolicy({ is_managed: true });
+    requireStoredPolicy(policy).windows.malware.mode = ProtectionModes.prevent;
+    getById.mockResolvedValue(policy);
+    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+
+    await expect(
+      applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
+    ).rejects.toBeInstanceOf(PolicyBlockedChangeError);
+    expect(update).not.toHaveBeenCalled();
+    expect(countSpy).not.toHaveBeenCalled();
+  });
+
   it('forwards the complete Fleet payload with the assessment token, raw proposal, and user', async () => {
     const { deps, getById, update, soClient, esClient } = createWriteDeps();
     const policy = createEndpointPolicy();

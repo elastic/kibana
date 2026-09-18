@@ -64,11 +64,12 @@ export const selectApplyPreviewFacts = (preview: ApplyPolicyChangePreview): Appl
   };
 };
 
-const escapePipes = (text: string): string => text.replace(/\|/g, '\\|');
+const escapeMarkdownText = (text: string): string =>
+  text.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 
 const renderValue = (value: unknown): string => {
   const serialized = value === undefined ? undefined : JSON.stringify(value);
-  return escapePipes(typeof serialized === 'string' ? serialized : 'null');
+  return escapeMarkdownText(typeof serialized === 'string' ? serialized : 'null');
 };
 
 const renderRow = (row: ApplyPreviewChangeRow): string => {
@@ -76,14 +77,14 @@ const renderRow = (row: ApplyPreviewChangeRow): string => {
   const truncated =
     presented.from_truncation !== undefined || presented.to_truncation !== undefined;
   const origin = truncated ? `${row.originKind} value truncated` : row.originKind;
-  return `| ${escapePipes(row.path)} | ${renderValue(presented.from)} | ${renderValue(
+  return `| ${escapeMarkdownText(row.path)} | ${renderValue(presented.from)} | ${renderValue(
     presented.to
   )} | ${origin} |`;
 };
 
 const renderSideEffect = (sideEffect: ApplyPreviewSideEffect): string => {
   const presented = presentFromTo(sideEffect, DEFAULT_TRIM_LIMITS);
-  return `- ${escapePipes(sideEffect.path)}: ${renderValue(presented.from)} -> ${renderValue(
+  return `- ${escapeMarkdownText(sideEffect.path)}: ${renderValue(presented.from)} -> ${renderValue(
     presented.to
   )}`;
 };
@@ -127,7 +128,7 @@ export const renderApplyPolicyChangeConfirmation = (
     '',
     ...renderBlastRadius(facts.blastRadius),
     '',
-    `Checked policy revision ${facts.policyRevision}, version ${escapePipes(
+    `Checked policy revision ${facts.policyRevision}, version ${escapeMarkdownText(
       facts.policyVersion
     )} against the assessment.`,
     'Differences between the proposal and the policy Fleet returns are reported after apply.',
