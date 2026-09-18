@@ -547,6 +547,32 @@ describe('LensEditConfigurationFlyout', () => {
     expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
+  it('enables apply when a secondary form-based datasource changes on an ES|QL panel', async () => {
+    const multiDatasourceAttributes = {
+      ...esqlLensAttributes,
+      state: {
+        ...esqlLensAttributes.state,
+        datasourceStates: {
+          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+        },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    await renderConfigFlyout({ attributes: multiDatasourceAttributes }, undefined, {
+      datasourceStates: {
+        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedStateChanged },
+      },
+      activeDatasourceId: 'textBased',
+    });
+
+    expect(screen.getByRole('button', { name: /apply and close/i })).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
   it('save button should be disabled if expression cannot be generated', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();

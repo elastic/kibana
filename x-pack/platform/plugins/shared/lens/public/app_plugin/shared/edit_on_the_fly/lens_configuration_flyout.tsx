@@ -111,40 +111,53 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
+  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
+    useCurrentAttributes({
+      initialAttributes: attributes,
+    });
+
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
-    const datasource = datasourceMap[datasourceId];
-
-    const rawState = datasourceStates[datasourceId].state;
-    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
-
     const previousAttrs = previousAttributes.current;
-    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
-    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
-    // formBased attributes are already persistable and getPersistableState expects private state.
-    let previousPersistable: typeof currentPersistable = null;
-    if (previousDsState) {
-      previousPersistable =
-        datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
-          ? datasource.getPersistableState(previousDsState)
+    // Persisted secondary datasources (for example, a form-based reference line on
+    // an ES|QL chart) must participate in dirty detection. Include the current active
+    // datasource as well so datasource conversions are still detected.
+    const datasourceIds = new Set([
+      ...Object.keys(previousAttrs.state.datasourceStates),
+      datasourceId,
+    ]);
+
+    for (const id of datasourceIds) {
+      const currentDatasourceState = datasourceStates[id]?.state;
+      const previousDatasourceState = previousAttrs.state.datasourceStates[id];
+      if (!currentDatasourceState || !previousDatasourceState) {
+        return true;
+      }
+
+      const currentDatasource = datasourceMap[id as LensDatasourceId];
+      const currentPersistable = currentDatasource.getPersistableState(currentDatasourceState);
+      // Only textBased stores private state (e.g. indexPatternRefs) in attributes;
+      // formBased attributes are already persistable and getPersistableState expects private state.
+      const previousPersistable =
+        id === LENS_DATASOURCE_ID.TEXT_BASED
+          ? currentDatasource.getPersistableState(previousDatasourceState)
           : {
-              state: previousDsState,
+              state: previousDatasourceState,
               references: previousAttrs.references,
             };
+
+      if (
+        !currentDatasource.isEqual(
+          previousPersistable.state,
+          previousPersistable.references,
+          currentPersistable.state,
+          currentPersistable.references
+        )
+      ) {
+        return true;
+      }
     }
-
-    const datasourceStatesAreSame =
-      currentPersistable != null &&
-      previousPersistable != null &&
-      datasource.isEqual(
-        previousPersistable.state,
-        previousPersistable.references,
-        currentPersistable.state,
-        currentPersistable.references
-      );
-
-    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -236,11 +249,6 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const textBasedMode = isTextBasedAttributes(attributes);
-
-  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
-    useCurrentAttributes({
-      initialAttributes: attributes,
-    });
 
   const onTextBasedQueryStateChange = useCallback((state: TextBasedQueryState) => {
     setESQLQueryState(state);

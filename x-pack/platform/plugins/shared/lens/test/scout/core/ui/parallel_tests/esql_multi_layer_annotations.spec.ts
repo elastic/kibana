@@ -101,6 +101,34 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'enables apply after editing a persisted reference line on an ES|QL panel',
+      async ({ page, pageObjects }) => {
+        const { dashboard, lens } = pageObjects;
+
+        await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+        await lens.layers.createLayer('referenceLine');
+        await applyLensInlineEditorAndWaitClosed({ lens });
+        await dashboard.saveChangesToExistingDashboard();
+
+        await page.reload();
+        await dashboard.waitForRenderComplete();
+        await dashboard.ensureEditMode();
+        await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+        await lens.layers.activateLayerTab(1);
+        await lens.dimensions.openDimensionEditor(
+          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
+          1
+        );
+        await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '250');
+        await lens.closeDimensionEditor();
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION)
+        ).toHaveText('Static value: 250');
+        await expect(lens.applyFlyoutButton).toBeEnabled();
+      }
+    );
+
+    spaceTest(
       'hides data-view-dependent controls on annotation and reference line layers',
       async ({ page, pageObjects }) => {
         const { lens } = pageObjects;
