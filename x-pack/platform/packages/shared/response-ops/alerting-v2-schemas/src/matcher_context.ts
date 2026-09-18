@@ -8,19 +8,12 @@
 import type { AlertEpisodeStatus } from './alert_action_schema';
 import type { AlertEventSeverity } from './severity';
 
-export interface MatcherContextRule {
-  id: string;
-  name: string;
-  tags: string[];
-}
-
 export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
-  rule?: MatcherContextRule;
   data?: Record<string, unknown>;
 }
 
@@ -49,9 +42,6 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
     description: 'Timestamp of the most recent event',
   },
   { path: 'severity', type: 'string', description: 'Episode severity when present' },
-  { path: 'rule.id', type: 'string', description: "The rule's saved object ID" },
-  { path: 'rule.name', type: 'string', description: "The rule's display name" },
-  { path: 'rule.tags', type: 'string[]', description: "The rule's tags array" },
   {
     path: 'data',
     type: 'object',
