@@ -93,6 +93,46 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
 };
 
 /**
+ * Registers the `security.investigation.timeline` attachment renderer
+ * (chronological event table for forensic artifacts).
+ */
+export const registerInvestigationTimelineAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_timeline_attachment" */
+    './investigation_timeline'
+  ).then(({ createInvestigationTimelineAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationTimeline,
+      createInvestigationTimelineAttachmentDefinition()
+    );
+  });
+};
+
+/**
+ * Registers the `security.investigation.iocs` attachment renderer
+ * (category table of indicator badges for forensic artifacts).
+ */
+export const registerInvestigationIocsAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_iocs_attachment" */
+    './investigation_iocs'
+  ).then(({ createInvestigationIocsAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationIocs,
+      createInvestigationIocsAttachmentDefinition()
+    );
+  });
+};
+
+/**
  * Registers the rich `security.entity` attachment renderer (entity card for a single entity,
  * entity table with per-row Explore links for multiple, Canvas preview for single host/user/
  * service). Callable from `plugin.tsx#start()` alongside `registerRuleAttachment` /

@@ -347,6 +347,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity_analytics_dashboard',
   'security.entity_graph',
   'security.entity_risk_score_history',
+  'security.investigation.iocs',
+  'security.investigation.timeline',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
