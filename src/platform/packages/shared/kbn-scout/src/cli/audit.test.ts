@@ -103,6 +103,20 @@ describe('fileConsumesKey', () => {
     expect(fileConsumesKey(content, 'dashboard')).toBe(true);
   });
 
+  it('does not count type-only references', () => {
+    // `typeof pageObjects.dashboard` parses as a type query over a qualified
+    // name, not a property access expression, so it never reaches the runtime
+    // branch. Pinned here so the behaviour is explicit.
+    const content = [
+      `type Dashboard = typeof pageObjects.dashboard;`,
+      `type Lens = PageObjects['lens'];`,
+      `function useIt(dashboard: typeof pageObjects.dashboard) {}`,
+    ].join('\n');
+
+    expect(fileConsumesKey(content, 'dashboard')).toBe(false);
+    expect(fileConsumesKey(content, 'lens')).toBe(false);
+  });
+
   it('does not treat a typed function parameter as a pageObjects destructure', () => {
     const content = [
       `export async function openInlineEditor({ dashboard, lens }: DashboardAndLens) {`,
