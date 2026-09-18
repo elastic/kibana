@@ -6,11 +6,10 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreAuditService, ElasticsearchClient } from '@kbn/core/server';
+import type { CoreAuditService } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
@@ -53,7 +52,6 @@ export class DocumentationManager implements DocumentationManagerAPI {
   private docInstallClient: ProductDocInstallClient;
   private auditService: CoreAuditService;
   private packageInstaller?: PackageInstaller;
-  private esClient: ElasticsearchClient;
 
   constructor({
     logger,
@@ -62,7 +60,6 @@ export class DocumentationManager implements DocumentationManagerAPI {
     docInstallClient,
     auditService,
     packageInstaller,
-    esClient,
   }: {
     logger: Logger;
     taskManager: TaskManagerStartContract;
@@ -70,7 +67,6 @@ export class DocumentationManager implements DocumentationManagerAPI {
     docInstallClient: ProductDocInstallClient;
     auditService: CoreAuditService;
     packageInstaller?: PackageInstaller;
-    esClient: ElasticsearchClient;
   }) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -78,15 +74,14 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.docInstallClient = docInstallClient;
     this.auditService = auditService;
     this.packageInstaller = packageInstaller;
-    this.esClient = esClient;
   }
 
   async install(options: DocInstallOptions): Promise<void> {
     const { request, force = false, wait = false } = options;
     const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
-    const { status: previousStatus } = await this.getStatus({ inferenceId });
-    if (!force && previousStatus === 'installed') {
+    const { status } = await this.getStatus({ inferenceId });
+    if (!force && status === 'installed') {
       return;
     }
 
@@ -157,44 +152,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async ensureDefaultProductDocumentation(): Promise<void> {
-    const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
-      () => this.esClient.inference.get({}),
-      { resourceType: ResourceTypes.productDoc }
-    );
-    const { status } = await this.getStatus({ inferenceId });
-
-    this.logger.info(
-      `Ensuring product documentation for default inference ID [${inferenceId}] (status: ${status})`
-    );
-
-    if (status === 'uninstalled' || status === 'error') {
-      const license = await this.licensing.getLicense();
-      if (!checkLicense(license)) {
-        this.logger.debug(
-          `Skipping product documentation install for inference ID [${inferenceId}]: invalid license`
-        );
-        return;
-      }
-      await this.install({ inferenceId });
-      return;
-    }
-
-    if (status === 'installing' || status === 'uninstalling') {
-      this.logger.debug(
-        `Skipping product documentation for inference ID [${inferenceId}]: installation already in progress (status: ${status})`
-      );
-      return;
-    }
-
-    // 'installed' — updateAll() on startup handles updates for all installed IDs including this one
-    this.logger.debug(
-      `Product documentation for inference ID [${inferenceId}] is already installed; update will be handled by updateAll`
-    );
-  }
-
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { forceUpdate, inferenceIds } = options ?? {};
+    const { forceUpdate, inferenceIds, wait = false } = options ?? {};
     const idsToUpdate: string[] =
       Array.isArray(inferenceIds) && inferenceIds?.length > 0
         ? inferenceIds
@@ -202,46 +161,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
+    await Promise.all(
+      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate, wait }))
+    );
     return {
       inferenceIds: idsToUpdate,
     };
-  }
-
-  async ensureDefaultSecurityLabs(): Promise<void> {
-    const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
-      () => this.esClient.inference.get({}),
-      { resourceType: ResourceTypes.securityLabs }
-    );
-    const { status } = await this.getSecurityLabsStatus({ inferenceId });
-
-    this.logger.info(
-      `Ensuring Security Labs content for default inference ID [${inferenceId}] (status: ${status})`
-    );
-
-    if (status === 'uninstalled' || status === 'error') {
-      const license = await this.licensing.getLicense();
-      if (!checkLicense(license)) {
-        this.logger.debug(
-          `Skipping Security Labs install for inference ID [${inferenceId}]: invalid license`
-        );
-        return;
-      }
-      await this.installSecurityLabs({ inferenceId });
-      return;
-    }
-
-    if (status === 'installing' || status === 'uninstalling') {
-      this.logger.debug(
-        `Skipping Security Labs for inference ID [${inferenceId}]: installation already in progress (status: ${status})`
-      );
-      return;
-    }
-
-    // 'installed' — updateSecurityLabsAll() on startup handles updates for installed IDs
-    this.logger.debug(
-      `Security Labs for inference ID [${inferenceId}] is already installed; update will be handled by updateSecurityLabsAll`
-    );
   }
 
   async updateSecurityLabsAll(options?: {
