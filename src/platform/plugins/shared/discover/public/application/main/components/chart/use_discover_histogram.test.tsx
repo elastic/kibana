@@ -31,6 +31,7 @@ import type { UnifiedHistogramCustomization } from '../../../../customizations/c
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { DataViewSource } from '@kbn/data-source';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
@@ -609,6 +610,47 @@ describe('useDiscoverHistogram', () => {
       });
       expect(api.fetch).toHaveBeenCalledTimes(2);
       expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ timeInterval }));
+    });
+
+    it('should fetch when breakdownField changes even if DataViewSource is a new wrapper', async () => {
+      const { toolkit } = await setup();
+      const { api } = await setupFetching({ toolkit });
+      const tabId = toolkit.getCurrentTab().id;
+      const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        tabId
+      );
+      const dataView = currentDataView$.getValue();
+      const breakdownField = 'host.name';
+
+      act(() => {
+        currentDataSource$.next(new DataViewSource(dataView!));
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { breakdownField },
+          })
+        );
+      });
+
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ breakdownField }));
+    });
+
+    it('should not fetch when only the DataViewSource wrapper identity changes', async () => {
+      const { toolkit } = await setup();
+      const { api } = await setupFetching({ toolkit });
+      const tabId = toolkit.getCurrentTab().id;
+      const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        tabId
+      );
+      const dataView = currentDataView$.getValue();
+
+      act(() => {
+        currentDataSource$.next(new DataViewSource(dataView!));
+      });
+
+      expect(api.fetch).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -56,6 +56,12 @@ export const setDataView: InternalStateThunkActionCreator<
     }
 
     currentDataView$.next(dataView);
+
+    const existingSource = currentDataSource$.getValue();
+    if (existingSource?.kind === 'index-pattern' && existingSource.getDataView() === dataView) {
+      return;
+    }
+
     const resolved = services.dataSourceService.fromDataView(dataView);
     if (resolved) {
       currentDataSource$.next(resolved);

@@ -62,6 +62,24 @@ const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchPar
   'timeInterval',
 ];
 
+/**
+ * `dataSource` is compared by kind+id so a new DataViewSource wrapper around the
+ * same DataView (e.g. revert → setDataView) does not look like a source change.
+ */
+function hasFetchParamChanged(
+  previous: UnifiedHistogramFetchParamsExternal,
+  next: UnifiedHistogramFetchParamsExternal,
+  key: keyof UnifiedHistogramFetchParamsExternal
+): boolean {
+  if (key === 'dataSource') {
+    return (
+      previous.dataSource?.kind !== next.dataSource?.kind ||
+      previous.dataSource?.id !== next.dataSource?.id
+    );
+  }
+  return previous[key] !== next[key];
+}
+
 export interface UseUnifiedHistogramOptions {
   initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
 }
@@ -304,12 +322,13 @@ export const useDiscoverHistogram = (
     if (!collectedFetchParams || !previousFetchParams) {
       return;
     }
-    const changedParams = Object.keys(collectedFetchParams).filter((key) => {
-      return (
-        collectedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal] !==
-        previousFetchParams[key as keyof UnifiedHistogramFetchParamsExternal]
-      );
-    });
+    const changedParams = Object.keys(collectedFetchParams).filter((key) =>
+      hasFetchParamChanged(
+        previousFetchParams,
+        collectedFetchParams,
+        key as keyof UnifiedHistogramFetchParamsExternal
+      )
+    );
 
     if (
       changedParams.length > 0 &&

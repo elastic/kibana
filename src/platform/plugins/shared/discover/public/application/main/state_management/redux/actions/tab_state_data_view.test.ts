@@ -106,6 +106,28 @@ describe('tab_state_data_view actions', () => {
       );
     });
 
+    it('reuses the existing DataViewSource when setDataView is called with the same DataView', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const currentDataSource$ = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$;
+      const existing = currentDataSource$.getValue();
+      const dataView = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataView$.getValue();
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: dataView!,
+        })
+      );
+
+      expect(currentDataSource$.getValue()).toBe(existing);
+    });
+
     it('does not wrap an unregistered ES|QL shim as DataViewSource', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
       const previous = selectTabRuntimeState(
