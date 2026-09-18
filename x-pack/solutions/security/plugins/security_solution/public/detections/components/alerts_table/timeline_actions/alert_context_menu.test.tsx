@@ -386,6 +386,25 @@ describe('Alert table context menu', () => {
       expect(wrapper.getByTestId(runDocumentWorkflowActionButton)).toBeInTheDocument();
     });
 
+    // Ids only: the server resolves each document's fields, so every caller produces the same
+    // document shape regardless of which data it happens to have loaded.
+    test('it passes the document id rather than the row ECS fields', async () => {
+      render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [{ _id: eventEcsRowData._id, _index: '' }],
+        })
+      );
+      expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
+        expect.objectContaining({ documents: expect.anything() })
+      );
+    });
+
     test('it shows the document workflow panel when run workflow action is clicked', async () => {
       mockUseRunDocumentWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: mockDocumentWorkflowMenuItem,

@@ -12,8 +12,12 @@ import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { preprocessDocumentInputs } from './preprocess_document_inputs';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
+const searchHits = (hits: Array<{ _id: string; _index: string; fields: object }>) => ({
+  hits: { hits },
+});
+
 describe('preprocessDocumentInputs', () => {
-  let mockEsClient: { mget: jest.Mock };
+  let mockEsClient: { search: jest.Mock };
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockContext: AlertPreprocessingContext;
 
@@ -23,7 +27,7 @@ describe('preprocessDocumentInputs', () => {
   ];
 
   beforeEach(() => {
-    mockEsClient = { mget: jest.fn() };
+    mockEsClient = { search: jest.fn() };
     mockLogger = loggerMock.create();
     mockContext = {
       core: Promise.resolve({
@@ -45,28 +49,29 @@ describe('preprocessDocumentInputs', () => {
       const result = await preprocessDocumentInputs(inputs, mockContext, mockLogger);
 
       expect(result).toEqual(inputs);
-      expect(mockEsClient.mget).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
     });
   });
 
   describe('when documentIds are present', () => {
-    it('fetches the selection in a single mget and expands it into event.documents', async () => {
-      mockEsClient.mget.mockResolvedValue({
-        docs: [
+    it('expands the selection into event.documents as dotted paths with array values', async () => {
+      // This is the shape every client produced when it embedded documents itself. Reading
+      // `_source` instead would hand workflows nested objects and scalars, breaking any
+      // expression written against the embedded shape.
+      mockEsClient.search.mockResolvedValue(
+        searchHits([
           {
-            found: true,
             _id: 'doc-1',
             _index: 'logs-default',
-            _source: { '@timestamp': '2024-01-01T00:00:00Z', 'host.name': 'host-1' },
+            fields: { '@timestamp': ['2024-01-01T00:00:00Z'], 'host.name': ['host-1'] },
           },
           {
-            found: true,
             _id: 'doc-2',
             _index: 'logs-default',
-            _source: { '@timestamp': '2024-01-02T00:00:00Z', 'host.name': 'host-2' },
+            fields: { '@timestamp': ['2024-01-02T00:00:00Z'], 'host.name': ['host-2'] },
           },
-        ],
-      });
+        ])
+      );
 
       const result = await preprocessDocumentInputs(
         { event: { triggerType: 'document', documentIds } },
@@ -74,33 +79,78 @@ describe('preprocessDocumentInputs', () => {
         mockLogger
       );
 
-      expect(mockEsClient.mget).toHaveBeenCalledTimes(1);
-      expect(mockEsClient.mget).toHaveBeenCalledWith({ docs: documentIds });
-      // Each expanded document keeps the `{ _id, _index, ...source }` shape a caller would
-      // otherwise have embedded, so a workflow cannot tell the two paths apart.
       expect(result.event).toEqual({
         triggerType: 'document',
         documents: [
           {
             _id: 'doc-1',
             _index: 'logs-default',
-            '@timestamp': '2024-01-01T00:00:00Z',
-            'host.name': 'host-1',
+            '@timestamp': ['2024-01-01T00:00:00Z'],
+            'host.name': ['host-1'],
           },
           {
             _id: 'doc-2',
             _index: 'logs-default',
-            '@timestamp': '2024-01-02T00:00:00Z',
-            'host.name': 'host-2',
+            '@timestamp': ['2024-01-02T00:00:00Z'],
+            'host.name': ['host-2'],
           },
         ],
       });
     });
 
+    it('asks for every mapped field of the selected ids and no source', async () => {
+      mockEsClient.search.mockResolvedValue(
+        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: {} }])
+      );
+
+      await preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['logs-default'],
+          size: 2,
+          _source: false,
+          fields: ['*'],
+          query: { ids: { values: ['doc-1', 'doc-2'] } },
+        })
+      );
+    });
+
+    // An `ids` query spans every selected index, so it can match an id in an index the user
+    // never selected.
+    it('ignores hits outside the selected (id, index) pairs', async () => {
+      mockEsClient.search.mockResolvedValue(
+        searchHits([
+          { _id: 'doc-1', _index: 'logs-default', fields: { 'host.name': ['host-1'] } },
+          { _id: 'doc-1', _index: 'logs-other', fields: { 'host.name': ['impostor'] } },
+        ])
+      );
+
+      const result = await preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      expect((result.event as { documents: unknown[] }).documents).toEqual([
+        { _id: 'doc-1', _index: 'logs-default', 'host.name': ['host-1'] },
+      ]);
+    });
+
     it('drops documentIds from the expanded event', async () => {
-      mockEsClient.mget.mockResolvedValue({
-        docs: [{ found: true, _id: 'doc-1', _index: 'logs-default', _source: { a: 1 } }],
-      });
+      mockEsClient.search.mockResolvedValue(
+        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
+      );
 
       const result = await preprocessDocumentInputs(
         { event: { triggerType: 'document', documentIds: [documentIds[0]] } },
@@ -112,9 +162,9 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('preserves other input fields and other event fields', async () => {
-      mockEsClient.mget.mockResolvedValue({
-        docs: [{ found: true, _id: 'doc-1', _index: 'logs-default', _source: { a: 1 } }],
-      });
+      mockEsClient.search.mockResolvedValue(
+        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
+      );
 
       const result = await preprocessDocumentInputs(
         {
@@ -130,12 +180,9 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('skips and logs documents that no longer exist', async () => {
-      mockEsClient.mget.mockResolvedValue({
-        docs: [
-          { found: true, _id: 'doc-1', _index: 'logs-default', _source: { a: 1 } },
-          { found: false, _id: 'doc-2', _index: 'logs-default' },
-        ],
-      });
+      mockEsClient.search.mockResolvedValue(
+        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
+      );
 
       const result = await preprocessDocumentInputs(
         { event: { triggerType: 'document', documentIds } },
@@ -150,12 +197,7 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('throws when none of the selected documents are found', async () => {
-      mockEsClient.mget.mockResolvedValue({
-        docs: [
-          { found: false, _id: 'doc-1', _index: 'logs-default' },
-          { found: false, _id: 'doc-2', _index: 'logs-default' },
-        ],
-      });
+      mockEsClient.search.mockResolvedValue(searchHits([]));
 
       await expect(
         preprocessDocumentInputs(
@@ -180,11 +222,11 @@ describe('preprocessDocumentInputs', () => {
         )
       ).rejects.toThrow(`Cannot run a workflow on more than ${MAX_RUN_WORKFLOW_DOCS} documents`);
 
-      expect(mockEsClient.mget).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
     });
 
     it('surfaces Elasticsearch errors', async () => {
-      mockEsClient.mget.mockRejectedValue(new Error('Elasticsearch connection failed'));
+      mockEsClient.search.mockRejectedValue(new Error('Elasticsearch connection failed'));
 
       await expect(
         preprocessDocumentInputs(

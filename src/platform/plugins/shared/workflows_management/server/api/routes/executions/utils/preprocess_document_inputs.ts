@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { fetchDocumentsByIds } from './fetch_documents_by_ids';
+import { fetchDocumentFieldsByIds } from './fetch_by_ids';
 import type {
   DocumentTriggerInput,
   ExpandedDocument,
@@ -19,10 +19,10 @@ import type { AlertPreprocessingContext } from '../../../workflows_management_ap
  * Expands a compact `event.documentIds` selection into the `event.documents` array workflows
  * already consume.
  *
- * Each expanded document keeps the `{ _id, _index, ...source }` shape a caller would otherwise
- * embed itself, so a workflow sees no difference between a pre-expanded payload and one the
- * server expanded. Inputs without `documentIds` pass through untouched, which keeps callers that
- * still send full documents working.
+ * Each expanded document keeps the `{ _id, _index, 'dotted.field': [value] }` shape callers
+ * produced when they embedded documents themselves, so a workflow sees no difference between a
+ * pre-expanded payload and one the server expanded. Inputs without `documentIds` pass through
+ * untouched, which keeps callers that still send full documents working.
  */
 export async function preprocessDocumentInputs(
   inputs: Record<string, unknown>,
@@ -42,21 +42,20 @@ export async function preprocessDocumentInputs(
   logger.debug(`Preprocessing ${event.documentIds.length} document(s) for workflow execution`);
 
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const fetched = await fetchDocumentsByIds({
+  const fetched = await fetchDocumentFieldsByIds({
     selections: event.documentIds,
     esClient,
     logger,
-    entityName: 'Document',
   });
 
   if (fetched.length === 0) {
     throw new Error('No documents found with the provided IDs');
   }
 
-  const documents: ExpandedDocument[] = fetched.map(({ _id, _index, _source }) => ({
+  const documents: ExpandedDocument[] = fetched.map(({ _id, _index, fields }) => ({
     _id,
     _index,
-    ..._source,
+    ...fields,
   }));
 
   // `documentIds` is dropped from the outgoing event: it has served its purpose and leaving it

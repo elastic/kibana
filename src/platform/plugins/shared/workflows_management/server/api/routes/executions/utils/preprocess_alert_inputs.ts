@@ -13,7 +13,7 @@ import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/se
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { fetchDocumentsByIds } from './fetch_documents_by_ids';
+import { fetchAlertSourcesByIds } from './fetch_by_ids';
 import type {
   AlertEventRule,
   AlertSelection,
@@ -101,12 +101,7 @@ async function fetchAlerts(
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   const ruleTypeRegistryMap = (await context.alerting).listTypes();
 
-  const documents = await fetchDocumentsByIds({
-    selections: alertIds,
-    esClient,
-    logger,
-    entityName: 'Alert',
-  });
+  const documents = await fetchAlertSourcesByIds({ selections: alertIds, esClient, logger });
 
   return documents.map(({ _id, _index, _source }) => {
     let alert = _source as Alert;

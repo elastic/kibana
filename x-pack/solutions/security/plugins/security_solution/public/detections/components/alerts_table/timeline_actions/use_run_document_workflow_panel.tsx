@@ -37,26 +37,20 @@ export interface DocumentSelection {
   _index: string;
 }
 
-/**
- * How the selected documents reach the workflow. Callers pass exactly one:
- *
- * - `documents` embeds each document's source in the request. Fine for a single row.
- * - `documentIds` sends only `(id, index)` pairs and lets the server fetch the sources, which
- *   keeps the request small for bulk selections.
- */
-export type DocumentWorkflowsSelection =
-  | { documents: Array<DocumentSelection & Record<string, unknown>>; documentIds?: never }
-  | { documentIds: DocumentSelection[]; documents?: never };
-
-export type DocumentWorkflowsPanelProps = DocumentWorkflowsSelection & {
+export interface DocumentWorkflowsPanelProps {
+  /**
+   * The selected documents as `(id, index)` pairs. The server fetches each document's fields,
+   * so the request stays small no matter how many are selected, and every caller produces the
+   * same document shape.
+   */
+  documentIds: DocumentSelection[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
-};
+}
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
 export const DocumentWorkflowsPanel = ({
-  documents,
   documentIds,
   onClose,
   onExecute,
@@ -65,10 +59,10 @@ export const DocumentWorkflowsPanel = ({
     () => ({
       event: {
         triggerType: 'document' as const,
-        ...(documentIds !== undefined ? { documentIds } : { documents }),
+        documentIds,
       },
     }),
-    [documents, documentIds]
+    [documentIds]
   );
 
   return (
@@ -84,7 +78,8 @@ export const DocumentWorkflowsPanel = ({
 export const RUN_DOCUMENT_WORKFLOW_PANEL_ID = 'RUN_DOCUMENT_WORKFLOW_PANEL_ID';
 export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
 
-export type UseRunDocumentWorkflowPanelProps = DocumentWorkflowsSelection & {
+export interface UseRunDocumentWorkflowPanelProps {
+  documentIds: DocumentSelection[];
   closePopover: () => void;
   /**
    * True when the user chose "select all N". A table only hands over its loaded rows, so the
@@ -97,7 +92,7 @@ export type UseRunDocumentWorkflowPanelProps = DocumentWorkflowsSelection & {
    * describe their selection as a query omit it, and the run stays scoped to the loaded rows.
    */
   selectionScope?: RunWorkflowSelectionScope;
-};
+}
 
 /**
  * Resolves a select-all into concrete ids, then renders the run panel against them.
@@ -139,7 +134,6 @@ export interface UseRunDocumentWorkflowPanelResult {
 
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
-  documents,
   documentIds,
   isAllSelected = false,
   selectionScope,
@@ -156,21 +150,19 @@ export const useRunDocumentWorkflowPanel = ({
   // loaded rows are all there is to run on.
   const selectAllScope = isAllSelected ? selectionScope : undefined;
 
-  const panelContent = useMemo(() => {
-    if (selectAllScope !== undefined) {
-      return (
+  const panelContent = useMemo(
+    () =>
+      selectAllScope !== undefined ? (
         <ResolvingDocumentWorkflowsPanel
-          pageSelections={documentIds ?? []}
+          pageSelections={documentIds}
           selectionScope={selectAllScope}
           onClose={closePopover}
         />
-      );
-    }
-    if (documentIds !== undefined) {
-      return <DocumentWorkflowsPanel documentIds={documentIds} onClose={closePopover} />;
-    }
-    return <DocumentWorkflowsPanel documents={documents ?? []} onClose={closePopover} />;
-  }, [selectAllScope, documentIds, documents, closePopover]);
+      ) : (
+        <DocumentWorkflowsPanel documentIds={documentIds} onClose={closePopover} />
+      ),
+    [selectAllScope, documentIds, closePopover]
+  );
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
     () => [

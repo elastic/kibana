@@ -211,13 +211,7 @@ export const TakeActionButton = memo(
     const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
-        documents: [
-          {
-            _id: documentId,
-            _index: hit.raw._index ?? '',
-            ...hit.flattened,
-          },
-        ],
+        documentIds: [{ _id: documentId, _index: hit.raw._index ?? '' }],
       });
 
     const { exploreActionItems } = useExploreActions({

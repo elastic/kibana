@@ -14,8 +14,8 @@ export interface DocumentSelection {
 
 /**
  * A document trigger selection sent as compact `(id, index)` pairs. The server expands each pair
- * into the same `{ _id, _index, ...source }` shape a caller would otherwise embed itself, so a
- * request stays small regardless of how many documents are selected.
+ * into the same `{ _id, _index, 'dotted.field': [value] }` shape a caller would otherwise embed
+ * itself, so a request stays small regardless of how many documents are selected.
  */
 export interface DocumentTriggerInput {
   event: {

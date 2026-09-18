@@ -517,34 +517,10 @@ describe('take action dropdown', () => {
     });
   });
 
-  describe('searchHit prop', () => {
-    it('should pass searchHit._source fields to the document workflow panel', () => {
-      const searchHit = {
-        _id: 'alert-123',
-        _index: 'alerts-index',
-        _source: { 'host.name': 'my-host', 'agent.type': 'endpoint' },
-      };
-
-      mount(
-        <TestProviders>
-          <TakeActionDropdown {...defaultProps} searchHit={searchHit} />
-        </TestProviders>
-      );
-
-      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          documents: [
-            expect.objectContaining({
-              _id: defaultProps.dataAsNestedObject._id,
-              'host.name': 'my-host',
-              'agent.type': 'endpoint',
-            }),
-          ],
-        })
-      );
-    });
-
-    it('should pass empty source fields when searchHit is undefined', () => {
+  describe('document workflow payload', () => {
+    // Ids only: the server resolves each document's fields, so every caller produces the same
+    // document shape regardless of which data it happens to have loaded.
+    it('should pass the document id and index to the document workflow panel', () => {
       mount(
         <TestProviders>
           <TakeActionDropdown {...defaultProps} />
@@ -553,12 +529,16 @@ describe('take action dropdown', () => {
 
       expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
         expect.objectContaining({
-          documents: [
-            expect.objectContaining({
+          documentIds: [
+            {
               _id: defaultProps.dataAsNestedObject._id,
-            }),
+              _index: defaultProps.dataAsNestedObject._index ?? '',
+            },
           ],
         })
+      );
+      expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
+        expect.objectContaining({ documents: expect.anything() })
       );
     });
   });

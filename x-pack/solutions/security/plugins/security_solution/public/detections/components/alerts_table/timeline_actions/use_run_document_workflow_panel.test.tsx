@@ -113,13 +113,7 @@ const mockDocumentIdSearch = ({
 
 const defaultProps: UseRunDocumentWorkflowPanelProps = {
   closePopover: jest.fn(),
-  documents: [
-    {
-      _id: 'doc-123',
-      _index: 'documents-index',
-      'host.name': 'test-host',
-    },
-  ],
+  documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
 };
 
 const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): WorkflowListItemDto => ({
@@ -271,7 +265,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(panelProps.inputs).toEqual({
         event: {
           triggerType: 'document',
-          documents: defaultProps.documents,
+          documentIds: defaultProps.documentIds,
         },
       });
       expect(panelProps.visibility).toBeUndefined();
@@ -291,9 +285,9 @@ describe('useRunDocumentWorkflowPanel', () => {
       ]);
     });
 
-    // Bulk callers send id pairs instead of embedding each document's source, which is what
-    // keeps a large selection inside the request payload limit.
-    it('sends documentIds instead of documents when the caller selects by id', async () => {
+    // Every caller sends id pairs and lets the server resolve the fields: it keeps a large
+    // selection inside the payload limit and gives every caller the same document shape.
+    it('sends only id pairs, never an embedded source', async () => {
       const documentIds = [
         { _id: 'doc-1', _index: 'documents-index' },
         { _id: 'doc-2', _index: 'documents-index' },
