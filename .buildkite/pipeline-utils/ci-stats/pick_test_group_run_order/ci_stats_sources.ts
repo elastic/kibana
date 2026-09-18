@@ -39,16 +39,8 @@ export function buildCiStatsSources(args: {
   pipelineSlug: string;
   prNumber: string | undefined;
   selectiveMergeBase: string | undefined;
-  mergeQueueMergeBase: string | undefined;
 }): CiStatsSource[] {
-  const {
-    trackedBranch,
-    ownBranch,
-    pipelineSlug,
-    prNumber,
-    selectiveMergeBase,
-    mergeQueueMergeBase,
-  } = args;
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, selectiveMergeBase } = args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 
@@ -70,15 +62,8 @@ export function buildCiStatsSources(args: {
           { branch: trackedBranch, jobName: pipelineSlug },
         ]
       : []),
-    // try to get times from the merge-queue group's merge-base commit
-    ...(mergeQueueMergeBase
-      ? [
-          { commit: mergeQueueMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: mergeQueueMergeBase, jobName: PIPELINES.MERGE_QUEUE },
-        ]
-      : []),
-    // try to get times from the mergeBase commit; with a merge queue enabled the
-    // merge base may only have been built by the merge-queue pipeline
+    // try to get times from the merge-base commit; for merge-queue builds this is
+    // MERGE_QUEUE_MERGE_BASE, which may only have been built by kibana-merge-queue
     ...(selectiveMergeBase
       ? [
           { commit: selectiveMergeBase, jobName: PIPELINES.ON_MERGE },

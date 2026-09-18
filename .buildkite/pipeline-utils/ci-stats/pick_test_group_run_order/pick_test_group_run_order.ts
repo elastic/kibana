@@ -165,7 +165,6 @@ export async function pickTestGroupRunOrder() {
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
       selectiveMergeBase: config.selectiveMergeBase,
-      mergeQueueMergeBase: config.mergeQueueMergeBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,
