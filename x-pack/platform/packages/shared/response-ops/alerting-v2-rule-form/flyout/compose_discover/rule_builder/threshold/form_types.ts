@@ -253,14 +253,19 @@ export const isAscendingComparator = (comparator: Comparator): boolean =>
 export const SEVERITY_COLUMN = 'severity';
 
 /**
- * Whether a stat or evaluation is named `severity`, which would collide with the generated
- * severity column (the generated `EVAL severity` would silently override the user's). When true,
- * severity is not configurable, so {@link reconcileSeverity} clears any existing config.
+ * Whether a stat, evaluation, or group-by field is named `severity`, which would collide with the
+ * generated severity column: the generated `EVAL severity` overwrites the user's column (and for a
+ * group-by field, the executor then hashes the overwritten value, collapsing distinct groups).
+ * When true, severity is not configurable, so {@link reconcileSeverity} clears any existing config.
  */
 export const hasReservedSeverityLabel = (
   stats: StatDefinition[],
-  evaluations: EvaluationDefinition[]
-): boolean => [...stats, ...evaluations].some((item) => item.label.trim() === SEVERITY_COLUMN);
+  evaluations: EvaluationDefinition[],
+  groupByFields: string[]
+): boolean =>
+  [...stats.map((s) => s.label), ...evaluations.map((e) => e.label), ...groupByFields].some(
+    (label) => label.trim() === SEVERITY_COLUMN
+  );
 
 export const createDefaultSeverityConfig = (): SeverityConfig => ({
   mode: 'single',

@@ -116,6 +116,15 @@ describe('threshold builder validate', () => {
     expect(validate!(STATE, values)).toBe(false);
   });
 
+  it('is invalid when a group-by field is named severity while severity is configured', () => {
+    const values = makeValues({
+      groupByFields: ['severity'],
+      severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
+
   it('is invalid when severity is set with multiple alert conditions', () => {
     // ES|QL generation only emits severity for a single condition; without this guard a parsed
     // state like this would validate and then lose its severity EVAL on save.

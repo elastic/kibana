@@ -41,7 +41,9 @@ const isSeverityConfigValid = (values: ThresholdFormValues): boolean => {
   if (!values.severity) return true;
 
   if (!isSeveritySupported(values.alertConditions)) return false;
-  if (hasReservedSeverityLabel(values.stats, values.evaluations)) return false;
+  if (hasReservedSeverityLabel(values.stats, values.evaluations, values.groupByFields)) {
+    return false;
+  }
   const [firstCondition] = values.alertConditions;
   if (values.severity.mode === 'multi' && !isMultiSeveritySupported(firstCondition.comparator)) {
     return false;

@@ -202,6 +202,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [thresholdValues, onThresholdValuesChange]
   );
 
+  const updateGroupByFields = useCallback(
+    (groupByFields: string[]) => {
+      // A group-by field named `severity` collides with the generated column, so clear severity.
+      onThresholdValuesChange({
+        ...thresholdValues,
+        groupByFields,
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          thresholdValues.alertConditions,
+          hasReservedSeverityLabel(thresholdValues.stats, thresholdValues.evaluations, groupByFields)
+        ),
+      });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
   // ── Stat helpers ──
   const updateStat = useCallback(
     (index: number, updates: Partial<StatDefinition>) => {
@@ -244,7 +260,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         severity: reconcileSeverity(
           thresholdValues.severity,
           updatedConditions,
-          hasReservedSeverityLabel(next, thresholdValues.evaluations)
+          hasReservedSeverityLabel(next, thresholdValues.evaluations, thresholdValues.groupByFields)
         ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
@@ -349,7 +365,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         severity: reconcileSeverity(
           thresholdValues.severity,
           updatedConditions,
-          hasReservedSeverityLabel(thresholdValues.stats, next)
+          hasReservedSeverityLabel(thresholdValues.stats, next, thresholdValues.groupByFields)
         ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
@@ -464,11 +480,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   );
 
   const severitySupported = isSeveritySupported(thresholdValues.alertConditions);
-  // A stat/evaluation named `severity` collides with the generated column, so severity is not
-  // configurable until it is renamed.
+  // A stat/evaluation/group-by field named `severity` collides with the generated column, so
+  // severity is not configurable until it is renamed.
   const severityLabelConflict = hasReservedSeverityLabel(
     thresholdValues.stats,
-    thresholdValues.evaluations
+    thresholdValues.evaluations,
+    thresholdValues.groupByFields
   );
 
   return (
@@ -568,13 +585,10 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           compressed
           options={allFields.map((name) => ({ label: name }))}
           selectedOptions={thresholdValues.groupByFields.map((f) => ({ label: f }))}
-          onChange={(opts) =>
-            update(
-              'groupByFields',
-              opts.map((o) => o.label)
-            )
+          onChange={(opts) => updateGroupByFields(opts.map((o) => o.label))}
+          onCreateOption={(val) =>
+            updateGroupByFields([...thresholdValues.groupByFields, val])
           }
-          onCreateOption={(val) => update('groupByFields', [...thresholdValues.groupByFields, val])}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.groupByPlaceholder', {
             defaultMessage: 'Add group-by fields',
           })}

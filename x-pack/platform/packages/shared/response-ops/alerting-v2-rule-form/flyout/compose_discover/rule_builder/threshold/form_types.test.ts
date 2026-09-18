@@ -410,10 +410,13 @@ describe('severity helpers', () => {
   });
 
   describe('hasReservedSeverityLabel', () => {
+    const countStat = { id: 's1', label: 'count', aggregation: Aggregation.COUNT };
+
     it('is true when a stat is named severity', () => {
       expect(
         hasReservedSeverityLabel(
           [{ id: 's1', label: 'severity', aggregation: Aggregation.COUNT }],
+          [],
           []
         )
       ).toBe(true);
@@ -422,16 +425,19 @@ describe('severity helpers', () => {
     it('is true when an evaluation is named severity', () => {
       expect(
         hasReservedSeverityLabel(
-          [{ id: 's1', label: 'count', aggregation: Aggregation.COUNT }],
-          [{ id: 'e1', label: 'severity', expression: 'count / 2' }]
+          [countStat],
+          [{ id: 'e1', label: 'severity', expression: 'count / 2' }],
+          []
         )
       ).toBe(true);
     });
 
-    it('is false when no stat/eval is named severity', () => {
-      expect(
-        hasReservedSeverityLabel([{ id: 's1', label: 'count', aggregation: Aggregation.COUNT }], [])
-      ).toBe(false);
+    it('is true when a group-by field is named severity', () => {
+      expect(hasReservedSeverityLabel([countStat], [], ['host.name', 'severity'])).toBe(true);
+    });
+
+    it('is false when no stat/eval/group-by is named severity', () => {
+      expect(hasReservedSeverityLabel([countStat], [], ['host.name'])).toBe(false);
     });
   });
 
