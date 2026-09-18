@@ -114,30 +114,16 @@ describe('generateOxlintConfig', () => {
     );
   });
 
-  it('ignores files that no project covers, collapsing uncovered subtrees to a glob', () => {
+  it('ignores files that no project covers', () => {
     const config = generateOxlintConfig(
       [project('plugins/a', ['server/**/*'])],
-      [
-        'plugins/a/server/plugin.ts',
-        'plugins/a/scripts/build.ts',
-        'plugins/a/scripts/lib/util.ts',
-        '.github/query.ts',
-        'root.ts',
-      ]
+      ['plugins/a/server/plugin.ts', 'plugins/a/scripts/build.ts', '.github/query.ts']
     );
 
-    const ignored = (file: string) =>
-      config.ignorePatterns.some((glob) => new Minimatch(glob, { dot: true }).match(file));
-    expect(ignored('plugins/a/server/plugin.ts')).toBe(false);
-    expect(ignored('plugins/a/scripts/build.ts')).toBe(true);
-    expect(ignored('plugins/a/scripts/lib/util.ts')).toBe(true);
-    expect(ignored('.github/query.ts')).toBe(true);
-    expect(ignored('root.ts')).toBe(true);
-    // one glob per uncovered subtree, not one entry per file
     expect(config.ignorePatterns).toEqual(
-      expect.arrayContaining(['plugins/a/scripts/**/*', '.github/**/*', 'root.ts'])
+      expect.arrayContaining(['plugins/a/scripts/build.ts', '.github/query.ts'])
     );
-    expect(config.ignorePatterns).not.toContain('plugins/a/**/*');
+    expect(config.ignorePatterns).not.toContain('plugins/a/server/plugin.ts');
   });
 
   it('ignores declaration files via a glob, not the uncovered-files list', () => {

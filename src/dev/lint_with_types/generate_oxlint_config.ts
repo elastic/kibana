@@ -130,8 +130,6 @@ export function generateOxlintConfig(
 
   const overrides: OxlintOverride[] = [];
   const covered = new Set<string>();
-  /** every directory that (transitively) contains a covered file */
-  const coveredAncestors = new Set<string>();
 
   for (const project of sortedProjects) {
     const prefix = project.repoRelDir === '.' ? '' : `${project.repoRelDir}/`;
@@ -153,12 +151,6 @@ export function generateOxlintConfig(
       }
       covered.add(file);
       coveredDirs.add(Path.posix.dirname(file));
-      for (let dir = Path.posix.dirname(file); dir !== '.'; dir = Path.posix.dirname(dir)) {
-        if (coveredAncestors.has(dir)) {
-          break;
-        }
-        coveredAncestors.add(dir);
-      }
       for (const { glob, mm } of RULE_GLOBS) {
         if (mm.match(rel)) {
           on.add(prefix + glob);
@@ -196,23 +188,6 @@ export function generateOxlintConfig(
     }
   }
 
-  // files no active project covers were never linted by the per-project ESLint run; whole
-  // subtrees without a covered file collapse to one glob so the list stays small when scoped
-  const uncovered = new Set<string>();
-  for (const file of files) {
-    if (covered.has(file)) {
-      continue;
-    }
-    let top: string | undefined;
-    for (let dir = Path.posix.dirname(file); dir !== '.'; dir = Path.posix.dirname(dir)) {
-      if (coveredAncestors.has(dir)) {
-        break;
-      }
-      top = dir;
-    }
-    uncovered.add(top ? `${top}/**/*` : file);
-  }
-
   return {
     $schema: './node_modules/oxlint/configuration_schema.json',
     plugins: ['typescript'],
@@ -222,6 +197,10 @@ export function generateOxlintConfig(
     options: { typeAware: true, respectEslintDisableDirectives: false },
     rules: { ...BASE_RULES },
     overrides,
-    ignorePatterns: [...IGNORE_PATTERNS, ...uncovered],
+    ignorePatterns: [
+      ...IGNORE_PATTERNS,
+      // files no active project covers were never linted by the per-project ESLint run
+      ...files.filter((file) => !covered.has(file)),
+    ],
   };
 }

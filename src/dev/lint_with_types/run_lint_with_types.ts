@@ -73,8 +73,9 @@ export function runLintWithTypes() {
             '--config',
             Path.relative(REPO_ROOT, CONFIG_PATH),
             '--disable-nested-config',
-            // a project may cover no lintable files (e.g. only declaration files), as under ESLint
-            '--no-error-on-unmatched-pattern',
+            // a single project may cover no lintable files (e.g. only declaration files), as
+            // under ESLint; the full run must still fail if the config ever ignores everything
+            ...(target ? ['--no-error-on-unmatched-pattern'] : []),
             '--ignore-path',
             '.eslintignore',
             ...(flags.fix ? ['--fix'] : []),
