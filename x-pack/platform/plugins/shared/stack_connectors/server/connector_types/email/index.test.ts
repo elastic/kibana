@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-jest.mock('./send_email', () => ({
-  sendEmail: jest.fn(),
-}));
+jest.mock('./send_email', () => {
+  const actual = jest.requireActual('./send_email');
+  return {
+    ...actual,
+    sendEmail: jest.fn(),
+  };
+});
 
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -953,6 +957,46 @@ describe('execute()', () => {
         },
       }
     `);
+  });
+
+  test('ensure subject and message pass through using HTTP_REQUEST and __json service', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('the subject');
+    expect(emailSent.content.message).toBe(
+      'a message to you\n\n---\n\nThis message was sent by Elastic.'
+    );
+    expect(emailSent.content.messageHTML).toBe(null);
+  });
+
+  test('ensure fixed subject and message and no footer using HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        kibanaFooterLink: {
+          path: '/some-url',
+          text: 'Click this link',
+        },
+      },
+      config: { ...executorOptions.config, service: 'gmail' },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('This is a test email from Kibana');
+    expect(emailSent.content.message).toBe('This is a test email from Kibana');
+    expect(emailSent.content.messageHTML).toBe(null);
   });
 
   test('ensure parameters are as expected with HTML message with source NOTIFICATION', async () => {
