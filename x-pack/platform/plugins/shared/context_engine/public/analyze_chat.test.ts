@@ -69,10 +69,12 @@ describe('buildAnalyzeChat', () => {
     expect(content).toContain('Description: Support demo');
   });
 
-  it('passes through an undefined feedback agent (button gating handles the no-agent case)', () => {
+  it('falls back to the default agent when no agent is configured', () => {
     const options = buildAnalyzeChat({
       aiIndex: aiIndex({ feedback_analysis: undefined }),
     });
-    expect(options.agentId).toBeUndefined();
+    // When feedback_analysis has no agent_id the default Agent Builder agent is used so the
+    // Analyze & improve chat still opens rather than silently doing nothing.
+    expect(options.agentId).toBe('elastic-ai-agent');
   });
 });

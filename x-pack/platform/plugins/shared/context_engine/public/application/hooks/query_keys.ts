@@ -23,4 +23,10 @@ export const contextEngineQueryKeys = {
     byTag: (tag: string, from: number, size: number) =>
       ['context_engine', 'signals', 'by_tag', tag, from, size] as const,
   },
+  improvements: {
+    /** Every list for one AI index, so a decision can invalidate open and history together. */
+    all: (aiIndexId: string) => ['context_engine', 'improvements', aiIndexId] as const,
+    list: (aiIndexId: string, status: string[] | undefined, from: number, size: number) =>
+      ['context_engine', 'improvements', aiIndexId, status ?? [], from, size] as const,
+  },
 };

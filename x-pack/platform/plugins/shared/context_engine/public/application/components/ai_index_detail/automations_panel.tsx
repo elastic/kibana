@@ -30,6 +30,10 @@ import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
 import { AutomationRow } from './automation_row';
+import { ScopedImprovements } from './scoped_improvements';
+
+/** The improvements that would change this panel's part of the AI index. */
+const AUTOMATION_ACTIONS = ['add_workflow', 'edit_workflow', 'remove_workflow'] as const;
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
@@ -245,6 +249,12 @@ export const AutomationsPanel = ({
           )}
         </>
       )}
+
+      <ScopedImprovements
+        aiIndex={aiIndex}
+        actions={AUTOMATION_ACTIONS}
+        data-test-subj="contextAiIndexAutomationImprovements"
+      />
     </EuiPanel>
   );
 };

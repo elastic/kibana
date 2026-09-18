@@ -91,6 +91,11 @@ record:
   observe-only: the run still reports what it found but may not propose a
   change.
 
+Only `enabled` is exposed in the UI. Every other field is a per-index override
+of something that already has a server-side default, so the detail page sets
+none of them and an index wanting different values is configured through this
+route.
+
 The dedicated `PUT .../feedback_analysis` route replaces only this block,
 leaving the rest of the record untouched. Unlike a full AI index replace it is
 permitted on **managed** AI indices: their definition is owned by the plugin
@@ -121,14 +126,17 @@ No changes to the Context Engine plugin are required.
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the
-per-space `context-engine-signals-<space>` index. The AI index detail page
-renders a read-only **Signals** panel: a preaggregated grouped-by-tag list, a
-drill-down into a group's individual signals (each with a trace waterfall in a
-flyout), and an "Analyze & improve" button that opens Agent Builder when a chat
-opener has been registered.
+per-space `context-engine-signals-<space>` index.
 
-The panel is backed by two internal, read-only routes (reads run as the current
-user against the current space's signals index):
+They have no panel on the AI index detail page. A `SignalsPanel` component
+exists — a grouped-by-tag list, a drill-down into a group's individual signals
+with a trace waterfall per signal, and an "Analyze & improve" button — but
+nothing renders it. It was a view of the evidence behind suggestions, and those
+are now shown in the panel they would change (see
+[Improvements](#improvements)), which left it without an audience of its own.
+
+Its routes are still served — two internal, read-only ones, where reads run as
+the current user against the current space's signals index:
 
 | Method | Path                                      | Description                                            |
 | ------ | ----------------------------------------- | ------------------------------------------------------ |
@@ -166,9 +174,47 @@ the same guidance in its instructions goes unmarked.
 An **improvement** is a proposed change to one AI index's KI pipeline, derived
 from that index's signals. They live in the `context-engine-improvements` index,
 exposed to the server as
-`ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written
-by an analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The
-review UI that applies them comes later.
+`ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written by an
+analysis run (see [Feedback analysis runs](#feedback-analysis-runs)).
+
+### Reviewing them
+
+Suggestions are shown in the panel whose part of the AI index they would change
+— source proposals under **Sources**, automation proposals under
+**Automations** — rather than in a queue of their own. A proposal to add a
+source is a question about the sources, and answering it means looking at what
+is already configured. Each panel filters one cached list client-side, so the
+panels between them cost a single request, and a panel with nothing to review
+renders as it did before.
+
+Approving is the authorization boundary: both the store access and the change it
+materializes run on the approving user's own Elasticsearch client and request,
+so an approval can never effect something the reviewer could not do themselves.
+Rejecting asks why first — the reason is optional, but when given it is recorded
+on `resolution.reason`, which is what later runs read to avoid re-proposing the
+same thing.
+
+The panels are backed by four internal routes, all gated by the
+`contextEngine:feedbackLoopEnabled` setting on top of `contextEngine:enabled`:
+
+| Method | Path                                                                    | Description                                        |
+| ------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| `GET`  | `/internal/context_engine/ai_index/{id}/improvements`                   | Open suggestions for an AI index, paginated        |
+| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/approve`   | Apply the change and record it as applied          |
+| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/reject`    | Record it as rejected, with an optional `reason`   |
+| `POST` | `/internal/context_engine/ai_index/{id}/feedback_analysis/_run`         | Start one analysis run off-schedule                |
+
+One run analyzes an index at a time. The workflow declares
+`concurrency: { key: <per index>, strategy: drop, max: 1 }`, so the engine
+refuses an overlapping run whether it came from the schedule or from this route.
+It refuses quietly: a dropped run is still given an execution document and its
+id is still returned, only marked `skipped`. `_run` therefore reads the
+execution back — an mget by id, so the skip is visible immediately — and answers
+`409` rather than reporting a run that was thrown away.
+
+KI proposals (`add_ki`, `edit_ki`, `remove_ki`) currently have no panel. The
+loop is not expected to propose them, and the apply path for them exists either
+way.
 
 Improvements are **scoped to the space of the AI index they target**, which is
 the space the service is constructed for. Every read filters on it and every
@@ -261,6 +307,16 @@ a forced output schema, record the result.
 The briefing is handed over as the agent's `message`. It instructs the agent to
 load the `analyze-and-improve` skill before reading anything, so the run carries
 the analysis playbook whichever agent the index is configured with.
+
+**Signals are evidence, not a precondition.** A run analyzes whether or not the
+window held any: an indicator its source contradicts, an automation producing
+nothing, a source nothing covers are all visible without a failed retrieval, and
+an index nobody has queried yet is when a bad setup is cheapest to fix. The
+briefing says which kind of run it is, and asks for grounding either way — signal
+ids when there are groups, and what was actually read when there are not, which
+is why `signal_ids` is optional on a proposal and its provenance can be empty.
+The agent is skipped only for `can_analyze: false`: an index with no signals, no
+indicators, no sources and no automations, where there is nothing to read at all.
 
 The briefing does not carry prior proposals, only how many there are and where
 they stand. A run cannot be handed the history that matters to it, because until

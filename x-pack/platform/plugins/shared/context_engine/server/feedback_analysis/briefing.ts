@@ -97,7 +97,9 @@ const renderGroups = (groups: SignalPatternGroup[], run: FeedbackAnalysisRunCont
     return [
       header,
       '',
-      'None of the selected signals were classified as a problem. Retrievals against this index ran and returned rows.',
+      run.signal_count === 0
+        ? 'No signals at all. Either nothing has queried this index in the window, or trace collection is not reaching it. That rules out claims about what agents asked for and what came back — but not the index itself, which is described above and which you can read directly. Judge the setup on its own terms: indicators that no longer match their source, automations that produce nothing, sources nothing covers, coverage the description promises and the indicators do not deliver.'
+        : 'None of the selected signals were classified as a problem. Retrievals against this index ran and returned rows. What is left to judge is the index itself, described above and readable directly.',
     ].join('\n');
   }
 
@@ -158,7 +160,25 @@ const renderHistory = (aiIndexId: string, history: ImprovementHistorySummary): s
 
 const LOAD_SKILL_RULE = `- **Load the \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` skill before you look at anything.** It carries the playbook for reading these signals. If you cannot load it, say so in \`summary\` and work from this briefing alone.`;
 
-const renderTask = (allowedActions: ImprovementAction[]): string => {
+/**
+ * What grounding means for this run.
+ *
+ * With signal groups, evidence is the retrievals themselves and every proposal has to name the ones
+ * it came from. Without them the index is the only thing to read, so the rule is not relaxed so
+ * much as pointed elsewhere: say what was read instead of citing ids that do not exist. Dropping
+ * the requirement entirely would let a run with nothing to go on invent work.
+ */
+const groundingRules = (hasGroups: boolean): string[] =>
+  hasGroups
+    ? [
+        '- **Ground every proposal.** Cite the `signal_ids` you took it from, using the ids listed with each group above. A proposal you cannot attach to signals is one you should not make.',
+      ]
+    : [
+        '- **Ground every proposal in what you read.** There are no signals to cite, so omit `signal_ids` and name the evidence in `rationale` instead: the indicator and what contradicts it, the automation and what it failed to produce, the source and what nothing covers. A proposal you cannot trace to something you actually looked at is one you should not make.',
+        '- **Read the index before judging it.** Nothing about how agents used it is available this run, so an opinion formed from the summary above alone is a guess. Query the indicators and the sources with your tools first.',
+      ];
+
+const renderTask = (allowedActions: ImprovementAction[], hasGroups: boolean): string => {
   if (allowedActions.length === 0) {
     return [
       '## Your task',
@@ -184,12 +204,14 @@ const renderTask = (allowedActions: ImprovementAction[]): string => {
     `- **Only these actions are permitted here**: ${allowedActions
       .map((action) => `\`${action}\``)
       .join(', ')}. Anything else is rejected on write.`,
-    '- **Ground every proposal.** Cite the `signal_ids` you took it from, using the ids listed with each group above. A proposal you cannot attach to signals is one you should not make.',
+    ...groundingRules(hasGroups),
     '- **Check the target’s history once you know what you want to change.** Run the query under "What was proposed before" against it. Reviewers have already ruled on some of these, and their reasons apply to your proposal as much as to the one they rejected.',
-    '- **Propose nothing rather than something weak.** An empty list is a valid, useful answer when the signals do not point anywhere. Padding the list costs a reviewer more than it gains.',
-    '- **One proposal per distinct problem.** Two groups with the same underlying cause are one fix.',
+    '- **Propose nothing rather than something weak.** An empty list is a valid, useful answer when the evidence does not point anywhere. Padding the list costs a reviewer more than it gains.',
+    '- **One proposal per distinct problem.** Two findings with the same underlying cause are one fix.',
     '',
-    'You may use your tools to look at the index, its knowledge indicators, and the conversations behind these signals before deciding. Answer with the structured output you were given.',
+    hasGroups
+      ? 'You may use your tools to look at the index, its knowledge indicators, and the conversations behind these signals before deciding. Answer with the structured output you were given.'
+      : 'Use your tools to look at the index, its knowledge indicators, its sources and its automations before deciding. Answer with the structured output you were given.',
   ].join('\n');
 };
 
@@ -211,5 +233,5 @@ export const renderBriefing = ({
     '',
     renderHistory(aiIndex.id, history),
     '',
-    renderTask(allowedActions),
+    renderTask(allowedActions, groups.length > 0),
   ].join('\n');

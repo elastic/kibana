@@ -10,8 +10,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import type { WorkflowEnablementApi } from './schedule';
-import { createFeedbackAnalysisScheduleService } from './schedule';
+import type { WorkflowsManagementPort } from './schedule';
+import {
+  FeedbackAnalysisAlreadyRunningError,
+  createFeedbackAnalysisScheduleService,
+} from './schedule';
 
 const DEFAULT_SPACE = 'default';
 
@@ -23,18 +26,25 @@ const documentIdFor = (aiIndexId: string, spaceId: string) =>
 
 const WORKFLOW_DOCUMENT_ID = documentIdFor('orders', DEFAULT_SPACE);
 
+interface ManagementMock {
+  updateWorkflow: jest.Mock;
+  getWorkflowExecution: jest.Mock;
+}
+
 describe('createFeedbackAnalysisScheduleService', () => {
-  let client: jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
-  let workflowsManagement: { updateWorkflow: jest.Mock };
+  let client: jest.Mocked<
+    Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall' | 'execute'>
+  >;
+  let workflowsManagement: ManagementMock;
   let request: KibanaRequest;
   let service: ReturnType<typeof createFeedbackAnalysisScheduleService>;
 
-  const createService = (management: { updateWorkflow: jest.Mock } | undefined) =>
+  const createService = (management: ManagementMock | undefined) =>
     createFeedbackAnalysisScheduleService({
       logger: loggingSystemMock.createLogger(),
       getManagedWorkflowsClient: async () => client as unknown as PluginScopedManagedWorkflowsApi,
       ...(management
-        ? { workflowsManagement: management as unknown as WorkflowEnablementApi }
+        ? { workflowsManagement: management as unknown as WorkflowsManagementPort }
         : {}),
     });
 
@@ -42,8 +52,13 @@ describe('createFeedbackAnalysisScheduleService', () => {
     client = {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn().mockResolvedValue('execution-1'),
     };
-    workflowsManagement = { updateWorkflow: jest.fn().mockResolvedValue(undefined) };
+    workflowsManagement = {
+      updateWorkflow: jest.fn().mockResolvedValue(undefined),
+      // The engine only skips a run it refused, so anything else means it started.
+      getWorkflowExecution: jest.fn().mockResolvedValue({ status: 'running' }),
+    };
     request = httpServerMock.createKibanaRequest();
     service = createService(workflowsManagement);
   });
@@ -227,7 +242,9 @@ describe('createFeedbackAnalysisScheduleService', () => {
     });
   });
 
-  it('installs independent schedules per space for the same AI index id', async () => {
+  it('pins the schedule to the default space regardless of which space enables it', async () => {
+    // The managed workflow lives in the default space so its document id is stable: a request
+    // from 'marketing' and one from 'default' converge on the same workflow instance.
     await service.reconcile({
       aiIndexId: 'orders',
       spaceId: 'default',
@@ -241,31 +258,25 @@ describe('createFeedbackAnalysisScheduleService', () => {
       request,
     });
 
-    // The workflow document id is the ES `_id` and is not namespaced by space, so a suffix of
-    // just the AI index id would point both spaces at one document.
     expect(client.install).toHaveBeenCalledTimes(2);
-    expect(client.install.mock.calls[0][1]).toEqual(
-      expect.objectContaining({
-        spaceId: 'default',
-        workflowIdSuffix: suffixFor('orders', 'default'),
-      })
-    );
-    expect(client.install.mock.calls[1][1]).toEqual(
-      expect.objectContaining({
-        spaceId: 'marketing',
-        workflowIdSuffix: suffixFor('orders', 'marketing'),
-      })
-    );
+    for (const [, options] of client.install.mock.calls) {
+      expect(options).toEqual(
+        expect.objectContaining({
+          spaceId: DEFAULT_SPACE,
+          workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
+        })
+      );
+    }
     expect(workflowsManagement.updateWorkflow.mock.calls.map(([workflowId]) => workflowId)).toEqual(
-      [documentIdFor('orders', 'default'), documentIdFor('orders', 'marketing')]
+      [WORKFLOW_DOCUMENT_ID, WORKFLOW_DOCUMENT_ID]
     );
 
     await service.remove({ aiIndexId: 'orders', spaceId: 'marketing' });
 
     expect(client.uninstall).toHaveBeenCalledTimes(1);
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'marketing',
-      workflowIdSuffix: suffixFor('orders', 'marketing'),
+      spaceId: DEFAULT_SPACE,
+      workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
     });
   });
 
@@ -311,5 +322,64 @@ describe('createFeedbackAnalysisScheduleService', () => {
     expect(workflowsManagement.updateWorkflow.mock.calls.map(([workflowId]) => workflowId)).toEqual(
       [WORKFLOW_DOCUMENT_ID, documentIdFor('customers', DEFAULT_SPACE)]
     );
+  });
+
+  describe('running one now', () => {
+    it('returns the execution it started', async () => {
+      await expect(service.run({ aiIndexId: 'orders', request })).resolves.toBe('execution-1');
+
+      expect(client.execute).toHaveBeenCalledWith(
+        request,
+        CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+        expect.objectContaining({
+          workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
+          triggeredBy: 'manual',
+        })
+      );
+    });
+
+    it('reports a run that collided with one already in flight', async () => {
+      // The workflow caps itself at one run per index and drops the rest. A dropped run is still
+      // given an execution id, so only its status says it never started.
+      workflowsManagement.getWorkflowExecution.mockResolvedValue({ status: 'skipped' });
+
+      await expect(service.run({ aiIndexId: 'orders', request })).rejects.toBeInstanceOf(
+        FeedbackAnalysisAlreadyRunningError
+      );
+
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
+        'execution-1',
+        'default'
+      );
+    });
+
+    it('reads the execution back from the space the schedule lives in', async () => {
+      await service.run({ aiIndexId: 'orders', request });
+
+      // Not the caller's space: the instance is pinned where it was installed, so looking anywhere
+      // else would find nothing and report every run as started.
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
+        'execution-1',
+        'default'
+      );
+    });
+
+    it('treats a run it cannot check as started', async () => {
+      // Saying "already running" on a failed read would tell the user not to retry the one thing
+      // that would fix it.
+      workflowsManagement.getWorkflowExecution.mockRejectedValue(
+        new Error('executions unreadable')
+      );
+
+      await expect(service.run({ aiIndexId: 'orders', request })).resolves.toBe('execution-1');
+    });
+
+    it('starts a run without workflows management, since there is nothing to ask', async () => {
+      const withoutManagement = createService(undefined);
+
+      await expect(withoutManagement.run({ aiIndexId: 'orders', request })).resolves.toBe(
+        'execution-1'
+      );
+    });
   });
 });

@@ -12,12 +12,22 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import type { AiIndexSource, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type {
   UseDataConnectorsOptions,
   UseDataConnectorsResult,
 } from '../../hooks/use_data_connectors';
 import { SourcesPanel } from './sources_panel';
+
+const mockScopedImprovements = jest.fn();
+
+// Covered on its own; here it only needs to show which suggestions this panel claims.
+jest.mock('./scoped_improvements', () => ({
+  ScopedImprovements: (props: unknown) => {
+    mockScopedImprovements(props);
+    return null;
+  },
+}));
 
 const mockUseDataConnectors = jest.fn(
   (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
@@ -59,6 +69,29 @@ const sources: AiIndexSource[] = [
 describe('SourcesPanel', () => {
   beforeEach(() => {
     mockUseDataConnectors.mockClear();
+    mockScopedImprovements.mockClear();
+  });
+
+  it('is where suggestions about sources are reviewed', () => {
+    const aiIndex = { id: 'my-ai-index' } as GetAiIndexResponse;
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        sources={sources}
+        canEdit
+        onEditSources={jest.fn()}
+        isManaged={false}
+        aiIndex={aiIndex}
+      />
+    );
+
+    expect(mockScopedImprovements).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aiIndex,
+        actions: ['add_source', 'edit_source', 'remove_source'],
+      })
+    );
   });
 
   it('shows the loading skeleton while loading and no rows', () => {

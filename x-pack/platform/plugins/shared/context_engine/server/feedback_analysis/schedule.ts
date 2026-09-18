@@ -20,17 +20,37 @@ import { parseIntervalMinutes } from '../../common/validation';
 const SPACE_HASH_LENGTH = 16;
 
 /**
- * The one workflows management call this plugin makes, declared structurally rather than imported:
+ * The workflows management calls this plugin makes, declared structurally rather than imported:
  * workflows management reaches back here through Agent Builder, so depending on its contract would
- * close a project reference cycle.
+ * close a project reference cycle. Only the fields that are read are named.
  */
-export interface WorkflowEnablementApi {
+export interface WorkflowsManagementPort {
   updateWorkflow(
     workflowId: string,
     workflow: { enabled: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<unknown>;
+
+  getWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<{ status: string } | null>;
+}
+
+/**
+ * Raised when a requested run collided with one already in flight for the same AI index.
+ *
+ * Not a failure of the request so much as an answer to it: the analysis the caller wanted is
+ * happening, just not because of them.
+ */
+export class FeedbackAnalysisAlreadyRunningError extends Error {
+  constructor(aiIndexId: string) {
+    super(
+      `Feedback analysis is already running for AI index [${aiIndexId}]. Its improvements appear when that run finishes.`
+    );
+    this.name = 'FeedbackAnalysisAlreadyRunningError';
+  }
 }
 
 export interface ReconcileScheduleParams {
@@ -50,9 +70,40 @@ export interface FeedbackAnalysisScheduleService {
   /** Brings the managed workflow for one AI index in line with its configuration. */
   reconcile(params: ReconcileScheduleParams): Promise<void>;
 
+  /**
+   * Runs one analysis immediately, off-schedule, and returns the execution id.
+   *
+   * Only possible while analysis is enabled: disabling uninstalls the per-index workflow, so with
+   * it off there is no instance to execute. The caller checks the configuration and explains that,
+   * rather than offering an action that would fail here.
+   *
+   * Throws {@link FeedbackAnalysisAlreadyRunningError} when a run for this index is already in
+   * flight, which the workflow's own concurrency settings decide rather than this code.
+   *
+   * Takes no space: the instance lives where it was installed, not where the request came from.
+   */
+  run(params: { aiIndexId: string; request: KibanaRequest }): Promise<string>;
+
   /** Tears the schedule down when the AI index it analyzes is deleted. */
   remove(params: { aiIndexId: string; spaceId: string }): Promise<void>;
 }
+
+/**
+ * A managed workflow instance is keyed by `(workflowId, spaceId)` while an AI index is global and
+ * writable from any space, so the schedule is pinned here rather than taken from the request. A
+ * request-scoped space would let an enable in one space and a disable in another address different
+ * instances, leaving a run nobody can stop.
+ */
+// Importing DEFAULT_SPACE_ID from @kbn/spaces-plugin would close a project reference cycle through
+// Agent Builder; hardcode the well-known value instead.
+const SCHEDULE_SPACE_ID = 'default';
+
+/**
+ * What the execution engine marks a run it refused to start. Compared as a string rather than
+ * imported as `ExecutionStatus.SKIPPED`, for the same reason the workflows calls above are
+ * structural: importing the contract would close a project reference cycle.
+ */
+const DROPPED_EXECUTION_STATUS = 'skipped';
 
 export const createFeedbackAnalysisScheduleService = ({
   logger,
@@ -62,7 +113,7 @@ export const createFeedbackAnalysisScheduleService = ({
   logger: Logger;
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   /** Optional at the plugin boundary, so a deployment without it cannot schedule analysis. */
-  workflowsManagement?: WorkflowEnablementApi;
+  workflowsManagement?: WorkflowsManagementPort;
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
@@ -86,6 +137,42 @@ export const createFeedbackAnalysisScheduleService = ({
   const workflowDocumentIdFor = (aiIndexId: string, spaceId: string) =>
     `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${workflowIdSuffixFor(aiIndexId, spaceId)}`;
 
+  /**
+   * Whether the run that was just started was refused for colliding with one already in flight.
+   *
+   * The workflow declares `concurrency: { max: 1, strategy: drop }` per AI index, so the engine
+   * already prevents two analyses of the same index from overlapping. It just does not say so:
+   * a dropped run still gets an execution document, still gets its id returned, and is marked
+   * `skipped` on the way out — so starting a run and being ignored looks exactly like starting one.
+   * Reading the execution back is what tells the two apart. Nothing else skips a run at admission,
+   * so the status alone is the signal, without matching on a human-readable reason.
+   *
+   * The read is an mget by id, which is realtime in Elasticsearch, so the skip is visible even
+   * though it is written without waiting for a refresh.
+   *
+   * Fails open. Without workflows management there is nothing to ask, and a read that errors says
+   * nothing about the run; reporting "already running" on that basis would replace a run the user
+   * can retry with a message telling them not to.
+   */
+  const wasDropped = async (executionId: string): Promise<boolean> => {
+    if (!workflowsManagement) {
+      return false;
+    }
+
+    try {
+      const execution = await workflowsManagement.getWorkflowExecution(
+        executionId,
+        SCHEDULE_SPACE_ID
+      );
+      return execution?.status === DROPPED_EXECUTION_STATUS;
+    } catch (error) {
+      log.warn(
+        `Could not tell whether feedback analysis run '${executionId}' started: ${error.message}`
+      );
+      return false;
+    }
+  };
+
   const intervalMinutesFor = (feedbackAnalysis: AiIndexFeedbackAnalysis): number => {
     const interval = feedbackAnalysis.schedule?.interval ?? DEFAULT_FEEDBACK_ANALYSIS_INTERVAL;
     return parseIntervalMinutes(interval) ?? MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES;
@@ -103,7 +190,8 @@ export const createFeedbackAnalysisScheduleService = ({
     async reconcile({ aiIndexId, spaceId, feedbackAnalysis, request }) {
       if (!feedbackAnalysis?.enabled) {
         // Uninstalling drops the trigger task with the document, so disabling needs no request.
-        await uninstall(aiIndexId, spaceId);
+        // Always target SCHEDULE_SPACE_ID so the document ID matches what run() addresses.
+        await uninstall(aiIndexId, SCHEDULE_SPACE_ID);
         log.debug(
           () =>
             `Removed feedback analysis schedule for AI index '${aiIndexId}' in space '${spaceId}'`
@@ -119,9 +207,12 @@ export const createFeedbackAnalysisScheduleService = ({
 
       const intervalMinutes = intervalMinutesFor(feedbackAnalysis);
       const client = await getManagedWorkflowsClient();
+      // Install into SCHEDULE_SPACE_ID so run()'s workflowIdSuffix (which also uses
+      // SCHEDULE_SPACE_ID) addresses the same workflow document regardless of which space
+      // the enable/disable request came from.
       await client.install(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+        spaceId: SCHEDULE_SPACE_ID,
+        workflowIdSuffix: workflowIdSuffixFor(aiIndexId, SCHEDULE_SPACE_ID),
         values: {
           aiIndexId,
           intervalMinutes,
@@ -135,9 +226,9 @@ export const createFeedbackAnalysisScheduleService = ({
       // reconciles: the schedule then follows whoever last saved it rather than expiring with the
       // account that first turned it on.
       await workflowsManagement.updateWorkflow(
-        workflowDocumentIdFor(aiIndexId, spaceId),
+        workflowDocumentIdFor(aiIndexId, SCHEDULE_SPACE_ID),
         { enabled: true },
-        spaceId,
+        SCHEDULE_SPACE_ID,
         request
       );
 
@@ -146,8 +237,32 @@ export const createFeedbackAnalysisScheduleService = ({
       );
     },
 
+    async run({ aiIndexId, request }) {
+      const client = await getManagedWorkflowsClient();
+      const executionId = await client.execute(
+        request,
+        CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+        {
+          spaceId: SCHEDULE_SPACE_ID,
+          workflowIdSuffix: workflowIdSuffixFor(aiIndexId, SCHEDULE_SPACE_ID),
+          triggeredBy: 'manual',
+        }
+      );
+
+      if (await wasDropped(executionId)) {
+        log.debug(
+          () =>
+            `Dropped an off-schedule feedback analysis run for AI index '${aiIndexId}': one is already running`
+        );
+        throw new FeedbackAnalysisAlreadyRunningError(aiIndexId);
+      }
+
+      log.info(`Started an off-schedule feedback analysis run for AI index '${aiIndexId}'`);
+      return executionId;
+    },
+
     async remove({ aiIndexId, spaceId }) {
-      await uninstall(aiIndexId, spaceId);
+      await uninstall(aiIndexId, SCHEDULE_SPACE_ID);
       log.debug(
         () =>
           `Removed feedback analysis schedule for deleted AI index '${aiIndexId}' in space '${spaceId}'`

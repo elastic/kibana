@@ -37,6 +37,23 @@ interface Candidate {
   input: ImprovementRevisionInput;
 }
 
+/**
+ * Returns the name of a required payload field that the proposal is missing, or undefined when the
+ * payload is complete. Mirrors the `required()` checks in `apply/index.ts` so incomplete
+ * suggestions are rejected at record time rather than only when the reviewer tries to apply them.
+ * Missing target fields are caught separately by `buildImprovementId`.
+ */
+const missingRequiredField = (proposal: ProposedImprovement): string | undefined => {
+  const { action, payload } = proposal;
+  if (action === 'add_ki' && !payload?.ki) return 'payload.ki';
+  if (action === 'edit_ki' && !payload?.ki_patch) return 'payload.ki_patch';
+  if ((action === 'add_workflow' || action === 'edit_workflow') && !payload?.workflow_yaml)
+    return 'payload.workflow_yaml';
+  if ((action === 'add_source' || action === 'edit_source') && !payload?.source)
+    return 'payload.source';
+  return undefined;
+};
+
 const describe = (proposal: unknown): { action?: string; title?: string } => {
   if (typeof proposal !== 'object' || proposal === null) {
     return {};
@@ -88,6 +105,17 @@ export const recordImprovements = async ({
     }
 
     const proposal = parsed.data;
+
+    const missing = missingRequiredField(proposal);
+    if (missing) {
+      skipped.push({
+        action: proposal.action,
+        title: proposal.title,
+        reason: 'invalid',
+        detail: `The ${proposal.action} proposal is missing ${missing}.`,
+      });
+      continue;
+    }
 
     if (!allowed.has(proposal.action)) {
       skipped.push({
@@ -149,10 +177,12 @@ export const recordImprovements = async ({
         payload: proposal.payload ?? {},
         provenance: {
           agent_run_id: agentRunId,
-          signal_ids: proposal.signal_ids,
+          // Absent when the proposal came from reading the index rather than an observed
+          // retrieval, which is the only evidence a run over a signal-less window has.
+          signal_ids: proposal.signal_ids ?? [],
           signal_spaces: signalSpaces,
           signal_window: signalWindow,
-          signal_count: proposal.signal_ids.length,
+          signal_count: proposal.signal_ids?.length ?? 0,
           ...(proposal.signal_tags ? { tags: proposal.signal_tags } : {}),
         },
       },
