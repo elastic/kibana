@@ -11,7 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { asRouteSchema, minLengthMessage, routeId } from '../../zod_query';
+import { asRouteSchema, minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
@@ -28,7 +28,7 @@ const EditPrivateLocationSchema = z.object({
   label: z
     .string()
     .min(1, { error: minLengthMessage(1) })
-    .max(1024)
+    .max(MAX_ROUTE_ID_LENGTH)
     .optional(),
   tags: z.array(z.string().max(256)).max(100).optional(),
   isAgentSharding: z.boolean().optional(),

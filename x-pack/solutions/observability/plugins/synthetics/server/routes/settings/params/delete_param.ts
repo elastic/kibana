@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
-import { MAX_PARAM_BULK_SIZE, optionalRouteId } from '../../zod_query';
+import { MAX_PARAM_BULK_SIZE, optionalRouteId, routeId } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -29,7 +29,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       body: z
         .object({
-          ids: z.array(z.string().max(1024)).min(1).max(MAX_PARAM_BULK_SIZE),
+          ids: z.array(routeId).min(1).max(MAX_PARAM_BULK_SIZE),
         })
         .nullable(),
       params: z.object({

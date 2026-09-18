@@ -60,6 +60,15 @@ describe('QuerySchema', () => {
     expect(QuerySchema.parse({ tags: 'prod' }).tags).toBe('prod');
     expect(QuerySchema.parse({ tags: ['prod', 'us'] }).tags).toEqual(['prod', 'us']);
   });
+
+  it('parses JSON-encoded searchAfter the way config-schema arrayOf did', () => {
+    expect(QuerySchema.parse({ searchAfter: '["monitor-1"]' }).searchAfter).toEqual(['monitor-1']);
+    expect(QuerySchema.parse({ searchAfter: ['monitor-1'] }).searchAfter).toEqual(['monitor-1']);
+  });
+
+  it('rejects a non-JSON searchAfter string', () => {
+    expect(QuerySchema.safeParse({ searchAfter: 'monitor-1' }).success).toBe(false);
+  });
 });
 
 describe('getSavedObjectKqlFilter', () => {

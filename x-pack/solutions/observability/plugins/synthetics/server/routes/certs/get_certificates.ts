@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { queryBoolean, queryNumber } from '../zod_query';
+import {
+  MAX_DATE_RANGE_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+  queryBoolean,
+  queryNumber,
+} from '../zod_query';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
@@ -29,26 +34,26 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       size: queryNumber.optional(),
       sortBy: z.string().max(256).optional(),
       direction: z.string().max(256).optional(),
-      search: z.string().max(1024).optional(),
-      from: z.string().max(256).optional(),
-      to: z.string().max(256).optional(),
+      search: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+      to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
       // Upper bound on certificate `not_after` (datemath, e.g. `now+30d`), powering
       // the "Expiring within" quick filter. Already-expired certs are included.
-      notValidAfter: z.string().max(256).optional(),
+      notValidAfter: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
       // Comma-separated filters (e.g. `http,browser`) sent as strings to avoid
       // query-array serialization edge cases. `monitorTypes` scopes by monitor
       // type; `browserResourceTypes` and `certOrigin` are browser-only quick
       // filters; `tags` scopes by monitor tag.
-      monitorTypes: z.string().max(1024).optional(),
-      browserResourceTypes: z.string().max(1024).optional(),
+      monitorTypes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      browserResourceTypes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       certOrigin: z.string().max(256).optional(),
-      tags: z.string().max(1024).optional(),
+      tags: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       // Comma-separated issuer (certificate authority) common names; scopes the
       // list to certs signed by the selected CA(s).
-      issuers: z.string().max(4096).optional(),
+      issuers: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       // Comma-separated remote cluster aliases; honoured only when CCS is on.
       // Empty/absent → every configured cluster.
-      remoteNames: z.string().max(1024).optional(),
+      remoteNames: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       // Same contract as Overview/Management: load enabled monitors from every
       // space the user can read, and drop the CCS remote-branch space gate.
       showFromAllSpaces: queryBoolean.optional(),

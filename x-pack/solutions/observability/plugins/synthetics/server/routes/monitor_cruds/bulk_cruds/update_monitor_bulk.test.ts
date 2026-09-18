@@ -7,6 +7,7 @@
 
 import type { z } from '@kbn/zod';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_MONITOR_BULK_SIZE, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import { updateSyntheticsMonitorBulkRoute } from './update_monitor_bulk';
 
 jest.mock('../services/update_monitor_api', () => ({
@@ -144,20 +145,22 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       expect(value.updates[0].attributes).toEqual({});
     });
 
-    it('rejects more than 500 updates', () => {
-      const updates = Array.from({ length: 501 }, (_, i) => ({
+    it(`rejects more than ${MAX_MONITOR_BULK_SIZE} updates`, () => {
+      const updates = Array.from({ length: MAX_MONITOR_BULK_SIZE + 1 }, (_, i) => ({
         id: `monitor-id-${i}`,
         attributes: { enabled: false },
       }));
-      expect(() => bodySchema.parse({ updates })).toThrow(/too big|maximum|<=500/i);
+      expect(() => bodySchema.parse({ updates })).toThrow(
+        new RegExp(`too big|maximum|<=${MAX_MONITOR_BULK_SIZE}`, 'i')
+      );
     });
 
-    it('rejects an id longer than 1024 characters', () => {
+    it(`rejects an id longer than ${MAX_ROUTE_ID_LENGTH} characters`, () => {
       expect(() =>
         bodySchema.parse({
-          updates: [{ id: 'a'.repeat(1025), attributes: { enabled: false } }],
+          updates: [{ id: 'a'.repeat(MAX_ROUTE_ID_LENGTH + 1), attributes: { enabled: false } }],
         })
-      ).toThrow(/too big|maximum|<=1024/i);
+      ).toThrow(new RegExp(`too big|maximum|<=${MAX_ROUTE_ID_LENGTH}`, 'i'));
     });
   });
 

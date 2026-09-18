@@ -9,15 +9,15 @@ import type { RouteValidationFunction } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
-export const MAX_ROUTE_ID_LENGTH = 1024;
+export const MAX_ROUTE_ID_LENGTH = 4096;
 export const MAX_ROUTE_STRING_LENGTH = 4096;
-export const MAX_DATE_RANGE_LENGTH = 256;
-// Monitor bulk id lists; matches `findDecryptedMonitors` perPage.
-export const MAX_MONITOR_BULK_SIZE = 500;
-// Param id lists are SO-only deletes, so they can be larger than monitor bulk.
-export const MAX_PARAM_BULK_SIZE = 1000;
-// Monitor interval in minutes (`"1"`…`"240"`); DoS cap, not a product limit.
-export const MAX_SCHEDULE_LENGTH = 64;
+export const MAX_DATE_RANGE_LENGTH = 4096;
+// Pre-existing product cap (project-monitor delete + overview trends).
+export const MAX_MONITOR_BATCH_SIZE = 500;
+// Public bulk id lists were unbounded; decrypt finder paginates past perPage 500.
+export const MAX_MONITOR_BULK_SIZE = 10_000;
+// Param id lists are SO-only, so they can match the public bulk cap.
+export const MAX_PARAM_BULK_SIZE = 10_000;
 // Params hold PEM chains / keys; 10KB 400s those. 1MB is a DoS cap, not a product limit.
 export const MAX_PARAM_VALUE_LENGTH = 1_000_000;
 

@@ -23,6 +23,7 @@ import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 import {
+  jsonArrayFromString,
   MAX_DATE_RANGE_LENGTH,
   MAX_ROUTE_STRING_LENGTH,
   queryBoolean,
@@ -31,7 +32,7 @@ import {
 
 const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
 const MAX_MONITOR_QUERY_ID_LENGTH = 256;
-const MAX_FILTER_ITEM_LENGTH = 512;
+const MAX_FILTER_ITEM_LENGTH = MAX_ROUTE_STRING_LENGTH;
 const MAX_FILTER_ARRAY_SIZE = 1000;
 const MAX_SEARCH_AFTER_SIZE = 50;
 
@@ -81,10 +82,10 @@ export const QuerySchema = z.object({
   perPage: queryNumber.optional(),
   sortField: MonitorSortFieldSchema,
   sortOrder: z.enum(['desc', 'asc']).optional(),
-  searchAfter: z
-    .array(z.string().max(MAX_FILTER_ITEM_LENGTH))
-    .max(MAX_SEARCH_AFTER_SIZE)
-    .optional(),
+  searchAfter: jsonArrayFromString(
+    z.string().max(MAX_FILTER_ITEM_LENGTH),
+    MAX_SEARCH_AFTER_SIZE
+  ).optional(),
   internal: queryBoolean.optional().default(false),
 });
 

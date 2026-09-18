@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { queryBoolean } from '../zod_query';
+import { MAX_DATE_RANGE_LENGTH, MAX_ROUTE_STRING_LENGTH, queryBoolean } from '../zod_query';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
@@ -35,9 +35,9 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
   path: SYNTHETICS_API_URLS.CERTS_FACETS,
   validate: {
     query: z.object({
-      from: z.string().max(256).optional(),
-      to: z.string().max(256).optional(),
-      remoteNames: z.string().max(1024).optional(),
+      from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+      to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+      remoteNames: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
       showFromAllSpaces: queryBoolean.optional(),
     }),
   },

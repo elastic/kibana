@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { queryNumber, routeId, MAX_DATE_RANGE_LENGTH } from '../zod_query';
+import { queryNumber, routeId, MAX_DATE_RANGE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../zod_query';
 import type { MonitorStatusHeatmapBucket } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { queryMonitorHeatmap } from '../../common/pings/monitor_status_heatmap';
@@ -22,7 +22,7 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
       to: z.union([z.string().max(MAX_DATE_RANGE_LENGTH), queryNumber]).optional(),
       interval: queryNumber,
       monitorId: routeId,
-      location: z.string().max(1024),
+      location: z.string().max(MAX_ROUTE_ID_LENGTH),
       remoteName: z.string().max(256).optional(),
     }),
   },

@@ -53,7 +53,6 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: z.object({
-        // `max` matches the 500-per-page decrypt in `findDecryptedMonitors`;
         updates: z
           .array(
             z.object({

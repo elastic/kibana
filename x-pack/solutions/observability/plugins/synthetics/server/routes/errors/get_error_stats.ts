@@ -17,7 +17,6 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.ERROR_STATS,
   validate: {
     query: z.object({
-      // Datemath / ISO timestamps; same 256 cap as QuerySchema dateRangeStart.
       from: z.string().max(MAX_DATE_RANGE_LENGTH),
       to: z.string().max(MAX_DATE_RANGE_LENGTH),
       monitorTypes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),

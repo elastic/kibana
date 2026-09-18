@@ -15,7 +15,7 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 const MAX_SELECTED_REMOTE_CLUSTERS = 100;
 const MAX_SHARED_SPACES = 1_000;
 
-export const SyntheticsMultiSpaceSettingsSchema = z.object({
+export const SyntheticsMultiSpaceSettingsSchema = z.strictObject({
   useAllRemoteClusters: z.boolean().optional(),
   selectedRemoteClusters: z.array(z.string().max(256)).max(MAX_SELECTED_REMOTE_CLUSTERS).optional(),
   // Optional list of spaces the settings should be shared with. Accepts `*` for "all spaces".

@@ -8,7 +8,7 @@ import { z } from '@kbn/zod';
 import {
   asRouteSchema,
   maxArraySizeMessage,
-  MAX_MONITOR_BULK_SIZE,
+  MAX_MONITOR_BATCH_SIZE,
   routeId,
 } from '../../zod_query';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
@@ -28,7 +28,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       z.object({
         monitors: z
           .array(routeId)
-          .max(MAX_MONITOR_BULK_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BULK_SIZE) }),
+          .max(MAX_MONITOR_BATCH_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BATCH_SIZE) }),
       })
     ),
     params: z.object({
@@ -52,7 +52,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const { saved_objects: monitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: MAX_MONITOR_BULK_SIZE,
+        perPage: MAX_MONITOR_BATCH_SIZE,
         filter: deleteFilter,
         fields: [],
       });
