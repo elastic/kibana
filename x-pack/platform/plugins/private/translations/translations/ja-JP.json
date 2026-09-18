@@ -50509,7 +50509,6 @@
     "xpack.serverlessVectordb.nav.dataManagement": "データ管理",
     "xpack.serverlessVectordb.nav.developerTools": "開発者ツール",
     "xpack.serverlessVectordb.nav.ingest.indices.title": "インデックスとデータストリーム",
-    "xpack.serverlessVectordb.nav.ingest.pipelines.title": "取り込み",
     "xpack.serverlessVectordb.nav.mngt.access": "アクセス",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "アラートとインサイト",
     "xpack.serverlessVectordb.nav.mngt.content": "コンテンツ",

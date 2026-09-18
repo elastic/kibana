@@ -50343,7 +50343,6 @@
     "xpack.serverlessVectordb.nav.dataManagement": "Datenverwaltung",
     "xpack.serverlessVectordb.nav.developerTools": "Entwickler-Tools",
     "xpack.serverlessVectordb.nav.ingest.indices.title": "Indizes und Datenströme",
-    "xpack.serverlessVectordb.nav.ingest.pipelines.title": "Ingest",
     "xpack.serverlessVectordb.nav.mngt.access": "Zugriff",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "Alerts und Einblicke",
     "xpack.serverlessVectordb.nav.mngt.content": "Inhalt",
