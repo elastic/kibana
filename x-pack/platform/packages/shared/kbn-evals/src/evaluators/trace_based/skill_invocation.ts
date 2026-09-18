@@ -16,11 +16,14 @@ const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
  * Tool call arguments are recorded as compact JSON of the tool's parameters — e.g.
  * `{"skill":"detection-rule-edit"}` for `load_skill` (its only parameter is `skill`) or
  * `{"path":"/skills/security/threat-hunting/SKILL.md"}` for `filestore.read`/`read_file`.
- * The `load_skill` branch therefore anchors the *value* of `skill` (`\"skill\":\"<name>\"`)
- * instead of matching the name as a bare substring, which also matched a different skill whose
- * name merely contains it (`detection-rule-edit-v2`), scoring a successful invocation for a
- * skill that was never loaded. The path form stays anchored on `<name>/SKILL.md` for both
- * tools, since `load_skill` accepts a folder path or a SKILL.md path as well as the name.
+ * The `load_skill` branch therefore anchors the *value* of `skill` (the delimited JSON value
+ * `"skill":"<name>"`) instead of matching the name as a bare substring, which also matched a
+ * different skill whose name merely contains it (`detection-rule-edit-v2`), scoring a
+ * successful invocation for a skill that was never loaded. The value forms `load_skill`
+ * documents — the bare name, the skill's folder path, or the SKILL.md path — are matched on
+ * their own delimiters (the delimited name value, a value ending in `/<name>`, or a path
+ * ending in `/<name>/SKILL.md`), so a neighbouring folder such as `detection-rule-edit-v2`
+ * matches none of them.
  * The file-read branch covers `read_file` (current id) as well as `filestore.read` (legacy id):
  * a SKILL.md read through either id is the same load, and the eval suite's trajectory filter
  * treats both as one.
@@ -62,6 +65,7 @@ export function createSkillInvocationEvaluator({
         attributes.gen_ai.tool.name == "load_skill"
           AND (
             attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\":\\"${skillName}\\"*"
+            OR attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\":\\"*/${skillName}\\"*"
             OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
           )
       )

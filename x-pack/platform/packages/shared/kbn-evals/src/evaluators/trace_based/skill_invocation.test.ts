@@ -65,6 +65,9 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
+    // `load_skill` also accepts the skill's folder path, which ends at the folder name rather
+    // than at SKILL.md — a valid load that would otherwise score 0.
+    expect(calledQuery).toContain('*\\"skill\\":\\"*/data-exploration\\"*');
     // A SKILL.md read through the current `read_file` id is the same load as the legacy
     // `filestore.read` id, and the suite's trajectory filter treats both as one.
     expect(calledQuery.replace(/\s+/g, ' ')).toContain(

@@ -133,6 +133,12 @@ describe('SecurityRuleGenerationClient', () => {
             tool_id: 'load_skill',
             params: { skill: '/skills/detection-rule-edit/SKILL.md' },
           },
+          // The folder path is a supported `load_skill` form too.
+          {
+            type: 'tool_call',
+            tool_id: 'load_skill',
+            params: { skill: '/skills/detection-rule-edit' },
+          },
           {
             type: 'tool_call',
             tool_id: 'read_file',
@@ -159,6 +165,13 @@ describe('SecurityRuleGenerationClient', () => {
           // A substring match on the serialized arguments would drop this, while the evaluator's
           // span query requires the delimited `"skill":"detection-rule-edit"` value.
           { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'detection-rule-edit-v2' } },
+          // A neighbouring *folder* — the checks are anchored at the value's end, so this stays
+          // visible as well.
+          {
+            type: 'tool_call',
+            tool_id: 'load_skill',
+            params: { skill: '/skills/detection-rule-edit-v2' },
+          },
           { type: 'tool_call', tool_id: 'read_file', params: { path: '/etc/passwd' } },
           // Same path shape as an expected SKILL.md load, different skill.
           {
@@ -176,6 +189,7 @@ describe('SecurityRuleGenerationClient', () => {
       // look like an empty (perfect) trajectory, and a positive case could never report
       // them as extra tools.
       expect(result.toolCalls).toEqual([
+        'load_skill',
         'load_skill',
         'load_skill',
         'read_file',
