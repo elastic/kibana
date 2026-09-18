@@ -937,6 +937,30 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
     });
 
+    it('requests recreate when deleting extras restores an exhausted budget', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
+        (async function* () {
+          yield ['unexpected-policy'];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['unexpected-policy'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(state.maxCleanUpRetries).toBe(DEFAULT_MAX_CLEANUP_RETRIES);
+      expect(result.performCleanupSync).toBe(true);
+    });
+
     it('does not request recreate when the budget is exhausted and policies are missing', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {

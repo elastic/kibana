@@ -63,8 +63,9 @@ export async function cleanUpDuplicatedPackagePolicies(
 
   // The budget bounds recreate attempts only. Letting it stop the scan too would
   // hide leftovers behind a recreate that can never succeed — the 9.5.3 failure.
-  const canRecreate = (taskState.maxCleanUpRetries ?? DEFAULT_MAX_CLEANUP_RETRIES) > 0;
-  if (!canRecreate) {
+  // Read at the point of use: deleting extras below is progress and restores it.
+  const hasRecreateBudget = () => (taskState.maxCleanUpRetries ?? DEFAULT_MAX_CLEANUP_RETRIES) > 0;
+  if (!hasRecreateBudget()) {
     logger.warn(
       `[PrivateLocationCleanUpTask] Not recreating missing package policies as max retries have been reached. ` +
         `Leftover policies are still deleted. Request cleanup again to retry.`
@@ -170,7 +171,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       }
       // Deleted extras need no recreate of their own: a monitor left without its
       // expected policy shows up here as missing.
-      if (canRecreate) {
+      if (hasRecreateBudget()) {
         performCleanupSync = true;
         if (!hasExtras) {
           taskState.maxCleanUpRetries -= 1;
