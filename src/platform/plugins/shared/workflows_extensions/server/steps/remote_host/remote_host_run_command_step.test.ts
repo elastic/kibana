@@ -75,6 +75,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'run-command',
       stepType: 'ssh.run',
+      maxStepSizeBytes: 10 * 1024 * 1024,
     };
 
     return {
@@ -123,6 +124,10 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       });
       expect(mockedUploadFile).toHaveBeenCalledTimes(1);
       expect(mockedExecScript).toHaveBeenCalledTimes(1);
+      expect(mockedExecScript).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.stringContaining('-gt 10485760')
+      );
     });
 
     it('returns parsed STEP_OUTPUT when the command finishes within 2s', async () => {

@@ -86,11 +86,13 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         return { error: new Error('Command is required') };
       }
 
+      const maxBytes = context.maxStepSizeBytes ?? 0;
       const result = await startJob(
         toConnectorContext(connectorId, context, getActionsStart),
         command,
         context.input.env,
-        context.input.cwd
+        context.input.cwd,
+        maxBytes
       );
 
       if (result.status === 'running') {
@@ -118,7 +120,8 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
           jobId: state.jobId,
           stdoutOffset: state.stdoutOffset,
           stderrOffset: state.stderrOffset,
-        }
+        },
+        context.maxStepSizeBytes ?? 0
       );
 
       if (result.status === 'running') {
