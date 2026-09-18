@@ -1033,6 +1033,29 @@ describe('severity round-trip', () => {
     expect(parsed!.evaluations[0].label).toBe('severity');
     expect(parsed!.severity).toBeUndefined();
   });
+
+  it('rejects a multi-severity CASE whose branches test a different metric', () => {
+    // The condition is on `cpu_avg` but the CASE tests `mem_avg`; keeping it would silently
+    // rewrite the branches against `cpu_avg` on save, so the parse must bail to ES|QL mode.
+    const query =
+      'FROM logs-* | STATS cpu_avg = AVG(system.cpu), mem_avg = AVG(system.mem) ' +
+      '| WHERE cpu_avg > 0.8 | EVAL severity = CASE(mem_avg > 0.95, "high", mem_avg > 0.9, "medium")';
+    expect(parseThresholdEsql(query)).toBeNull();
+  });
+
+  it('rejects a multi-severity CASE whose branches use a different comparator', () => {
+    const query =
+      'FROM logs-* | STATS cpu_avg = AVG(system.cpu) ' +
+      '| WHERE cpu_avg > 0.8 | EVAL severity = CASE(cpu_avg >= 0.95, "high", cpu_avg >= 0.9, "medium")';
+    expect(parseThresholdEsql(query)).toBeNull();
+  });
+
+  it('rejects severity when there is more than one alert condition', () => {
+    const query =
+      'FROM logs-* | STATS cpu_avg = AVG(system.cpu), mem_avg = AVG(system.mem) ' +
+      '| WHERE cpu_avg > 0.8 AND mem_avg > 0.5 | EVAL severity = "high"';
+    expect(parseThresholdEsql(query)).toBeNull();
+  });
 });
 
 describe('parseDiscoverQueryForBuilder', () => {

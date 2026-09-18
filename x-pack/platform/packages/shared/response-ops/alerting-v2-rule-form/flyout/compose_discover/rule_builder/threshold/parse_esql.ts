@@ -26,6 +26,7 @@ import {
   Aggregation,
   Comparator,
   generateId,
+  isSeveritySupported,
   reconcileAlertConditionMetrics,
   DEFAULT_SINGLE_SEVERITY_LEVEL,
   DEFAULT_THRESHOLD_FORM_VALUES,
@@ -328,11 +329,20 @@ const isSeverityEval = (cmd: ESQLCommand): boolean => {
 };
 
 /**
- * Reconstruct the severity config from an `EVAL severity = ...` command. A bare
- * string literal maps to single mode; a `CASE(...)` maps to multi mode. Every CASE
- * branch is a band carrying its own threshold; there is no default branch.
+ * Reconstruct the severity config from an `EVAL severity = ...` command. A bare string literal
+ * maps to single mode; a `CASE(...)` maps to multi mode. Severity is only representable for a
+ * single alert condition, and every multi-mode CASE branch must test that condition's exact
+ * metric and comparator (only the threshold varies per band) — otherwise the ES|QL is not
+ * builder-representable and this returns `null` so the query stays in ES|QL mode.
  */
-const parseSeverityEval = (cmd: ESQLCommand): SeverityConfig | null => {
+const parseSeverityEval = (
+  cmd: ESQLCommand,
+  alertConditions: AlertCondition[]
+): SeverityConfig | null => {
+  // ES|QL generation only emits severity for a single condition.
+  if (!isSeveritySupported(alertConditions)) return null;
+  const [condition] = alertConditions;
+
   const fn = cmd.args[0] as ESQLFunction;
   const rhs = unwrapSingleItem(fn.args[1]);
 
@@ -357,6 +367,9 @@ const parseSeverityEval = (cmd: ESQLCommand): SeverityConfig | null => {
     const leaf = parseConditionNode(unwrapSingleItem(caseArgs[i]));
     const level = extractStringLiteral(caseArgs[i + 1]);
     if (!leaf || !level || !isSeverityValue(level)) return null;
+    // Each band must test the same metric and comparator as the alert condition; otherwise
+    // generation would silently rewrite the branch against the condition's metric/comparator.
+    if (leaf.metric !== condition.metric || leaf.comparator !== condition.comparator) return null;
     bands.push({ id: generateId(), severity: level, threshold: leaf.threshold[0] });
   }
 
@@ -471,7 +484,7 @@ export const parseThresholdEsql = (
   // Optional trailing EVAL severity = ... (emitted after the breach WHERE)
   let severity: SeverityConfig | undefined;
   if (idx < commands.length && isSeverityEval(commands[idx])) {
-    const parsedSeverity = parseSeverityEval(commands[idx]);
+    const parsedSeverity = parseSeverityEval(commands[idx], alertConditions);
     if (!parsedSeverity) return null;
     severity = parsedSeverity;
     idx++;
