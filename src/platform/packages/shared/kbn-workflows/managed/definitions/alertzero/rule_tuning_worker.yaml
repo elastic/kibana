@@ -58,13 +58,6 @@ triggers:
           # the default so disabled candidates can be backfilled.
           maximum: 10
           description: Overrides how many tuning reviews one sweep may launch, up to the default of 10.
-        max_open_reviews:
-          type: integer
-          minimum: 1
-          # The active-review lookup is capped at 100 by the executions API, so a
-          # ceiling above that could not be enforced.
-          maximum: 100
-          description: Overrides the maximum number of active tuning reviews in this space, up to 100.
       additionalProperties: false
 outputs:
   - name: reviews_requested
@@ -141,7 +134,7 @@ steps:
   - name: resolve_free_slots
     type: data.set
     with:
-      free: "${{ inputs.max_open_reviews | default: consts.max_open_reviews | minus: steps.collect_active_rules.output.expected | at_least: 0 }}"
+      free: "${{ consts.max_open_reviews | minus: steps.collect_active_rules.output.expected | at_least: 0 }}"
 
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.

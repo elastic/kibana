@@ -893,21 +893,12 @@ describe('detection rule workflows', () => {
         const consts = (tuning as unknown as { consts: Record<string, number> }).consts;
         const free = tuningSteps.find(({ name }) => name === 'resolve_free_slots')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
-        const trigger = (
-          tuning.triggers as unknown as Array<{
-            type: string;
-            inputs: { properties: Record<string, Record<string, unknown>> };
-          }>
-        ).find(({ type }) => type === 'manual')!;
 
         // The active-review lookup returns at most 100, so a higher ceiling could
         // not be enforced.
         expect(consts.max_open_reviews).toBeLessThanOrEqual(100);
-        expect(trigger.inputs.properties.max_open_reviews).toEqual(
-          expect.objectContaining({ minimum: 1, maximum: 100 })
-        );
         expect(String(free.with?.free)).toContain(
-          'inputs.max_open_reviews | default: consts.max_open_reviews | minus: steps.collect_active_rules.output.expected | at_least: 0'
+          'consts.max_open_reviews | minus: steps.collect_active_rules.output.expected | at_least: 0'
         );
         expect(String(rows.with?.rows)).toContain(
           '| slice: 0, steps.resolve_free_slots.output.free'
