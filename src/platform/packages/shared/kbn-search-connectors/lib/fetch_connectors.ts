@@ -49,10 +49,9 @@ export const fetchConnectorByIndexName = async (
         index_name: indexName,
       },
     });
-    const result = connectorListResult.count > 0 ? connectorListResult.results[0] : undefined;
-    if (!result?.id || result.deleted) {
-      return undefined;
-    }
+    const result = connectorListResult.results.find(
+      (connector) => connector.id && !connector.deleted
+    );
     return result;
   } catch (error) {
     throw error;

@@ -144,6 +144,17 @@ describe('fetchConnectors lib', () => {
         fetchConnectorByIndexName(mockClient as unknown as ElasticsearchClient, 'indexName')
       ).resolves.toBeUndefined();
     });
+    it('should return live connector when a soft-deleted result is listed first', async () => {
+      const liveConnector = { id: 'connector2', service_type: 'type2' };
+      mockClient.transport.request.mockResolvedValue({
+        count: 2,
+        results: [{ id: 'connector1', service_type: 'type1', deleted: true }, liveConnector],
+      });
+
+      await expect(
+        fetchConnectorByIndexName(mockClient as unknown as ElasticsearchClient, 'indexName')
+      ).resolves.toEqual(liveConnector);
+    });
     it('should return undefined on connector not found case', async () => {
       mockClient.transport.request.mockImplementationOnce(() =>
         Promise.resolve({ count: 0, results: [] })
