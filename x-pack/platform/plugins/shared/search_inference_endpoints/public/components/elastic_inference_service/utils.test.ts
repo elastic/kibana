@@ -428,5 +428,98 @@ describe('utils', () => {
         'rerank-v1',
       ]);
     });
+
+    describe('display options', () => {
+      const ga = makeGroupedModel({ modelName: 'ga-model', modelStatus: EisModelStatus.GA });
+      const preview = makeGroupedModel({
+        modelName: 'preview-model',
+        modelStatus: EisModelStatus.Preview,
+      });
+      const deprecated = makeGroupedModel({
+        modelName: 'deprecated-model',
+        modelStatus: EisModelStatus.Deprecated,
+      });
+      const eol = makeGroupedModel({
+        modelName: 'eol-model',
+        modelStatus: EisModelStatus.DeprecatedEOL,
+      });
+      const blocked = makeGroupedModel({
+        modelName: 'blocked-model',
+        endpoints: [
+          {
+            inference_id: 'blocked',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'blocked' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      });
+      const displayModels = [ga, preview, deprecated, eol, blocked];
+
+      it('hides preview, end-of-life, and region-blocked models by default', () => {
+        const result = filterGroupedModels(displayModels, noFilters);
+        expect(result.map((m) => m.modelName)).toEqual(['deprecated-model', 'ga-model']);
+      });
+
+      it('keeps deprecated models that have not reached end of life visible', () => {
+        const result = filterGroupedModels([deprecated], {
+          ...noFilters,
+          showEndOfLifeModels: false,
+        });
+        expect(result.map((m) => m.modelName)).toEqual(['deprecated-model']);
+      });
+
+      it('shows preview models when showPreviewModels is true', () => {
+        const result = filterGroupedModels(displayModels, {
+          ...noFilters,
+          showPreviewModels: true,
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'deprecated-model',
+          'ga-model',
+          'preview-model',
+        ]);
+      });
+
+      it('shows end-of-life models when showEndOfLifeModels is true', () => {
+        const result = filterGroupedModels(displayModels, {
+          ...noFilters,
+          showEndOfLifeModels: true,
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'deprecated-model',
+          'eol-model',
+          'ga-model',
+        ]);
+      });
+
+      it('shows region-blocked models when showOutsideRegionPreferences is true', () => {
+        const result = filterGroupedModels(displayModels, {
+          ...noFilters,
+          showOutsideRegionPreferences: true,
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'blocked-model',
+          'deprecated-model',
+          'ga-model',
+        ]);
+      });
+
+      it('applies search together with hidden preview models', () => {
+        const hidden = filterGroupedModels(displayModels, {
+          ...noFilters,
+          searchQuery: 'preview',
+        });
+        expect(hidden.map((m) => m.modelName)).toEqual([]);
+
+        const shown = filterGroupedModels(displayModels, {
+          ...noFilters,
+          searchQuery: 'preview',
+          showPreviewModels: true,
+        });
+        expect(shown.map((m) => m.modelName)).toEqual(['preview-model']);
+      });
+    });
   });
 });
