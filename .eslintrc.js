@@ -2806,6 +2806,15 @@ module.exports = {
       files: [
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'scripts/capture_sigevents_env_snapshot.js',
+        'scripts/capture_sigevents_otel_demo_snapshots.js',
+        'scripts/probe_sigevents_eval_snapshot.js',
+        'scripts/replay_sigevents_eval_snapshot.js',
+        'scripts/restore_sigevents_env_snapshot.js',
+        'scripts/seed_sigevents_env.js',
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/**',
+        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/oblt.significant_events.feature_flag.*',
+        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/platform.significant_events.feature_flag.*',
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
