@@ -21,7 +21,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
     body: schema.any(),
-    params: z.object({
+    params: z.strictObject({
       monitorId: routeId,
     }),
   },

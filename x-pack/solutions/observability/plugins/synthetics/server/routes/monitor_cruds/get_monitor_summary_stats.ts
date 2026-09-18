@@ -30,7 +30,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: false,
   path: SYNTHETICS_API_URLS.MONITOR_SUMMARY_STATS,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       monitorId: routeId,
       locationLabel: z.string().max(MAX_ROUTE_ID_LENGTH),
       from: z.string().max(MAX_DATE_RANGE_LENGTH).default('now-30d'),

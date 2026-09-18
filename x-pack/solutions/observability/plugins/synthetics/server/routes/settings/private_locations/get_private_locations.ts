@@ -26,7 +26,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      params: z.object({
+      params: z.strictObject({
         id: optionalRouteId,
       }),
     },

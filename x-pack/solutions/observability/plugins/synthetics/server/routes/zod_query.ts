@@ -24,7 +24,10 @@ export const MAX_PARAM_BULK_SIZE = 10_000;
 export const MAX_PARAM_VALUE_LENGTH = 1_000_000;
 
 export const queryNumber = z.coerce.number();
-export const queryBoolean = BooleanFromString;
+export const queryBoolean = z.preprocess(
+  (value) => (typeof value === 'string' ? value.toLowerCase() : value),
+  BooleanFromString
+);
 export const routeId = z.string().min(1).max(MAX_ROUTE_ID_LENGTH);
 export const optionalRouteId = z.string().max(MAX_ROUTE_ID_LENGTH).optional();
 export const optionalQueryString = z.string().max(MAX_ROUTE_STRING_LENGTH).optional();
@@ -43,14 +46,23 @@ export const maxArraySizeMessage = (maxSize: number) => (issue: { input?: unknow
 
 /**
  * config-schema `arrayOf` JSON-parses query strings (`spaces=["*"]`). Cap the
- * raw string so a huge payload never reaches `JSON.parse`.
+ * raw string to the largest valid JSON array for `maxSize` items of
+ * `itemMaxLength` (plus quote/comma/whitespace slack) so a huge payload never
+ * reaches `JSON.parse`, without rejecting in-contract lists.
  */
-export const jsonArrayFromString = <T extends z.ZodType>(item: T, maxSize: number) =>
+export const jsonArrayRawMaxLength = (itemMaxLength: number, maxSize: number): number =>
+  maxSize * (itemMaxLength + 4) + 2;
+
+export const jsonArrayFromString = <T extends z.ZodType>(
+  item: T,
+  maxSize: number,
+  itemMaxLength: number = MAX_ROUTE_ID_LENGTH
+) =>
   z.preprocess((value: unknown) => {
     if (typeof value !== 'string') {
       return value;
     }
-    if (value.length > MAX_ROUTE_STRING_LENGTH) {
+    if (value.length > jsonArrayRawMaxLength(itemMaxLength, maxSize)) {
       return value;
     }
     try {

@@ -69,6 +69,15 @@ describe('QuerySchema', () => {
   it('rejects a non-JSON searchAfter string', () => {
     expect(QuerySchema.safeParse({ searchAfter: 'monitor-1' }).success).toBe(false);
   });
+
+  it('rejects unknown query keys the way schema.object did', () => {
+    expect(QuerySchema.safeParse({ filterr: 'prod' }).success).toBe(false);
+  });
+
+  it('accepts case-insensitive boolean query strings', () => {
+    expect(QuerySchema.parse({ internal: 'TRUE' }).internal).toBe(true);
+    expect(QuerySchema.parse({ showFromAllSpaces: 'False' }).showFromAllSpaces).toBe(false);
+  });
 });
 
 describe('getSavedObjectKqlFilter', () => {

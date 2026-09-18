@@ -12,7 +12,7 @@ import { getLatestTestRun } from '../../queries/get_latest_test_run';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getLatestTestRunRouteQuerySchema = z.object({
+export const getLatestTestRunRouteQuerySchema = z.strictObject({
   from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
   to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
   locationLabel: optionalQueryString,

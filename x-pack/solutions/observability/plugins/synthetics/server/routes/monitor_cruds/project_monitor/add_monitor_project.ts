@@ -31,14 +31,14 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       // primarily used for testing purposes, to specify the type of saved object
       savedObjectType: z
         .enum([syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle])
         .optional()
         .default(syntheticsMonitorSavedObjectType),
     }),
-    params: z.object({
+    params: z.strictObject({
       projectName: routeId,
     }),
     // Monitor field codecs stay in the project formatter (Phase 4b).

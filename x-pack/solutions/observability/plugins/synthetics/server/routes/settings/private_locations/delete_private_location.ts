@@ -22,7 +22,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
   validate: {},
   validation: {
     request: {
-      params: z.object({
+      params: z.strictObject({
         locationId: routeId,
       }),
     },

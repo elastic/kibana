@@ -50,7 +50,7 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
   method: 'GET',
   path: SYNTHETICS_API_URLS.FILTERS,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       showFromAllSpaces: queryBoolean.optional(),
     }),
   },

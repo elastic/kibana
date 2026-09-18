@@ -16,7 +16,7 @@ export const getErrorGroupsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.ERROR_GROUPS,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       from: z.string().max(MAX_DATE_RANGE_LENGTH),
       to: z.string().max(MAX_DATE_RANGE_LENGTH),
       monitorTypes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),

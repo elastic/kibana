@@ -11,7 +11,7 @@ import { queryPings } from '../../queries/query_pings';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getPingsRouteQuerySchema = z.object({
+export const getPingsRouteQuerySchema = z.strictObject({
   from: z.string().max(MAX_DATE_RANGE_LENGTH),
   to: z.string().max(MAX_DATE_RANGE_LENGTH),
   locations: optionalQueryString,

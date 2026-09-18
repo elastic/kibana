@@ -31,6 +31,13 @@ describe('jsonArrayFromString', () => {
     expect(schema.parse('["default","other"]')).toEqual(['default', 'other']);
   });
 
+  it('parses 100 typical space ids whose JSON exceeds 4096 characters', () => {
+    const spaces = Array.from({ length: 100 }, (_, i) => `space-${String(i).padStart(38, '0')}`);
+    const encoded = JSON.stringify(spaces);
+    expect(encoded.length).toBeGreaterThan(4096);
+    expect(schema.parse(encoded)).toEqual(spaces);
+  });
+
   it('accepts a real array', () => {
     expect(schema.parse(['default'])).toEqual(['default']);
   });

@@ -54,10 +54,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
   validate: {},
   validation: {
     request: {
-      params: z.object({
+      params: z.strictObject({
         monitorId: routeId,
       }),
-      query: z.object({
+      query: z.strictObject({
         internal: queryBoolean.optional().default(false),
       }),
       body: schema.any(),

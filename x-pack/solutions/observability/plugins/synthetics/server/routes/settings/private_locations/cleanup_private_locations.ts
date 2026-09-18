@@ -16,7 +16,7 @@ export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => 
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       hasAlreadyDoneCleanup: queryBoolean.optional(),
     }),
   },

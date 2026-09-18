@@ -15,11 +15,11 @@ export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () =>
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       checkGroup: routeId,
       stepIndex: queryNumber,
     }),
-    query: z.object({
+    query: z.strictObject({
       remoteName: z.string().max(256).optional(),
       timestamp: z.string().max(30).optional(),
     }),

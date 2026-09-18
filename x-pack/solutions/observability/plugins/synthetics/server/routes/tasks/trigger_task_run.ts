@@ -14,7 +14,7 @@ export const getSyntheticsTriggerTaskRun: SyntheticsRestApiRouteFactory = () => 
   method: 'POST',
   path: SYNTHETICS_API_URLS.TRIGGER_TASK_RUN,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       taskType: z.enum(['syncPrivateLocationMonitors', 'cleanUpPackagePolicyTask']),
     }),
   },

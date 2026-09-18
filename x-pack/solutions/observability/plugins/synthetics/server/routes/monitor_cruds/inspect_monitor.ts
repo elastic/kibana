@@ -26,7 +26,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT,
   validate: {
     body: schema.any(),
-    query: z.object({
+    query: z.strictObject({
       id: optionalRouteId,
       hideParams: queryBoolean.optional(),
     }),

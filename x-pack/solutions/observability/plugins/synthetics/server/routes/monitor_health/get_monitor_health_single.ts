@@ -15,7 +15,7 @@ export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_HEALTH,
   writeAccess: false,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       monitorId: routeId,
     }),
   },

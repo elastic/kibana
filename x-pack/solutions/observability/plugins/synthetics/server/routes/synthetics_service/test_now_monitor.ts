@@ -24,7 +24,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
   validate: {},
   validation: {
     request: {
-      params: z.object({
+      params: z.strictObject({
         monitorId: routeId,
       }),
     },

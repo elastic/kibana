@@ -29,7 +29,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.CERTS,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       pageIndex: queryNumber.optional(),
       size: queryNumber.optional(),
       sortBy: z.string().max(256).optional(),

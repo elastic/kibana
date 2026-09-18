@@ -40,7 +40,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validation: {
     request: {
       body: schema.any(),
-      query: z.object({
+      query: z.strictObject({
         id: optionalRouteId,
         preserve_namespace: queryBoolean.optional(),
         gettingStarted: queryBoolean.optional(),

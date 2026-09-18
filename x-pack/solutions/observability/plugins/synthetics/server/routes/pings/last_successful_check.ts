@@ -18,7 +18,7 @@ export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () 
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       monitorId: routeId,
       stepIndex: queryNumber,
       timestamp: z.string().max(64),

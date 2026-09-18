@@ -13,7 +13,7 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { MONITOR_SEARCH_FIELDS } from '../../common';
 
-const querySchema = z.object({
+const querySchema = z.strictObject({
   search_after: z.string().max(4096).optional(),
   per_page: queryNumber.optional(),
 });
@@ -22,7 +22,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       projectName: routeId,
     }),
     query: querySchema,

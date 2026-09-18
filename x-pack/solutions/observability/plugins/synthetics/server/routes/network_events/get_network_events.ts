@@ -15,7 +15,7 @@ export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.NETWORK_EVENTS,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       checkGroup: routeId,
       stepIndex: queryNumber,
       remoteName: z.string().max(256).optional(),

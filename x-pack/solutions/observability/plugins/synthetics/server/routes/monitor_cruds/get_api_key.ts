@@ -21,7 +21,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       spaces: jsonArrayFromString(routeId, 100).optional(),
       accessToElasticManagedLocations: queryBoolean.optional(),
     }),

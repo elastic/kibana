@@ -13,7 +13,7 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       packagePolicyId: routeId,
     }),
   },

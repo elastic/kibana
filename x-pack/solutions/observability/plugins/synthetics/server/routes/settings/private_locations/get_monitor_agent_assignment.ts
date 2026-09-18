@@ -49,7 +49,7 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_AGENT_ASSIGNMENT,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       monitorId: routeId,
     }),
   },

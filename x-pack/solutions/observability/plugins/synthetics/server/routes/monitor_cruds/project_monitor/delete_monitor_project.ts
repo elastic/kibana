@@ -31,7 +31,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
           .max(MAX_MONITOR_BATCH_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BATCH_SIZE) }),
       })
     ),
-    params: z.object({
+    params: z.strictObject({
       projectName: routeId,
     }),
   },

@@ -76,7 +76,7 @@ const CommonQuerySchema = {
   dateRangeEnd: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
 };
 
-export const QuerySchema = z.object({
+export const QuerySchema = z.strictObject({
   ...CommonQuerySchema,
   page: queryNumber.optional(),
   perPage: queryNumber.optional(),
@@ -84,14 +84,15 @@ export const QuerySchema = z.object({
   sortOrder: z.enum(['desc', 'asc']).optional(),
   searchAfter: jsonArrayFromString(
     z.string().max(MAX_FILTER_ITEM_LENGTH),
-    MAX_SEARCH_AFTER_SIZE
+    MAX_SEARCH_AFTER_SIZE,
+    MAX_FILTER_ITEM_LENGTH
   ).optional(),
   internal: queryBoolean.optional().default(false),
 });
 
 export type MonitorsQuery = z.infer<typeof QuerySchema>;
 
-export const OverviewStatusSchema = z.object({
+export const OverviewStatusSchema = z.strictObject({
   ...CommonQuerySchema,
   scopeStatusByLocation: queryBoolean.optional(),
   groupByMonitor: queryBoolean.optional(),

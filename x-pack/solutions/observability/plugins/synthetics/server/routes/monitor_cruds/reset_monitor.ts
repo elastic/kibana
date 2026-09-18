@@ -16,10 +16,10 @@ export const resetSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => 
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_RESET,
   validate: {
-    params: z.object({
+    params: z.strictObject({
       monitorId: routeId,
     }),
-    query: z.object({
+    query: z.strictObject({
       force: queryBoolean.default(false),
     }),
   },

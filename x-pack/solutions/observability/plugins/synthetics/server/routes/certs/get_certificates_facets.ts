@@ -34,7 +34,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
   method: 'GET',
   path: SYNTHETICS_API_URLS.CERTS_FACETS,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
       to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
       remoteNames: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),

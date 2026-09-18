@@ -28,7 +28,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
           ids: z.array(routeId).min(1).max(MAX_MONITOR_BULK_SIZE),
         })
         .nullable(),
-      params: z.object({
+      params: z.strictObject({
         id: optionalRouteId,
       }),
     },

@@ -16,7 +16,7 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_STATUS_HEATMAP,
   validate: {
-    query: z.object({
+    query: z.strictObject({
       // Query values are strings; keep datemath (`now-1h`) rather than coercing to NaN.
       from: z.union([z.string().max(MAX_DATE_RANGE_LENGTH), queryNumber]).optional(),
       to: z.union([z.string().max(MAX_DATE_RANGE_LENGTH), queryNumber]).optional(),

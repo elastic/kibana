@@ -17,7 +17,7 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-const RequestParamsSchema = z.object({
+const RequestParamsSchema = z.strictObject({
   id: routeId,
 });
 

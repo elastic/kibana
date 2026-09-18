@@ -13,7 +13,7 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
-const RequestParamsSchema = z.object({
+const RequestParamsSchema = z.strictObject({
   id: optionalRouteId,
 });
 

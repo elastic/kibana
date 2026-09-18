@@ -32,7 +32,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           ids: z.array(routeId).min(1).max(MAX_PARAM_BULK_SIZE),
         })
         .nullable(),
-      params: z.object({
+      params: z.strictObject({
         id: optionalRouteId,
       }),
     },
