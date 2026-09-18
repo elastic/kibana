@@ -113029,7 +113029,7 @@ components:
         job_ids:
           description: Anomaly detection job or group IDs whose results are shown in the charts.
           items:
-            maxLength: 1000
+            maxLength: 2048
             minLength: 1
             type: string
           maxItems: 10000
@@ -113104,8 +113104,8 @@ components:
                 type: object
                 properties:
                   min:
-                    enum:
-                      - 75
+                    maximum: 100
+                    minimum: 0
                     type: number
                 required:
                   - min
@@ -113135,7 +113135,7 @@ components:
             job_ids:
               description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
               items:
-                maxLength: 1000
+                maxLength: 2048
                 minLength: 1
                 type: string
               maxItems: 10000
@@ -113144,6 +113144,11 @@ components:
             per_page:
               description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
               minimum: 1
+              type: number
+            severity_threshold:
+              description: Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.
+              maximum: 100
+              minimum: 0
               type: number
             swimlane_type:
               enum:
@@ -113172,7 +113177,7 @@ components:
             job_ids:
               description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
               items:
-                maxLength: 1000
+                maxLength: 2048
                 minLength: 1
                 type: string
               maxItems: 10000
@@ -113181,6 +113186,11 @@ components:
             per_page:
               description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
               minimum: 1
+              type: number
+            severity_threshold:
+              description: Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.
+              maximum: 100
+              minimum: 0
               type: number
             swimlane_type:
               enum:
@@ -113193,7 +113203,7 @@ components:
               type: string
             view_by:
               description: Field name used to split anomalies into a view-by swim lane.
-              maxLength: 1000
+              maxLength: 2048
               minLength: 1
               type: string
           required:
@@ -113211,11 +113221,11 @@ components:
           type: string
         forecast_id:
           description: Identifier of a forecast to overlay on the chart.
-          maxLength: 1000
+          maxLength: 2048
           type: string
         function_description:
           description: 'For detectors that use the `metric` function, selects which value to plot: `min`, `max`, or `mean`. Ignored for other detector functions. When omitted, the viewer derives a default from the highest-scoring anomaly record.'
-          maxLength: 1000
+          maxLength: 2048
           type: string
         hide_border:
           description: When true, the panel border is hidden. Defaults to false.
@@ -113226,7 +113236,7 @@ components:
         job_ids:
           description: Anomaly detection job ID whose results are shown in the single metric viewer.
           items:
-            maxLength: 1000
+            maxLength: 2048
             minLength: 1
             type: string
           maxItems: 1
@@ -113240,7 +113250,7 @@ components:
         selected_entities:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
+              - maxLength: 2048
                 type: string
               - type: number
           description: Values of the partition, by, or over fields that identify the single time series to display.

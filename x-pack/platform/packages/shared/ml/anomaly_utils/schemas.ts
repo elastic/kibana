@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
+
+const MAX_STRING_LENGTH = 2048;
 
 const mlEntityFieldTypeSchema = z.enum(ML_ENTITY_FIELD_TYPE);
 
@@ -27,7 +29,7 @@ export const criteriaFieldSchema = z
   })
   .strict();
 
-export const mlEntityFieldValueSchema = z.union([z.string().max(10000), z.number()]);
+export const mlEntityFieldValueSchema = z.union([z.string().max(MAX_STRING_LENGTH), z.number()]);
 
 export const mlEntityFieldSchema = z
   .object({
