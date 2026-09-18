@@ -53760,6 +53760,18 @@ paths:
           schema:
             maxLength: 500
             type: string
+        - description: Pending is_default value from the flyout (before save)
+          in: query
+          name: isDefault
+          required: false
+          schema:
+            type: boolean
+        - description: Pending is_default_monitoring value from the flyout (before save)
+          in: query
+          name: isDefaultMonitoring
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
