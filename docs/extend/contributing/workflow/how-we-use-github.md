@@ -169,7 +169,7 @@ it's notable and affects our users) and which section it appears in. For example
 - `release_note:feature`: Specifies a new feature and adds the PR to the  Features section in the release notes. Use the feature label for a brand new capability or major functionality that did not exist before.
 - `release_note:enhancement`: Specifies a feature enhancement and adds the PR to the Enhancements section in the release notes. Use the enhancement label for improvements, optimizations, or extensions to an existing feature.
 - `release_note:fix`: Specifies a bug fix and adds the PR to the Bug fixes section in the release notes.
-- `release_node:plugin_api_changes`: Specifies changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide.
+- `release_note:plugin_api_changes`: Specifies changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide.
 - `release_note:skip`: Omits the PR from release notes.
 
 The following labels are related to backporting PRs:
