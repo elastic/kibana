@@ -30,7 +30,7 @@ overwrites a drifted one.
 
 Wire schemas and types (`NightshiftSource`, `SourceHealth`, request/response shapes) live in
 `@kbn/nightshift-shared` so browser code can import them. A typed repository client is exposed
-on the public start contract as `nightshiftSourcesRepositoryClient`.
+on the public start contract through `getClient()`.
 
 ## Query validation
 
@@ -101,7 +101,10 @@ project type in `config/serverless.yml` and back on for Observability Complete i
 
 ## Known limitations
 
-- `PUT`, `_enable` and `_disable` are last-write-wins; no optimistic concurrency.
+- `PUT`, `_enable` and `_disable` pass the saved-object `version` they just read, so a concurrent
+  write 409s. `DELETE` cannot: Core's `soClient.delete` has no version option. A concurrent `PUT`
+  can recreate the view after `DELETE` has removed it and still delete the catalog row, leaving
+  an orphaned view.
 - Deleting a space removes the saved objects but leaves their views behind. Nothing cleans
   orphaned `$.nightshift.sources.*` views yet. ES|QL views are cluster-global; the Spaces
   boundary is the saved object, not the view name.

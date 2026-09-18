@@ -76,6 +76,19 @@ export const deleteSource = (
 ): Promise<ApiClientResponse> =>
   apiClient.delete(spacePath(`${SOURCES_PATH}/${id}`, spaceId), withHeaders(cookieHeader));
 
+/** 200/404 are gone; anything else is a leak we should fail teardown on. */
+export const deleteSourceChecked = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: CookieHeader,
+  id: string,
+  options: SourceRequestOptions = {}
+): Promise<void> => {
+  const deleted = await deleteSource(apiClient, cookieHeader, id, options);
+  if (deleted.statusCode !== 200 && deleted.statusCode !== 404) {
+    throw new Error(`Failed to delete source ${id}: ${JSON.stringify(deleted.body)}`);
+  }
+};
+
 export const setSourceEnabled = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
@@ -154,9 +167,6 @@ export const cleanupSources = async (
     }
   }
   for (const id of ids) {
-    const deleted = await deleteSource(apiClient, cookieHeader, id, { spaceId });
-    if (deleted.statusCode !== 200 && deleted.statusCode !== 404) {
-      throw new Error(`Failed to delete source ${id}: ${JSON.stringify(deleted.body)}`);
-    }
+    await deleteSourceChecked(apiClient, cookieHeader, id, { spaceId });
   }
 };

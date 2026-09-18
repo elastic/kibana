@@ -45,8 +45,11 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
-      await deleteTestIndex(esClient, index);
+      try {
+        await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
+      } finally {
+        await deleteTestIndex(esClient, index);
+      }
     });
 
     apiTest(
@@ -186,7 +189,21 @@ apiTest.describe(
       expect(listedIds(onlyEnabled.body)).not.toContain(source.id);
 
       const enabled = await setSourceEnabled(apiClient, manager.cookieHeader, source.id, true);
+      expect(enabled).toHaveStatusCode(200);
       expect(enabled.body.source.enabled).toBe(true);
+
+      const enabledAgain = await listSources(
+        apiClient,
+        manager.cookieHeader,
+        `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=true`
+      );
+      expect(listedIds(enabledAgain.body)).toContain(source.id);
+      const disabledGone = await listSources(
+        apiClient,
+        manager.cookieHeader,
+        `search=${encodeURIComponent(`${TITLE_PREFIX}-${suffix}-enabled`)}&enabled=false`
+      );
+      expect(listedIds(disabledGone.body)).not.toContain(source.id);
 
       await deleteSource(apiClient, manager.cookieHeader, source.id);
     });

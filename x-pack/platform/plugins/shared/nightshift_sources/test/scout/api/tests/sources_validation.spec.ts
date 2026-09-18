@@ -37,8 +37,11 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
-      await deleteTestIndex(esClient, index);
+      try {
+        await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
+      } finally {
+        await deleteTestIndex(esClient, index);
+      }
     });
 
     const rejected = [
@@ -96,7 +99,7 @@ apiTest.describe(
     apiTest('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-ts`,
-        esql: `TS metrics-nightshift-none-${suffix}-*`,
+        esql: `TS ${index}-none-*`,
       });
       expect(response).toHaveStatusCode(200);
       await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
@@ -107,7 +110,7 @@ apiTest.describe(
     apiTest('accepts FROM over a pattern with no indices yet', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-none`,
-        esql: `FROM logs-nightshift-none-${suffix}-* | WHERE status >= 500`,
+        esql: `FROM ${index}-none-* | WHERE status >= 500`,
       });
       expect(response).toHaveStatusCode(200);
 

@@ -17,6 +17,7 @@ export {
   createSource,
   createTestIndex,
   deleteSource,
+  deleteSourceChecked,
   deleteTestIndex,
   findListed,
   getSource,

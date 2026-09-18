@@ -18,6 +18,7 @@ import {
   createSource,
   createTestIndex,
   deleteSource,
+  deleteSourceChecked,
   deleteTestIndex,
   findListed,
   getSource,
@@ -54,9 +55,12 @@ apiTest.describe(
     // Scout backs every custom role session with the same underlying role, so the manager
     // session taken in beforeAll no longer carries manager privileges once another role was used.
     apiTest.afterAll(async ({ apiClient, esClient, samlAuth }) => {
-      manager = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGER_ROLE);
-      await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
-      await deleteTestIndex(esClient, index);
+      try {
+        manager = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGER_ROLE);
+        await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
+      } finally {
+        await deleteTestIndex(esClient, index);
+      }
     });
 
     apiTest('lets a Nightshift reader read but not write', async ({ apiClient, samlAuth }) => {
@@ -121,21 +125,22 @@ apiTest.describe(
           const created = await createSource(apiClient, manager.cookieHeader, body, { spaceId });
           expect(created).toHaveStatusCode(200);
           const id = created.body.source.id;
+          try {
+            const listedHere = await listSources(
+              apiClient,
+              manager.cookieHeader,
+              `search=${encodeURIComponent(body.title)}`
+            );
+            expect(listedHere).toHaveStatusCode(200);
+            expect(findListed(listedHere.body, id)).toBeUndefined();
+            expect(await getSource(apiClient, manager.cookieHeader, id)).toHaveStatusCode(404);
 
-          const listedHere = await listSources(
-            apiClient,
-            manager.cookieHeader,
-            `search=${encodeURIComponent(body.title)}`
-          );
-          expect(listedHere).toHaveStatusCode(200);
-          expect(findListed(listedHere.body, id)).toBeUndefined();
-          expect(await getSource(apiClient, manager.cookieHeader, id)).toHaveStatusCode(404);
-
-          const fetchedThere = await getSource(apiClient, manager.cookieHeader, id, { spaceId });
-          expect(fetchedThere).toHaveStatusCode(200);
-          expect(fetchedThere.body.source.id).toBe(id);
-
-          await deleteSource(apiClient, manager.cookieHeader, id, { spaceId });
+            const fetchedThere = await getSource(apiClient, manager.cookieHeader, id, { spaceId });
+            expect(fetchedThere).toHaveStatusCode(200);
+            expect(fetchedThere.body.source.id).toBe(id);
+          } finally {
+            await deleteSourceChecked(apiClient, manager.cookieHeader, id, { spaceId });
+          }
         } finally {
           await apiServices.spaces.delete(spaceId);
         }
