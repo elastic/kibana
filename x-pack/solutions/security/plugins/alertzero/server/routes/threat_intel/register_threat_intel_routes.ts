@@ -7,12 +7,14 @@
 
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntReadinessRoute } from './readiness';
+import { registerHuntForThreatRoute } from './hunt_for_threat';
 
 /**
  * Registers the threat-intel hunt routes (readiness, run hunt, get hunt
- * status, list hunt reports). Remaining routes land in Phases 3-7 as the
+ * status, list hunt reports). Remaining routes land in Phases 4-7 as the
  * hunt pipeline is lifted from the mustard prototype.
  */
 export const registerThreatIntelRoutes = (deps: RouteDependencies): void => {
   registerHuntReadinessRoute(deps);
+  registerHuntForThreatRoute(deps);
 };
