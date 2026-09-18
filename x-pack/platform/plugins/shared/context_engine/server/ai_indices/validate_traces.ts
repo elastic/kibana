@@ -9,8 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
+import pLimit from 'p-limit';
 import type { AiIndexTrace } from '../../common/http_api/ai_indices';
 import { InvalidAiIndexTraceError } from './errors';
+
+// Bound concurrent resolveIndex calls so one request cannot fan out unbounded ES traffic.
+const RESOLVE_INDEX_CONCURRENCY = 10;
 
 const resolveExpression = async (
   expression: string,
@@ -99,8 +103,9 @@ export const validateTraces = async ({
       .filter((trace) => trace.type === 'index')
       .flatMap((trace) => trace.value.split(',').map((expression) => expression.trim()))
   );
+  const limit = pLimit(RESOLVE_INDEX_CONCURRENCY);
   for (const expression of expressions) {
-    checks.push(validateIndexExpression(expression, esClient));
+    checks.push(limit(() => validateIndexExpression(expression, esClient)));
   }
 
   await Promise.all(checks);

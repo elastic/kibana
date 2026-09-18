@@ -22,6 +22,7 @@ import {
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
+  MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
   aiIndexKiByIdPath,
@@ -1737,6 +1738,24 @@ describe('ai indices routes', () => {
       }));
       expect(() => validateBody({ ...validBody, traces })).toThrow();
     });
+
+    it('rejects an index trace value with more than 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS + 1 },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() => validateBody({ ...validBody, traces: [{ type: 'index', value }] })).toThrow();
+    });
+
+    it('accepts an index trace value with exactly 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() =>
+        validateBody({ ...validBody, traces: [{ type: 'index', value }] })
+      ).not.toThrow();
+    });
   });
 
   describe('PUT body validation', () => {
@@ -1843,6 +1862,24 @@ describe('ai indices routes', () => {
     it('rejects a missing traces array', () => {
       const { traces, ...bodyWithoutTraces } = validBody;
       expect(() => validateBody(bodyWithoutTraces)).toThrow();
+    });
+
+    it('rejects an index trace value with more than 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS + 1 },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() => validateBody({ ...validBody, traces: [{ type: 'index', value }] })).toThrow();
+    });
+
+    it('accepts an index trace value with exactly 50 comma-separated expressions', () => {
+      const value = Array.from(
+        { length: MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS },
+        (_, i) => `logs-${i}`
+      ).join(',');
+      expect(() =>
+        validateBody({ ...validBody, traces: [{ type: 'index', value }] })
+      ).not.toThrow();
     });
   });
 

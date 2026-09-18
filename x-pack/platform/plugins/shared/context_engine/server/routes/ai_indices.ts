@@ -35,6 +35,7 @@ import {
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_TRACES,
+  MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   MAX_AI_INDEX_TRACE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
@@ -239,6 +240,11 @@ const aiIndexTraceSchema = schema.oneOf([
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      validate: (value) => {
+        if (value.split(',').length > MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS) {
+          return `value must contain at most ${MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS} comma-separated expressions`;
+        }
+      },
       meta: { description: 'An index or data stream name or pattern to read traces from.' },
     }),
   }),
