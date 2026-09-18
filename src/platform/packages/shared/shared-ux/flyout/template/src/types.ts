@@ -18,6 +18,7 @@ import type {
   EuiFlyoutProps,
   EuiIconProps,
 } from '@elastic/eui';
+// FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
 import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type {
@@ -196,6 +197,7 @@ type MenuTriggerOwnedProps =
   | 'onClick'
   | 'isSelected'
   | 'aria-haspopup'
+  | 'aria-pressed'
   | 'type';
 
 /**
