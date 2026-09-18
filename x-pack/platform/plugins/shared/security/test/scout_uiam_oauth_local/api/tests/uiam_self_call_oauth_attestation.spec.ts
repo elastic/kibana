@@ -21,7 +21,7 @@ apiTest.describe(
   { tag: tags.serverless.security.complete },
   () => {
     apiTest(
-      'Case 3: OAuth ephemeral self-call stamp survives the token swap so the acceptUiamOAuth receiver skips a second exchange',
+      'OAuth ephemeral self-call stamp survives the token swap so the acceptUiamOAuth receiver skips a second exchange',
       async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
         const audience = `${new URL(kbnUrl.get()).origin}/${MCP_ENDPOINT}`;
         const oauthAccessToken = await createUiamOAuthAccessToken({
@@ -48,7 +48,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'Case 4/8b: relayed token self-call withholds the stamp and forwards the upstream secret to ES',
+      'Relayed token self-call withholds the stamp and forwards the upstream secret to ES',
       async ({ apiClient, ephemeralToken }) => {
         const relayHeaders = {
           ...COMMON_UNSAFE_HEADERS,
@@ -68,7 +68,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'Case 4/8b: relayed token self-call to an acceptUiamOAuth route is treated like an external call',
+      'Relayed token self-call to an acceptUiamOAuth route is treated like an external call',
       async ({ apiClient, ephemeralToken }) => {
         const relayAuth = {
           Authorization: `Bearer ${ephemeralToken}`,

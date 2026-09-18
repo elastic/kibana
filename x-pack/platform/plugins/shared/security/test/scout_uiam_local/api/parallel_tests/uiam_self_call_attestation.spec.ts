@@ -61,7 +61,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'Case 8a: Kibana-minted internal UIAM API key self-call stamps and the receiver attaches the ES secret',
+      'Kibana-minted internal UIAM API key self-call stamps and the receiver attaches the ES secret',
       async ({ apiClient }) => {
         const [_, { accessToken }] = await userSessionCookieFactory();
         const grantResponse = await grantUiamApiKey(accessToken);
@@ -82,7 +82,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'Case 5: cookie session on the UI Run path (not Task Manager worker) stamps and the acceptUiamOAuth receiver skips exchange',
+      'Cookie session on the UI Run path (not Task Manager worker) stamps and the acceptUiamOAuth receiver skips exchange',
       async ({ apiClient }) => {
         const [userSessionCookie] = await userSessionCookieFactory();
 
