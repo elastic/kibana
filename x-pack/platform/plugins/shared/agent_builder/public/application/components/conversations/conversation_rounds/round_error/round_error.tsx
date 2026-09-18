@@ -76,7 +76,7 @@ const renderErrorContent = (error: unknown): React.ReactNode => {
 
 interface RoundErrorProps {
   error: unknown;
-  onRetry: () => void;
+  onRetry?: () => void;
 }
 
 const labels = {
@@ -106,26 +106,28 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
         errorContent
       )}
 
-      <EuiFlexGroup direction="row" justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            css={css`
-              color: ${euiTheme.colors.textPrimary};
-            `}
-            data-test-subj="agentBuilderRoundErrorRetryButton"
-            iconType="refresh"
-            onClick={onRetry}
-            aria-label={labels.retryAriaLabel}
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.RETRY,
-              detail: 'conversation',
-            })}
-          >
-            {labels.tryAgain}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {onRetry && (
+        <EuiFlexGroup direction="row" justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              css={css`
+                color: ${euiTheme.colors.textPrimary};
+              `}
+              data-test-subj="agentBuilderRoundErrorRetryButton"
+              iconType="refresh"
+              onClick={onRetry}
+              aria-label={labels.retryAriaLabel}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.RETRY,
+                detail: 'conversation',
+              })}
+            >
+              {labels.tryAgain}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiFlexGroup>
   );
 };
