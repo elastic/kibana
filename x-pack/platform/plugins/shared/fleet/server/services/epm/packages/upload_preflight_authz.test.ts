@@ -268,7 +268,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockSpaceId,
         mockSavedObjectsClient
       )
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual([]);
 
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
@@ -555,5 +555,33 @@ describe('checkUploadPackageAssetPrivileges', () => {
     ).rejects.toThrow('SO store unavailable');
 
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
+
+  it('returns the exact authorized destination spaces so callers can cap propagation', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: 'primary-space',
+        additional_spaces_installed_kibana: {
+          'space-a': [],
+        },
+      },
+    });
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      'space-x',
+      mockSavedObjectsClient
+    );
+
+    expect(result).toEqual(expect.arrayContaining(['space-x', 'primary-space', 'space-a']));
+    expect(result).toHaveLength(3);
   });
 });

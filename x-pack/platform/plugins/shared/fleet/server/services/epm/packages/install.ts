@@ -686,6 +686,7 @@ export async function installPackageWithStateMachine(options: {
   automaticInstall?: boolean;
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
+  authorizedSpaces?: string[];
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -710,6 +711,7 @@ export async function installPackageWithStateMachine(options: {
     automaticInstall,
     installedAsDependencyOf,
     skipDependencyCheck,
+    authorizedSpaces,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -836,6 +838,7 @@ export async function installPackageWithStateMachine(options: {
       useStreaming,
       installedAsDependencyOf,
       skipDependencyCheck,
+      authorizedSpaces,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -935,12 +938,13 @@ async function installPackageByUpload({
       }
     }
 
+    let authorizedSpaces: string[] = [];
     if (
       !isBundledPackage &&
       request &&
       !appContextService.getConfig()?.internal?.skipUploadPackageValidation
     ) {
-      await checkUploadPackageAssetPrivileges(
+      authorizedSpaces = await checkUploadPackageAssetPrivileges(
         request,
         archiveBuffer,
         contentType,
@@ -1015,6 +1019,7 @@ async function installPackageByUpload({
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       useStreaming,
+      authorizedSpaces: authorizedSpaces.length > 0 ? authorizedSpaces : undefined,
     });
   } catch (e) {
     return {

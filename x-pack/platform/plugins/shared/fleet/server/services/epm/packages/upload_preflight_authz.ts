@@ -109,7 +109,7 @@ export async function checkUploadPackageAssetPrivileges(
   contentType: string,
   spaceId: string,
   savedObjectsClient: SavedObjectsClientContract
-): Promise<void> {
+): Promise<string[]> {
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
   if (signals.blockedTypes.length > 0) {
@@ -121,7 +121,8 @@ export async function checkUploadPackageAssetPrivileges(
   }
 
   if (signals.gatedTypesFound.size === 0 && !signals.hasMlSecurityRules) {
-    return;
+    // No gated asset types found; return empty set so callers skip propagation capping.
+    return [];
   }
 
   // Preflight authz requires the security plugin. Kibana deployments with security
@@ -170,4 +171,8 @@ export async function checkUploadPackageAssetPrivileges(
       `Insufficient privileges to upload this package. Missing: ${missingActions.join(', ')}`
     );
   }
+
+  // Return the exact set of Spaces that were authorized so callers can use it to cap
+  // multispace propagation to the same snapshot (preventing TOCTOU bypass).
+  return destinationSpaces;
 }

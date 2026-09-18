@@ -17,7 +17,14 @@ import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install
 import { indexPatternTypes } from '../../../kibana/index_pattern/install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
+  const {
+    savedObjectsClient,
+    logger,
+    installedPkg,
+    packageInstallContext,
+    spaceId,
+    authorizedSpaces,
+  } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
@@ -31,6 +38,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       logger,
       spaceId,
       assetTags: packageInfo?.asset_tags,
+      authorizedSpaces,
     })
   );
   // Necessary to avoid async promise rejection warning
