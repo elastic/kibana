@@ -16,9 +16,9 @@ import type { InternalServices } from '../types';
 import {
   isTaskCurrentlyRunningError,
   chunkedTaskStateSchemaByVersion,
+  getChunkedTaskState,
   isProductName,
   runInstallChunk,
-  type ChunkedTaskState,
   type InstallLockManager,
 } from './utils';
 
@@ -44,11 +44,15 @@ export const registerInstallAllTaskDefinition = ({
         const inferenceId = taskInstance.params?.inferenceId;
         return {
           async run() {
-            const { remaining, attempts } = taskInstance.state as ChunkedTaskState;
+            const {
+              requestedAt,
+              state: { remaining, attempts },
+            } = getChunkedTaskState(taskInstance);
             const { packageInstaller, logger } = getServices();
             return runInstallChunk({
               lockManager,
               logger,
+              requestedAt,
               items: (remaining ?? Object.values(DocumentationProduct)).filter(isProductName),
               attempts,
               install: (productName) =>
@@ -82,9 +86,8 @@ export const scheduleInstallAllTask = async ({
     ? INSTALL_ALL_TASK_ID
     : INSTALL_ALL_TASK_ID_MULTILINGUAL;
   try {
-    // A new request replaces the persisted plan of an earlier install so that a stale continuation,
-    // e.g. one cancelled by an uninstall in between, cannot absorb it
-    await taskManager.removeIfExists(taskId);
+    // `runSoon` below stamps a new `scheduledAt`, which makes an existing task drop its persisted
+    // plan and start over instead of absorbing the request
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: INSTALL_ALL_TASK_TYPE,

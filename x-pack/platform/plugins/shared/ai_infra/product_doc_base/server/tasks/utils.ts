@@ -9,6 +9,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
   throwUnrecoverableError,
+  type ConcreteTaskInstance,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
@@ -29,6 +30,8 @@ const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
 });
 
 export const chunkedTaskStateSchema = schema.object({
+  // `scheduledAt` of the request this plan belongs to; a newer request (runSoon) starts over
+  requestedAt: schema.maybe(schema.string({ maxLength: 64 })),
   remaining: schema.maybe(itemsSchema),
   // Failed attempts for the current item
   attempts: schema.maybe(schema.number({ min: 0 })),
@@ -57,10 +60,22 @@ export const chunkedTaskStateSchemaByVersion = {
 export const isProductName = (value: string): value is ProductName =>
   allProductNames.includes(value as ProductName);
 
+/**
+ * The persisted plan of a chunked task, or an empty state when the task has been requested again
+ * (Task Manager sets `scheduledAt` on every `runSoon`) since the plan was persisted.
+ */
+export const getChunkedTaskState = (
+  taskInstance: Pick<ConcreteTaskInstance, 'state' | 'scheduledAt'>
+): { requestedAt: string; state: ChunkedTaskState } => {
+  const requestedAt = taskInstance.scheduledAt.toISOString();
+  const state = taskInstance.state as ChunkedTaskState;
+  return { requestedAt, state: state.requestedAt === requestedAt ? state : {} };
+};
+
 // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
 // a capacity slot for one item and completed items are not redone when a later attempt fails.
-export const nextChunkRunResult = (remaining: string[]) =>
-  remaining.length > 0 ? { state: { remaining }, runAt: new Date() } : { state: {} };
+export const nextChunkRunResult = (requestedAt: string, remaining: string[]) =>
+  remaining.length > 0 ? { state: { requestedAt, remaining }, runAt: new Date() } : { state: {} };
 
 // Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
 export const deferredRunResult = (state: Record<string, unknown>) => ({
@@ -96,6 +111,7 @@ export const runTaskUnderInstallLock = async ({
 export const runInstallChunk = async <T extends string>({
   lockManager,
   logger,
+  requestedAt,
   items,
   attempts = 0,
   install,
@@ -104,6 +120,7 @@ export const runInstallChunk = async <T extends string>({
 }: {
   lockManager: InstallLockManager;
   logger: Logger;
+  requestedAt: string;
   items: T[];
   attempts?: number;
   install: (item: T) => Promise<unknown>;
@@ -132,7 +149,7 @@ export const runInstallChunk = async <T extends string>({
     metadata: { ...metadata, item },
   });
   if (!acquired) {
-    return deferredRunResult({ remaining: items, ...(attempts ? { attempts } : {}) });
+    return deferredRunResult({ requestedAt, remaining: items, ...(attempts ? { attempts } : {}) });
   }
   if (superseded) {
     logger.info(`Documentation item [${item}] skipped: a later request superseded this task`);
@@ -153,11 +170,11 @@ export const runInstallChunk = async <T extends string>({
       }s: ${installError.message}`
     );
     return {
-      state: { remaining: items, attempts: failedAttempts },
+      state: { requestedAt, remaining: items, attempts: failedAttempts },
       runAt: new Date(Date.now() + delayMs),
     };
   }
-  return nextChunkRunResult(rest);
+  return nextChunkRunResult(requestedAt, rest);
 };
 
 export const getTaskStatus = async ({

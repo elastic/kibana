@@ -23,13 +23,14 @@ import { MAX_INSTALL_ITEM_RETRIES } from './utils';
 
 const allProducts = Object.values(DocumentationProduct);
 const scheduledAt = new Date('2026-09-17T10:00:00.000Z');
+const requestedAt = scheduledAt.toISOString();
 
 describe('InstallAll task', () => {
   let installProduct: jest.Mock;
   let wasUninstalledSince: jest.Mock;
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
-  let runTask: (state: Record<string, unknown>) => Promise<unknown>;
+  let runTask: (state: Record<string, unknown>, at?: Date) => Promise<unknown>;
 
   beforeEach(() => {
     installProduct = jest.fn().mockResolvedValue(true);
@@ -47,10 +48,10 @@ describe('InstallAll task', () => {
         } as unknown as InternalServices),
     });
     const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][INSTALL_ALL_TASK_TYPE];
-    runTask = (state) =>
+    runTask = (state, at = scheduledAt) =>
       definition
         .createTaskRunner({
-          taskInstance: { params: { inferenceId: '.elser' }, state, scheduledAt },
+          taskInstance: { params: { inferenceId: '.elser' }, state, scheduledAt: at },
         } as unknown as RunContext)
         .run();
   });
@@ -64,33 +65,55 @@ describe('InstallAll task', () => {
       inferenceId: '.elser',
     });
     expect(result).toEqual({
-      state: { remaining: allProducts.slice(1) },
+      state: { requestedAt, remaining: allProducts.slice(1) },
       runAt: expect.any(Date),
     });
   });
 
-  it('continues from the persisted remaining products', async () => {
-    const result = await runTask({ remaining: ['security', 'observability'] });
+  it('continues from the persisted remaining products of the same request', async () => {
+    const result = await runTask({ requestedAt, remaining: ['security', 'observability'] });
 
     expect(installProduct).toHaveBeenCalledWith({ productName: 'security', inferenceId: '.elser' });
-    expect(result).toEqual({ state: { remaining: ['observability'] }, runAt: expect.any(Date) });
+    expect(result).toEqual({
+      state: { requestedAt, remaining: ['observability'] },
+      runAt: expect.any(Date),
+    });
+  });
+
+  it('starts over when the task was requested again after the plan was persisted', async () => {
+    const newRequest = new Date('2026-09-17T11:00:00.000Z');
+
+    const result = await runTask(
+      { requestedAt, remaining: ['observability'], attempts: 3 },
+      newRequest
+    );
+
+    expect(installProduct).toHaveBeenCalledWith({
+      productName: allProducts[0],
+      inferenceId: '.elser',
+    });
+    expect(wasUninstalledSince).toHaveBeenCalledWith({ inferenceId: '.elser', since: newRequest });
+    expect(result).toEqual({
+      state: { requestedAt: newRequest.toISOString(), remaining: allProducts.slice(1) },
+      runAt: expect.any(Date),
+    });
   });
 
   it('completes without rescheduling after the last product', async () => {
-    const result = await runTask({ remaining: ['observability'] });
+    const result = await runTask({ requestedAt, remaining: ['observability'] });
 
     expect(result).toEqual({ state: {} });
   });
 
   it('ignores unknown product names in the persisted state', async () => {
-    const result = await runTask({ remaining: ['not-a-product'] });
+    const result = await runTask({ requestedAt, remaining: ['not-a-product'] });
 
     expect(installProduct).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
   });
 
   it('checks for a later uninstall since the install was requested before every product', async () => {
-    await runTask({ remaining: ['security'] });
+    await runTask({ requestedAt, remaining: ['security'] });
 
     expect(wasUninstalledSince).toHaveBeenCalledWith({ inferenceId: '.elser', since: scheduledAt });
   });
@@ -107,7 +130,7 @@ describe('InstallAll task', () => {
   it('stops between products when an uninstall was requested after this install', async () => {
     wasUninstalledSince.mockResolvedValue(true);
 
-    const result = await runTask({ remaining: ['security', 'observability'] });
+    const result = await runTask({ requestedAt, remaining: ['security', 'observability'] });
 
     expect(installProduct).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {} });
@@ -116,7 +139,9 @@ describe('InstallAll task', () => {
   it('propagates status read failures so Task Manager retries instead of completing', async () => {
     wasUninstalledSince.mockRejectedValue(new Error('es unavailable'));
 
-    const error = (await runTask({ remaining: ['security'] }).catch((e) => e)) as Error;
+    const error = (await runTask({ requestedAt, remaining: ['security'] }).catch(
+      (e) => e
+    )) as Error;
 
     expect(error.message).toBe('es unavailable');
     expect(isUnrecoverableError(error)).toBe(false);
@@ -124,7 +149,7 @@ describe('InstallAll task', () => {
   });
 
   it('installs each product under the shared install lock', async () => {
-    await runTask({ remaining: ['kibana'] });
+    await runTask({ requestedAt, remaining: ['kibana'] });
 
     expect(withLock).toHaveBeenCalledWith(
       PRODUCT_DOC_INSTALL_LOCK_ID,
@@ -136,11 +161,11 @@ describe('InstallAll task', () => {
   it('defers the run without installing when another install holds the lock', async () => {
     withLock.mockRejectedValue(new LockAcquisitionError('held'));
 
-    const result = await runTask({ remaining: ['kibana', 'security'], attempts: 2 });
+    const result = await runTask({ requestedAt, remaining: ['kibana', 'security'], attempts: 2 });
 
     expect(installProduct).not.toHaveBeenCalled();
     expect(result).toEqual({
-      state: { remaining: ['kibana', 'security'], attempts: 2 },
+      state: { requestedAt, remaining: ['kibana', 'security'], attempts: 2 },
       runAt: expect.any(Date),
     });
   });
@@ -149,11 +174,11 @@ describe('InstallAll task', () => {
     installProduct.mockRejectedValue(new Error('boom'));
     const now = Date.now();
 
-    const first = (await runTask({ remaining: ['kibana', 'security'] })) as {
+    const first = (await runTask({ requestedAt, remaining: ['kibana', 'security'] })) as {
       state: Record<string, unknown>;
       runAt: Date;
     };
-    expect(first.state).toEqual({ remaining: ['kibana', 'security'], attempts: 1 });
+    expect(first.state).toEqual({ requestedAt, remaining: ['kibana', 'security'], attempts: 1 });
     expect(first.runAt.getTime() - now).toBeGreaterThanOrEqual(30_000);
     expect(first.runAt.getTime() - now).toBeLessThan(60_000);
 
@@ -161,7 +186,7 @@ describe('InstallAll task', () => {
       state: Record<string, unknown>;
       runAt: Date;
     };
-    expect(third.state).toEqual({ remaining: ['kibana', 'security'], attempts: 3 });
+    expect(third.state).toEqual({ requestedAt, remaining: ['kibana', 'security'], attempts: 3 });
     expect(third.runAt.getTime() - now).toBeGreaterThanOrEqual(120_000);
     expect(logger.warn).toHaveBeenCalledTimes(2);
   });
@@ -170,6 +195,7 @@ describe('InstallAll task', () => {
     installProduct.mockRejectedValue(new Error('boom'));
 
     const error = (await runTask({
+      requestedAt,
       remaining: ['kibana', 'security'],
       attempts: MAX_INSTALL_ITEM_RETRIES,
     }).catch((e) => e)) as Error;
@@ -180,14 +206,17 @@ describe('InstallAll task', () => {
   });
 
   it('resets the attempt counter once the item succeeds', async () => {
-    const result = await runTask({ remaining: ['kibana', 'security'], attempts: 2 });
+    const result = await runTask({ requestedAt, remaining: ['kibana', 'security'], attempts: 2 });
 
-    expect(result).toEqual({ state: { remaining: ['security'] }, runAt: expect.any(Date) });
+    expect(result).toEqual({
+      state: { requestedAt, remaining: ['security'] },
+      runAt: expect.any(Date),
+    });
   });
 });
 
 describe('scheduleInstallAllTask', () => {
-  it('replaces an existing task so a reinstall request does not wake a stale continuation', async () => {
+  it('ensures the task exists and runs it soon without deleting a task others may wait on', async () => {
     const taskManager = taskManagerMock.createStart();
 
     const taskId = await scheduleInstallAllTask({
@@ -197,10 +226,7 @@ describe('scheduleInstallAllTask', () => {
     });
 
     expect(taskId).toBe(INSTALL_ALL_TASK_ID);
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID);
-    expect(taskManager.removeIfExists.mock.invocationCallOrder[0]).toBeLessThan(
-      taskManager.ensureScheduled.mock.invocationCallOrder[0]
-    );
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({
         id: INSTALL_ALL_TASK_ID,
@@ -221,6 +247,6 @@ describe('scheduleInstallAllTask', () => {
     });
 
     expect(taskId).toBe(INSTALL_ALL_TASK_ID_MULTILINGUAL);
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID_MULTILINGUAL);
+    expect(taskManager.runSoon).toHaveBeenCalledWith(INSTALL_ALL_TASK_ID_MULTILINGUAL);
   });
 });

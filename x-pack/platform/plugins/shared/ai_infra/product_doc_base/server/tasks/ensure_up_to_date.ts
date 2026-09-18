@@ -15,9 +15,9 @@ import type { InternalServices } from '../types';
 import {
   isTaskCurrentlyRunningError,
   chunkedTaskStateSchemaByVersion,
+  getChunkedTaskState,
   isProductName,
   runInstallChunk,
-  type ChunkedTaskState,
   type InstallLockManager,
 } from './utils';
 
@@ -25,6 +25,11 @@ export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL =
   'ProductDocBase:EnsureUpToDateMultilingual';
+// Task params are immutable, so forced updates use their own task so they cannot be absorbed by an
+// ordinary update that is already scheduled
+export const ENSURE_DOC_UP_TO_DATE_TASK_ID_FORCED = 'ProductDocBase:EnsureUpToDateForced';
+export const ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL_FORCED =
+  'ProductDocBase:EnsureUpToDateMultilingualForced';
 
 const OPENAPI_SPEC_ITEM = 'openapi';
 
@@ -48,7 +53,10 @@ export const registerEnsureUpToDateTaskDefinition = ({
         return {
           async run() {
             const { packageInstaller, logger } = getServices();
-            const { remaining, attempts } = taskInstance.state as ChunkedTaskState;
+            const {
+              requestedAt,
+              state: { remaining, attempts },
+            } = getChunkedTaskState(taskInstance);
             const items = remaining ?? [
               ...(await packageInstaller.getProductsToUpdate({ inferenceId, forceUpdate })),
               OPENAPI_SPEC_ITEM,
@@ -56,6 +64,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
             return runInstallChunk({
               lockManager,
               logger,
+              requestedAt,
               items,
               attempts,
               // `scheduledAt` is the time of the latest update request for this task
@@ -81,6 +90,21 @@ export const registerEnsureUpToDateTaskDefinition = ({
   });
 };
 
+export const getEnsureUpToDateTaskId = ({
+  inferenceId,
+  forceUpdate,
+}: {
+  inferenceId: string;
+  forceUpdate?: boolean;
+}): string => {
+  if (isImpliedDefaultElserInferenceId(inferenceId)) {
+    return forceUpdate ? ENSURE_DOC_UP_TO_DATE_TASK_ID_FORCED : ENSURE_DOC_UP_TO_DATE_TASK_ID;
+  }
+  return forceUpdate
+    ? ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL_FORCED
+    : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
+};
+
 export const scheduleEnsureUpToDateTask = async ({
   taskManager,
   logger,
@@ -92,13 +116,10 @@ export const scheduleEnsureUpToDateTask = async ({
   inferenceId: string;
   forceUpdate?: boolean;
 }) => {
-  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
-    ? ENSURE_DOC_UP_TO_DATE_TASK_ID
-    : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
+  const taskId = getEnsureUpToDateTaskId({ inferenceId, forceUpdate });
   try {
-    // A new request replaces any persisted plan and params of an earlier update so that, for
-    // example, a forced update is not swallowed by an ordinary one that is still in progress.
-    await taskManager.removeIfExists(taskId);
+    // `runSoon` below stamps a new `scheduledAt`, which makes an existing task drop its persisted
+    // plan and start over instead of absorbing the request
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,

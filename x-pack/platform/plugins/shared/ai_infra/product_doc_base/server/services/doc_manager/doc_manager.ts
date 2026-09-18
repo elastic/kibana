@@ -248,7 +248,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
         );
         return;
       }
-      await this.installSecurityLabs({ inferenceId });
+      await this.installDefaultSecurityLabs(inferenceId);
       return;
     }
 
@@ -263,6 +263,34 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.debug(
       `Security Labs for inference ID [${inferenceId}] is already installed; update will be handled by updateSecurityLabsAll`
     );
+  }
+
+  // The status is checked again under the lock so that nodes starting together do not each
+  // reinstall the content the first one has just installed
+  private async installDefaultSecurityLabs(inferenceId: string): Promise<void> {
+    const { packageInstaller } = this;
+    if (!packageInstaller) {
+      throw new Error('PackageInstaller not available');
+    }
+    try {
+      await waitForInstallLock({
+        lockManager: this.lockManager,
+        metadata: { source: 'ensureDefaultSecurityLabs', inferenceId },
+        run: async () => {
+          const { status } = await this.getSecurityLabsStatus({ inferenceId });
+          if (status === 'installed') {
+            this.logger.debug(
+              `Security Labs for inference ID [${inferenceId}] was installed while waiting for the install lock`
+            );
+            return;
+          }
+          await packageInstaller.installSecurityLabs({ inferenceId });
+        },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to install Security Labs content: ${error.message}`);
+      throw error;
+    }
   }
 
   async updateSecurityLabsAll(options?: {

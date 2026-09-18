@@ -421,6 +421,49 @@ describe('DocumentationManager', () => {
       expect(installedUnderLock).toBe(true);
     });
 
+    it('skips the install when Security Labs was installed while waiting for the lock', async () => {
+      packageInstaller.getSecurityLabsStatus
+        .mockResolvedValueOnce({ status: 'uninstalled' }) // before the lock
+        .mockResolvedValueOnce({ status: 'installed' }); // under the lock, after another node
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(withLock).toHaveBeenCalledTimes(1);
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+    });
+
+    it('installs once when two startup calls make the same pre-lock decision', async () => {
+      let installed = false;
+      packageInstaller.getSecurityLabsStatus.mockImplementation(async () => ({
+        status: installed ? 'installed' : 'uninstalled',
+      }));
+      packageInstaller.installSecurityLabs.mockImplementation(async () => {
+        installed = true;
+      });
+      // both calls read the status before either enters the lock; the lock then serializes them
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let queue: Promise<unknown> = Promise.resolve();
+      withLock.mockImplementation((_lockId: string, callback: () => Promise<unknown>) => {
+        const run = queue.then(async () => {
+          await gate;
+          await callback();
+        });
+        queue = run.catch(() => undefined);
+        return run;
+      });
+
+      const first = docManager.ensureDefaultSecurityLabs();
+      const second = docManager.ensureDefaultSecurityLabs();
+      await new Promise((resolve) => setImmediate(resolve));
+      release();
+      await Promise.all([first, second]);
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledTimes(1);
+    });
+
     it('schedules no install when Security Labs is already installed', async () => {
       packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'installed' });
 
