@@ -122,14 +122,16 @@ export const IAC_PROVISIONER_RENDER_FALLBACK_EVENT: EventTypeOpts<IacProvisioner
  * string. `not_checked` is the verify route's answer to `compare: false` (integration set only,
  * no IaCP call); it is a read and never reaches the event.
  */
-export type IacKeyVerificationOutcome =
-  | 'matches'
-  | 'no_key'
-  | 'key_mismatch'
-  | 'unsupported_provider'
-  | 'no_integrations'
-  | 'key_unavailable'
-  | 'not_checked';
+export const IAC_KEY_VERIFICATION_OUTCOMES = [
+  'matches',
+  'no_key',
+  'key_mismatch',
+  'unsupported_provider',
+  'no_integrations',
+  'key_unavailable',
+  'not_checked',
+] as const;
+export type IacKeyVerificationOutcome = (typeof IAC_KEY_VERIFICATION_OUTCOMES)[number];
 /**
  * Where the check was asked for. Derived server-side from the request: 'onboarding' when new
  * integrations are supplied (AWS onboarding, Existing Identity), 'flyout' when none are

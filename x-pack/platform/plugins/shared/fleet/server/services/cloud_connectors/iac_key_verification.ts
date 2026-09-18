@@ -175,9 +175,9 @@ export const getIacKeyOutcome = async (
   }
   const storedSha = storedKey.trim();
   logger.debug(
-    `Comparing stored key ${storedSha} for ${contextForLog} against integration set ${JSON.stringify(
-      selections
-    )}`
+    `Comparing stored key ${storedSha} for ${contextForLog} against ${
+      selections.length
+    } packages (${selections.map(({ name }) => name).join(', ')})`
   );
   try {
     reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
@@ -300,7 +300,11 @@ export const verifyCloudConnectorIacKey = async (
     CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
     cloudConnectorId
   );
-  const existing = await getCloudConnectorIntegrationSelections(soClient, cloudConnectorId);
+  const { integrations: existing, exceedsCap } = await getCloudConnectorIntegrationSelections(
+    soClient,
+    cloudConnectorId,
+    { maxPackages: MAX_IAC_RENDER_INTEGRATIONS }
+  );
   const merged = mergeIntegrationSelections([...existing, ...(newIntegrations ?? [])]);
   const deploymentId = attributes.iac_deployment_id || undefined;
   const region = parseAwsRegionFromArn(deploymentId);
@@ -308,11 +312,12 @@ export const verifyCloudConnectorIacKey = async (
   // The request body caps only the integrations being added; the merged set can be larger. The
   // browser re-renders the returned set as-is through the render route, which rejects more than
   // MAX_IAC_RENDER_INTEGRATIONS packages, so a set that large is returned empty and left
-  // uncompared: no stack action is offered that could not complete.
-  const exceedsRenderCap = merged.length > MAX_IAC_RENDER_INTEGRATIONS;
+  // uncompared: no stack action is offered that could not complete. The stored set alone can
+  // already be over the cap (the lookup stops reading then), or the additions can push it over.
+  const exceedsRenderCap = exceedsCap || merged.length > MAX_IAC_RENDER_INTEGRATIONS;
   if (exceedsRenderCap) {
     logger.warn(
-      `IaC key check skipped for connector ${cloudConnectorId}: ${merged.length} packages exceed the render limit of ${MAX_IAC_RENDER_INTEGRATIONS}`
+      `IaC key check skipped for connector ${cloudConnectorId}: the integration set exceeds the render limit of ${MAX_IAC_RENDER_INTEGRATIONS} packages`
     );
   }
   const integrations = exceedsRenderCap ? [] : merged;

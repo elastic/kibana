@@ -17,6 +17,7 @@ import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { IAC_UPGRADE_TASK_FLOW } from '../../common/telemetry/iac_provisioner_events';
 import { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
 import type { IacUpgradeStatus } from '../../common/types/models/cloud_connector';
+import { MAX_IAC_RENDER_INTEGRATIONS } from '../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import { appContextService } from '../services';
 import {
@@ -160,7 +161,19 @@ const checkConnector = async (
   logger: Logger,
   signal: AbortSignal
 ): Promise<ConnectorOutcome> => {
-  const selections = await getCloudConnectorIntegrationSelections(soClient, id);
+  const { integrations: selections, exceedsCap } = await getCloudConnectorIntegrationSelections(
+    soClient,
+    id,
+    { maxPackages: MAX_IAC_RENDER_INTEGRATIONS }
+  );
+  if (exceedsCap) {
+    // Same fail-open as getIacKeyOutcome's key_unavailable: the render route the flyout's Update
+    // goes through rejects a set this large, so a verdict could not be acted on.
+    logger.warn(
+      `${IAC_UPGRADE_CHECK_TASK} Connector ${id} skipped (fail open): more than ${MAX_IAC_RENDER_INTEGRATIONS} packages exceed the render limit`
+    );
+    return 'skipped';
+  }
   const outcome = await getIacKeyOutcome(soClient, attributes, selections, {
     flow: IAC_UPGRADE_TASK_FLOW,
     contextForLog: `connector ${id}`,

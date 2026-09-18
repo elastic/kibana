@@ -10,9 +10,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
+import { MAX_IAC_RENDER_INTEGRATIONS } from '../../common/types/rest_spec/iac_provisioner';
 import {
   getCloudConnectorIntegrationSelections,
   getIacKeyOutcome,
+  type IacIntegrationSelection,
 } from '../services/cloud_connectors';
 import { reportIacProvisionerUpgradeCheckCompleted } from '../services/telemetry/iac_provisioner_telemetry';
 import { isIacProvisionerEnabled } from '../services/utils/iac_provisioner';
@@ -47,6 +49,9 @@ const finderFor = (pages: unknown[][]) => ({
   close: jest.fn(),
 });
 
+/** The lookup's answer for a connector whose integration set fits under the render cap. */
+const stored = (integrations: IacIntegrationSelection[]) => ({ integrations, exceedsCap: false });
+
 const mockSoClient = { createPointInTimeFinder: jest.fn(), update: jest.fn() } as any;
 const signal = new AbortController().signal;
 
@@ -64,9 +69,11 @@ describe('iac_upgrade_check_task', () => {
       .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
       .mockReturnValue(mockSoClient);
     mockedEnabled.mockResolvedValue(true);
-    mockedSelections.mockResolvedValue([
-      { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-    ]);
+    mockedSelections.mockResolvedValue(
+      stored([
+        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+      ])
+    );
   });
 
   it('does nothing when IaCP is disabled', async () => {
@@ -114,6 +121,23 @@ describe('iac_upgrade_check_task', () => {
       [{ name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] }],
       { flow: 'iac_upgrade_task', contextForLog: 'connector legacy' }
     );
+    expect(mockedSelections).toHaveBeenCalledWith(mockSoClient, 'legacy', {
+      maxPackages: MAX_IAC_RENDER_INTEGRATIONS,
+    });
+  });
+
+  it('skips a connector whose integration set exceeds the render limit without comparing', async () => {
+    mockSoClient.createPointInTimeFinder.mockReturnValue(finderFor([[makeConnector('huge', {})]]));
+    mockedSelections.mockResolvedValue({ integrations: [], exceedsCap: true });
+
+    const counts = await runIacUpgradeCheckTask(signal);
+
+    expect(mockedGetIacKeyOutcome).not.toHaveBeenCalled();
+    expect(mockSoClient.update).not.toHaveBeenCalled();
+    expect(counts).toEqual({ upToDate: 0, upgradeAvailable: 0, skipped: 1 });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Connector huge skipped (fail open)')
+    );
   });
 
   it('leaves status untouched when the current key cannot be determined (IaCP down)', async () => {
@@ -130,7 +154,7 @@ describe('iac_upgrade_check_task', () => {
     mockSoClient.createPointInTimeFinder.mockReturnValue(
       finderFor([[makeConnector('unused', {})]])
     );
-    mockedSelections.mockResolvedValue([]);
+    mockedSelections.mockResolvedValue(stored([]));
     mockedGetIacKeyOutcome.mockResolvedValue('no_integrations');
 
     const counts = await runIacUpgradeCheckTask(signal);
@@ -150,9 +174,11 @@ describe('iac_upgrade_check_task', () => {
     );
     mockedSelections
       .mockRejectedValueOnce(new Error('SO unavailable'))
-      .mockResolvedValueOnce([
-        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-      ]);
+      .mockResolvedValueOnce(
+        stored([
+          { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+        ])
+      );
     mockedGetIacKeyOutcome.mockResolvedValue('matches');
     mockSoClient.update.mockResolvedValue({});
 

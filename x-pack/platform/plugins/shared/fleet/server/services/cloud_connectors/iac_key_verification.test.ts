@@ -27,7 +27,10 @@ import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations
 import { IAC_UPGRADE_TASK_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../common/types/rest_spec/iac_provisioner';
 
-import { getCloudConnectorIntegrationSelections } from './iac_integrations';
+import {
+  getCloudConnectorIntegrationSelections,
+  type IacIntegrationSelection,
+} from './iac_integrations';
 import { getIacKeyOutcome, verifyCloudConnectorIacKey } from './iac_key_verification';
 
 jest.mock('../app_context');
@@ -47,6 +50,9 @@ const mockedRender = jest.mocked(iacProvisionerService.renderTemplate);
 const mockedSupported = jest.mocked(isIacProvisionerSupportedFor);
 const mockedSelections = jest.mocked(getCloudConnectorIntegrationSelections);
 const mockedResolve = jest.mocked(buildIacProvisionerIntegrations);
+
+/** The lookup's answer for a connector whose stored set fits under the render cap. */
+const stored = (integrations: IacIntegrationSelection[]) => ({ integrations, exceedsCap: false });
 
 /** The resolver call `getIacKeyOutcome` makes for a merged selection set. */
 const resolveCall = (requestedIntegrations: unknown) => ({
@@ -283,9 +289,11 @@ describe('verifyCloudConnectorIacKey', () => {
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
     soClient.update.mockResolvedValue({} as any);
     mockedSupported.mockResolvedValue(true);
-    mockedSelections.mockResolvedValue([
-      { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-    ]);
+    mockedSelections.mockResolvedValue(
+      stored([
+        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+      ])
+    );
     mockedResolve.mockResolvedValue(RESOLVED_AWS);
   });
 
@@ -378,10 +386,12 @@ describe('verifyCloudConnectorIacKey', () => {
     // The request cap bounds only the integrations being added; MAX existing packages plus one
     // new one is a set the render route would reject, so no stack action may be offered for it.
     mockedSelections.mockResolvedValue(
-      Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS }, (_, i) => ({
-        name: `pkg_${i}`,
-        policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }],
-      }))
+      stored(
+        Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS }, (_, i) => ({
+          name: `pkg_${i}`,
+          policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }],
+        }))
+      )
     );
     soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:stored' }));
 
@@ -404,6 +414,28 @@ describe('verifyCloudConnectorIacKey', () => {
       { compare: false }
     );
     expect(read).toEqual(expect.objectContaining({ outcome: 'not_checked', integrations: [] }));
+  });
+
+  it('returns an empty, uncompared set when the stored set alone exceeds the render limit', async () => {
+    // The lookup stops reading once the connector's own packages pass the cap, so there is no
+    // set to merge the additions into; the answer is the same fail-open as an over-cap merge.
+    mockedSelections.mockResolvedValue({ integrations: [], exceedsCap: true });
+    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:stored' }));
+
+    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', [
+      { name: 'one_more', policyTemplates: [{ name: 'tpl', enabledInputs: ['in'] }] },
+    ]);
+
+    expect(mockedSelections).toHaveBeenCalledWith(soClient, 'cc-1', {
+      maxPackages: MAX_IAC_RENDER_INTEGRATIONS,
+    });
+    expect(result).toEqual(
+      expect.objectContaining({ matches: true, outcome: 'key_unavailable', integrations: [] })
+    );
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedRender).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('exceeds the render limit'));
   });
 
   it('treats an empty integrations array as a flyout check', async () => {
@@ -456,10 +488,15 @@ describe('verifyCloudConnectorIacKey', () => {
   it('reports no_key when the connector deployed the static template', async () => {
     soClient.get.mockResolvedValueOnce(connector({}));
     // Two package policies on the same connector, so the returned set has to be merged.
-    mockedSelections.mockResolvedValueOnce([
-      { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-      { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }] },
-    ]);
+    mockedSelections.mockResolvedValueOnce(
+      stored([
+        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+        {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
+        },
+      ])
+    );
 
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
@@ -498,7 +535,7 @@ describe('verifyCloudConnectorIacKey', () => {
 
   it('fails open when the connector has no integrations', async () => {
     soClient.get.mockResolvedValueOnce(connector({}));
-    mockedSelections.mockResolvedValueOnce([]);
+    mockedSelections.mockResolvedValueOnce(stored([]));
 
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
@@ -741,7 +778,7 @@ describe('verifyCloudConnectorIacKey', () => {
 
     it('leaves the stored status alone when the connector has no integrations', async () => {
       soClient.get.mockResolvedValueOnce(connector({}));
-      mockedSelections.mockResolvedValueOnce([]);
+      mockedSelections.mockResolvedValueOnce(stored([]));
 
       await verifyCloudConnectorIacKey(soClient, 'cc-1');
 

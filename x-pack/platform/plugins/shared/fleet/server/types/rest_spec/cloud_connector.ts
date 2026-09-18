@@ -6,9 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors';
+import {
+  IAC_KEY_VERIFICATION_OUTCOMES,
+  type IacKeyVerificationOutcome,
+} from '../../../common/telemetry/iac_provisioner_events';
 
 import { MAX_IAC_RENDER_INTEGRATIONS, RenderIacTemplateIntegrationSchema } from './iac_provisioner';
 
@@ -382,15 +387,11 @@ export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
   reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
   // `matches` is true for a definite match, a check that could not run (fail open) and a
   // `compare: false` read (`not_checked`); `outcome` tells them apart.
-  outcome: schema.oneOf([
-    schema.literal('matches'),
-    schema.literal('no_key'),
-    schema.literal('key_mismatch'),
-    schema.literal('unsupported_provider'),
-    schema.literal('no_integrations'),
-    schema.literal('key_unavailable'),
-    schema.literal('not_checked'),
-  ]),
+  outcome: schema.oneOf(
+    IAC_KEY_VERIFICATION_OUTCOMES.map((outcome) => schema.literal(outcome)) as [
+      Type<IacKeyVerificationOutcome>
+    ]
+  ),
   deploymentId: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),
   // Same shape and size limit as the render route takes, so the browser can re-render exactly
