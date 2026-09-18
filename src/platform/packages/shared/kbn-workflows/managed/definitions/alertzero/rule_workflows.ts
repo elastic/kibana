@@ -76,6 +76,6 @@ export const ALERTZERO_RULE_CREATION_WORKFLOW = {
   id: ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

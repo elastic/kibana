@@ -237,11 +237,11 @@ describe('Detection Coverage review', () => {
     // Without an investigation there is nowhere to propose, so a failed create must
     // fail the run rather than continue into a proposal with an empty conversation id.
     // A check without a verdict asks nobody, so it opens nothing either.
-    it('opens an investigation from the template for every verdict but no_coverage', () => {
+    it('opens an investigation from the template for every verdict', () => {
       const create = stepByName('create_investigation');
       expect(create?.type).toBe('ai.conversation.create');
       expect(create?.with?.template_id).toBe('investigation');
-      expect(create?.if).toContain("verdict != 'no_coverage'");
+      expect(create?.if).not.toContain('no_coverage');
       expect(create?.if).toContain('verdict != null');
       expect(create?.if).toContain("verdict != ''");
       expect(create).not.toHaveProperty('on-failure');
@@ -360,10 +360,11 @@ describe('Detection Coverage review', () => {
     // The gate types actionInput as an object, so action-less proposals omit the keys
     // rather than pass an empty value. With no action to inherit a category from, they
     // must name their own queue bucket or fall into the uncategorized fallback.
-    it.each([
+    const actionless: Array<[string, string]> = [
       ['propose_confirm', 'configure'],
-      ...REPORT_STEPS.map((name) => [name, 'investigate'] as const),
-    ])('%s carries no action but names its category', (name, category) => {
+      ...REPORT_STEPS.map((name): [string, string] => [name, 'investigate']),
+    ];
+    it.each(actionless)('%s carries no action but names its category', (name, category) => {
       const inputs = inputsOf(stepByName(name));
       expect(inputs).not.toHaveProperty('actionWorkflowId');
       expect(inputs).not.toHaveProperty('actionInput');
@@ -376,12 +377,17 @@ describe('Detection Coverage review', () => {
       );
     });
 
-    it('dispatches rule creation only for no_coverage and outside the gate', () => {
+    // The creation worker runs its own proposal gate, on the investigation this
+    // review opened, so the analyst sees one record for the gap.
+    it('dispatches rule creation only for no_coverage, on the same investigation', () => {
       const creation = stepByName('run_rule_creation');
       expect(creation?.type).toBe('workflow.execute');
       expect(creation?.with?.['workflow-id']).toBe(ALERTZERO_RULE_CREATION_WORKFLOW_ID);
       expect(creation?.['on-failure']?.continue).toBe(true);
       expect(inputsOf(creation).gap_description).toBe('{{ steps.gap.output.description }}');
+      expect(inputsOf(creation).investigation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
     });
 
     // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up to
@@ -497,6 +503,14 @@ describe('Detection Coverage review', () => {
       for (const name of REPORT_STEPS) {
         expect(String(decision?.approved)).toContain(`steps.${name}.output.decision == 'approved'`);
       }
+      // The creation child reports its own gate's decision, so the investigation
+      // closes on that path too.
+      expect(String(decision?.approved)).toContain(
+        "steps.run_rule_creation.output.decision == 'approved'"
+      );
+      expect(String(decision?.dismissed)).toContain(
+        "steps.run_rule_creation.output.decision == 'dismissed'"
+      );
       for (const name of PROPOSAL_STEPS) {
         expect(String(decision?.dismissed)).toContain(
           `steps.${name}.output.decision == 'dismissed'`
@@ -588,22 +602,23 @@ describe('Detection Coverage review', () => {
 
     it('reads reviewed from the creation worker, not created, so a dismissal still processes', () => {
       expect(creationDefinition.outputs?.map((output) => output.name)).toEqual(
-        expect.arrayContaining(['created', 'reviewed', 'rule_name'])
+        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name'])
       );
       expect(creationEmit?.reviewed).toContain(
-        'steps.review_creation.output.response.approved == true'
+        "steps.propose_creation.output.decision == 'approved'"
       );
       expect(creationEmit?.reviewed).toContain(
-        'steps.review_creation.output.response.approved == false'
+        "steps.propose_creation.output.decision == 'dismissed'"
       );
       expect(
         evaluateExpression(creationEmit?.reviewed ?? '', {
-          steps: { review_creation: { output: { response: { approved: false } } } },
+          steps: { propose_creation: { output: { decision: 'dismissed' } } },
         })
       ).toBe(true);
+      // An expired gate carries no decision and must leave the indicator pending.
       expect(
         evaluateExpression(creationEmit?.reviewed ?? '', {
-          steps: { review_creation: { output: {} } },
+          steps: { propose_creation: { output: { status: 'expired', decision: '' } } },
         })
       ).toBe(false);
     });

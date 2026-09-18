@@ -1,7 +1,7 @@
 version: "1"
 name: Create detection rule
 description: >
-  AlertZero action: creates a custom query detection rule. Executed by the
+  AlertZero action: creates a detection rule, disabled. Executed by the
   investigation proposal gate once an analyst approves, so the rule is
   attributed to the approver.
 enabled: true
@@ -16,7 +16,7 @@ consts:
   # live under `consts`: unknown top-level keys are stripped by the schema.
   actionMetadata:
     name: Create detection rule
-    description: Creates a new, disabled custom query detection rule.
+    description: Creates a new, disabled detection rule.
     category: configure
     impact: low
     reversible: true
@@ -30,8 +30,17 @@ triggers:
           description: >
             Rule fields. Every action workflow takes a single `actionInput`
             object so the generic gate workflow never needs to know an
-            action's parameter names.
+            action's parameter names. With `type` set the object is the full
+            create-rule request body and is passed through as is; without it
+            the bare fields build a custom query rule.
           properties:
+            type:
+              type: string
+              enum: ["query", "esql"]
+              description: Rule type. Omit to build a custom query rule from the bare fields.
+            language:
+              type: string
+              enum: ["kuery", "lucene", "esql"]
             name:
               type: string
               description: Rule name.
@@ -40,22 +49,36 @@ triggers:
               description: Rule description.
             query:
               type: string
-              description: KQL query the rule runs.
+              description: Query the rule runs.
             index:
               type: array
               items:
                 type: string
-              description: Index patterns the rule searches.
+              description: Index patterns a query rule searches. An ES|QL rule names its source in the query.
+            interval:
+              type: string
+            from:
+              type: string
+            to:
+              type: string
             severity:
               type: string
               enum: ["low", "medium", "high", "critical"]
             risk_score:
               type: number
+            threat:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            tags:
+              type: array
+              items:
+                type: string
           required:
             - name
             - description
             - query
-            - index
       required:
         - actionInput
       additionalProperties: false
@@ -67,8 +90,19 @@ outputs:
 steps:
   # Always creates the rule disabled — the step ignores `rule.enabled`. Add a
   # `security.enableRule` step if an active rule is ever wanted.
-  - name: create_rule
+  #
+  # A caller that drafted the whole rule (the creation worker drafts ES|QL rules)
+  # hands over the request body; the API validates it per type.
+  - name: create_drafted_rule
     type: security.createRule
+    if: "${{ inputs.actionInput.type != null }}"
+    with:
+      rule: "${{ inputs.actionInput }}"
+
+  # Bare fields build a custom query rule, the original contract.
+  - name: create_query_rule
+    type: security.createRule
+    if: "${{ inputs.actionInput.type == null }}"
     with:
       rule:
         type: query
@@ -86,5 +120,5 @@ steps:
     type: workflow.output
     status: completed
     with:
-      ruleId: "{{ steps.create_rule.output.id }}"
-      ruleName: "{{ steps.create_rule.output.name }}"
+      ruleId: "{{ steps.create_drafted_rule.output.id | default: steps.create_query_rule.output.id }}"
+      ruleName: "{{ steps.create_drafted_rule.output.name | default: steps.create_query_rule.output.name }}"

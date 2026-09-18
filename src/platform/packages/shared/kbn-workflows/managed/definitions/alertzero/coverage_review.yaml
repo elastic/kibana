@@ -5,9 +5,9 @@ description: >
   whether a rule covers the gap, opens an investigation for the analyst, and records the
   cheapest fix as a proposal on it: enable a disabled rule, install a prebuilt rule, or
   confirm an enabled rule already covers the gap. The action runs only once an analyst
-  approves. Without a rule, starts rule creation. After a decision, marks the indicator
-  processed. Without a decision, or when an approved action changed nothing, the
-  indicator stays pending.
+  approves. Without a rule, drafts one and proposes it on the same investigation. After
+  a decision, marks the indicator processed. Without a decision, or when an approved
+  action changed nothing, the indicator stays pending.
 enabled: true
 tags:
   - security
@@ -173,17 +173,16 @@ steps:
 
   # Human-facing record of this review, deliberately separate from coverage_check's
   # own conversation: the agent transcript stays opaque, the investigation is where
-  # analysts collaborate and where the proposal attaches its decision. Public so
-  # anyone in the space can pick it up. Skipped without a verdict (nobody is asked)
-  # and for no_coverage, where the creation worker owns the analyst interaction. No
-  # on-failure: without an investigation there is nowhere to propose, so the review
-  # fails and the indicator stays pending.
+  # analysts collaborate and where every proposal attaches its decision, including
+  # the drafted rule on the no_coverage path. Public so anyone in the space can pick
+  # it up. Skipped without a verdict: nobody is asked. No on-failure: without an
+  # investigation there is nowhere to propose, so the review fails and the indicator
+  # stays pending.
   - name: create_investigation
     type: ai.conversation.create
     if: >-
       ${{ steps.coverage_check.output.structured_output.verdict != null
-        and steps.coverage_check.output.structured_output.verdict != ''
-        and steps.coverage_check.output.structured_output.verdict != 'no_coverage' }}
+        and steps.coverage_check.output.structured_output.verdict != '' }}
     with:
       title: "Detection coverage: {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}{{ steps.gap.output.technique }} {% endif %}{{ steps.gap.output.description | truncate: 80 }}"
       access_control:
@@ -266,6 +265,8 @@ steps:
     cases:
       - match: no_coverage
         steps:
+          # The creation worker drafts the rule and proposes it on this investigation,
+          # so the analyst sees one record for the gap whichever route it takes.
           - name: run_rule_creation
             type: workflow.execute
             on-failure:
@@ -277,6 +278,7 @@ steps:
                 gap_description: "{{ steps.gap.output.description }}"
                 evidence: "{{ steps.gap.output.evidence }}"
                 preview_invocation_count: "${{ inputs.preview_invocation_count }}"
+                investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
 
       - match: covered_disabled
         steps:
@@ -464,14 +466,16 @@ steps:
           or steps.propose_confirm.output.decision == 'approved'
           or steps.report_unresolved_rule.output.decision == 'approved'
           or steps.report_missing_version.output.decision == 'approved'
-          or steps.report_unknown_verdict.output.decision == 'approved' }}
+          or steps.report_unknown_verdict.output.decision == 'approved'
+          or steps.run_rule_creation.output.decision == 'approved' }}
       dismissed: >-
         ${{ steps.propose_enable.output.decision == 'dismissed'
           or steps.propose_install.output.decision == 'dismissed'
           or steps.propose_confirm.output.decision == 'dismissed'
           or steps.report_unresolved_rule.output.decision == 'dismissed'
           or steps.report_missing_version.output.decision == 'dismissed'
-          or steps.report_unknown_verdict.output.decision == 'dismissed' }}
+          or steps.report_unknown_verdict.output.decision == 'dismissed'
+          or steps.run_rule_creation.output.decision == 'dismissed' }}
 
   # The action ran inside the gate, so its result is not visible here; re-read the
   # rule to learn what actually landed. The enable path reads by the uuid resolved
@@ -541,7 +545,7 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
+        verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% elsif steps.run_rule_creation.output.created == true %}Analyst approved creating a new rule for the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
     on-failure:
       continue: true
 
