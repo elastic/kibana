@@ -7,14 +7,19 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
+import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
+import { detectionsDataStream } from './lib/significant_events/detections';
+import { eventsDataStream } from './lib/significant_events/events';
+import { memoriesDataStream, memoryHistoryDataStream } from './memory_and_investigation/lib/memory';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
 jest.mock('./lib/run_quotas', () => ({
-  ...jest.requireActual('./lib/run_quotas'),
   consumeRunQuota: jest.fn(),
   createRunQuotaInternalRepository: jest.fn(),
 }));
+
+jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
 
 const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
 const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
@@ -41,7 +46,7 @@ const createSetupDeps = ({
       : {}),
   } as unknown as SignificantEventsPluginSetupDependencies);
 
-describe('SignificantEventsPlugin investigation quota setup', () => {
+describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     consumeRunQuotaMock.mockResolvedValue({ allowed: true });
@@ -51,6 +56,22 @@ describe('SignificantEventsPlugin investigation quota setup', () => {
     const plugin = createPlugin();
 
     expect(() => plugin.setup(createCoreSetup(), createSetupDeps())).not.toThrow();
+  });
+
+  it('registers all Core data streams', () => {
+    const core = createCoreSetup();
+
+    createPlugin().setup(core, createSetupDeps());
+
+    expect(
+      core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
+    ).toEqual([
+      detectionsDataStream,
+      eventsDataStream,
+      knowledgeIndicatorsDataStream,
+      memoriesDataStream,
+      memoryHistoryDataStream,
+    ]);
   });
 
   it('registers a callback without accessing start services', () => {
