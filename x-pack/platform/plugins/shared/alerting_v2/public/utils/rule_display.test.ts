@@ -23,7 +23,7 @@ describe('formatAlertDelay', () => {
     expect(formatAlertDelay({ pending_count: 3 })).toBe('After 3 matches');
   });
 
-  it('describes a timeframe alongside a count of one', () => {
+  it('describes a timeframe ANDed with a count of one as a delay', () => {
     expect(
       formatAlertDelay({
         pending_count: 1,
@@ -32,6 +32,32 @@ describe('formatAlertDelay', () => {
       } as StateTransition)
     ).toBe('After 1 match and 5 min');
   });
+
+  it.each(['OR', undefined] as const)(
+    'describes a timeframe with a count of one as immediate when the operator is %s',
+    (pendingOperator) => {
+      expect(
+        formatAlertDelay({
+          pending_count: 1,
+          pending_timeframe: '5m',
+          ...(pendingOperator != null ? { pending_operator: pendingOperator } : {}),
+        } as StateTransition)
+      ).toBe('Immediate');
+    }
+  );
+
+  it.each(['AND', 'OR'] as const)(
+    'describes a pending count of zero as immediate even with a timeframe and %s',
+    (pendingOperator) => {
+      expect(
+        formatAlertDelay({
+          pending_count: 0,
+          pending_timeframe: '5m',
+          pending_operator: pendingOperator,
+        } as StateTransition)
+      ).toBe('Immediate');
+    }
+  );
 
   it('describes a timeframe on its own', () => {
     expect(formatAlertDelay({ pending_timeframe: '5m' })).toBe('After 5 min');

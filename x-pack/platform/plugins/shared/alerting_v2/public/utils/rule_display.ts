@@ -12,12 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 export const EMPTY_VALUE = '-';
 
-/**
- * The evaluation that first matches already counts towards the threshold, so counts at or
- * below this resolve on that evaluation and are shown as immediate rather than as a delay.
- */
-const IMMEDIATE_COUNT = 1;
-
 const IMMEDIATE_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.immediateValue', {
   defaultMessage: 'Immediate',
 });
@@ -98,6 +92,20 @@ const recoveryLabel = (n: number) =>
     values: { n },
   });
 
+/**
+ * Returns true when the phase resolves on the very first evaluation:
+ * - count 0: server skips the phase entirely regardless of timeframe.
+ * - count 1 + no timeframe: count is satisfied on first eval.
+ * - count 1 + timeframe + OR (default): count branch alone is sufficient.
+ * - count 1 + timeframe + AND: both dimensions required, not immediate.
+ */
+const isImmediateDelay = (count?: number, timeframe?: string, operator?: string): boolean => {
+  if (count == null) return false;
+  if (count === 0) return true;
+  if (count === 1) return timeframe == null || operator !== 'AND';
+  return false;
+};
+
 export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
   const {
     pending_count: count,
@@ -109,7 +117,7 @@ export function formatAlertDelay(stateTransition: RuleAttachmentData['state_tran
     return EMPTY_VALUE;
   }
 
-  if (count != null && count <= IMMEDIATE_COUNT && timeframe == null) {
+  if (isImmediateDelay(count, timeframe, operator)) {
     return IMMEDIATE_LABEL;
   }
 
@@ -129,7 +137,7 @@ export function formatRecoveryDelay(
     return EMPTY_VALUE;
   }
 
-  if (count != null && count <= IMMEDIATE_COUNT && timeframe == null) {
+  if (isImmediateDelay(count, timeframe, operator)) {
     return IMMEDIATE_LABEL;
   }
 
