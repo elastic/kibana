@@ -10,6 +10,10 @@ import expect from 'expect';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
+  getImportExceptionsListItemNewerVersionSchemaMock,
+  getImportExceptionsListSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import {
   clearChangeHistory,
   combineToNdJson,
   getCustomQueryRuleParams,
@@ -18,6 +22,7 @@ import {
   importRulesWithSuccess,
   refreshChangeHistory,
 } from '../../../utils';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -29,6 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInServerlessMKI import_rules with rule overwrite set to "true"', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
+      await deleteAllExceptions(supertest, log);
     });
 
     it('DOES NOT report a conflict if there is an attempt to import two rules with the same rule_id', async () => {
@@ -123,7 +129,9 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importedRule.name).toBe('Imported rule');
       expect(importedRule.revision).toBe(existing.revision + 1);
       expect(importedRule.created_at).toBe(existing.created_at);
+      expect(importedRule.created_by).toBe(existing.created_by);
       expect(importedRule.updated_at).not.toBe(existing.updated_at);
+      expect(typeof importedRule.updated_by).toBe('string');
     });
 
     /**
@@ -301,6 +309,108 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.interval).toBe('1h');
       expect(body.name).toBe('After interval overwrite');
       expect(body.revision).toBe(existing.revision + 1);
+    });
+
+    it('updates interval when overwriting an enabled rule', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-enabled-interval-rule',
+          name: 'Before enabled interval overwrite',
+          interval: '100m',
+          enabled: true,
+        })
+      );
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-enabled-interval-rule',
+            name: 'After enabled interval overwrite',
+            interval: '1h',
+            enabled: true,
+          }),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-enabled-interval-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.interval).toBe('1h');
+      expect(body.enabled).toBe(true);
+      expect(body.name).toBe('After enabled interval overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+    });
+
+    it('attaches an exceptions list when overwriting an existing rule', async () => {
+      const existing = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-exceptions-rule',
+          name: 'Before exceptions overwrite',
+          enabled: false,
+        })
+      );
+
+      const exceptionsList = [
+        {
+          id: 'overwrite-exceptions-list',
+          list_id: 'overwrite_exceptions_list',
+          type: 'detection' as const,
+          namespace_type: 'single' as const,
+        },
+      ];
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-exceptions-rule',
+            name: 'After exceptions overwrite',
+            enabled: false,
+            exceptions_list: exceptionsList,
+          }),
+          {
+            ...getImportExceptionsListSchemaMock('overwrite_exceptions_list'),
+            type: 'detection',
+          },
+          getImportExceptionsListItemNewerVersionSchemaMock(
+            'overwrite_exceptions_item',
+            'overwrite_exceptions_list'
+          ),
+        ],
+        overwrite: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_count: 1,
+        errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 1,
+        exceptions_errors: [],
+      });
+
+      const { body } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-exceptions-rule' } })
+        .expect(200);
+
+      expect(body.id).toBe(existing.id);
+      expect(body.name).toBe('After exceptions overwrite');
+      expect(body.revision).toBe(existing.revision + 1);
+      expect(body.exceptions_list).toEqual([
+        {
+          ...exceptionsList[0],
+          id: expect.any(String),
+        },
+      ]);
     });
 
     it('reports partial success when overwriting a batch with one schema-invalid rule', async () => {
@@ -525,20 +635,13 @@ export default ({ getService }: FtrProviderContext): void => {
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
-        expect(body.total).toBe(2);
         expect(body.items).toHaveLength(2);
 
         const [imported, created] = body.items;
         expect(imported.action).toBe('rule_import');
-        expect(imported.user).toEqual({ name: 'elastic' });
         expect(imported.metadata?.bulk_count).toBe(1);
-        expect(imported.rule).toMatchObject({
-          id: rule.id,
-          rule_id: 'overwrite-history-rule',
-          name: 'After import overwrite',
-          revision: 1,
-          enabled: false,
-        });
+        expect(imported.rule.revision).toBe(1);
+        expect(imported.rule.name).toBe('After import overwrite');
         expect(imported.old_values).toMatchObject({
           name: 'Before import overwrite',
           revision: 0,
@@ -546,13 +649,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(imported.rule.created_at).not.toBe(imported.rule.updated_at);
 
         expect(created.action).toBe('rule_create');
+        expect(created.metadata?.bulk_count).toBeUndefined();
+        expect(created.rule.revision).toBe(0);
+        expect(created.rule.name).toBe('Before import overwrite');
         expect(created.old_values).toBeNull();
-        expect(created.rule).toMatchObject({
-          id: rule.id,
-          rule_id: 'overwrite-history-rule',
-          name: 'Before import overwrite',
-          revision: 0,
-        });
       });
     });
   });

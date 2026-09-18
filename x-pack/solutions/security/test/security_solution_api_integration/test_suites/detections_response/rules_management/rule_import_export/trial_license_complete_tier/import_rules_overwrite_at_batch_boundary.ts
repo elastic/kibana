@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { range } from 'lodash';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '../../../utils';
 
@@ -17,9 +18,7 @@ import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '.
  * FTR coverage report / https://github.com/elastic/kibana/issues/275204
  */
 const RULE_COUNT = 568;
-
-/** Matches `RULE_IMPORT_BATCH_SIZE` — one route chunk / one alerting bulk. */
-const BATCH_SIZE = 200;
+const BATCH_SIZE = RULE_IMPORT_BULK_CREATE_BATCH_SIZE;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -93,8 +92,18 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.total).toBe(RULE_COUNT);
       expect(body.data).toHaveLength(RULE_COUNT);
 
-      // Ends/starts of 200-rule chunks plus a few mids — not every rule.
-      const sampleIndexes = [0, 50, 199, 200, 300, 399, 400, 500, RULE_COUNT - 1];
+      // Ends/starts of each chunk plus a few mids — not every rule.
+      const sampleIndexes = [
+        0,
+        50,
+        BATCH_SIZE - 1,
+        BATCH_SIZE,
+        300,
+        BATCH_SIZE * 2 - 1,
+        BATCH_SIZE * 2,
+        500,
+        RULE_COUNT - 1,
+      ];
       for (const i of sampleIndexes) {
         const ruleId = `overwrite-batch-rule-${i}`;
         const found = body.data.find(
