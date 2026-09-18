@@ -1000,8 +1000,7 @@ async function installPackageByUpload({
     // Throwing here (before setLastUploadInstallCache) keeps the install record untouched so
     // the caller can retry; throwing inside the state machine would mark the record install_failed.
     if (authorizedSpaces.length > 0 && installedPkg) {
-      const primarySpaceId =
-        installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+      const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
       const isAdditionalSpaceInstall = primarySpaceId !== spaceId;
       if (!isAdditionalSpaceInstall) {
         const newSpaces = Object.keys(

@@ -17,13 +17,7 @@ import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install
 import { indexPatternTypes } from '../../../kibana/index_pattern/install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const {
-    savedObjectsClient,
-    logger,
-    installedPkg,
-    packageInstallContext,
-    spaceId,
-  } = context;
+  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
