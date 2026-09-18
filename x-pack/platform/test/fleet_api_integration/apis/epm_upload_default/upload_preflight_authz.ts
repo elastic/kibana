@@ -147,6 +147,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'test-rule-id',
         type: 'security-rule',
         attributes: {
+          rule_id: 'test-rule-ok',
           name: 'Test Rule',
           type: 'query',
           query: 'event.action: *',
