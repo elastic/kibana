@@ -25,25 +25,25 @@ import type { SignificantEvent } from './data_stream';
  * - space_id is not set here — the request-scoped client injects it
  */
 export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
-  const data: Record<string, unknown> = {
-    event_id: event.event_id,
-    // rule_name is the alerting v2 UI display-name convention (read by the alerts UI)
-    rule_name: event.title,
-    title: event.title,
-    summary: event.summary,
-    confidence: event.confidence,
-    stream_names: event.stream_names,
-  };
-
-  if (event.symptom_hypothesis !== undefined) data.symptom_hypothesis = event.symptom_hypothesis;
-  if (event.assessment_note !== undefined) data.assessment_note = event.assessment_note;
-  if (event.signals !== undefined) data.signals = event.signals;
-  if (event.causal_features !== undefined) data.causal_features = event.causal_features;
-  if (event.blast_radius !== undefined) data.blast_radius = event.blast_radius;
-  if (event.investigations !== undefined) data.investigations = event.investigations;
-  if (event.workflow_execution_id !== undefined)
-    data.workflow_execution_id = event.workflow_execution_id;
-  if (event.conversation_id !== undefined) data.conversation_id = event.conversation_id;
+  const data = Object.fromEntries(
+    Object.entries({
+      event_id: event.event_id,
+      // rule_name is the alerting v2 UI display-name convention (read by the alerts UI)
+      rule_name: event.title,
+      title: event.title,
+      summary: event.summary,
+      confidence: event.confidence,
+      stream_names: event.stream_names,
+      symptom_hypothesis: event.symptom_hypothesis,
+      assessment_note: event.assessment_note,
+      signals: event.signals,
+      causal_features: event.causal_features,
+      blast_radius: event.blast_radius,
+      investigations: event.investigations,
+      workflow_execution_id: event.workflow_execution_id,
+      conversation_id: event.conversation_id,
+    }).filter(([_k, v]) => v !== undefined)
+  );
 
   return {
     source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
