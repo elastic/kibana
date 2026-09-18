@@ -238,6 +238,115 @@ describe('buildStepExecutionsTree', () => {
     });
   });
 
+  describe('with runtime foreach-iteration steps', () => {
+    it('nests consoles under real iteration steps, not scopeId indices', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-foreach',
+          stepId: 'loop',
+          stepType: 'foreach',
+          status: ExecutionStatus.RUNNING,
+          stepExecutionIndex: 0,
+          scopeStack: [],
+        }),
+        createStepExecution({
+          id: 'exec-iter-0',
+          stepId: 'iteration-0',
+          stepType: 'foreach-iteration',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-console-0',
+          stepId: 'log',
+          stepType: 'console',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+            {
+              stepId: 'iteration-0',
+              nestedScopes: [
+                { nodeId: 'enterSynthetic_iteration-0', nodeType: 'enter-foreach-iteration' },
+              ],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-iter-1',
+          stepId: 'iteration-1',
+          stepType: 'foreach-iteration',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 1,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-console-1',
+          stepId: 'log',
+          stepType: 'console',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 1,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+            {
+              stepId: 'iteration-1',
+              nestedScopes: [
+                { nodeId: 'enterSynthetic_iteration-1', nodeType: 'enter-foreach-iteration' },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions);
+
+      expect(result[0].children).toHaveLength(2);
+      expect(result[0].children[0]).toEqual(
+        expect.objectContaining({
+          stepId: 'iteration-0',
+          stepType: 'foreach-iteration',
+          stepExecutionId: 'exec-iter-0',
+          children: [
+            expect.objectContaining({
+              stepId: 'log',
+              stepExecutionId: 'exec-console-0',
+            }),
+          ],
+        })
+      );
+      expect(result[0].children[1]).toEqual(
+        expect.objectContaining({
+          stepId: 'iteration-1',
+          stepType: 'foreach-iteration',
+          stepExecutionId: 'exec-iter-1',
+          children: [
+            expect.objectContaining({
+              stepId: 'log',
+              stepExecutionId: 'exec-console-1',
+            }),
+          ],
+        })
+      );
+    });
+  });
+
   describe('with nested if/else steps', () => {
     it('should build tree with if parent and branch children', () => {
       const stepExecutions: WorkflowStepExecutionDto[] = [
