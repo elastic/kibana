@@ -310,6 +310,24 @@ describe('validateReadOnlyQuery', () => {
     it('accepts a dotted reference to an allowlisted physical table', () => {
       expect(validateReadOnlyQuery('SELECT * FROM main.processes', ALLOWED)).toBeNull();
     });
+
+    it('does not exempt a schema-qualified reference via a matching CTE alias', () => {
+      // `main.sqlite_master` always resolves to the physical table: a qualified
+      // reference is never the CTE, so the alias exemption must not apply. The
+      // sibling `main.curl` case only fails closed because `curl` is denylisted.
+      expect(
+        validateReadOnlyQuery(
+          'WITH sqlite_master AS (SELECT 1) SELECT * FROM main.sqlite_master',
+          ALLOWED
+        )
+      ).toMatch(/not in the Osquery schema catalog/i);
+    });
+
+    it('still exempts an unqualified reference to a CTE alias', () => {
+      expect(
+        validateReadOnlyQuery('WITH secret_table AS (SELECT 1) SELECT * FROM secret_table', ALLOWED)
+      ).toBeNull();
+    });
   });
 
   describe('denylist additions', () => {

@@ -93,6 +93,12 @@ const physicalTableName = (ref: string): string => {
 };
 
 /**
+ * A reference with no schema qualifier (`processes`), as opposed to a qualified
+ * one (`main.processes`).
+ */
+const isUnqualifiedRef = (ref: string): boolean => !ref.includes('.');
+
+/**
  * Validates that an Osquery SQL query is read-only and only references tables
  * present in the SchemaService catalog (the extensible allowlist).
  *
@@ -172,9 +178,21 @@ export const validateReadOnlyQuery = (
     )}. These tables perform host-side actions (HTTP requests, file carving, YARA scans, network or radio side effects) even in a SELECT.`;
   }
 
-  const unknown = [...new Set(physicalRefs)].filter(
-    (t) => !allowedTables.has(t) && !cteAliases.has(t)
-  );
+  // The CTE exemption applies to UNQUALIFIED references only: SQLite resolves a
+  // qualified name (`main.sqlite_master`) to the physical table and never to a
+  // CTE, so exempting it because its last segment matches a CTE alias would let
+  // a catalog-omitted physical table reach dispatch (github-actions #4975398841).
+  const unknown = [
+    ...new Set(
+      tableRefs
+        .filter(
+          (ref) =>
+            !allowedTables.has(physicalTableName(ref)) &&
+            !(isUnqualifiedRef(ref) && cteAliases.has(ref.toLowerCase()))
+        )
+        .map(physicalTableName)
+    ),
+  ];
   if (unknown.length > 0) {
     return `Table(s) not in the Osquery schema catalog (allowlist): ${unknown.join(
       ', '
