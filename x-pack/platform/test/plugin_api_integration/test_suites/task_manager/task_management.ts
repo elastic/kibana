@@ -1936,11 +1936,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       await runTaskSoon({ id: longRunningTask.id });
 
-      // ensure task is running
+      // ensure task is running and capture when this execution was due
+      let dueRunAt: string;
       await retry.try(async () => {
         const task = await currentTask(longRunningTask.id);
 
         expect(task.status).to.be('running');
+        dueRunAt = task.runAt;
       });
 
       await retry.try(async () => {
@@ -1950,22 +1952,22 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updates.errors.length).to.be(0);
       });
 
-      // the running task's schedule is updated in place while it is still running
-      let runningRunAt: number;
+      // the running task's schedule is updated in place while it is still running, runAt is untouched
       await retry.try(async () => {
         const task = await currentTask(longRunningTask.id);
 
         expect(task.status).to.be('running');
         expect(task.schedule).to.eql({ interval: '3h' });
-        runningRunAt = Date.parse(task.runAt);
+        expect(task.runAt).to.be(dueRunAt);
       });
 
+      // once the run finishes, the next runAt is one 3h interval from this run's due time
       await retry.tryForTime(150000, async () => {
         const task = await currentTask(longRunningTask.id);
 
         expect(task.status).to.be('idle');
         expect(task.schedule).to.eql({ interval: '3h' });
-        expectReschedule(runningRunAt, task, 3 * 60 * 60 * 1000);
+        expectReschedule(Date.parse(dueRunAt), task, 3 * 60 * 60 * 1000);
       });
     });
 

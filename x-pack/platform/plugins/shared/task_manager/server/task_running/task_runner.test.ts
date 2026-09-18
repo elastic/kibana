@@ -1502,10 +1502,12 @@ describe('TaskManagerRunner', () => {
 
     test('does not revert a schedule that was updated while the task was running', async () => {
       let wasCancelled = false;
+      const runAt = new Date();
       const { runner, store, logger, instance } = await readyToRunStageSetup({
         instance: {
           id: 'foo',
           status: TaskStatus.Running,
+          runAt,
           startedAt: new Date(),
           enabled: true,
           schedule: { interval: '1h' },
@@ -1531,7 +1533,8 @@ describe('TaskManagerRunner', () => {
       });
 
       // Another writer (e.g. bulkUpdateSchedules with includeRunningTasks) changed the schedule
-      // to 3h and bumped the version while the task was running.
+      // to 3h and bumped the version while the task was running. `runAt` is left untouched for
+      // running tasks, so it still reflects when this execution was due.
       const currentTask = {
         ...instance,
         version: 'WzIsMV0=',
@@ -1555,9 +1558,13 @@ describe('TaskManagerRunner', () => {
         'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
         expect.anything()
       );
-      // Completion persists the externally-updated 3h schedule, not the runner's stale 1h schedule.
+      // Completion persists the externally-updated 3h schedule, not the runner's stale 1h schedule,
+      // and the next runAt is one 3h interval from this run's due time.
       expect(store.partialUpdate).toHaveBeenLastCalledWith(
-        expect.objectContaining({ schedule: { interval: '3h' } }),
+        expect.objectContaining({
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
         expect.objectContaining({ validate: expect.any(Boolean) })
       );
     });

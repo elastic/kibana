@@ -1084,11 +1084,13 @@ describe('TaskScheduling', () => {
       ]);
     });
 
-    test('should update running task with new schedule if includeRunningTasks is true', async () => {
+    test('should update running task schedule without changing runAt if includeRunningTasks is true', async () => {
+      const runAt = new Date('2024-01-01T10:00:00.000Z');
       const task = taskManagerMock.createTask({
         id,
         schedule: { interval: '3h' },
         status: TaskStatus.Running,
+        runAt,
       });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -1102,16 +1104,17 @@ describe('TaskScheduling', () => {
 
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
-      expect(bulkUpdatePayload).toHaveLength(1);
-      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
-      expect(bulkUpdatePayload[0].runAt).toBeInstanceOf(Date);
+      expect(bulkUpdatePayload).toEqual([{ ...task, schedule: { interval: '5h' } }]);
+      expect(bulkUpdatePayload[0].runAt).toBe(runAt);
     });
 
-    test('should update claiming task if includeRunningTasks is true', async () => {
+    test('should update claiming task schedule without changing runAt if includeRunningTasks is true', async () => {
+      const runAt = new Date('2024-01-01T10:00:00.000Z');
       const task = taskManagerMock.createTask({
         id,
         schedule: { interval: '3h' },
         status: TaskStatus.Claiming,
+        runAt,
       });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -1125,8 +1128,8 @@ describe('TaskScheduling', () => {
 
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
-      expect(bulkUpdatePayload).toHaveLength(1);
-      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
+      expect(bulkUpdatePayload).toEqual([{ ...task, schedule: { interval: '5h' } }]);
+      expect(bulkUpdatePayload[0].runAt).toBe(runAt);
     });
 
     test('should not update failed task even if includeRunningTasks is true', async () => {

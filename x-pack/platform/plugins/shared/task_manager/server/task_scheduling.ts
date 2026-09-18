@@ -261,7 +261,8 @@ export class TaskScheduling {
   /**
    * Bulk updates schedules for tasks by ids.
    * By default only tasks with `idle` status are updated. Pass `includeRunningTasks: true` to also
-   * update running/claiming tasks.
+   * update running/claiming tasks; for those only `schedule` (and API keys) are written, and the
+   * next `runAt` is derived from the new schedule when the current run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @param {BulkUpdateSchedulesOptions} options  - API key options and `includeRunningTasks` flag
@@ -288,6 +289,12 @@ export class TaskScheduling {
       map: (task) => {
         if (isEqual(task.schedule, schedule)) {
           return task;
+        }
+
+        // For a running/claiming task `runAt` is the time the current execution was due; the task
+        // runner computes the next `runAt` from it and the new schedule once the run completes.
+        if (task.status !== TaskStatus.Idle) {
+          return { ...task, schedule };
         }
 
         const newRunAtInMs = calculateNextRunAtFromSchedule({

@@ -428,7 +428,8 @@ export class TaskManagerRunner implements TaskRunner {
         );
 
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
-        const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+        const stopUpdatingLongRunningTasks =
+          this.updateRetryAtOnIntervalForLongRunningTasks(startedAt);
 
         try {
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
@@ -975,7 +976,7 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private updateRetryAtOnIntervalForLongRunningTasks() {
+  private updateRetryAtOnIntervalForLongRunningTasks(startedAt: Date) {
     let stopped = false;
 
     const updateRetryAt = async () => {
@@ -992,16 +993,15 @@ export class TaskManagerRunner implements TaskRunner {
               tags: [this.id, this.taskType],
             }
           );
-          this.instance = asReadyToRun(
-            (await this.bufferedTaskStore.partialUpdate(
-              {
-                id: taskInstance.id,
-                version: taskInstance.version,
-                retryAt: updatedRetryAt,
-              },
-              { validate: false, doc: taskInstance }
-            )) as ConcreteTaskInstanceWithStartedAt
+          const updatedTask = await this.bufferedTaskStore.partialUpdate(
+            {
+              id: taskInstance.id,
+              version: taskInstance.version,
+              retryAt: updatedRetryAt,
+            },
+            { validate: false, doc: taskInstance }
           );
+          this.instance = asReadyToRun({ ...updatedTask, startedAt });
         } catch (error) {
           if (isVersionConflictError(error)) {
             let currentTask: ConcreteTaskInstance | undefined;
@@ -1009,7 +1009,7 @@ export class TaskManagerRunner implements TaskRunner {
               currentTask = await this.bufferedTaskStore.get(this.id);
             } catch (e) {
               this.logger.warn(
-                `Unable to update retryAt for long running task: ${this.id} - could not re-read current task after conflict: ${e.message}`,
+                `Unable to update retryAt for long running task: ${this.id} - could not re-read the current task document to check for a reclaim (${e.message}), will retry on the next interval`,
                 { tags: [this.id, this.taskType] }
               );
             }
@@ -1025,7 +1025,7 @@ export class TaskManagerRunner implements TaskRunner {
               await this.cancel();
             } else if (currentTask) {
               // Update to the current task, and retryAt on the next interval.
-              this.instance = asReadyToRun(currentTask as ConcreteTaskInstanceWithStartedAt);
+              this.instance = asReadyToRun({ ...currentTask, startedAt });
               this.logger.warn(
                 `Conflict error trying to update retryAt for a long-running task: ${this.id} - updated to the current task document, will retry on the next interval`,
                 { tags: [this.id, this.taskType] }
