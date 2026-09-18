@@ -12,16 +12,16 @@ interface TruncateMessageResult {
 }
 
 export const truncateMessage = (message: string, maxLength: number): TruncateMessageResult => {
-  const characters = Array.from(message.trim());
-  const originalLength = characters.length;
+  const originalLength = Array.from(message).length;
 
   if (originalLength <= maxLength) {
-    return { originalLength, truncated: false, value: characters.join('') };
+    return { originalLength, truncated: false, value: message };
   }
 
   return {
     originalLength,
     truncated: true,
-    value: characters.slice(0, maxLength).join(''),
+    // Trim only when over the limit so in-limit messages are forwarded unchanged.
+    value: Array.from(message.trim()).slice(0, maxLength).join(''),
   };
 };

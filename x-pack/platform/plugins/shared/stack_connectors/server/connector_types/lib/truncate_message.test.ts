@@ -42,17 +42,25 @@ describe('truncateMessage', () => {
     });
   });
 
-  it('trims leading whitespace before measuring length', () => {
-    expect(truncateMessage(`${' '.repeat(130)}alert`, 130)).toEqual({
-      originalLength: 5,
+  it('returns a short message unchanged, including surrounding whitespace', () => {
+    expect(truncateMessage('  alert  ', 130)).toEqual({
+      originalLength: 9,
       truncated: false,
+      value: '  alert  ',
+    });
+  });
+
+  it('trims leading whitespace from an over-limit message', () => {
+    expect(truncateMessage(`${' '.repeat(130)}alert`, 130)).toEqual({
+      originalLength: 135,
+      truncated: true,
       value: 'alert',
     });
   });
 
   it('truncates to maxLength after trimming leading whitespace from long content', () => {
     expect(truncateMessage(`${' '.repeat(10)}${'a'.repeat(131)}`, 130)).toEqual({
-      originalLength: 131,
+      originalLength: 141,
       truncated: true,
       value: 'a'.repeat(130),
     });
