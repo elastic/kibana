@@ -93,6 +93,16 @@ describe('fileConsumesKey', () => {
     expect(fileConsumesKey(content, 'globalSearch')).toBe(true);
   });
 
+  it('parses .ts files as TypeScript so TS-only syntax does not hide later accesses', () => {
+    const content = [
+      `const identity = <T>(value: T) => value;`,
+      `const size = <number>someValue;`,
+      `await pageObjects.dashboard.goto();`,
+    ].join('\n');
+
+    expect(fileConsumesKey(content, 'dashboard')).toBe(true);
+  });
+
   it('does not treat a typed function parameter as a pageObjects destructure', () => {
     const content = [
       `export async function openInlineEditor({ dashboard, lens }: DashboardAndLens) {`,

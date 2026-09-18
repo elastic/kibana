@@ -73,12 +73,15 @@ const isPageObjectsReference = (node: ts.Node): boolean => {
  * are not counted.
  */
 export function collectConsumedKeys(fileContent: string, fileName = 'file.ts'): Set<string> {
+  // Parse `.ts` as TS, not TSX: generic arrows like `<T>(v: T) => v` are valid
+  // TypeScript but ambiguous in TSX, and a mis-parse would silently drop later
+  // `pageObjects` accesses from the census.
   const source = ts.createSourceFile(
     fileName,
     fileContent,
     ts.ScriptTarget.Latest,
     false,
-    ts.ScriptKind.TSX
+    fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
   );
   const keys = new Set<string>();
 
