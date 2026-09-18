@@ -235,6 +235,12 @@ describe('scoreCallOrder', () => {
     expect(r.metadata.exploredAfterDraft).toEqual([SKILL]);
   });
 
+  it('flags internal exploratory tools after drafting, not just registry tools', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE, 'read_file', 'bash', ATTACH_READ]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.exploredAfterDraft).toEqual(['read_file', 'bash']);
+  });
+
   it('fails a run that never drafted', () => {
     const r = scoreCallOrder(settled([SKILL, LABS]));
     expect(r.score).toBe(0);

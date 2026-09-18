@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
-import { internalTools, isInternalTool } from '@kbn/agent-builder-common/tools';
+import { internalTools, isAttachmentTool } from '@kbn/agent-builder-common/tools';
 import { RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { extractConversationId, toolSpanJoinClauses, LLM_ISSUED_TOOL_SPAN } from './tool_routing';
@@ -200,12 +200,8 @@ export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
   const firstDraft = toolNames.indexOf(RULE_CREATION_TOOL_ID);
   const skillLoaded = toolNames.indexOf(internalTools.loadSkill);
   const drafts = toolNames.filter((name) => name === RULE_CREATION_TOOL_ID).length;
-  // After drafting, only previewing, redrafting, and Agent Builder's own tools (attachment
-  // reads/renders) are expected; anything else is research the skill says comes before.
   const expectedAfterDraft = (name: string) =>
-    name === RULE_CREATION_TOOL_ID ||
-    name === RULE_PREVIEW_TOOL_ID ||
-    (isInternalTool(name) && name !== internalTools.loadSkill);
+    name === RULE_CREATION_TOOL_ID || name === RULE_PREVIEW_TOOL_ID || isAttachmentTool(name);
   const exploredAfterDraft =
     firstDraft === -1 ? [] : toolNames.slice(firstDraft + 1).filter((n) => !expectedAfterDraft(n));
 
