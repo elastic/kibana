@@ -21664,7 +21664,6 @@
     "xpack.fleet.agentPolicyForm.diagnosticsRateLimitDescription": "Ratenlimit für den „Request Diagnostics Action Handler“. Beeinflusst die über die CLI erfassten Diagnosedaten nicht. {learnMoreLink}.",
     "xpack.fleet.agentPolicyForm.diagnosticsRateLimitDescription.learnMoreLinkLabel": "Weitere Informationen",
     "xpack.fleet.agentPolicyForm.diagnosticsRateLimitLabel": "Diagnoseratebegrenzung",
-    "xpack.fleet.agentPolicyForm.downloadSourceDescription": "Wenn eine Upgrade-Aktion ausgeführt wird, werden die Agenten die Binärdatei von diesem Speicherort herunterladen.",
     "xpack.fleet.agentPolicyForm.downloadSourceLabel": "Agent-Binärdatei herunterladen",
     "xpack.fleet.agentPolicyForm.enableHttpMonitoringLabel": "Aktivieren Sie den HTTP Endpoint bei {monitoringEndpoint}",
     "xpack.fleet.agentPolicyForm.enableHttpMonitoringPprofLabel": "Aktivieren Sie das Profiling bei {profilingEndpoint}",
