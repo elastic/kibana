@@ -295,50 +295,6 @@ describe('InvestigationOutput', () => {
     expect(action).toHaveFocus();
   });
 
-  it('retains recommendation details across equivalent state refreshes and closes them after a change', async () => {
-    const user = userEvent.setup();
-    const { rerender } = renderWithI18n(
-      <InvestigationOutput status="complete" state={finalState} />
-    );
-
-    await user.click(
-      screen.getByRole('button', {
-        name: /Roll back the deployment that introduced the regression/,
-      })
-    );
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-
-    rerender(
-      <I18nProvider>
-        <InvestigationOutput
-          status="complete"
-          state={{
-            ...finalState,
-            recommendations: finalState.recommendations?.map((recommendation) => ({
-              ...recommendation,
-            })),
-          }}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-
-    rerender(
-      <I18nProvider>
-        <InvestigationOutput
-          status="complete"
-          state={{
-            ...finalState,
-            recommendations: [{ title: 'Inspect the new investigation', confidence: 0.8 }],
-          }}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  });
-
   it('renders the conclusion on its own when no recommendations or blind spots were reported', () => {
     const conclusionOnly: InvestigationState = {
       summary: finalState.summary,

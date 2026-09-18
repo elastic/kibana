@@ -191,14 +191,6 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
   const { conclusion, recommendations, blind_spots: blindSpots } = state;
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
-  const currentRecommendation = selectedRecommendation
-    ? recommendations?.find(
-        ({ title, description, code }) =>
-          title === selectedRecommendation.title &&
-          description === selectedRecommendation.description &&
-          code === selectedRecommendation.code
-      )
-    : undefined;
   const recommendationModalTitleId = useGeneratedHtmlId({ prefix: 'investigationRecommendation' });
 
   if (!conclusion && !recommendations?.length && !blindSpots?.length) {
@@ -282,26 +274,26 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
         </EuiFlexItem>
       )}
 
-      {currentRecommendation && (
+      {selectedRecommendation && (
         <EuiModal
           aria-labelledby={recommendationModalTitleId}
           onClose={() => setSelectedRecommendation(undefined)}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={recommendationModalTitleId}>
-              {currentRecommendation.title}
+              {selectedRecommendation.title}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            {currentRecommendation.description && (
+            {selectedRecommendation.description && (
               <>
-                <AgentText text={currentRecommendation.description} />
-                {currentRecommendation.code && <EuiSpacer size="m" />}
+                <AgentText text={selectedRecommendation.description} />
+                {selectedRecommendation.code && <EuiSpacer size="m" />}
               </>
             )}
-            {currentRecommendation.code && (
+            {selectedRecommendation.code && (
               <EuiCodeBlock language="shell" fontSize="s" paddingSize="s" isCopyable>
-                {currentRecommendation.code}
+                {selectedRecommendation.code}
               </EuiCodeBlock>
             )}
           </EuiModalBody>
