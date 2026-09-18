@@ -11,7 +11,7 @@ import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { testUsers } from '../test_users';
+import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -20,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
   const retry = getService('retry');
+  const security = getService('security');
 
   const privilegeTestPkgName = 'preflight_authz_test';
   const privilegeTestPkgVersion = '1.0.0';
@@ -56,6 +57,7 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
+      await setupTestUsers(security);
     });
 
     beforeEach(async () => {
