@@ -6334,8 +6334,8 @@ importers:
         specifier: 2.2.1
         version: 2.2.1
       ignore:
-        specifier: 7.0.6
-        version: 7.0.6
+        specifier: 7.0.8
+        version: 7.0.8
       ink:
         specifier: 5.2.1
         version: 5.2.1(@types/react@18.2.79)(react@18.2.0)
@@ -19586,8 +19586,8 @@ packages:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
 
-  ignore@7.0.6:
-    resolution: {integrity: sha512-BAg6QkE8W+TuQLrrw0Ugr7HegXduRuuj8/ti2kSOc+jz1dmx8/WNcjr6XGnq5YpDWxFwwaavqD0+jIUOKelTsw==}
+  ignore@7.0.8:
+    resolution: {integrity: sha512-YYNsSlXBjMk92SKnkwvB5LOVSa6OznlFUGcsvrFgNJbJCd0M1XKeFVRc8ZByeCqz32FivYNHJVooLmdqrmvp/Q==}
     engines: {node: '>= 4'}
 
   image-ssim@0.2.0:
@@ -32930,7 +32930,7 @@ snapshots:
       '@typescript-eslint/utils': 8.60.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/visitor-keys': 8.60.0
       eslint: 8.57.0(supports-color@10.2.2)
-      ignore: 7.0.6
+      ignore: 7.0.8
       natural-compare: 1.4.0
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -35620,7 +35620,7 @@ snapshots:
       ajv: 8.20.0
       commander: 14.0.3
       enhanced-resolve: 5.25.1
-      ignore: 7.0.6
+      ignore: 7.0.8
       interpret: 3.1.1
       is-installed-globally: 1.0.0
       json5: 2.2.3
@@ -37425,7 +37425,7 @@ snapshots:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       fast-glob: 3.3.3
-      ignore: 7.0.6
+      ignore: 7.0.8
       is-path-inside: 4.0.0
       micromatch: 4.0.8
       slash: 5.1.0
@@ -37997,7 +37997,7 @@ snapshots:
 
   ignore@5.3.2: {}
 
-  ignore@7.0.6: {}
+  ignore@7.0.8: {}
 
   image-ssim@0.2.0: {}
 
@@ -43908,7 +43908,7 @@ snapshots:
       globby: 16.2.4
       globjoin: 0.1.4
       html-tags: 5.1.0
-      ignore: 7.0.6
+      ignore: 7.0.8
       import-meta-resolve: 4.2.0
       mathml-tag-names: 4.0.0
       meow: 14.1.0
