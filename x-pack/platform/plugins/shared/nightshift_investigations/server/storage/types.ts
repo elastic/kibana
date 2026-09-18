@@ -11,9 +11,11 @@ import type {
   InvestigationSubjectType,
   InvestigationTriggerType,
   PaginatedResponse,
+  Severity,
 } from '../../common';
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
+  title: string;
   status: InvestigationStatus;
   subject_type: InvestigationSubjectType;
   subject_id: string;
@@ -43,6 +45,7 @@ export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttri
 };
 
 export interface InvestigationPatch extends InvestigationStructuredOutput {
+  title?: string;
   status?: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
@@ -55,6 +58,13 @@ export interface FindInvestigationsQuery<
   Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
 > {
   statuses?: InvestigationStatus[];
+  subjectTypes?: InvestigationSubjectType[];
+  severities?: Severity[];
+  /**
+   * Full-text query across title, subject_summary, summary, and conclusion.
+   * Passed as `search` + `searchFields` to the SO find API, not as part of the KQL filter.
+   */
+  query?: string;
   concurrencyKey?: string;
   createdAfter?: string;
   createdBefore?: string;
@@ -62,7 +72,7 @@ export interface FindInvestigationsQuery<
   startedBefore?: string;
   completedAfter?: string;
   completedBefore?: string;
-  sortField?: 'created_at' | 'completed_at';
+  sortField?: 'created_at' | 'completed_at' | 'severity';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;

@@ -127,4 +127,23 @@ describe('EsqlApproximationToggle', () => {
       expect(screen.queryByTestId('esqlApproximationToggleSwitch')).not.toBeInTheDocument();
     });
   });
+
+  describe('disabledReason', () => {
+    const disabledReason = 'Enter an ES|QL query to enable this.';
+
+    beforeEach(() => {
+      renderToggle({ isApproximate: false, onChange, disabledReason });
+    });
+
+    it('renders the button as disabled without a separate disabled flag', () => {
+      expect(screen.getByTestId('esqlApproximationToggleButton')).toBeDisabled();
+    });
+
+    it('shows the consumer reason in the tooltip', async () => {
+      await userEvent.hover(screen.getByTestId('esqlApproximationToggleButton'), {
+        pointerEventsCheck: 0,
+      });
+      expect(await screen.findByText(disabledReason)).toBeInTheDocument();
+    });
+  });
 });

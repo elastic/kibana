@@ -176,18 +176,11 @@ export const BULK_DEMOTE_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Failed to remove selected rules' }
 );
 
-/**
- * Detection scope disclosure, shown when CPS has linked projects. Rules follow the space's
- * cross-project scope, which can differ from the all-linked-projects scope used to generate the
- * knowledge indicator a rule was promoted from.
- *
- * Remove this once alerting v2 supports per-rule project routing and significant events rules
- * opt into all linked projects: the two scopes will match and this disclosure becomes false.
- */
+/** Shown when CPS has linked projects. Rules match generation: all linked projects, not the space picker. */
 export const DETECTION_SCOPE_HELP_TEXT = i18n.translate(
   'xpack.significantEventsApp.queriesTable.detectionScopeHelpText',
   {
     defaultMessage:
-      "Rules run within this space's cross-project search scope, which may differ from the data analyzed when their knowledge indicator was generated.",
+      'Rules run across all projects linked through cross-project search, regardless of the project scope configured for this space.',
   }
 );

@@ -7,10 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
-import {
-  useLinkedActionPolicies,
-  LINKED_ACTION_POLICIES_FETCH_LIMIT,
-} from './use_linked_action_policies';
+import { useLinkedActionPolicies } from './use_linked_action_policies';
 
 const mockUseMatchedActionPolicies = jest.fn();
 const mockHttp = { fake: 'http-start-contract' };
@@ -24,7 +21,7 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `CoreStart(${key})`,
 }));
 
-const RULE_ID = 'rule-1';
+const RULE_TAGS = ['prod'];
 
 const buildItem = (
   category: MatchedActionPolicy['category'],
@@ -60,28 +57,32 @@ describe('useLinkedActionPolicies', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
   });
 
-  it('delegates to useMatchedActionPolicies with the injected http contract and ruleId', () => {
-    renderHook(() => useLinkedActionPolicies(RULE_ID));
+  it('delegates to useMatchedActionPolicies with the injected http contract and tags', () => {
+    renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
-    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, ruleId: RULE_ID });
+    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
   });
 
-  it('counts items with category "global" as catch-all and "global-filtered" as matching criteria', () => {
+  it('counts items with category "catch-all" as catch-all and "tags" as matching criteria', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
-        buildItem('global', { id: 'catch-all-1' }),
-        buildItem('global-filtered', { id: 'filtered-1' }),
-        buildItem('global-filtered', { id: 'filtered-2' }),
+        buildItem('catch-all', { id: 'catch-all-1' }),
+        buildItem('tags', { id: 'filtered-1' }),
+        buildItem('tags', { id: 'filtered-2' }),
       ],
       total: 3,
+      evaluatedCount: 3,
+      isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.totalCount).toBe(3);
     expect(result.current.catchAllCount).toBe(1);
@@ -95,13 +96,16 @@ describe('useLinkedActionPolicies', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
-      items: [buildItem('global-filtered')],
-      total: LINKED_ACTION_POLICIES_FETCH_LIMIT + 1,
+      items: [buildItem('tags'), buildItem('tags')],
+      evaluatedCount: 2,
+      total: 3,
+      isTruncated: true,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
-    expect(result.current.totalCount).toBe(1);
+    expect(result.current.totalCount).toBe(2);
+    expect(result.current.evaluatedCount).toBe(2);
     expect(result.current.isCountTruncated).toBe(true);
   });
 
@@ -111,9 +115,11 @@ describe('useLinkedActionPolicies', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.isLoading).toBe(true);
   });
@@ -124,9 +130,11 @@ describe('useLinkedActionPolicies', () => {
       error: new Error('network error'),
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
-    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
     expect(result.current.isError).toBe(true);
     expect(result.current.error?.message).toBe('network error');

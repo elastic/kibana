@@ -9,18 +9,23 @@ import { escapeQuotes } from '@kbn/es-query';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import type { FindInvestigationsQuery, InvestigationAttributes } from './types';
 
+const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
+
+const orClause = (field: string, values: readonly string[]): string =>
+  `(${values.map((value) => `${attr(field)}: "${escapeQuotes(value)}"`).join(' OR ')})`;
+
 /** Translates a query into the KQL filter both saved object repositories search with. */
 export const buildInvestigationFilter = <Fields extends keyof InvestigationAttributes>(
   query: FindInvestigationsQuery<Fields>
 ): string | undefined => {
   const filters: string[] = [];
-  const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
 
   if (query.statuses?.length) {
-    const statusFilter = query.statuses
-      .map((status) => `${attr('status')}: "${escapeQuotes(status)}"`)
-      .join(' OR ');
-    filters.push(`(${statusFilter})`);
+    filters.push(orClause('status', query.statuses));
+  }
+
+  if (query.subjectTypes?.length) {
+    filters.push(orClause('subject_type', query.subjectTypes));
   }
 
   if (query.concurrencyKey) {
@@ -40,6 +45,10 @@ export const buildInvestigationFilter = <Fields extends keyof InvestigationAttri
     if (value) {
       filters.push(`${attr(field)} ${op} "${escapeQuotes(value)}"`);
     }
+  }
+
+  if (query.severities?.length) {
+    filters.push(orClause('severity', query.severities));
   }
 
   return filters.length > 0 ? filters.join(' AND ') : undefined;
