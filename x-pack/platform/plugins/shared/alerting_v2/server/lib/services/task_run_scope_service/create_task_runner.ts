@@ -6,15 +6,13 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { CoreDiServiceStart } from '@kbn/core-di';
-import { Global } from '@kbn/core-di-internal';
+import { createToken, type KibanaResolutionContext, Scope } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
   RunResult,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
-import { createToken } from '@kbn/core-di';
 import type { Newable } from 'inversify';
 import type { PluginConfig } from '../../../config';
 
@@ -70,40 +68,6 @@ export const TaskRunnerFactoryToken = createToken<TaskRunnerFactory>(
 );
 
 /**
- * Waits for the injection service to become available (i.e. the plugin has
- * started), while remaining responsive to Task Manager cancellation.
- *
- * Task Manager aborts a run's `abortController` on timeout or shutdown. Racing
- * the abort signal ensures a run does not wait indefinitely if the plugin never
- * finishes starting: instead of leaving a pending promise dangling, the run
- * rejects and Task Manager handles it as a normal task failure.
- */
-async function waitForInjection(
-  injectionPromise: Promise<CoreDiServiceStart>,
-  signal: AbortSignal,
-  taskType: string,
-  taskId: string
-): Promise<CoreDiServiceStart> {
-  const abortError = () =>
-    new Error(
-      `Aborted ${taskType} task while waiting for the alerting_v2 plugin to start (task id: ${taskId})`
-    );
-
-  if (signal.aborted) {
-    throw abortError();
-  }
-
-  return new Promise<CoreDiServiceStart>((resolve, reject) => {
-    const onAbort = () => reject(abortError());
-    signal.addEventListener('abort', onAbort, { once: true });
-
-    injectionPromise
-      .finally(() => signal.removeEventListener('abort', onAbort))
-      .then(resolve, reject);
-  });
-}
-
-/**
  * Factory for task runners that creates scoped DI containers for each task execution.
  *
  * Task Manager is a dependency of this plugin, so it can start polling and run a
@@ -123,31 +87,24 @@ async function waitForInjection(
  * - Does not bind Request scope
  * - Task runner can only use internal/singleton-scoped services
  */
-export function createTaskRunnerFactory({
-  injectionPromise,
-}: {
-  injectionPromise: Promise<CoreDiServiceStart>;
-}): TaskRunnerFactory {
+export function createTaskRunnerFactory({ inject }: KibanaResolutionContext): TaskRunnerFactory {
   return ({ taskRunnerClass, taskType, requiresFakeRequest = true }) => {
     return ({ taskInstance, signal, fakeRequest, executionUuid }: RunContext) => ({
-      run: async () => {
+      run: inject(Scope, async (scope) => {
         if (requiresFakeRequest && !fakeRequest) {
           throw new Error(
             `Cannot execute ${taskType} task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
           );
         }
 
-        const injection = await waitForInjection(
-          injectionPromise,
-          signal,
-          taskType,
-          taskInstance.id
-        );
-        const scope = injection.fork();
+        if (signal.aborted) {
+          throw new Error(
+            `Aborted ${taskType} task while waiting for the alerting_v2 plugin to start (task id: ${taskInstance.id})`
+          );
+        }
 
         if (fakeRequest) {
-          scope.bind(Request).toConstantValue(fakeRequest);
-          scope.bind(Global).toConstantValue(Request);
+          scope.expose(Request).toConstantValue(fakeRequest);
           scope.bind(taskRunnerClass).toSelf().inRequestScope();
         } else {
           scope.bind(taskRunnerClass).toSelf().inTransientScope();
@@ -157,9 +114,9 @@ export function createTaskRunnerFactory({
           const runner = scope.get(taskRunnerClass);
           return await runner.run({ taskInstance, signal, executionUuid });
         } finally {
-          await scope.unbindAllAsync();
+          scope.dispose();
         }
-      },
+      }),
     });
   };
 }

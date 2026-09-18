@@ -7,8 +7,8 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
-import type { ServiceToken } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { Scope, type ServiceToken } from '@kbn/core-di';
+import { CoreSetup } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
@@ -79,11 +79,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
         .get(Start as ServiceToken<AlertingServerStart>)
         .getAlertEventsClientWithRequest(request);
     const checkAlertWritePrivilege = (request: KibanaRequest) =>
-      resolveRequestScoped(
-        container.get(CoreStart('injection')),
-        request,
-        PrivilegeChecker
-      ).canWrite('alerts');
+      resolveRequestScoped(container.get(Scope), request, PrivilegeChecker).canWrite('alerts');
     registerCreateAlertEventStep(
       workflowsExtensionsSetup,
       getAlertEventsClient,
