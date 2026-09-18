@@ -19,6 +19,8 @@ export interface RetrievedPattern {
   message: string;
   /** Number of documents sharing the pattern in the time window. */
   count: number;
+  /** Reranker relevance score (logit). Only present for semantic strategies. */
+  relevanceScore?: number;
 }
 
 /**
@@ -126,4 +128,20 @@ export const distinctRelevantMessagesAtK = (
   );
 
   return found.size;
+};
+
+/**
+ * Top relevance score from the reranker.
+ *
+ * Returns null when none of the patterns have a relevanceScore (keyword-only strategies).
+ * This metric crossed with Recall separates two failure modes: low recall with high score
+ * means the reranker ordered poorly; low recall with negative score means the relevant
+ * patterns never reached the ranking window (candidate selection problem).
+ */
+export const topRelevanceScore = (patterns: readonly RetrievedPattern[]): number | null => {
+  if (patterns.length === 0) {
+    return null;
+  }
+  const topScore = patterns[0]?.relevanceScore;
+  return topScore !== undefined ? topScore : null;
 };

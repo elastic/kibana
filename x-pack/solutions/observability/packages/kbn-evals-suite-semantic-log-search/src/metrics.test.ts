@@ -11,6 +11,7 @@ import {
   distinctRelevantMessagesAtK,
   precisionAtK,
   recallOfLabels,
+  topRelevanceScore,
   trapsAtK,
   weightedPrecisionAtK,
 } from './metrics';
@@ -106,5 +107,34 @@ describe('distinctRelevantMessagesAtK', () => {
   it('collapses repeats of the same message', () => {
     const results = [relevant(0), relevant(0), relevant(1)];
     expect(distinctRelevantMessagesAtK(results, connectionFailures, 20, 2)).toBe(2);
+  });
+});
+
+describe('topRelevanceScore', () => {
+  it('returns the score from the first pattern when present', () => {
+    const results: RetrievedPattern[] = [
+      { pattern: 'a', message: 'a', count: 10, relevanceScore: 3.5 },
+      { pattern: 'b', message: 'b', count: 5, relevanceScore: 2.1 },
+    ];
+    expect(topRelevanceScore(results)).toBe(3.5);
+  });
+
+  it('returns null when patterns have no relevanceScore', () => {
+    const results: RetrievedPattern[] = [
+      { pattern: 'a', message: 'a', count: 10 },
+      { pattern: 'b', message: 'b', count: 5 },
+    ];
+    expect(topRelevanceScore(results)).toBeNull();
+  });
+
+  it('returns null when there are no patterns', () => {
+    expect(topRelevanceScore([])).toBeNull();
+  });
+
+  it('handles negative scores', () => {
+    const results: RetrievedPattern[] = [
+      { pattern: 'a', message: 'a', count: 10, relevanceScore: -2.5 },
+    ];
+    expect(topRelevanceScore(results)).toBe(-2.5);
   });
 });

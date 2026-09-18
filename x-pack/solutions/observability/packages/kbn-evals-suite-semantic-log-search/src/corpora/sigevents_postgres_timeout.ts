@@ -33,7 +33,6 @@ const MESSAGE_CLASSES = {
    */
   connectionWarning: [
     '"msg":"pool nearing capacity"',
-    'Pool nearing capacity: active=',
     'connection pool at 90% capacity',
     '"msg":"pg pool approaching limit"',
     'msg="pgx: connection pool approaching limit"',

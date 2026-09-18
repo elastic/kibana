@@ -7,7 +7,12 @@
 
 export const DEFAULT_MAX_PATTERNS = 10;
 export const DEFAULT_PAGE_SIZE = 50;
-export const DEFAULT_RANK_WINDOW = 200;
+
+/** Patterns passed to RERANK. Each one is an inference call, so this is the cost knob. */
+export const DEFAULT_RANK_WINDOW = 500;
+
+/** CATEGORIZE similarity threshold (1-100). Lower values group more aggressively into fewer patterns. */
+export const CATEGORIZE_SIMILARITY_THRESHOLD = 70;
 
 /** Standard ES|QL time-range predicate using Kibana's reserved `?_tstart` / `?_tend` params. */
 export const ESQL_TIME_RANGE_FILTER = '@timestamp >= ?_tstart AND @timestamp < ?_tend';
