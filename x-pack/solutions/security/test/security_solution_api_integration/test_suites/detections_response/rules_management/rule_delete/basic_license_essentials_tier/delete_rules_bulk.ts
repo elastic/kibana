@@ -71,9 +71,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).toEqual({
           success: true,
-          rules_count: 0,
+          rules_count: 1,
           attributes: {
-            errors: [],
             results: {
               updated: [],
               created: [],
