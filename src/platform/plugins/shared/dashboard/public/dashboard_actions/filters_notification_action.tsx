@@ -35,6 +35,12 @@ import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_s
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { ACTION_FILTERS_NOTIFICATION } from './constants';
 
+// TODO: The PublishesEsql support here is a temporary measure. ES|QL statements from esql$ are
+// not panel-level filters — they are internal data-source queries that happen to be visible for
+// transparency. They should be surfaced by a dedicated action rather than piggybacking on the
+// filters notification action. Once that action exists, remove PublishesEsql from
+// FiltersNotificationActionApi, drop the esql$ branches in isApiCompatible/compatibilityCheck/
+// getCompatibilityChangesSubject, and delete the ES|QL section from FiltersNotificationPopover.
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
   Partial<PublishesEsql> &
