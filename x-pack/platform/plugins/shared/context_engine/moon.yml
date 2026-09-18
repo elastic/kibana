@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/es-errors'
   - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-spaces-common'
   - '@kbn/management-settings-ids'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-page-kibana-template'
@@ -92,7 +94,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - test/scout/**/*
+    - test/scout_agent_builder/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

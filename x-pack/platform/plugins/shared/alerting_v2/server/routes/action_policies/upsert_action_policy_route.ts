@@ -45,6 +45,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Create or replace an action policy',
     description:
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',

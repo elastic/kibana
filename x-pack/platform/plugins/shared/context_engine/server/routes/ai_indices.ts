@@ -16,6 +16,9 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
@@ -70,16 +73,22 @@ import {
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
+  AiIndexIdConflictError,
   InvalidConnectorSourceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import {
+  deleteAutomationResources,
+  deleteBackingStoreResource,
+} from '../ai_indices/delete_resources';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import { resolveSpaceId } from '../utils/resolve_space_id';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
@@ -90,6 +99,18 @@ const READ_SECURITY: RouteSecurity = {
 const WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
 };
+
+const DELETE_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.writeContextEngine],
+    extendedPrivileges: [...WorkflowsManagementOperationPrivileges.delete],
+  },
+};
+
+const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
+  WorkflowsManagementOperationPrivileges.delete.every(
+    (privilege) => request.authzResult?.[privilege] === true
+  );
 
 const aiIndexIdSchema = schema.string({
   minLength: 1,
@@ -293,12 +314,29 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (
     error instanceof AiIndexManagedError ||
     error instanceof AiIndexConflictError ||
-    error instanceof AiIndexAlreadyExistsError
+    error instanceof AiIndexAlreadyExistsError ||
+    error instanceof AiIndexIdConflictError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
   throw error;
 };
+
+const deleteAiIndexQuerySchema = schema.object({
+  delete_knowledge_indicators: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.',
+    },
+  }),
+  delete_automations: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description: 'When true, also delete the attached workflow automations. Defaults to false.',
+    },
+  }),
+});
 
 export const registerAiIndexRoutes = ({
   router,
@@ -307,19 +345,27 @@ export const registerAiIndexRoutes = ({
   getImprovementsService,
   getScheduleService,
   getActions,
+  getWorkflowsManagementApi,
+  getSpaces,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
+  getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+  const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     try {
-      const aiIndex = await getAiIndexService().get(aiIndexId);
+      const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       await getScheduleService().reconcile({
         aiIndexId,
+        spaceId,
         ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
         request,
       });
@@ -363,9 +409,10 @@ export const registerAiIndexRoutes = ({
             actions: await getActions(),
             request,
           });
-          await getAiIndexService().create(id, properties);
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id, request);
+          await reconcileSchedule(id, spaceId, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -408,11 +455,12 @@ export const registerAiIndexRoutes = ({
             actions: await getActions(),
             request,
           });
-          const status = await getAiIndexService().put(aiIndexId, request.body);
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const status = await getAiIndexService().put(aiIndexId, spaceId, request.body);
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -449,8 +497,9 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId);
+          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId, spaceId);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
@@ -480,11 +529,12 @@ export const registerAiIndexRoutes = ({
         version: AI_INDEX_API_VERSION,
         validate: false,
       },
-      withContextEngineFeatureFlag(async (ctx, _request, response) => {
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         try {
+          const spaceId = resolveSpaceId(await getSpaces(), request);
           const body: ListAiIndexResponse = {
-            ai_indices: await getAiIndexService().list(),
+            ai_indices: await getAiIndexService().list(spaceId),
           };
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
           return response.ok({ body });
@@ -519,11 +569,12 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
         const { size, type } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: ListKisResponse = await getKis(esClient, {
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
           });
@@ -561,12 +612,13 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             index,
             kiId,
           });
@@ -604,13 +656,15 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const feedbackAnalysis = await getAiIndexService().setFeedbackAnalysis(
             aiIndexId,
+            spaceId,
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
@@ -626,11 +680,14 @@ export const registerAiIndexRoutes = ({
   router.versioned
     .delete({
       path: aiIndexByIdPath,
-      security: WRITE_SECURITY,
+      security: DELETE_SECURITY,
       access: 'public',
       summary: 'Delete an AI index',
       description:
-        'Deletes an AI index by id. Only the AI index entry is deleted — backing indices are left untouched and must be removed with the Delete index API if desired.',
+        'Deletes an AI index by id. The backing data stream/index (and therefore its Knowledge ' +
+        'Indicators) and the attached workflow automations are left untouched unless the ' +
+        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
+        'The dest is not deleted when another AI index still uses it.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -642,6 +699,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: deleteAiIndexQuerySchema,
           },
         },
       },
@@ -649,14 +707,23 @@ export const registerAiIndexRoutes = ({
         const core = await ctx.core;
         const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const {
+          delete_knowledge_indicators: deleteKnowledgeIndicators,
+          delete_automations: deleteAutomations,
+        } = request.query;
         try {
-          await getAiIndexService().delete(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          if (aiIndex.managed) {
+            throw new AiIndexManagedError(aiIndexId);
+          }
+          await getAiIndexService().delete(aiIndexId, spaceId);
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
           await getScheduleService()
-            .remove({ aiIndexId })
+            .remove({ aiIndexId, spaceId })
             .catch((error) => {
               logger.warn(
                 `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
@@ -665,12 +732,61 @@ export const registerAiIndexRoutes = ({
               );
             });
 
+          // From here on, failures are best-effort: the AI index entry is already gone (the primary
+          // goal), so any failure is reported back to the caller as a partial-failure
+          const errors: string[] = [];
+
+          if (deleteKnowledgeIndicators) {
+            const err = await deleteBackingStoreResource({
+              esClient: core.elasticsearch.client,
+              dest: aiIndex.dest,
+              logger,
+              aiIndexId,
+              spaceId,
+            });
+            if (err) errors.push(err);
+          }
+
+          if (deleteAutomations) {
+            if (
+              aiIndex.automations.some((automation) => automation.type === 'workflow') &&
+              !hasWorkflowDeletePrivilege(request)
+            ) {
+              const message = 'Missing privilege to delete workflow automations.';
+              logger.warn(
+                `Deleted AI index '${aiIndexId}', but could not delete its automations: ${message}`
+              );
+              errors.push(`Failed to delete automations: ${message}`);
+            } else {
+              const automationErrors = await deleteAutomationResources({
+                automations: aiIndex.automations,
+                workflowsManagementApi: await getWorkflowsManagementApi(),
+                spaceId,
+                request,
+                logger,
+                aiIndexId,
+              });
+              errors.push(...automationErrors);
+            }
+          }
+
+          // Log any partial failures to audit trail
+          for (const err of errors) {
+            auditLogger.log(
+              aiIndexAuditEvent({
+                action: AiIndexAuditAction.DELETE_RESOURCES,
+                id: aiIndexId,
+                error: new Error(err),
+              })
+            );
+          }
+
           // The improvements store is keyed by AI index id, so revisions left behind would
           // resurface if an AI index were later recreated under the same id. Best-effort: the store
           // is a user-owned index and the caller may well have no privileges on it, and reporting a
           // failure for an index that is already gone would only send them to retry a delete that
           // now 404s. What is left behind is inert until an id is reused.
-          await getImprovementsService(core.elasticsearch.client.asCurrentUser)
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser, spaceId)
             .deleteByAiIndex(aiIndexId)
             .catch((error) => {
               logger.warn(
@@ -680,7 +796,7 @@ export const registerAiIndexRoutes = ({
               );
             });
 
-          const body: DeleteAiIndexResponse = { acknowledged: true };
+          const body: DeleteAiIndexResponse = { acknowledged: true, errors };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

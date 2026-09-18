@@ -39,6 +39,11 @@ export class EisModelsPage {
   readonly addEndpointIdField: Locator;
   readonly addEndpointReasoningToggle: Locator;
 
+  // Restricted regions header badge
+  readonly restrictedRegionsBadge: Locator;
+  readonly restrictedRegionsPopover: Locator;
+  readonly restrictedRegionsEditButton: Locator;
+
   // Manage Region Preferences Modal
   readonly manageRegionsButton: Locator;
   readonly manageRegionsModal: Locator;
@@ -66,6 +71,11 @@ export class EisModelsPage {
   readonly confirmDeleteRegionPolicySaveButton: Locator;
   readonly confirmDeleteRegionPolicyCancelButton: Locator;
   readonly confirmDeleteRegionPolicyAcknowledge: Locator;
+
+  readonly displayOptionsButton: Locator;
+  readonly displayOptionsApplyButton: Locator;
+  readonly endOfLifeModelsShowButton: Locator;
+  readonly outsideRegionPreferencesShowButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     // Header
@@ -107,6 +117,10 @@ export class EisModelsPage {
     this.addEndpointCloseButton = this.page.testSubj.locator('addEndpointModalCloseButton');
     this.addEndpointIdField = this.page.testSubj.locator('addEndpointIdField');
     this.addEndpointReasoningToggle = this.page.testSubj.locator('addEndpointReasoningToggle');
+
+    this.restrictedRegionsBadge = this.page.testSubj.locator('restrictedRegionsBadge');
+    this.restrictedRegionsPopover = this.page.testSubj.locator('restrictedRegionsPopover');
+    this.restrictedRegionsEditButton = this.page.testSubj.locator('restrictedRegionsEditButton');
 
     // Manage Region Preferences Modal
     this.manageRegionsButton = this.page.testSubj.locator('eisManageRegionsButton');
@@ -159,6 +173,15 @@ export class EisModelsPage {
     this.confirmDeleteRegionPolicyCancelButton = this.confirmDeleteRegionPolicyModal.locator(
       '[data-test-subj="confirmModalCancelButton"]'
     );
+
+    this.displayOptionsButton = this.page.testSubj.locator('eisDisplayOptionsButton');
+    this.displayOptionsApplyButton = this.page.testSubj.locator('eisDisplayOptionsApplyButton');
+    this.endOfLifeModelsShowButton = this.page.testSubj.locator(
+      'eisDisplayOptionsEndOfLifeModelsShow'
+    );
+    this.outsideRegionPreferencesShowButton = this.page.testSubj.locator(
+      'eisDisplayOptionsOutsideRegionPreferencesShow'
+    );
   }
 
   // --- Navigation ---
@@ -182,6 +205,18 @@ export class EisModelsPage {
 
   public async clearSearch() {
     await this.search('');
+  }
+
+  public async showEndOfLifeModels() {
+    await this.displayOptionsButton.click();
+    await this.endOfLifeModelsShowButton.click();
+    await this.displayOptionsApplyButton.click();
+  }
+
+  public async showModelsOutsideRegionPreferences() {
+    await this.displayOptionsButton.click();
+    await this.outsideRegionPreferencesShowButton.click();
+    await this.displayOptionsApplyButton.click();
   }
 
   // --- Parameterized Locators ---

@@ -59,7 +59,11 @@ import {
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
-import { registerTaskManagerUsageCollector } from './usage';
+import {
+  registerEventLogTelemetryTask,
+  registerTaskManagerUsageCollector,
+  scheduleEventLogTelemetryTask,
+} from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
@@ -307,10 +311,13 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         monitoredUtilization$,
-        this.config.unsafe.exclude_task_types
+        this.config.unsafe.exclude_task_types,
+        () => core.getStartServices().then(([, , startContract]) => startContract),
+        this.logger
       );
     }
 
+    registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
@@ -527,6 +534,7 @@ export class TaskManagerPlugin
       taskPollingLifecycle: this.taskPollingLifecycle,
     });
 
+    scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
       this.logger,
