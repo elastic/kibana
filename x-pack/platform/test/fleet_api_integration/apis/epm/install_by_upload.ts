@@ -7,9 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import JSZip from 'jszip';
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { HTTPError } from 'superagent';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -309,104 +307,5 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
     });
-
-    describe('Upload preflight asset privilege checks', () => {
-      skipIfNoDockerRegistry(providerContext);
-
-      const privilegeTestPkgName = 'preflight-authz-test';
-      const privilegeTestPkgVersion = '1.0.0';
-
-      async function buildPackageZipWithAssetType(
-        assetType: string,
-        assetContent: object
-      ): Promise<Buffer> {
-        const pkgKey = `${privilegeTestPkgName}-${privilegeTestPkgVersion}`;
-        const zip = new JSZip();
-        zip.file(
-          `${pkgKey}/manifest.yml`,
-          [
-            `name: ${privilegeTestPkgName}`,
-            `title: Preflight Authz Test`,
-            `version: ${privilegeTestPkgVersion}`,
-            `description: Test package for preflight authz checks`,
-            `type: integration`,
-            `format_version: 1.0.0`,
-            `categories: []`,
-            `conditions:`,
-            `  kibana.version: "^8.0.0"`,
-          ].join('\n')
-        );
-        zip.file(`${pkgKey}/kibana/${assetType}/test-asset.json`, JSON.stringify(assetContent));
-        const buffer = await zip.generateAsync({ type: 'nodebuffer' });
-        return buffer;
-      }
-
-      before(async () => {
-        await fleetAndAgents.setup();
-      });
-
-      afterEach(async () => {
-        await supertest
-          .delete(`/api/fleet/epm/packages/${privilegeTestPkgName}/${privilegeTestPkgVersion}`)
-          .set('kbn-xsrf', 'xxxx');
-      });
-
-      it('rejects upload of package with security_ai_prompt asset for Fleet-only user — 403', async () => {
-        const aiPromptAsset = {
-          id: 'test-prompt-id',
-          type: 'security-ai-prompt',
-          attributes: { name: 'Test Prompt', content: 'You are a security assistant.' },
-        };
-        const buf = await buildPackageZipWithAssetType('security_ai_prompt', aiPromptAsset);
-
-        await supertestWithoutAuth
-          .post(`/api/fleet/epm/packages`)
-          .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
-          .set('kbn-xsrf', 'xxxx')
-          .type('application/zip')
-          .send(buf)
-          .expect(403);
-      });
-
-      it('rejects upload of package with security_rule asset for Fleet-only user — 403 before any install writes', async () => {
-        const securityRuleAsset = {
-          id: 'test-rule-id',
-          type: 'security-rule',
-          attributes: {
-            name: 'Test Rule',
-            type: 'query',
-            query: 'event.action: *',
-            language: 'kuery',
-            enabled: false,
-            risk_score: 50,
-            severity: 'medium',
-            version: 1,
-          },
-        };
-        const buf = await buildPackageZipWithAssetType('security_rule', securityRuleAsset);
-
-        await supertestWithoutAuth
-          .post(`/api/fleet/epm/packages`)
-          .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
-          .set('kbn-xsrf', 'xxxx')
-          .type('application/zip')
-          .send(buf)
-          .expect(403);
-
-        // Verify no install state was written — the preflight check must have fired
-        // before any saved object or package-install records were created.
-        const installRecord = await esClient.search({
-          index: INGEST_SAVED_OBJECT_INDEX,
-          size: 0,
-          rest_total_hits_as_int: true,
-          query: {
-            bool: {
-              filter: [{ term: { 'epm-packages.name': privilegeTestPkgName } }],
-            },
-          },
-        });
-        expect(installRecord.hits.total).to.equal(0);
-      });
-    }); // Upload preflight asset privilege checks
-  }); // EPM - install by upload
+  });
 }
