@@ -12,10 +12,16 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
- * managed rule-creation workflow the pnd plugin installs at start, so pnd must be
+ * managed rule-creation workflow the alertzero plugin installs at start, so alertzero must be
  * enabled; the workflow's ai.agent step additionally requires the Workflows UI and
  * agent settings, and the approval-gate tests respond to the review step through the
  * inbox plugin's respond route, which is also disabled by default.
+ *
+ * `agenticInvestigations` is a **required** plugin of alertzero (added in #290329) and defaults
+ * to `enabled: false`. Without this flag Kibana cascade-disables alertzero entirely, so
+ * `initialize_managed_workflows.ts` never runs and the rule-creation workflow is never installed.
+ * Nothing in the eval suite calls an `agenticInvestigations` route directly, but the flag is
+ * load-bearing and must not be removed.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -23,7 +29,8 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--xpack.pnd.enabled=true',
+      '--xpack.alertzero.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
       '--xpack.inbox.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',

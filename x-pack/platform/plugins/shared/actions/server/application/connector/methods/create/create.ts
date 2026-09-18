@@ -18,9 +18,14 @@ import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
-import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
+import {
+  invalidateStoredConnectorEventIdentity,
+  mintInboundEventIdentityAttributes,
+  toRawActionIdentityAttributes,
+} from '../../../../inbound/event_identity';
 
 export async function create({
   context,
@@ -73,6 +78,8 @@ export async function create({
       })
     );
   }
+
+  ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -139,9 +146,9 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
-  const configWithIngress = preserveInboundIngressHashIfNeeded({
+  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
+    connectorId: id,
     actionTypeId,
-    config: configForSave as Record<string, unknown>,
   });
 
   const result = await tryCatch(
@@ -152,13 +159,18 @@ export async function create({
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configWithIngress,
+          config: configForSave,
           secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
+          ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         { id }
       )
   );
+
+  if (result instanceof Error) {
+    await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  }
 
   const wasSuccessful = !(result instanceof Error);
   const label = `connectorId: "${id}"; type: ${actionTypeId}`;

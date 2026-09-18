@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** --- Episode actions bar --- */
-export const EPISODE_ACTIONS_BAR_MORE_ACTIONS = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodeActionsBar.moreActionsButtonAriaLabel',
-  { defaultMessage: 'More actions' }
-);
-
 /** --- Assignee cell --- */
 export const ASSIGNEE_CELL_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.assigneeCell.empty', {
   defaultMessage: '—',
@@ -68,6 +62,20 @@ export const getRuleCellCopyRuleIdTooltip = (ruleId: string) =>
     defaultMessage: 'Click to copy the full rule ID: {ruleId}',
     values: { ruleId },
   });
+
+export const getDurationLowerBoundLabel = (duration: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.durationCell.lowerBoundLabel', {
+    defaultMessage: '≥ {duration}',
+    values: { duration },
+  });
+
+export const DURATION_LOWER_BOUND_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.durationCell.lowerBoundTooltip',
+  {
+    defaultMessage:
+      'The episode started before the selected time range, so its actual duration is longer. Widen the time range or open the episode to see it.',
+  }
+);
 
 export const RULE_CELL_RULE_ID_COPIED = i18n.translate(
   'xpack.alertingV2EpisodesUi.ruleCell.ruleIdCopied',

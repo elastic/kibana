@@ -6,22 +6,19 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 export function SloGroupListEmpty() {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="sloGroupListEmpty"
       title={i18n.translate('xpack.slo.groupList.emptyTitle', {
         defaultMessage: 'No SLO group results',
       })}
-      color="warning"
-      iconType="warning"
-    >
-      {i18n.translate('xpack.slo.groupList.emptyMessage', {
+      text={i18n.translate('xpack.slo.groupList.emptyMessage', {
         defaultMessage: 'There are no results for your criteria.',
       })}
-    </EuiCallOut>
+    />
   );
 }

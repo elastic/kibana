@@ -10,7 +10,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
@@ -23,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
 import { NoPermissionsTooltip } from '../common/components/permissions';
 import { fetchSyntheticsDiagnostics } from './hooks/api';
@@ -94,9 +94,19 @@ const yieldToBrowserForPaint = (): Promise<void> =>
     });
   });
 
-export function SyntheticsDiagnosticsFlyoutLauncher() {
+export function SyntheticsDiagnosticsFlyoutLauncher({
+  hideTrigger = false,
+  isOpen: isOpenProp,
+  onClose: onCloseProp,
+}: {
+  hideTrigger?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
+} = {}) {
   const canEditSynthetics = useCanEditSynthetics();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = isOpenProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : internalIsOpen;
   const [loading, setLoading] = useState(false);
   const [zipExporting, setZipExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,19 +145,31 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
     }
   }, []);
 
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (isOpen && !wasOpen.current) {
+      void loadDiagnostics();
+    }
+    wasOpen.current = isOpen;
+  }, [isOpen, loadDiagnostics]);
+
   const onOpen = () => {
     if (!canEditSynthetics) {
       return;
     }
-    setIsOpen(true);
-    void loadDiagnostics();
+    setInternalIsOpen(true);
   };
 
   const onClose = () => {
     if (zipExporting) {
       return;
     }
-    setIsOpen(false);
+    if (onCloseProp) {
+      onCloseProp();
+    }
+    if (!isControlled) {
+      setInternalIsOpen(false);
+    }
   };
 
   const onDownloadZip = async () => {
@@ -167,19 +189,21 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
 
   return (
     <>
-      <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
-        <EuiButtonEmpty
-          data-test-subj="syntheticsDiagnosticsOpenButton"
-          iconType="inspect"
-          size="s"
-          onClick={onOpen}
-          isDisabled={!canEditSynthetics}
-        >
-          {i18n.translate('xpack.synthetics.diagnostics.openButton', {
-            defaultMessage: 'Diagnostics bundle',
-          })}
-        </EuiButtonEmpty>
-      </NoPermissionsTooltip>
+      {hideTrigger ? null : (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          <EuiButtonEmpty
+            data-test-subj="syntheticsDiagnosticsOpenButton"
+            iconType="inspect"
+            size="s"
+            onClick={onOpen}
+            isDisabled={!canEditSynthetics}
+          >
+            {i18n.translate('xpack.synthetics.diagnostics.openButton', {
+              defaultMessage: 'Diagnostics bundle',
+            })}
+          </EuiButtonEmpty>
+        </NoPermissionsTooltip>
+      )}
       {isOpen ? (
         <EuiFlyout
           ownFocus
@@ -204,36 +228,29 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
               <EuiLoadingSpinner size="xl" data-test-subj="syntheticsDiagnosticsLoading" />
             ) : null}
             {error ? (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
-                color="danger"
                 title={i18n.translate('xpack.synthetics.diagnostics.loadErrorTitle', {
                   defaultMessage: 'Could not load diagnostics',
                 })}
-              >
-                {error}
-              </EuiCallOut>
+                text={error}
+              />
             ) : null}
             {zipExporting && data ? (
               <>
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
-                  color="primary"
-                  iconType="download"
                   title={i18n.translate('xpack.synthetics.diagnostics.zipPreparingTitle', {
                     defaultMessage: 'Preparing download',
                   })}
                   data-test-subj="syntheticsDiagnosticsZipPreparingCallout"
+                  text={i18n.translate('xpack.synthetics.diagnostics.zipPreparingBody', {
+                    defaultMessage:
+                      'Building the ZIP file. This can take a moment for large environments.',
+                  })}
                 >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.synthetics.diagnostics.zipPreparingBody', {
-                      defaultMessage:
-                        'Building the ZIP file. This can take a moment for large environments.',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="s" />
                   <EuiProgress size="xs" color="primary" />
-                </EuiCallOut>
+                </KbnInfoCallout>
                 <EuiSpacer size="m" />
               </>
             ) : null}

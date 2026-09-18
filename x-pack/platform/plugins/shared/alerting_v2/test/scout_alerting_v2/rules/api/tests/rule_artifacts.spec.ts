@@ -29,11 +29,11 @@ const runbook = (content: string, id = 'rb-1') => ({
 const dashboard = (dashboardId: string, id = 'db-1') => ({
   id,
   type: DASHBOARD_ARTIFACT_TYPE,
-  data: { dashboardId },
+  data: { dashboard_id: dashboardId },
 });
 
 const dashboardReference = (dashboardId: string, artifactId = 'db-1') => ({
-  name: `artifact:dashboardId:${artifactId}`,
+  name: `artifact:dashboard_id:${artifactId}`,
   type: 'dashboard',
   id: dashboardId,
 });
@@ -323,7 +323,7 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_ARTIFACT_DATA');
-      expect(response.body.message).toContain('dashboardId');
+      expect(response.body.message).toContain('dashboard_id');
     }
   );
 

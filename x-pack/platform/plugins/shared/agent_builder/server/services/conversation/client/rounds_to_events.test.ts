@@ -20,6 +20,10 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   executionStartedEvent,
+  nextResumeIndex,
+  parseExecutionId,
+  resumeExecutionId,
+  resumeExecutionStartedEvent,
   isRoundDerivedEventId,
   roundsToEvents,
   userMessageEvent,
@@ -289,5 +293,69 @@ describe('isRoundDerivedEventId', () => {
     expect(isRoundDerivedEventId('my-error::step::context')).toBe(false);
     expect(isRoundDerivedEventId('round-1::step::0::retry')).toBe(false);
     expect(isRoundDerivedEventId('round-1::step::')).toBe(false);
+  });
+});
+
+describe('parseExecutionId', () => {
+  it.each([1, 2, 10])('parses resume %i', (index) => {
+    expect(parseExecutionId(resumeExecutionId('round::nested', index))).toEqual({
+      roundId: 'round::nested',
+      index,
+    });
+  });
+
+  it('parses an initial execution', () => {
+    expect(parseExecutionId('round::execution')).toEqual({ roundId: 'round', index: 0 });
+  });
+
+  it.each(['round', 'round::execution::bad', 'round::execution::1::step::0'])(
+    'rejects unrelated id %s',
+    (id) => expect(parseExecutionId(id)).toBeUndefined()
+  );
+});
+
+describe('resumeExecutionStartedEvent', () => {
+  it('produces an execution_started event scoped to the resume execution', () => {
+    const conversation = baseConversation([baseRound()]);
+    const event = resumeExecutionStartedEvent({
+      roundId: 'round-1',
+      executionIndex: 2,
+      startedAt: '2026-01-02T00:00:00.000Z',
+      triggerEventId: 'round-1::prompt_response::2',
+      conversation,
+    });
+
+    expect(event).toMatchObject({
+      id: 'round-1::execution::2::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: '2026-01-02T00:00:00.000Z',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      execution_id: 'round-1::execution::2',
+      trigger_event_id: 'round-1::prompt_response::2',
+    });
+  });
+});
+
+describe('nextResumeIndex', () => {
+  it('returns 0 when the conversation has no events', () => {
+    expect(nextResumeIndex({ events: undefined }, 'round-1')).toBe(0);
+    expect(nextResumeIndex({ events: [] }, 'round-1')).toBe(0);
+  });
+
+  it('counts distinct executions for the target round only', () => {
+    const events = [
+      { execution_id: 'round-1::execution' },
+      { execution_id: 'round-1::execution' },
+      { execution_id: 'round-1::execution::1' },
+      { execution_id: 'round-2::execution' },
+    ] as never;
+    expect(nextResumeIndex({ events }, 'round-1')).toBe(2);
+    expect(nextResumeIndex({ events }, 'round-2')).toBe(1);
+    expect(nextResumeIndex({ events }, 'round-3')).toBe(0);
+  });
+
+  it('ignores events without an execution_id', () => {
+    const events = [{ id: 'x' }, { execution_id: 'round-1::execution' }] as never;
+    expect(nextResumeIndex({ events }, 'round-1')).toBe(1);
   });
 });

@@ -20,8 +20,8 @@ const createRegistry = (): ArtifactTypeRegistry => {
   const registry = new ArtifactTypeRegistry();
   registry.register({
     type: 'dashboard',
-    dataSchema: z.object({ dashboardId: z.string().max(256) }).strict(),
-    references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
+    dataSchema: z.object({ dashboard_id: z.string().max(256) }).strict(),
+    references: [{ field: 'dashboard_id', savedObjectType: 'dashboard' }],
   });
   registry.register({
     type: 'runbook',
@@ -32,25 +32,25 @@ const createRegistry = (): ArtifactTypeRegistry => {
 
 describe('buildArtifactReferenceName', () => {
   it('builds an artifact:<field>:<artifactId> name', () => {
-    expect(buildArtifactReferenceName('dashboardId', 'a1')).toBe('artifact:dashboardId:a1');
+    expect(buildArtifactReferenceName('dashboard_id', 'a1')).toBe('artifact:dashboard_id:a1');
   });
 
   it('keeps colons in the artifact id intact', () => {
-    expect(buildArtifactReferenceName('dashboardId', 'a:1')).toBe('artifact:dashboardId:a:1');
+    expect(buildArtifactReferenceName('dashboard_id', 'a:1')).toBe('artifact:dashboard_id:a:1');
   });
 });
 
 describe('parseArtifactReferenceName', () => {
   it('parses a well-formed name', () => {
-    expect(parseArtifactReferenceName('artifact:dashboardId:a1')).toEqual({
-      field: 'dashboardId',
+    expect(parseArtifactReferenceName('artifact:dashboard_id:a1')).toEqual({
+      field: 'dashboard_id',
       artifactId: 'a1',
     });
   });
 
   it('assigns everything after the second separator to the artifact id', () => {
-    expect(parseArtifactReferenceName('artifact:dashboardId:a:1')).toEqual({
-      field: 'dashboardId',
+    expect(parseArtifactReferenceName('artifact:dashboard_id:a:1')).toEqual({
+      field: 'dashboard_id',
       artifactId: 'a:1',
     });
   });
@@ -62,21 +62,21 @@ describe('parseArtifactReferenceName', () => {
   it('returns undefined when the field or artifact id is missing', () => {
     expect(parseArtifactReferenceName('artifact:')).toBeUndefined();
     expect(parseArtifactReferenceName('artifact::a1')).toBeUndefined();
-    expect(parseArtifactReferenceName('artifact:dashboardId')).toBeUndefined();
-    expect(parseArtifactReferenceName('artifact:dashboardId:')).toBeUndefined();
+    expect(parseArtifactReferenceName('artifact:dashboard_id')).toBeUndefined();
+    expect(parseArtifactReferenceName('artifact:dashboard_id:')).toBeUndefined();
   });
 });
 
 describe('extractArtifactReferences', () => {
   it('extracts references for registered dashboard artifacts', () => {
     const refs = extractArtifactReferences(
-      [{ id: 'a1', type: 'dashboard', data: { dashboardId: 'dash-1' } }],
+      [{ id: 'a1', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
       createRegistry()
     );
 
     expect(refs).toEqual([
       {
-        name: 'artifact:dashboardId:a1',
+        name: 'artifact:dashboard_id:a1',
         type: 'dashboard',
         id: 'dash-1',
       },
@@ -106,13 +106,13 @@ describe('rebuildArtifactReferences', () => {
   it('rebuilds refs for registered artifacts and carries unregistered ones', () => {
     const previous: SavedObjectReference[] = [
       { name: 'other:ref', type: 'index-pattern', id: 'ip-1' },
-      { name: 'artifact:dashboardId:legacy', type: 'dashboard', id: 'old-dash' },
+      { name: 'artifact:dashboard_id:legacy', type: 'dashboard', id: 'old-dash' },
       { name: 'artifact:linkId:custom-1', type: 'search', id: 'search-1' },
     ];
 
     const next = rebuildArtifactReferences({
       artifacts: [
-        { id: 'a1', type: 'dashboard', data: { dashboardId: 'dash-2' } },
+        { id: 'a1', type: 'dashboard', data: { dashboard_id: 'dash-2' } },
         { id: 'custom-1', type: 'obs.custom', data: { linkId: 'search-1' } },
       ],
       previousReferences: previous,
@@ -122,7 +122,7 @@ describe('rebuildArtifactReferences', () => {
     expect(next).toEqual(
       expect.arrayContaining([
         { name: 'other:ref', type: 'index-pattern', id: 'ip-1' },
-        { name: 'artifact:dashboardId:a1', type: 'dashboard', id: 'dash-2' },
+        { name: 'artifact:dashboard_id:a1', type: 'dashboard', id: 'dash-2' },
         { name: 'artifact:linkId:custom-1', type: 'search', id: 'search-1' },
       ])
     );
@@ -133,12 +133,12 @@ describe('rebuildArtifactReferences', () => {
 describe('injectArtifactReferences', () => {
   it('injects remapped reference ids into registered artifact data', () => {
     const artifacts = injectArtifactReferences(
-      [{ id: 'a1', type: 'dashboard', data: { dashboardId: 'old-id' } }],
-      [{ name: 'artifact:dashboardId:a1', type: 'dashboard', id: 'new-id' }],
+      [{ id: 'a1', type: 'dashboard', data: { dashboard_id: 'old-id' } }],
+      [{ name: 'artifact:dashboard_id:a1', type: 'dashboard', id: 'new-id' }],
       createRegistry()
     );
 
-    expect(artifacts).toEqual([{ id: 'a1', type: 'dashboard', data: { dashboardId: 'new-id' } }]);
+    expect(artifacts).toEqual([{ id: 'a1', type: 'dashboard', data: { dashboard_id: 'new-id' } }]);
   });
 
   it('leaves unregistered artifacts untouched', () => {

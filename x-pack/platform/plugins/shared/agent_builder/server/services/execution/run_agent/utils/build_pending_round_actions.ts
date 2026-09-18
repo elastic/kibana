@@ -9,7 +9,6 @@ import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-commo
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ResearchAgentAction } from '../actions';
-import type { ProcessedConversationRound } from './prepare_conversation';
 import { roundToActions } from './round_to_actions';
 import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
 
@@ -26,7 +25,7 @@ export const buildPendingRoundActions = ({
   toolIdMapping,
   eventEmitter,
 }: {
-  round: ConversationRound | ProcessedConversationRound;
+  round: ConversationRound;
   promptState: PromptStorageState;
   toolIdMapping: ToolIdMapping;
   eventEmitter: (event: ChatAgentEvent) => void;

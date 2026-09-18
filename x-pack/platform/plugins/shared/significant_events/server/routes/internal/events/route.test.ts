@@ -8,6 +8,12 @@
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalEventsRoutes } from './route';
 
+const mockCleanupStaleEvents = jest.fn();
+
+jest.mock('../../../lib/significant_events/events/cleanup_stale_events', () => ({
+  cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+}));
+
 jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
@@ -17,11 +23,41 @@ const investigateRoute =
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
+const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/events/{id}'];
+const eventsUpdateRoute =
+  internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
+const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
 
 type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
   getState: jest.fn().mockResolvedValue(state),
+});
+
+describe('POST /internal/significant_events/events/_cleanup', () => {
+  it('runs cleanup with manage-scoped event and rule clients', async () => {
+    mockCleanupStaleEvents.mockResolvedValue({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+    const eventClient = {};
+    const rulesClient = {};
+
+    const result = await cleanupRoute.handler({
+      params: { body: { candidateRuleIds: ['rule-1'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => eventClient,
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+      }),
+      server: {},
+    } as never);
+
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
+      eventClient,
+      rulesClient,
+      candidateRuleIds: ['rule-1'],
+    });
+    expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+  });
 });
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
@@ -167,5 +203,127 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
+  });
+});
+
+describe('GET /internal/significant_events/events/{id}', () => {
+  const baseEvent = {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    event_uuid: 'version-1',
+    event_id: 'event-1',
+    status: 'open' as const,
+    stream_names: ['logs.test'],
+    title: 'Test event',
+    summary: 'Test summary',
+    severity: '40-medium' as const,
+    confidence: 0.8,
+  };
+
+  it('returns 404 when the event uuid is missing', async () => {
+    await expect(
+      eventsGetRoute.handler({
+        params: { path: { id: 'missing' } },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          getEventClient: () => ({
+            findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
+            findByEventId: jest.fn(),
+          }),
+        }),
+        server: {},
+      } as never)
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('returns the latest version in the event lineage', async () => {
+    const older = { ...baseEvent };
+    const latest = {
+      ...baseEvent,
+      event_uuid: 'version-2',
+      previous_event_uuid: 'version-1',
+      assessment_note: 'Known noise',
+    };
+
+    const response = await eventsGetRoute.handler({
+      params: { path: { id: older.event_uuid } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => ({
+          findByEventUuid: jest.fn().mockResolvedValue({ hits: [older] }),
+          findByEventId: jest.fn().mockResolvedValue({ hits: [older, latest] }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.event_uuid).toBe('version-2');
+    expect(response.assessment_note).toBe('Known noise');
+  });
+
+  it('passes signals through to the response unchanged', async () => {
+    const signals = [
+      {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        verdict: 'false_positive',
+        metadata: {
+          rule_uuid: 'rule-uuid-1',
+          rule_name: 'Test Rule',
+          detection_id: 'det-1',
+          change_point_type: 'dip',
+        },
+      },
+    ];
+    const eventWithSignals = { ...baseEvent, signals };
+
+    const response = await eventsGetRoute.handler({
+      params: { path: { id: baseEvent.event_uuid } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => ({
+          findByEventUuid: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
+          findByEventId: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.signals).toEqual(signals);
+  });
+});
+
+describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
+  const bodySchema = eventsUpdateRoute.params.shape.body;
+
+  it('rejects dismissed status with no assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'dismissed' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(['assessment_note']);
+    }
+  });
+
+  it('rejects dismissed status with a blank assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'dismissed', assessment_note: '   ' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(['assessment_note']);
+    }
+  });
+
+  it('accepts dismissed status with a non-empty assessment_note', () => {
+    const result = bodySchema.safeParse({
+      status: 'dismissed',
+      assessment_note: 'Known noise from nightly batch job',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts closed status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'closed' });
+    expect(result.success).toBe(true);
   });
 });
