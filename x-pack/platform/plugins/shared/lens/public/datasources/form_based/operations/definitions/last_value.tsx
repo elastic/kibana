@@ -134,6 +134,14 @@ function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
   return dateFields;
 }
 
+// Resolves the date field a last value column should sort by when none is set: the data view's
+// default time field when it is a date, otherwise the first available date field.
+export function getDefaultDateFieldName(indexPattern: IndexPattern): string | undefined {
+  return isTimeFieldNameDateField(indexPattern)
+    ? indexPattern.timeFieldName
+    : indexPattern.fields.find((field) => field.type === 'date')?.name;
+}
+
 function setDefaultShowArrayValues(
   field: IndexPatternField,
   oldParams: LastValueIndexPatternColumn['params']
@@ -227,9 +235,7 @@ export const lastValueOperation: OperationDefinition<
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];
-    const sortField = isTimeFieldNameDateField(indexPattern)
-      ? indexPattern.timeFieldName
-      : indexPattern.fields.find((f) => f.type === 'date')?.name;
+    const sortField = getDefaultDateFieldName(indexPattern);
 
     if (!sortField) {
       throw new Error(

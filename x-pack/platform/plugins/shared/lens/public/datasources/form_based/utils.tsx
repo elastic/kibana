@@ -12,7 +12,7 @@ import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { escapeQuotes, type TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, uniq, uniqBy } from 'lodash';
@@ -60,6 +60,10 @@ import {
 } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import {
+  getOrderAggLastValueSortFieldStatus,
+  isCustomLastValueOrderAgg,
+} from './operations/definitions/terms/helpers';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
@@ -73,6 +77,7 @@ import {
   PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   PRECISION_ERROR_ACCURACY_MODE_ENABLED,
   PRECISION_ERROR_ASC_COUNT_PRECISION,
+  TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
   TSDB_UNSUPPORTED_COUNTER_OP,
   UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX,
 } from '../../user_messages_ids';
@@ -597,6 +602,122 @@ export function getPrecisionErrorWarningMessages(
         }
       });
   }
+
+  return warningMessages;
+}
+
+/**
+ * Non-blocking warning for terms columns ranked by a custom `last_value` order-agg whose `sortField`
+ * is missing but can fall back to a default date field.
+ * Render auto-fills the default so the chart still works. This surfaces the fallback and, in the editor,
+ * offers a fix that persists the field onto the order-agg so the ranking becomes explicit on the next save.
+ */
+export function getCustomRankLastValueSortFieldWarningMessages(
+  state: FormBasedPrivateState,
+  { dataViews }: FramePublicAPI,
+  setState?: StateSetter<FormBasedPrivateState>
+): UserMessage[] {
+  const warningMessages: UserMessage[] = [];
+
+  if (!state) {
+    return warningMessages;
+  }
+
+  Object.entries(state.layers).forEach(([layerId, layer]) => {
+    const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
+    if (!indexPattern) {
+      return;
+    }
+
+    Object.keys(layer.columns).forEach((columnId) => {
+      const column = layer.columns[columnId];
+      if (!isCustomLastValueOrderAgg(column)) {
+        return;
+      }
+
+      const status = getOrderAggLastValueSortFieldStatus(layer, columnId, indexPattern);
+      if (status.status !== 'missing-with-default') {
+        return;
+      }
+
+      const { defaultField } = status;
+      const { orderAgg } = column.params;
+      // API-generated panels persist an empty `label`, so fall back to the operation's default
+      // label (and finally the source field) to avoid an empty {name} in the message.
+      const columnName =
+        (column.customLabel && column.label) ||
+        operationDefinitionMap[column.operationType]?.getDefaultLabel?.(
+          column,
+          layer.columns,
+          indexPattern
+        );
+
+      warningMessages.push({
+        uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
+        severity: 'warning',
+        fixableInEditor: true,
+        displayLocations: [
+          { id: 'toolbar' },
+          { id: 'dimensionButton', dimensionId: columnId },
+          { id: 'embeddableBadge' },
+        ],
+        shortMessage: i18n.translate(
+          'xpack.lens.indexPattern.terms.customRankLastValueMissingSortField.shortMessage',
+          {
+            defaultMessage: 'Ranking by last value uses {field} because no sort field is set.',
+            values: { field: defaultField },
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.terms.customRankLastValueMissingSortField"
+              defaultMessage="{name} ranks top values by their last value, but no sort field is set, so {field} is used by default. Edit in Lens editor to fix the error, then save to persist the ranking."
+              values={{
+                name: <strong>{columnName}</strong>,
+                field: <strong>{defaultField}</strong>,
+              }}
+            />
+            {setState ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiButtonEmpty
+                  data-test-subj="lnsCustomRankLastValueSortByField"
+                  size="s"
+                  flush="left"
+                  onClick={() => {
+                    setState((prevState) =>
+                      mergeLayer({
+                        state: prevState,
+                        layerId,
+                        newLayer: updateDefaultLabels(
+                          updateColumnParam({
+                            layer,
+                            columnId,
+                            paramName: 'orderAgg',
+                            value: {
+                              ...orderAgg,
+                              params: { ...orderAgg.params, sortField: defaultField },
+                            },
+                          }),
+                          indexPattern
+                        ),
+                      })
+                    );
+                  }}
+                >
+                  {i18n.translate('xpack.lens.indexPattern.terms.customRankLastValueSortByField', {
+                    defaultMessage: 'Sort by {field}',
+                    values: { field: defaultField },
+                  })}
+                </EuiButtonEmpty>
+              </>
+            ) : null}
+          </>
+        ),
+      });
+    });
+  });
 
   return warningMessages;
 }

@@ -31,6 +31,7 @@ import type {
   DataType,
   GenericIndexPatternColumn,
   IncompleteColumn,
+  LastValueIndexPatternColumn,
   TermsIndexPatternColumn,
   IndexPatternField,
 } from '@kbn/lens-common';
@@ -48,12 +49,15 @@ import { getFirstValue } from '../../../pure_utils';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
+  getOrderAggErrorMessages,
+  isCustomLastValueOrderAgg,
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
   isPercentileSortable,
   getOtherBucketSwitchDefault,
 } from './helpers';
+import { getDefaultDateFieldName } from '../last_value';
 import {
   DEFAULT_MAX_DOC_COUNT,
   DEFAULT_SIZE,
@@ -217,6 +221,7 @@ export const termsOperation: OperationDefinition<
       ...getInvalidFieldMessage(layer, columnId, indexPattern),
       ...getDisallowedTermsMessage(layer, columnId, indexPattern),
       ...getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern),
+      ...getOrderAggErrorMessages(layer, columnId, indexPattern),
     ];
   },
   getNonTransferableFields: (column, newIndexPattern) => {
@@ -328,12 +333,26 @@ export const termsOperation: OperationDefinition<
       orderBy = 'custom';
       const def = operationDefinitionMap?.[orderAggColumn?.operationType];
       if (def && 'toEsAggsFn' in def) {
+        let resolvedOrderAggColumn = orderAggColumn;
+        // When a terms column is custom-ranked by a last_value order-agg with no sortField, fall
+        // back to the data view's default date field so the chart still renders with a valid sort.
+        if (isCustomLastValueOrderAgg(column) && !column.params.orderAgg.params?.sortField) {
+          const defaultField = getDefaultDateFieldName(_indexPattern);
+          if (defaultField) {
+            const { orderAgg: lastValueOrderAgg } = column.params;
+            const orderAggWithDefaultSort: LastValueIndexPatternColumn = {
+              ...lastValueOrderAgg,
+              params: { ...lastValueOrderAgg.params, sortField: defaultField },
+            };
+            resolvedOrderAggColumn = orderAggWithDefaultSort;
+          }
+        }
         orderAgg = [
           {
             type: 'expression' as const,
             chain: [
               def.toEsAggsFn(
-                orderAggColumn,
+                resolvedOrderAggColumn,
                 `${columnId}-orderAgg`,
                 _indexPattern,
                 layer,
