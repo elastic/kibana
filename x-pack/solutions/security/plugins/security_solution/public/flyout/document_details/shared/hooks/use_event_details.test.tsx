@@ -8,7 +8,7 @@
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
-import { getAlertIndexAlias, useEventDetails } from './use_event_details';
+import { useEventDetails } from './use_event_details';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
@@ -24,26 +24,6 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 
 const eventId = 'eventId';
 const indexName = 'indexName';
-
-describe('getAlertIndexAlias', () => {
-  it('should handle default alert index', () => {
-    expect(getAlertIndexAlias('.internal.alerts-security.alerts')).toEqual(
-      '.alerts-security.alerts-default'
-    );
-  });
-
-  it('should handle default preview index', () => {
-    expect(getAlertIndexAlias('.internal.preview.alerts-security.alerts')).toEqual(
-      '.preview.alerts-security.alerts-default'
-    );
-  });
-
-  it('should handle non default space id', () => {
-    expect(getAlertIndexAlias('.internal.preview.alerts-security.alerts', 'test')).toEqual(
-      '.preview.alerts-security.alerts-test'
-    );
-  });
-});
 
 describe('useEventDetails', () => {
   let hookResult: RenderHookResult<UseEventDetailsResult, UseEventDetailsParams>;

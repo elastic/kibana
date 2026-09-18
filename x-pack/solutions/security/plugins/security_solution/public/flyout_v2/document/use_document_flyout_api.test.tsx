@@ -130,6 +130,33 @@ describe('useDocumentFlyoutApi', () => {
     );
   });
 
+  it('openDocumentFlyoutFromPatternAsChild opens a system flyout that inherits the current session', () => {
+    const { result } = renderHook(() => useDocumentFlyoutApi());
+    result.current.openDocumentFlyoutFromPatternAsChild({
+      documentId: '1',
+      indexName: 'logs-*,alerts-*',
+    });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      'FLYOUT_CONTENT',
+      expect.objectContaining({
+        size: 's',
+        session: 'inherit',
+        historyKey: documentFlyoutHistoryKey,
+      })
+    );
+    const sessionContent = (flyoutProviders as jest.Mock).mock.calls[0][0].children;
+    const childContent = sessionContent.props.children.props.children;
+    expect(childContent.props.dataTestSubj).toBe(CHILD_DOCUMENT_FLYOUT_TEST_ID);
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: undefined,
+    });
+  });
+
   it.each([
     ['openDocumentFlyoutFromIndex', 'start'],
     ['openDocumentFlyoutFromIndexAsChild', 'inherit'],
@@ -361,6 +388,21 @@ describe('useDocumentFlyoutApi', () => {
 
       expect(mockWriteOnOpen).toHaveBeenCalledWith(
         { kind: 'document', documentId: 'doc-id', indexName: 'doc-index' },
+        'inherit'
+      );
+      // buildOnClose is called with the parent descriptor (null when URL has no prior state)
+      expect(mockBuildOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('openDocumentFlyoutFromPatternAsChild writes a documentFromPattern descriptor in inherit mode', () => {
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentFlyoutFromPatternAsChild({
+        documentId: 'doc-id',
+        indexName: 'logs-*',
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith(
+        { kind: 'documentFromPattern', documentId: 'doc-id', indexName: 'logs-*' },
         'inherit'
       );
       // buildOnClose is called with the parent descriptor (null when URL has no prior state)

@@ -20,6 +20,8 @@ import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts
 import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { getAlertIndexAlias } from '../../shared/utils/alert_index_alias';
 import { EventKind } from './constants/event_kinds';
 import { DocumentFlyout } from '.';
 import type { DocumentFlyoutWrapperProps } from './document_flyout_wrapper';
@@ -57,20 +59,30 @@ export const DocumentFlyoutWrapperFromPattern = memo(
     dataTestSubj,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
+    const spaceId = useSpaceId();
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
     const isDataViewInvalid = status === 'error';
     const isDataViewDegraded = status === 'ready' && !dataView.hasMatchedIndices();
 
+    // Routing a search *at* the index (rather than filtering `_index` inside an authorized data view)
+    // requires the public alias for alert documents: their `_index` is the hidden `.internal.alerts-*`
+    // backing index, which the request user cannot query directly. Non-alert indices pass through.
+    const resolvedIndexName = useMemo(
+      () => (indexName ? getAlertIndexAlias(indexName, spaceId) ?? indexName : indexName),
+      [indexName, spaceId]
+    );
+
     const shouldSkipSearch = useMemo(
-      () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
-      [dataView, documentId, indexName, isDataViewInvalid, isDataViewLoading]
+      () =>
+        isDataViewLoading || isDataViewInvalid || !documentId || !resolvedIndexName || !dataView,
+      [dataView, documentId, resolvedIndexName, isDataViewInvalid, isDataViewLoading]
     );
 
     const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
     const [loading, , searchHit, , refetchDocument] = useTimelineEventsDetails({
-      indexName: indexName ?? '',
+      indexName: resolvedIndexName ?? '',
       eventId: documentId ?? '',
       runtimeMappings,
       skip: shouldSkipSearch,
