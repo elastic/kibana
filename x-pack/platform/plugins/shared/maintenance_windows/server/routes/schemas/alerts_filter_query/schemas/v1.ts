@@ -41,52 +41,54 @@ export const alertsFilterQuerySchema = schema.object(
         meta: { description: 'A filter written in Kibana Query Language (KQL).' },
       })
     ),
-    filters: schema.maybe(schema.arrayOf(
-      schema.object({
-        query: schema.maybe(
-          schema.recordOf(
+    filters: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          query: schema.maybe(
+            schema.recordOf(
+              schema.string(),
+              schema.any({
+                meta: {
+                  description: 'A query for the filter.',
+                },
+              })
+            )
+          ),
+          meta: schema.recordOf(
             schema.string(),
             schema.any({
               meta: {
-                description: 'A query for the filter.',
+                description:
+                  'An object with fields such as "controlledBy", "disabled", "field", "group", "index", "isMultiIndex", "key", "negate", "params",  "type", "value"',
               },
             })
-          )
-        ),
-        meta: schema.recordOf(
-          schema.string(),
-          schema.any({
-            meta: {
-              description:
-                'An object with fields such as "controlledBy", "disabled", "field", "group", "index", "isMultiIndex", "key", "negate", "params",  "type", "value"',
-            },
-          })
-        ),
-        $state: schema.maybe(
-          schema.object({
-            store: schema.oneOf(
-              [
-                schema.literal(FilterStateStore.APP_STATE),
-                schema.literal(FilterStateStore.GLOBAL_STATE),
-              ],
-              {
-                meta: {
-                  description:
-                    'A filter can be either specific to an application context or applied globally.',
-                },
-              }
-            ),
-          })
-        ),
-      }),
-      {
-        maxSize: 100,
-        meta: {
-          description:
-            'A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.',
-        },
-      }
-    )),
+          ),
+          $state: schema.maybe(
+            schema.object({
+              store: schema.oneOf(
+                [
+                  schema.literal(FilterStateStore.APP_STATE),
+                  schema.literal(FilterStateStore.GLOBAL_STATE),
+                ],
+                {
+                  meta: {
+                    description:
+                      'A filter can be either specific to an application context or applied globally.',
+                  },
+                }
+              ),
+            })
+          ),
+        }),
+        {
+          maxSize: 100,
+          meta: {
+            description:
+              'A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.',
+          },
+        }
+      )
+    ),
     dsl: schema.maybe(
       schema.string({
         maxLength: 10000,

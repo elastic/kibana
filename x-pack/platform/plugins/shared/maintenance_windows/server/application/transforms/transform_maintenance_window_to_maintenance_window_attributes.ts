@@ -20,9 +20,7 @@ type ScopeInput = NonNullable<MaintenanceWindowWithoutComputedProperties['scope'
 type ScopeAttributes = NonNullable<MaintenanceWindowAttributes['scope']>;
 
 // Normalize the legacy scopedQuery field (telemetry mirror). Still requires non-optional kql/filters/dsl.
-const normalizeScopedQuery = (
-  query: AlertsFilterQueryInput
-): AlertsFilterQueryAttributes => ({
+const normalizeScopedQuery = (query: AlertsFilterQueryInput): AlertsFilterQueryAttributes => ({
   enabled: true,
   filters: query.filters ?? [],
   kql: query.kql ?? '',
@@ -31,8 +29,12 @@ const normalizeScopedQuery = (
 
 // Scope fields already carry `enabled` and optional kql/filters/dsl — pass through as-is.
 const transformScope = (scope: ScopeInput): ScopeAttributes => ({
-  ...(scope.alerting !== undefined ? { alerting: scope.alerting as AlertsFilterQueryAttributes } : {}),
-  ...(scope.alertingV2 !== undefined ? { alertingV2: scope.alertingV2 as AlertingV2ScopeAttributes } : {}),
+  ...(scope.alerting !== undefined
+    ? { alerting: scope.alerting as AlertsFilterQueryAttributes }
+    : {}),
+  ...(scope.alertingV2 !== undefined
+    ? { alertingV2: scope.alertingV2 as AlertingV2ScopeAttributes }
+    : {}),
 });
 
 // Tri-state spread used only for the legacy scopedQuery field (which retains | null).

@@ -64,9 +64,8 @@ export async function createMaintenanceWindow(
     enabled,
     expirationDate,
     categoryIds,
-    scopedQuery: resolvedScope.alerting?.enabled && resolvedScope.alerting.kql
-      ? resolvedScope.alerting
-      : null,
+    scopedQuery:
+      resolvedScope.alerting?.enabled && resolvedScope.alerting.kql ? resolvedScope.alerting : null,
     rRule,
     duration,
     events,

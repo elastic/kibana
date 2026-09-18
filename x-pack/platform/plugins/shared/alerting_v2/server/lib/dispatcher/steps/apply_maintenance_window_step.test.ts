@@ -387,9 +387,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   });
 
   it('does not suppress an episode when the MW has no scope at all (v2 not selected)', async () => {
-    service.getEnabledMaintenanceWindows.mockResolvedValue([
-      buildMw({ scope: undefined }),
-    ]);
+    service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ scope: undefined })]);
 
     const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({

@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/lazy-object'
   - '@kbn/task-manager-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/kibana-react-plugin'
   - '@kbn/management-plugin'

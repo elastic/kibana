@@ -12,7 +12,12 @@ import { getScopedQueryErrorMessage } from '../../../common';
 import type { AlertsFilterQueryAttributes, AlertingV2ScopeAttributes } from '../../data/types';
 
 export interface ScopeInput {
-  alerting?: { enabled: boolean; kql?: string; filters?: AlertsFilterQueryAttributes['filters']; dsl?: string };
+  alerting?: {
+    enabled: boolean;
+    kql?: string;
+    filters?: AlertsFilterQueryAttributes['filters'];
+    dsl?: string;
+  };
   alertingV2?: { enabled: boolean; kql?: string };
 }
 
@@ -63,9 +68,7 @@ export const resolveScope = ({
           dsl,
         };
       } catch (error) {
-        throw Boom.badRequest(
-          `${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`
-        );
+        throw Boom.badRequest(`${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`);
       }
     }
   }
@@ -80,9 +83,7 @@ export const resolveScope = ({
       try {
         fromKueryExpression(scope.alertingV2.kql);
       } catch (error) {
-        throw Boom.badRequest(
-          `${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`
-        );
+        throw Boom.badRequest(`${errorPrefix} - ${getScopedQueryErrorMessage(error.message)}`);
       }
       resolved.alertingV2 = { enabled: true, kql: scope.alertingV2.kql };
     }
