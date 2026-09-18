@@ -9,7 +9,12 @@ import { Readable } from 'stream';
 import { z } from '@kbn/zod/v4';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import { MAX_STREAM_NAME_LENGTH, Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import {
+  MAX_STREAM_NAME_LENGTH,
+  Streams,
+  emptyAssets,
+  getInheritedFieldsFromAncestors,
+} from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -60,7 +65,10 @@ const exportContentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream to export content from.'),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the stream to export content from.'),
     }),
     body: z.object({
       name: z.string().max(256),
@@ -192,7 +200,10 @@ const importContentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream to import content into.'),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z

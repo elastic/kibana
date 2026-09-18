@@ -87,7 +87,9 @@ const listAttachmentsRoute = createServerRoute({
     }),
     query: z
       .object({
-        query: z.optional(z.string().max(1000)).describe('Search query to filter attachments by title'),
+        query: z
+          .optional(z.string().max(1000))
+          .describe('Search query to filter attachments by title'),
         attachmentTypes: z
           .optional(z.union([attachmentTypeSchema, z.array(attachmentTypeSchema)]))
           .describe('Filter by attachment types (single value or array)'),

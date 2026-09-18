@@ -52,7 +52,9 @@ const readIngestRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.') }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+    }),
   }),
   handler: async ({
     params,

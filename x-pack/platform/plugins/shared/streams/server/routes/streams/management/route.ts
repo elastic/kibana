@@ -47,7 +47,10 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the parent stream to fork from.'),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the parent stream to fork from.'),
     }),
     body: z.object({
       stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
