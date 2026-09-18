@@ -39,9 +39,8 @@ export const createMemoryListTool = ({
     'Shows names, titles, categories, and whether pages have references.',
   schema: memoryListSchema,
   handler: async ({ category, show_category_tree: showCategoryTree }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       if (showCategoryTree) {
         const tree = await memoryService.getCategoryTree();
         return {

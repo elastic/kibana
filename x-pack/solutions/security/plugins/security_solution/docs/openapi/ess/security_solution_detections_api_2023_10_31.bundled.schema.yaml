@@ -5922,6 +5922,27 @@ components:
             100 entries per request; larger maps are rejected.
           maxProperties: 100
           type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: >-
+            Use this when the query references fields that are not in the alerts
+            index mapping, for example data view runtime fields with a Painless
+            script.
+
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch
+            as `runtime_mappings` on the status-update query. Unlike
+            `runtime_fields`, Kibana keeps your script and runs it at query
+            time. It does not replace the script with a `_source` reader.
+
+            When a script is present, Kibana sets `on_script_error` to
+            `continue`. If the script fails on one alert, that field has no
+            value for the alert and the update continues.
+
+            Unique field names across `runtime_fields` and `runtime_mappings`
+            combined cannot exceed 100. Larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -5958,6 +5979,7 @@ components:
             - isolate
           type: string
         comment:
+          maxLength: 30000
           type: string
       required:
         - command
@@ -5966,11 +5988,14 @@ components:
         type: object
         properties:
           field:
+            maxLength: 2000
             type: string
           value:
             oneOf:
-              - type: string
+              - maxLength: 30000
+                type: string
               - items:
+                  maxLength: 30000
                   type: string
                 type: array
       description: 'Map Osquery results columns or static values to Elastic Common
@@ -7222,6 +7247,7 @@ components:
           description: 'Add a note that explains or describes the action. You can find
             your comment in the response actions history log. Example:
             "comment": "Check processes"'
+          maxLength: 30000
           type: string
         config:
           type: object
@@ -8446,6 +8472,7 @@ components:
         pack_id:
           description: 'To specify a query pack, use the packId field. Example: "packId":
             "processes_elastic"'
+          maxLength: 256
           type: string
         queries:
           items:
@@ -8454,10 +8481,12 @@ components:
         query:
           description: 'To run a single query, use the query field and enter a SQL query.
             Example: "query": "SELECT * FROM processes;"'
+          maxLength: 30000
           type: string
         saved_query_id:
           description: 'To run a saved query, use the saved_query_id field and specify the
             saved query ID. Example: "saved_query_id": "processes_elastic"'
+          maxLength: 256
           type: string
         timeout:
           description: 'A timeout period, in seconds, after which the query will stop
@@ -8473,11 +8502,14 @@ components:
           $ref: '#/components/schemas/EcsMapping'
         id:
           description: Query ID
+          maxLength: 256
           type: string
         platform:
+          maxLength: 256
           type: string
         query:
           description: Query to run
+          maxLength: 30000
           type: string
         removed:
           type: boolean
@@ -8485,6 +8517,7 @@ components:
           type: boolean
         version:
           description: Query version
+          maxLength: 256
           type: string
       required:
         - id
@@ -9870,9 +9903,11 @@ components:
       properties:
         scriptId:
           description: The ID of the script to run (from the Kibana Script library)
+          maxLength: 256
           type: string
         scriptInput:
           description: The arguments to pass to the script (if any)
+          maxLength: 8192
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
@@ -9889,6 +9924,7 @@ components:
         comment:
           description: Add a note that explains or describes the action. You can find your
             comment in the response actions history log
+          maxLength: 30000
           type: string
         config:
           type: object
@@ -9901,6 +9937,37 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
       required:
         - command
+    RuntimeFieldMapping:
+      description: A runtime field included in the status-update query so the query
+        can match fields that are not in the alerts index mapping, for example
+        scripted fields on a data view. Elasticsearch evaluates the field at
+        query time.
+      type: object
+      properties:
+        format:
+          description: Format string for date runtime fields, for example
+            `strict_date_optional_time`.
+          maxLength: 100
+          type: string
+        script:
+          additionalProperties: false
+          description: Inline Painless script that Elasticsearch evaluates for each alert.
+            Only `source` is accepted. Stored scripts, parameterized scripts
+            (`params`), and non-default `lang` values are not supported. Extra
+            properties are rejected with a 400 so the script is not run with
+            different semantics.
+          type: object
+          properties:
+            source:
+              description: Painless script source to execute.
+              maxLength: 10000
+              type: string
+          required:
+            - source
+        type:
+          $ref: '#/components/schemas/RuntimeFieldType'
+      required:
+        - type
     RuntimeFieldType:
       description: The data type for the runtime field type. Determines how the field
         value is indexed and queried.
@@ -10519,6 +10586,27 @@ components:
             source index defined when the alerts were created.
           maxProperties: 100
           type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: >-
+            Use this when the query references fields that are not in the alerts
+            index mapping, for example data view runtime fields with a Painless
+            script.
+
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch
+            as `runtime_mappings` on the status-update query. Unlike
+            `runtime_fields`, Kibana keeps your script and runs it at query
+            time. It does not replace the script with a `_source` reader.
+
+            When a script is present, Kibana sets `on_script_error` to
+            `continue`. If the script fails on one alert, that field has no
+            value for the alert and the update continues.
+
+            Unique field names across `runtime_fields` and `runtime_mappings`
+            combined cannot exceed 100. Larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
@@ -10671,6 +10759,7 @@ components:
           description: 'Add a note that explains or describes the action. You can find
             your comment in the response actions history log. Example:
             "comment": "Check processes"'
+          maxLength: 30000
           type: string
         config:
           type: object

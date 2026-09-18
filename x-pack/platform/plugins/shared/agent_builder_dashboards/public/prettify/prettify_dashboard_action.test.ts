@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { EmbeddableChatAccess } from '@kbn/agent-builder-browser';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
@@ -47,8 +48,9 @@ const esqlLens = {
   },
 };
 
-const child = (usesEsql: boolean) => ({
-  usesEsql$: new BehaviorSubject(usesEsql),
+const child = (esql: AggregateQuery[]) => ({
+  esql$: new BehaviorSubject(esql),
+  approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
 });
 
 const layoutPanel = {
@@ -64,7 +66,7 @@ const createLayout = (panelIds: string[]) => ({
 
 const createDashboardApi = ({
   viewMode = 'edit',
-  children = { a: child(true) },
+  children = { a: child([{ esql: 'FROM logs | LIMIT 10' }]) },
   panels = [esqlLens],
   layout = createLayout(Object.keys(children)),
 }: {
@@ -160,7 +162,7 @@ describe('createPrettifyDashboardAction', () => {
     await expect(
       action.isCompatible!({
         dashboardApi: createDashboardApi({
-          children: { a: child(true), c: child(false) },
+          children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]), c: child([]) },
         }),
       })
     ).resolves.toBe(true);
@@ -172,7 +174,7 @@ describe('createPrettifyDashboardAction', () => {
     await expect(
       action.isCompatible!({
         dashboardApi: createDashboardApi({
-          children: { c: child(false) },
+          children: { c: child([]) },
         }),
       })
     ).resolves.toBe(false);
@@ -196,7 +198,7 @@ describe('createPrettifyDashboardAction', () => {
     await expect(
       action.isCompatible!({
         dashboardApi: createDashboardApi({
-          children: { a: child(true) },
+          children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]) },
           layout: createLayout([]),
         }),
       })
@@ -345,7 +347,7 @@ describe('createPrettifyDashboardAction', () => {
 
     await action.execute!({
       dashboardApi: createDashboardApi({
-        children: { c: child(false) },
+        children: { c: child([]) },
       }),
     });
 

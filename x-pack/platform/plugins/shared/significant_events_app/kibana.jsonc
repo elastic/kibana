@@ -18,8 +18,8 @@
       "streams",
       "unifiedSearch"
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
-    "requiredBundles": ["kibanaReact", "observabilityAIAssistant", "stackConnectors", "esqlDataGrid"],
+      "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
+    "requiredBundles": ["kibanaReact", "observabilityAIAssistant", "stackConnectors"],
     "extraPublicDirs": ["common"]
   }
 }

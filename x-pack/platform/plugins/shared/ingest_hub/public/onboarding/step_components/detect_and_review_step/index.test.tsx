@@ -33,6 +33,10 @@ jest.mock('./installed_content', () => ({
   InstalledContent: () => <div data-test-subj="mock-installed-content" />,
 }));
 
+jest.mock('./use_aws_overview_dashboard_url', () => ({
+  useAwsOverviewDashboardUrl: jest.fn(),
+}));
+
 jest.mock('./agent_setup_callout', () => ({
   AgentSetupCallout: () => (
     <div data-test-subj="mock-agent-callout">
@@ -51,17 +55,20 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { useServiceDataDetection } from './use_service_data_detection';
+import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
 import { DetectAndReviewStep } from '.';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockUseServiceDataDetection = useServiceDataDetection as jest.Mock;
+const mockUseAwsOverviewDashboardUrl = useAwsOverviewDashboardUrl as jest.Mock;
 
 function setupMocks({
   deploymentMethod = 'managed_integration' as 'managed_integration' | 'agent_based' | 'ecf',
   selectedServiceIds = [] as string[],
   packageData = undefined as object | undefined,
+  overviewHref = undefined as string | undefined,
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
@@ -86,6 +93,7 @@ function setupMocks({
     totalCount: 0,
     isTimedOut: false,
   });
+  mockUseAwsOverviewDashboardUrl.mockReturnValue(overviewHref);
 }
 
 function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}) {
@@ -144,6 +152,20 @@ describe('DetectAndReviewStep', () => {
       renderStep({ onBack });
       fireEvent.click(screen.getByText('Back'));
       expect(onBack).toHaveBeenCalledTimes(1);
+    });
+
+    it('has href to the [Metrics AWS] Overview dashboard when the hook resolves one', () => {
+      setupMocks({ overviewHref: '/base/app/dashboards#/view/aws-overview-id' });
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).toHaveAttribute('href', '/base/app/dashboards#/view/aws-overview-id');
+    });
+
+    it('has no href when the hook returns undefined', () => {
+      setupMocks({ overviewHref: undefined });
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).not.toHaveAttribute('href');
     });
   });
 
