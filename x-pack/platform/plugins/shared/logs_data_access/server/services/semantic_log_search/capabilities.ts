@@ -6,227 +6,47 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import {
-  getIndexMappings,
-  flattenMapping,
-  type MappingField,
-} from '@kbn/agent-builder-genai-utils';
-
-/**
- * Information about a semantic_text field including its inference endpoint.
- */
-export interface SemanticTextField {
-  field: string;
-  inferenceId: string;
-}
-
-/**
- * Information about a pattern_text field.
- * pattern_text automatically creates subfields: .template, .template_id, .args
- */
-export interface PatternTextField {
-  field: string;
-  /** The subfield containing the template hash, e.g. "message.template_id" */
-  templateIdField: string;
-}
+import { CAPABILITY_FIELD_TYPES } from './constants';
 
 /**
  * Target capabilities for semantic log search.
- *
- * Detection of `semantic_text` and `pattern_text` is preserved as the input
- * the pre-indexed rungs will need. Those rungs are not dispatched today;
- * `search()` uses RERANK + CATEGORIZE, or returns unavailable. The planned
- * direction for the pre-indexed rungs is Knowledge Indicators in the AI Index.
  */
 export interface TargetCapabilities {
-  /** All fields from the flattened mapping */
-  fields: MappingField[];
-  /** Pattern text fields with their template subfields */
-  patternFields: PatternTextField[];
   /** Whether the target has semantic search capability (pre-indexed embeddings) */
   hasSemanticCapability: boolean;
   /** Whether the target has exact template resolution (pattern_text) */
   hasPatternCapability: boolean;
-  /** The primary semantic field for the message (typically 'message_semantic' or 'message') */
-  primarySemanticField?: SemanticTextField;
-  /** The primary pattern field for the message (typically 'message') */
-  primaryPatternField?: PatternTextField;
-}
-
-/**
- * Extract semantic_text field information from a mapping property.
- */
-function extractSemanticTextField(
-  fieldName: string,
-  property: MappingProperty
-): SemanticTextField | undefined {
-  if (property.type === 'semantic_text') {
-    return {
-      field: fieldName,
-      inferenceId: property.inference_id ?? '',
-    };
-  }
-  return undefined;
-}
-
-/**
- * Extract pattern_text field information from a mapping property.
- */
-function extractPatternTextField(
-  fieldName: string,
-  property: MappingProperty
-): PatternTextField | undefined {
-  // pattern_text is a new ES field type not yet in @elastic/elasticsearch types
-  if ((property.type as string) === 'pattern_text') {
-    return {
-      field: fieldName,
-      templateIdField: `${fieldName}.template_id`,
-    };
-  }
-  return undefined;
-}
-
-/**
- * Recursively extract special field types from mapping properties.
- */
-function extractSpecialFields(
-  properties: Record<string, MappingProperty>,
-  prefix = ''
-): { semanticFields: SemanticTextField[]; patternFields: PatternTextField[] } {
-  const semanticFields: SemanticTextField[] = [];
-  const patternFields: PatternTextField[] = [];
-
-  for (const [key, property] of Object.entries(properties)) {
-    const fieldPath = prefix ? `${prefix}.${key}` : key;
-
-    const semanticField = extractSemanticTextField(fieldPath, property);
-    if (semanticField) {
-      semanticFields.push(semanticField);
-    }
-
-    const patternField = extractPatternTextField(fieldPath, property);
-    if (patternField) {
-      patternFields.push(patternField);
-    }
-
-    // Recurse into nested properties
-    if ('properties' in property && property.properties) {
-      const nested = extractSpecialFields(
-        property.properties as Record<string, MappingProperty>,
-        fieldPath
-      );
-      semanticFields.push(...nested.semanticFields);
-      patternFields.push(...nested.patternFields);
-    }
-
-    // Recurse into multi-fields
-    if ('fields' in property && property.fields) {
-      const nested = extractSpecialFields(
-        property.fields as Record<string, MappingProperty>,
-        fieldPath
-      );
-      semanticFields.push(...nested.semanticFields);
-      patternFields.push(...nested.patternFields);
-    }
-  }
-
-  return { semanticFields, patternFields };
 }
 
 /**
  * Detect capabilities for a target index/data stream/pattern.
  *
- * Inspects the mappings to find:
- * - semantic_text fields with their inference_id
- * - pattern_text fields with their template subfields
- *
- * Identifies the primary fields for message searching (looks for 'message' or common variants).
+ * Uses the field_caps API to check if the target has semantic_text or pattern_text fields.
+ * Returns false/false if the target does not exist or is not accessible.
  */
 export async function detectCapabilities(
   esClient: ElasticsearchClient,
   target: string
 ): Promise<TargetCapabilities> {
-  // Resolve target to concrete indices
-  const resolveResponse = await esClient.indices.resolveIndex({ name: target });
-  const concreteIndices = [
-    ...resolveResponse.indices.map((i) => i.name),
-    ...resolveResponse.data_streams.flatMap((ds) => ds.backing_indices),
-  ];
+  try {
+    const response = await esClient.fieldCaps({
+      index: target,
+      fields: ['*'],
+    });
 
-  if (concreteIndices.length === 0) {
+    const fields = Object.values(response.fields);
+
     return {
-      fields: [],
-      patternFields: [],
+      hasSemanticCapability: fields.some((field) => CAPABILITY_FIELD_TYPES.semantic in field),
+      hasPatternCapability: fields.some((field) => CAPABILITY_FIELD_TYPES.pattern in field),
+    };
+  } catch (error) {
+    // Target does not exist or is not accessible
+    return {
       hasSemanticCapability: false,
       hasPatternCapability: false,
     };
   }
-
-  // Get mappings for all concrete indices
-  const mappings = await getIndexMappings({
-    indices: concreteIndices,
-    cleanup: false, // We need the raw mappings to extract inference_id
-    esClient,
-  });
-
-  // Aggregate fields and special fields across all indices
-  const allFields: MappingField[] = [];
-  const allSemanticFields: SemanticTextField[] = [];
-  const allPatternFields: PatternTextField[] = [];
-  const seenFieldPaths = new Set<string>();
-  const seenSemanticPaths = new Set<string>();
-  const seenPatternPaths = new Set<string>();
-
-  for (const [_indexName, { mappings: indexMappings }] of Object.entries(mappings)) {
-    // Flatten for general field info
-    const flatFields = flattenMapping(indexMappings);
-    for (const field of flatFields) {
-      if (!seenFieldPaths.has(field.path)) {
-        seenFieldPaths.add(field.path);
-        allFields.push(field);
-      }
-    }
-
-    // Extract special fields from raw mappings
-    if (indexMappings.properties) {
-      const { semanticFields, patternFields } = extractSpecialFields(
-        indexMappings.properties as Record<string, MappingProperty>
-      );
-
-      for (const sf of semanticFields) {
-        if (!seenSemanticPaths.has(sf.field)) {
-          seenSemanticPaths.add(sf.field);
-          allSemanticFields.push(sf);
-        }
-      }
-
-      for (const pf of patternFields) {
-        if (!seenPatternPaths.has(pf.field)) {
-          seenPatternPaths.add(pf.field);
-          allPatternFields.push(pf);
-        }
-      }
-    }
-  }
-
-  // Find primary fields (prefer 'message' or 'message_semantic')
-  const primarySemanticField =
-    allSemanticFields.find((f) => f.field === 'message_semantic') ||
-    allSemanticFields.find((f) => f.field === 'message') ||
-    allSemanticFields[0];
-
-  const primaryPatternField =
-    allPatternFields.find((f) => f.field === 'message') || allPatternFields[0];
-
-  return {
-    fields: allFields,
-    patternFields: allPatternFields,
-    hasSemanticCapability: allSemanticFields.length > 0,
-    hasPatternCapability: allPatternFields.length > 0,
-    primarySemanticField,
-    primaryPatternField,
-  };
 }
 
 /** The default rerank inference endpoint available in ES 9.3+ */
