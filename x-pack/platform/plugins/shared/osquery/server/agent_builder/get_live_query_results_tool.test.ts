@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server/tools';
 import { z } from '@kbn/zod/v4';
 import type { SchemaService } from '../lib/schema_service';
 import { runLiveQueryTool } from './run_live_query_tool';
@@ -30,9 +31,8 @@ beforeAll(async () => {
   ({ getLiveQueryResultsTool } = await import('./get_live_query_results_tool'));
 });
 
-const availabilityOf = (definition: {
-  availability?: { handler: (ctx: never) => Promise<{ status: string }> };
-}) => definition.availability!.handler({ request: toolRequest, spaceId: 'default' } as never);
+const availabilityOf = (definition: { availability?: ToolAvailabilityConfig }) =>
+  definition.availability!.handler({ request: toolRequest, spaceId: 'default' } as never);
 
 describe('getLiveQueryResultsTool', () => {
   describe('action_id schema bound', () => {
