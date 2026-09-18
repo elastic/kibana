@@ -480,6 +480,17 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Focus the YAML editor and type through the real keyboard so the suggest
+   * widget filters exactly as it does for a user. The editor is focused first
+   * because in serverless-security the Agent Builder chat panel autofocuses its
+   * input on mount, and without reclaiming focus the keystrokes leak there.
+   */
+  async typeInYamlEditor(text: string): Promise<void> {
+    await this.focusYamlEditor();
+    await this.page.keyboard.type(text);
+  }
+
+  /**
    * Returns a locator for the current Monaco error markers inside the given
    * editor container.
    *
