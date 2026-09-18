@@ -90,6 +90,16 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
+export {
+  NIGHTSHIFT_INVESTIGATION_ATTACHMENT_ID,
+  NIGHTSHIFT_INVESTIGATION_ATTACHMENT_TYPE,
+  nightshiftInvestigationAttachmentSchema,
+} from './investigation_attachment';
+export type {
+  NightshiftInvestigationAttachment,
+  NightshiftInvestigationAttachmentData,
+} from './investigation_attachment';
+
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
 
@@ -131,6 +141,8 @@ export interface UpdateInvestigationRequest extends InvestigationStructuredOutpu
   title?: string;
   error?: string;
   conversation_id?: string;
+  /** Workflow execution producing this update. Used to reject stale terminal writes. */
+  execution_id?: string;
 }
 
 export interface GetInvestigationResponse extends InvestigationStructuredOutput {

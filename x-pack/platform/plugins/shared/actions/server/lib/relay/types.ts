@@ -72,6 +72,8 @@ export interface RelayTriggerInput {
   message: string;
   /** Timestamp of the message to reply to, when posting into an existing thread. */
   threadTs?: string;
+  /** Stable key used as Slack's client_msg_id so retries do not duplicate the post. */
+  idempotencyKey?: string;
 }
 
 export interface RelayTriggerResponse {
@@ -82,7 +84,20 @@ export interface RelayTriggerResponse {
   channel: string;
 }
 
+export interface RelayPostMessageInput extends RelayTriggerInput {
+  idempotencyKey: string;
+}
+
+export interface RelayUpdateInput {
+  tenantKey: string;
+  channel: string;
+  messageTs: string;
+  message: string;
+}
+
 export interface RelayClientContract {
+  /** Callback URL used by Agent Builder executions whose results Relay renders. */
+  getAgentBuilderCallbackUrl(): string;
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
   /** Unbind a single workspace binding identified by its tenant key. */
@@ -100,6 +115,10 @@ export interface RelayClientContract {
   unbindChannel(tenantKey: string, channelId: string): Promise<void>;
   /** Post to a bound channel. `channel` is an id or a connected name. 403 if not bound; 409 if uninstalled; 429 if Slack throttled the lookup. */
   trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
+  /** Post through the versioned Slack message API. Falls back at the caller for older Relays. */
+  postMessage(input: RelayPostMessageInput): Promise<RelayTriggerResponse>;
+  /** Update an existing Slack message by its channel and timestamp. */
+  update(input: RelayUpdateInput): Promise<RelayTriggerResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
 }

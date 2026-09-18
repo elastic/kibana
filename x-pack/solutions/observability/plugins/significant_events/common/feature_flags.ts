@@ -19,3 +19,9 @@ export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
  * integrations (e.g. the Elastic Slack App) can be connected via the Relay service.
  */
 export const STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG = 'streams.significantEventsAppsEnabled';
+
+/**
+ * Routes Slack events to Nightshift. When disabled, Kibana invokes the Agent
+ * Builder callback path using the deployment's Relay configuration.
+ */
+export const STREAMS_NIGHTSHIFT_INVESTIGATIONS_ENABLED_FLAG = 'streams.investigationEnabled';

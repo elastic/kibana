@@ -21,8 +21,10 @@ import type {
   RelayInstallRequest,
   RelayInstallResponse,
   RelayListBindingsOptions,
+  RelayPostMessageInput,
   RelayTriggerInput,
   RelayTriggerResponse,
+  RelayUpdateInput,
 } from './types';
 
 export interface RelayClientOptions {
@@ -84,6 +86,10 @@ export class RelayClient implements RelayClientContract {
     this.logger = logger;
     this.useSystemIdentity = useSystemIdentity;
     this.getSystemIdentity = getSystemIdentity;
+  }
+
+  getAgentBuilderCallbackUrl(): string {
+    return new URL('/v1/events', this.baseUrl).toString();
   }
 
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
@@ -179,12 +185,14 @@ export class RelayClient implements RelayClientContract {
     channel,
     message,
     threadTs,
+    idempotencyKey,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
     const response = await this.post('/v1/slack/trigger', {
       tenant_key: tenantKey,
       channel,
       message,
       ...(threadTs ? { thread_ts: threadTs } : {}),
+      ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
     });
 
     const body = response.data as RelayTriggerResponseBody | undefined;
@@ -200,6 +208,57 @@ export class RelayClient implements RelayClientContract {
       tenantKey: body.tenant_key ?? tenantKey,
       channel: typeof body.channel === 'string' && body.channel.length > 0 ? body.channel : channel,
     };
+  }
+
+  async postMessage({
+    tenantKey,
+    channel,
+    message,
+    threadTs,
+    idempotencyKey,
+  }: RelayPostMessageInput): Promise<RelayTriggerResponse> {
+    const path = '/v1/slack/messages';
+    const response = await this.post(path, {
+      tenant_key: tenantKey,
+      channel,
+      message,
+      ...(threadTs ? { thread_ts: threadTs } : {}),
+      idempotency_key: idempotencyKey,
+    });
+
+    const body = response.data as RelayTriggerResponseBody | undefined;
+    if (typeof body?.ref !== 'string' || body.ref.length === 0) {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `ref`'
+      );
+    }
+    return { ref: body.ref, tenantKey: body?.tenant_key ?? tenantKey };
+  }
+
+  async update({
+    tenantKey,
+    channel,
+    messageTs,
+    message,
+  }: RelayUpdateInput): Promise<RelayTriggerResponse> {
+    const path = `/v1/slack/messages/${encodeURIComponent(messageTs)}`;
+    const response = await this.put(path, {
+      tenant_key: tenantKey,
+      channel,
+      message,
+    });
+
+    const body = response.data as RelayTriggerResponseBody | undefined;
+    if (typeof body?.ref !== 'string' || body.ref.length === 0) {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `ref`'
+      );
+    }
+    return { ref: body.ref, tenantKey: body?.tenant_key ?? tenantKey };
   }
 
   isRelayOrigin(url: string): boolean {

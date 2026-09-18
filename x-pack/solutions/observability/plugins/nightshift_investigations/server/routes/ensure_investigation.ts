@@ -30,11 +30,16 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     path: z.object({
       id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
+    body: z
+      .object({
+        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      })
+      .optional(),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.ensureOrCreate(params.path.id);
+      await client.ensureOrCreate(params.path.id, params.body?.execution_id);
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

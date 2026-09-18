@@ -13,6 +13,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { RelayRequestError } from '@kbn/actions-plugin/server';
 import type { InvestigationStatus } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -112,6 +113,241 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
   trigger_feedback: [],
   ...overrides,
+});
+
+describe('NightshiftInvestigationsClient.admitSlackInput()', () => {
+  it('ignores a follow-up when its Slack thread has no investigation', async () => {
+    const result = await makeClient().admitSlackInput({
+      sourceKey: 'slack_thread:T1:C1:100.1',
+      idempotencyKey: 'Ev1',
+      message: 'Was the deploy involved?',
+      startIfMissing: false,
+      replyTarget: {
+        surface: 'slack',
+        tenant_key: 'T1',
+        channel: 'C1',
+        thread_ts: '100.1',
+      },
+    });
+
+    expect(result).toBeUndefined();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('continues one investigation and deduplicates a repeated Slack event', async () => {
+    let stored: InvestigationRecord | undefined;
+    let version = 0;
+    repository.get.mockImplementation(async (id) => (stored?.id === id ? stored : undefined));
+    repository.find.mockImplementation(async ({ sourceKey }) =>
+      findResult(stored?.source_keys?.includes(sourceKey ?? '') ? [stored] : [])
+    );
+    repository.create.mockImplementation(async ({ id, attributes }) => {
+      version += 1;
+      stored = { id, version: String(version), ...attributes };
+    });
+    repository.update.mockImplementation(async ({ id, patch }) => {
+      if (!stored || stored.id !== id) throw new Error('missing investigation');
+      version += 1;
+      stored = { ...stored, ...patch, version: String(version) };
+    });
+    mockManagement.getWorkflow.mockResolvedValue({ definition: { steps: [] } });
+    mockManagement.runWorkflow.mockResolvedValueOnce('exec-1').mockResolvedValueOnce('exec-2');
+
+    const client = makeClient();
+    const input = {
+      sourceKey: 'slack_thread:T1:C1:100.1',
+      message: 'Why did checkout fail?',
+      replyTarget: {
+        surface: 'slack' as const,
+        tenant_key: 'T1',
+        channel: 'C1',
+        thread_ts: '100.1',
+      },
+    };
+
+    const first = await client.admitSlackInput({ ...input, idempotencyKey: 'Ev1' });
+    const second = await client.admitSlackInput({
+      ...input,
+      idempotencyKey: 'Ev2',
+      message: 'Was the deploy involved?',
+    });
+    const duplicate = await client.admitSlackInput({
+      ...input,
+      idempotencyKey: 'Ev2',
+      message: 'Was the deploy involved?',
+    });
+
+    if (!first || !second) {
+      throw new Error('Expected both Slack events to be admitted');
+    }
+    expect(second.investigation_id).toBe(first.investigation_id);
+    expect(first.execution_id).toBe('exec-1');
+    expect(second.execution_id).toBe('exec-2');
+    expect(duplicate).toEqual(second);
+    expect(mockManagement.runWorkflow).toHaveBeenCalledTimes(2);
+    expect(stored).toEqual(
+      expect.objectContaining({
+        conversation_id: expect.any(String),
+        source_keys: ['slack_thread:T1:C1:100.1'],
+        admissions: [
+          { idempotency_key: 'Ev1', execution_id: 'exec-1' },
+          { idempotency_key: 'Ev2', execution_id: 'exec-2' },
+        ],
+      })
+    );
+    expect(stored?.latest_execution_id).toBeUndefined();
+  });
+
+  describe('admission idempotency around the run', () => {
+    let stored: InvestigationRecord | undefined;
+    let client: NightshiftInvestigationsClient;
+
+    const input = {
+      sourceKey: 'slack_thread:T1:C1:100.1',
+      idempotencyKey: 'slack_message:T1:C1:100.1',
+      message: 'Why did checkout fail?',
+      replyTarget: {
+        surface: 'slack' as const,
+        tenant_key: 'T1',
+        channel: 'C1',
+        thread_ts: '100.1',
+      },
+    };
+
+    beforeEach(() => {
+      stored = undefined;
+      let version = 0;
+      repository.get.mockImplementation(async (id) => (stored?.id === id ? stored : undefined));
+      repository.find.mockImplementation(async ({ sourceKey }) =>
+        findResult(stored?.source_keys?.includes(sourceKey ?? '') ? [stored] : [])
+      );
+      repository.create.mockImplementation(async ({ id, attributes }) => {
+        version += 1;
+        stored = { id, version: String(version), ...attributes };
+      });
+      repository.update.mockImplementation(async ({ id, patch }) => {
+        if (!stored || stored.id !== id) throw new Error('missing investigation');
+        version += 1;
+        stored = { ...stored, ...patch, version: String(version) };
+      });
+      mockManagement.getWorkflow.mockResolvedValue({ definition: { steps: [] } });
+      client = makeClient();
+    });
+
+    it('reserves the admission before the run starts', async () => {
+      let admissionsWhenRunStarted;
+      mockManagement.runWorkflow.mockImplementation(async () => {
+        admissionsWhenRunStarted = stored?.admissions;
+        return 'exec-1';
+      });
+
+      await client.admitSlackInput(input);
+
+      // No execution id yet — the reservation exists purely to claim the message.
+      expect(admissionsWhenRunStarted).toEqual([{ idempotency_key: 'slack_message:T1:C1:100.1' }]);
+    });
+
+    it('resolves a redelivery that arrives while the first run is still starting', async () => {
+      let redelivered;
+      mockManagement.runWorkflow.mockImplementation(async () => {
+        redelivered = await client.admitSlackInput(input);
+        return 'exec-1';
+      });
+
+      const first = await client.admitSlackInput(input);
+
+      expect(mockManagement.runWorkflow).toHaveBeenCalledTimes(1);
+      expect(redelivered).toEqual({
+        investigation_id: first?.investigation_id,
+        execution_id: undefined,
+      });
+      expect(first?.execution_id).toBe('exec-1');
+    });
+
+    it('releases the reservation when the run fails to start, so the message can be retried', async () => {
+      mockManagement.runWorkflow
+        .mockRejectedValueOnce(new Error('workflow engine unavailable'))
+        .mockResolvedValueOnce('exec-1');
+
+      await expect(client.admitSlackInput(input)).rejects.toThrow('workflow engine unavailable');
+      expect(stored?.admissions).toEqual([]);
+
+      const retried = await client.admitSlackInput(input);
+
+      expect(retried?.execution_id).toBe('exec-1');
+      expect(stored?.admissions).toEqual([
+        { idempotency_key: 'slack_message:T1:C1:100.1', execution_id: 'exec-1' },
+      ]);
+    });
+  });
+
+  it('runs in the conversation the thread is already bound to when another admission won the create', async () => {
+    const winner = makeRecord(
+      { status: 'pending', conversation_id: 'conversation-winner', admissions: [] },
+      { id: 'inv-race' }
+    );
+    repository.find.mockResolvedValue(findResult([]));
+    // The pre-create lookup misses, then a concurrent admission creates the record first.
+    repository.get.mockResolvedValueOnce(undefined).mockResolvedValue(winner);
+    repository.create.mockRejectedValue(new InvestigationAlreadyExistsError('inv-race'));
+    mockManagement.getWorkflow.mockResolvedValue({ definition: { steps: [] } });
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+
+    await makeClient().admitSlackInput({
+      sourceKey: 'slack_thread:T1:C1:100.1',
+      idempotencyKey: 'slack_message:T1:C1:100.1',
+      message: 'Why did checkout fail?',
+      replyTarget: {
+        surface: 'slack',
+        tenant_key: 'T1',
+        channel: 'C1',
+        thread_ts: '100.1',
+      },
+    });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({ conversation_id: 'conversation-winner' }),
+      expect.anything(),
+      'nightshift-slack'
+    );
+  });
+
+  it('never rewrites the conversation of an investigation that already has one', async () => {
+    const existing = makeRecord(
+      { status: 'completed', conversation_id: 'conversation-original', admissions: [] },
+      { id: 'inv-existing' }
+    );
+    repository.find.mockResolvedValue(findResult([existing]));
+    repository.get.mockResolvedValue(existing);
+    mockManagement.getWorkflow.mockResolvedValue({ definition: { steps: [] } });
+    mockManagement.runWorkflow.mockResolvedValue('exec-2');
+
+    await makeClient().admitSlackInput({
+      sourceKey: 'slack_thread:T1:C1:100.1',
+      idempotencyKey: 'slack_message:T1:C1:100.2',
+      message: 'Was the deploy involved?',
+      replyTarget: {
+        surface: 'slack',
+        tenant_key: 'T1',
+        channel: 'C1',
+        thread_ts: '100.1',
+      },
+    });
+
+    for (const [{ patch }] of repository.update.mock.calls) {
+      expect(patch).not.toHaveProperty('conversation_id');
+    }
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({ conversation_id: 'conversation-original' }),
+      expect.anything(),
+      'nightshift-slack'
+    );
+  });
 });
 
 const makeRecord = (
@@ -1069,7 +1305,7 @@ describe('NightshiftInvestigationsClient.update()', () => {
 
     await expect(
       makeClient().update('inv-1', { status: 'completed', summary: 'Replayed.' })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(true);
     expect(repository.update).not.toHaveBeenCalled();
   });
 
@@ -1146,6 +1382,200 @@ describe('NightshiftInvestigationsClient.update()', () => {
       }),
       version: '1',
     });
+  });
+
+  it('delivers a terminal Slack reply before committing terminal state', async () => {
+    const calls: string[] = [];
+    const postMessage = jest.fn().mockImplementation(async () => {
+      calls.push('relay');
+      return { ref: '200.1', tenantKey: 'T1' };
+    });
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'running',
+        completed_at: undefined,
+        latest_execution_id: 'exec-2',
+        reply_target: {
+          surface: 'slack',
+          tenant_key: 'T1',
+          channel: 'C1',
+          thread_ts: '100.1',
+        },
+      })
+    );
+    repository.update.mockImplementation(async () => {
+      calls.push('repository');
+    });
+
+    await makeClient({
+      relayClient: { postMessage } as never,
+      kibanaUrl: 'https://kibana.example/base',
+    }).update('inv-1', {
+      status: 'completed',
+      execution_id: 'exec-2',
+      summary: 'Root cause found.',
+    });
+
+    expect(calls).toEqual(['relay', 'repository']);
+    expect(postMessage).toHaveBeenCalledWith({
+      tenantKey: 'T1',
+      channel: 'C1',
+      threadTs: '100.1',
+      message:
+        'Root cause found.\n\n<https://kibana.example/base/s/test-space/app/nightshift?investigationId=inv-1|View in Kibana>',
+      idempotencyKey: 'exec-2',
+    });
+    expect(repository.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        patch: expect.objectContaining({
+          reply_target: expect.objectContaining({ message_ts: '200.1' }),
+        }),
+      })
+    );
+  });
+
+  it('falls back to the legacy post endpoint when Relay has no message API', async () => {
+    const postMessage = jest
+      .fn()
+      .mockRejectedValue(new RelayRequestError('/v1/slack/messages', 404));
+    const trigger = jest.fn().mockResolvedValue({ ref: '200.1', tenantKey: 'T1' });
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'running',
+        completed_at: undefined,
+        latest_execution_id: 'exec-2',
+        reply_target: {
+          surface: 'slack',
+          tenant_key: 'T1',
+          channel: 'C1',
+          thread_ts: '100.1',
+        },
+      })
+    );
+
+    await makeClient({ relayClient: { postMessage, trigger } as never }).update('inv-1', {
+      status: 'completed',
+      execution_id: 'exec-2',
+      summary: 'Findings.',
+    });
+
+    expect(trigger).toHaveBeenCalledWith(
+      expect.objectContaining({ threadTs: '100.1', idempotencyKey: 'exec-2' })
+    );
+  });
+
+  it('updates the existing Slack findings message after a successful follow-up', async () => {
+    const update = jest.fn().mockResolvedValue({ ref: '200.1', tenantKey: 'T1' });
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'running',
+        completed_at: undefined,
+        latest_execution_id: 'exec-2',
+        reply_target: {
+          surface: 'slack',
+          tenant_key: 'T1',
+          channel: 'C1',
+          thread_ts: '100.1',
+          message_ts: '200.1',
+        },
+      })
+    );
+
+    await makeClient({ relayClient: { update } as never }).update('inv-1', {
+      status: 'completed',
+      execution_id: 'exec-2',
+      summary: 'Updated findings.',
+    });
+
+    expect(update).toHaveBeenCalledWith({
+      tenantKey: 'T1',
+      channel: 'C1',
+      messageTs: '200.1',
+      message: 'Updated findings.',
+    });
+  });
+
+  it('posts and remembers a replacement when the prior Slack message was deleted', async () => {
+    const update = jest.fn().mockRejectedValue(new RelayRequestError('/v1/slack/update', 404));
+    const postMessage = jest.fn().mockResolvedValue({ ref: '300.1', tenantKey: 'T1' });
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'running',
+        completed_at: undefined,
+        latest_execution_id: 'exec-2',
+        reply_target: {
+          surface: 'slack',
+          tenant_key: 'T1',
+          channel: 'C1',
+          thread_ts: '100.1',
+          message_ts: '200.1',
+        },
+      })
+    );
+
+    await makeClient({ relayClient: { update, postMessage } as never }).update('inv-1', {
+      status: 'completed',
+      execution_id: 'exec-2',
+      summary: 'Replacement findings.',
+    });
+
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threadTs: '100.1',
+        idempotencyKey: 'exec-2',
+      })
+    );
+    expect(repository.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        patch: expect.objectContaining({
+          reply_target: expect.objectContaining({ message_ts: '300.1' }),
+        }),
+      })
+    );
+  });
+
+  it('leaves state retryable when terminal Slack delivery fails', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'running',
+        completed_at: undefined,
+        latest_execution_id: 'exec-2',
+        reply_target: {
+          surface: 'slack',
+          tenant_key: 'T1',
+          channel: 'C1',
+          thread_ts: '100.1',
+        },
+      })
+    );
+    const postMessage = jest.fn().mockRejectedValue(new Error('Relay unavailable'));
+
+    await expect(
+      makeClient({ relayClient: { postMessage } as never }).update('inv-1', {
+        status: 'completed',
+        execution_id: 'exec-2',
+      })
+    ).rejects.toThrow('Relay unavailable');
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('ignores a delayed terminal update from an older execution', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'running',
+        completed_at: undefined,
+        latest_execution_id: 'exec-2',
+      })
+    );
+
+    await expect(
+      makeClient().update('inv-1', {
+        status: 'completed',
+        execution_id: 'exec-1',
+      })
+    ).resolves.toBe(false);
+
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('writes with the version it read and maps a concurrent-write conflict to InvestigationConflictError', async () => {
@@ -1228,10 +1658,41 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         status: 'running',
         started_at: '2024-01-01T00:00:00Z',
         executed_by: 'workflow-user',
+        latest_execution_id: EXECUTION_ID,
       },
       version: 'v1',
     });
     expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('starts the next admitted Slack execution after the previous round completed', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        {
+          status: 'completed',
+          latest_execution_id: 'exec-1',
+          admissions: [
+            { idempotency_key: 'Ev1', execution_id: 'exec-1' },
+            { idempotency_key: 'Ev2', execution_id: 'exec-2' },
+          ],
+        },
+        { id: 'slack-investigation', version: 'v2' }
+      )
+    );
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({ id: 'exec-2', workflowId: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID })
+    );
+
+    await makeClient().ensureOrCreate('slack-investigation', 'exec-2');
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'slack-investigation',
+      patch: expect.objectContaining({
+        status: 'running',
+        latest_execution_id: 'exec-2',
+      }),
+      version: 'v2',
+    });
   });
 
   it('treats a lost pending-to-running race as a no-op', async () => {
