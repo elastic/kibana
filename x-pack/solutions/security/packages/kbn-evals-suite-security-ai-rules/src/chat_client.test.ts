@@ -156,6 +156,9 @@ describe('SecurityRuleGenerationClient', () => {
       const { fetch } = createFetchStub(
         stepsResponse([
           { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'some-other-skill' } },
+          // A substring match on the serialized arguments would drop this, while the evaluator's
+          // span query requires the delimited `"skill":"detection-rule-edit"` value.
+          { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'detection-rule-edit-v2' } },
           { type: 'tool_call', tool_id: 'read_file', params: { path: '/etc/passwd' } },
           // Same path shape as an expected SKILL.md load, different skill.
           {
@@ -172,7 +175,13 @@ describe('SecurityRuleGenerationClient', () => {
       // Filtering by tool id alone would hide these entirely: a negative case would then
       // look like an empty (perfect) trajectory, and a positive case could never report
       // them as extra tools.
-      expect(result.toolCalls).toEqual(['load_skill', 'read_file', 'read_file', 'filestore.read']);
+      expect(result.toolCalls).toEqual([
+        'load_skill',
+        'load_skill',
+        'read_file',
+        'read_file',
+        'filestore.read',
+      ]);
     });
   });
 

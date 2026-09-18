@@ -21,6 +21,9 @@ const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
  * name merely contains it (`detection-rule-edit-v2`), scoring a successful invocation for a
  * skill that was never loaded. The path form stays anchored on `<name>/SKILL.md` for both
  * tools, since `load_skill` accepts a folder path or a SKILL.md path as well as the name.
+ * The file-read branch covers `read_file` (current id) as well as `filestore.read` (legacy id):
+ * a SKILL.md read through either id is the same load, and the eval suite's trajectory filter
+ * treats both as one.
  */
 export function createSkillInvocationEvaluator({
   traceEsClient,
@@ -64,7 +67,10 @@ export function createSkillInvocationEvaluator({
       )
       OR
       (
-        attributes.gen_ai.tool.name == "filestore.read"
+        (
+          attributes.gen_ai.tool.name == "filestore.read"
+          OR attributes.gen_ai.tool.name == "read_file"
+        )
           AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
       ),
       1,

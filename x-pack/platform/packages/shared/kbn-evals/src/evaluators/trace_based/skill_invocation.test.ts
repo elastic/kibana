@@ -65,6 +65,11 @@ describe('createSkillInvocationEvaluator', () => {
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "load_skill"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
+    // A SKILL.md read through the current `read_file` id is the same load as the legacy
+    // `filestore.read` id, and the suite's trajectory filter treats both as one.
+    expect(calledQuery.replace(/\s+/g, ' ')).toContain(
+      '( attributes.gen_ai.tool.name == "filestore.read" OR attributes.gen_ai.tool.name == "read_file" ) AND attributes.gen_ai.tool.call.arguments LIKE "*/data-exploration/SKILL.md*"'
+    );
   });
 
   it('anchors the load_skill argument to the configured skill name', async () => {

@@ -210,11 +210,11 @@ export class SecurityRuleGenerationClient {
 
 /**
  * Tools the agent uses to load skill content. A call to one of these is only a SKILL.md load
- * when its arguments name the expected skill — the same argument shape the skill-invocation
- * evaluator matches in its span query (`skill_invocation.ts`: `load_skill` arguments containing
- * the skill name, or `filestore.read` arguments pointing at `<skill>/SKILL.md`). `read_file` is
- * the current id of that same file-read tool and `filestore.read` its legacy id, so both get the
- * path form here.
+ * when its arguments name the expected skill — the same predicate the skill-invocation
+ * evaluator matches in its span query (`skill_invocation.ts`): `load_skill` with the exact
+ * `skill` name (or a `/<skill>/SKILL.md` path), or a file-read tool pointing at
+ * `/<skill>/SKILL.md`. `read_file` is the current id of that file-read tool and
+ * `filestore.read` its legacy id, and the query's file-read branch accepts both.
  */
 const SKILL_ROUTING_TOOL_IDS = new Set(['load_skill', 'read_file', 'filestore.read']);
 
@@ -223,15 +223,21 @@ const SKILL_ROUTING_TOOL_IDS = new Set(['load_skill', 'read_file', 'filestore.re
  * unrelated work as well: a `read_file` of some other path, or a `load_skill` for a different
  * skill, is not covered by the skill-invocation evaluator, and dropping it would let a
  * negative case score a perfect trajectory on an empty list and hide extra tools on positives.
+ * The `skill` value is compared exactly, so `detection-rule-edit-v2` stays visible here exactly
+ * as it does in the evaluator's span query.
  */
 const isExpectedSkillLoad = (step: RuleToolStep): boolean => {
   if (!step.tool_id || !SKILL_ROUTING_TOOL_IDS.has(step.tool_id)) {
     return false;
   }
   const args = JSON.stringify(step.params ?? {});
-  return step.tool_id === 'load_skill'
-    ? args.includes(DETECTION_RULE_SKILL_NAME)
-    : args.includes(`/${DETECTION_RULE_SKILL_NAME}/SKILL.md`);
+  if (step.tool_id === 'load_skill') {
+    return (
+      (step.params as { skill?: unknown } | undefined)?.skill === DETECTION_RULE_SKILL_NAME ||
+      args.includes(`/${DETECTION_RULE_SKILL_NAME}/SKILL.md`)
+    );
+  }
+  return args.includes(`/${DETECTION_RULE_SKILL_NAME}/SKILL.md`);
 };
 
 const extractInvokedToolIds = (response: ConverseResponse): string[] => {
