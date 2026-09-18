@@ -308,7 +308,7 @@ apiTest.describe(
       apiClient: any,
       user: { username: string; password: string }
     ): Promise<string> => {
-      const probeAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-probe-${user.username}-${randomUUID()}`;
+      const probeAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-probe-${randomUUID().slice(0, 8)}`;
       await createAgentAs(apiClient, user, mockAgent(probeAgentId));
       const probeAgent = await apiClient.get(
         `${accessControlApiBase}/agents/${encodeURIComponent(probeAgentId)}`,
@@ -819,7 +819,7 @@ apiTest.describe(
     apiTest(
       'PUT /agents/{id}/access_control accepts legacy name-only entries and rejects entries with neither id nor name',
       async ({ apiClient }) => {
-        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-name-${randomUUID()}`;
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-name-${randomUUID().slice(0, 8)}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
 
         const nameOnly = await apiClient.put(
@@ -833,8 +833,8 @@ apiTest.describe(
           }
         );
         expect(nameOnly).toHaveStatusCode(200);
-        expect(nameOnly.body.access_control.entries).toHaveLength(1);
-        expect(nameOnly.body.access_control.entries[0]).toMatchObject({
+        expect(nameOnly.body.entries).toHaveLength(1);
+        expect(nameOnly.body.entries[0]).toMatchObject({
           type: 'user',
           name: bob.username,
           role: AgentAccessControlRole.User,
@@ -881,13 +881,13 @@ apiTest.describe(
           }
         );
         expect(res).toHaveStatusCode(200);
-        expect(res.body.access_control.entries).toHaveLength(2);
-        expect(res.body.access_control.entries[0]).toMatchObject({
+        expect(res.body.entries).toHaveLength(2);
+        expect(res.body.entries[0]).toMatchObject({
           type: 'user',
           name: bob.username,
           role: AgentAccessControlRole.Editor,
         });
-        expect(res.body.access_control.entries[1]).toMatchObject({
+        expect(res.body.entries[1]).toMatchObject({
           type: 'user',
           id: eveId,
           role: AgentAccessControlRole.User,
