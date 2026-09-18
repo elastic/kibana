@@ -4510,5 +4510,20 @@ describe('Output Service', () => {
 
       expect(result).toEqual({ agentPolicyCount: 2, agentCount: 15 });
     });
+
+    it('chunks IDs into batches of 1000 to avoid ES max_buckets limit', async () => {
+      const ids = Array.from({ length: 1500 }, (_, i) => `policy-${i}`);
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages(ids));
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({});
+
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledTimes(2);
+      expect(mockedGetAgentCountForAgentPolicies.mock.calls[0][1]).toHaveLength(1000);
+      expect(mockedGetAgentCountForAgentPolicies.mock.calls[1][1]).toHaveLength(500);
+    });
   });
 });
