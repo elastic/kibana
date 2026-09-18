@@ -1029,4 +1029,99 @@ describe('transformWorkflowToGraph — fallback lane', () => {
     const finishSources = finishEdges.map((e) => e.source);
     expect(finishSources).not.toContain('notify-oncall');
   });
+
+  it('nested fallback: fallbackOf is the innermost owner, not overwritten by outer recursion', () => {
+    // Before the fix, the outer loop re-stamped fallbackOf = outerOwnerId on all
+    // inner.nodes, clobbering the inner recursion's fallbackOf = innerOwnerId.
+    // After the fix: if (d.fallbackOf === undefined) d.fallbackOf = id — innermost wins.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'outer-owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  name: 'inner-owner',
+                  type: 'http',
+                  'on-failure': {
+                    fallback: [{ name: 'inner-lane-step', type: 'http' }],
+                  },
+                },
+              ],
+            },
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const innerLaneStep = r.nodes.find((n) => n.id === 'inner-lane-step');
+    expect(innerLaneStep).toBeDefined();
+    // The inner-lane-step's fallbackOf must be 'inner-owner', not 'outer-owner'.
+    const data = innerLaneStep!.data as Record<string, unknown>;
+    expect(data.fallbackOf).toBe('inner-owner');
+
+    // The inner-owner itself must have fallbackOf = 'outer-owner'.
+    const innerOwner = r.nodes.find((n) => n.id === 'inner-owner');
+    expect(innerOwner).toBeDefined();
+    const innerOwnerData = innerOwner!.data as Record<string, unknown>;
+    expect(innerOwnerData.fallbackOf).toBe('outer-owner');
+  });
+
+  it('edge order: all structural edges precede all failure edges within the same graph', () => {
+    // The packing pass reads declaration order from the graph edge list.
+    // Failure edges must come after all structural edges in the same graph
+    // boundary — otherwise the packing sees [failure, spine] and places the
+    // lane on the wrong side.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'outer-owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  name: 'inner-owner',
+                  type: 'http',
+                  'on-failure': {
+                    fallback: [{ name: 'inner-lane-step', type: 'http' }],
+                  },
+                },
+              ],
+            },
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const edges = r.edges;
+    const isFailureEdge = (e: (typeof edges)[number]) =>
+      (e as { isFailure?: boolean }).isFailure === true;
+
+    // Find the index of the first failure edge.
+    const firstFailureIdx = edges.findIndex(isFailureEdge);
+    expect(firstFailureIdx).toBeGreaterThanOrEqual(0);
+
+    // All edges before the first failure edge must be structural.
+    for (let i = 0; i < firstFailureIdx; i++) {
+      expect(isFailureEdge(edges[i])).toBe(false);
+    }
+
+    // All failure edges must come after all structural edges.
+    // i.e., once we see a structural edge after a failure edge, that's a bug.
+    let seenFailure = false;
+    for (const e of edges) {
+      if (isFailureEdge(e)) {
+        seenFailure = true;
+      } else if (seenFailure) {
+        // Structural edge after a failure edge — violation.
+        fail(
+          `Structural edge ${e.source} → ${e.target} appears after a failure edge in the outer graph`
+        );
+      }
+    }
+  });
 });

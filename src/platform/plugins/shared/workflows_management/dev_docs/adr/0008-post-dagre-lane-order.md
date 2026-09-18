@@ -1,7 +1,7 @@
 
 # ADR-0008 — Post-dagre fork and trigger lane order
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0011
 **Date:** 2026-09-17
 **Deciders:** @elastic/workflows-eng
 

@@ -181,9 +181,7 @@ export function useWorkflowLayout({
       else incomingByTarget.set(e.target, [e.source]);
     }
     // Build fallback-lane sets for execution highlighting and merge detection.
-    // Owner ids: nodes that have an on-failure.fallback lane.
     // Leaf ids: last nodes in each fallback lane (rejoin sources for shape 2).
-    const fallbackOwnerIds = new Set(transformed.fallbackLanes.map((l) => l.owner));
     const fallbackLeafIds = new Set(transformed.fallbackLanes.flatMap((l) => [...l.leaves]));
 
     const mergeNodeIds = new Set<string>();
@@ -206,7 +204,6 @@ export function useWorkflowLayout({
       nodeById,
       allEdges,
       mergeNodeIds,
-      fallbackOwnerIds,
       fallbackLeafIds,
     };
   }, [
@@ -414,7 +411,7 @@ export function useWorkflowLayout({
   ]);
 
   const derivedEdges = useMemo<Edge[]>(() => {
-    const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds, fallbackOwnerIds } = topologyMeta;
+    const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds } = topologyMeta;
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
     const { traversedForkEdgeIds, traversedBypassIds } = branchTraversal;
 
@@ -442,10 +439,6 @@ export function useWorkflowLayout({
     const mapped = allEdges.map((e) => {
       const laid = layoutEdgeById.get(e.id);
       const isFailure = (e as { isFailure?: boolean }).isFailure === true;
-      // Both out-edges of a fallback owner use fork-bus routing (isFork).
-      // This includes the spine edge which carries no branchType — without isFork
-      // it would silently fall back to smooth-step after dagre clears its points.
-      const isFork = fallbackOwnerIds.has(e.source);
 
       // Fork edges (if/switch branches) highlight only for the branch that ran;
       // edges leaving an empty (bypass) lane inherit that lane's traversal;
@@ -483,6 +476,9 @@ export function useWorkflowLayout({
         id: e.id,
         source: e.source,
         target: e.target,
+        // Failure edges exit via the dedicated bottom-right handle so React Flow
+        // hands computeEdgePath the correct sourceX (right edge, not centre).
+        sourceHandle: isFailure ? 'failure' : undefined,
         type: 'workflowEdge',
         data: {
           label: e.label,
@@ -491,7 +487,6 @@ export function useWorkflowLayout({
           branchType: e.branchType,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
-          isFork,
           isFailure,
         },
       };

@@ -12,13 +12,15 @@ foundations now in place (specs 00 and 01):
 - Nodes render steps, triggers and `if`/`switch`/`parallel`/`foreach` control-flow blocks.
 - Edges render the execution path between steps, with `isMerge` routing for joins after branches.
 - The `stepExecutions` colouring from execution runs is the only interactive state.
-- `on-failure.fallback` steps are **not rendered** — only the retry badge appears.
 - All handles are `opacity: 0`; `nodesConnectable={false}`; no mutation path from graph to YAML
   exists (authoring affordances land in specs 03–08).
 - `insertStep` can now address any step in the tree, including switch cases and parallel branches
   (spec 00).
 - Fork and trigger lane order is stable across YAML edits — growing one branch never visually swaps
   it with a sibling (spec 01).
+- `on-failure.fallback` steps are rendered as a side lane hung off the owner. The failure edge is
+  always-dashed; it turns red once any lane node has a step-execution record. Two lane shapes:
+  terminating (no `continue`) and rejoining (`continue: true`) (spec 02).
 
 ## Authoring capabilities
 
@@ -26,7 +28,7 @@ foundations now in place (specs 00 and 01):
 |---|---|---|---|
 | Shared step-child traversal (prerequisite) | ✅ Implemented | 00 | ADR-0003, ADR-0007 |
 | Fork and trigger lane order preserved after layout | ✅ Implemented | 01 | ADR-0008 |
-| Fallback lane graph model (read-only) | ❌ Not implemented | 02 | ADR-0004 |
+| Fallback lane graph model (read-only) | ✅ Implemented | 02 | ADR-0004, ADR-0010, ADR-0011 |
 | Connection ports (visible anchors, hover `+`, red fallback dot) | ❌ Not implemented | 03 | — |
 | Insert step from a flow port | ❌ Not implemented | 04 | ADR-0002, ADR-0005, ADR-0006 |
 | Node action menu (`⋮` — Edit / Duplicate / Add fallback steps / Delete) | ❌ Not implemented | 05 | — |
@@ -49,9 +51,9 @@ Candidate designs (all deferred, pending design and product input):
 - An `Insert step after` item in the `⋮` node-action menu (no structural change; works when the block is last).
 - An append-at-end canvas overlay (closes the "block is last step" sub-gap).
 
-### Fallback lane depth: one step deep
+### Fallback lane ports: not yet rendered
 
-Fallback lanes do not have their own ports in the initial implementation. A fallback lane is exactly one level deep. This is a spec 03 open decision — fallback-step nodes could carry ports, but the scope was not settled before spec 03 shipped.
+Fallback lane nodes render and are fully positioned. They do not yet have ports — the visible red failure port is spec 07's scope. The lane itself can be any depth; nested `on-failure.fallback` blocks render as nested side lanes.
 
 ---
 
@@ -64,8 +66,8 @@ Fallback lanes do not have their own ports in the initial implementation. A fall
 | Package | Role in authoring |
 |---|---|
 | `@kbn/workflows` (`graph_layout/`) | Logical graph construction; `visitStepChildSlots` (shared traversal); topology fingerprint |
-| `@kbn/dag-layout` | Dagre wrapper; `dagLayout`, `DagPositionedNode`, `DagPositionedEdge` |
-| `@kbn/workflows-ui` | ReactFlow rendering; post-dagre lane-order passes; `WorkflowGraphEditActions` seam; `port_geometry.ts` |
+| `@kbn/dag-layout` | Dagre wrapper; `dagLayout`, `DagPositionedNode`, `DagPositionedEdge`; `separatePositionedOverlapsInPlace` (PAVA overlap repair) |
+| `@kbn/workflows-ui` | ReactFlow rendering; post-dagre positioning pipeline (`enforce_lane_order.ts`, `workflow_layout_pipeline.ts`); `WorkflowGraphEditActions` seam; `port_geometry.ts` |
 | `@kbn/workflows-yaml` (`lib/yaml_edit`) | YAML AST utilities; `getStepNode`, `buildWorkflowLookup` |
 | `workflows_management` | Redux store; snippet mutation path; `insertStepSnippet`; `WorkflowVisualEditor` |
 

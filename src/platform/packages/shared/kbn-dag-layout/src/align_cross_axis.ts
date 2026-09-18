@@ -518,3 +518,152 @@ export const translateEdgePoints = (
   dx: number,
   dy: number
 ): Array<{ x: number; y: number }> => points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+
+import type { DagPositionedNode } from './types';
+
+const SEPARATE_OVERLAPS_MAX_ITERS = 10;
+
+/**
+ * Separate overlapping boxes in a positioned node array using a scanline PAVA
+ * (pool-adjacent-violators) sweep. Operates on `DagPositionedNode[]` rather
+ * than a graphlib graph, so it can be called after every position-mutating
+ * post-dagre pass.
+ *
+ * Algorithm:
+ * - At each distinct main-axis start, collect all boxes straddling that
+ *   scanline. They form a clique of mutual main-axis overlap.
+ * - Sort the clique by cross axis and run PAVA (`resolveCrossAxisOverlaps`).
+ * - Because PAVA is order-preserving it cannot undo a lane-order enforcement
+ *   that ran before this pass.
+ * - Iterate to stability (capped at SEPARATE_OVERLAPS_MAX_ITERS).
+ * - When a group node moves, translate all its inner nodes by the same delta.
+ *
+ * Pure and re-runnable: on input that is already overlap-free the sweep fires
+ * on 0 nodes and returns immediately. Running it on raw `dagLayout` output is
+ * a verified no-op.
+ *
+ * @param nodes - All positioned nodes (outer + inner). Mutated in place by
+ *   replacing array elements when positions change.
+ * @param crossAxis - Cross axis ('x' for TB, 'y' for LR).
+ * @param nodeSep - Minimum gap between adjacent box borders.
+ * @param groupInnerIds - Map from group node id → set of inner node ids.
+ *   The outer sweep treats group nodes as opaque boxes and moves inner nodes
+ *   when the group moves. The inner sweep then resolves overlaps within each
+ *   group body independently. Pass an empty map when there are no groups.
+ */
+export const separatePositionedOverlapsInPlace = (
+  nodes: DagPositionedNode[],
+  crossAxis: CrossAxis,
+  nodeSep: number,
+  groupInnerIds: ReadonlyMap<string, ReadonlySet<string>> = new Map()
+): void => {
+  if (nodes.length < 2) return;
+
+  // Build index: node id → array index.
+  const idxById = new Map(nodes.map((n, i) => [n.id, i]));
+
+  // Mutable position store (cross axis only; main axis never changes here).
+  const crossPos = new Map<string, number>(
+    nodes.map((n) => [n.id, crossAxis === 'x' ? n.x : n.y])
+  );
+
+  // Cross-axis accessors operating on the mutable store.
+  const crossOf = (id: string) => crossPos.get(id) ?? 0;
+  const setCross = (id: string, value: number) => crossPos.set(id, value);
+
+  // Main-axis accessors use original node values (main axis never changes).
+  const mainOf = (id: string) => {
+    const n = nodes[idxById.get(id)!];
+    return crossAxis === 'x' ? n.y : n.x;
+  };
+  const mainSpanOf = (id: string) => {
+    const n = nodes[idxById.get(id)!];
+    return crossAxis === 'x' ? n.height : n.width;
+  };
+  const crossSpanOf = (id: string) => {
+    const n = nodes[idxById.get(id)!];
+    return crossAxis === 'x' ? n.width : n.height;
+  };
+
+  // Determine which nodes are outer (not inner to any group at this level).
+  const innerNodeIdSet = new Set<string>();
+  for (const innerIds of groupInnerIds.values()) {
+    for (const id of innerIds) innerNodeIdSet.add(id);
+  }
+  const outerNodeIds = nodes.map((n) => n.id).filter((id) => !innerNodeIdSet.has(id));
+
+  // Collect per-group inner id lists (only those present in the node array).
+  const groupInnerLists = new Map<string, string[]>();
+  for (const [gid, innerIds] of groupInnerIds) {
+    const present = [...innerIds].filter((id) => idxById.has(id));
+    if (present.length > 0) groupInnerLists.set(gid, present);
+  }
+
+  /** Run one PAVA sweep over the given node id list. Returns true if any node moved. */
+  const runSweep = (nodeIds: readonly string[]): boolean => {
+    if (nodeIds.length < 2) return false;
+    let anyMoved = false;
+
+    // Event points: the distinct main-axis starts of all nodes in this set.
+    const eventPoints = [...new Set(nodeIds.map(mainOf))].sort((a, b) => a - b);
+
+    for (const y0 of eventPoints) {
+      // Active set = nodes whose main-axis interval contains y0.
+      const active = nodeIds.filter((id) => {
+        const m = mainOf(id);
+        return m <= y0 && y0 < m + mainSpanOf(id);
+      });
+      if (active.length < 2) continue;
+
+      // Sort by current cross-axis left edge.
+      active.sort((a, b) => crossOf(a) - crossOf(b));
+
+      // PAVA expects box-center positions.
+      const centers = active.map((id) => crossOf(id) + crossSpanOf(id) / 2);
+      const widths = active.map(crossSpanOf);
+      const resolved = resolveCrossAxisOverlaps(centers, widths, nodeSep);
+      if (resolved === centers) continue; // no change — all centers already valid.
+
+      for (let i = 0; i < active.length; i++) {
+        const newCross = resolved[i] - widths[i] / 2; // center → left edge
+        const id = active[i];
+        const oldCross = crossOf(id);
+        if (Math.abs(newCross - oldCross) < 0.001) continue;
+        const delta = newCross - oldCross;
+        setCross(id, newCross);
+        anyMoved = true;
+        // Carry inner nodes of any group that moved.
+        const innerIds = groupInnerLists.get(id);
+        if (innerIds) {
+          for (const innerId of innerIds) {
+            setCross(innerId, crossOf(innerId) + delta);
+          }
+        }
+      }
+    }
+    return anyMoved;
+  };
+
+  // Iterate outer + inner sweeps to stability.
+  for (let iter = 0; iter < SEPARATE_OVERLAPS_MAX_ITERS; iter++) {
+    let anyMoved = runSweep(outerNodeIds);
+    for (const innerIds of groupInnerLists.values()) {
+      if (runSweep(innerIds)) anyMoved = true;
+    }
+    if (!anyMoved) break;
+  }
+
+  // Write updated cross positions back to the node array.
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i];
+    const newCross = crossPos.get(n.id);
+    if (newCross === undefined) continue;
+    if (crossAxis === 'x') {
+      if (Math.abs(newCross - n.x) < 0.001) continue;
+      nodes[i] = { ...n, x: newCross };
+    } else {
+      if (Math.abs(newCross - n.y) < 0.001) continue;
+      nodes[i] = { ...n, y: newCross };
+    }
+  }
+};

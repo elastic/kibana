@@ -66,6 +66,14 @@ export interface TransformResult {
 
 interface InternalTransformResult extends TransformResult {
   leafIds: string[];
+  /**
+   * Failure edges collected by this level's transform. Kept separate from
+   * `edges` so callers can forward them to their own `failureEdges` bucket
+   * rather than splicing them mid-list. Only the two graph-level boundaries
+   * concatenate: `transformWorkflowToGraph` (outer graph) and the
+   * `foreachGroups` push (group body, which is its own graph).
+   */
+  failureEdges: GraphEdge[];
 }
 
 /**
@@ -87,9 +95,25 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     };
 
   const ids = new IdAllocator();
-  const { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes } =
-    transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids);
-  return { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes };
+  const {
+    nodes,
+    edges,
+    failureEdges,
+    foreachGroups,
+    bypassLaneNodes,
+    nodeRefs,
+    fallbackLanes,
+  } = transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids);
+  // Boundary 1: concatenate all failure edges after all structural edges so
+  // the outer graph's edge list keeps [structural, failure] order (plan step 6).
+  return {
+    nodes,
+    edges: [...edges, ...failureEdges],
+    foreachGroups,
+    bypassLaneNodes,
+    nodeRefs,
+    fallbackLanes,
+  };
 }
 
 function transformInternal(
@@ -198,10 +222,12 @@ function transformInternal(
       // as compound-group children (workflow_layout_pipeline.ts:65). Hoisting
       // would cause a duplicate node id for unbalanced if/switch inside a
       // foreach/while body.
+      // Boundary 2: the group body is its own graph; concatenate failure edges
+      // last so the body's edge list also keeps [structural, failure] order.
       foreachGroups.push({
         id,
         innerNodes: inner.nodes,
-        innerEdges: inner.edges,
+        innerEdges: [...inner.edges, ...inner.failureEdges],
         bypassLaneNodes: inner.bypassLaneNodes,
       });
       foreachGroups.push(...inner.foreachGroups);
@@ -239,6 +265,7 @@ function transformInternal(
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
+        failureEdges.push(...inner.failureEdges);
         foreachGroups.push(...inner.foreachGroups);
         fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
@@ -276,6 +303,7 @@ function transformInternal(
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
+        failureEdges.push(...inner.failureEdges);
         foreachGroups.push(...inner.foreachGroups);
         fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
@@ -325,6 +353,7 @@ function transformInternal(
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
+        failureEdges.push(...inner.failureEdges);
         foreachGroups.push(...inner.foreachGroups);
         fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
@@ -361,6 +390,7 @@ function transformInternal(
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
+        failureEdges.push(...inner.failureEdges);
         foreachGroups.push(...inner.foreachGroups);
         fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
@@ -383,6 +413,7 @@ function transformInternal(
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
+        failureEdges.push(...inner.failureEdges);
         foreachGroups.push(...inner.foreachGroups);
         fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
@@ -421,6 +452,7 @@ function transformInternal(
       nodes.push(...inner.nodes);
       bypassLaneNodes.push(...inner.bypassLaneNodes);
       edges.push(...inner.edges);
+      failureEdges.push(...inner.failureEdges);
       foreachGroups.push(...inner.foreachGroups);
       fallbackLanes.push(...inner.fallbackLanes);
       const firstId = inner.nodes[0]?.id;
@@ -446,15 +478,18 @@ function transformInternal(
 
       // Stamp fallbackOf on every node in the lane, including nodes inside
       // nested foreach groups, so the minimap and renderers can identify them.
+      // Only stamp where unset so the innermost owner wins in nested fallbacks.
       for (const n of inner.nodes) {
         if (n.type === 'step') {
-          (n.data as { fallbackOf?: string }).fallbackOf = id;
+          const d = n.data as { fallbackOf?: string };
+          if (d.fallbackOf === undefined) d.fallbackOf = id;
         }
       }
       for (const g of inner.foreachGroups) {
         for (const n of g.innerNodes) {
           if (n.type === 'step') {
-            (n.data as { fallbackOf?: string }).fallbackOf = id;
+            const d = n.data as { fallbackOf?: string };
+            if (d.fallbackOf === undefined) d.fallbackOf = id;
           }
         }
       }
@@ -462,6 +497,7 @@ function transformInternal(
       nodes.push(...inner.nodes);
       bypassLaneNodes.push(...inner.bypassLaneNodes);
       edges.push(...inner.edges);
+      failureEdges.push(...inner.failureEdges);
       foreachGroups.push(...inner.foreachGroups);
       fallbackLanes.push(...inner.fallbackLanes);
 
@@ -496,8 +532,8 @@ function transformInternal(
     prevExitIds = exitIds;
   }
 
-  // Append deferred failure edges last so dagre sees [spine, fallback] order.
-  edges.push(...failureEdges);
-
-  return { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes, leafIds: prevExitIds };
+  // Return failureEdges separately — the caller decides where to concatenate.
+  // Only the two graph-level boundaries merge them (transformWorkflowToGraph and
+  // the foreachGroups push), keeping [structural, failure] order per graph.
+  return { nodes, edges, failureEdges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes, leafIds: prevExitIds };
 }

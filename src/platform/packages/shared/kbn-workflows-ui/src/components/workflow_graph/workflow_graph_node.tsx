@@ -251,6 +251,16 @@ function NodePreviewCard({
         />
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* Secondary source handle for the failure edge — exits bottom-right (TB)
+          or right-bottom (LR). opacity: 0 keeps it invisible; the visible port
+          is spec 07's. React Flow reads sourceHandle="failure" on the edge to
+          pick this handle's coordinates as sourceX/sourceY. */}
+      <Handle
+        type="source"
+        id="failure"
+        position={sourceHandlePos}
+        style={{ opacity: 0, right: 0, left: 'auto' }}
+      />
     </>
   );
 }
@@ -556,6 +566,13 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         )}
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* See note on the preview-mode component above for failure handle semantics. */}
+      <Handle
+        type="source"
+        id="failure"
+        position={sourceHandlePos}
+        style={{ opacity: 0, right: 0, left: 'auto' }}
+      />
     </>
   );
 }

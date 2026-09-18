@@ -120,8 +120,16 @@ export function applyDagre(
         crossAxis === 'x' ? afterSource.x - beforeSource.x : afterSource.y - beforeSource.y;
       const targetDelta =
         crossAxis === 'x' ? afterTarget.x - beforeTarget.x : afterTarget.y - beforeTarget.y;
-      const successorCount = (g.successors(edge.source) ?? []).length;
-      const predecessorCount = (g.predecessors(edge.target) ?? []).length;
+      // Exclude alignment-ignored edges (e.g. failure edges) so that a fallback
+      // owner's spine edge is not mistaken for a fan-out when the owner has only
+      // one non-failure successor. Unfiltered, a fallback owner always shows
+      // successorCount === 2 and drops its waypoints.
+      const successorCount = (g.outEdges(edge.source) ?? []).filter(
+        (oe) => !ignoredEdgeIdSet.has(((g.edge(oe.v, oe.w) as EdgeLabel | undefined)?.label as string) ?? '')
+      ).length;
+      const predecessorCount = (g.inEdges(edge.target) ?? []).filter(
+        (ie) => !ignoredEdgeIdSet.has(((g.edge(ie.v, ie.w) as EdgeLabel | undefined)?.label as string) ?? '')
+      ).length;
       // Fan-out/fan-in edges keep stale multi-rank Dagre buses after barycenter; smooth-step instead.
       const isBranchOrMergeEdge = successorCount > 1 || predecessorCount > 1;
       const useDagreWaypoints =

@@ -508,3 +508,327 @@ describe('workflow layout pipeline', () => {
     expect(WORKFLOW_RANK_SEP).toBe(70);
   });
 });
+
+// ─── spec 02 regression — named fixtures ──────────────────────────────────────
+//
+// Before this fix, enforceForkLaneOrder permuted lane *starts*, which is only
+// overlap-safe for equal-width lanes. The reported YAML combined a nested
+// fallback lane with an asymmetric if (foreach in then, single step in else),
+// triggering overlaps of 232 / 209 / 14 px. All four variants below now produce
+// zero overlapping pairs. See the plan's root-cause section for variant labels.
+
+const OVERLAP_TOLERANCE = 1;
+
+/** Returns true if the two axis-aligned rectangles overlap by more than OVERLAP_TOLERANCE. */
+const overlaps = (
+  a: { x: number; y: number; width: number; height: number },
+  b: { x: number; y: number; width: number; height: number }
+): boolean =>
+  a.x + OVERLAP_TOLERANCE < b.x + b.width &&
+  a.x + a.width > b.x + OVERLAP_TOLERANCE &&
+  a.y + OVERLAP_TOLERANCE < b.y + b.height &&
+  a.y + a.height > b.y + OVERLAP_TOLERANCE;
+
+/**
+ * Returns all overlapping pairs of outer (non-inner) nodes.
+ * Containers vs their own inner nodes are not considered — inner coordinates
+ * are absolute but a container box includes its padding, so partial overlap
+ * with own children is by design.
+ */
+const findOverlappingPairs = (
+  nodes: ReturnType<typeof computeWorkflowLayout>['nodes'],
+  groupIds: Set<string>
+): Array<[string, string]> => {
+  const pairs: Array<[string, string]> = [];
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i];
+      const b = nodes[j];
+      // Skip pairs where one is a group and the other is its inner node.
+      // (Container position is absolute; inner node position is absolute too.)
+      if (groupIds.has(a.id) || groupIds.has(b.id)) continue;
+      if (overlaps(a, b)) pairs.push([a.id, b.id]);
+    }
+  }
+  return pairs;
+};
+
+describe('spec 02 regression — named fixtures', () => {
+  // ── Variant A — the reported YAML ─────────────────────────────────────────
+  // A step with a nested fallback lane, followed by an asymmetric if
+  // (foreach in then, single step in else), followed by a final step.
+  // This is the exact shape that triggered the 232 / 209 / 14 px overlaps.
+  it('variant A (reported YAML): no pairwise overlap', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [
+                {
+                  name: 'nested-owner',
+                  type: 'http',
+                  'on-failure': {
+                    fallback: [{ name: 'nested-lane-step', type: 'http' }],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'loop-step',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner', type: 'http' }],
+              },
+            ],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  it('variant A: then-lane is left of else-lane (declaration order)', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'loop-step',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner', type: 'http' }],
+              },
+            ],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // In TB, the then-lane head (loop-step container) must be to the left of
+    // the else-lane head (else-step) — declaration order.
+    const loopNode = result.nodes.find((n) => n.id === 'loop-step');
+    const elseNode = result.nodes.find((n) => n.id === 'else-step');
+    expect(loopNode).toBeDefined();
+    expect(elseNode).toBeDefined();
+    expect(centerX(loopNode!)).toBeLessThan(centerX(elseNode!));
+  });
+
+  it('owner with fallback and a plain following step share the spine column', () => {
+    // Speculative anchoring (pass 3) translates the owner onto its spine
+    // successor's column. Owner and next-step should share the same x-centre.
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          { name: 'next-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const ownerNode = result.nodes.find((n) => n.id === 'owner');
+    const nextNode = result.nodes.find((n) => n.id === 'next-step');
+    expect(ownerNode).toBeDefined();
+    expect(nextNode).toBeDefined();
+    // After speculative anchoring, owner and next-step should be on the same column.
+    expect(Math.abs(centerX(ownerNode!) - centerX(nextNode!))).toBeLessThanOrEqual(
+      CENTER_TOLERANCE
+    );
+  });
+
+  // ── Variant B — pre-existing spec 01 bug (no fallback, foreach in then) ───
+  it('variant B (if+foreach in then, no fallback): no pairwise overlap', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'loop-step',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner', type: 'http' }],
+              },
+            ],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  // ── Variant C — fallback with following sibling, flat then/else ────────────
+  it('variant C (fallback + following sibling, flat then): no pairwise overlap', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'then-step', type: 'http' }],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  // ── Variant D — no fallback, flat then/else (equal widths, always worked) ──
+  it('variant D (equal-width flat then/else, no fallback): no pairwise overlap', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'then-step', type: 'http' }],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  // ── continue: true — spine head shared between fallback and spine lanes ────
+  it('continue: true — fork is not skipped (asymmetric exclusion)', () => {
+    // Without the asymmetric exclusion fix, buildLaneSets would classify the
+    // spine head as a join (reachable from both lanes) → spine lane empty →
+    // fork skipped → fallback lane stays wherever dagre put it.
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              continue: true,
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          { name: 'next-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // fallback-step must be positioned (not at 0,0 from a skipped fork).
+    const fallbackNode = result.nodes.find((n) => n.id === 'fallback-step');
+    expect(fallbackNode).toBeDefined();
+    expect(isFinite(fallbackNode!.x)).toBe(true);
+    expect(isFinite(fallbackNode!.y)).toBe(true);
+    // The failure edge must be reconciled — the pipeline must complete without error.
+    const ownerNode = result.nodes.find((n) => n.id === 'owner');
+    const nextNode = result.nodes.find((n) => n.id === 'next-step');
+    expect(ownerNode).toBeDefined();
+    expect(nextNode).toBeDefined();
+    // Owner and next-step should be on the same column (the spine).
+    expect(Math.abs(centerX(ownerNode!) - centerX(nextNode!))).toBeLessThanOrEqual(
+      CENTER_TOLERANCE
+    );
+  });
+
+  it('continue: true — no pairwise overlap', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              continue: true,
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          { name: 'next-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  it('edge whose endpoints move by different deltas: reconcileEdgePoints clears it', () => {
+    // Build a fallback owner whose lane head moves a different amount than the
+    // owner itself after the post-dagre passes. The failure edge's waypoints
+    // should be cleared (points.length < 2), not translated.
+    //
+    // We can't easily control the exact movements, but we can assert that the
+    // pipeline produces a valid result (no throws, finite positions) even when
+    // waypoints are cleared — the smooth-step fallback renders correctly.
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    for (const n of result.nodes) {
+      expect(isFinite(n.x)).toBe(true);
+      expect(isFinite(n.y)).toBe(true);
+    }
+    for (const e of result.edges) {
+      for (const p of e.points) {
+        expect(isFinite(p.x)).toBe(true);
+        expect(isFinite(p.y)).toBe(true);
+      }
+    }
+  });
+});

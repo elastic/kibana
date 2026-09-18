@@ -8,9 +8,14 @@
  */
 
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
-import { dagLayout } from '@kbn/dag-layout';
+import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
-import { enforceForkLaneOrder, enforceTriggerLaneOrder } from './enforce_lane_order';
+import {
+  anchorFallbackOwnersSpeculative,
+  enforceForkLaneOrder,
+  enforceTriggerLaneOrder,
+  reconcileEdgePoints,
+} from './enforce_lane_order';
 
 // Workflow-specific layout constants. These encode domain knowledge (foreach
 // header height, gutter widths) that does not belong in @kbn/dag-layout.
@@ -83,6 +88,17 @@ export const computeWorkflowLayout = (
     alignmentIgnoredEdges: edges.filter((e) => e.isFailure).map((e) => e.id),
   });
 
+  // Snapshot cross-axis centres immediately after dagLayout, before any
+  // post-dagre pass moves nodes. reconcileEdgePoints uses this to translate-or-
+  // clear edge waypoints after all position-mutating passes (Step 4).
+  const crossAxis = direction === 'TB' ? 'x' : 'y';
+  const initialCentres = new Map(
+    laid.nodes.map((n) => [
+      n.id,
+      crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2,
+    ])
+  );
+
   // Post-dagre pass 1: enforce fork lane declaration order.
   // Runs once per graph (outer + each foreachGroup body) so containers move as
   // opaque units — prevents inner nodes from detaching from their container.
@@ -90,16 +106,60 @@ export const computeWorkflowLayout = (
     laid.nodes,
     laid.edges,
     transformed,
-    direction
+    direction,
+    WORKFLOW_NODE_SEP
   );
 
   // Post-dagre pass 2: enforce trigger lane declaration order.
-  const { nodes: finalNodes, edges: finalEdges } = enforceTriggerLaneOrder(
+  const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
     orderedNodes,
     orderedEdges,
     transformed.nodeRefs,
     direction
   );
 
-  return { nodes: finalNodes, edges: finalEdges };
+  // Post-dagre pass 3: order-preserving overlap repair.
+  // Packing is fork-local and can leave nested-fork nodes overlapping nodes
+  // outside the fork's own lanes. PAVA is order-preserving (never swaps two
+  // nodes), so it cannot undo the lane ordering from passes 1–2. On raw
+  // dagLayout output this is a verified no-op (0/400 shapes in the corpus).
+  const groupInnerIds = new Map<string, Set<string>>(
+    transformed.foreachGroups.map((g) => [
+      g.id,
+      new Set([
+        ...g.innerNodes.map((n) => n.id),
+        ...(g.bypassLaneNodes ?? []).map((n) => n.id),
+      ]),
+    ])
+  );
+
+  // separatePositionedOverlapsInPlace mutates the array in place.
+  const repairedNodes = [...triggeredNodes];
+  separatePositionedOverlapsInPlace(repairedNodes, crossAxis, WORKFLOW_NODE_SEP, groupInnerIds);
+
+  // Post-dagre pass 4: speculative anchoring of each fallback owner onto its
+  // spine column. Runs AFTER the repair pass — running before repair causes the
+  // repair to re-space ranks independently, destroying alignment (measured:
+  // 2.0% vs 74.1% owner straightness). Per-owner rollback protects lane order.
+  anchorFallbackOwnersSpeculative(
+    repairedNodes,
+    transformed.edges,
+    transformed.fallbackLanes,
+    crossAxis,
+    WORKFLOW_NODE_SEP,
+    groupInnerIds
+  );
+
+  // Post-dagre pass 5: reconcile edge waypoints.
+  // Translate-or-clear based on how much each endpoint moved since dagLayout.
+  // Single pass, covers all prior position mutations. Preserves reference
+  // equality for React Flow's memo when points are unchanged.
+  const finalEdges = reconcileEdgePoints(
+    triggeredEdges,
+    repairedNodes,
+    initialCentres,
+    crossAxis
+  );
+
+  return { nodes: repairedNodes, edges: finalEdges };
 };

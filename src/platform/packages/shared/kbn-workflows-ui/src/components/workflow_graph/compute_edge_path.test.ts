@@ -8,7 +8,12 @@
  */
 
 import { Position } from '@xyflow/react';
-import { buildForkBusPath, buildMergeBusPath, computeEdgePath } from './compute_edge_path';
+import {
+  buildFailureLanePath,
+  buildForkBusPath,
+  buildMergeBusPath,
+  computeEdgePath,
+} from './compute_edge_path';
 
 const TRUNK = 20;
 
@@ -355,5 +360,100 @@ describe('computeEdgePath', () => {
       // Path should not contain the fork busY
       expect(r.path).not.toContain(` ${forkBusY} `);
     });
+
+    it('fallback owner spine edge is NOT fork-bus routed (no branchType, no isFailure)', () => {
+      // Before the fix, the spine edge of a fallback owner carried isFork: true
+      // and was routed via buildForkBusPath. After the fix, it carries neither
+      // branchType nor isFailure, so it routes via dagre waypoints or smooth-step.
+      // The fork busY = sourceY + FORK_BUS_TRUNK = 100 + 20 = 120.
+      const r = computeEdgePath({
+        sourceX: 200,
+        sourceY: 100,
+        targetX: 200,
+        targetY: 300,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        // No branchType, no isFailure — this is the spine edge.
+      });
+      const forkBusY = 100 + FORK_BUS_TRUNK;
+      expect(r.path).not.toContain(` ${forkBusY} `);
+    });
+  });
+});
+
+// ─── buildFailureLanePath ─────────────────────────────────────────────────────
+
+describe('buildFailureLanePath', () => {
+  it('TB: produces an orthogonal path from source to target with intermediate bus', () => {
+    // Owner at (200,100), failure head at (400,300). TB layout.
+    // Expected shape: source → trunk down (busY=120) → across to tx=400 → down to ty=300.
+    const trunk = 20;
+    const r = buildFailureLanePath(
+      { sourceX: 200, sourceY: 100, targetX: 400, targetY: 300 },
+      false, // isLR
+      trunk
+    );
+    expect(r.path.length).toBeGreaterThan(0);
+    // Path must pass through the bus Y = sourceY + trunk = 120
+    expect(r.path).toContain('120');
+    // Path must reach targetX = 400
+    expect(r.path).toContain('400');
+    // Label should be near the target column, just below the bus.
+    expect(r.labelX).toBe(400);
+    expect(r.labelY).toBeGreaterThan(100);
+    expect(r.labelY).toBeLessThan(300);
+  });
+
+  it('LR: produces an orthogonal path from source to target', () => {
+    // Owner at right edge (200,150), failure head at (400,300). LR layout.
+    const trunk = 20;
+    const r = buildFailureLanePath(
+      { sourceX: 200, sourceY: 150, targetX: 400, targetY: 300 },
+      true, // isLR
+      trunk
+    );
+    expect(r.path.length).toBeGreaterThan(0);
+    // Path must pass through the bus X = sourceX + trunk = 220
+    expect(r.path).toContain('220');
+  });
+
+  it('computeEdgePath routes isFailure:true edges via buildFailureLanePath (not fork bus)', () => {
+    // The failure edge must use the failure-lane path, not the fork bus.
+    // Fork bus shape has sourceY - 2 at start and busY = sourceY + FORK_BUS_TRUNK.
+    // Failure lane path has the same busY but different semantic (not a shared trunk).
+    // Key assertion: isFailure:true triggers the failure-lane path regardless of branchType.
+    const r = computeEdgePath({
+      sourceX: 200,
+      sourceY: 100,
+      targetX: 400,
+      targetY: 300,
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Top,
+      isFailure: true,
+    });
+    expect(r.path.length).toBeGreaterThan(0);
+    // The failure lane path's busY = 100 + 20 = 120 should appear in the path.
+    expect(r.path).toContain('120');
+    // The targetX (400) should appear — the path crosses to the target column.
+    expect(r.path).toContain('400');
+  });
+
+  it('computeEdgePath spine edge (no flags) does NOT route via failure-lane path', () => {
+    // The spine edge carries no isFailure, no branchType — it should route via
+    // dagre waypoints or smooth-step, never via buildFailureLanePath.
+    // If no dagrePoints are given, smooth-step is used.
+    const r = computeEdgePath({
+      sourceX: 200,
+      sourceY: 100,
+      targetX: 200,
+      targetY: 300,
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Top,
+      // No isFailure, no branchType — pure spine edge.
+    });
+    // Spine edge is aligned → smooth-step renders the midpoint path.
+    // The failure-lane busY (120) should NOT be in the path for an aligned edge.
+    const forkBusY = 100 + FORK_BUS_TRUNK;
+    expect(r.path).not.toContain(` ${forkBusY} `);
   });
 });

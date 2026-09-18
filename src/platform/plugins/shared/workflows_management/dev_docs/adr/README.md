@@ -1,6 +1,6 @@
 # Architecture Decision Records — Workflows Management
 
-This directory holds ADRs for the `workflows_management` plugin and the package family it depends on (`@kbn/workflows`, `@kbn/workflows-ui`, `@kbn/workflows-yaml`). It is the first `adr/` directory in Kibana — numbered files are used because supersession becomes a property of the filesystem rather than a convention inside a changelog.
+This directory holds ADRs for the `workflows_management` plugin and the package family it depends on (`@kbn/workflows`, `@kbn/workflows-ui`, `@kbn/workflows-yaml`, `@kbn/dag-layout`). It is the first `adr/` directory in Kibana — numbered files are used because supersession becomes a property of the filesystem rather than a convention inside a changelog.
 
 ## Format
 
@@ -43,4 +43,7 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 | [0005](0005-undo-delegates-to-monaco.md) | Undo delegates to Monaco | Accepted |
 | [0006](0006-graph-mutations-reuse-snippet-path.md) | Graph mutations reuse the snippet insertion path | Accepted |
 | [0007](0007-structural-child-slots.md) | Structural child slots and per-slot enumerator | Accepted |
-| [0008](0008-post-dagre-lane-order.md) | Post-dagre fork and trigger lane order | Accepted |
+| [0008](0008-post-dagre-lane-order.md) | Post-dagre fork and trigger lane order | Superseded by ADR-0011 |
+| [0009](0009-alignment-ignored-edges.md) | `alignmentIgnoredEdges`: excluding failure edges from cross-axis alignment | Accepted |
+| [0010](0010-fallback-lane-graph-model.md) | Fallback lane graph model | Accepted |
+| [0011](0011-post-dagre-positioning-pipeline.md) | Post-dagre positioning pipeline | Accepted |

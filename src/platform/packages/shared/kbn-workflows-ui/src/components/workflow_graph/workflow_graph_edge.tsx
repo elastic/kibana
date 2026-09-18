@@ -32,11 +32,6 @@ interface WorkflowEdgeData extends Record<string, unknown> {
    */
   readonly hideEndMarker?: boolean;
   /**
-   * True on both out-edges of a fallback-lane owner. Forces fork-bus routing
-   * even on the spine edge, which carries no `branchType` (see assumption 6).
-   */
-  readonly isFork?: boolean;
-  /**
    * True on the edge from a step to its fallback lane head. Renders as always-
    * dashed; stroke colour transitions from `borderBaseProminent` to `danger`
    * once any node in the lane has a step-execution record (ADR-0010 decision 9).
@@ -83,7 +78,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     points: edgeData?.points,
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
-    isFork: edgeData?.isFork,
+    isFailure: edgeData?.isFailure,
   });
 
   const traversed = edgeData?.traversed ?? false;
@@ -179,7 +174,6 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.branchType === nd?.branchType &&
     pd?.isMerge === nd?.isMerge &&
     pd?.hideEndMarker === nd?.hideEndMarker &&
-    pd?.isFork === nd?.isFork &&
     pd?.isFailure === nd?.isFailure
   );
 }

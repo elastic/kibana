@@ -24,15 +24,22 @@ An entry in `TransformResult.nodeRefs` mapping a graph node id to a workflow ste
 A synthetic node with no corresponding YAML step, emitted by `transform_workflow_to_graph.ts` when a branch of an `if`/`switch`/`parallel` is empty. It renders as a dashed placeholder. _Not_ excluded from all operations: a bypass-lane node is a legitimate insertion target (its position in the graph encodes which empty branch it heads) and maps to `{ mode: 'branch', stepName: '<owner>', branch: BranchSlot }` in `WorkflowGraphInsertionContext`.
 
 **lane**
-The cross-axis extent occupied by the steps of one child slot within one laid-out graph. Lanes of
-the same fork owner are disjoint and ordered; that order is the **slot declaration order** (the
-order the slot's edge appears in the graph's edge list), not dagre's output. A lane is not a set of
-nodes: nodes reachable from more than one sibling lane (joins) belong to no lane and stay put during
-lane reordering. `bypass lane node` and `fallback lane` are specialisations — the former is what
-gives an *empty* slot a lane in the laid graph.
+The cross-axis extent occupied by the nodes reachable exclusively via **one out-edge of a fork**,
+within one laid-out graph. A fallback owner is a fork: its spine edge and its failure edge each
+have a lane, even though only the latter is a child slot.
+
+Lanes of one fork are **ordered** in slot declaration order (the order the slot's edge appears in
+the graph's edge list), not dagre's output. That order is enforced only between boxes that share a
+rank band — lanes occupying disjoint ranks may interleave on the cross axis. Lanes are **not**
+disjoint intervals.
+
+A lane is not a set of nodes: nodes reachable from more than one sibling lane (joins) belong to no
+lane — except that a node shared between a fallback lane and its own spine lane belongs to the
+spine lane, because a `continue` rejoin means the lane feeds the spine rather than branching
+beside it. `bypass lane node` and `fallback lane` are specialisations.
 
 **isMerge (edge property)**
-An _edge_ tag, not a node type. Set to `true` on edges whose target has in-degree > 1 (i.e., edges converging at a join after a fork). Computed in `use_workflow_layout.ts` from target in-degree; drives `buildMergeBusPath` routing. There is no join node in the logical graph — `transform_workflow_to_graph.ts` wires branch leaves directly to the next sibling via `exitIds = dedupeIds(branchExits)`.
+An _edge_ tag, not a node type. Set to `true` on edges whose target has in-degree > 1 **and** whose source is a bypass-lane node or a fallback-lane leaf (i.e., edges that participate in the fan-in matching a synthetic fork bus). Computed in `use_workflow_layout.ts`; drives `buildMergeBusPath` routing. There is no join node in the logical graph — `transform_workflow_to_graph.ts` wires branch leaves directly to the next sibling via `exitIds = dedupeIds(branchExits)`. Widening this to plain in-degree > 1 is deferred (ADR-0011).
 
 ---
 
@@ -84,15 +91,15 @@ The graph edge traversed _on failure_, connecting a step to the head of its fall
 The placed row or column holding a step's fallback steps in the rendered graph. Retires: "error branch".
 
 **`on-failure` vs `fallback`**
-Both appear in the schema: `on-failure` is the container map (which also holds `retry`, `continue`, etc.); `fallback` is the key inside that map holding the list of fallback steps. The `error`/`failure` split follows this: `GraphEdge.isFailure` and `buildFailureEdgePath` describe traversal; `fallback` and `fallbackTarget`/`fallbackConnected` describe the steps and their authoring state.
+Both appear in the schema: `on-failure` is the container map (which also holds `retry`, `continue`, etc.); `fallback` is the key inside that map holding the list of fallback steps. The `error`/`failure` split follows this: `GraphEdge.isFailure` describes traversal; `fallback` and `fallbackTarget`/`fallbackConnected` describe the steps and their authoring state.
 
-**`continue` (boolean)**
-A key inside `on-failure` that, when `true`, suppresses re-throwing after the fallback path has run. Writing `fallback` without `continue` leaves the workflow still failing after fallback — the execution graph's `ExitTryBlock` re-throws. Writing `continue: true` converts "notify on failure" into "swallow the failure". These are separate operations with different semantics; the graph authoring surface writes them separately.
+**`continue` (boolean or string)**
+A key inside `on-failure` that, when `true` (or a template expression that evaluates to a truthy value), suppresses re-throwing after the fallback path has run. Writing `fallback` without `continue` leaves the workflow still failing after fallback — the execution graph's `ExitTryBlock` re-throws. Writing `continue: true` converts "notify on failure" into "swallow the failure". These are separate operations with different semantics; the graph authoring surface writes them separately.
 
 **fallback lane shape (two variants)**
-The rendered diamond has two shapes depending on `continue`:
-- `fallback` alone → terminating diamond. `ExitTryBlock` re-throws; no return corridor is drawn.
-- `fallback` + `continue: true` → true diamond, rejoining the owner's next sibling. Reuses `isMerge` / `buildMergeBusPath`.
+The rendered layout has two shapes depending on `continue`:
+- `fallback` alone → terminating lane. `ExitTryBlock` re-throws; no return corridor is drawn. The fallback steps are a side column with no edge back to the spine.
+- `fallback` + `continue: true` (or any truthy template) → rejoining lane, re-entering the owner's next sibling. Reuses `isMerge` / `buildMergeBusPath` on the join edge.
 
 ---
 
