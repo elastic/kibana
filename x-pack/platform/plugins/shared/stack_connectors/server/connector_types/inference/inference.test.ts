@@ -93,9 +93,9 @@ describe('InferenceConnector', () => {
           meta: true,
           requestTimeout: 180_000,
           signal: undefined,
-          compression: false,
           headers: {
             'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+            'accept-encoding': 'identity',
           },
         }
       );
@@ -326,9 +326,9 @@ describe('InferenceConnector', () => {
           asStream: true,
           meta: true,
           requestTimeout: 180_000,
-          compression: false,
           headers: {
             'X-Elastic-Product-Use-Case': 'inference',
+            'accept-encoding': 'identity',
           },
         }
       );
@@ -358,9 +358,9 @@ describe('InferenceConnector', () => {
           meta: true,
           requestTimeout: 180_000,
           signal,
-          compression: false,
           headers: {
             'X-Elastic-Product-Use-Case': 'inference',
+            'accept-encoding': 'identity',
           },
         }
       );
