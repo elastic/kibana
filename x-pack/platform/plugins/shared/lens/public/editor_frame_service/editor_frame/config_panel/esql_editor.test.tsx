@@ -76,6 +76,20 @@ const getSuggestionsMock = getSuggestions as jest.MockedFunction<typeof getSugge
 const getGridAttrsMock = getGridAttrs as jest.MockedFunction<typeof getGridAttrs>;
 const addColumnsToCacheMock = addColumnsToCache as jest.MockedFunction<typeof addColumnsToCache>;
 const useFetchContextMock = useFetchContext as jest.MockedFunction<typeof useFetchContext>;
+const createMockFetchContext = (
+  overrides: Partial<ReturnType<typeof useFetchContext>> = {}
+): ReturnType<typeof useFetchContext> => ({
+  isReload: false,
+  filters: undefined,
+  query: undefined,
+  searchSessionId: undefined,
+  timeRange: undefined,
+  timeslice: undefined,
+  esqlVariables: [],
+  projectRouting: undefined,
+  isApproximate: false,
+  ...overrides,
+});
 
 describe('ESQLEditor', () => {
   const coreStart = coreMock.createStart();
@@ -145,7 +159,7 @@ describe('ESQLEditor', () => {
       dataView: mockDataView,
     } as unknown as Awaited<ReturnType<typeof getGridAttrs>>);
     addColumnsToCacheMock.mockClear();
-    useFetchContextMock.mockReturnValue({ esqlVariables: [], isApproximate: false });
+    useFetchContextMock.mockReturnValue(createMockFetchContext());
   });
 
   it('runs the same query again after the previous run was aborted', async () => {
@@ -217,10 +231,11 @@ describe('ESQLEditor', () => {
         rows: [],
         dataView: mockDataView,
       } as unknown as Awaited<ReturnType<typeof getGridAttrs>>);
-      useFetchContextMock.mockReturnValue({
-        esqlVariables: [{ key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS }],
-        isApproximate: false,
-      });
+      useFetchContextMock.mockReturnValue(
+        createMockFetchContext({
+          esqlVariables: [{ key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS }],
+        })
+      );
       const onLayerQuerySubmit = jest.fn().mockResolvedValue(undefined);
 
       renderEditor({ onLayerQuerySubmit });

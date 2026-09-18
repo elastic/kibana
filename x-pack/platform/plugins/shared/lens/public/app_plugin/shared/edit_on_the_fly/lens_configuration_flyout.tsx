@@ -123,8 +123,8 @@ export function LensEditConfigurationFlyout({
     // Persisted secondary datasources (for example, a form-based reference line on
     // an ES|QL chart) must participate in dirty detection. Include the current active
     // datasource as well so datasource conversions are still detected.
-    const datasourceIds = new Set([
-      ...Object.keys(previousAttrs.state.datasourceStates),
+    const datasourceIds = new Set<LensDatasourceId>([
+      ...(Object.keys(previousAttrs.state.datasourceStates) as LensDatasourceId[]),
       datasourceId,
     ]);
 

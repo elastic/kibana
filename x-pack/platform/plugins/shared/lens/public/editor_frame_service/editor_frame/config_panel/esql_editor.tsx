@@ -169,7 +169,7 @@ export function ESQLEditor({
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
-  const { esqlVariables, isApproximate } = useFetchContext({ uuid: panelId, parentApi });
+  const { esqlVariables = [], isApproximate } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   // Update column limit indicator when chart data finishes loading
