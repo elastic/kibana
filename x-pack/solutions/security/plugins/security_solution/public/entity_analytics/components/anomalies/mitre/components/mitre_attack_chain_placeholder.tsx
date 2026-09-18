@@ -24,13 +24,6 @@ export const MitreAttackChainPlaceholder: React.FC<MitreAttackChainPlaceholderPr
       width: 100%;
     `}
   >
-    {/*
-     * Sizing skeleton — establishes the correct panel height without consulting
-     * MITRE query state. MitreAttackChain is a horizontal flex row, so its height
-     * is determined by a single dot column (chip row + dot circle + optional label),
-     * not by the number of tactics. One MitreTacticDot is sufficient and stays
-     * honest if the dot's dimensions change.
-     */}
     <div
       aria-hidden="true"
       css={css`
