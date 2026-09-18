@@ -20,7 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
 
-  const privilegeTestPkgName = 'preflight-authz-test';
+  const privilegeTestPkgName = 'preflight_authz_test';
   const privilegeTestPkgVersion = '1.0.0';
 
   async function buildPackageZipWithAssetType(
