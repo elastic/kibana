@@ -2,11 +2,12 @@ version: "1"
 name: Detection Coverage Review
 description: >
   Reviews one knowledge indicator that reports a detection gap. Asks the coverage skill
-  whether a rule covers the gap. For a disabled rule, asks a human to enable it. For a
-  prebuilt rule that is not installed, asks a human to install it. For an enabled rule,
-  asks a human to confirm the coverage. Without a rule, starts rule creation. After the
-  answer, marks the indicator processed. Without an answer, or when an approved action
-  changed nothing, the indicator stays pending.
+  whether a rule covers the gap, opens an investigation for the analyst, and records the
+  cheapest fix as a proposal on it: enable a disabled rule, install a prebuilt rule, or
+  confirm an enabled rule already covers the gap. The action runs only once an analyst
+  approves. Without a rule, drafts one and proposes it on the same investigation. After
+  a decision, marks the indicator processed. Without a decision, or when an approved
+  action changed nothing, the indicator stays pending.
 enabled: true
 tags:
   - security
@@ -18,6 +19,12 @@ settings:
     key: "coverage-{{ inputs.ki_id }}"
     strategy: drop
     max: 1
+  # This run parks in WAITING_FOR_CHILD while the proposal gate holds the decision,
+  # and the engine's default 6h workflow timeout would cancel the review under the
+  # analyst. So this must stay above the gate's own ceiling of `168h` (a 72h
+  # decision window, a second 72h for a proposal re-parked just before its
+  # deadline, plus margin). A test pins the relationship.
+  timeout: "176h"
 triggers:
   - type: manual
     inputs:
@@ -40,6 +47,8 @@ outputs:
   - name: verdict
     type: string
   - name: existing_rule
+    type: string
+  - name: investigation_id
     type: string
   - name: coverage_confirmed
     type: boolean
@@ -66,10 +75,9 @@ outputs:
   - name: ki_processed
     type: boolean
 steps:
-  # Step 1 of 6: read the indicator. This step has no `on-failure: continue`. If the read
-  # fails, the run fails. The indicator stays pending, and the next sweep starts a new
-  # review. If the read finds no indicator, the check in step 3 does not run, and
-  # `emit_result` reports `check_error`.
+  # Read the indicator. No `on-failure: continue`: if the read fails, the run fails, the
+  # indicator stays pending, and the next sweep starts a new review. If the read finds no
+  # indicator, the check below does not run and `emit_result` reports `check_error`.
   - name: read_ki
     type: elasticsearch.search
     with:
@@ -80,8 +88,8 @@ steps:
           values:
             - "{{ inputs.ki_id }}"
 
-  # Step 2 of 6: prepare the gap text for the model. The text is truncated. Indicator
-  # content can be 64 kB.
+  # Prepare the gap text for the model. The text is truncated. Indicator content can be
+  # 64 kB.
   - name: gap
     type: data.set
     with:
@@ -89,8 +97,8 @@ steps:
       description: "{{ steps.read_ki.output.hits.hits[0]._source.title | truncate: 2000, '' }}"
       evidence: "{{ steps.read_ki.output.hits.hits[0]._source.content | truncate: 4000, '' }}"
 
-  # Step 3 of 6: ask the coverage skill for a verdict. A new rule is the last option. A
-  # reported gap is often covered by a rule that is disabled or not installed.
+  # Ask the coverage skill for a verdict. A new rule is the last option. A reported gap
+  # is often covered by a rule that is disabled or not installed.
   - name: coverage_check
     type: ai.agent
     # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
@@ -99,10 +107,10 @@ steps:
     plugin-id: alertzero_detection_coverage
     aggregate-by: alertzero_parent
     timeout: "10m"
-    # Runs only when step 1 found the indicator.
+    # Runs only when the read found the indicator.
     if: "${{ steps.read_ki.output.hits.total.value > 0 }}"
-    # If the check fails, the run continues without a verdict. No branch below matches.
-    # The default branch reports it. No action runs.
+    # A failed check must not kill the run: with no verdict, no route below matches, no
+    # investigation opens and `emit_result` reports it. Never fall through into an action.
     on-failure:
       continue: true
     create-conversation: true
@@ -141,18 +149,129 @@ steps:
             type: string
         required: [verdict, rule_id, rule_name, prebuilt_version, rationale]
 
-  # Step 4 of 6: one branch per verdict. A missing or unknown verdict matches no branch.
-  # It goes to the default branch, never to rule creation.
+  # Only an installed rule has a saved object. Step `if` cannot group with
+  # parentheses, so the verdict test lives here and is read below as a flag.
+  - name: rule_lookup
+    type: data.set
+    with:
+      installed: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'covered_enabled'
+          or steps.coverage_check.output.structured_output.verdict == 'covered_disabled' }}
+
+  # The agent reports the signature rule_id; the enable action, the rule link and
+  # the attachment refresh all address the saved object, so resolve its uuid once.
+  # A miss leaves `id` unset and routes the verdict to the action-less report below.
+  - name: resolve_rule
+    type: kibana.request
+    if: >-
+      ${{ steps.rule_lookup.output.installed == true
+        and steps.coverage_check.output.structured_output.rule_id != '' }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ steps.coverage_check.output.structured_output.rule_id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  # Human-facing record of this review, deliberately separate from coverage_check's
+  # own conversation: the agent transcript stays opaque, the investigation is where
+  # analysts collaborate and where every proposal attaches its decision, including
+  # the drafted rule on the no_coverage path. Public so anyone in the space can pick
+  # it up. Skipped without a verdict: nobody is asked. No on-failure: without an
+  # investigation there is nowhere to propose, so the review fails and the indicator
+  # stays pending.
+  - name: create_investigation
+    type: ai.conversation.create
+    if: >-
+      ${{ steps.coverage_check.output.structured_output.verdict != null
+        and steps.coverage_check.output.structured_output.verdict != '' }}
+    with:
+      title: "Detection coverage: {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}{{ steps.gap.output.technique }} {% endif %}{{ steps.gap.output.description | truncate: 80 }}"
+      access_control:
+        access_mode: public
+      template_id: investigation
+      metadata:
+        status: open
+        description: "{{ steps.gap.output.description }}"
+        workflow_execution_id: "{{ execution.id }}"
+
+  # By-reference security.rule attachment: the framework resolves the rule once
+  # from its rule_id and snapshots it, recording the rule as it was when this
+  # review ran. The fixed attachment id makes the refresh below deterministic.
+  - name: attach_rule
+    type: ai.attachment.add
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.resolve_rule.output.id != null }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: "coverage-rule"
+      type: security.rule
+      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Evidence shared by every proposal comment below. Links carry the space prefix:
+  # the review runs in the space of the sweep that started it, and a link without
+  # it opens the default space.
+  - name: compose_evidence
+    type: data.set
+    with:
+      rule_line: "{% if steps.resolve_rule.output.id != null %}**Rule:** [{{ steps.resolve_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_rule.output.id }}) (`{{ steps.resolve_rule.output.id }}`){% else %}**Rule:** {{ steps.coverage_check.output.structured_output.rule_name }} (`{{ steps.coverage_check.output.structured_output.rule_id }}`){% endif %}"
+      investigation_line: "**Investigation:** [Detection coverage](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
+      gap_block: |-
+        **Detection gap**
+        {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}
+        {% endif %}{{ steps.gap.output.description }}
+        {% if steps.gap.output.evidence != null and steps.gap.output.evidence != '' %}
+        **Evidence**
+        {{ steps.gap.output.evidence }}
+        {% endif %}
+      check_line: "**Coverage check:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
+
+  # Body shared by the three report proposals below: what the check found, where
+  # to look, and that approving applies nothing.
+  - name: compose_report
+    type: data.set
+    with:
+      body: |-
+        **Verdict:** {{ steps.coverage_check.output.structured_output.verdict }}
+        {{ steps.compose_evidence.output.rule_line }}
+        {{ steps.compose_evidence.output.investigation_line }}
+
+        {{ steps.compose_evidence.output.gap_block }}
+
+        {% if steps.coverage_check.output.structured_output.rationale != null and steps.coverage_check.output.structured_output.rationale != '' %}**Rationale**
+        {{ steps.coverage_check.output.structured_output.rationale }}
+        {% endif %}
+        {{ steps.compose_evidence.output.check_line }}
+
+        **On approval**
+        Nothing is applied automatically; approving acknowledges the follow-up.
+
+  # One case per verdict. A missing or unknown verdict matches no case and goes to
+  # the default, never to rule creation. Inside a case the investigation exists
+  # (its create step has no on-failure), so no step re-checks it.
   #
-  # No approval step below has `on-failure: continue`. If nobody answers in 72 hours, the
-  # run fails before `mark_processed`. The indicator stays pending, and the next sweep
-  # starts a new review.
+  # The proposal gate records the recommendation on the investigation, parks on
+  # the analyst's decision for up to 72h, and on approval runs the action as the
+  # approver. When nobody answers the gate settles the proposal as `expired` and
+  # completes without a decision: the indicator stays pending for the next sweep
+  # and the investigation stays open because nobody decided. No proposal has an
+  # on-failure: a gate that fails outright fails this run before `mark_processed`.
   - name: handle_verdict
     type: switch
     expression: "{{ steps.coverage_check.output.structured_output.verdict }}"
     cases:
       - match: no_coverage
         steps:
+          # The creation worker drafts the rule and proposes it on this investigation,
+          # so the analyst sees one record for the gap whichever route it takes.
           - name: run_rule_creation
             type: workflow.execute
             on-failure:
@@ -164,160 +283,332 @@ steps:
                 gap_description: "{{ steps.gap.output.description }}"
                 evidence: "{{ steps.gap.output.evidence }}"
                 preview_invocation_count: "${{ inputs.preview_invocation_count }}"
+                investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
       - match: covered_disabled
         steps:
-          - name: review_enable
-            type: waitForApproval
-            timeout: "72h"
+          # The enable action addresses the saved object, so it needs the uuid the
+          # lookup above resolved.
+          - name: propose_enable
+            type: workflow.execute
+            if: "${{ steps.resolve_rule.output.id != null }}"
             with:
-              approveLabel: Enable rule
-              rejectLabel: Dismiss
-              message: |-
-                A disabled rule already covers this gap.
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Enable an existing rule that covers this gap**
 
-                Rule: {{ steps.coverage_check.output.structured_output.rule_name }}
-                Why it matches: {{ steps.coverage_check.output.structured_output.rationale }}
+                  {{ steps.compose_evidence.output.rule_line }}
+                  **Recommended action:** Enable rule
+                  {{ steps.compose_evidence.output.investigation_line }}
 
-                Detection gap: {{ steps.gap.output.description }}
+                  {{ steps.compose_evidence.output.gap_block }}
 
-                Review the check: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
+                  **Why it matches**
+                  {{ steps.coverage_check.output.structured_output.rationale }}
 
-          - name: enable_existing_rule
-            type: security.enableRule
-            on-failure:
-              continue: true
-            if: >-
-              ${{ steps.review_enable.output.response.approved == true
-                and steps.coverage_check.output.structured_output.rule_id != '' }}
+                  {{ steps.compose_evidence.output.check_line }}
+
+                  **On approval**
+                  The rule is enabled and starts producing alerts on its next scheduled run. Dismissing leaves it off.
+                actionWorkflowId: system-alertzero-action-enable-rule
+                actionInput:
+                  id: "{{ steps.resolve_rule.output.id }}"
+                impact: low
+                confidence: medium
+                # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.
+                autoApprove: false
+
+          # Nothing to enable when the lookup found no saved object; the analyst has to
+          # find the rule by hand.
+          - name: report_unresolved_rule
+            type: workflow.execute
+            if: "${{ steps.resolve_rule.output.id == null }}"
             with:
-              query: 'alert.attributes.params.ruleId: "{{ steps.coverage_check.output.structured_output.rule_id }}"'
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Coverage check needs a manual follow-up**
+
+                  The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.
+
+                  {{ steps.compose_report.output.body }}
+                category: configure
+                impact: low
+                confidence: low
+
       - match: prebuilt_available
         steps:
-          - name: review_install
-            type: waitForApproval
-            timeout: "72h"
+          # The install action needs both handles. Step `if` cannot group with
+          # parentheses, so the test lives here and is read below as a flag.
+          - name: install_target
+            type: data.set
             with:
-              approveLabel: Install rule
-              rejectLabel: Dismiss
-              message: |-
-                An Elastic prebuilt rule covers this gap. It is not installed.
+              ready: >-
+                ${{ steps.coverage_check.output.structured_output.rule_id != ''
+                  and steps.coverage_check.output.structured_output.prebuilt_version > 0 }}
 
-                Rule: {{ steps.coverage_check.output.structured_output.rule_name }}
-                Why it matches: {{ steps.coverage_check.output.structured_output.rationale }}
-
-                Detection gap: {{ steps.gap.output.description }}
-
-                Approve to install and enable the rule now. Review the check:
-                /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
-
-          - name: install_prebuilt_rule
-            type: kibana.request
-            on-failure:
-              continue: true
-            if: >-
-              ${{ steps.review_install.output.response.approved == true
-                and steps.coverage_check.output.structured_output.rule_id != ''
-                and steps.coverage_check.output.structured_output.prebuilt_version > 0 }}
+          - name: propose_install
+            type: workflow.execute
+            if: "${{ steps.install_target.output.ready == true }}"
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/internal/detection_engine/prebuilt_rules/installation/_perform"
-              headers:
-                kbn-xsrf: string
-                elastic-api-version: "1"
-                x-elastic-internal-origin: kibana
-                Content-Type: application/json
-              body:
-                mode: SPECIFIC_RULES
-                rules:
-                  - rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-                    version: "${{ steps.coverage_check.output.structured_output.prebuilt_version }}"
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Install a prebuilt rule that covers this gap**
 
-          - name: enable_installed_rule
-            type: security.enableRule
-            on-failure:
-              continue: true
-            if: >-
-              ${{ steps.install_prebuilt_rule.output.summary.succeeded > 0
-                or steps.install_prebuilt_rule.output.summary.skipped > 0 }}
+                  {{ steps.compose_evidence.output.rule_line }}
+                  **Recommended action:** Install and enable prebuilt rule (version {{ steps.coverage_check.output.structured_output.prebuilt_version }})
+                  {{ steps.compose_evidence.output.investigation_line }}
+
+                  {{ steps.compose_evidence.output.gap_block }}
+
+                  **Why it matches**
+                  {{ steps.coverage_check.output.structured_output.rationale }}
+
+                  {{ steps.compose_evidence.output.check_line }}
+
+                  **On approval**
+                  The Elastic prebuilt rule is installed from the package and enabled immediately. Dismissing leaves it uninstalled.
+                actionWorkflowId: system-alertzero-action-install-prebuilt-rule
+                actionInput:
+                  rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+                  version: "${{ steps.coverage_check.output.structured_output.prebuilt_version }}"
+                impact: medium
+                confidence: medium
+                autoApprove: false
+
+          - name: report_missing_version
+            type: workflow.execute
+            if: "${{ steps.install_target.output.ready != true }}"
             with:
-              query: 'alert.attributes.params.ruleId: "{{ steps.coverage_check.output.structured_output.rule_id }}"'
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Coverage check needs a manual follow-up**
+
+                  The check matched a prebuilt rule, but did not report a rule id and version to install.
+
+                  {{ steps.compose_report.output.body }}
+                category: configure
+                impact: low
+                confidence: low
 
       - match: covered_enabled
         steps:
-          - name: confirm_coverage
-            type: waitForApproval
-            timeout: "72h"
+          # Same gate without an action: approval is the analyst's judgement that the
+          # enabled rule fully addresses the gap, so approval is the whole lifecycle.
+          # With no action to inherit a category from, the queue bucket is named here.
+          - name: propose_confirm
+            type: workflow.execute
             with:
-              approveLabel: Coverage confirmed
-              rejectLabel: Dismiss
-              message: |-
-                An enabled rule already covers this gap. Confirm that it covers the reported behavior.
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Confirm an enabled rule already covers this gap**
 
-                Rule: {{ steps.coverage_check.output.structured_output.rule_name }}
-                Why it covers: {{ steps.coverage_check.output.structured_output.rationale }}
+                  {{ steps.compose_evidence.output.rule_line }}
+                  **Recommended action:** None; confirm coverage
+                  {{ steps.compose_evidence.output.investigation_line }}
 
-                Detection gap: {{ steps.gap.output.description }}
+                  {{ steps.compose_evidence.output.gap_block }}
 
-                Note: this check does not include rule exceptions. Exceptions can reduce coverage.
+                  **Why it covers**
+                  {{ steps.coverage_check.output.structured_output.rationale }}
 
-                Review the check: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
+                  This check does not account for rule exceptions, which may limit coverage.
+
+                  {{ steps.compose_evidence.output.check_line }}
+
+                  **On approval**
+                  Nothing changes; approving records that the gap is covered. Dismiss if the rule does not fully address the reported behavior.
+                category: configure
+                impact: low
+                confidence: medium
 
     default:
-      # Unknown verdicts only. If the check produced no verdict, no approval is asked.
-      # `emit_result` reports `check_error`.
-      - name: report_only
-        type: waitForApproval
-        timeout: "72h"
+      # Unknown verdicts only. A check that produced no verdict asked nobody; the
+      # investigation was not opened and `emit_result` carries `check_error`.
+      - name: report_unknown_verdict
+        type: workflow.execute
         if: >-
           ${{ steps.coverage_check.output.structured_output.verdict != null
             and steps.coverage_check.output.structured_output.verdict != '' }}
         with:
-          approveLabel: Acknowledged
-          rejectLabel: Dismiss
-          message: |-
-            The coverage check returned an unexpected verdict. No automated action was taken.
+          workflow-id: system-create-investigation-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            comment: |-
+              **Coverage check needs a manual follow-up**
 
-            Verdict: {{ steps.coverage_check.output.structured_output.verdict }}
-            Detection gap: {{ steps.gap.output.description }}
+              The coverage check returned an unexpected verdict and no automated action was taken.
 
-            Review the check: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
+              {{ steps.compose_report.output.body }}
+            category: configure
+            impact: low
+            confidence: low
 
-  # Step 5 of 6: decide whether each approved action was applied. `error` cannot answer
-  # that. A step's `error` is null when it succeeded, when its own `if` skipped it, when
-  # its branch never ran, and when it ran and changed nothing: an enable whose query
-  # matches no rule returns a summary of zeros without an error. Each flag below reads
-  # the API response instead. `emit_result` reports the same three values.
+  # The gate reports its outcome on two axes: `decision` is what the analyst
+  # concluded (`approved` / `dismissed`, absent until someone decides) and
+  # `status` is how far it got (`succeeded` once the action ran, `no_action` when
+  # there was nothing to run, `expired` when nobody answered). Spelled out per
+  # outcome rather than derived from a single flag so a run that never proposed,
+  # or whose proposal expired, matches none of them.
+  - name: record_decision
+    type: data.set
+    with:
+      applied: >-
+        ${{ steps.propose_enable.output.status == 'succeeded'
+          or steps.propose_install.output.status == 'succeeded' }}
+      approved: >-
+        ${{ steps.propose_enable.output.status == 'succeeded'
+          or steps.propose_install.output.status == 'succeeded'
+          or steps.propose_confirm.output.decision == 'approved'
+          or steps.report_unresolved_rule.output.decision == 'approved'
+          or steps.report_missing_version.output.decision == 'approved'
+          or steps.report_unknown_verdict.output.decision == 'approved'
+          or steps.run_rule_creation.output.decision == 'approved' }}
+      dismissed: >-
+        ${{ steps.propose_enable.output.decision == 'dismissed'
+          or steps.propose_install.output.decision == 'dismissed'
+          or steps.propose_confirm.output.decision == 'dismissed'
+          or steps.report_unresolved_rule.output.decision == 'dismissed'
+          or steps.report_missing_version.output.decision == 'dismissed'
+          or steps.report_unknown_verdict.output.decision == 'dismissed'
+          or steps.run_rule_creation.output.decision == 'dismissed' }}
+
+  # The action ran inside the gate, so its result is not visible here; re-read the
+  # rule to learn what actually landed. The enable path reads by the uuid resolved
+  # above; a freshly installed rule had no uuid at proposal time, so that path
+  # reads by signature and a 404 means the install did not happen.
+  - name: refetch_rule
+    type: kibana.request
+    if: "${{ steps.record_decision.output.applied == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?{% if steps.resolve_rule.output.id != null %}id={{ steps.resolve_rule.output.id | url_encode }}{% else %}rule_id={{ steps.coverage_check.output.structured_output.rule_id | url_encode }}{% endif %}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  # security.rule attachments resolve once and never refresh, so after the enable
+  # the snapshot would silently show the disabled rule. This writes the enabled
+  # rule as version 2; version 1 keeps the before state in the attachment history.
+  - name: refresh_rule_attachment
+    type: ai.attachment.update
+    if: >-
+      ${{ steps.resolve_rule.output.id != null
+        and steps.attach_rule.error == null
+        and steps.refetch_rule.error == null
+        and steps.refetch_rule.output.id != null }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      attachment_id: "coverage-rule"
+      data:
+        text: "{{ steps.refetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.refetch_rule.output.name }}"
+      description: "Rule after enabling: {{ steps.refetch_rule.output.name }}"
+    on-failure:
+      continue: true
+
+  # A prebuilt rule has no saved object until the install action runs, so the
+  # by-reference attachment is only possible now.
+  - name: attach_installed_rule
+    type: ai.attachment.add
+    if: >-
+      ${{ steps.propose_install.output.status == 'succeeded'
+        and steps.refetch_rule.error == null
+        and steps.refetch_rule.output.id != null }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: "coverage-rule"
+      type: security.rule
+      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Metadata writes fire the ai.conversation.metadataUpdated trigger, which is
+  # the emit point for downstream feedback signals. An expired gate leaves the
+  # investigation open on purpose: nobody decided.
+  - name: close_investigation_resolved
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_decision.output.approved == true }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: resolved
+        verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% elsif steps.run_rule_creation.output.created == true %}Analyst approved creating a new rule for the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
+    on-failure:
+      continue: true
+
+  - name: close_investigation_dismissed
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_decision.output.dismissed == true }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: other
+        verdict: "Analyst dismissed the coverage proposal."
+    on-failure:
+      continue: true
+
+  # Decide whether each approved action was applied, and whether anyone decided at
+  # all. The gate's `succeeded` only says the action workflow completed: an install
+  # whose package had nothing to install still completes. Each flag below reads the
+  # re-read rule instead. `emit_result` reports the same values, and `mark_processed`
+  # reads them, so the queue write and the report cannot disagree.
   #
-  # A dismissed approval leaves every flag false. A dismissal is a decision, so the
-  # indicator is processed. `creation_unreviewed` is the same class of hole for the
-  # no_coverage path: the child can finish with `created: false` and no error without
-  # asking anyone when the draft has an empty query or no attachment.
+  # `decided` is the no-decision hole for the proposal paths: an expired gate
+  # completes with neither `approved` nor `dismissed`. `creation_unreviewed` is the
+  # same class of hole for the no_coverage path: the child can finish with
+  # `created: false` and no error without asking anyone when the draft has an empty
+  # query or no attachment.
   - name: resolve_outcome
     type: data.set
     with:
       enable_approved_not_applied: >-
-        ${{ steps.review_enable.output.response.approved == true
-          and not (steps.enable_existing_rule.output.succeeded > 0
-            or steps.enable_existing_rule.output.skipped > 0) }}
+        ${{ steps.propose_enable.output.status == 'succeeded'
+          and not (steps.refetch_rule.error == null
+            and steps.refetch_rule.output.enabled == true) }}
       install_approved_not_applied: >-
-        ${{ steps.review_install.output.response.approved == true
-          and not (steps.install_prebuilt_rule.output.summary.succeeded > 0
-            or steps.install_prebuilt_rule.output.summary.skipped > 0) }}
+        ${{ steps.propose_install.output.status == 'succeeded'
+          and not (steps.refetch_rule.error == null
+            and steps.refetch_rule.output.id != null) }}
       installed_not_enabled: >-
-        ${{ (steps.install_prebuilt_rule.output.summary.succeeded > 0
-          or steps.install_prebuilt_rule.output.summary.skipped > 0)
-          and not (steps.enable_installed_rule.output.succeeded > 0
-            or steps.enable_installed_rule.output.skipped > 0) }}
+        ${{ steps.propose_install.output.status == 'succeeded'
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.id != null
+          and steps.refetch_rule.output.enabled != true }}
       creation_unreviewed: >-
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
           and steps.run_rule_creation.output.reviewed != true }}
+      decided: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
+          or steps.record_decision.output.approved == true
+          or steps.record_decision.output.dismissed == true }}
 
-  # Step 6 of 6: mark the indicator processed. This is the only write to the indicator
-  # and the last step. It runs only after an applied decision. A timed-out approval
-  # failed the run earlier. A check without a verdict asked nobody. A failed rule-creation
-  # run decided nothing. A rule-creation run that asked nobody (empty query or missing
-  # attachment) also decided nothing. An approved action that changed nothing did not
-  # apply the decision. In each case the indicator stays pending for the next sweep.
+  # Mark the indicator processed. This is the only write to the indicator and the
+  # last step. It runs only after an applied decision. A check without a verdict asked
+  # nobody. An expired proposal decided nothing. A failed rule-creation run decided
+  # nothing, and one that asked nobody (empty query or missing attachment) also
+  # decided nothing. An approved action that changed nothing did not apply the
+  # decision. In each case the indicator stays pending for the next sweep.
   #
   # Only `attributes.status` is written. `attributes` merges on update. `tags` is a list,
   # and a partial update replaces the full list. This workflow does not write tags.
@@ -327,13 +618,13 @@ steps:
     # stays pending for the next sweep.
     on-failure:
       continue: true
-    # `error == null` is not enough for `run_rule_creation`. Step `if` cannot group with
-    # parentheses, so `creation_unreviewed` from step 5 carries that test. The other
-    # three action flags also come from step 5.
+    # Step `if` cannot group with parentheses, so every compound test lives in
+    # `resolve_outcome` and is read here as a flag.
     if: >-
       ${{ steps.coverage_check.output.structured_output.verdict != null
         and steps.coverage_check.output.structured_output.verdict != ''
         and steps.run_rule_creation.error == null
+        and steps.resolve_outcome.output.decided == true
         and steps.resolve_outcome.output.creation_unreviewed == false
         and steps.resolve_outcome.output.enable_approved_not_applied == false
         and steps.resolve_outcome.output.install_approved_not_applied == false
@@ -351,22 +642,27 @@ steps:
     with:
       verdict: "{{ steps.coverage_check.output.structured_output.verdict }}"
       existing_rule: "{{ steps.coverage_check.output.structured_output.rule_name }}"
-      # Only meaningful for covered_enabled.
-      coverage_confirmed: "${{ steps.confirm_coverage.output.response.approved == true }}"
-      # Each flag checks the API response, not the absence of an error. A skipped step has
-      # no error. An error check would report success for work that did not run.
-      rule_enabled: "${{ steps.enable_existing_rule.output.succeeded > 0 or steps.enable_existing_rule.output.skipped > 0 or steps.enable_installed_rule.output.succeeded > 0 or steps.enable_installed_rule.output.skipped > 0 }}"
-      rule_installed: "${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 }}"
-      # Approved but not applied. One flag per action, read from step 5. A combined flag
-      # does not work. A step from another branch did not run and evaluates to null. That
-      # hides the true case. Each flag also blocks `mark_processed`, so a true flag means
-      # the indicator is still pending.
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      # Only meaningful for covered_enabled. False on every other verdict and when the
+      # analyst dismisses the confirmation instead of accepting the coverage judgement.
+      coverage_confirmed: "${{ steps.propose_confirm.output.decision == 'approved' }}"
+      # Each flag asserts EVIDENCE OF THE MUTATION from the re-read rule, never the
+      # gate's status alone; see `resolve_outcome`.
+      rule_enabled: >-
+        ${{ steps.record_decision.output.applied == true
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.enabled == true }}
+      rule_installed: >-
+        ${{ steps.propose_install.output.status == 'succeeded'
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.id != null }}
+      # Approved but not applied. One flag per action, read from `resolve_outcome`, so a
+      # true flag here also means the indicator is still pending.
       enable_approved_not_applied: "${{ steps.resolve_outcome.output.enable_approved_not_applied }}"
       install_approved_not_applied: "${{ steps.resolve_outcome.output.install_approved_not_applied }}"
       installed_not_enabled: "${{ steps.resolve_outcome.output.installed_not_enabled }}"
-      # Two different failures. Step 1 found no indicator, so the check never ran. Or the
-      # check ran and returned no verdict. In both cases no branch ran and nobody was
-      # asked.
+      # Two different failures. The read found no indicator, so the check never ran. Or
+      # the check ran and returned no verdict. In both cases nobody was asked.
       check_error: >-
         {% if steps.read_ki.output.hits.total.value == 0 %}knowledge indicator not found{% elsif steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
       # Rule-creation path only.

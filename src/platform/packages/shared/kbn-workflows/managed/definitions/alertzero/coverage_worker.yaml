@@ -179,8 +179,8 @@ steps:
       indicators: "${{ steps.search_pending_indicators.output.hits.hits | default: consts.no_rows | slice: 0, steps.resolve_free_slots.output.free | slice: 0, steps.resolve_batch_size.output.size }}"
 
   # Step 8 of 8: start one review per indicator. The sweep does not wait for the review.
-  # A review can wait up to 72 hours for a human. The sweep passes the indicator id and
-  # the index name. The review reads the indicator.
+  # A review can park for up to a week while its proposal gate waits for a human. The
+  # sweep passes the indicator id and the index name. The review reads the indicator.
   - name: start_reviews
     type: foreach
     foreach: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows }}"
