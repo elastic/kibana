@@ -8,12 +8,16 @@
  */
 
 import path from 'path';
-import fs from 'fs/promises';
 
+import { getPackages } from '@kbn/repo-packages';
+import {
+  buildMoonProjectDirLookup,
+  getMoonAffectedProjectNames,
+  isMoonGeneratorInput,
+} from '@kbn/moon/src/generator_inputs';
 import { REPO_ROOT } from '../kbn_pm/src/lib/paths.mjs';
 
 import { PrecommitCheck } from './precommit_check';
-import { getMoonAffectedProjectNames, isMoonGeneratorInput } from './moon_generator_inputs';
 
 export class MoonConfigGenerationCheck extends PrecommitCheck {
   constructor() {
@@ -25,23 +29,23 @@ export class MoonConfigGenerationCheck extends PrecommitCheck {
   }
 
   async execute(log, files, options) {
-    const rootPackageJsonPath = path.join(REPO_ROOT, 'package.json');
-    const rootPackageJson = await fs.readFile(rootPackageJsonPath);
-    const rootPackage = JSON.parse(rootPackageJson);
-    const dependencyLookup = Object.fromEntries(
-      Object.entries({
-        ...rootPackage.dependencies,
-        ...rootPackage.devDependencies,
-      }).map(([k, v]) => [v.replace('link:', ''), k])
-    );
-
-    /**
-     * This can't be done with @kbn/moon because we want to see locally changed files/projects only
-     */
+    const projectLookup = buildMoonProjectDirLookup(getPackages(REPO_ROOT));
     const affectedProjects = getMoonAffectedProjectNames(
       files.map((f) => f.getRelativePath()),
-      dependencyLookup
+      projectLookup
     );
+
+    const unmapped = files
+      .map((f) => f.getRelativePath())
+      .filter((rel) => isMoonGeneratorInput(rel))
+      .map((rel) => path.dirname(rel))
+      .filter((dir) => dir && dir !== '.' && !projectLookup[dir]);
+
+    if (unmapped.length) {
+      log.warning(
+        `Moon config check: no kibana package at ${unmapped.join(', ')} (not in repo package list)`
+      );
+    }
 
     if (affectedProjects.length === 0) {
       return;
