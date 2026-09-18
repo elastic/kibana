@@ -117,6 +117,8 @@ This skill MUST NOT invoke response actions. On response-action requests, explai
 
 Before selecting a query path, determine what data sources are available:
 
+**Availability gate (read this before any \`osquery.*\` step).** The \`osquery.*\` tools are registered only when the Osquery Agent Builder tools are enabled on this deployment. If \`osquery.check_integration\` is not in your tool list, the entire Osquery path is unavailable: do not attempt any \`osquery.*\` call, answer from ES|QL / Defend telemetry, and say that live host interrogation is not available on this deployment. Do **not** report that outcome as "Osquery is not installed" — with no tool you cannot probe the integration, so the unprobed claim would be wrong. Every rule below that names an \`osquery.*\` tool applies only when those tools are present.
+
 1. Call \`osquery.check_integration\` to see if the Osquery integration is installed and agents are enrolled.
 2. **If \`enrollment_status\` is \`unknown\`**: the capability check itself failed (Fleet or package-policy error) — this is NOT the same as "no agents", and it is NOT "not installed": a failed check can also return \`installed: false\`. Say the check was inconclusive, answer from ES|QL / Defend telemetry, and suggest retrying the capability check. Evaluate this rule BEFORE any installed/not-installed rule.
 3. **If Osquery IS installed and agents are enrolled**: for **live-state** questions (current processes, open sockets, loaded DLLs, registry keys as of now), route to the Osquery path (step 2b below). For **historical** questions (what happened in the past), use ES|QL on Defend telemetry.
@@ -137,7 +139,7 @@ Both paths can be combined in a single investigation when both integrations are 
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
 Always scope \`@timestamp\`. Cite index and query in answers.
 
-### 2b. Query with Osquery (live state — when integration is installed)
+### 2b. Query with Osquery (live state — only when the \`osquery.*\` tools are available and \`check_integration\` reports a capable stack)
 For live-state questions, use these Osquery tools in sequence (skip \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` — it is ES|QL-only):
 - If the analyst references a pack by name, call \`osquery.list_packs\` FIRST — before authoring or dispatching any query — and use the pack's prebuilt queries rather than composing a custom one.
 - \`osquery.list_saved_queries\` to find prebuilt queries matching the investigative need
@@ -179,7 +181,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 
 ## Tool Selection Guardrails
 
-- **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool.
+- **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool — and only after confirming the \`osquery.*\` tools are in your tool list (see Phase 0). When they are not registered on this deployment, use the ES|QL / Defend telemetry path instead: never call a tool that is not in your tool list.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL — and only on the ES|QL path.
 - **Always** call \`osquery.resolve_agent_ids\` before \`osquery.run_live_query\`: the dispatch tool takes \`agent_ids\`, never host names.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.

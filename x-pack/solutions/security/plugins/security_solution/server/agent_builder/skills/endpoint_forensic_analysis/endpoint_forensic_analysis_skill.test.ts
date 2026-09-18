@@ -5,14 +5,36 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
+import { z as zod } from '@kbn/zod/v4';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import {
-  ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
-  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
-  endpointForensicAnalysisSkill,
-} from './endpoint_forensic_analysis_skill';
+
+// The packaged Kibana server runs with --disallow-code-generation-from-strings,
+// and the jest setup mirrors that by making `new Function` throw — which is what
+// zod v4's fastpass compiler needs for schemas carrying checks. Production
+// therefore takes zod's non-jit path automatically; jitless parsing here
+// exercises the same checks instead of dying in the compiler.
+//
+// zod captures `jitless` when a schema is constructed, and the skill builds its
+// inline-tool schemas at import time — so the config has to be set before the
+// module is evaluated. Hence the dynamic import inside `beforeAll`: a static
+// import would be hoisted above the config call. (Each test file gets its own
+// module registry, so this import is also the first evaluation of the module.)
+zod.config({ jitless: true });
+
+type SkillModule = typeof import('./endpoint_forensic_analysis_skill');
+
+let ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID: SkillModule['ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID'];
+let ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS: SkillModule['ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS'];
+let endpointForensicAnalysisSkill: SkillModule['endpointForensicAnalysisSkill'];
+
+beforeAll(async () => {
+  const skillModule = await import('./endpoint_forensic_analysis_skill');
+  ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = skillModule.ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID;
+  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS = skillModule.ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS;
+  endpointForensicAnalysisSkill = skillModule.endpointForensicAnalysisSkill;
+});
 
 describe('endpointForensicAnalysisSkill', () => {
   it('uses an allow-listed built-in skill id', () => {
@@ -165,6 +187,31 @@ describe('endpointForensicAnalysisSkill', () => {
   it('requires resolve_agent_ids before dispatching a live query (review finding 16)', () => {
     expect(endpointForensicAnalysisSkill.content).toContain(
       '**Always** call `osquery.resolve_agent_ids` before `osquery.run_live_query`'
+    );
+  });
+
+  // github-actions review #4975398846: `osquery.*` tools are registered only
+  // when the Osquery plugin's `agentBuilderTools` flag is on (default false), so
+  // a skill that unconditionally mandates `osquery.check_integration` hands
+  // default deployments an instruction they cannot execute — and an otherwise
+  // valid ES|QL investigation can stall before reaching its fallback.
+  it('routes to the ES|QL path when the osquery tools are not registered', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**Availability gate (read this before any `osquery.*` step).**'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'If `osquery.check_integration` is not in your tool list, the entire Osquery path is unavailable'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Every rule below that names an `osquery.*` tool applies only when those tools are present.'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'only when the `osquery.*` tools are available and `check_integration` reports a capable stack'
+    );
+    // The unconditional "always call it" phrasing is what made the skill
+    // unusable without the flag; it must not come back.
+    expect(endpointForensicAnalysisSkill.content).not.toContain(
+      '- **Always** call `osquery.check_integration` before using any other `osquery.*` tool.'
     );
   });
 });
