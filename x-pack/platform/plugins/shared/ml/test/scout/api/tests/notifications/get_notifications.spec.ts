@@ -76,6 +76,7 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
         responseType: 'json',
       });
 
+      expect(res).toHaveStatusCode(200);
       expect(res.body.total).toBe(1);
       expect(res.body.results).toHaveLength(1);
       expect(res.body.results[0].job_type).toBe('anomaly_detector');
