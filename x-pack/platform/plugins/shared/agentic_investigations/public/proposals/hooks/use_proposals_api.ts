@@ -40,9 +40,16 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
 };
 
 /**
- * Pending proposals, already grouped and ranked by the API (category, then
- * impact, confidence and deadline). Expired ones are dropped: a deadline that
- * has passed is no longer a decision anyone can make.
+ * Proposals awaiting a human, already grouped and ranked by the API (category,
+ * then impact, confidence and deadline).
+ *
+ * `status: 'pending'` is the whole "awaiting" condition, since that status is
+ * only ever valid while undecided. `excludeExpired` is still needed alongside
+ * it, because it filters on the deadline *date*: between a deadline passing and
+ * the gate workflow settling the record there is task lag during which it still
+ * reads `pending`, and a decision nobody can make any more has no business in
+ * the queue. `excludeSuperseded` drops the earlier attempts of a retried
+ * proposal, so a chain of failures appears once rather than once per attempt.
  */
 export const usePendingProposals = (conversationId?: string) => {
   const { services } = useKibana();
@@ -55,6 +62,7 @@ export const usePendingProposals = (conversationId?: string) => {
         query: {
           status: 'pending',
           excludeExpired: true,
+          excludeSuperseded: true,
           ...(conversationId ? { conversationId } : {}),
         },
       }),
@@ -82,6 +90,25 @@ export const useProposal = (id: string | undefined) => {
 };
 
 /**
+ * Both decision mutations refetch rather than reading the response body: the
+ * route only releases the gating workflow, and the decision is written by that
+ * workflow's post-gate steps, which run after the resume call has returned.
+ *
+ * The id therefore comes from the mutation's variables, not from a response
+ * body that still describes an undecided proposal. A refetch that beats the
+ * post-gate write reads `pending` once more, which is what the `executing`
+ * state being added separately is for — nothing here can wait for a write that
+ * lands out of band.
+ */
+const invalidateProposal = (
+  queryClient: ReturnType<typeof useQueryClient>,
+  { id }: { id: string }
+) => {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.detail(id) });
+};
+
+/**
  * Approving submits the action input the analyst was shown, so the API can
  * refuse an approval that no longer matches the record.
  */
@@ -95,12 +122,7 @@ export const useApproveProposal = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
+    onSuccess: (_proposal, { id }) => invalidateProposal(queryClient, { id }),
   });
 };
 
@@ -114,11 +136,6 @@ export const useDismissProposal = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
+    onSuccess: (_proposal, { id }) => invalidateProposal(queryClient, { id }),
   });
 };

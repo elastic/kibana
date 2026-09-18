@@ -34,7 +34,7 @@ export const useTimelineItems = (): TimelineItem[] => {
   );
   const activeExecution = useObservable(activeStream$, null);
 
-  const { pendingMessage } = useStreamRecord(conversationId);
+  const { pendingMessage, pendingAttachments } = useStreamRecord(conversationId);
   const pendingUserMessage = useMemo<UserMessageEvent | null>(
     () =>
       pendingMessage
@@ -43,14 +43,45 @@ export const useTimelineItems = (): TimelineItem[] => {
             type: TimelineEventType.userMessage,
             created_at: new Date().toISOString(),
             actor: { type: EventActorType.user, id: '' },
-            data: { message: pendingMessage },
+            data: {
+              message: pendingMessage,
+              attachments: pendingAttachments?.fallbackAttachments,
+              attachment_refs: pendingAttachments?.attachmentRefs,
+            },
           }
         : null,
-    [pendingMessage]
+    [pendingMessage, pendingAttachments]
   );
 
   const persistedEvents = conversation?.events;
-  const savedItems = useMemo(() => buildSavedItems(persistedEvents ?? []), [persistedEvents]);
+  const triggerEventId = activeExecution?.triggerEventId;
+
+  const savedItems = useMemo(() => {
+    const items = buildSavedItems(persistedEvents ?? []);
+    if (!pendingAttachments || !triggerEventId) {
+      return items;
+    }
+    // The server saves the user message before its attachment refs. Until they arrive, the saved
+    // copy of the message being sent shows the attachments the user attached locally.
+    return items.map((item) =>
+      item.kind === 'userMessage' &&
+      item.key === triggerEventId &&
+      !item.event.data.attachment_refs?.length
+        ? {
+            ...item,
+            event: {
+              ...item.event,
+              data: {
+                ...item.event.data,
+                attachments: pendingAttachments.fallbackAttachments,
+                attachment_refs: pendingAttachments.attachmentRefs,
+              },
+            },
+          }
+        : item
+    );
+  }, [persistedEvents, pendingAttachments, triggerEventId]);
+
   const liveItems = useMemo(
     () => buildLiveItems({ pendingUserMessage, activeExecution }),
     [pendingUserMessage, activeExecution]

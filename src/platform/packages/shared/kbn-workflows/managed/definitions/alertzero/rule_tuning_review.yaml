@@ -10,11 +10,14 @@ tags:
   - security
   - detection-rule-tuning
 settings:
-  # The proposal gate runs for up to 80h (72h decision window plus its own margin)
-  # while this run parks in WAITING_FOR_CHILD. The engine's default 6h workflow
-  # timeout would cancel the review under the analyst, so this must stay above the
-  # gate's own timeout.
-  timeout: "84h"
+  # This run parks in WAITING_FOR_CHILD for as long as the proposal gate holds
+  # the decision, and the engine's default 6h workflow timeout would cancel the
+  # review out from under the analyst. So this has to stay above the gate's own
+  # ceiling, which is `168h`: a 72h decision window, plus a second full 72h for
+  # a proposal re-parked just before its deadline, plus margin. A test pins the
+  # relationship, so raising the gate's ceiling fails here rather than silently
+  # cancelling reviews.
+  timeout: "176h"
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
   # review is still pending: alerts are only tagged after the gate resolves,
   # so the harvest keeps returning such a rule until then.
@@ -209,7 +212,7 @@ steps:
   - name: record_entry
     type: data.set
     with:
-      declined: "${{ steps.propose_entry.output.status == 'dismissed' }}"
+      declined: "${{ steps.propose_entry.output.decision == 'dismissed' }}"
 
   # A declined review still retires its alerts, or the next sweep would open the
   # same entry gate for the same alerts again.
@@ -648,20 +651,27 @@ steps:
         impact: low
         confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
-  # The gate reports `succeeded` once the action ran, `approved` for a manual
-  # proposal, `dismissed` otherwise. Spelled out per outcome rather than derived
-  # from a single flag so a run that never proposed (no diagnosis) matches none of
-  # them and leaves the alerts untagged.
+  # The gate reports its outcome on two independent axes: `decision` is what the
+  # analyst concluded (`approved` / `dismissed`, absent until someone decides),
+  # and `status` is how far it got (`succeeded` once the action ran, `no_action`
+  # when there was nothing to run, `expired` when nobody answered). Spelled out
+  # per outcome rather than derived from a single flag so a run that never
+  # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
+  #
+  # NOTE: `approved` still reads `succeeded` for the action path, so a decision
+  # the analyst approved but whose patch failed counts as not approved. The
+  # decision axis can now tell those apart — left as-is here because this change
+  # is only migrating the renamed values.
   - name: record_proposal_action_decision
     type: data.set
     with:
       applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
       approved: >-
         ${{ steps.propose_action.output.status == 'succeeded'
-          or steps.propose_manual.output.status == 'approved' }}
+          or steps.propose_manual.output.decision == 'approved' }}
       dismissed: >-
-        ${{ steps.propose_action.output.status == 'dismissed'
-          or steps.propose_manual.output.status == 'dismissed' }}
+        ${{ steps.propose_action.output.decision == 'dismissed'
+          or steps.propose_manual.output.decision == 'dismissed' }}
 
   ### this is temporray, unitl excepion/rule score proposals is implemented
   - name: review_tuning
@@ -797,7 +807,7 @@ steps:
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
     if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.status == 'approved' }}
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.decision == 'approved' }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
