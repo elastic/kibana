@@ -7,51 +7,37 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { type Investigation } from '../../types';
-import { getActionButtonIconProps } from '../helpers';
-import { CONVERSATION_CARD_ACTIONS } from './translations';
-import { BaseActions, type BaseActionsProps } from '../actions';
+import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;
   onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
 
   onClickAction: BaseActionsProps['onClickAction'];
+  /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
+  onOpenChat: () => void;
 }
 
+/**
+ * The card's trailing controls: opening the chat, which an analyst does constantly, and
+ * the menu holding everything that changes the record — including the recommended
+ * action, so the card surfaces navigation rather than a decision.
+ */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction }) => {
+  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
-        <EuiFlexItem grow={false} alignItems="center" justifyContent="flexStart">
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                size="s"
-                type={getActionButtonIconProps(investigation).type}
-                color={getActionButtonIconProps(investigation).color}
-                aria-hidden={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color={getActionButtonIconProps(investigation).color}
-                flush="both"
-                size="xs"
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  onClickRecommendedAction?.({
-                    id: investigation.id,
-                  });
-                }}
-              >
-                {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <ActionButton
+            iconType="productAgent"
+            tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openInChat}
+            onClick={onOpenChat}
+          />
         </EuiFlexItem>
         <span
           aria-hidden="true"
@@ -67,7 +53,11 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           })}
         />
         <EuiFlexItem grow={false}>
-          <BaseActions investigation={investigation} onClickAction={onClickAction} />
+          <BaseActions
+            investigation={investigation}
+            onClickAction={onClickAction}
+            onClickRecommendedAction={onClickRecommendedAction}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
