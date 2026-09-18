@@ -1,8 +1,16 @@
 The fix — whether you are proposing one, writing the patch, or revising an existing one — must be **durable** and **well-researched**, and must **address the root cause**. Be unapologetically critical about fix quality: it is far better to spend extra time now and fix the flakiness for good than to whip up a lightly researched patch. Spending time learning the feature under test and the surrounding code (application and test) is expected and encouraged.
 
-Use the testing best practices in `docs/extend/testing/` (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`) as your north star, even where the surrounding test file predates them. They won't cover every scenario, and the guidance below has exceptions too — but a departure from either must be justified in the PR description (not in code comments; a good fix is self-explanatory). Most of this is judgment, and a justified departure is fine. The items under **Keep the test honest** are not judgment calls: a patch that needs one of them isn't a fix. Most of this is judgment, and a justified departure is fine. The items under **Keep the test honest** are not judgment calls: a patch that needs one of them isn't a fix.
+Most of this is judgment, and a justified departure is fine. The items under **Keep the test honest** are not judgment calls: a patch that needs one of them isn't a fix. A departure from either the best practices below or this document must be justified in the PR description (not in code comments; a good fix is self-explanatory).
 
 Again, be unapologetically critical about the fix quality.
+
+#### Testing best practices
+
+Read these even when the surrounding test file predates them. They won't cover every scenario.
+
+- [`scout-best-practices.md`](docs/extend/testing/scout-best-practices.md) — shared Scout rules: pick the right test type, tolerate leftover data, and don't leak state.
+- [`ui-best-practices.md`](docs/extend/testing/ui-best-practices.md) — Scout UI: wait on the rendered result, prefer APIs for setup, and avoid retry loops and hard sleeps.
+- [`api-best-practices.md`](docs/extend/testing/api-best-practices.md) — Scout API: call the endpoint under test with `apiClient`, and assert status plus response shape.
 
 #### What a good fix looks like
 
