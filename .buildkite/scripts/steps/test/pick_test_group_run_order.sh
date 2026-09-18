@@ -5,7 +5,8 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 STORE_CACHE=${STORE_CACHE:-false}
-STORE_CACHE_OUTPUT=.buildkite/scripts/steps/store_cache.txt
+STORE_CACHE_OUTPUT=$(mktemp)
+trap 'rm -f "$STORE_CACHE_OUTPUT"' EXIT
 
 if [[ ${STORE_CACHE} == "true" ]]; then
   echo "--- Run store_cache in the background"
