@@ -280,7 +280,7 @@ const StepDataSection = ({
                 disableScreenReaderOutput
               >
                 <EuiButtonIcon
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate('workflows.executionFlyout.stepDetail.copyFieldPath', {

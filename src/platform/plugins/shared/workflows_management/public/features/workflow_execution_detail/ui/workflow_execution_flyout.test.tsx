@@ -164,7 +164,10 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
     expect(screen.getByTestId('tree-selected-id')).toHaveTextContent('step-123');
     expect(screen.getAllByTestId('workflowExecutionStepDataTable').length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getAllByTestId('workflowExecutionStepDataCopyFieldPath')[0]);
+    const copyFieldPathButton = screen.getAllByTestId('workflowExecutionStepDataCopyFieldPath')[0];
+    expect(copyFieldPathButton.querySelector('[data-euiicon-type="copy"]')).toBeInTheDocument();
+
+    fireEvent.click(copyFieldPathButton);
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith('steps.lookup_host.output.result');
   });
