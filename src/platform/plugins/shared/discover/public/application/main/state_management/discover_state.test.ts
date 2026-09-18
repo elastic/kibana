@@ -143,7 +143,7 @@ async function getState(
     services,
   });
   nextState.internalState.dispatch(
-    internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+    internalStateActions.setInitializationState({ hasESData: true, hasDataView: true })
   );
   const getCurrentUrl = () => nextHistory.createHref(nextHistory.location);
   return {
@@ -1262,6 +1262,7 @@ describe('Discover state', () => {
           "sampleSize": undefined,
           "sharingSavedObjectProps": undefined,
           "sort": Array [],
+          "tabTypeState": undefined,
           "tags": undefined,
           "timeRange": undefined,
           "timeRestore": false,

@@ -6,15 +6,14 @@
  */
 
 import type { EpisodeDataSource } from '../types/episode_data_source';
+import { classicActionExtensions } from './action_extensions';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
 import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
 import { resolveClassicRules } from './apis/resolve_classic_rules';
-import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from './constants';
+import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
-
-export const CLASSIC_EPISODE_SOURCE_ID = 'classic-alerts';
 
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
@@ -70,4 +69,6 @@ export const createClassicEpisodeSource = ({
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
+
+  actionExtensions: classicActionExtensions,
 });
