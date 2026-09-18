@@ -294,33 +294,30 @@ export const ActionPolicyDetailsFlyout = ({
               'xpack.alertingV2.actionPolicy.detailsFlyout.notification.title',
               { defaultMessage: 'Notification' }
             )}
-            hasBorder
             data-test-subj="actionPolicyDetailsFlyoutNotification"
           >
-            <Body.Section.Subsection>
-              <SubsectionColumns>
+            <SubsectionColumns hasBorder>
+              <Column
+                title={DISPATCH_PER_LABEL}
+                data-test-subj="actionPolicyDetailsFlyoutDispatchModeBlock"
+              >
+                {getGroupingModeLabel(groupingMode)}
+              </Column>
+              {groupingMode === 'per_field' && (
                 <Column
-                  title={DISPATCH_PER_LABEL}
-                  data-test-subj="actionPolicyDetailsFlyoutDispatchModeBlock"
+                  title={GROUP_BY_LABEL}
+                  data-test-subj="actionPolicyDetailsFlyoutGroupByBlock"
                 >
-                  {getGroupingModeLabel(groupingMode)}
+                  {groupBy && groupBy.length > 0 ? <BadgeList items={groupBy} /> : EMPTY_VALUE}
                 </Column>
-                {groupingMode === 'per_field' && (
-                  <Column
-                    title={GROUP_BY_LABEL}
-                    data-test-subj="actionPolicyDetailsFlyoutGroupByBlock"
-                  >
-                    {groupBy && groupBy.length > 0 ? <BadgeList items={groupBy} /> : EMPTY_VALUE}
-                  </Column>
-                )}
-                <Column
-                  title={FREQUENCY_LABEL}
-                  data-test-subj="actionPolicyDetailsFlyoutFrequencyBlock"
-                >
-                  {getFrequencyLabel(policy.throttle, groupingMode)}
-                </Column>
-              </SubsectionColumns>
-            </Body.Section.Subsection>
+              )}
+              <Column
+                title={FREQUENCY_LABEL}
+                data-test-subj="actionPolicyDetailsFlyoutFrequencyBlock"
+              >
+                {getFrequencyLabel(policy.throttle, groupingMode)}
+              </Column>
+            </SubsectionColumns>
           </Body.Section>
           <Body.Section
             id="destinations"

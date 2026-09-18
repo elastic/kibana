@@ -8,6 +8,7 @@
 import React, { Children, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiPanel,
   EuiText,
   EuiTextTruncate,
   useEuiMemoizedStyles,
@@ -80,8 +81,6 @@ const getStyles = ({ euiTheme }: UseEuiTheme) => {
     wrapper: css`
       container-type: inline-size;
       container-name: ${CONTAINER_NAME};
-      /* Cancel EuiPanel padding so column dividers span the bordered box like InfoBlocks. */
-      margin: calc(-1 * ${euiTheme.size.m});
     `,
     grid: css`
       display: grid;
@@ -162,17 +161,31 @@ export const Column = ({
 
 interface SubsectionColumnsProps {
   children: ReactNode;
+  hasBorder?: boolean;
 }
 
-/** Responsive column grid with InfoBlocks-style dividers, for use inside a bordered Subsection. */
-export const SubsectionColumns = ({ children }: SubsectionColumnsProps): React.JSX.Element => {
+/** Responsive column grid with InfoBlocks-style dividers. Pass `hasBorder` to render a bordered panel. */
+export const SubsectionColumns = ({
+  children,
+  hasBorder = false,
+}: SubsectionColumnsProps): React.JSX.Element => {
   const styles = useEuiMemoizedStyles(getStyles);
   const itemCount = Children.toArray(children).length;
   const columns = resolveMaxColumns(itemCount);
 
-  return (
+  const grid = (
     <div css={styles.wrapper}>
       <div css={[styles.grid, styles.grids[columns]]}>{children}</div>
     </div>
   );
+
+  if (hasBorder) {
+    return (
+      <EuiPanel hasShadow={false} hasBorder paddingSize="none">
+        {grid}
+      </EuiPanel>
+    );
+  }
+
+  return grid;
 };

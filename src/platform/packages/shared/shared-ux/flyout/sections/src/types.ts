@@ -54,8 +54,8 @@ export interface FlyoutSectionProps {
 export interface FlyoutSubsectionProps {
   /** DOM id for the subsection wrapper, for use as a scroll or link target. */
   id?: string;
-  /** Subsection heading (rendered as `<h5>`). Omit for a bordered box of unlabeled content. */
-  title?: ReactNode;
+  /** Subsection heading (rendered as `<h5>`). */
+  title: ReactNode;
   hasBorder?: boolean;
   'data-test-subj'?: string;
   children?: ReactNode;

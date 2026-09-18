@@ -35,14 +35,14 @@ export const FlyoutSubsection = ({
 }: FlyoutSubsectionProps) => {
   const styles = useEuiMemoizedStyles(getSubsectionStyles);
 
-  const heading = title ? (
+  const heading = (
     <>
       <EuiTitle size="xxs">
         <h5>{title}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
     </>
-  ) : null;
+  );
 
   // No `aria-labelledby` counterpart to `FlyoutSection`: the `h5` already places the subsection in
   // the document outline, and a named region per subsection would only add landmark noise.
