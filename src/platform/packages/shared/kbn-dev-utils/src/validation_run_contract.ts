@@ -9,10 +9,17 @@
 
 import { createFailError } from '@kbn/dev-cli-errors';
 
-export type ValidationScope = 'staged' | 'local' | 'branch' | 'full';
+export type ValidationScope = 'staged' | 'local' | 'branch' | 'prepush' | 'full';
 export type ValidationTestMode = 'related' | 'affected' | 'all';
 export type ValidationDownstreamMode = 'none' | 'direct' | 'deep';
-export type ValidationProfile = 'precommit' | 'quick' | 'agent' | 'branch' | 'pr' | 'full';
+export type ValidationProfile =
+  | 'precommit'
+  | 'quick'
+  | 'agent'
+  | 'branch'
+  | 'pr'
+  | 'prepush'
+  | 'full';
 
 export interface ValidationProfileDefaults {
   scope: ValidationScope;
@@ -40,6 +47,11 @@ export const VALIDATION_PROFILE_DEFAULTS: Readonly<
   },
   branch: {
     scope: 'branch',
+    testMode: 'affected',
+    downstream: 'none',
+  },
+  prepush: {
+    scope: 'prepush',
     testMode: 'affected',
     downstream: 'none',
   },
@@ -90,6 +102,7 @@ const parseValidationScope = createEnumParser<ValidationScope>('scope', [
   'staged',
   'local',
   'branch',
+  'prepush',
   'full',
 ]);
 
@@ -111,6 +124,7 @@ const parseValidationProfile = createEnumParser<ValidationProfile>('profile', [
   'agent',
   'branch',
   'pr',
+  'prepush',
   'full',
 ]);
 
@@ -140,7 +154,8 @@ const resolveValidationContract = ({
     testMode: testMode ?? defaults.testMode,
     downstream: downstream ?? defaults.downstream,
     baseRef,
-    headRef: resolvedScope === 'branch' ? headRef ?? 'HEAD' : headRef,
+    headRef:
+      resolvedScope === 'branch' || resolvedScope === 'prepush' ? headRef ?? 'HEAD' : headRef,
   };
 };
 
@@ -150,11 +165,11 @@ const validateResolvedValidationContract = ({
   baseRef,
   headRef,
 }: Pick<ResolvedValidationContract, 'scope' | 'baseRef' | 'headRef'>): void => {
-  if (scope !== 'branch' && baseRef !== undefined) {
-    throw createFailError('--base-ref can only be used when --scope is branch.');
+  if (scope !== 'branch' && scope !== 'prepush' && baseRef !== undefined) {
+    throw createFailError('--base-ref can only be used when --scope is branch or prepush.');
   }
-  if (scope !== 'branch' && headRef !== undefined) {
-    throw createFailError('--head-ref can only be used when --scope is branch.');
+  if (scope !== 'branch' && scope !== 'prepush' && headRef !== undefined) {
+    throw createFailError('--head-ref can only be used when --scope is branch or prepush.');
   }
 };
 
