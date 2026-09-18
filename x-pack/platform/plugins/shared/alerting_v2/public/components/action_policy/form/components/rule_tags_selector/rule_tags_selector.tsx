@@ -41,7 +41,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     search: debouncedSearch || undefined,
   });
 
-  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher?.tags]);
+  const selectedTags = matcher?.tags ?? [];
 
   const options = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
     const groups: Array<EuiComboBoxOptionOption<string>> = [];
@@ -57,7 +57,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     }
 
     const apiTagSet = new Set(apiTags);
-    const orphaned = selectedTags.filter((t) => !apiTagSet.has(t));
+    const orphaned = (matcher?.tags ?? []).filter((t) => !apiTagSet.has(t));
 
     if (orphaned.length > 0) {
       groups.push({
@@ -70,50 +70,45 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     }
 
     return groups;
-  }, [apiTags, selectedTags]);
+  }, [apiTags, matcher?.tags]);
 
   const showCapGuidance = isSuccess && !search && apiTags.length >= TAGS_RESPONSE_LIMIT;
   const showEmptyState = isSuccess && !search && apiTags.length === 0 && selectedTags.length === 0;
 
-  const helpText = (() => {
-    if (isError) {
-      return (
-        <>
-          <span data-test-subj="ruleTagsSelectorError">
-            {i18n.translate(
-              'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.errorMessage',
-              { defaultMessage: 'Could not load rule tags.' }
-            )}{' '}
-          </span>
-          <EuiLink onClick={() => refetch()} data-test-subj="ruleTagsSelectorRetry">
-            {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.retryLabel', {
-              defaultMessage: 'Retry',
-            })}
-          </EuiLink>
-        </>
-      );
-    }
-    if (showEmptyState) {
-      return (
-        <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
-          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
-            defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',
+  let helpText: React.ReactNode;
+  if (isError) {
+    helpText = (
+      <>
+        <span data-test-subj="ruleTagsSelectorError">
+          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.errorMessage', {
+            defaultMessage: 'Could not load rule tags.',
+          })}{' '}
+        </span>
+        <EuiLink onClick={refetch} data-test-subj="ruleTagsSelectorRetry">
+          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.retryLabel', {
+            defaultMessage: 'Retry',
           })}
-        </EuiText>
-      );
-    }
-    if (showCapGuidance) {
-      return (
-        <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorCapGuidance">
-          {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance', {
-            defaultMessage: 'Showing first {cap} most-used tags. Type to search for more.',
-            values: { cap: TAGS_RESPONSE_LIMIT },
-          })}
-        </EuiText>
-      );
-    }
-    return undefined;
-  })();
+        </EuiLink>
+      </>
+    );
+  } else if (showEmptyState) {
+    helpText = (
+      <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
+        {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
+          defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',
+        })}
+      </EuiText>
+    );
+  } else if (showCapGuidance) {
+    helpText = (
+      <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorCapGuidance">
+        {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance', {
+          defaultMessage: 'Showing first {cap} most-used tags. Type to search for more.',
+          values: { cap: TAGS_RESPONSE_LIMIT },
+        })}
+      </EuiText>
+    );
+  }
 
   return (
     <EuiFormRow
