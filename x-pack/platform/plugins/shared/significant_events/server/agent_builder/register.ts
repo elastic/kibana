@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import { MemoryServiceImpl } from '../memory_and_investigation/lib/memory';
+import { createMemoryService } from '../memory_and_investigation/lib/memory';
 import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
@@ -24,14 +24,9 @@ export const createMemoryToolsOptions = ({
   server: StreamsServer;
   logger: Logger;
 }): MemoryToolsOptions => {
-  const getMemoryService = (esClient: ElasticsearchClient) =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient,
-    });
-
   return {
-    getMemoryService,
+    getMemoryService: (esClient: ElasticsearchClient) =>
+      createMemoryService(esClient, server.core.dataStreams, logger.get('memory')),
     getSecurity: () => server.core.security,
     getScopedClients,
     server,
@@ -65,5 +60,11 @@ export const registerStreamsAgentBuilder = async ({
   telemetry: EbtTelemetryClient;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+  });
 };

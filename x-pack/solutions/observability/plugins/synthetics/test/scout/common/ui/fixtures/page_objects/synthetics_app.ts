@@ -38,6 +38,10 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('createConnectorButton');
   }
 
+  async navigateToPrivateLocations() {
+    await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/private-locations'));
+  }
+
   async navigateToParamsSettings() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/params'));
     await this.page.testSubj.waitForSelector('syntheticsParamsTable-loaded');
@@ -205,6 +209,23 @@ export class SyntheticsAppPage {
     }
   }
 
+  async createBasicAPIMonitorDetails({
+    name,
+    inlineScript,
+    apmServiceName,
+    locations,
+  }: {
+    name: string;
+    inlineScript: string;
+    apmServiceName: string;
+    locations: string[];
+  }) {
+    await this.selectMonitorType('syntheticsMonitorTypeAPI');
+    await this.createBasicMonitorDetails({ name, apmServiceName, locations });
+    await this.page.testSubj.click('syntheticsSourceTab__inline');
+    await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+  }
+
   async createMonitor({
     monitorConfig,
     monitorType,
@@ -224,6 +245,9 @@ export class SyntheticsAppPage {
         break;
       case FormMonitorType.MULTISTEP:
         await this.createBasicBrowserMonitorDetails(monitorConfig as any);
+        break;
+      case FormMonitorType.API:
+        await this.createBasicAPIMonitorDetails(monitorConfig as any);
         break;
       default:
         break;
@@ -298,7 +322,8 @@ export class SyntheticsAppPage {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
       if (selector.includes('codeEditorContainer')) {
-        await expect(this.page.locator(selector)).toHaveText(expected);
+        // Monaco innerText includes the gutter line number and may wrap tokens.
+        await expect(this.page.locator(selector)).toContainText(expected);
       } else {
         await expect(this.page.locator(selector)).toHaveValue(expected);
       }
@@ -319,7 +344,7 @@ export class SyntheticsAppPage {
     agentPolicy: string;
     tags?: string[];
   }) {
-    await this.page.click('button:has-text("Create location")');
+    await this.page.testSubj.click('addPrivateLocationButton');
     await this.page.testSubj.fill('syntheticsLocationFormFieldText', name);
     await this.page.click('[aria-label="Select agent policy"]');
     await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);

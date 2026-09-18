@@ -454,4 +454,86 @@ describe('DocViewerTable', () => {
       expect(screen.queryByText('@timestamp')).toBeNull();
     });
   });
+
+  describe('pinning', () => {
+    it('should render pinning controls', () => {
+      setupComponent({ columns: ['bytes'] });
+
+      expect(screen.getByTestId('unifiedDocViewer_pinControl_bytes')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toBeInTheDocument();
+    });
+
+    describe.each([
+      {
+        from: 'Pin field',
+        to: 'Unpin field',
+        fieldInitialStatus: 'unpinned',
+        before: () => storage.clear(),
+      },
+      {
+        from: 'Unpin field',
+        to: 'Pin field',
+        fieldInitialStatus: 'pinned',
+        before: () => storage.set('discover:pinnedFields', { [dataView.id!]: ['bytes'] }),
+      },
+    ])('when the field is $fieldInitialStatus', ({ from, to, before }) => {
+      beforeEach(() => {
+        before();
+      });
+
+      afterEach(() => {
+        storage.clear();
+      });
+
+      describe('when the pinning control is clicked', () => {
+        it('should toggle the field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            from
+          );
+
+          await user.click(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes'));
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            to
+          );
+        });
+
+        it('should not focus the toggled field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          await user.click(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes'));
+
+          expect(document.activeElement).not.toBe(
+            screen
+              .getByTestId('unifiedDocViewer_pinControlButton_bytes')
+              .closest('[role="gridcell"]')
+          );
+        });
+      });
+
+      describe('when the pinning control is focused and Enter is pressed', () => {
+        it('should toggle the field and focus its new grid position', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+          const button = screen.getByTestId('unifiedDocViewer_pinControlButton_bytes');
+
+          button.focus();
+          await user.keyboard('{Enter}');
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            to
+          );
+          expect(document.activeElement).toBe(
+            screen
+              .getByTestId('unifiedDocViewer_pinControlButton_bytes')
+              .closest('[role="gridcell"]')
+          );
+        });
+      });
+    });
+  });
 });

@@ -90,6 +90,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
+    await globalRun(Tasks.AssertPackageEntryPoints);
     await globalRun(Tasks.ReplaceFavicon);
     // [rspack-transition] Use Rspack by default, with an explicit legacy webpack opt-out.
     // When legacy is removed, keep only Tasks.BuildRspackBundles.

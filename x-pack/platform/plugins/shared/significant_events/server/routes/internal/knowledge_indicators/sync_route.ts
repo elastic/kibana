@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 
 export interface StreamsWithIndicatorsResponse {
   streams: Array<{ streamName: string }>;
@@ -31,7 +31,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),

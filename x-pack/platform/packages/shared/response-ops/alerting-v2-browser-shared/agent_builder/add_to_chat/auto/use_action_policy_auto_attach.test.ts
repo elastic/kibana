@@ -22,7 +22,7 @@ const policy = {
   description: 'Routes critical alerts',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: 'data.severity : "critical"',
+  matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name'],
   tags: ['production'],
   grouping_mode: 'per_field',
