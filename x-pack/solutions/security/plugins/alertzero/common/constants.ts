@@ -65,3 +65,11 @@ export const HUNT_TIERS = [HUNT_TIER_1, HUNT_TIER_2] as const;
  * (buildout.md:175). Build with `` `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${spaceId}` ``.
  */
 export const HUNT_ALERTS_INDEX_PATTERN_PREFIX = '.alerts-security.alerts-' as const;
+
+/**
+ * Global-catalog space sentinel on `.kibana-threat-reports` (buildout.md:150:
+ * "global catalog rows use `space_id: '*'`"). Reads filter to `{terms: {
+ * space_id: [currentSpaceId, HUNT_GLOBAL_SPACE_ID] }}`; F4's feedback write is
+ * always space-scoped to the caller's concrete space, never this sentinel.
+ */
+export const HUNT_GLOBAL_SPACE_ID = '*' as const;
