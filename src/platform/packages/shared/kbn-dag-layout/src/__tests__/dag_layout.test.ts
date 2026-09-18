@@ -590,11 +590,17 @@ describe('dagLayout — analyzeSiblings prevCross symmetry', () => {
 //
 // Lane nodes are removed from dagre's input and placed in the +cross margin.
 // The owner has exactly one spine successor → `handleSingleChild` fires →
-// spine is structurally straight (100%, not heuristically). The lane head is
-// levelled with the owner on the main axis; the spine below the owner is pushed
-// down to clear the lane's full main extent.
+// spine is structurally straight (100%, not heuristically).
+//
+// Cascade rule (D3, revised): the lane head starts one rank below the owner,
+// i.e. `head.y ≈ owner.y + owner.height + rankSep` in TB. Each nesting depth
+// steps one rank further down and one lane further right (D12).
+// The spine below the owner clears the lane's full subtree extent (D7).
 
 describe('dagLayout — reservedLanes', () => {
+  // Default separations used by dagLayout when not overridden.
+  const DEFAULT_NODE_SEP = 50;
+  const DEFAULT_RANK_SEP = 70;
   // Helper: build the asymmetric-fork fixture used across these tests.
   // Topology (TB): s1→s2→s3 (spine); s2→fb1→fb2 (failure lane, boundary edges).
   const ASYMMETRIC_FORK_NODES = () => [
@@ -628,7 +634,7 @@ describe('dagLayout — reservedLanes', () => {
     expect(Math.abs(centerX(s2) - centerX(s3))).toBeLessThan(CENTER_TOLERANCE);
   });
 
-  it('lane head is level with owner on main axis', () => {
+  it('lane head sits one rank below its owner on main axis (cascade, D3)', () => {
     const { nodes: laid } = dagLayout(
       ASYMMETRIC_FORK_NODES(),
       ASYMMETRIC_FORK_EDGES(),
@@ -637,8 +643,8 @@ describe('dagLayout — reservedLanes', () => {
     );
     const s2 = findNode(laid, 's2');
     const fb1 = findNode(laid, 'fb1');
-    // Head centre Y must match owner centre Y (main axis for TB).
-    expect(Math.abs(centerY(fb1) - centerY(s2))).toBeLessThan(CENTER_TOLERANCE);
+    // Cascade: fb1.y = s2.y + s2.height + rankSep (leading-edge drop, not centre-align).
+    expect(fb1.y).toBeCloseTo(s2.y + s2.height + DEFAULT_RANK_SEP, 0);
   });
 
   it('lane sits in the +cross margin, right of the spine in TB', () => {
@@ -688,6 +694,157 @@ describe('dagLayout — reservedLanes', () => {
     const { nodes: laid } = dagLayout(nodes, edgeList, [], {
       reservedLanes: [{ nodeIds: ['fb1', 'fb2'], depth: 0, ownerId: 's2' }],
     });
+    expectNoPairwiseOverlap(laid);
+  });
+
+  // ── Cascade ordering gate ─────────────────────────────────────────────────
+  //
+  // This is the fixture whose ABSENCE let the depth-inversion bug ship.
+  // ASYMMETRIC_FORK_LANES has a single depth-0 lane and no nesting, so the
+  // previous suite never exercised lane-vs-lane ordering. These tests do.
+
+  it('depth-3 nested lanes: cross order is monotonically outward (cascade gate)', () => {
+    // Spine: s1 → s2 → s3
+    // Depth-0 lane: owner=s2, nodes=[n0] (fallback of s2)
+    // Depth-1 lane: owner=n0, nodes=[n1] (fallback of n0)
+    // Depth-2 lane: owner=n1, nodes=[n2] (fallback of n1)
+    //
+    //  col 0 (spine)   col 1 (d=0)   col 2 (d=1)   col 3 (d=2)
+    //      [s2] ─────────► [n0] ─────────► [n1] ─────────► [n2]
+    const nodes = [node('s1'), node('s2'), node('s3'), node('n0'), node('n1'), node('n2')];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-n0', 's2', 'n0'),  // boundary
+      edge('n0-n1', 'n0', 'n1'),  // boundary
+      edge('n1-n2', 'n1', 'n2'),  // boundary
+    ];
+    const reservedLanes = [
+      { nodeIds: ['n0'], depth: 0, ownerId: 's2' },
+      { nodeIds: ['n1'], depth: 1, ownerId: 'n0' },
+      { nodeIds: ['n2'], depth: 2, ownerId: 'n1' },
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], { reservedLanes });
+
+    const s2 = findNode(laid, 's2');
+    const s3 = findNode(laid, 's3');
+    const n0 = findNode(laid, 'n0');
+    const n1 = findNode(laid, 'n1');
+    const n2 = findNode(laid, 'n2');
+
+    // Main axis (TB): each head one rank below its owner.
+    expect(n0.y).toBeCloseTo(s2.y + s2.height + DEFAULT_RANK_SEP, 0);
+    expect(n1.y).toBeCloseTo(n0.y + n0.height + DEFAULT_RANK_SEP, 0);
+    expect(n2.y).toBeCloseTo(n1.y + n1.height + DEFAULT_RANK_SEP, 0);
+
+    // Cross axis (TB = x): strictly monotonically outward (right).
+    expect(n0.x).toBeGreaterThan(s2.x + s2.width);    // col 1 right of spine
+    expect(n1.x).toBeGreaterThan(n0.x + n0.width);    // col 2 right of col 1
+    expect(n2.x).toBeGreaterThan(n1.x + n1.width);    // col 3 right of col 2
+
+    // D7: spine below s2 clears the deepest lane node (n2).
+    expect(s3.y).toBeGreaterThanOrEqual(n2.y + n2.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
+
+    // No overlaps.
+    expectNoPairwiseOverlap(laid);
+  });
+
+  it('multi-step fallback block stays in one column — only depth moves you right (D11)', () => {
+    // owner s2's fallback is [fb1, fb2] — two steps, no nested fallback.
+    // Both should share the same x (same column), fb2 below fb1.
+    const nodes = [node('s1'), node('s2'), node('s3'), node('fb1'), node('fb2')];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-fb1', 's2', 'fb1'),
+      edge('fb1-fb2', 'fb1', 'fb2'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      reservedLanes: [{ nodeIds: ['fb1', 'fb2'], depth: 0, ownerId: 's2' }],
+    });
+    const fb1 = findNode(laid, 'fb1');
+    const fb2 = findNode(laid, 'fb2');
+    // Same column: left edges coincide.
+    expect(Math.abs(fb1.x - fb2.x)).toBeLessThan(CENTER_TOLERANCE);
+    // fb2 is below fb1.
+    expect(fb2.y).toBeGreaterThan(fb1.y + fb1.height - CENTER_TOLERANCE);
+    expectNoPairwiseOverlap(laid);
+  });
+
+  it('nested lane anchors to its OWN owner, not the whole parent lane (D12)', () => {
+    // s2.fallback: [a, b]   and   a.fallback: [c]
+    //
+    //  col 0    col 1    col 2
+    //  [s2] ──► [a] ──► [c]
+    //            |
+    //           [b]         ← b and c may share a rank but are in different columns
+    //
+    // c must be one rank below a (its owner), NOT below b.
+    const nodes = [node('s1'), node('s2'), node('s3'), node('a'), node('b'), node('c')];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-a', 's2', 'a'), edge('a-b', 'a', 'b'),
+      edge('a-c', 'a', 'c'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      reservedLanes: [
+        { nodeIds: ['a', 'b'], depth: 0, ownerId: 's2' },
+        { nodeIds: ['c'],      depth: 1, ownerId: 'a' },
+      ],
+    });
+    const s2 = findNode(laid, 's2');
+    const a  = findNode(laid, 'a');
+    const b  = findNode(laid, 'b');
+    const c  = findNode(laid, 'c');
+
+    // a one rank below s2.
+    expect(a.y).toBeCloseTo(s2.y + s2.height + DEFAULT_RANK_SEP, 0);
+    // c one rank below a (its owner), NOT below b.
+    expect(c.y).toBeCloseTo(a.y + a.height + DEFAULT_RANK_SEP, 0);
+    // b and c may share a rank — assert they do NOT overlap cross-axis.
+    const bRight  = b.x + b.width;
+    const cLeft   = c.x;
+    expect(cLeft).toBeGreaterThan(bRight - DEFAULT_NODE_SEP);
+    expectNoPairwiseOverlap(laid);
+  });
+
+  it('two sequential spine owners: each lane head levels against its pushed owner (Fix 2)', () => {
+    // s1→O1→O2→s4 (spine)
+    // O1.fallback: [fb1a, fb1b]   O2.fallback: [fb2a, fb2b]
+    //
+    // O1's push moves O2 down. O2's cascade must level against O2's PUSHED
+    // position, not against O2's pre-push position.
+    const nodes = [
+      node('s1'), node('O1'), node('O2'), node('s4'),
+      node('fb1a'), node('fb1b'), node('fb2a'), node('fb2b'),
+    ];
+    const edgeList = [
+      edge('s1-O1', 's1', 'O1'),
+      edge('O1-O2', 'O1', 'O2'),
+      edge('O2-s4', 'O2', 's4'),
+      edge('O1-fb1a', 'O1', 'fb1a'), edge('fb1a-fb1b', 'fb1a', 'fb1b'),
+      edge('O2-fb2a', 'O2', 'fb2a'), edge('fb2a-fb2b', 'fb2a', 'fb2b'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      reservedLanes: [
+        { nodeIds: ['fb1a', 'fb1b'], depth: 0, ownerId: 'O1' },
+        { nodeIds: ['fb2a', 'fb2b'], depth: 0, ownerId: 'O2' },
+      ],
+    });
+    const O1   = findNode(laid, 'O1');
+    const O2   = findNode(laid, 'O2');
+    const fb1a = findNode(laid, 'fb1a');
+    const fb2a = findNode(laid, 'fb2a');
+
+    // Each head one rank below its own (current) owner.
+    expect(fb1a.y).toBeCloseTo(O1.y + O1.height + DEFAULT_RANK_SEP, 0);
+    expect(fb2a.y).toBeCloseTo(O2.y + O2.height + DEFAULT_RANK_SEP, 0);
+
+    // O2 must have been pushed past O1's lane extent.
+    const fb1b = findNode(laid, 'fb1b');
+    expect(O2.y).toBeGreaterThanOrEqual(fb1b.y + fb1b.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
+
     expectNoPairwiseOverlap(laid);
   });
 });
