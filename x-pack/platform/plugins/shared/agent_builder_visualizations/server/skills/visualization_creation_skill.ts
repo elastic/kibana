@@ -80,7 +80,6 @@ Do **not** use this skill when:
      - \`renderer\` (new visualizations only; \`lens\`, \`vega\` or \`custom_content\`; omit to default to Lens)
      - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
      - \`esql\` (optional, when you already have a validated ES|QL — generated for you otherwise)
-     - \`contentMode\` (\`custom_content\` only; pass \`"static"\` for a panel that genuinely has no data)
      - \`attachment_id\` (optional, only when updating an existing visualization)
      - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -130,7 +129,7 @@ Always reference real fields from the index mapping.
 
 ${
   platformCoreTools.createVisualization
-} renders with **Lens** (standard charts) or **Vega** (custom Vega-Lite). Decide and pass \`renderer\`:
+} renders with **Lens** (standard charts), **Vega** (custom Vega-Lite), or **custom content** (HTML layouts). Decide and pass \`renderer\`:
 
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
@@ -141,15 +140,7 @@ ${
 
 ### Custom content
 
-\`chartType\` does not apply. Two things work differently from the chart renderers:
-
-**Data or static is an explicit choice.** The query is generated for you exactly as it is for Lens and Vega, so omitting \`esql\` gives you a data-backed panel, not an empty one:
-- The panel shows live data → just describe it in \`query\`. Pass \`esql\` only when you already have a validated query.
-- The panel is genuinely static (a banner, a legend, an explanatory note, a decorative header) → pass \`contentMode: "static"\`. That is the only way to get a panel with no data; it is never what you get by forgetting a parameter.
-
-The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails the call and returns an error naming the reason. Correct it and retry rather than proceeding — do not fall back to \`contentMode: "static"\` to make a failure go away.
-
-**You never write the markup.** \`query\` is a plain-English description of what to display; the HTML template is generated server-side from it and stored in the attachment. Never author HTML, and never try to pass a template. To change an existing panel, call the tool again with its \`attachment_id\` and describe the change — a style-only edit refines the existing template and preserves its layout.
+Pass \`renderer: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Omit \`chartType\`. Do not write HTML, and never pass a template: the markup is generated server-side. To change an existing panel, call this tool again with its \`attachment_id\` and describe the update — do not read the attachment to edit the HTML. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -206,23 +197,13 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 }
 \`\`\`
 
-## Create a custom content panel (HTML layout, live data)
+## Create a custom content panel
 
 \`\`\`json
 {
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
   "renderer": "custom_content"
-}
-\`\`\`
-
-## Create a static custom content panel (no data)
-
-\`\`\`json
-{
-  "query": "A header banner reading 'Production overview' with a short subtitle",
-  "renderer": "custom_content",
-  "contentMode": "static"
 }
 \`\`\`
 

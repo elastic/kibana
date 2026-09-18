@@ -14,7 +14,10 @@ import {
   generateVisualizationEsql,
   selectDefaultTimeRange,
 } from '@kbn/agent-builder-visualizations-server';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
+import {
+  classifyCustomContentMode,
+  createCustomContentTemplateResolver,
+} from '@kbn/custom-content-server';
 import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
@@ -26,6 +29,7 @@ jest.mock('@kbn/agent-builder-visualizations-server', () => ({
 
 jest.mock('@kbn/custom-content-server', () => ({
   createCustomContentTemplateResolver: jest.fn(),
+  classifyCustomContentMode: jest.fn(),
 }));
 
 const mockBuildLens = buildLensConfig as jest.Mock;
@@ -33,6 +37,7 @@ const mockBuildVega = buildVegaConfig as jest.Mock;
 const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
 const mockGenerateEsql = generateVisualizationEsql as jest.Mock;
 const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
+const mockClassifyMode = classifyCustomContentMode as jest.Mock;
 const mockResolveTemplate = jest.fn();
 
 const createLogger = (): Logger =>
@@ -95,22 +100,26 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
   });
 
-  it('rejects contentMode on a renderer other than custom_content', () => {
-    expect(
-      schema.safeParse({
-        query: 'errors over time',
-        chartType: SupportedChartType.XY,
-        contentMode: 'static',
-      }).success
-    ).toBe(false);
+  it('strips leftover contentMode instead of exposing it as a tool parameter', () => {
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+      contentMode: 'static',
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data).not.toHaveProperty('contentMode');
+    }
 
-    expect(
-      schema.safeParse({
-        query: 'a welcome banner',
-        renderer: 'custom_content',
-        contentMode: 'static',
-      }).success
-    ).toBe(true);
+    const custom = schema.safeParse({
+      query: 'a welcome banner',
+      renderer: 'custom_content',
+      contentMode: 'static',
+    });
+    expect(custom.success).toBe(true);
+    if (custom.success) {
+      expect(custom.data).not.toHaveProperty('contentMode');
+    }
   });
 
   it('allows a new Vega visualization without chartType', () => {
@@ -206,6 +215,7 @@ describe('createVisualizationTool handler', () => {
       mode: 'relative',
     });
     mockGenerateEsql.mockResolvedValue({ query: 'FROM logs | STATS count() BY host' });
+    mockClassifyMode.mockResolvedValue('data');
     mockResolveTemplate.mockResolvedValue({
       template: '<div>{{ row["host"].value }}</div>',
       height: 420,
@@ -530,6 +540,7 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockBuildLens).not.toHaveBeenCalled();
       expect(mockBuildVega).not.toHaveBeenCalled();
+      expect(mockClassifyMode).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'a status board per host',
@@ -578,11 +589,30 @@ describe('createVisualizationTool handler', () => {
       expect(mockGenerateEsql).toHaveBeenCalledWith(
         expect.objectContaining({ nlQuery: 'a status board per host', index: 'logs-*' })
       );
+      expect(mockClassifyMode).toHaveBeenCalledWith(
+        expect.objectContaining({ prompt: 'a status board per host' })
+      );
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ esqlQuery: 'FROM logs | STATS count() BY host' })
       );
 
       const [{ data }] = result.results;
+      expect(data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    it('still generates a query when classification fails on a new panel', async () => {
+      mockClassifyMode.mockRejectedValue(new Error('connector timeout'));
+
+      const { result, logger } = await runHandler({
+        query: 'a status board per host',
+        renderer: 'custom_content',
+      });
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector timeout'));
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
       expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
@@ -601,11 +631,12 @@ describe('createVisualizationTool handler', () => {
       expect(mockResolveTemplate).not.toHaveBeenCalled();
     });
 
-    it('persists a static panel with no esql when contentMode is "static"', async () => {
+    it('persists a static panel with no esql when custom content classifies the prompt as static', async () => {
+      mockClassifyMode.mockResolvedValue('static');
+
       const { result, attachments } = await runHandler({
         query: 'a welcome banner',
         renderer: 'custom_content',
-        contentMode: 'static',
       });
 
       expect(mockGenerateEsql).not.toHaveBeenCalled();
@@ -647,6 +678,7 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockBuildLens).not.toHaveBeenCalled();
       // A style-only edit refines the existing template rather than re-sampling the query.
+      expect(mockClassifyMode).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: 'use a darker background',
         esqlQuery: undefined,
@@ -682,6 +714,8 @@ describe('createVisualizationTool handler', () => {
     // `renderer` cannot be passed on an update, so without this a wording tweak to a
     // static panel would either invent a query or fail outright.
     it('does not generate a query when editing a panel that is already static', async () => {
+      mockClassifyMode.mockResolvedValue('static');
+
       const { result } = await runHandler(
         { query: 'make the subtitle smaller', attachment_id: 'banner' },
         { attachments: staticAttachment() }
@@ -697,9 +731,27 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBeUndefined();
     });
 
-    it('adds data to a static panel when the edit asks for it explicitly', async () => {
+    it('does not generate a query when classification fails on a panel that is already static', async () => {
+      mockClassifyMode.mockRejectedValue(new Error('connector timeout'));
+
+      const { result, logger } = await runHandler(
+        { query: 'make the subtitle smaller', attachment_id: 'banner' },
+        { attachments: staticAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector timeout'));
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
+      expect(data.esql).toBeUndefined();
+    });
+
+    it('adds data to a static panel when custom content classifies the edit as needing data', async () => {
+      mockClassifyMode.mockResolvedValue('data');
+
       const { result } = await runHandler(
-        { query: 'show the log count too', attachment_id: 'banner', contentMode: 'data' },
+        { query: 'show the log count too', attachment_id: 'banner' },
         { attachments: staticAttachment() }
       );
 
