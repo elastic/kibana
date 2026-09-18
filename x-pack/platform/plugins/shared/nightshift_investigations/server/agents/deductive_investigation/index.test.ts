@@ -55,7 +55,7 @@ describe('deductive investigation agent type', () => {
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
       skill_ids: [],
-      workflow_ids: ['system-nightshift-sandbox-hydrate'],
+      workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
@@ -79,7 +79,7 @@ describe('deductive investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  it('keeps the combined hydrate and optimize workflows when cortex is off', () => {
+  it('keeps the combined materialize and optimize workflows when cortex is off', () => {
     const base = staticBase(
       getDeductiveInvestigationAgentType({
         sandboxEnabled: true,
@@ -88,11 +88,11 @@ describe('deductive investigation agent type', () => {
       })
     );
 
-    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-hydrate']);
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
     expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
   });
 
-  it('drops hydrate workflows when the sandbox is not configured', () => {
+  it('drops the materialize workflow when the sandbox is not configured', () => {
     const base = staticBase(
       getDeductiveInvestigationAgentType({
         sandboxEnabled: false,

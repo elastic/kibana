@@ -9,7 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
-  NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/deductive_investigator.md.text';
@@ -56,9 +56,9 @@ export const getDeductiveInvestigationAgentType = ({
   // One beforeAgent and one afterExecution workflow: Agent Builder runs those
   // lists in series. Obtain runs first in each; cortex + memory then run in
   // parallel against the same sandbox_id the bash tools derive.
-  const hydrateIds =
+  const materializeIds =
     sandboxEnabled && (cortexEnabled || memoryEnabled)
-      ? [NIGHTSHIFT_SANDBOX_HYDRATE_WORKFLOW_ID]
+      ? [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]
       : [];
   const optimizeIds = cortexEnabled || memoryEnabled ? [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] : [];
 
@@ -80,7 +80,7 @@ export const getDeductiveInvestigationAgentType = ({
       ],
       enable_elastic_capabilities: false,
       connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-      ...(hydrateIds.length > 0 ? { workflow_ids: hydrateIds } : {}),
+      ...(materializeIds.length > 0 ? { workflow_ids: materializeIds } : {}),
       ...(optimizeIds.length > 0 ? { post_execution_workflow_ids: optimizeIds } : {}),
     },
   };

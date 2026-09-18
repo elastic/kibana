@@ -23,8 +23,8 @@ import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installSandboxHydrateWorkflow } from './lib/managed_workflows/install_sandbox_hydrate';
-import { installAgentOptimizeWorkflow } from './lib/managed_workflows/install_agent_optimize';
+import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
+import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import {
   installDeductiveInvestigationAgent,
   installInvestigationAgent,
@@ -208,8 +208,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
         );
-        // Obtain + hydrate steps are always registered so the combined workflow
-        // can no-op a disabled hydrate branch instead of failing on an unknown
+        // Obtain + materialize steps are always registered so the combined workflow
+        // can no-op a disabled writer branch instead of failing on an unknown
         // step type. Obtain runs first and hands sandbox_id to both writers.
         plugins.workflowsExtensions.registerStepDefinition(
           obtainSandboxStepDefinition({
@@ -410,8 +410,8 @@ export class NightshiftInvestigationsPlugin
     );
     await installInvestigationWorkflow({ client });
     if (this.cortexEnabled || this.memoryEnabled) {
-      await installSandboxHydrateWorkflow({ client });
-      await installAgentOptimizeWorkflow({ client });
+      await installSandboxMaterializeWorkspaceWorkflow({ client });
+      await installAgentOptimizationsWorkflow({ client });
     }
     await client.ready();
   }
