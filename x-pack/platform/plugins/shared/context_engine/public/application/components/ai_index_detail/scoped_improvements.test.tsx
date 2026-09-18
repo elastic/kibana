@@ -80,7 +80,14 @@ describe('ScopedImprovements', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFeedbackLoopEnabled.mockReturnValue(true);
-    mockListImprovements.mockResolvedValue({ items: [addSource, addWorkflow], total: 2 });
+    mockListImprovements.mockImplementation((_http, { status }) => {
+      // History queries (applied/rejected) return empty; active suggestion queries return fixtures.
+      const isHistory =
+        Array.isArray(status) && status.every((s: string) => s === 'applied' || s === 'rejected');
+      return Promise.resolve(
+        isHistory ? { items: [], total: 0 } : { items: [addSource, addWorkflow], total: 2 }
+      );
+    });
     mockRejectImprovement.mockResolvedValue({ improvement: addSource });
     mockApproveImprovement.mockResolvedValue({ improvement: addSource });
   });
