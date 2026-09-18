@@ -554,3 +554,17 @@ export const UPCOMING_EVENTS_POPOVER_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Upcoming events',
   }
 );
+
+export const TABLE_SCOPE = i18n.translate('xpack.maintenanceWindows.table.scope', {
+  defaultMessage: 'Scope',
+});
+
+export const TABLE_SCOPE_BADGE_ALERTS = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeAlerts',
+  { defaultMessage: 'Alerts' }
+);
+
+export const TABLE_SCOPE_BADGE_EPISODES = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeEpisodes',
+  { defaultMessage: 'Episodes' }
+);
