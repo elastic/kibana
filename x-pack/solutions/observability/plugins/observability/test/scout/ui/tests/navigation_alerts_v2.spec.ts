@@ -426,6 +426,9 @@ test.describe(
       kbnClient,
       scoutSpace,
     }) => {
+      // Eight custom-role logins plus three uiSettings cache waits exceed Playwright's 60s default.
+      test.setTimeout(240_000);
+
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
         v2Enabled: true,
         showClassicAlertsPage: false,

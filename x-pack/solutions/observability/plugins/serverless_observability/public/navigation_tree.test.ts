@@ -201,11 +201,11 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         id: 'alerting',
         title: 'Alerting',
-        link: 'observability-overview:alerts',
         icon: 'warning',
         renderAs: 'panelOpener',
       })
     );
+    expect(alertsPanel).not.toHaveProperty('link');
     expect(alertsPanel?.children).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

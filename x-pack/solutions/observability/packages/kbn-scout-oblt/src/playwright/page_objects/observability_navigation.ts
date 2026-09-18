@@ -147,14 +147,24 @@ export class ObservabilityNavigation {
    * Resolve a body nav item wherever it renders. It lives in the primary nav on some
    * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
    * open "More" when it is not in the primary nav so the returned locator is reachable.
+   *
+   * Do not `or()` the primary item with the More trigger and `waitFor` — both can
+   * be visible at once, which Playwright treats as a strict-mode violation.
    */
   async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
     const primaryItem = this.navItemInPrimaryByDeepLinkId(deepLinkId);
     if (await primaryItem.isVisible()) {
       return primaryItem;
     }
-    await this.openMoreMenu();
-    return this.navItemInMoreByDeepLinkId(deepLinkId);
+    if (await this.moreMenuTrigger.isVisible()) {
+      await this.openMoreMenu();
+      return this.navItemInMoreByDeepLinkId(deepLinkId);
+    }
+    await primaryItem.waitFor({
+      state: 'visible',
+      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
+    return primaryItem;
   }
 
   /** Same overflow handling as `revealBodyNavItemByDeepLinkId`, keyed by node `id`. */
@@ -163,8 +173,15 @@ export class ObservabilityNavigation {
     if (await primaryItem.isVisible()) {
       return primaryItem;
     }
-    await this.openMoreMenu();
-    return this.navItemInMoreById(id);
+    if (await this.moreMenuTrigger.isVisible()) {
+      await this.openMoreMenu();
+      return this.navItemInMoreById(id);
+    }
+    await primaryItem.waitFor({
+      state: 'visible',
+      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
+    return primaryItem;
   }
 
   /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */

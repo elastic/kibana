@@ -172,7 +172,9 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
       title: i18n.translate('xpack.observability.nav.alerting', {
         defaultMessage: 'Alerting',
       }),
-      link: ALERTS_LINK,
+      // No parent `link`: chrome removes the whole node when that deep link is
+      // missing from navLinks. V2-only users cannot access the classic alerts
+      // route, so bind visibility to children (same pattern as Applications).
       icon: ALERTS_ICON,
       renderAs: 'panelOpener',
       getIsActive: getAlertsIsActive,

@@ -86,11 +86,11 @@ describe('getAlertsNavPanel', () => {
       expect.objectContaining({
         id: 'alerting',
         title: 'Alerting',
-        link: 'observability-overview:alerts',
         icon: 'warning',
         renderAs: 'panelOpener',
       })
     );
+    expect(result[0]).not.toHaveProperty('link');
     expect(result[0].children).toEqual([
       expect.objectContaining({
         breadcrumbStatus: 'hidden',
@@ -145,6 +145,14 @@ describe('getAlertsNavPanel', () => {
     it('shows Alerts when the user has v2 alerts read', () => {
       setCapabilities(core, { alerting_v2_alerts: { read: true } });
 
+      const result = getAlertsNavPanel(core);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'alerting',
+          renderAs: 'panelOpener',
+        })
+      );
+      expect(result[0]).not.toHaveProperty('link');
       expect(getSectionByTitle(core)?.children).toEqual([
         expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
       ]);
