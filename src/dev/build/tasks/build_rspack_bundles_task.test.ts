@@ -95,7 +95,25 @@ describe('BuildRspackBundles', () => {
         hmr: false,
         examples: config.pluginSelector.examples,
         testPlugins: config.pluginSelector.testPlugins,
+        devOnly: false,
         log,
+      })
+    );
+  });
+
+  it('passes devOnly false even when test plugins are enabled', async () => {
+    const configWithTestPlugins = getMockConfig();
+    Object.assign(configWithTestPlugins.pluginSelector, { testPlugins: true });
+    mockedRunBuild.mockResolvedValue({ success: true });
+    mockedGlobby.mockResolvedValue([]);
+    mockReadFile.mockResolvedValueOnce('{}');
+
+    await BuildRspackBundles.run(configWithTestPlugins, log, build);
+
+    expect(mockedRunBuild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        testPlugins: true,
+        devOnly: false,
       })
     );
   });

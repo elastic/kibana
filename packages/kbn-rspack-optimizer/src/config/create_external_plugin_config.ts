@@ -103,6 +103,7 @@ export async function createExternalPluginConfig(
     repoRoot,
     examples: false,
     testPlugins: false,
+    devOnly: false,
   });
 
   // Build targets map: pkgId -> { pluginId, targets }
