@@ -55,6 +55,20 @@ const createAttachments = (): MockAttachments => ({
   update: jest.fn().mockResolvedValue({ current_version: 2 }),
 });
 
+const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
+  type: 'lens' as const,
+  chartType,
+});
+const vegaTarget = { type: 'vega' as const };
+const customContentTarget = (esql?: string | null) => ({
+  type: 'custom_content' as const,
+  ...(esql !== undefined ? { esql } : {}),
+});
+const attachmentTarget = (
+  attachmentId: string,
+  rest: { chartType?: SupportedChartType; esql?: string | null } = {}
+) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
+
 const runHandler = async (
   params: Record<string, unknown>,
   overrides: { logger?: Logger; attachments?: MockAttachments } = {}
@@ -78,75 +92,76 @@ const runHandler = async (
 describe('createVisualizationTool schema', () => {
   const schema = createVisualizationTool().schema;
 
-  it('requires chartType for a new Lens visualization', () => {
-    expect(
-      schema.safeParse({
-        query: 'errors over time',
-        chartType: SupportedChartType.XY,
-      }).success
-    ).toBe(true);
-
+  it('requires a target', () => {
     expect(schema.safeParse({ query: 'errors over time' }).success).toBe(false);
-  });
-
-  it('allows a new custom content visualization without chartType', () => {
     expect(
-      schema.safeParse({ query: 'a status board per host', renderer: 'custom_content' }).success
-    ).toBe(true);
-  });
-
-  it('rejects contentMode on a renderer other than custom_content', () => {
-    expect(
-      schema.safeParse({
-        query: 'errors over time',
-        chartType: SupportedChartType.XY,
-        contentMode: 'static',
-      }).success
+      schema.safeParse({ query: 'errors over time', target: { type: 'unknown' } }).success
     ).toBe(false);
+  });
 
-    expect(
-      schema.safeParse({
-        query: 'a welcome banner',
-        renderer: 'custom_content',
-        contentMode: 'static',
-      }).success
-    ).toBe(true);
+  it('requires chartType for a new Lens visualization', () => {
+    expect(schema.safeParse({ query: 'errors over time', target: lensTarget() }).success).toBe(
+      true
+    );
+
+    expect(schema.safeParse({ query: 'errors over time', target: { type: 'lens' } }).success).toBe(
+      false
+    );
   });
 
   it('allows a new Vega visualization without chartType', () => {
-    expect(schema.safeParse({ query: 'small multiples by host', renderer: 'vega' }).success).toBe(
+    expect(schema.safeParse({ query: 'small multiples by host', target: vegaTarget }).success).toBe(
       true
     );
   });
 
-  it('allows an attachment update without chartType', () => {
+  it('allows a new custom content visualization without chartType', () => {
     expect(
-      schema.safeParse({ query: 'use a clearer title', attachment_id: 'existing' }).success
+      schema.safeParse({ query: 'a status board per host', target: customContentTarget() }).success
     ).toBe(true);
   });
 
-  it('rejects renderer when updating an existing attachment', () => {
+  it('accepts esql: null only where a panel can be data-free', () => {
+    expect(
+      schema.safeParse({ query: 'a welcome banner', target: customContentTarget(null) }).success
+    ).toBe(true);
     expect(
       schema.safeParse({
-        query: 'use a clearer title',
-        attachment_id: 'existing',
-        renderer: 'lens',
+        query: 'drop the data',
+        target: attachmentTarget('existing', { esql: null }),
       }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        target: { ...lensTarget(), esql: null },
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({ query: 'flows by host', target: { ...vegaTarget, esql: null } }).success
+    ).toBe(false);
+  });
+
+  it('allows an attachment update without chartType and requires the attachment id', () => {
+    expect(
+      schema.safeParse({ query: 'use a clearer title', target: attachmentTarget('existing') })
+        .success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ query: 'use a clearer title', target: { type: 'attachment' } }).success
     ).toBe(false);
   });
 
   it('accepts an optional time_range and rejects a partial one', () => {
-    expect(
-      schema.safeParse({
-        query: 'errors over time',
-        chartType: SupportedChartType.XY,
-      }).success
-    ).toBe(true);
+    expect(schema.safeParse({ query: 'errors over time', target: lensTarget() }).success).toBe(
+      true
+    );
 
     expect(
       schema.safeParse({
         query: 'errors over time',
-        chartType: SupportedChartType.XY,
+        target: lensTarget(),
         time_range: { from: 'now-7d', to: 'now' },
       }).success
     ).toBe(true);
@@ -154,14 +169,14 @@ describe('createVisualizationTool schema', () => {
     expect(
       schema.safeParse({
         query: 'errors over time',
-        chartType: SupportedChartType.XY,
+        target: lensTarget(),
         time_range: { from: 'now-7d' },
       }).success
     ).toBe(false);
   });
 
   it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
-    const base = { query: 'errors over time', chartType: SupportedChartType.XY };
+    const base = { query: 'errors over time', target: lensTarget() };
 
     expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
       false
@@ -213,13 +228,16 @@ describe('createVisualizationTool handler', () => {
     mockCreateTemplateResolver.mockReturnValue(mockResolveTemplate);
   });
 
-  it('builds a Lens visualization by default and persists it', async () => {
+  it('builds a Lens visualization and persists it', async () => {
     const { result, attachments } = await runHandler({
       query: 'errors over time',
-      chartType: SupportedChartType.XY,
+      target: lensTarget(),
     });
 
     expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({ chartType: SupportedChartType.XY, esql: undefined })
+    );
     expect(mockBuildVega).not.toHaveBeenCalled();
     expect(attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({ type: VISUALIZATION_ATTACHMENT_TYPE })
@@ -239,8 +257,19 @@ describe('createVisualizationTool handler', () => {
     expect(data.query).toBeUndefined();
   });
 
-  it('builds a Vega visualization when the renderer is "vega"', async () => {
-    const { result } = await runHandler({ query: 'flows by host', renderer: 'vega' });
+  it('passes a supplied esql through to the Lens builder', async () => {
+    await runHandler({
+      query: 'errors over time',
+      target: { ...lensTarget(), esql: 'FROM logs | STATS count() BY @timestamp' },
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({ esql: 'FROM logs | STATS count() BY @timestamp' })
+    );
+  });
+
+  it('builds a Vega visualization when the target type is "vega"', async () => {
+    const { result } = await runHandler({ query: 'flows by host', target: vegaTarget });
 
     expect(mockBuildVega).toHaveBeenCalledTimes(1);
     expect(mockBuildLens).not.toHaveBeenCalled();
@@ -260,7 +289,7 @@ describe('createVisualizationTool handler', () => {
 
     const { result, attachments } = await runHandler({
       query: 'errors over time',
-      chartType: SupportedChartType.XY,
+      target: lensTarget(),
     });
 
     expect(result.results[0].data.time_range).toBeUndefined();
@@ -291,7 +320,7 @@ describe('createVisualizationTool handler', () => {
     });
 
     const { result } = await runHandler(
-      { query: 'tweak it', attachment_id: 'existing' },
+      { query: 'tweak it', target: attachmentTarget('existing') },
       { attachments }
     );
 
@@ -335,7 +364,7 @@ describe('createVisualizationTool handler', () => {
     });
 
     const { result } = await runHandler(
-      { query: 'tweak it', attachment_id: 'legacy' },
+      { query: 'tweak it', target: attachmentTarget('legacy') },
       { attachments }
     );
 
@@ -348,6 +377,37 @@ describe('createVisualizationTool handler', () => {
 
     const [{ data }] = result.results;
     expect(data.renderer).toBe('lens');
+  });
+
+  it('rejects esql: null on a Lens or Vega update', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'drop the data', target: attachmentTarget('existing', { esql: null }) },
+      { attachments }
+    );
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('"esql": null only applies to custom content panels');
+    expect(mockBuildLens).not.toHaveBeenCalled();
+    expect(attachments.update).not.toHaveBeenCalled();
   });
 
   it('reuses the existing time_range on edit instead of probing', async () => {
@@ -371,7 +431,7 @@ describe('createVisualizationTool handler', () => {
     });
 
     const { result } = await runHandler(
-      { query: 'make it a line chart', attachment_id: 'existing' },
+      { query: 'make it a line chart', target: attachmentTarget('existing') },
       { attachments }
     );
 
@@ -388,7 +448,7 @@ describe('createVisualizationTool handler', () => {
   it('uses an explicit time_range on create and skips the data-aware probe', async () => {
     const { result, attachments } = await runHandler({
       query: 'errors over the last 7 days',
-      chartType: SupportedChartType.XY,
+      target: lensTarget(),
       time_range: { from: 'now-7d', to: 'now' },
     });
 
@@ -424,7 +484,7 @@ describe('createVisualizationTool handler', () => {
     const { result } = await runHandler(
       {
         query: 'show the last 30 days',
-        attachment_id: 'existing',
+        target: attachmentTarget('existing'),
         time_range: { from: 'now-30d', to: 'now' },
       },
       { attachments }
@@ -443,7 +503,7 @@ describe('createVisualizationTool handler', () => {
   it('returns an error when the attachment to update does not exist', async () => {
     const { result, attachments } = await runHandler({
       query: 'tweak it',
-      attachment_id: 'missing',
+      target: attachmentTarget('missing'),
     });
 
     const [{ type, data }] = result.results;
@@ -460,7 +520,7 @@ describe('createVisualizationTool handler', () => {
     attachments.add.mockRejectedValue(new Error('index_not_found'));
 
     const { result, logger } = await runHandler(
-      { query: 'errors over time', chartType: SupportedChartType.XY },
+      { query: 'errors over time', target: lensTarget() },
       { attachments }
     );
 
@@ -476,12 +536,15 @@ describe('createVisualizationTool handler', () => {
 
     const { result } = await runHandler({
       query: 'broken',
-      chartType: SupportedChartType.Metric,
+      target: lensTarget(SupportedChartType.Metric),
     });
 
     const [{ type, data }] = result.results;
     expect(type).toBe(ToolResultType.error);
     expect(data.message).toContain('esql_generation_failed');
+    expect(data.metadata).toEqual(
+      expect.objectContaining({ renderer: 'lens', chartType: SupportedChartType.Metric })
+    );
   });
 
   it('gives an actionable hint when index auto-discovery fails and no index was passed', async () => {
@@ -496,7 +559,7 @@ describe('createVisualizationTool handler', () => {
 
     const { result } = await runHandler({
       query: 'cpu by host',
-      chartType: SupportedChartType.XY,
+      target: lensTarget(),
     });
 
     const [{ type, data }] = result.results;
@@ -513,23 +576,24 @@ describe('createVisualizationTool handler', () => {
     const { result } = await runHandler({
       query: 'cpu by host',
       index: 'metrics-*',
-      chartType: SupportedChartType.XY,
+      target: lensTarget(),
     });
 
     const [{ data }] = result.results;
     expect(data.message).toContain('Failed to create visualization:');
     expect(data.message).not.toContain('Could not find an index matching');
   });
+
   describe('custom content', () => {
     it('generates the template server-side and persists it under visualization.template', async () => {
       const { result, attachments } = await runHandler({
         query: 'a status board per host',
-        renderer: 'custom_content',
-        esql: 'FROM logs | STATS count() BY host',
+        target: customContentTarget('FROM logs | STATS count() BY host'),
       });
 
       expect(mockBuildLens).not.toHaveBeenCalled();
       expect(mockBuildVega).not.toHaveBeenCalled();
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'a status board per host',
@@ -559,8 +623,7 @@ describe('createVisualizationTool handler', () => {
     it('does not return the template in the tool result', async () => {
       const { result } = await runHandler({
         query: 'a status board per host',
-        renderer: 'custom_content',
-        esql: 'FROM logs | STATS count() BY host',
+        target: customContentTarget('FROM logs | STATS count() BY host'),
       });
 
       const [{ data }] = result.results;
@@ -568,11 +631,11 @@ describe('createVisualizationTool handler', () => {
       expect(JSON.stringify(data)).not.toContain('row["host"]');
     });
 
-    it('generates the ES|QL query when none is supplied', async () => {
+    it('generates the ES|QL query for a new panel when esql is omitted', async () => {
       const { result } = await runHandler({
         query: 'a status board per host',
         index: 'logs-*',
-        renderer: 'custom_content',
+        target: customContentTarget(),
       });
 
       expect(mockGenerateEsql).toHaveBeenCalledWith(
@@ -586,13 +649,13 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
-    // Static is a request, not what you get by forgetting `esql`.
-    it('fails rather than falling back to static when query generation fails', async () => {
+    // Data-free is a request, not what you get when a query cannot be generated.
+    it('fails rather than falling back to a data-free panel when query generation fails', async () => {
       mockGenerateEsql.mockResolvedValue({ error: 'no suitable index' });
 
       const { result } = await runHandler({
         query: 'a status board per host',
-        renderer: 'custom_content',
+        target: customContentTarget(),
       });
 
       const [{ type, data }] = result.results;
@@ -601,11 +664,10 @@ describe('createVisualizationTool handler', () => {
       expect(mockResolveTemplate).not.toHaveBeenCalled();
     });
 
-    it('persists a static panel with no esql when contentMode is "static"', async () => {
+    it('persists a data-free panel with no esql when the agent passes esql: null', async () => {
       const { result, attachments } = await runHandler({
         query: 'a welcome banner',
-        renderer: 'custom_content',
-        contentMode: 'static',
+        target: customContentTarget(null),
       });
 
       expect(mockGenerateEsql).not.toHaveBeenCalled();
@@ -622,7 +684,7 @@ describe('createVisualizationTool handler', () => {
       expect(data.esql).toBeUndefined();
     });
 
-    it('keeps the custom content renderer when updating an existing attachment', async () => {
+    const dataAttachment = () => {
       const attachments = createAttachments();
       attachments.getAttachmentRecord.mockReturnValue({
         id: 'att-1',
@@ -639,13 +701,17 @@ describe('createVisualizationTool handler', () => {
           },
         ],
       });
+      return attachments;
+    };
 
+    it('keeps the custom content renderer and query when updating with esql omitted', async () => {
       const { result } = await runHandler(
-        { query: 'use a darker background', attachment_id: 'att-1' },
-        { attachments }
+        { query: 'use a darker background', target: attachmentTarget('att-1') },
+        { attachments: dataAttachment() }
       );
 
       expect(mockBuildLens).not.toHaveBeenCalled();
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
       // A style-only edit refines the existing template rather than re-sampling the query.
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: 'use a darker background',
@@ -657,9 +723,59 @@ describe('createVisualizationTool handler', () => {
       const [{ data }] = result.results;
       expect(data.renderer).toBe('custom_content');
       expect(data.attachment_id).toBe('att-1');
+      expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
-    const staticAttachment = () => {
+    it('re-samples when an update supplies a different esql', async () => {
+      const { result } = await runHandler(
+        {
+          query: 'show error counts instead',
+          target: attachmentTarget('att-1', { esql: 'FROM logs | STATS errors = COUNT() BY host' }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | STATS errors = COUNT() BY host',
+          existingTemplate: '<div>old</div>',
+          hasExistingQuery: false,
+        })
+      );
+
+      const [{ data }] = result.results;
+      expect(data.esql).toBe('FROM logs | STATS errors = COUNT() BY host');
+    });
+
+    it('drops the query when an update passes esql: null', async () => {
+      const { result, attachments } = await runHandler(
+        {
+          query: 'turn this into a plain banner',
+          target: attachmentTarget('att-1', { esql: null }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith({
+        prompt: 'turn this into a plain banner',
+        esqlQuery: undefined,
+        existingTemplate: '<div>old</div>',
+        hasExistingQuery: false,
+      });
+      expect(attachments.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.not.objectContaining({ esql: expect.anything() }),
+        })
+      );
+
+      const [{ data }] = result.results;
+      expect(data.esql).toBeUndefined();
+    });
+
+    const dataFreeAttachment = () => {
       const attachments = createAttachments();
       attachments.getAttachmentRecord.mockReturnValue({
         id: 'banner',
@@ -679,31 +795,42 @@ describe('createVisualizationTool handler', () => {
       return attachments;
     };
 
-    // `renderer` cannot be passed on an update, so without this a wording tweak to a
-    // static panel would either invent a query or fail outright.
-    it('does not generate a query when editing a panel that is already static', async () => {
+    // A wording tweak to a data-free panel must neither invent a query nor fail.
+    it('keeps a data-free panel data-free when updating with esql omitted', async () => {
       const { result } = await runHandler(
-        { query: 'make the subtitle smaller', attachment_id: 'banner' },
-        { attachments: staticAttachment() }
+        { query: 'make the subtitle smaller', target: attachmentTarget('banner') },
+        { attachments: dataFreeAttachment() }
       );
 
       expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined, existingTemplate: '<div>hi</div>' })
-      );
+      expect(mockResolveTemplate).toHaveBeenCalledWith({
+        prompt: 'make the subtitle smaller',
+        esqlQuery: undefined,
+        existingTemplate: '<div>hi</div>',
+        hasExistingQuery: false,
+      });
 
       const [{ type, data }] = result.results;
       expect(type).toBe(ToolResultType.visualization);
       expect(data.esql).toBeUndefined();
     });
 
-    it('adds data to a static panel when the edit asks for it explicitly', async () => {
+    it('adds data to a data-free panel when an update supplies an esql', async () => {
       const { result } = await runHandler(
-        { query: 'show the log count too', attachment_id: 'banner', contentMode: 'data' },
-        { attachments: staticAttachment() }
+        {
+          query: 'show the log count too',
+          target: attachmentTarget('banner', { esql: 'FROM logs | STATS count() BY host' }),
+        },
+        { attachments: dataFreeAttachment() }
       );
 
-      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | STATS count() BY host',
+          existingTemplate: '<div>hi</div>',
+        })
+      );
 
       const [{ data }] = result.results;
       expect(data.esql).toBe('FROM logs | STATS count() BY host');
@@ -714,8 +841,7 @@ describe('createVisualizationTool handler', () => {
 
       const { result } = await runHandler({
         query: 'a status board per host',
-        renderer: 'custom_content',
-        esql: 'FROM nope',
+        target: customContentTarget('FROM nope'),
       });
 
       const [{ type, data }] = result.results;

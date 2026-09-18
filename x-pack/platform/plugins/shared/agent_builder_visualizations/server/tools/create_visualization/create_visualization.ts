@@ -65,112 +65,150 @@ const getExistingTemplate = (data: VisualizationAttachmentData | undefined): str
   return data.visualization.template || undefined;
 };
 
-const createVisualizationSchema = z
-  .object({
-    query: z.string().max(2048).describe('A natural language query describing the visualization.'),
-    index: z
-      .string()
-      .max(1024)
-      .optional()
-      .describe(
-        '(strongly recommended) Index, alias, or datastream to target, grounded against the actual cluster. If omitted, the tool auto-discovers an index from the query, which FAILS when the referenced fields do not exist in any index. Prefer discovering the index (and verifying the fields exist) first, then pass it here — especially for multi-panel requests, where every call should reuse the same grounded index.'
-      ),
-    attachment_id: z
-      .string()
-      .max(256)
-      .optional()
-      .describe(
-        '(optional) ID of an existing visualization attachment to update. The attachment must exist. Omit renderer when updating because the existing visualization determines it.'
-      ),
-    renderer: z
-      .enum(['lens', 'vega', 'custom_content'])
-      .optional()
-      .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values; pass contentMode: "static" for one that needs no data at all. Omit this field when updating an existing attachment; edits keep the existing renderer.'
-      ),
-    chartType: z
-      .nativeEnum(SupportedChartType)
-      .optional()
-      .describe(
-        'Required when creating a new Lens visualization. For a new Vega visualization it is an optional styling hint; omit it when no Lens chart type represents the requested form. On updates it is optional because the existing visualization provides the current form.'
-      ),
-    esql: z
-      .string()
-      .max(4096)
-      .optional()
-      .describe(
-        '(optional) An ES|QL query. The tool generates one when this is omitted. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
-      ),
-    contentMode: z
-      .enum(['data', 'static'])
-      .optional()
-      .describe(
-        '(optional, "custom_content" only) Whether the panel is backed by data. "data" (the default) generates an ES|QL query when "esql" is omitted. Pass "static" only for content that genuinely has no data — a banner, a legend, an explanatory note. Static is never a fallback: if a query cannot be generated the call fails rather than silently returning an empty panel.'
-      ),
-    time_range: z
-      .object({
-        from: z
-          .string()
-          .max(256)
-          .describe(
-            'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
-          ),
-        to: z
-          .string()
-          .max(256)
-          .describe(
-            'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
-          ),
-      })
-      .check((ctx) => {
-        try {
-          getDateRange(ctx.value);
-        } catch (err) {
-          ctx.issues.push({
-            code: 'custom',
-            message: err instanceof Error ? err.message : 'Invalid time_range',
-            input: ctx.value,
-          });
-        }
-      })
-      .optional()
-      .describe(
-        '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
-      ),
-  })
-  .check((ctx) => {
-    if (ctx.value.attachment_id && ctx.value.renderer) {
-      ctx.issues.push({
-        code: 'custom',
-        message: 'renderer must be omitted when updating an existing visualization attachment.',
-        input: ctx.value,
-      });
-    }
+const ESQL_SOURCE_RULE =
+  'Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.';
 
-    // An update omits `renderer` by design, so the renderer is unknown here.
-    if (
-      ctx.value.contentMode &&
-      !ctx.value.attachment_id &&
-      ctx.value.renderer !== 'custom_content'
-    ) {
-      ctx.issues.push({
-        code: 'custom',
-        message: 'contentMode only applies to the custom_content renderer.',
-        input: ctx.value,
-      });
-    }
+const chartEsqlField = z
+  .string()
+  .max(4096)
+  .optional()
+  .describe(
+    `(optional) An ES|QL query. The tool generates one when this is omitted. ${ESQL_SOURCE_RULE}`
+  );
 
-    const isNewLensVisualization =
-      !ctx.value.attachment_id && (ctx.value.renderer ?? 'lens') === 'lens';
+const requiredChartTypeField = z
+  .nativeEnum(SupportedChartType)
+  .describe(
+    'The Lens chart type that best fits the request. Required for a new Lens visualization.'
+  );
 
-    if (isNewLensVisualization && !ctx.value.chartType) {
-      ctx.issues.push({
-        code: 'custom',
-        message: 'chartType is required when creating a new Lens visualization.',
-        input: ctx.value,
-      });
-    }
-  });
+const optionalChartTypeField = z
+  .nativeEnum(SupportedChartType)
+  .optional()
+  .describe(
+    '(optional) A Lens chart type used only as a styling hint. Omit it when no Lens chart type represents the requested form.'
+  );
+
+const lensTargetSchema = z.object({
+  type: z.literal('lens').describe('A new standard Lens chart (the common case).'),
+  chartType: requiredChartTypeField,
+  esql: chartEsqlField,
+});
+
+const vegaTargetSchema = z.object({
+  type: z
+    .literal('vega')
+    .describe(
+      'A new custom Vega-Lite visualization, when Lens cannot express the request — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings — or when the user explicitly asks for Vega/Vega-Lite.'
+    ),
+  chartType: optionalChartTypeField,
+  esql: chartEsqlField,
+});
+
+const customContentTargetSchema = z.object({
+  type: z
+    .literal('custom_content')
+    .describe(
+      'A new HTML/CSS layout, as a last resort when neither chart grammar fits — KPI scorecards with status badges, health boards, panels mixing narrative text with live values. The markup is generated server-side from "query"; never author it yourself.'
+    ),
+  esql: z
+    .string()
+    .max(4096)
+    .nullable()
+    .optional()
+    .describe(
+      `(optional) What feeds the panel. A string: use this ES|QL query as-is (${ESQL_SOURCE_RULE}). Omitted: the tool generates a query from "query". null: the panel has no data at all — a banner, a legend, an explanatory note — and no query is generated. Never pass null to get past a failed query generation; fix the index or fields and retry instead.`
+    ),
+});
+
+const attachmentTargetSchema = z.object({
+  type: z
+    .literal('attachment')
+    .describe(
+      'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
+    ),
+  attachment_id: z.string().max(256).describe('ID of the visualization attachment to update.'),
+  chartType: z
+    .nativeEnum(SupportedChartType)
+    .optional()
+    .describe(
+      '(optional) For Lens visualizations only: pass a new chart type when the request changes the chart family (e.g. xy to pie). Omit it to keep the current one.'
+    ),
+  esql: z
+    .string()
+    .max(4096)
+    .nullable()
+    .optional()
+    .describe(
+      `(optional) A string replaces the visualization's query (${ESQL_SOURCE_RULE}). Omitted: Lens and Vega edits derive the query from "query"; custom content edits keep the panel's existing query, or stay data-free when it has none. null: custom content only — drop the query so the panel becomes data-free.`
+    ),
+});
+
+const targetSchema = z
+  .discriminatedUnion('type', [
+    lensTargetSchema,
+    vegaTargetSchema,
+    customContentTargetSchema,
+    attachmentTargetSchema,
+  ])
+  .describe(
+    'What to build, discriminated by "type": a new "lens", "vega" or "custom_content" visualization, or an "attachment" update of an existing one. Each type accepts only the fields that apply to it.'
+  );
+
+const createVisualizationSchema = z.object({
+  query: z.string().max(2048).describe('A natural language query describing the visualization.'),
+  index: z
+    .string()
+    .max(1024)
+    .optional()
+    .describe(
+      '(strongly recommended) Index, alias, or datastream to target, grounded against the actual cluster. If omitted, the tool auto-discovers an index from the query, which FAILS when the referenced fields do not exist in any index. Prefer discovering the index (and verifying the fields exist) first, then pass it here — especially for multi-panel requests, where every call should reuse the same grounded index.'
+    ),
+  target: targetSchema,
+  time_range: z
+    .object({
+      from: z
+        .string()
+        .max(256)
+        .describe(
+          'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
+        ),
+      to: z
+        .string()
+        .max(256)
+        .describe(
+          'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
+        ),
+    })
+    .check((ctx) => {
+      try {
+        getDateRange(ctx.value);
+      } catch (err) {
+        ctx.issues.push({
+          code: 'custom',
+          message: err instanceof Error ? err.message : 'Invalid time_range',
+          input: ctx.value,
+        });
+      }
+    })
+    .optional()
+    .describe(
+      '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
+    ),
+});
+
+type CreateVisualizationTarget = z.output<typeof targetSchema>;
+
+/**
+ * Flattens the discriminated `target` into the handful of values the handler works with.
+ * `esql` keeps `null` (an explicit "no data" request) distinct from `undefined` (nothing said).
+ */
+const readTarget = (target: CreateVisualizationTarget) => ({
+  attachmentId: target.type === 'attachment' ? target.attachment_id : undefined,
+  requestedRenderer: target.type === 'attachment' ? undefined : target.type,
+  chartType: target.type === 'custom_content' ? undefined : target.chartType,
+  esql: target.esql,
+});
 
 export const createVisualizationTool = (): BuiltinToolDefinition<
   typeof createVisualizationSchema
@@ -180,14 +218,13 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
     type: ToolType.builtin,
     description: `Create or update a visualization from a natural language description. Supports BOTH standard Lens charts AND custom Vega-Lite visualizations (the Vega-Lite grammar only — NOT full Vega). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens or Vega-Lite; you do not author Vega specs by hand or ask the user to paste anything. If a request genuinely needs full Vega (custom signals/interactivity, imperative transforms, or bespoke rendering), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
 
-You choose how to render the request via the "renderer" parameter:
-- "lens" (the default when omitted) for a standard Lens chart; new Lens visualizations require "chartType" (${Object.values(
-      SupportedChartType
-    ).join(', ')}).
+You say what to build via "target", discriminated by "target.type":
+- "lens" for a standard Lens chart; requires "chartType" (${Object.values(SupportedChartType).join(
+      ', '
+    )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
-- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. "chartType" does not apply. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Pass contentMode: "static" for a panel that genuinely has no data.
-
-When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates.
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Pass "esql": null only when the panel genuinely has no data (a banner, a legend, a note); otherwise omit "esql" and a query is generated.
+- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates.
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 
@@ -209,18 +246,10 @@ Ground first: make sure the target index exists and every field you reference is
       openWorldHint: false,
     },
     handler: async (
-      {
-        query: nlQuery,
-        index,
-        renderer: requestedRenderer,
-        chartType,
-        esql,
-        contentMode,
-        attachment_id: attachmentId,
-        time_range: requestedTimeRange,
-      },
+      { query: nlQuery, index, target, time_range: requestedTimeRange },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
+      const { attachmentId, requestedRenderer, chartType, esql } = readTarget(target);
       try {
         // Step 1: Read any existing attachment so edits reuse its renderer + config.
         let existingData: VisualizationAttachmentData | undefined;
@@ -241,12 +270,18 @@ Ground first: make sure the target index exists and every field you reference is
           logger.debug(`Loaded existing visualization from attachment ${attachmentId}`);
         }
 
-        // Step 2: Resolve the renderer from the caller's choice. Edits keep the
-        // existing attachment's renderer; otherwise honor the explicit `renderer`
-        // param and default to Lens (the common case) when it is omitted.
+        // Step 2: Resolve the renderer. Edits keep the existing attachment's renderer;
+        // otherwise the target type names it.
         const renderer: VisualizationRenderer = existingData
           ? getEffectiveRenderer(existingData)
           : requestedRenderer ?? 'lens';
+
+        // `null` is the agent's explicit "this panel has no data"; only custom content can be data-free.
+        if (esql === null && renderer !== 'custom_content') {
+          throw new Error(
+            '"esql": null only applies to custom content panels. Lens and Vega visualizations always need a query; omit "esql" to have one derived from "query".'
+          );
+        }
 
         // Step 3: Generate the spec/config for the chosen renderer and assemble the
         // unified attachment data.
@@ -262,19 +297,19 @@ Ground first: make sure the target index exists and every field you reference is
           });
           const existingTemplate = getExistingTemplate(existingData);
           const existingEsql = existingData?.esql;
-          // Sampling costs a round trip, so only when the query actually changes.
-          let isQueryChanging = esql !== undefined && esql !== existingEsql;
-          let mergedEsql = esql ?? existingEsql;
 
-          // A stored panel with no query is static by construction: a styling edit must not
-          // turn it into a data panel, nor fail generating a query it never wanted.
-          const isEstablishedStatic =
-            Boolean(existingData) && !existingEsql && contentMode !== 'data';
-
-          if (contentMode === 'static' || isEstablishedStatic) {
+          // The agent decides whether the panel has data. `null` asks for none, a string
+          // supplies the query, and omitting it keeps an existing panel as it is — so a
+          // wording tweak can neither invent a query nor drop one. Only a brand-new panel
+          // with nothing said gets a generated query.
+          let mergedEsql: string | undefined;
+          if (esql === null) {
             mergedEsql = undefined;
-            isQueryChanging = false;
-          } else if (!mergedEsql) {
+          } else if (esql !== undefined) {
+            mergedEsql = esql;
+          } else if (existingData) {
+            mergedEsql = existingEsql;
+          } else {
             const generated = await generateVisualizationEsql({
               nlQuery,
               index,
@@ -289,12 +324,14 @@ Ground first: make sure the target index exists and every field you reference is
               throw new Error(
                 `Could not generate an ES|QL query for this panel: ${
                   generated.error ?? 'no query was produced'
-                }. Pass an explicit "esql", or use contentMode: "static" if the panel needs no data.`
+                }. Pass an explicit "esql" built with the ES|QL tools, or "esql": null only if the panel genuinely has no data.`
               );
             }
             mergedEsql = generated.query;
-            isQueryChanging = true;
           }
+
+          // Sampling costs a round trip, so only when the query actually changes.
+          const isQueryChanging = mergedEsql !== undefined && mergedEsql !== existingEsql;
 
           const { template, height } = await resolveTemplate({
             prompt: nlQuery,
@@ -314,7 +351,7 @@ Ground first: make sure the target index exists and every field you reference is
           const { spec, title, esqlQuery } = await buildVegaConfig({
             nlQuery,
             index,
-            esql,
+            esql: esql ?? undefined,
             existingSpec,
             chartType,
             modelProvider,
@@ -337,7 +374,7 @@ Ground first: make sure the target index exists and every field you reference is
             nlQuery,
             index,
             chartType,
-            esql,
+            esql: esql ?? undefined,
             existingConfig,
             parsedExistingConfig,
             modelProvider,
