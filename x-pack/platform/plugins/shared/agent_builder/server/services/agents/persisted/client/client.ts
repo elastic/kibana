@@ -21,6 +21,7 @@ import {
   isAgentNotFoundError,
   getAccessControlEntryKey,
   isAgentAccessControlRole,
+  isEntryCoveredByOwner,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   type AgentAccessControl,
@@ -755,13 +756,7 @@ export const validateAccessControlEntries = ({
       throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
     }
 
-    // Mirrors `isAgentOwner`: a name-only entry is covered only when the owner has no id either.
-    if (
-      owner !== undefined &&
-      (entry.id !== undefined
-        ? owner.id !== undefined && entry.id === owner.id
-        : owner.id === undefined && entry.name !== undefined && entry.name === owner.username)
-    ) {
+    if (isEntryCoveredByOwner(entry, owner)) {
       continue;
     }
 

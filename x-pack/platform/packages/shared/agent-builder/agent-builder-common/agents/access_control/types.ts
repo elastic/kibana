@@ -7,6 +7,7 @@
 
 import type { EuiBadgeProps } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { UserIdAndName } from '../../base/users';
 
 export enum AgentAccessControlMode {
   Private = 'private',
@@ -72,6 +73,20 @@ export interface AgentAccessControlEntry {
 /** Identity key for an entry: `id` when present, otherwise the legacy `name`. */
 export const getAccessControlEntryKey = (entry: AgentAccessControlEntry): string =>
   entry.id !== undefined ? `${entry.type}:id:${entry.id}` : `${entry.type}:name:${entry.name}`;
+
+/** True when owner matching already covers this entry, so the grant adds nothing. */
+export const isEntryCoveredByOwner = (
+  entry: AgentAccessControlEntry,
+  owner: UserIdAndName | undefined
+): boolean => {
+  if (owner === undefined) {
+    return false;
+  }
+  if (entry.id !== undefined) {
+    return owner.id !== undefined && entry.id === owner.id;
+  }
+  return owner.id === undefined && entry.name !== undefined && entry.name === owner.username;
+};
 
 export interface AgentAccessControl {
   access_mode: AgentAccessControlMode;

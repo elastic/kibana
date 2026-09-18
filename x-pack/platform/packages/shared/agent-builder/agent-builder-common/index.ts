@@ -153,6 +153,7 @@ export {
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   isAgentAccessControlRole,
   getAccessControlEntryKey,
+  isEntryCoveredByOwner,
   accessControlRoleMeets,
   maxAccessControlRole,
   getDefaultAgentAccessControl,

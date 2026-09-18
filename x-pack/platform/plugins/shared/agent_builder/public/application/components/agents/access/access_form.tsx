@@ -22,6 +22,7 @@ import {
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
   getAccessControlEntryKey,
+  isEntryCoveredByOwner,
   type AgentAccessControlEntry,
   AgentAccessControlRole,
   type AgentDefinition,
@@ -105,6 +106,8 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
+  const visibleEntries = entries.filter((entry) => !isEntryCoveredByOwner(entry, owner));
+
   const excludedUids = [...entries.map((entry) => entry.id), owner?.id].filter(
     (id): id is string => id !== undefined
   );
@@ -143,7 +146,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
         isDisabled={isDisabled}
         onAdd={handleAdd}
       />
-      {entries.length === 0 ? (
+      {visibleEntries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}
         </EuiText>
@@ -169,7 +172,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
                   </EuiFlexGroup>
                 </div>
               )}
-              {entries.map((entry) => (
+              {visibleEntries.map((entry) => (
                 <PrincipalRow
                   key={getAccessControlEntryKey(entry)}
                   entry={entry}
