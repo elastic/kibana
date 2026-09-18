@@ -479,4 +479,48 @@ describe('checkUploadPackageAssetPrivileges', () => {
       expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
     );
   });
+
+  it('passes failOnUnexpectedError: true to getInstallationObject so SO errors abort preflight', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue(undefined);
+
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      mockSavedObjectsClient
+    );
+
+    expect(getInstallationObject).toHaveBeenCalledWith(
+      expect.objectContaining({ failOnUnexpectedError: true })
+    );
+  });
+
+  it('propagates SO error from getInstallationObject and aborts preflight (fail-closed)', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockRejectedValue(new Error('SO store unavailable'));
+
+    await expect(
+      checkUploadPackageAssetPrivileges(
+        mockRequest,
+        mockArchiveBuffer,
+        mockContentType,
+        mockSpaceId,
+        mockSavedObjectsClient
+      )
+    ).rejects.toThrow('SO store unavailable');
+
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
 });

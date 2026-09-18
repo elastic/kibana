@@ -141,8 +141,13 @@ export async function checkUploadPackageAssetPrivileges(
   // current one, to prevent privilege escalation into Spaces the caller cannot access.
   const additionalSpaces = signals.pkgName
     ? Object.keys(
-        (await getInstallationObject({ savedObjectsClient, pkgName: signals.pkgName }))?.attributes
-          ?.additional_spaces_installed_kibana ?? {}
+        (
+          await getInstallationObject({
+            savedObjectsClient,
+            pkgName: signals.pkgName,
+            failOnUnexpectedError: true,
+          })
+        )?.attributes?.additional_spaces_installed_kibana ?? {}
       )
     : [];
 
