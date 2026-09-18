@@ -18,8 +18,20 @@ describe('maskMonitorParams', () => {
     );
   });
 
-  it('returns invalid JSON unchanged', () => {
-    expect(maskMonitorParams('{invalid JSON}')).toBe('{invalid JSON}');
+  it.each(['{invalid JSON}', '["secret"]', '"secret"', '42', 'false', 'null'])(
+    'fails closed for parameter values that cannot retain parameter names: %s',
+    (params) => {
+      expect(maskMonitorParams(params)).toBe(MASKED_PARAM_VALUE);
+    }
+  );
+
+  it('restores an opaque masked parameter value unchanged', () => {
+    expect(
+      restoreMaskedMonitorParams({
+        previousParams: '["secret"]',
+        submittedParams: MASKED_PARAM_VALUE,
+      })
+    ).toBe('["secret"]');
   });
 });
 

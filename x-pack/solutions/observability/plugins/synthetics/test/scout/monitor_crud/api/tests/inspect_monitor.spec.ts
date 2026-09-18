@@ -249,6 +249,30 @@ apiTest.describe(
       expect(publicConfig.monitors[0].streams[0].timeout).toBeUndefined();
     });
 
+    apiTest(
+      'reveals browser monitor parameters to an authorized inspector',
+      async ({ apiClient }) => {
+        const apiResponse = await inspectMonitor(
+          apiClient,
+          parameterReaderHeaders,
+          {
+            ...inspectBrowserMonitorFixture,
+            timeout: '30',
+            params: JSON.stringify({
+              username: 'elastic',
+              password: 'changeme',
+            }),
+            locations: [LOCAL_PUBLIC_LOCATION],
+          },
+          { hideParams: false }
+        );
+
+        const params = apiResponse.result.publicConfigs![0].monitors[0].streams[0].params;
+        expect(params.username).toBe('elastic');
+        expect(params.password).toBe('changeme');
+      }
+    );
+
     apiTest('inspect http monitor in private location', async ({ apiClient, apiServices }) => {
       const location = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
       const apiResponse = await inspectMonitor(
