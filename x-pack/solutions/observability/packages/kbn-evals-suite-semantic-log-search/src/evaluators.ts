@@ -14,6 +14,7 @@ import {
   distinctRelevantMessagesAtK,
   precisionAtK,
   recallOfLabels,
+  topRelevanceScore,
   trapsAtK,
   weightedPrecisionAtK,
 } from './metrics';
@@ -166,6 +167,25 @@ export const createDistinctMessagesEvaluator = (
   },
 });
 
+export const topRelevanceScoreEvaluator: RetrievalEvaluator = {
+  name: 'Top Relevance Score',
+  kind: 'CODE',
+  direction: 'neutral',
+  evaluate: async ({ output }) => {
+    const score = topRelevanceScore(output.patterns);
+
+    if (score === null) {
+      return unavailable('No relevanceScore available (keyword-only strategy or empty result)');
+    }
+
+    return {
+      score,
+      explanation: `Top reranker score: ${score.toFixed(2)}`,
+      metadata: { topScore: score },
+    };
+  },
+};
+
 export const retrievalEvaluators = (
   corpus: CorpusProfile,
   options: RetrievalEvaluatorOptions = {}
@@ -175,6 +195,7 @@ export const retrievalEvaluators = (
   createRecallEvaluator(corpus, options),
   createTrapEvaluator(corpus, options),
   createDistinctMessagesEvaluator(corpus, options),
+  topRelevanceScoreEvaluator,
 ];
 
 type AgentEvaluator = Evaluator<SemanticLogExample, AgentTaskOutput>;

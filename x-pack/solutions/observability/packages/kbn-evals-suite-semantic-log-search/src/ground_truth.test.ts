@@ -93,7 +93,9 @@ describe('ground truth predicates', () => {
     });
 
     it('grades a warning below a failure', () => {
-      expect(gradeOf('Pool nearing capacity: active=18', connectionFailures)).toBe(1);
+      expect(
+        gradeOf('[WARN] HikariPool: connection pool at 90% capacity', connectionFailures)
+      ).toBe(1);
     });
 
     it('grades an unlabelled message zero', () => {
@@ -101,7 +103,7 @@ describe('ground truth predicates', () => {
     });
 
     it('takes the highest grade when a message carries labels of several grades', () => {
-      const message = 'Pool nearing capacity: active=18; Connection pool exhausted';
+      const message = 'HikariPool: connection pool at 90% capacity; Connection pool exhausted';
       expect(gradeOf(message, connectionFailures)).toBe(2);
     });
   });

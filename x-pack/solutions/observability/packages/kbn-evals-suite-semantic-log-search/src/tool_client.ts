@@ -21,6 +21,7 @@ interface PatternLike {
   pattern?: string;
   count?: number;
   sample?: { message?: string; [key: string]: unknown };
+  relevanceScore?: number;
 }
 
 interface ToolData {
@@ -56,6 +57,7 @@ const toRetrievedPatterns = (items: PatternLike[]): RetrievedPattern[] =>
     pattern: item.pattern ?? '',
     message: item.sample?.message ?? item.pattern ?? '',
     count: item.count ?? 0,
+    ...(item.relevanceScore !== undefined ? { relevanceScore: item.relevanceScore } : {}),
   }));
 
 const executeTool = async ({

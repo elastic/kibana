@@ -29,6 +29,13 @@ export interface LogPattern {
   lastSeen: string;
   /** A representative document: _id, _index, @timestamp and selected fields */
   sample: Record<string, unknown>;
+  /**
+   * Reranker relevance score (logit, not normalized to 0-1).
+   * Empirically observed on `.rerank-v1-elasticsearch`: relevant patterns scored
+   * around +3.46, irrelevant ones around -5.65 to -6.12. If the inference endpoint
+   * changes, the scale may shift. Only present when the search strategy uses RERANK.
+   */
+  relevanceScore?: number;
 }
 
 export interface TimeRange {

@@ -8,58 +8,37 @@
 import { esql } from '@elastic/esql';
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type {
   LogPattern,
   SemanticLogSearchParams,
   SemanticLogSearchResult,
 } from '../../../../common/services/semantic_log_search/types';
-import { DEFAULT_MAX_PATTERNS, DEFAULT_RANK_WINDOW, ESQL_TIME_RANGE_FILTER } from '../constants';
+import {
+  CATEGORIZE_SIMILARITY_THRESHOLD,
+  DEFAULT_MAX_PATTERNS,
+  DEFAULT_RANK_WINDOW,
+  ESQL_TIME_RANGE_FILTER,
+} from '../constants';
 
 /**
- * Row structure from the ES|QL CATEGORIZE + RERANK query.
+ * ES|QL responds columnar: `columns` holds the names, each row holds the values positionally.
+ * This resolves the name-to-position lookup once so rows can be read by column name, and
+ * returns `undefined` for columns the response does not carry.
  */
-interface EsqlPatternRow {
-  pattern: string;
-  count: number;
-  first_seen: string;
-  last_seen: string;
-  sample: string;
-}
+const createCellReader = (response: ESQLSearchResponse) => {
+  const positions = new Map((response.columns ?? []).map(({ name }, position) => [name, position]));
 
-/**
- * Convert ES|QL columnar response to an array of typed objects.
- * This is the standard pattern used across Kibana (context_engine, entity_store, etc.).
- */
-export function esqlRowsToObjects<T>(response: ESQLSearchResponse): T[] {
-  const columns = response.columns ?? [];
-  return (response.values ?? []).map((row) => {
-    const record: Record<string, unknown> = {};
-    row.forEach((value, index) => {
-      const name = columns[index]?.name;
-      if (name) {
-        record[name] = value;
-      }
-    });
-    return record as T;
-  });
-}
+  return (row: ESQLRow, column: string): unknown => {
+    const position = positions.get(column);
+    return position === undefined ? undefined : row[position];
+  };
+};
 
-/**
- * CATEGORIZE emits `.*?` as anchors and `.+?` between literal tokens
- * (e.g. `.*?Shutting.+?down.+?process.*?`). The service contract is template
- * text ("Shutting down process"), so those delimiters are stripped here rather
- * than handed to callers.
- */
-const CATEGORIZE_WILDCARD = /\.[*+]\?/g;
-
-export function toTemplateText(raw: string): string {
-  const text = raw.split(CATEGORIZE_WILDCARD).filter(Boolean).join(' ').trim();
-  // A pattern made only of wildcards would normalise to nothing; keep the raw
-  // value rather than emitting an empty template.
-  return text || raw;
-}
+/** Timestamps arrive as ISO strings or epoch millis; fall back to now when absent. */
+const toIsoString = (value: unknown): string =>
+  value ? new Date(value as string | number).toISOString() : new Date().toISOString();
 
 /**
  * Parse ES|QL response into LogPattern array.
@@ -70,7 +49,7 @@ export function toTemplateText(raw: string): string {
  * - first_seen: date
  * - last_seen: date
  * - sample: keyword (sample message)
- * - _score: double (rerank score, not mapped to LogPattern)
+ * - _score: double (rerank score, mapped to relevanceScore)
  *
  * Note: ES|QL CATEGORIZE does not provide _id/_index for the sample,
  * so sample only contains the message field.
@@ -79,21 +58,33 @@ export function parseEsqlPatternResponse(
   response: ESQLSearchResponse,
   field: string = 'message'
 ): LogPattern[] {
-  const rows = esqlRowsToObjects<EsqlPatternRow>(response);
+  const cell = createCellReader(response);
 
-  return rows
-    .filter((row) => row.pattern != null && row.count != null)
-    .map((row) => ({
+  // One pass over the rows: returning an empty array skips a row, returning an object keeps it.
+  return (response.values ?? []).flatMap((row) => {
+    const pattern = cell(row, 'pattern');
+    const count = cell(row, 'count');
+
+    if (pattern == null || count == null) {
+      return [];
+    }
+
+    const sample = cell(row, 'sample');
+    const score = cell(row, '_score');
+
+    return {
       field,
-      pattern: toTemplateText(String(row.pattern)),
-      count: Number(row.count),
-      firstSeen: row.first_seen ? new Date(row.first_seen).toISOString() : new Date().toISOString(),
-      lastSeen: row.last_seen ? new Date(row.last_seen).toISOString() : new Date().toISOString(),
+      pattern: String(pattern),
+      count: Number(count),
+      firstSeen: toIsoString(cell(row, 'first_seen')),
+      lastSeen: toIsoString(cell(row, 'last_seen')),
       // ES|QL CATEGORIZE doesn't provide _id/_index, only the sample message
       sample: {
-        message: row.sample ? String(row.sample) : '',
+        message: sample ? String(sample) : '',
       },
-    }));
+      ...(typeof score === 'number' ? { relevanceScore: score } : {}),
+    };
+  });
 }
 
 /**
@@ -129,10 +120,25 @@ export async function searchWithEsqlRerank(
     query = query.where`KQL(${esql.str(kqlFilter)})`;
   }
 
-  // CATEGORIZE, keep the most prevalent patterns, then RERANK by semantic relevance.
+  // Query flow:
+  // 1. CATEGORIZE groups messages into patterns. output_format: "tokens" produces clean text
+  //    instead of regex. similarity_threshold is the single tuning point for pattern granularity.
+  //
+  // 2. Aggregate per pattern: count, time bounds, and a deterministic sample (LATEST, not SAMPLE,
+  //    so identical queries produce identical rankings).
+  //
+  // 3. Sort by count DESC and keep the top N (the rank window). RERANK is an inference call per
+  //    candidate, so not all patterns can reach it. Prevalence is orthogonal to relevance
+  //    (a routine health check beats a rare error), but lexical scoring regresses paraphrase
+  //    queries (a score on "db errors" gives zero to `postgres: FATAL connection limit exceeded`).
+  //    The real fix is embeddings at selection time (semantic_text).
+  //
+  // 4. RERANK scores the windowed patterns by semantic relevance. It operates on both pattern
+  //    (the template) and sample (a concrete message): the template loses specifics, the sample
+  //    preserves them.
   query = query
     .pipe(
-      'STATS count = COUNT(*), first_seen = MIN(@timestamp), last_seen = MAX(@timestamp), sample = SAMPLE(message, 1) BY pattern = CATEGORIZE(message)'
+      `STATS count = COUNT(*), first_seen = MIN(@timestamp), last_seen = MAX(@timestamp), sample = LATEST(message) BY pattern = CATEGORIZE(message, {"output_format": "tokens", "similarity_threshold": ${CATEGORIZE_SIMILARITY_THRESHOLD}})`
     )
     .sort(['count', 'DESC'])
     .limit(DEFAULT_RANK_WINDOW).pipe`RERANK ${esql.str(nlQuery)} ON pattern, sample`
@@ -148,9 +154,15 @@ export async function searchWithEsqlRerank(
 
   try {
     const response = await esClient.esql.query(request);
+    const patterns = parseEsqlPatternResponse(response as ESQLSearchResponse, 'message');
+
+    // TODO: derive a "nothing relevant matched" signal from the top _score and surface it as a
+    // tool warning. Needs a calibrated floor first: observed +3.46 when the right pattern
+    // reached the window, -5.65 and -6.12 when it did not, on `.rerank-v1-elasticsearch`.
+    // Three data points is not a threshold; measure with the eval suite first.
 
     return {
-      patterns: parseEsqlPatternResponse(response as ESQLSearchResponse, 'message'),
+      patterns,
       strategy: 'esql_rerank',
     };
   } catch (error) {

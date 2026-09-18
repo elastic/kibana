@@ -9,12 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SemanticLogSearchParams } from '../../../../common/services/semantic_log_search/types';
-import {
-  esqlRowsToObjects,
-  parseEsqlPatternResponse,
-  searchWithEsqlRerank,
-  toTemplateText,
-} from './esql_rerank';
+import { parseEsqlPatternResponse, searchWithEsqlRerank } from './esql_rerank';
 
 describe('searchWithEsqlRerank', () => {
   const emptyResponse: ESQLSearchResponse = { columns: [], values: [] };
@@ -50,8 +45,10 @@ describe('searchWithEsqlRerank', () => {
   it('categorizes, keeps the rank window, then reranks by the natural language query', async () => {
     const { query } = await runQuery();
 
-    expect(query).toContain('BY pattern = CATEGORIZE(message)');
-    expect(query).toContain('SORT count DESC | LIMIT 200');
+    expect(query).toContain(
+      'BY pattern = CATEGORIZE(message, {"output_format": "tokens", "similarity_threshold": 70})'
+    );
+    expect(query).toContain('SORT count DESC | LIMIT 500');
     expect(query).toContain('RERANK "connection failures" ON pattern, `sample`');
     expect(query).toMatch(/SORT _score DESC \| LIMIT 10$/);
   });
@@ -114,51 +111,6 @@ describe('searchWithEsqlRerank', () => {
 });
 
 describe('esql rerank helpers', () => {
-  describe('esqlRowsToObjects', () => {
-    it('converts columnar response to array of objects', () => {
-      const response: ESQLSearchResponse = {
-        columns: [
-          { name: 'name', type: 'keyword' },
-          { name: 'count', type: 'long' },
-        ],
-        values: [
-          ['foo', 10],
-          ['bar', 20],
-        ],
-      };
-
-      const result = esqlRowsToObjects<{ name: string; count: number }>(response);
-
-      expect(result).toEqual([
-        { name: 'foo', count: 10 },
-        { name: 'bar', count: 20 },
-      ]);
-    });
-
-    it('handles empty values', () => {
-      const response: ESQLSearchResponse = {
-        columns: [{ name: 'name', type: 'keyword' }],
-        values: [],
-      };
-
-      const result = esqlRowsToObjects(response);
-      expect(result).toEqual([]);
-    });
-
-    it('handles null values in rows', () => {
-      const response: ESQLSearchResponse = {
-        columns: [
-          { name: 'name', type: 'keyword' },
-          { name: 'value', type: 'long' },
-        ],
-        values: [['foo', null]],
-      };
-
-      const result = esqlRowsToObjects<{ name: string; value: number | null }>(response);
-      expect(result).toEqual([{ name: 'foo', value: null }]);
-    });
-  });
-
   describe('parseEsqlPatternResponse', () => {
     it('parses ES|QL response with all columns', () => {
       const response: ESQLSearchResponse = {
@@ -171,14 +123,14 @@ describe('esql rerank helpers', () => {
         ],
         values: [
           [
-            '.*?Connection.+?to.+?timed.+?out.*?',
+            'Connection to timed out',
             100,
             '2024-01-01T00:00:00.000Z',
             '2024-01-01T12:00:00.000Z',
             'Connection to db-server timed out',
           ],
           [
-            '.*?User.+?logged.+?in.*?',
+            'User logged in',
             50,
             '2024-01-01T00:00:00.000Z',
             '2024-01-01T06:00:00.000Z',
@@ -224,7 +176,7 @@ describe('esql rerank helpers', () => {
           { name: 'pattern', type: 'keyword' },
           { name: 'count', type: 'long' },
         ],
-        values: [['.*?Error.+?pattern.*?', 25]],
+        values: [['Error pattern', 25]],
       };
 
       const patterns = parseEsqlPatternResponse(response);
@@ -284,24 +236,40 @@ describe('esql rerank helpers', () => {
       expect(patterns[0].pattern).toBe('Valid');
       expect(patterns[0].count).toBe(5);
     });
-  });
 
-  describe('toTemplateText', () => {
-    it('normalises CATEGORIZE wildcards to template text', () => {
-      expect(toTemplateText('.*?Shutting.+?down.+?process.*?')).toBe('Shutting down process');
+    it('maps _score to relevanceScore when present', () => {
+      const response: ESQLSearchResponse = {
+        columns: [
+          { name: 'pattern', type: 'keyword' },
+          { name: 'count', type: 'long' },
+          { name: '_score', type: 'double' },
+        ],
+        values: [
+          ['Error pattern', 10, 3.46],
+          ['Warning pattern', 5, -2.15],
+        ],
+      };
+
+      const patterns = parseEsqlPatternResponse(response);
+
+      expect(patterns).toHaveLength(2);
+      expect(patterns[0].relevanceScore).toBe(3.46);
+      expect(patterns[1].relevanceScore).toBe(-2.15);
     });
 
-    it('normalises a single-token pattern', () => {
-      expect(toTemplateText('.*?Restarting.*?')).toBe('Restarting');
-    });
+    it('omits relevanceScore when _score is not present', () => {
+      const response: ESQLSearchResponse = {
+        columns: [
+          { name: 'pattern', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
+        values: [['Error pattern', 10]],
+      };
 
-    it('keeps apostrophes inside literals', () => {
-      expect(toTemplateText(".+?the.+?won't.+?do.+?anything.*?")).toBe("the won't do anything");
-    });
+      const patterns = parseEsqlPatternResponse(response);
 
-    it('falls back to the raw value when the pattern is only wildcards', () => {
-      expect(toTemplateText('.*?')).toBe('.*?');
-      expect(toTemplateText('.+?')).toBe('.+?');
+      expect(patterns).toHaveLength(1);
+      expect(patterns[0]).not.toHaveProperty('relevanceScore');
     });
   });
 });

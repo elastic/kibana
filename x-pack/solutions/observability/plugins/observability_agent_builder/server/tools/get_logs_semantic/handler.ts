@@ -33,6 +33,7 @@ export interface GetLogsSemanticResult {
     firstSeen: string;
     lastSeen: string;
     sample: { _id?: string; _index?: string; [key: string]: unknown };
+    relevanceScore?: number;
   }>;
   /** Sum of the pattern counts, not a document count of the index. */
   totalCount: number;
@@ -118,5 +119,6 @@ function toPattern(pattern: LogPattern): GetLogsSemanticResult['patterns'][numbe
         Object.entries(rest).map(([key, value]) => [key, truncateFieldValue(value)])
       ),
     },
+    ...(pattern.relevanceScore !== undefined ? { relevanceScore: pattern.relevanceScore } : {}),
   };
 }
