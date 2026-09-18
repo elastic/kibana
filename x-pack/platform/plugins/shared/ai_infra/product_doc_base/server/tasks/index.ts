@@ -33,7 +33,7 @@ export {
   scheduleEnsureSecurityLabsUpToDateTask,
   ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID,
 } from './ensure_security_labs_up_to_date';
-export { scheduleInstallAllTask, isInstallAllTaskPending } from './install_all';
+export { scheduleInstallAllTask, getInstallAllTaskStatus } from './install_all';
 export {
   scheduleUninstallAllTask,
   UNINSTALL_ALL_TASK_ID,

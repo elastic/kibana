@@ -14,7 +14,7 @@ import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/p
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
-  isInstallAllTaskPending,
+  getInstallAllTaskStatus,
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
@@ -101,6 +101,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       taskManager: this.taskManager,
       logger: this.logger,
       inferenceId,
+      force,
     });
 
     if (request) {
@@ -348,13 +349,20 @@ export class DocumentationManager implements DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
    */
   async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
-    // A failed install task is not reported here: its outcome is in the per-product install status
-    if (await isInstallAllTaskPending({ taskManager: this.taskManager, inferenceId })) {
+    const taskStatus = await getInstallAllTaskStatus({
+      taskManager: this.taskManager,
+      inferenceId,
+    });
+    if (taskStatus === 'pending') {
       return { status: 'installing' };
     }
 
     const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
-    const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
+    // A failed install task may have failed before writing any product status
+    const overallStatus =
+      taskStatus === 'failed'
+        ? 'error'
+        : getOverallStatus(Object.values(installStatus).map((v) => v.status));
     return { status: overallStatus, installStatus };
   }
 

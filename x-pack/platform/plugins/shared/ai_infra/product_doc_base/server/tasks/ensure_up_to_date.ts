@@ -13,18 +13,13 @@ import type {
 import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
-  chunkedTaskStateSchemaByVersion,
-  getInferenceScope,
-  isProductName,
-  runInstallChunk,
-  type ChunkedTaskState,
+  runTaskUnderInstallLock,
+  scheduleRequestTask,
   type InstallLockManager,
   type RequestTaskParams,
 } from './utils';
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
-
-const OPENAPI_SPEC_ITEM = 'openapi';
 
 interface EnsureUpToDateTaskParams extends RequestTaskParams {
   forceUpdate?: boolean;
@@ -42,8 +37,8 @@ export const registerEnsureUpToDateTaskDefinition = ({
   taskManager.registerTaskDefinitions({
     [ENSURE_DOC_UP_TO_DATE_TASK_TYPE]: {
       title: 'Ensure product documentation up to date task',
-      timeout: '10m',
-      maxAttempts: 3,
+      timeout: '20m',
+      maxAttempts: 5,
       createTaskRunner: ({ taskInstance }) => {
         const { inferenceId, forceUpdate, requestedAt } =
           taskInstance.params as EnsureUpToDateTaskParams;
@@ -51,59 +46,63 @@ export const registerEnsureUpToDateTaskDefinition = ({
         return {
           async run() {
             const { packageInstaller, logger } = getServices();
-            const { remaining, attempts } = taskInstance.state as ChunkedTaskState;
-            const items = remaining ?? [
-              ...(await packageInstaller.getProductsToUpdate({ inferenceId, forceUpdate })),
-              OPENAPI_SPEC_ITEM,
-            ];
-            return runInstallChunk({
+            return runTaskUnderInstallLock({
               lockManager,
-              logger,
-              items,
-              attempts,
-              // An item is superseded by a later uninstall of its own resource only
-              isSuperseded: (item) =>
-                packageInstaller.wasUninstalledSince({
-                  inferenceId,
-                  since,
-                  resourceType:
-                    item === OPENAPI_SPEC_ITEM
-                      ? ResourceTypes.openapiSpec
-                      : ResourceTypes.productDoc,
-                }),
-              // Each item re-checks under the lock whether it still needs updating, so concurrent
-              // update tasks for the same inference ID do not install it twice
-              install: async (item) => {
-                if (item === OPENAPI_SPEC_ITEM) {
-                  await packageInstaller.ensureOpenApiSpecUpToDate({
+              metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
+              run: async () => {
+                const superseded = async (
+                  resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec
+                ) => {
+                  const result = await packageInstaller.wasUninstalledSince({
                     inferenceId,
-                    forceUpdate,
                     since,
+                    resourceType,
                   });
-                } else if (isProductName(item)) {
+                  if (result) {
+                    logger.info(
+                      `Stopping product documentation update for [${inferenceId}]: superseded by a later uninstall of ${resourceType}`
+                    );
+                  }
+                  return result;
+                };
+                for (const productName of await packageInstaller.getProductsToUpdate({
+                  inferenceId,
+                  forceUpdate,
+                })) {
+                  if (await superseded(ResourceTypes.productDoc)) {
+                    return;
+                  }
+                  // Re-checked under the lock so concurrent update tasks do not install it twice
                   await packageInstaller.updateProductIfNeeded({
-                    productName: item,
+                    productName,
                     inferenceId,
                     forceUpdate,
                     since,
                   });
                 }
+                if (await superseded(ResourceTypes.openapiSpec)) {
+                  return;
+                }
+                await packageInstaller.ensureOpenApiSpecUpToDate({
+                  inferenceId,
+                  forceUpdate,
+                  since,
+                });
               },
-              metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
             });
           },
         };
       },
-      stateSchemaByVersion: chunkedTaskStateSchemaByVersion,
+      stateSchemaByVersion: {},
     },
   });
 };
 
 /**
- * Schedules a new update task for this request. Every request gets its own task instance with its
- * own params, so a forced update cannot be absorbed by an ordinary one that is still running.
+ * Schedules an update task for this request. A pending update with the same `forceUpdate` for the
+ * inference ID is reused, so e.g. every node's startup does not queue its own update.
  */
-export const scheduleEnsureUpToDateTask = async ({
+export const scheduleEnsureUpToDateTask = ({
   taskManager,
   logger,
   inferenceId,
@@ -119,12 +118,12 @@ export const scheduleEnsureUpToDateTask = async ({
     forceUpdate,
     requestedAt: new Date().toISOString(),
   };
-  const { id } = await taskManager.schedule({
+  return scheduleRequestTask({
+    taskManager,
+    logger,
     taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
     params,
-    state: {},
-    scope: ['productDoc', getInferenceScope(inferenceId)],
+    reusePending: true,
+    matches: (task) => Boolean(task.params.forceUpdate) === Boolean(forceUpdate),
   });
-  logger.info(`Task ${id} scheduled to update product documentation for [${inferenceId}]`);
-  return id;
 };

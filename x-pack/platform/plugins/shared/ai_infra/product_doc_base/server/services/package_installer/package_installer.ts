@@ -270,6 +270,51 @@ export class PackageInstaller {
   }
 
   /**
+   * Installs a product unless another task already installed the selected version after `since`
+   * (or an earlier attempt of the same task did), so overlapping installs and retries do not download
+   * and rebuild it again. Resolves to whether an install ran.
+   */
+  async installProductIfNeeded(params: {
+    productName: ProductName;
+    inferenceId: string;
+    since: Date;
+  }): Promise<boolean> {
+    const { productName, inferenceId, since } = params;
+    const [repositoryVersions, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+    ]);
+    const availableVersions = repositoryVersions[productName];
+    if (!availableVersions?.length) {
+      this.log.warn(`No version found for product [${productName}]`);
+      return false;
+    }
+    const productState = installStatuses[productName];
+    const selectedVersion = selectVersion(
+      this.currentVersion,
+      availableVersions,
+      this.isServerless
+    );
+    if (
+      productState &&
+      !isUpdateNeeded({
+        status: productState.status,
+        version: productState.version,
+        updatedAt: productState.updatedAt,
+        selectedVersion,
+        forceUpdate: true,
+        since,
+      })
+    ) {
+      this.log.info(
+        `Skipping install of product [${productName}]: version [${selectedVersion}] was installed after this request`
+      );
+      return false;
+    }
+    return this.installProduct({ productName, inferenceId });
+  }
+
+  /**
    * Re-installs a product planned for update unless that is no longer needed: it was uninstalled in
    * the meantime, or it already is at the selected version and, for forced updates, was (re)installed
    * after `since` by another task. Resolves to whether an install ran.

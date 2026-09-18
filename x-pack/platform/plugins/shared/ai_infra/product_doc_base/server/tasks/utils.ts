@@ -8,12 +8,10 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
-  throwUnrecoverableError,
   TaskStatus,
+  type ConcreteTaskInstance,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import {
   INSTALL_LOCK_RETRY_DELAY_MS,
@@ -23,45 +21,9 @@ import {
 
 export type { InstallLockManager };
 
-const allProductNames = Object.values(DocumentationProduct) as ProductName[];
-
-// Items are at most every product plus the OpenAPI spec
-const itemsSchema = schema.arrayOf(schema.string({ maxLength: 100 }), {
-  maxSize: allProductNames.length + 1,
-});
-
-export const chunkedTaskStateSchema = schema.object({
-  remaining: schema.maybe(itemsSchema),
-  // Failed attempts for the current item
-  attempts: schema.maybe(schema.number({ min: 0 })),
-});
-
-export const MAX_INSTALL_ITEM_RETRIES = 5;
-const INSTALL_ITEM_RETRY_BASE_DELAY_MS = 30_000;
-const INSTALL_ITEM_RETRY_MAX_DELAY_MS = 10 * 60 * 1000;
-
-// 30s, 1m, 2m, 4m, 8m
-export const installItemRetryDelayMs = (failedAttempts: number) =>
-  Math.min(
-    INSTALL_ITEM_RETRY_BASE_DELAY_MS * 2 ** (failedAttempts - 1),
-    INSTALL_ITEM_RETRY_MAX_DELAY_MS
-  );
-
-export type ChunkedTaskState = TypeOf<typeof chunkedTaskStateSchema>;
-
-export const chunkedTaskStateSchemaByVersion = {
-  1: {
-    schema: chunkedTaskStateSchema,
-    up: (state: Record<string, unknown>) => state,
-  },
-};
-
-export const isProductName = (value: string): value is ProductName =>
-  allProductNames.includes(value as ProductName);
-
 /**
  * Params shared by the per-request install and update tasks. Each request schedules its own task
- * instance, so the request time is immutable and never mixed up with an earlier request's plan.
+ * instance, so the request time is immutable and never mixed up with an earlier request.
  */
 export interface RequestTaskParams {
   inferenceId: string;
@@ -73,14 +35,94 @@ export interface RequestTaskParams {
 export const getInferenceScope = (inferenceId: string): string =>
   `productDoc:inference:${isImpliedDefaultElserInferenceId(inferenceId) ? 'default' : inferenceId}`;
 
-const PENDING_TASK_STATUSES = [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running];
+export const PENDING_TASK_STATUSES = [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running];
 
 /**
- * Whether a task of `taskType` for the given inference scope is still pending, i.e. scheduled,
- * claimed or running. Completed tasks are removed by Task Manager; failed ones are ignored here
- * because their outcome is recorded in the installation status.
+ * Tasks of `taskType` for the inference ID in one of `statuses`. Completed tasks are removed by Task
+ * Manager, so only pending and failed ones can be found.
  */
-export const isTaskPending = async ({
+export const findTasks = async ({
+  taskManager,
+  taskType,
+  inferenceId,
+  statuses,
+}: {
+  taskManager: TaskManagerStartContract;
+  taskType: string;
+  inferenceId: string;
+  statuses: TaskStatus[];
+}): Promise<ConcreteTaskInstance[]> => {
+  const { docs } = await taskManager.fetch({
+    size: 10,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'task.taskType': taskType } },
+          { term: { 'task.scope': getInferenceScope(inferenceId) } },
+          { terms: { 'task.status': statuses } },
+        ],
+      },
+    },
+  });
+  return docs;
+};
+
+/**
+ * Schedules a new task instance for a request, unless `reusePending` is set and a pending task of the
+ * same type for the inference ID (optionally matching `matches`) exists, in which case that task is
+ * reused. Failed leftovers of earlier requests are removed so the status only reflects the latest one.
+ */
+export const scheduleRequestTask = async <P extends RequestTaskParams>({
+  taskManager,
+  logger,
+  taskType,
+  params,
+  reusePending,
+  matches = () => true,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  taskType: string;
+  params: P;
+  reusePending: boolean;
+  matches?: (task: ConcreteTaskInstance) => boolean;
+}): Promise<string> => {
+  const { inferenceId } = params;
+  if (reusePending) {
+    const [pending] = (
+      await findTasks({ taskManager, taskType, inferenceId, statuses: PENDING_TASK_STATUSES })
+    ).filter(matches);
+    if (pending) {
+      logger.debug(`Reusing pending task ${pending.id} (${taskType}) for [${inferenceId}]`);
+      return pending.id;
+    }
+  }
+  const failed = await findTasks({
+    taskManager,
+    taskType,
+    inferenceId,
+    statuses: [TaskStatus.Failed],
+  });
+  if (failed.length > 0) {
+    await taskManager.bulkRemove(failed.map(({ id }) => id));
+  }
+  const { id } = await taskManager.schedule({
+    taskType,
+    params: { ...params },
+    state: {},
+    scope: ['productDoc', getInferenceScope(inferenceId)],
+  });
+  logger.info(`Task ${id} (${taskType}) scheduled for [${inferenceId}]`);
+  return id;
+};
+
+export type RequestTaskStatus = 'pending' | 'failed' | 'none';
+
+/**
+ * Whether a task of `taskType` for the inference ID is pending, or the latest request failed. Failed
+ * tasks are removed when a new request is scheduled, so a remaining one belongs to the latest request.
+ */
+export const getRequestTaskStatus = async ({
   taskManager,
   taskType,
   inferenceId,
@@ -88,27 +130,23 @@ export const isTaskPending = async ({
   taskManager: TaskManagerStartContract;
   taskType: string;
   inferenceId: string;
-}): Promise<boolean> => {
-  const { docs } = await taskManager.fetch({
-    size: 1,
-    query: {
-      bool: {
-        filter: [
-          { term: { 'task.taskType': taskType } },
-          { term: { 'task.scope': getInferenceScope(inferenceId) } },
-          { terms: { 'task.status': PENDING_TASK_STATUSES } },
-        ],
-      },
-    },
+}): Promise<RequestTaskStatus> => {
+  const tasks = await findTasks({
+    taskManager,
+    taskType,
+    inferenceId,
+    statuses: [...PENDING_TASK_STATUSES, TaskStatus.Failed],
   });
-  return docs.length > 0;
+  if (tasks.some(({ status }) => status !== TaskStatus.Failed)) {
+    return 'pending';
+  }
+  return tasks.length > 0 ? 'failed' : 'none';
 };
 
-// Re-runs the task shortly without consuming an attempt, e.g. while another install holds the lock
-const lockRetryAt = () => new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS);
-
 /**
- * Runs `run` under the cluster-wide install lock, deferring the task run when another install holds it.
+ * Runs `run` under the cluster-wide install lock so that at most one documentation install runs at a
+ * time across all tasks and Kibana nodes. When another install holds the lock the run is deferred
+ * instead of failing an attempt. Errors propagate so Task Manager retries the task with backoff.
  */
 export const runTaskUnderInstallLock = async ({
   lockManager,
@@ -120,85 +158,9 @@ export const runTaskUnderInstallLock = async ({
   metadata?: Record<string, unknown>;
 }) => {
   const acquired = await tryWithInstallLock({ lockManager, run, metadata });
-  return acquired ? { state: {} } : { state: {}, runAt: lockRetryAt() };
-};
-
-/**
- * Installs the first of `items` under the cluster-wide install lock, so that at most one documentation
- * install runs at a time across all tasks and Kibana nodes. When another install holds the lock the
- * item is kept and the run is deferred instead of failing an attempt. The lock is released between
- * items and does not order operations, so `isSuperseded` is checked under the lock before every item:
- * when a newer request (an uninstall of that item's resource) took effect since this task's request,
- * the task stops instead of recreating the documentation. A failing item is retried with exponential backoff up to
- * `MAX_INSTALL_ITEM_RETRIES` times, after which the task fails without further Task Manager retries.
- */
-export const runInstallChunk = async <T extends string>({
-  lockManager,
-  logger,
-  items,
-  attempts = 0,
-  install,
-  isSuperseded,
-  metadata,
-}: {
-  lockManager: InstallLockManager;
-  logger: Logger;
-  items: T[];
-  attempts?: number;
-  install: (item: T) => Promise<unknown>;
-  isSuperseded: (item: T) => Promise<boolean>;
-  metadata?: Record<string, unknown>;
-}) => {
-  const [item, ...rest] = items;
-  if (!item) {
-    return { state: {} };
-  }
-  let superseded = false;
-  let installError: Error | undefined;
-  const acquired = await tryWithInstallLock({
-    lockManager,
-    run: async () => {
-      superseded = await isSuperseded(item);
-      if (superseded) {
-        return;
-      }
-      try {
-        await install(item);
-      } catch (e) {
-        installError = e as Error;
-      }
-    },
-    metadata: { ...metadata, item },
-  });
-  if (!acquired) {
-    return { state: { remaining: items, ...(attempts ? { attempts } : {}) }, runAt: lockRetryAt() };
-  }
-  if (superseded) {
-    logger.info(`Documentation item [${item}] skipped: a later request superseded this task`);
-    return { state: {} };
-  }
-  if (installError) {
-    const failedAttempts = attempts + 1;
-    if (failedAttempts > MAX_INSTALL_ITEM_RETRIES) {
-      logger.error(
-        `Giving up on documentation item [${item}] after ${failedAttempts} attempts: ${installError.message}`
-      );
-      throwUnrecoverableError(installError);
-    }
-    const delayMs = installItemRetryDelayMs(failedAttempts);
-    logger.warn(
-      `Documentation item [${item}] failed (attempt ${failedAttempts}), retrying in ${
-        delayMs / 1000
-      }s: ${installError.message}`
-    );
-    return {
-      state: { remaining: items, attempts: failedAttempts },
-      runAt: new Date(Date.now() + delayMs),
-    };
-  }
-  // Returning `runAt` makes Task Manager run the task again for the next item, so a run only holds
-  // a capacity slot for one item and completed items are not redone when a later attempt fails.
-  return rest.length > 0 ? { state: { remaining: rest }, runAt: new Date() } : { state: {} };
+  return acquired
+    ? { state: {} }
+    : { state: {}, runAt: new Date(Date.now() + INSTALL_LOCK_RETRY_DELAY_MS) };
 };
 
 export const isTaskCurrentlyRunningError = (err: Error): boolean => {

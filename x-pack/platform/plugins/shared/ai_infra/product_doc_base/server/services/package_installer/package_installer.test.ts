@@ -463,6 +463,69 @@ describe('PackageInstaller', () => {
     });
   });
 
+  describe('installProductIfNeeded', () => {
+    const since = new Date('2026-09-17T10:00:00.000Z');
+    const params = { productName: 'kibana' as const, inferenceId: '.elser', since };
+
+    beforeEach(() => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
+      jest.spyOn(packageInstaller, 'installProduct').mockResolvedValue(true);
+    });
+
+    it('installs a product that is not installed', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+      } as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
+      expect(packageInstaller.installProduct).toHaveBeenCalledWith({
+        productName: 'kibana',
+        inferenceId: '.elser',
+      });
+    });
+
+    it('installs a product that is at an older version', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.15', updatedAt: '2026-09-17T10:30:00.000Z' },
+      } as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
+    });
+
+    it('skips a product another task installed at the selected version after the request', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.16', updatedAt: '2026-09-17T10:30:00.000Z' },
+      } as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(false);
+      expect(packageInstaller.installProduct).not.toHaveBeenCalled();
+    });
+
+    it('reinstalls a product that was at the selected version before the request', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '8.16', updatedAt: '2026-09-17T09:00:00.000Z' },
+      } as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
+    });
+
+    it('skips when the repository has no version for the product', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: [] });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({} as never);
+
+      await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(false);
+      expect(logger.warn).toHaveBeenCalledWith('No version found for product [kibana]');
+    });
+
+    it('propagates status read failures', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
+
+      await expect(packageInstaller.installProductIfNeeded(params)).rejects.toThrow(
+        'es unavailable'
+      );
+    });
+  });
+
   describe('updateProductIfNeeded', () => {
     const since = new Date('2026-09-17T10:00:00.000Z');
     const params = { productName: 'kibana' as const, inferenceId: '.elser', since };

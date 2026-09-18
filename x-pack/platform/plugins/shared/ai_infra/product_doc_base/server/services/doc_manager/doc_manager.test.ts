@@ -23,7 +23,7 @@ import {
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
   scheduleEnsureSecurityLabsUpToDateTask,
-  isInstallAllTaskPending,
+  getInstallAllTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -45,8 +45,8 @@ const scheduleEnsureSecurityLabsUpToDateTaskMock =
 const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
   typeof waitUntilTaskCompleted
 >;
-const isInstallAllTaskPendingMock = isInstallAllTaskPending as jest.MockedFn<
-  typeof isInstallAllTaskPending
+const getInstallAllTaskStatusMock = getInstallAllTaskStatus as jest.MockedFn<
+  typeof getInstallAllTaskStatus
 >;
 
 const DEFAULT_INFERENCE_ID = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
@@ -119,7 +119,7 @@ describe('DocumentationManager', () => {
     scheduleEnsureUpToDateTaskMock.mockReset();
     scheduleEnsureSecurityLabsUpToDateTaskMock.mockReset();
     waitUntilTaskCompletedMock.mockReset();
-    isInstallAllTaskPendingMock.mockReset();
+    getInstallAllTaskStatusMock.mockReset();
   });
 
   describe('#install', () => {
@@ -128,7 +128,7 @@ describe('DocumentationManager', () => {
         licensingMock.createLicense({ license: { type: 'enterprise' } })
       );
 
-      isInstallAllTaskPendingMock.mockResolvedValue(false);
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
@@ -143,6 +143,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: DEFAULT_INFERENCE_ID,
+        force: false,
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -214,7 +215,7 @@ describe('DocumentationManager', () => {
 
   describe('#update', () => {
     beforeEach(() => {
-      isInstallAllTaskPendingMock.mockResolvedValue(false);
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
@@ -264,7 +265,7 @@ describe('DocumentationManager', () => {
 
   describe('#ensureDefaultProductDocumentation', () => {
     beforeEach(() => {
-      isInstallAllTaskPendingMock.mockResolvedValue(false);
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
       licensing.getLicense.mockResolvedValue(
         licensingMock.createLicense({ license: { type: 'enterprise' } })
       );
@@ -285,6 +286,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
+        force: false,
       });
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
@@ -317,6 +319,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
+        force: false,
       });
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
@@ -473,7 +476,7 @@ describe('DocumentationManager', () => {
 
   describe('#updateAll', () => {
     beforeEach(() => {
-      isInstallAllTaskPendingMock.mockResolvedValue(false);
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
@@ -502,7 +505,7 @@ describe('DocumentationManager', () => {
 
   describe('#uninstall', () => {
     beforeEach(() => {
-      isInstallAllTaskPendingMock.mockResolvedValue(false);
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
