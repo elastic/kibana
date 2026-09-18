@@ -9,6 +9,7 @@
 
 import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import type {
+  DataAttributeProps,
   EuiBadgeProps,
   EuiButtonProps,
   EuiContextMenuPanelDescriptor,
@@ -178,14 +179,6 @@ export type FlyoutFooterMenuPanel = Omit<
   title?: string;
   content?: never;
 };
-
-/**
- * Arbitrary `data-*` attributes. Equivalent to EUI's own `DataAttributeProps`, which is
- * not exported from `@elastic/eui`.
- */
-interface DataAttributeProps {
-  [key: `data-${string}`]: string | undefined;
-}
 
 /**
  * Trigger button props the template sets itself, so a consumer value would be discarded.
