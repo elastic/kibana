@@ -107,8 +107,10 @@ export const pollActionResponses = async (
         track_total_hits: true,
         // The transform keys docs by (@timestamp, action_id, agent_id), so a
         // retried flush double-counts one agent. Count distinct agents, and
-        // how many of those responses carry an error (the same classification
-        // query.action_results.dsl.ts applies: error.keyword empty = success).
+        // how many of those responses carry an error. osquerybeat sets `error`
+        // only when the query failed — never to an empty string — so `exists`
+        // selects the same responses the query.action_results.dsl.ts
+        // classification reports as `error` (doc['error.keyword'].size() > 0).
         aggs: {
           distinct_agents: {
             cardinality: { field: 'agent_id' },
