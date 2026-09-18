@@ -2429,7 +2429,7 @@ class AgentPolicyService {
       .getInternalUserSOClientWithoutSpaceExtension()
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        filter: `${savedObjectType}.attributes.download_source_ids:${escapedId}`,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
         fields: ['id'],
         perPage: 1,
         namespaces: ['*'],

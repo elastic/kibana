@@ -1805,7 +1805,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(getAgentPolicyResponse.item.download_source_ids).to.eql([secondaryId]);
-        expect(getAgentPolicyResponse.item.download_source_id).to.eql(null);
+        expect(getAgentPolicyResponse.item.download_source_id).to.eql(secondaryId);
       });
     });
 
