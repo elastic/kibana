@@ -650,6 +650,45 @@ describe('checkUploadPackageAssetPrivileges', () => {
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
 
+  it('reads installed_kibana (not additional-Space refs) when detecting gated types to remove for a streaming package', async () => {
+    // Streaming packages save all refs to installed_kibana regardless of Space
+    // (saveKibanaAssetsRefs is called without saveAsAdditionnalSpace).
+    // cleanUpUnusedKibanaAssetsStep reads installed_kibana unconditionally.
+    // Preflight must read the same source — otherwise additional_spaces_installed_kibana[spaceId]
+    // is empty, the check is skipped, and cleanup removes the security rule via internal client.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'security_detection_engine-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: 'primary-space',
+        // Streaming wrote the ref to installed_kibana (primary), not additional Space refs.
+        installed_kibana: [{ id: 'existing-rule', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'request-space': [], // empty — streaming never writes here
+        },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest, mockArchiveBuffer, mockContentType, 'request-space',
+      'security_detection_engine', installation
+    );
+
+    // Must detect the security-rule in installed_kibana and require rules-all.
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      ['request-space'],
+      expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
+    );
+    expect(result).toEqual(['request-space']);
+  });
+
   it('checks only the request space for a streaming package even when installed in additional spaces', async () => {
     // security_detection_engine uses streaming install, which writes only to the request Space.
     // Preflight must mirror that — do not require privileges in the other Spaces.

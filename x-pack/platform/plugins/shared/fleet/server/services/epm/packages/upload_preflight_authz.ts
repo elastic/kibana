@@ -127,6 +127,14 @@ export async function checkUploadPackageAssetPrivileges(
     ];
   }
 
+  // Streaming packages persist all Kibana asset refs in installed_kibana regardless of which
+  // Space triggered the install (saveKibanaAssetsRefs is called without saveAsAdditionnalSpace).
+  // cleanUpUnusedKibanaAssetsStep reads installed_kibana unconditionally for the same reason.
+  // Mirror that here so the preflight sees the same ref set as cleanup — otherwise a benign
+  // upload in an additional Space would find additional_spaces_installed_kibana[spaceId] empty,
+  // skip the privilege check, and let cleanup delete gated assets via the internal client.
+  const isStreamingPackage = pkgName != null && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
+
   // Build per-Space gated type sets: archive types (written to every destination Space) union
   // each Space's own existing gated types (which cleanUpUnusedKibanaAssetsStep would remove).
   // Keeping these sets per-Space avoids requiring privileges for a type in a Space that never
@@ -137,7 +145,7 @@ export async function checkUploadPackageAssetPrivileges(
     const types = new Set(signals.gatedTypesFound);
     if (installation) {
       const refs =
-        space === effectivePrimarySpace
+        isStreamingPackage || space === effectivePrimarySpace
           ? installation.attributes.installed_kibana
           : installation.attributes.additional_spaces_installed_kibana?.[space];
       for (const ref of refs ?? []) {
