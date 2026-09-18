@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-  ARTIFACT_VALUE_LIMITS,
-  RUNBOOK_ARTIFACT_TYPE,
-} from '@kbn/alerting-v2-constants';
+import { Parser } from '@elastic/esql';
+import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
+import { z } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
+  isRecoveryTransitionConsistentWithStrategy,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -21,9 +20,22 @@ import {
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
+  bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
+  ruleTagsParamsSchema,
+  findRulesRequestSchema,
 } from './rule_data_schema';
-import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
+import { tagsResponseSchema } from './common';
+import {
+  FIND_MAX_RESULT_WINDOW,
+  ID_MAX_LENGTH,
+  MAX_ARTIFACT_DATA_FIELDS,
+  MAX_ARTIFACT_DATA_LENGTH,
+  MAX_BULK_ITEMS,
+  MAX_ESQL_QUERY_LENGTH,
+  MAX_FIELD_NAME_LENGTH,
+} from './constants';
 
 const validCreateData = {
   kind: 'alert',
@@ -52,6 +64,7 @@ describe('createRuleDataSchema', () => {
         metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
+        recovery_strategy: 'no_breach',
         grouping: { fields: ['host.name'] },
         state_transition: {
           pending_operator: 'AND',
@@ -61,7 +74,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       });
 
       expect(result).toEqual(
@@ -69,6 +82,7 @@ describe('createRuleDataSchema', () => {
           metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
+          recovery_strategy: 'no_breach',
           grouping: { fields: ['host.name'] },
           state_transition: {
             pending_operator: 'AND',
@@ -78,7 +92,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
-          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+          artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         })
       );
     });
@@ -88,13 +102,13 @@ describe('createRuleDataSchema', () => {
       expect(result.kind).toBe('signal');
     });
 
-    it('strips unknown properties', () => {
-      const result = createRuleDataSchema.parse({
-        ...validCreateData,
-        unknownProp: 'should be removed',
-      });
-
-      expect(result).not.toHaveProperty('unknownProp');
+    it('rejects unknown top-level fields (strict)', () => {
+      expect(() =>
+        createRuleDataSchema.parse({
+          ...validCreateData,
+          unknownProp: 'should be rejected',
+        })
+      ).toThrow();
     });
   });
 
@@ -323,7 +337,7 @@ describe('createRuleDataSchema', () => {
     it('accepts a standalone query with a no_data block', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        no_data_strategy: 'emit',
+        no_data_strategy: 'last_known_status',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -335,6 +349,19 @@ describe('createRuleDataSchema', () => {
         breach: { query: 'FROM logs-* | LIMIT 1' },
         no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
       });
+    });
+
+    it('rejects no_data_strategy "emit"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data_strategy: 'emit',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
     });
 
     it('accepts no_data_strategy "last_known_status"', () => {
@@ -362,6 +389,29 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts a composed query without a breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a composed query with an empty breach segment', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: '' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a composed query with a whitespace-only breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -372,6 +422,19 @@ describe('createRuleDataSchema', () => {
         },
       });
       expect(result.success).toBe(false);
+    });
+
+    it('accepts recovery_strategy "query" without a composed breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          recovery: { segment: 'WHERE cpu < 0.5' },
+        },
+      });
+      expect(result.success).toBe(true);
     });
 
     it('rejects a composed query with an invalid breach segment (compose fails ES|QL validation)', () => {
@@ -521,11 +584,11 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects a signal rule with no_data_strategy "emit"', () => {
+    it('rejects a signal rule with a no_data_strategy', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         kind: 'signal',
-        no_data_strategy: 'emit',
+        no_data_strategy: 'last_known_status',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -533,6 +596,68 @@ describe('createRuleDataSchema', () => {
         },
       });
       expect(result.success).toBe(false);
+    });
+
+    it('rejects standalone no_data_strategy "recover" when query.no_data is absent', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data_strategy: 'recover',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects standalone no_data_strategy "last_known_status" when query.no_data is absent', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data_strategy: 'last_known_status',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects no_data_strategy "none" when query.no_data is also provided', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data_strategy: 'none',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects standalone query.no_data when no_data_strategy is omitted', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts composed no_data_strategy "recover" without a no_data block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data_strategy: 'recover',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-* | STATS AVG(cpu) BY host.name',
+          breach: { segment: 'WHERE AVG(cpu) > 0.9' },
+        },
+      });
+      expect(result.success).toBe(true);
     });
   });
 
@@ -588,6 +713,7 @@ describe('createRuleDataSchema', () => {
     it('accepts state_transition with only recovering fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: {
           recovering_operator: 'OR',
           recovering_count: 5,
@@ -614,6 +740,7 @@ describe('createRuleDataSchema', () => {
     it('accepts recovering_count of 0', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: { recovering_count: 0 },
       });
 
@@ -749,81 +876,203 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('artifacts value length', () => {
-    it('accepts a runbook artifact at the maximum allowed length', () => {
+  describe('recovery delay allowed', () => {
+    it('rejects a recovering_count when recovery_strategy is unset', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
-          },
-        ],
+        state_transition: { pending_count: 0, recovering_count: 2 },
       });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a recovering_count when recovery_strategy is "none"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a recovering_timeframe when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { recovering_timeframe: '5m' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an inert recovery delay even when no_data_strategy is "recover"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        no_data_strategy: 'recover',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+        },
+        state_transition: { recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovering_count of 0 when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts pending-only state_transition when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 3 },
+      });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
+    it('accepts a recovering delay when recovery_strategy is "no_breach"', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
-          },
-        ],
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 2, recovering_timeframe: '5m' },
       });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
-            }),
-          ])
-        );
-      }
-    });
 
-    it('accepts a non-runbook artifact at the default maximum length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
-          },
-        ],
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('artifacts envelope', () => {
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
+
+    // Per-type limits are registry-enforced server-side; the envelope only caps the
+    // serialized size of `data`, which is the sole bound for unregistered types.
+    it('accepts data up to the serialized size ceiling', () => {
+      const wrapper = JSON.stringify({ value: '' }).length;
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(MAX_ARTIFACT_DATA_LENGTH - wrapper) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
+    it('rejects data above the serialized size ceiling', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(MAX_ARTIFACT_DATA_LENGTH) },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('measures structured values against the ceiling, not just strings', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { list: new Array(MAX_ARTIFACT_DATA_LENGTH).fill(1) },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts runbook-sized content, since per-type limits are registry-enforced', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT) },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('does not enforce per-type required fields at the envelope layer', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: {},
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts structured values of any shape', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { count: 12, enabled: true, nested: { a: 'b' }, list: [1, 2, 3] },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it(`accepts an artifact carrying ${MAX_ARTIFACT_DATA_FIELDS} fields`, () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: Object.fromEntries(
+          Array.from({ length: MAX_ARTIFACT_DATA_FIELDS }, (_, index) => [`field-${index}`, 'a'])
+        ),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects an artifact carrying more fields than the limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: Object.fromEntries(
+          Array.from({ length: MAX_ARTIFACT_DATA_FIELDS + 1 }, (_, index) => [
+            `field-${index}`,
+            'a',
+          ])
+        ),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a field name longer than the limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)]: 'value' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty field name', () => {
+      const result = parseWithArtifact({ id: 'artifact-1', type: 'host', data: { '': 'value' } });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects duplicate artifact ids within the array', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
-          },
+          { id: 'same', type: 'host', data: { value: 'a' } },
+          { id: 'same', type: 'runbook', data: { content: 'b' } },
         ],
       });
+
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: expect.stringContaining(
-                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
-              ),
-            }),
-          ])
-        );
-      }
     });
   });
 
@@ -857,31 +1106,41 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.description).toBe('updated description');
   });
 
+  it('accepts a non-empty tags update', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: ['prod', 'infra'] } });
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
+  it('accepts metadata.tags set to null (clear all tags)', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('rejects metadata.tags as an empty array (use null to clear)', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
-      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
     });
     expect(withArtifacts).toMatchObject({
-      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
     });
 
     const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
     expect(nullArtifacts).toMatchObject({ artifacts: null });
   });
 
-  it('accepts an enabled field set to true', () => {
-    const result = updateRuleDataSchema.parse({ enabled: true });
-    expect(result).toEqual({ enabled: true });
+  it('rejects enabled: true (enabled is not writable via update)', () => {
+    const result = updateRuleDataSchema.safeParse({ enabled: true });
+    expect(result.success).toBe(false);
   });
 
-  it('accepts an enabled field set to false', () => {
-    const result = updateRuleDataSchema.parse({ enabled: false });
-    expect(result).toEqual({ enabled: false });
-  });
-
-  it('omits enabled when not provided', () => {
-    const result = updateRuleDataSchema.parse({});
-    expect(result).not.toHaveProperty('enabled');
+  it('rejects enabled: false (enabled is not writable via update)', () => {
+    const result = updateRuleDataSchema.safeParse({ enabled: false });
+    expect(result.success).toBe(false);
   });
 
   it('accepts a state_transition object', () => {
@@ -897,9 +1156,32 @@ describe('updateRuleDataSchema', () => {
     expect(result.state_transition).toBeNull();
   });
 
-  it('strips unknown properties', () => {
-    const result = updateRuleDataSchema.parse({ unknownProp: 'removed' });
-    expect(result).not.toHaveProperty('unknownProp');
+  it('accepts a settable no_data_strategy', () => {
+    const result = updateRuleDataSchema.parse({ no_data_strategy: 'recover' });
+    expect(result.no_data_strategy).toBe('recover');
+  });
+
+  it('rejects no_data_strategy "emit"', () => {
+    const result = updateRuleDataSchema.safeParse({ no_data_strategy: 'emit' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => updateRuleDataSchema.parse({ unknownProp: 'rejected' })).toThrow();
+  });
+
+  it('rejects unknown keys inside metadata (strict)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'updated', unknownField: 'x' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unknown keys inside schedule (strict)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      schedule: { every: '5m', extra: true },
+    });
+    expect(result.success).toBe(false);
   });
 
   describe('field constraints', () => {
@@ -976,77 +1258,36 @@ describe('updateRuleDataSchema', () => {
     });
   });
 
-  describe('artifacts value length', () => {
-    it('accepts a runbook artifact at the maximum allowed length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
-          },
-        ],
+  describe('artifacts envelope', () => {
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      updateRuleDataSchema.safeParse({ artifacts: [artifact] });
+
+    it('rejects data above the serialized size ceiling', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(MAX_ARTIFACT_DATA_LENGTH) },
       });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts runbook-sized content, since per-type limits are registry-enforced', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT) },
+      });
+
       expect(result.success).toBe(true);
     });
+  });
 
-    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
-          },
-        ],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
-            }),
-          ])
-        );
-      }
-    });
+  describe('artifacts null clearing', () => {
+    it('clears artifacts with an explicit null rather than an emptied artifact', () => {
+      const result = updateRuleDataSchema.safeParse({ artifacts: null });
 
-    it('accepts a non-runbook artifact at the default maximum length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
-          },
-        ],
-      });
       expect(result.success).toBe(true);
-    });
-
-    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
-          },
-        ],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: expect.stringContaining(
-                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
-              ),
-            }),
-          ])
-        );
-      }
     });
   });
 
@@ -1133,6 +1374,28 @@ describe('getBreachEsqlQuery', () => {
       breach: { segment: 'WHERE cpu > 0.9' },
     };
     expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
+
+  it('returns base verbatim when the breach block is omitted', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
+  // Storage persists a conditionless composed rule as an empty segment, so
+  // both shapes reach this helper and must not append a trailing pipe.
+  it.each([
+    ['empty', ''],
+    ['whitespace-only', '   '],
+  ])('returns base verbatim for a %s stored breach segment', (_label, segment) => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
   });
 
   it('handles a trailing comment in base without corrupting the composed query', () => {
@@ -1239,13 +1502,22 @@ describe('getNoDataEsqlQuery', () => {
     expect(getNoDataEsqlQuery(query, 'emit')).toBe('FROM heartbeat-* | LIMIT 1');
   });
 
-  it('returns undefined for composed format (no no_data block)', () => {
+  it('returns base for composed format (base is the data-presence query)', () => {
     const query = {
       format: 'composed' as const,
       base: 'FROM metrics-*',
       breach: { segment: 'WHERE cpu > 0.9' },
     };
-    expect(getNoDataEsqlQuery(query, 'emit')).toBeUndefined();
+    expect(getNoDataEsqlQuery(query, 'emit')).toBe('FROM metrics-*');
+  });
+
+  it('returns undefined for composed format when no_data_strategy is "none"', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getNoDataEsqlQuery(query, 'none')).toBeUndefined();
   });
 
   it('returns undefined when no_data_strategy is "none"', () => {
@@ -1323,6 +1595,27 @@ describe('updateRuleBodySchema', () => {
   it('rejects a version longer than 256 characters', () => {
     expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
   });
+
+  it('documents PATCH omission for time_field, recovery_strategy, and no_data_strategy', () => {
+    const json = z.toJSONSchema(updateRuleBodySchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    }) as {
+      properties?: Record<string, { description?: string }>;
+    };
+
+    expect({
+      time_field: json.properties?.time_field?.description,
+      recovery_strategy: json.properties?.recovery_strategy?.description,
+      no_data_strategy: json.properties?.no_data_strategy?.description,
+    }).toMatchInlineSnapshot(`
+      Object {
+        "no_data_strategy": "How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to \`null\` to clear it (those runs are then ignored). If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules.",
+        "recovery_strategy": "The condition that marks an alert recovered. If omitted, the existing value is kept. Set to \`null\` to clear it (recovery is then disabled). Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. With \`none\`, the alert stays \`active\`, even after the breach query stops returning matches. \`state_transition.recovering_count\` and \`recovering_timeframe\` require an explicit \`recovery_strategy\` other than \`none\`.",
+        "time_field": "Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.",
+      }
+    `);
+  });
 });
 
 /**
@@ -1362,6 +1655,129 @@ describe('rule field immutability classification', () => {
         "time_field",
       ]
     `);
+  });
+});
+
+describe('ES|QL query length cap', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const oversized = `FROM logs-* | WHERE ${'a'.repeat(MAX_ESQL_QUERY_LENGTH)}`;
+
+  it('rejects an oversized standalone query on length alone, without invoking the parser', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+
+    const result = createRuleDataSchema.safeParse({
+      ...validCreateData,
+      query: { format: 'standalone', breach: { query: oversized } },
+    });
+
+    expect(result.success).toBe(false);
+    expect(parseErrors).not.toHaveBeenCalled();
+  });
+
+  it('rejects an oversized composed base without invoking the parser', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parse = jest.spyOn(Parser, 'parse');
+
+    const result = createRuleDataSchema.safeParse({
+      ...validCreateData,
+      query: { format: 'composed', base: oversized, breach: { segment: 'WHERE cpu > 0.9' } },
+    });
+
+    expect(result.success).toBe(false);
+    expect(parseErrors).not.toHaveBeenCalled();
+    expect(parse).not.toHaveBeenCalled();
+  });
+
+  it('does not compose or parse an oversized segment', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parse = jest.spyOn(Parser, 'parse');
+
+    const result = createRuleDataSchema.safeParse({
+      ...validCreateData,
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: `WHERE ${'a'.repeat(MAX_ESQL_QUERY_LENGTH)}` },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    expect(parse).not.toHaveBeenCalled();
+    for (const [query] of parseErrors.mock.calls) {
+      expect(query.length).toBeLessThanOrEqual(MAX_ESQL_QUERY_LENGTH);
+    }
+  });
+
+  it('still parses queries within the limit', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+
+    const result = createRuleDataSchema.safeParse(validCreateData);
+
+    expect(result.success).toBe(true);
+    expect(parseErrors).toHaveBeenCalled();
+  });
+});
+
+describe('findRulesRequestSchema', () => {
+  it('accepts an empty query', () => {
+    expect(findRulesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid query params', () => {
+    expect(
+      findRulesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        filter: 'kind: alert',
+        sort_field: 'name',
+        sort_order: 'asc',
+        search: 'cpu',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      filter: 'kind: alert',
+      sort_field: 'name',
+      sort_order: 'asc',
+      search: 'cpu',
+    });
+  });
+
+  it('coerces numeric strings for page and per_page', () => {
+    expect(findRulesRequestSchema.parse({ page: '2', per_page: '50' })).toEqual({
+      page: 2,
+      per_page: 50,
+    });
+  });
+
+  it.each([0, -1, 1.5, 'abc', FIND_MAX_RESULT_WINDOW + 1, 1e9])('rejects page %p', (page) => {
+    expect(findRulesRequestSchema.safeParse({ page }).success).toBe(false);
+  });
+
+  it.each([0, 1.5, 1001])('rejects per_page %p', (perPage) => {
+    expect(findRulesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
+  });
+
+  it('accepts the last page inside the max result window', () => {
+    expect(findRulesRequestSchema.safeParse({ page: 10, per_page: 1000 }).success).toBe(true);
+  });
+
+  it('rejects a page beyond the max result window', () => {
+    const result = findRulesRequestSchema.safeParse({ page: 11, per_page: 1000 });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('applies the default page size to the result window check when per_page is omitted', () => {
+    expect(findRulesRequestSchema.safeParse({ page: 500 }).success).toBe(true);
+    expect(findRulesRequestSchema.safeParse({ page: 501 }).success).toBe(false);
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findRulesRequestSchema.parse({ unknown_key: 'kind: alert' })).toThrow();
   });
 });
 
@@ -1422,15 +1838,15 @@ describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
     kind: 'alert' as const,
-    metadata: { name: 'r' },
+    metadata: { name: 'r', version: 1 },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    createdBy: 'user-a',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user-a',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
   };
 
   it('accepts an empty rules array', () => {
@@ -1446,5 +1862,219 @@ describe('bulkGetRulesResponseSchema', () => {
 
   it('rejects a missing rules field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('bulkCreateRulesRequestSchema', () => {
+  const validItem = {
+    kind: 'alert',
+    metadata: { name: 'test rule' },
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  };
+
+  it('accepts a single item and defaults enabled to true', () => {
+    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0].enabled).toBe(true);
+    expect(result.rules[0].id).toBeUndefined();
+  });
+
+  it('accepts client-supplied id and enabled: false', () => {
+    const result = bulkCreateRulesRequestSchema.parse({
+      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+    });
+    expect(result.rules[0].id).toBe('rule-1');
+    expect(result.rules[0].enabled).toBe(false);
+  });
+
+  it('accepts up to MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
+  });
+
+  it('rejects an empty rules array', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
+  });
+
+  it('rejects duplicate client-supplied ids', () => {
+    expect(() =>
+      bulkCreateRulesRequestSchema.parse({
+        rules: [
+          { ...validItem, id: 'same-id' },
+          { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+  });
+
+  it('rejects an item that fails create-rule refinements', () => {
+    expect(() =>
+      bulkCreateRulesRequestSchema.parse({
+        rules: [{ ...validItem, kind: 'signal', recovery_strategy: 'no_breach' }],
+      })
+    ).toThrow();
+  });
+});
+
+describe('bulkCreateRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r', version: 1 },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts created rules and an empty errors array', () => {
+    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts per-item errors without created rules', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      rules: [],
+      errors: [
+        {
+          id: 'rule-1',
+          error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
+        },
+      ],
+    });
+    expect(result.rules).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
+  });
+});
+
+describe('ruleTagsParamsSchema', () => {
+  it('accepts an empty object', () => {
+    expect(ruleTagsParamsSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid search and kind', () => {
+    expect(ruleTagsParamsSchema.parse({ search: 'cpu', kind: 'alert' })).toEqual({
+      search: 'cpu',
+      kind: 'alert',
+    });
+  });
+
+  it('accepts kind: signal', () => {
+    expect(ruleTagsParamsSchema.parse({ kind: 'signal' })).toEqual({ kind: 'signal' });
+  });
+
+  it('rejects search longer than 256 characters', () => {
+    expect(() => ruleTagsParamsSchema.parse({ search: 'a'.repeat(257) })).toThrow();
+  });
+
+  it('rejects invalid kind', () => {
+    expect(() => ruleTagsParamsSchema.parse({ kind: 'unknown' })).toThrow();
+  });
+
+  it('rejects the removed filter key', () => {
+    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => ruleTagsParamsSchema.parse({ foo: 'bar' })).toThrow();
+  });
+});
+
+describe('tagsResponseSchema', () => {
+  it('accepts a tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: ['a', 'b'] })).toEqual({ tags: ['a', 'b'] });
+  });
+
+  it('accepts an empty tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: [] })).toEqual({ tags: [] });
+  });
+
+  it('rejects a missing tags field', () => {
+    expect(() => tagsResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('isRecoveryTransitionConsistentWithStrategy', () => {
+  it('returns true when recovery is enabled, regardless of recovering delay', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+      })
+    ).toBe(true);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'query',
+        state_transition: { recovering_count: 3 },
+      })
+    ).toBe(true);
+  });
+
+  it('returns true when recovery is disabled but no recovering delay is set', () => {
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: 'none' })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: null })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({})).toBe(true);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: {},
+      })
+    ).toBe(true);
+  });
+
+  it('rejects recovering_count 0 when recovery is disabled (immediate recovery is not a delay)', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 0 },
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for a positive recovering delay when recovery is disabled', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 1 },
+      })
+    ).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: null,
+        state_transition: { recovering_timeframe: '5m' },
+      })
+    ).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({ state_transition: { recovering_count: 2 } })
+    ).toBe(false);
   });
 });

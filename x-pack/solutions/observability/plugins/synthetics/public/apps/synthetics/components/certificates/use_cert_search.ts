@@ -7,7 +7,7 @@
 
 import { useContext, useEffect } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getCertsListAction, selectCertsListState } from '../../state/certs';
 import {
   DEFAULT_DIRECTION,
@@ -25,11 +25,12 @@ export const useCertSearch = ({
   direction = DEFAULT_DIRECTION,
   monitorTypes,
   browserResourceTypes,
-  party,
+  certOrigin,
   tags,
   issuers,
   notValidAfter,
   remoteNames,
+  showFromAllSpaces,
 }: GetCertsParams): CertResult & { isLoading?: boolean } => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
@@ -45,11 +46,12 @@ export const useCertSearch = ({
         direction,
         monitorTypes,
         browserResourceTypes,
-        party,
+        certOrigin,
         tags,
         issuers,
         notValidAfter,
         remoteNames,
+        showFromAllSpaces,
       })
     );
   }, [
@@ -62,11 +64,12 @@ export const useCertSearch = ({
     sortBy,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     notValidAfter,
     remoteNames,
+    showFromAllSpaces,
   ]);
 
   const { data, isLoading } = useSelector(selectCertsListState);

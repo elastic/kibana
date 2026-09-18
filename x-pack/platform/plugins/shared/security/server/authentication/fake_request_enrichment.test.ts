@@ -24,7 +24,7 @@ describe('createFakeRequestEnrichment', () => {
 
     expect(getOverride(request)).toBeUndefined();
 
-    enrichRequestWithUserProfile(request, 'u_test_profile_123');
+    enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
     const override = getOverride(request);
     expect(override).toBeDefined();
@@ -36,15 +36,34 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request);
       expect(user).toBeDefined();
       expect(user!.profile_uid).toBe('u_test_profile_123');
     });
 
+    it('exposes the given username on the enriched user', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
+
+      const user = getOverride(request);
+      expect(user).toBeDefined();
+      expect(user!.username).toBe('jdoe');
+    });
+
+    it('leaves username undefined when not provided', () => {
+      const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
+
+      expect(getOverride(request)!.username).toBeUndefined();
+    });
+
     it.each<keyof AuthenticatedUser>([
-      'username',
       'email',
       'full_name',
       'roles',
@@ -57,11 +76,12 @@ describe('createFakeRequestEnrichment', () => {
       'elastic_cloud_user',
       'operator',
       'api_key',
+      'http_authentication_scheme',
     ])('returns undefined when reading "%s" off the enriched user', (property) => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request)!;
       expect(user[property]).toBeUndefined();
@@ -73,7 +93,7 @@ describe('createFakeRequestEnrichment', () => {
         const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
         const request = httpServerMock.createFakeKibanaRequest({});
 
-        enrichRequestWithUserProfile(request, 'u_test_profile_123');
+        enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
         const user = getOverride(request)! as unknown as Record<string, unknown>;
         expect(user[property]).toBeUndefined();
@@ -84,7 +104,7 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request)!;
       expect(() => (user as any)[Symbol.toPrimitive]).not.toThrow();
@@ -96,7 +116,7 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const asyncReturn = async () => getOverride(request);
       const resolved = await asyncReturn();
@@ -107,7 +127,7 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request)!;
       expect(JSON.parse(JSON.stringify(user))).toEqual({ profile_uid: 'u_test_profile_123' });
@@ -117,7 +137,7 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request)!;
       expect(Object.isFrozen(user)).toBe(true);
@@ -128,7 +148,7 @@ describe('createFakeRequestEnrichment', () => {
       const enrichedRequest = httpServerMock.createFakeKibanaRequest({});
       const otherRequest = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(enrichedRequest, 'u_enriched');
+      enrichRequestWithUserProfile(enrichedRequest, { profileId: 'u_enriched' });
 
       expect(getOverride(otherRequest)).toBeUndefined();
     });
@@ -137,9 +157,9 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const realRequest = httpServerMock.createKibanaRequest();
 
-      expect(() => enrichRequestWithUserProfile(realRequest, 'u_profile_123')).toThrow(
-        /must only be called on a fake request/
-      );
+      expect(() =>
+        enrichRequestWithUserProfile(realRequest, { profileId: 'u_profile_123' })
+      ).toThrow(/must only be called on a fake request/);
 
       expect(getOverride(realRequest)).toBeUndefined();
       expect(logger.warn).not.toHaveBeenCalled();
@@ -149,8 +169,8 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      enrichRequestWithUserProfile(request, 'u_first');
-      enrichRequestWithUserProfile(request, 'u_second');
+      enrichRequestWithUserProfile(request, { profileId: 'u_first' });
+      enrichRequestWithUserProfile(request, { profileId: 'u_second' });
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already-enriched'));
@@ -165,7 +185,7 @@ describe('createFakeRequestEnrichment', () => {
         headers: { authorization: 'ApiKey original' },
       });
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request);
       expect(user!.profile_uid).toBe('u_test_profile_123');
@@ -176,7 +196,7 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({ headers: {} });
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       const user = getOverride(request);
       expect(user!.profile_uid).toBe('u_test_profile_123');
@@ -189,7 +209,7 @@ describe('createFakeRequestEnrichment', () => {
         headers: { authorization: 'ApiKey original' },
       });
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       (request.headers as Record<string, string | undefined>).authorization = 'ApiKey attacker';
 
@@ -206,7 +226,7 @@ describe('createFakeRequestEnrichment', () => {
         headers: { authorization: 'ApiKey original' },
       });
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       delete (request.headers as Record<string, string | undefined>).authorization;
 
@@ -218,7 +238,7 @@ describe('createFakeRequestEnrichment', () => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({ headers: {} });
 
-      enrichRequestWithUserProfile(request, 'u_test_profile_123');
+      enrichRequestWithUserProfile(request, { profileId: 'u_test_profile_123' });
 
       (request.headers as Record<string, string | undefined>).authorization = 'ApiKey attacker';
 

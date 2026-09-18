@@ -21,6 +21,9 @@ interface CliArgs {
   live: boolean;
 }
 
+const isKibanaSystemUser = (username: string | undefined) =>
+  username === 'kibana_system' || username === 'kibana_system_user';
+
 const parseArgs = (): CliArgs => {
   const argv = process.argv.slice(2);
   return {
@@ -43,7 +46,7 @@ const getKibanaConnection = () => {
   const host = process.env.KIBANA_HOST ?? config.server?.host ?? flat('server.host') ?? '127.0.0.1';
   const resolvedHost = host === '0.0.0.0' ? '127.0.0.1' : host;
   const port = process.env.KIBANA_PORT ?? config.server?.port ?? flat('server.port') ?? 5601;
-  // `server.basePath` is empty when not configured; in dev mode `yarn start`
+  // `server.basePath` is empty when not configured; in dev mode `pnpm start`
   // injects a random 3-letter base path at runtime that we then have to
   // discover from a redirect (see `discoverBasePath`).
   const configBasePath: string =
@@ -53,7 +56,7 @@ const getKibanaConnection = () => {
   const protocol = process.env.KIBANA_PROTOCOL ?? (sslEnabled ? 'https' : 'http');
   let kbnUsername =
     process.env.KIBANA_USERNAME ?? config.elasticsearch?.username ?? flat('elasticsearch.username');
-  if (kbnUsername === 'kibana_system_user' || !kbnUsername) {
+  if (isKibanaSystemUser(kbnUsername) || !kbnUsername) {
     kbnUsername = 'elastic';
   }
   const kbnPassword =
@@ -150,7 +153,7 @@ const buildEsClient = () => {
     const node = config.elasticsearch?.hosts;
     if (node) {
       const rawUser = config.elasticsearch?.username;
-      const esUsername = rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser;
+      const esUsername = isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser;
       const esPassword = config.elasticsearch?.password;
       const verificationMode = config.elasticsearch?.ssl?.verificationMode;
       return new Client({
@@ -946,6 +949,7 @@ const browserMonitor = (overrides: Record<string, any>) =>
     'filter_journeys.match': '',
     'filter_journeys.tags': [],
     ignore_https_errors: false,
+    certificate_error_spki_allowlist: [],
     throttling: {
       id: 'custom',
       label: 'Custom',

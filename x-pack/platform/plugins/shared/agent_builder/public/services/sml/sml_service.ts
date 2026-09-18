@@ -11,13 +11,13 @@ import type {
   SmlSearchConstraints,
   SmlSearchFilters,
   SmlSearchHttpResponse,
-} from '@kbn/agent-context-layer-plugin/public';
-import { smlAutocompletePath, smlSearchPath } from '@kbn/agent-context-layer-plugin/public';
+} from '@kbn/agent-builder-sml-plugin/public';
+import { smlAutocompletePath, smlSearchPath } from '@kbn/agent-builder-sml-plugin/public';
 
 /**
  * Browser client for SML.
- *   - `search(...)` → `/internal/agent_context_layer/sml/_search` (hybrid retrieval)
- *   - `autocomplete(...)` → `/internal/agent_context_layer/sml/_autocomplete` (@ menu / typeahead)
+ *   - `search(...)` → `/internal/agent_builder_sml/sml/_search` (hybrid retrieval)
+ *   - `autocomplete(...)` → `/internal/agent_builder_sml/sml/_autocomplete` (@ menu / typeahead)
  */
 export class SmlService {
   private readonly http: HttpSetup;

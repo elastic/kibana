@@ -57,6 +57,46 @@ describe('GetAttackDiscoveryGenerationsSearchResult schema', () => {
       loading_message: { buckets: [{ key: 'Loading...', doc_count: 1 }] },
     };
 
+    it('returns a parsed result when workflow_id buckets are present', () => {
+      const response = {
+        aggregations: {
+          generations: {
+            buckets: [
+              {
+                ...baseBucket,
+                workflow_id: { buckets: [{ key: 'workflow-1', doc_count: 1 }] },
+              },
+            ],
+          },
+        },
+      };
+      const result = GetAttackDiscoveryGenerationsSearchResult.parse(response);
+
+      expect(result.aggregations.generations.buckets[0].workflow_id?.buckets[0].key).toBe(
+        'workflow-1'
+      );
+    });
+
+    it('returns a parsed result when workflow_run_id buckets are present', () => {
+      const response = {
+        aggregations: {
+          generations: {
+            buckets: [
+              {
+                ...baseBucket,
+                workflow_run_id: { buckets: [{ key: 'workflow-run-1', doc_count: 1 }] },
+              },
+            ],
+          },
+        },
+      };
+      const result = GetAttackDiscoveryGenerationsSearchResult.parse(response);
+
+      expect(result.aggregations.generations.buckets[0].workflow_run_id?.buckets[0].key).toBe(
+        'workflow-run-1'
+      );
+    });
+
     it('returns a parsed result when alerts_context_count.value is null', () => {
       const response = {
         aggregations: {

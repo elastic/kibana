@@ -14,6 +14,16 @@ import type { IResourceInitializer } from './resource_manager';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
+// Expand to zero replicas on single-node clusters, where a replica can never
+// be allocated and would leave the cluster health permanently yellow.
+const AUTO_EXPAND_REPLICAS = '0-1';
+
+// Max Java long. Installing at the highest priority keeps our managed template
+// from being rejected for tying with a user template whose patterns overlap
+// `.rule-events*` / `.alert-actions*` (ES only rejects overlapping templates at
+// equal priority). Stringified to avoid JS number precision loss.
+const INDEX_TEMPLATE_PRIORITY = `${9223372036854775807n}` as unknown as number;
+
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
     private readonly logger: Logger,
@@ -28,10 +38,11 @@ export class DatastreamInitializer implements IResourceInitializer {
       version: this.resourceDefinition.version,
       template: {
         aliases: {},
-        priority: 500,
+        priority: INDEX_TEMPLATE_PRIORITY,
         mappings: this.resourceDefinition.mappings,
         lifecycle: this.resourceDefinition.lifecycle,
         settings: {
+          'index.auto_expand_replicas': AUTO_EXPAND_REPLICAS,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           'index.lifecycle.prefer_ilm': false,
@@ -50,16 +61,34 @@ export class DatastreamInitializer implements IResourceInitializer {
         elasticsearchClient: this.esClient,
       });
     } catch (error) {
-      if (!isResponseError(error)) {
+      if (!isResponseError(error) || error.statusCode !== 409) {
         throw error;
       }
 
-      if (error.statusCode === 409) {
-        this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
-        return;
-      }
+      this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
+    }
 
-      throw error;
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  /**
+   * Applies `auto_expand_replicas` to the data stream's existing backing indices: the index
+   * template only affects indices created after it was installed, so without this, deployments
+   * that created the data stream before the setting was added would keep an unallocatable
+   * replica shard until the next rollover.
+   */
+  private async updateExistingIndicesReplicaSettings(): Promise<void> {
+    try {
+      await this.esClient.indices.putSettings({
+        index: this.resourceDefinition.dataStreamName,
+        settings: { 'index.auto_expand_replicas': AUTO_EXPAND_REPLICAS },
+      });
+    } catch (error) {
+      // Best effort: replica expansion only affects cluster health reporting and
+      // must not block the initialization of alerting resources.
+      this.logger.warn(
+        `Failed to update auto_expand_replicas for ${this.resourceDefinition.dataStreamName}: ${error.message}`
+      );
     }
   }
 }

@@ -43,6 +43,12 @@ jest.mock('../../../hooks/agents/use_agent_edit', () => ({
   useAgentEdit: jest.fn(),
 }));
 
+// The settings tab's AI indices section reads a ui setting this test's Kibana context does not
+// provide. Off keeps the section out of the way; it has its own tests.
+jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
+  useIsContextEngineEnabled: () => false,
+}));
+
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
@@ -174,5 +180,41 @@ describe('AgentForm', () => {
     renderWithIntl(<AgentForm />);
 
     expect(screen.queryByTestId('agentFormOwnerLabel')).not.toBeInTheDocument();
+  });
+
+  it('displays the Managed badge in edit mode when the agent has a non-chat type', () => {
+    (useAgentEdit as jest.Mock).mockReturnValue({
+      state: editModeState,
+      agentType: 'platform.sig_events.investigation-type',
+      isLoading: false,
+      isSubmitting: false,
+      submit: mockSubmit,
+      tools: [],
+      skills: [],
+      plugins: [],
+      error: undefined,
+    });
+
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+    expect(screen.getByTestId('agentBuilderAgentPreconfiguredTypeBadge')).toBeInTheDocument();
+  });
+
+  it('does not display the Managed badge for a chat-type agent', () => {
+    (useAgentEdit as jest.Mock).mockReturnValue({
+      state: editModeState,
+      agentType: 'chat',
+      isLoading: false,
+      isSubmitting: false,
+      submit: mockSubmit,
+      tools: [],
+      skills: [],
+      plugins: [],
+      error: undefined,
+    });
+
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+    expect(screen.queryByTestId('agentBuilderAgentPreconfiguredTypeBadge')).not.toBeInTheDocument();
   });
 });

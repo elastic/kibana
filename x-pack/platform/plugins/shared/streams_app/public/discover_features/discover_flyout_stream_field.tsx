@@ -16,7 +16,7 @@ import {
   adaptDocToResolverInputs,
   useResolvedDefinitionName,
 } from './use_resolved_definition_name';
-import { StreamLinkContent } from './stream_link_content';
+import { getRemoteSearchType, StreamLinkContent } from './stream_link_content';
 import { useCcsHasRemoteClusters } from './use_ccs_has_remote_clusters';
 
 export interface DiscoverFlyoutStreamFieldProps {
@@ -59,7 +59,7 @@ function DiscoverFlyoutStreamFieldContent({
     ccsHasRemoteClusters,
   });
 
-  const remoteSearchType = cpsHasLinkedProjects ? 'cps' : ccsHasRemoteClusters ? 'ccs' : undefined;
+  const remoteSearchType = getRemoteSearchType({ cpsHasLinkedProjects, ccsHasRemoteClusters });
 
   return (
     <StreamLinkContent

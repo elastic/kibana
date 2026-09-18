@@ -7,10 +7,11 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type BulkActivateEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { bulkActivateEpisodeActions } from './bulk_create_alert_actions';
+import { successOrPartialToast } from './helpers';
+import { episodeSupportsActions } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 export interface UnresolveActionDeps {
@@ -23,29 +24,32 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
   order: 31,
   displayName: i18n.UNRESOLVE,
   iconType: 'cross',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some(
-      (ep) =>
-        ep.last_deactivate_action !== 'activate' &&
-        // last_deactivate_action is authoritative; episode.status may be stale after a resolve
-        (ep.last_deactivate_action === 'deactivate' ||
-          ep['episode.status'] !== ALERT_EPISODE_STATUS.ACTIVE)
-    ),
+  isCompatible: ({ episodes }: EpisodeActionContext) => {
+    const nativeEpisodes = episodes.filter(episodeSupportsActions);
+    return (
+      nativeEpisodes.length > 0 &&
+      nativeEpisodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE)
+    );
+  },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+    const actionable = episodes
+      .filter(episodeSupportsActions)
+      .filter((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE);
+    const items: BulkActivateEpisodeActionItem[] = actionable.map((ep) => ({
+      episode_id: ep['episode.id'],
       reason: i18n.RESOLVE_ACTION_REASON,
     }));
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkActivateEpisodeActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
     }
   },
+  showWhenDisabled: ({ episodes }: EpisodeActionContext) =>
+    episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE),
+  disabledTooltip: i18n.UNRESOLVE_NOT_AVAILABLE,
 });

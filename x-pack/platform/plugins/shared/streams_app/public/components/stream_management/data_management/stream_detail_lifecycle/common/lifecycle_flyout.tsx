@@ -16,6 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 export interface LifecycleFlyoutProps
   extends Pick<
@@ -24,6 +26,7 @@ export interface LifecycleFlyoutProps
   > {
   titleId: string;
   title: string;
+  headerContent?: React.ReactNode;
   children: React.ReactNode;
   'data-test-subj'?: string;
 }
@@ -31,33 +34,41 @@ export interface LifecycleFlyoutProps
 export const LifecycleFlyout = ({
   titleId,
   title,
+  headerContent,
   children,
   ownFocus,
   paddingSize,
   ...flyoutProps
 }: LifecycleFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
+  const headerPadding = headerContent ? euiTheme.size.l : euiTheme.size.xl;
   const headerStyles = css`
-    padding: ${euiTheme.size.xl};
+    padding: ${headerPadding};
   `;
+  const { focusProps } = usePushFlyoutFocus({ enabled: (flyoutProps.type ?? 'push') === 'push' });
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   return (
     <EuiFlyout
       size={400}
-      type="push"
+      type={canvas.enabled ? 'overlay' : 'push'}
       ownFocus={ownFocus}
       paddingSize={paddingSize}
       aria-labelledby={titleId}
       role="region"
+      {...focusProps}
       {...flyoutProps}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
+        <EuiFlexGroup direction="column" gutterSize="l" responsive={false} css={headerStyles}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="s">
               <h2 id={titleId}>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
+          {headerContent && <EuiFlexItem grow={false}>{headerContent}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       {children}

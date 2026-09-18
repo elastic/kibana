@@ -19,6 +19,7 @@ import type {
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantAPIKeyOptions,
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -52,7 +53,7 @@ export interface ConstructorOptions {
   uiam?: UiamServicePublic;
 }
 
-type GrantAPIKeyParams =
+type GrantAPIKeyParams = (
   | {
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'password';
@@ -63,7 +64,8 @@ type GrantAPIKeyParams =
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'access_token';
       access_token: string;
-    };
+    }
+) & { refresh?: boolean | 'wait_for' };
 
 /**
  * Class responsible for managing Elasticsearch API keys.
@@ -173,7 +175,13 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<CreateAPIKeyResult>({
           method: 'POST',
           path: '/_security/cross_cluster/api_key',
-          body: { name, expiration, metadata, access: createParams.access },
+          body: {
+            name,
+            expiration,
+            metadata,
+            access: createParams.access,
+            certificate_identity: createParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
@@ -227,7 +235,11 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<UpdateAPIKeyResult>({
           method: 'PUT',
           path: `/_security/cross_cluster/api_key/${id}`,
-          body: { metadata, access: updateParams.access },
+          body: {
+            metadata,
+            access: updateParams.access,
+            certificate_identity: updateParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.updateApiKey({
@@ -263,7 +275,8 @@ export class APIKeys implements NativeAPIKeysType {
    */
   async grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    options?: GrantAPIKeyOptions
   ) {
     if (!this.license.isEnabled()) {
       return null;
@@ -277,13 +290,12 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    // Preserve UIAM client authentication paired with the granting credential. Other credentials
+    // use `es-client-authentication` (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
+      clientAuthentication = this.uiam.getClientAuthentication(request);
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,
@@ -313,6 +325,9 @@ export class APIKeys implements NativeAPIKeysType {
       authorizationHeader,
       clientAuthentication
     );
+    if (options?.refresh !== undefined) {
+      params.refresh = options.refresh;
+    }
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
@@ -361,8 +376,11 @@ export class APIKeys implements NativeAPIKeysType {
         body: {
           api_key: authorizationHeader.credentials,
           name: cloneParams.name,
-          expiration: null,
+          // `metadata` MUST come before `expiration`. ES's RestCloneApiKeyAction
+          // over-advances the parser on `expiration: null`, silently dropping the next field.
+          // Remove this ordering constraint once the ES fix ships: https://github.com/elastic/elasticsearch/pull/152874
           ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
+          expiration: null,
         },
       });
 

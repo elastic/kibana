@@ -9,40 +9,13 @@
 
 import { createInMemoryContextAwarenessToolkit } from './in_memory_toolkit';
 import {
-  type ProfileStateDefinition,
-  ProfileStateRegistry,
-  ProfileStateType,
-} from './profile_state';
-
-interface TestProfileState {
-  uiValue: string;
-  urlValue: string;
-  persistentValue: string;
-  nestedValue: {
-    count: number;
-  };
-}
-
-const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
-  key: 'testProfileState',
-  descriptor: {
-    uiValue: { type: ProfileStateType.Ui },
-    urlValue: { type: ProfileStateType.Url },
-    persistentValue: { type: ProfileStateType.Persistent },
-    nestedValue: { type: ProfileStateType.Ui },
-  },
-  defaultState: {
-    uiValue: 'defaultUi',
-    urlValue: 'defaultUrl',
-    persistentValue: 'defaultPersistent',
-    nestedValue: { count: 0 },
-  },
-};
+  createRegisteredTestProfileStateRegistry,
+  TEST_PROFILE_STATE_DEF,
+  type TestProfileState,
+} from './__mocks__/profile_state';
 
 const createRegisteredRegistry = () => {
-  const profileStateRegistry = new ProfileStateRegistry();
-  profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-  return profileStateRegistry;
+  return createRegisteredTestProfileStateRegistry();
 };
 
 describe('createInMemoryContextAwarenessToolkit', () => {
@@ -85,6 +58,31 @@ describe('createInMemoryContextAwarenessToolkit', () => {
       persistentValue: 'persistent',
       nestedValue: { count: 1 },
     });
+  });
+
+  it('merges partial initial profile state over definition defaults', () => {
+    const stateAdapter = createInMemoryContextAwarenessToolkit({
+      initialProfileState: {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'initialUrl',
+          nestedValue: { count: 42 },
+        },
+      },
+      profileStateRegistry: createRegisteredRegistry(),
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+    const emittedValues: TestProfileState[] = [];
+    const subscription = stateAdapter.getState$().subscribe((state) => emittedValues.push(state));
+
+    const expectedState = {
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      urlValue: 'initialUrl',
+      nestedValue: { count: 42 },
+    };
+
+    expect(stateAdapter.getState()).toEqual(expectedState);
+    expect(emittedValues).toEqual([expectedState]);
+
+    subscription.unsubscribe();
   });
 
   it('emits profile state updates and skips deep equal duplicate values', () => {

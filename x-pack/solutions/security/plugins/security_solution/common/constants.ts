@@ -11,10 +11,12 @@ import {
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
+import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
-  SecurityPageName,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
 /**
@@ -124,6 +126,7 @@ export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const RULES_CHANGES_HISTORY_PATH = `${RULES_PATH}/id/:ruleId/changes-history` as const;
+export const ALERT_ANALYSIS_WORKFLOW_PATH = `${RULES_PATH}/alert_analysis_workflow` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -145,6 +148,7 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/custom_yara_signatures` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
@@ -158,6 +162,8 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
+export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
+  'securitySolution.useNewEntityAnalyticsPage' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -170,6 +176,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_CUSTOM_YARA_SIGNATURES_PATH = `${APP_PATH}${CUSTOM_YARA_SIGNATURES_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
@@ -275,8 +282,18 @@ export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness feature */
+export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the new EUI-based flyout system */
+export const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the rule changes history feature */
+export const ENABLE_RULE_CHANGES_HISTORY_SETTING =
+  'securitySolution:enableRuleChangesHistory' as const;
 
 /**
  * Id for the notifications alerting type
@@ -498,12 +515,16 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  AI_RULE_CREATION_MENU: 'securitySolution.rulesManagementPage.aiRuleCreationMenuTour.v9.4',
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
   ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
+  ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
+    'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
+  // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
+  // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
+  MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -692,6 +713,8 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
   'kibana.alert.severity',
   'kibana.alert.start',
   'kibana.alert.workflow_status',
+  'kibana.alert.workflow_reason',
+  'kibana.alert.workflow_user',
   'kibana.alert.reason',
   'kibana.alert.risk_score',
   'kibana.alert.rule.name',
@@ -728,12 +751,12 @@ export enum SecurityAgentBuilderAttachments {
   alerts = 'security.alerts',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
+  entityGraph = 'security.entity_graph',
+  entityRiskScoreHistory = 'security.entity_risk_score_history',
+  investigationIocs = 'security.investigation.iocs',
+  investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
-
-export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
-  'securitySolution.registerAlertValidationStepsEnabled' as const;
-export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;

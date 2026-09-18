@@ -17,7 +17,7 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
-import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
+import { isAsExpression, isSource, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
@@ -25,6 +25,7 @@ import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../constants';
 
 export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -207,9 +208,19 @@ export function sourceExists(index: string, sources: Set<string>) {
   const individualIndices = index.split(',').map((item) => cleanIndex(item));
   // Check if all individual indices exist in sources
   const allExist = individualIndices.every((singleIndex) => {
+    const unquoted = removeSourceNameQuotes(singleIndex);
     // First, check for exact match after removing source name quotes
-    if (sources.has(removeSourceNameQuotes(singleIndex))) {
+    if (sources.has(unquoted)) {
       return true;
+    }
+    // CPS (cross-project search): resolveIndex returns names as "project:index".
+    // A query like `FROM index` is valid when project_routing routes to a project
+    // that owns `my-index`, so also match against the local part of prefixed sources.
+    for (const src of sources) {
+      const sep = src.indexOf(':');
+      if (sep !== -1 && src.slice(sep + 1) === unquoted) {
+        return true;
+      }
     }
     // If not an exact match, perform a fuzzy search
     return Boolean(fuzzySearch(singleIndex, sources.keys()));
@@ -406,9 +417,15 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
     type: 'source',
   });
 
-  if (sourceNode) {
-    return LeafPrinter.print(sourceNode);
+  if (!isSource(sourceNode)) {
+    return undefined;
   }
+
+  const isCoordinatorTarget = sourceNode.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;
+  // FROM does not support the _coordinator prefix used by LOOKUP JOIN.
+  const sourceToPrint = isCoordinatorTarget && sourceNode.index ? sourceNode.index : sourceNode;
+
+  return LeafPrinter.print(sourceToPrint);
 };
 
 export function getIndexSourcesFromQuery(query: string): string[] {

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import {
+  transformCustomScheduleToRRule,
+  getDurationInMilliseconds,
+} from '@kbn/response-ops-schedule-schema';
 import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../schemas/maintenance_window/external/request/update';
 import type { UpdateMaintenanceWindowParams } from '../../../../../../application/methods/update/types';
-import { transformCustomScheduleToRRule } from '../../../../../../lib/transforms/custom_to_rrule/latest';
-import { getDurationInMilliseconds } from '../../../../../../lib/transforms/custom_to_rrule/util';
 
 /**
  *  This function converts from the external, human readable, Maintenance Window creation/POST

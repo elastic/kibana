@@ -12,26 +12,6 @@ import type { ScoutPage } from '@kbn/scout';
 export class Navigation {
   constructor(private readonly page: ScoutPage) {}
 
-  async goToSecurity() {
-    await this.page.gotoApp('security');
-    await this.page.testSubj
-      .locator('kbnChromeLayoutNavigation')
-      .waitFor({ state: 'visible', timeout: 30_000 });
-  }
-
-  async clickLogo() {
-    await this.page.testSubj.locator('nav-header-logo').waitFor({ state: 'visible' });
-    await this.page.testSubj.click('nav-header-logo');
-  }
-
-  getSidenav() {
-    return this.page.testSubj.locator('kbnChromeLayoutNavigation');
-  }
-
-  getBreadcrumbByText(text: string) {
-    return this.page.locator('.euiBreadcrumb', { hasText: text });
-  }
-
   async openUserMenu() {
     await this.page.testSubj.click('userMenuButton');
     await this.page.testSubj.locator('userMenu').waitFor({ state: 'visible' });
@@ -57,8 +37,8 @@ export class Navigation {
 
   async applyCustomization() {
     // Set up the response waiter before clicking so we don't miss the request.
-    // We don't assert on status: the PUT can succeed (200) or fail (e.g. a
-    // read-only user lacks user-storage write access), and callers assert the
+    // We don't assert on status: the PUT can succeed (200) or fail because
+    // User Storage could not persist the value, and callers assert the
     // resulting UI state (persisted nav, or an error toast) afterwards.
     const saved = this.page.waitForResponse(
       (resp) => resp.url().includes('/internal/user_storage/') && resp.request().method() === 'PUT'

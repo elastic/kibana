@@ -24,9 +24,7 @@ import {
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
 } from './columns';
-import { VIEW_HISTORY } from '../translations';
 import type { IndexSummaryTableItem } from '../../../../../types';
-import { CHECK_NOW } from '../../translations';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -142,7 +140,7 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(CHECK_NOW)).toBeInTheDocument();
+        expect(screen.getByTestId(`checkNowAction-${indexName}`)).toBeInTheDocument();
       });
 
       test('it invokes the `onCheckNowAction` with the index name when the check now button is clicked', async () => {
@@ -168,10 +166,10 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(CHECK_NOW);
+        const button = screen.getByTestId(`checkNowAction-${indexName}`);
         await userEvent.click(button);
 
-        expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
+        expect(onCheckNowAction).toHaveBeenCalledWith(indexSummaryTableItem.indexName);
       });
 
       test('it invokes the `onViewHistoryAction` with the index name when the view history button is clicked', async () => {
@@ -198,10 +196,10 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(VIEW_HISTORY);
+        const button = screen.getByTestId(`viewHistoryAction-${indexName}`);
         await userEvent.click(button);
 
-        expect(onViewHistoryAction).toBeCalledWith(indexSummaryTableItem.indexName);
+        expect(onViewHistoryAction).toHaveBeenCalledWith(indexSummaryTableItem.indexName);
       });
     });
 

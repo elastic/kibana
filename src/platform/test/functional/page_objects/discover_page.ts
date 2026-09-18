@@ -59,6 +59,18 @@ export class DiscoverPageObject extends FtrService {
     return !newButton && !openButton;
   }
 
+  /**
+   * Whether we're in a standalone Discover session (vs. editing a session embedded in a dashboard).
+   * Classic chrome tells these apart via the first breadcrumb ("Discover" vs "Dashboards"); next-project
+   * chrome has no breadcrumbs, so we rely on the new/open buttons, which are hidden only while editing.
+   */
+  private async isStandaloneDiscoverSession(): Promise<boolean> {
+    if (await this.globalNav.isNextProjectChrome()) {
+      return !(await this.isOnDashboardsEditMode());
+    }
+    return (await this.globalNav.getFirstBreadcrumb()) === 'Discover';
+  }
+
   public async getChartTimespan() {
     const getHistogramChartDataTimeRange = async () =>
       await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
@@ -74,14 +86,10 @@ export class DiscoverPageObject extends FtrService {
   public async saveAsSearch(searchName: string) {
     await this.clickSaveAsSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -98,17 +106,13 @@ export class DiscoverPageObject extends FtrService {
     saveAsNew?: boolean,
     { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
-    const mode = await this.globalNav.getFirstBreadcrumb();
+    const isStandaloneSession = await this.isStandaloneDiscoverSession();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     if (tags.length) {
       await this.testSubjects.click('savedObjectTagSelector');
@@ -145,7 +149,7 @@ export class DiscoverPageObject extends FtrService {
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
 
-    if (mode === 'Discover') {
+    if (isStandaloneSession) {
       await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
         const last = await this.getCurrentQueryName();
 
@@ -165,14 +169,10 @@ export class DiscoverPageObject extends FtrService {
       await this.clickSaveSearchButton();
     }
 
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     if (storeTimeRange !== undefined) {
       await this.retry.waitFor(`store time range switch is set`, async () => {
@@ -261,6 +261,27 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  /**
+   * Opens a new Discover tab and runs the current query so the tab is initialized.
+   * New ES|QL tabs start empty, so the previous query is copied onto the tab first.
+   * Use `unifiedTabs.createNewTab()` for the uninitialized empty state.
+   */
+  public async createNewTabAndSearch() {
+    const unifiedTabs = this.ctx.getPageObject('unifiedTabs');
+    const esqlQuery = (await this.testSubjects.exists('ESQLEditor'))
+      ? (await this.ctx.getService('esql').getEsqlEditorQuery()).trim()
+      : '';
+
+    await unifiedTabs.createNewTab();
+
+    if (esqlQuery) {
+      await this.ctx.getService('monacoEditor').setCodeEditorValue(esqlQuery);
+    }
+
+    await this.queryBar.clickQuerySubmitButton();
+    await this.waitUntilTabIsLoaded();
+  }
+
   public async getColumnHeaders() {
     return await this.dataGrid.getHeaderFields();
   }
@@ -298,12 +319,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
-    const mode = await this.globalNav.getFirstBreadcrumb();
+    const isStandaloneSession = await this.isStandaloneDiscoverSession();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
-    if (mode === 'Discover') {
+    if (isStandaloneSession) {
       await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
         const currentName = await this.getCurrentQueryName();
         return currentName === searchName;
@@ -395,8 +416,12 @@ export class DiscoverPageObject extends FtrService {
 
   public async getBreakdownFieldValue() {
     const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await breakdownButton.getVisibleText();
 
-    return breakdownButton.getVisibleText();
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   public async chooseBreakdownField(field: string, value?: string) {
@@ -589,7 +614,7 @@ export class DiscoverPageObject extends FtrService {
     });
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
     );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();
@@ -668,12 +693,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async expectDocTableToBeLoaded() {
-    const renderComplete = await this.testSubjects.getAttribute(
-      'discoverDocTable',
-      'data-render-complete'
-    );
-
-    expect(renderComplete).to.be('true');
+    await this.retry.waitFor('doc table to finish rendering', async () => {
+      const renderComplete = await this.testSubjects.getAttribute(
+        'discoverDocTable',
+        'data-table-loaded'
+      );
+      return renderComplete === 'true';
+    });
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
@@ -883,17 +909,10 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+  public async selectDataViewMode() {
     await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
-    if (options?.discardModal) {
-      await this.testSubjects.exists('discover-esql-to-dataview-modal');
-      await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-      await this.retry.waitFor('the modal to close', async () => {
-        return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-      });
-    }
   }
 
   public async removeHeaderColumn(name: string) {
@@ -907,7 +926,7 @@ export class DiscoverPageObject extends FtrService {
   public async waitForDocTableLoadingComplete() {
     await this.testSubjects.waitForAttributeToChange(
       'discoverDocTable',
-      'data-render-complete',
+      'data-table-loaded',
       'true'
     );
   }
@@ -993,21 +1012,32 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async assertViewModeToggleNotExists() {
-    await this.testSubjects.missingOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.testSubjects.missingOrFail('dscViewModeToggleButton', { timeout: 2 * 1000 });
   }
 
   public async assertViewModeToggleExists() {
-    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.testSubjects.existOrFail('dscViewModeToggleButton', { timeout: 2 * 1000 });
   }
 
   public async assertFieldStatsTableNotExists() {
     await this.testSubjects.missingOrFail('dscFieldStatsEmbeddedContent', { timeout: 2 * 1000 });
   }
 
+  /**
+   * Opens the view mode selector dropdown and selects the option with the given test subject
+   * (one of `dscViewModeDocumentOption`, `dscViewModePatternAnalysisOption`, `dscViewModeFieldStatsOption`).
+   */
+  public async selectViewMode(optionTestSubject: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('dscViewModeToggleButton');
+      await this.testSubjects.existOrFail('dscViewModeToggleSelectable');
+    });
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(optionTestSubject);
+  }
+
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
+      await this.selectViewMode('dscViewModeFieldStatsOption');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }
@@ -1278,12 +1308,28 @@ export class DiscoverPageObject extends FtrService {
     return this.browser.removeLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
   }
 
-  public getQueryMode() {
-    return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  public async getQueryMode() {
+    const storedValue = await this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+    if (storedValue == null) return null;
+    try {
+      return JSON.parse(storedValue)?.currentMode ?? null;
+    } catch {
+      return null;
+    }
   }
 
-  public setQueryMode(mode: string) {
-    return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
+  /**
+   * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
+   * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
+   * flag), so `defaultMode` defaults to `'classic'` to match today's default. When
+   * the flag is flipped to make ES|QL the default, update `defaultMode` or the seed
+   * is ignored.
+   */
+  public setQueryMode(currentMode: string, defaultMode: string = 'classic') {
+    return this.browser.setLocalStorageItem(
+      DISCOVER_QUERY_MODE_KEY,
+      JSON.stringify({ currentMode, defaultMode })
+    );
   }
 
   /** Discover Embeddable helper methods   */

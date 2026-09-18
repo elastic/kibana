@@ -50,7 +50,11 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     force: request.body?.force,
     batchSize: request.body?.batchSize,
     showInactive: request.body?.includeInactive,
+    dryRun: request.body?.dryRun,
   });
 
-  return response.ok({ body: { actionId: results.actionId } });
+  if (request.body.dryRun) {
+    return response.ok({ body: { count: (results as { count: number }).count } });
+  }
+  return response.ok({ body: { actionId: (results as { actionId: string }).actionId } });
 };

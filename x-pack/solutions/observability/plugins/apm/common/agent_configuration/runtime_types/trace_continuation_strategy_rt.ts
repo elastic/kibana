@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { traceContinuationStrategyRt } from '@kbn/apm-common';
+export { traceContinuationStrategySchema } from '@kbn/apm-common';

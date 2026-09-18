@@ -171,7 +171,7 @@ describe('GeminiConnector', () => {
         const response = await connector.runApi(runActionParams, connectorUsageCollector);
 
         // Assertions
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
@@ -202,6 +202,31 @@ describe('GeminiConnector', () => {
         expect(response).toEqual(connectorResponse);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.runApi(
+          {
+            body: JSON.stringify(sampleGeminiBody),
+            model: DEFAULT_MODEL,
+            maxContentLength: 10 * 1024 * 1024,
+          },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.runApi(
+          { body: JSON.stringify(sampleGeminiBody), model: DEFAULT_MODEL },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       describe('RunApiResponseSchema', () => {
         it('successfully validates a response that only has known properties', () => {
           const onlyKnownProperties = {
@@ -216,7 +241,7 @@ describe('GeminiConnector', () => {
             // missing candidates and usageMetadata
           };
 
-          expect(() => RunApiResponseSchema.parse(missingRequiredFields)).toThrowError();
+          expect(() => RunApiResponseSchema.parse(missingRequiredFields)).toThrow();
         });
 
         it('removes unknown properties, but does NOT fail validation when they are present', () => {
@@ -249,7 +274,7 @@ describe('GeminiConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
@@ -282,7 +307,7 @@ describe('GeminiConnector', () => {
 
       it('the API call includes maxOutputTokens when provided', async () => {
         await connector.invokeAI(withMaxOutputTokens, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
@@ -416,7 +441,7 @@ describe('GeminiConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:streamGenerateContent?alt=sse`,
@@ -454,9 +479,24 @@ describe('GeminiConnector', () => {
         );
       });
 
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        await connector.invokeStream(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
+          connectorUsageCollector
+        );
+      });
+
       it('the API call includes maxOutputTokens when provided', async () => {
         await connector.invokeStream(withMaxOutputTokens, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:streamGenerateContent?alt=sse`,
@@ -630,7 +670,7 @@ describe('GeminiConnector', () => {
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -649,7 +689,7 @@ describe('GeminiConnector', () => {
     it('the create dashboard API call returns available: false when user has correct permissions', async () => {
       mockRequest.mockResolvedValue({ has_all_requested: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -669,7 +709,7 @@ describe('GeminiConnector', () => {
     it('the create dashboard API call returns available: false when init dashboard fails', async () => {
       mockGenAi.mockResolvedValue({ success: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',

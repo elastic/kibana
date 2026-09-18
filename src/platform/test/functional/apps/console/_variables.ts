@@ -72,6 +72,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET ${index3}');
+        await PageObjects.console.waitForSelectedRequestsCount(1);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -90,6 +91,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET _search\n');
         await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
+        await PageObjects.console.waitForSelectedRequestsCount(1);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -108,6 +110,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET _search\n');
         await PageObjects.console.enterText(`{\n\t"query": {"match_\${queryType}": {}}`);
+        await PageObjects.console.waitForSelectedRequestsCount(1);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/vis-type-vega-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/vis-type-vega-plugin'
   description: Moon project for @kbn/vis-type-vega-plugin
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/private/vis_types/vega
 dependsOn:
   - '@kbn/core'
@@ -50,7 +50,12 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/visualizations-common'
   - '@kbn/es-types'
+  - '@kbn/esql-types'
   - '@kbn/esql-utils'
+  - '@kbn/scout'
+  - '@kbn/presentation-util'
+  - '@kbn/zod'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod
@@ -59,8 +64,10 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - public/**/*
+    - test/scout/**/*
     - '*.ts'
     - public/test_utils/vega_map_test.json
     - public/test_utils/vegalite_graph.json

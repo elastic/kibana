@@ -8,7 +8,7 @@
 import { isEmpty, findIndex, indexOf, pickBy, uniq, map } from 'lodash';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
@@ -25,9 +25,16 @@ import type { ScheduleFormData } from '../../components/schedule_section/types';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
+  // Whether the pack SO actually persisted a pack-level schedule, vs. the
+  // form synthesizing an interval default for a legacy pack. See
+  // `resolveInheritedScheduleInput` in `../queries/use_pack_query_form.tsx`.
+  packHasExplicitSchedule?: boolean;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  euiFieldProps,
+  packHasExplicitSchedule,
+}) => {
   const {
     field: { value: fieldValue },
   } = useController<{ queries: PackQueryFormData[] }, 'queries'>({
@@ -45,8 +52,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   const packScheduleFormData = useWatch({ name: 'schedule' }) as ScheduleFormData | undefined;
 
   const packSchedule = useMemo(
-    () => (packScheduleFormData ? serializeSchedule(packScheduleFormData) : undefined),
-    [packScheduleFormData]
+    () =>
+      packScheduleFormData
+        ? {
+            ...serializeSchedule(packScheduleFormData),
+            hasExplicitSchedule: !!packHasExplicitSchedule,
+          }
+        : undefined,
+    [packScheduleFormData, packHasExplicitSchedule]
   );
 
   const handleNameChange = useCallback(
@@ -87,10 +100,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     (updatedQuery: any) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
+          // The stored identity claim must survive an edit even though the
+          // flyout replaces the draft wholesale and `id` may be renamed.
+          const originalId = fieldValue?.[showEditQueryFlyout]?.originalId;
           update(
             showEditQueryFlyout,
             produce({}, (draft: PackQueryFormData) => {
               draft.id = updatedQuery.id;
+              if (originalId !== undefined) {
+                draft.originalId = originalId;
+              }
+
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
               draft.timeout = updatedQuery.timeout;
@@ -130,7 +150,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
         handleHideEditFlyout();
         resolve();
       }),
-    [handleHideEditFlyout, update, showEditQueryFlyout]
+    [handleHideEditFlyout, update, showEditQueryFlyout, fieldValue]
   );
 
   const handleAddQuery = useCallback(

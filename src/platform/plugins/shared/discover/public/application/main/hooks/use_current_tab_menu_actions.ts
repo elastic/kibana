@@ -11,7 +11,6 @@ import { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../common/constants';
 import { isDataViewSource } from '../../../../common/data_sources';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { useInspector } from './use_inspector';
@@ -20,21 +19,20 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
-  useInternalStateSelector,
 } from '../state_management/redux';
 
 interface UseCurrentTabMenuActionsParams {
   currentDataView: DataView | undefined;
+  switchToEsqlMetric?: string;
 }
 
-export const useCurrentTabMenuActions = ({ currentDataView }: UseCurrentTabMenuActionsParams) => {
+export const useCurrentTabMenuActions = ({
+  currentDataView,
+  switchToEsqlMetric = 'esql:try_btn_clicked',
+}: UseCurrentTabMenuActionsParams) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const currentTab = useCurrentTabSelector((tab) => tab);
-  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
   const transitionFromDataViewToESQL = useCurrentTabAction(
     internalStateActions.transitionFromDataViewToESQL
   );
@@ -53,35 +51,22 @@ export const useCurrentTabMenuActions = ({ currentDataView }: UseCurrentTabMenuA
     }
 
     if (isDataViewMode) {
-      services.trackUiMetric?.(METRIC_TYPE.CLICK, 'esql:try_btn_clicked');
+      services.trackUiMetric?.(METRIC_TYPE.CLICK, switchToEsqlMetric);
       dispatch(transitionFromDataViewToESQL({ dataView: currentDataView }));
       return;
     }
 
     services.trackUiMetric?.(METRIC_TYPE.CLICK, 'esql:back_to_classic_clicked');
-
-    const shouldShowESQLToDataViewTransitionModal =
-      !persistedDiscoverSession || unsavedTabIds.includes(currentTab.id);
-
-    if (
-      shouldShowESQLToDataViewTransitionModal &&
-      !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-    ) {
-      dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-    } else {
-      dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
-    }
+    dispatch(transitionFromESQLToDataView({ dataView: currentDataView }));
   }, [
     currentDataView,
-    currentTab.id,
     dispatch,
     isDataViewMode,
     isEsqlEnabled,
-    persistedDiscoverSession,
     services,
+    switchToEsqlMetric,
     transitionFromDataViewToESQL,
     transitionFromESQLToDataView,
-    unsavedTabIds,
   ]);
 
   return {

@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -436,6 +437,7 @@ export type RegistrySearchResult = Pick<
   | 'categories'
   | 'discovery'
   | 'deprecated'
+  | 'group'
 >;
 
 // from /categories
@@ -515,7 +517,6 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
-  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
   [RegistryDataStreamKeys.provider_permissions]?: RegistryProviderPermissions[];
@@ -769,6 +770,7 @@ export interface FailedAttempt {
 
 export interface InstallFailedAttempt extends FailedAttempt {
   target_version: string;
+  missing_assets?: Array<{ id: string; type: string }>;
 }
 
 export interface CustomAssetFailedAttempt extends FailedAttempt {
@@ -793,6 +795,7 @@ export enum INSTALL_STATES {
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
   SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
+  VERIFY_ASSETS = 'verify_assets',
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;
@@ -828,7 +831,9 @@ export interface Installation {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
-  installed_kibana_space_id?: string;
+  installed_kibana_space_id?: SpaceId;
+  /** Kibana version running at the time Kibana assets for this package were last installed/updated */
+  installed_kibana_version?: string;
   keep_policies_up_to_date?: boolean;
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
@@ -857,6 +862,8 @@ export interface Installation {
   installed_as_dependency?: boolean;
   /** Namespaces opted in for namespace-level customization for this package. */
   namespace_customization_enabled_for?: string[];
+  /** Per-namespace managed settings (e.g. ILM policy) for this package. */
+  namespace_customization_settings?: { [namespace: string]: { ilm_policy?: string } };
   /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
   previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
 }

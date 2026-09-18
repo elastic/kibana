@@ -39,12 +39,14 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
     },
     color,
     seriesType,
+    customFunction: 'AVG',
     dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
   return (
     <Chart
       id="latency"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}

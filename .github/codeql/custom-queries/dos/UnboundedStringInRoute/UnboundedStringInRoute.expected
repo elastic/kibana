@@ -1,52 +1,365 @@
-| __fixtures__/plugins/mock/server/not_a_safe_file.ts:8:13:8:27 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:23:13:23:27 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:33:13:33:29 | schema.string({}) | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:43:13:43:43 | schema. ... h: 1 }) | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:53:13:53:57 | schema. ... ined }) | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:62:11:62:25 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:71:11:71:25 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:81:15:81:29 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:91:14:91:28 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:92:20:92:34 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:93:16:93:30 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:103:29:103:43 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:113:26:113:40 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:127:16:127:30 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:134:24:134:38 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:149:13:149:47 | schema. ... : '' }) | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:159:13:159:45 | schema. ... true }) | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:239:13:239:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:249:13:249:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:259:13:259:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:269:13:269:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:279:13:279:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:289:13:289:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:295:23:295:32 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:308:15:308:24 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:309:15:309:24 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:319:13:319:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:329:13:329:22 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:550:17:550:31 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:564:17:564:26 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:578:22:578:36 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:582:16:582:30 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:595:22:595:31 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:599:16:599:25 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:610:27:610:41 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:616:10:616:24 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:622:12:622:21 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:635:13:635:24 | zv4.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:645:13:645:24 | zv4.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:655:13:655:24 | zv4.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:689:13:689:26 | zBare.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:699:13:699:26 | zBare.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:709:13:709:26 | zBare.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:743:13:743:24 | zNs.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:753:13:753:24 | zNs.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:763:13:763:24 | zNs.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:773:13:773:24 | zNs.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:833:19:833:33 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:842:9:842:23 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:843:8:843:22 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
-| test.js:848:16:848:25 | z.string() | This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain. |
-| test.js:854:13:854:27 | schema.string() | This schema.string() call does not specify a maxLength. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxLength: N } as the options argument. |
+edges
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:10:15:25 | CrossFileRequest | __fixtures__/plugins/mock/server/routes/reachability.ts:15:10:15:25 | CrossFileRequest | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:10:15:25 | CrossFileRequest | __fixtures__/plugins/mock/server/routes/reachability.ts:69:66:69:81 | CrossFileRequest | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:28:15:43 | CrossFileZodBody | __fixtures__/plugins/mock/server/routes/reachability.ts:15:28:15:43 | CrossFileZodBody | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:28:15:43 | CrossFileZodBody | __fixtures__/plugins/mock/server/routes/reachability.ts:50:62:50:77 | CrossFileZodBody | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:46:15:52 | BaseReq | __fixtures__/plugins/mock/server/routes/reachability.ts:15:46:15:52 | BaseReq | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:46:15:52 | BaseReq | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:29 | BaseReq | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:26:25:28:3 | {\\n    b ... ert\\n  } | __fixtures__/plugins/mock/server/routes/reachability.ts:26:11:28:4 | schema. ... rt\\n  }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:27:11:27:53 | schema. ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability.ts:26:11:28:4 | schema. ... rt\\n  }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:27:11:27:53 | schema. ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability.ts:26:25:28:3 | {\\n    b ... ert\\n  } | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:27:36:27:50 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:27:11:27:53 | schema. ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability.ts:34:11:34:65 | { body: ... () }) } | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability.ts:41:14:41:56 | { body: ... () }) } | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | __fixtures__/plugins/mock/server/routes/reachability.ts:50:26:50:80 | { body: ... Body) } | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:62:50:77 | CrossFileZodBody | __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:62:50:77 | CrossFileZodBody | __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:56:48:56:62 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:56:20:56:65 | schema. ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:29 | BaseReq | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:63:51:63:65 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:16:33:18:1 | {\\n  bod ... Alert\\n} | __fixtures__/plugins/mock/server/routes/reachability.ts:15:10:15:25 | CrossFileRequest | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:9:17:57 | schema. ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:16:33:18:1 | {\\n  bod ... Alert\\n} | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:40:17:54 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:9:17:57 | schema. ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:33:21:71 | z.objec ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability.ts:15:28:15:43 | CrossFileZodBody | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:59:21:68 | z.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:33:21:71 | z.objec ... ng() }) | provenance | Config |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:24:24:68 | schema. ... ng() }) | __fixtures__/plugins/mock/server/routes/reachability.ts:15:46:15:52 | BaseReq | provenance |  |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:51:24:65 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:24:24:68 | schema. ... ng() }) | provenance | Config |
+| test.js:36:15:36:29 | schema.string() | test.js:35:13:37:8 | schema. ...      }) | provenance | Config |
+| test.js:49:15:49:31 | schema.string({}) | test.js:48:13:50:8 | schema. ...      }) | provenance | Config |
+| test.js:62:15:62:45 | schema. ... h: 1 }) | test.js:61:13:63:8 | schema. ...      }) | provenance | Config |
+| test.js:75:15:75:59 | schema. ... ined }) | test.js:74:13:76:8 | schema. ...      }) | provenance | Config |
+| test.js:99:13:99:27 | schema.string() | test.js:98:15:100:8 | schema. ...      }) | provenance | Config |
+| test.js:112:17:112:31 | schema.string() | test.js:111:14:113:8 | schema. ...      }) | provenance | Config |
+| test.js:125:16:125:30 | schema.string() | test.js:124:13:128:8 | schema. ...      }) | provenance | Config |
+| test.js:126:22:126:36 | schema.string() | test.js:124:13:128:8 | schema. ...      }) | provenance | Config |
+| test.js:127:18:127:32 | schema.string() | test.js:124:13:128:8 | schema. ...      }) | provenance | Config |
+| test.js:140:15:140:46 | schema. ... ring()) | test.js:139:13:141:8 | schema. ...      }) | provenance | Config |
+| test.js:140:31:140:45 | schema.string() | test.js:140:15:140:46 | schema. ... ring()) | provenance | Config |
+| test.js:153:15:153:43 | schema. ... ring()) | test.js:152:13:154:8 | schema. ...      }) | provenance | Config |
+| test.js:153:28:153:42 | schema.string() | test.js:153:15:153:43 | schema. ... ring()) | provenance | Config |
+| test.js:171:17:173:12 | schema. ...      }) | test.js:170:18:174:9 | {\\n      ...       } | provenance | Config |
+| test.js:171:31:173:11 | {\\n      ...       } | test.js:171:17:173:12 | schema. ...      }) | provenance | Config |
+| test.js:171:31:173:11 | {\\n      ...       } | test.js:171:17:173:12 | schema. ...      }) | provenance | Config |
+| test.js:172:20:172:34 | schema.string() | test.js:171:17:173:12 | schema. ...      }) | provenance | Config |
+| test.js:172:20:172:34 | schema.string() | test.js:171:17:173:12 | schema. ...      }) | provenance | Config |
+| test.js:172:20:172:34 | schema.string() | test.js:171:31:173:11 | {\\n      ...       } | provenance | Config |
+| test.js:181:7:181:20 | badQuerySchema | test.js:187:12:187:25 | badQuerySchema | provenance |  |
+| test.js:181:24:181:38 | schema.string() | test.js:181:7:181:20 | badQuerySchema | provenance |  |
+| test.js:187:12:187:25 | badQuerySchema | test.js:186:14:188:8 | schema. ...      }) | provenance | Config |
+| test.js:200:15:200:49 | schema. ... : '' }) | test.js:199:13:201:8 | schema. ...      }) | provenance | Config |
+| test.js:213:15:213:47 | schema. ... true }) | test.js:212:13:214:8 | schema. ...      }) | provenance | Config |
+| test.js:314:15:314:24 | z.string() | test.js:313:13:315:8 | z.objec ...      }) | provenance | Config |
+| test.js:327:15:327:24 | z.string() | test.js:327:15:327:31 | z.string().min(1) | provenance | Config |
+| test.js:327:15:327:31 | z.string().min(1) | test.js:326:13:328:8 | z.objec ...      }) | provenance | Config |
+| test.js:340:15:340:24 | z.string() | test.js:340:15:340:35 | z.strin ... ional() | provenance | Config |
+| test.js:340:15:340:35 | z.strin ... ional() | test.js:339:13:341:8 | z.objec ...      }) | provenance | Config |
+| test.js:353:15:353:24 | z.string() | test.js:353:15:353:43 | z.strin ...  name') | provenance | Config |
+| test.js:353:15:353:43 | z.strin ...  name') | test.js:352:13:354:8 | z.objec ...      }) | provenance | Config |
+| test.js:366:15:366:24 | z.string() | test.js:366:15:366:31 | z.string().min(1) | provenance | Config |
+| test.js:366:15:366:31 | z.string().min(1) | test.js:366:15:366:42 | z.strin ... ional() | provenance | Config |
+| test.js:366:15:366:42 | z.strin ... ional() | test.js:365:13:367:8 | z.objec ...      }) | provenance | Config |
+| test.js:379:15:379:24 | z.string() | test.js:379:15:379:42 | z.strin ... -Z]+$/) | provenance | Config |
+| test.js:379:15:379:42 | z.strin ... -Z]+$/) | test.js:378:13:380:8 | z.objec ...      }) | provenance | Config |
+| test.js:387:7:387:19 | zodBodySchema | test.js:392:13:392:25 | zodBodySchema | provenance |  |
+| test.js:387:23:387:32 | z.string() | test.js:387:7:387:19 | zodBodySchema | provenance |  |
+| test.js:404:17:404:26 | z.string() | test.js:403:14:406:8 | z.objec ...      }) | provenance | Config |
+| test.js:405:17:405:26 | z.string() | test.js:405:17:405:33 | z.string().min(1) | provenance | Config |
+| test.js:405:17:405:33 | z.string().min(1) | test.js:403:14:406:8 | z.objec ...      }) | provenance | Config |
+| test.js:418:15:418:24 | z.string() | test.js:418:15:418:35 | z.strin ... lable() | provenance | Config |
+| test.js:418:15:418:35 | z.strin ... lable() | test.js:417:13:419:8 | z.objec ...      }) | provenance | Config |
+| test.js:431:15:431:24 | z.string() | test.js:431:15:431:31 | z.string().trim() | provenance | Config |
+| test.js:431:15:431:31 | z.string().trim() | test.js:430:13:432:8 | z.objec ...      }) | provenance | Config |
+| test.js:810:17:814:10 | schema. ...      }) | test.js:809:13:815:8 | schema. ...      }) | provenance | Config |
+| test.js:811:19:813:12 | schema. ...      }) | test.js:810:17:814:10 | schema. ...      }) | provenance | Config |
+| test.js:812:19:812:33 | schema.string() | test.js:811:19:813:12 | schema. ...      }) | provenance | Config |
+| test.js:827:17:831:10 | z.objec ...      }) | test.js:826:13:832:8 | z.objec ...      }) | provenance | Config |
+| test.js:828:19:830:12 | z.objec ...      }) | test.js:827:17:831:10 | z.objec ...      }) | provenance | Config |
+| test.js:829:19:829:28 | z.string() | test.js:828:19:830:12 | z.objec ...      }) | provenance | Config |
+| test.js:844:19:847:10 | schema. ...      }) | test.js:843:13:852:8 | schema. ...      }) | provenance | Config |
+| test.js:846:24:846:38 | schema.string() | test.js:844:19:847:10 | schema. ...      }) | provenance | Config |
+| test.js:848:17:851:10 | schema. ...      }) | test.js:843:13:852:8 | schema. ...      }) | provenance | Config |
+| test.js:850:18:850:32 | schema.string() | test.js:848:17:851:10 | schema. ...      }) | provenance | Config |
+| test.js:864:19:867:10 | z.objec ...      }) | test.js:863:13:872:8 | z.objec ...      }) | provenance | Config |
+| test.js:866:24:866:33 | z.string() | test.js:864:19:867:10 | z.objec ...      }) | provenance | Config |
+| test.js:868:17:871:10 | z.objec ...      }) | test.js:863:13:872:8 | z.objec ...      }) | provenance | Config |
+| test.js:870:18:870:27 | z.string() | test.js:868:17:871:10 | z.objec ...      }) | provenance | Config |
+| test.js:884:29:884:43 | schema.string() | test.js:884:13:884:58 | useVali ... a.any() | provenance |  |
+| test.js:892:10:892:24 | schema.string() | test.js:895:73:895:92 | createStringSchema() | provenance |  |
+| test.js:895:73:895:92 | createStringSchema() | test.js:895:53:895:95 | schema. ... ma() }) | provenance | Config |
+| test.js:902:12:902:21 | z.string() | test.js:908:38:908:70 | new Sch ... tring() | provenance |  |
+| test.js:908:38:908:70 | new Sch ... tring() | test.js:908:23:908:73 | z.objec ... ng() }) | provenance | Config |
+| test.js:923:15:923:26 | zv4.string() | test.js:922:13:924:8 | zv4.obj ...      }) | provenance | Config |
+| test.js:936:15:936:26 | zv4.string() | test.js:936:15:936:33 | zv4.string().min(1) | provenance | Config |
+| test.js:936:15:936:33 | zv4.string().min(1) | test.js:935:13:937:8 | zv4.obj ...      }) | provenance | Config |
+| test.js:949:15:949:26 | zv4.string() | test.js:949:15:949:37 | zv4.str ... ional() | provenance | Config |
+| test.js:949:15:949:37 | zv4.str ... ional() | test.js:948:13:950:8 | zv4.obj ...      }) | provenance | Config |
+| test.js:992:15:992:28 | zBare.string() | test.js:991:13:993:8 | zBare.o ...      }) | provenance | Config |
+| test.js:1005:15:1005:28 | zBare.string() | test.js:1005:15:1005:35 | zBare.s ... .min(1) | provenance | Config |
+| test.js:1005:15:1005:35 | zBare.s ... .min(1) | test.js:1004:13:1006:8 | zBare.o ...      }) | provenance | Config |
+| test.js:1018:15:1018:28 | zBare.string() | test.js:1018:15:1018:39 | zBare.s ... lable() | provenance | Config |
+| test.js:1018:15:1018:39 | zBare.s ... lable() | test.js:1017:13:1019:8 | zBare.o ...      }) | provenance | Config |
+| test.js:1061:15:1061:26 | zNs.string() | test.js:1060:13:1062:8 | zNs.obj ...      }) | provenance | Config |
+| test.js:1074:15:1074:26 | zNs.string() | test.js:1074:15:1074:33 | zNs.string().min(1) | provenance | Config |
+| test.js:1074:15:1074:33 | zNs.string().min(1) | test.js:1073:13:1075:8 | zNs.obj ...      }) | provenance | Config |
+| test.js:1087:15:1087:26 | zNs.string() | test.js:1087:15:1087:37 | zNs.str ... ional() | provenance | Config |
+| test.js:1087:15:1087:37 | zNs.str ... ional() | test.js:1086:13:1088:8 | zNs.obj ...      }) | provenance | Config |
+| test.js:1100:15:1100:26 | zNs.string() | test.js:1100:15:1100:37 | zNs.str ... lable() | provenance | Config |
+| test.js:1100:15:1100:37 | zNs.str ... lable() | test.js:1099:13:1101:8 | zNs.obj ...      }) | provenance | Config |
+| test.js:1167:15:1169:10 | schema. ...      }) | test.js:1166:16:1170:7 | {\\n      ...       } | provenance | Config |
+| test.js:1167:29:1169:9 | {\\n      ...       } | test.js:1167:15:1169:10 | schema. ...      }) | provenance | Config |
+| test.js:1167:29:1169:9 | {\\n      ...       } | test.js:1167:15:1169:10 | schema. ...      }) | provenance | Config |
+| test.js:1168:18:1168:32 | schema.string() | test.js:1167:15:1169:10 | schema. ...      }) | provenance | Config |
+| test.js:1168:18:1168:32 | schema.string() | test.js:1167:15:1169:10 | schema. ...      }) | provenance | Config |
+| test.js:1168:18:1168:32 | schema.string() | test.js:1167:29:1169:9 | {\\n      ...       } | provenance | Config |
+| test.js:1184:7:1184:24 | sharedCommonSchema | test.js:1188:59:1188:76 | sharedCommonSchema | provenance |  |
+| test.js:1184:28:1187:2 | schema. ... lert\\n}) | test.js:1184:7:1184:24 | sharedCommonSchema | provenance |  |
+| test.js:1185:9:1185:23 | schema.string() | test.js:1184:28:1187:2 | schema. ... lert\\n}) | provenance | Config |
+| test.js:1186:8:1186:22 | schema.string() | test.js:1184:28:1187:2 | schema. ... lert\\n}) | provenance | Config |
+| test.js:1191:14:1191:28 | routeBodySchema | test.js:1194:61:1194:75 | routeBodySchema | provenance |  |
+| test.js:1191:32:1193:2 | z.objec ... lert\\n}) | test.js:1191:14:1191:28 | routeBodySchema | provenance |  |
+| test.js:1192:16:1192:25 | z.string() | test.js:1191:32:1193:2 | z.objec ... lert\\n}) | provenance | Config |
+| test.js:1198:10:1200:4 | schema. ... rt\\n  }) | test.js:1202:59:1202:76 | buildRouteSchema() | provenance |  |
+| test.js:1199:13:1199:27 | schema.string() | test.js:1198:10:1200:4 | schema. ... rt\\n  }) | provenance | Config |
+nodes
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:10:15:25 | CrossFileRequest | semmle.label | CrossFileRequest |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:10:15:25 | CrossFileRequest | semmle.label | CrossFileRequest |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:28:15:43 | CrossFileZodBody | semmle.label | CrossFileZodBody |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:28:15:43 | CrossFileZodBody | semmle.label | CrossFileZodBody |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:46:15:52 | BaseReq | semmle.label | BaseReq |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:15:46:15:52 | BaseReq | semmle.label | BaseReq |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:26:11:28:4 | schema. ... rt\\n  }) | semmle.label | schema. ... rt\\n  }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:26:25:28:3 | {\\n    b ... ert\\n  } | semmle.label | {\\n    b ... ert\\n  } |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:27:11:27:53 | schema. ... ng() }) | semmle.label | schema. ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:27:36:27:50 | schema.string() | semmle.label | schema.string() |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:11:34:65 | { body: ... () }) } | semmle.label | { body: ... () }) } |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | semmle.label | schema. ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | semmle.label | schema. ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | semmle.label | schema.string() |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:14:41:56 | { body: ... () }) } | semmle.label | { body: ... () }) } |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | semmle.label | z.objec ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | semmle.label | z.objec ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | semmle.label | z.string() |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:26:50:80 | { body: ... Body) } | semmle.label | { body: ... Body) } |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | semmle.label | buildRo ... odBody) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | semmle.label | buildRo ... odBody) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:50:62:50:77 | CrossFileZodBody | semmle.label | CrossFileZodBody |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:56:20:56:65 | schema. ... ng() }) | semmle.label | schema. ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:56:48:56:62 | schema.string() | semmle.label | schema.string() |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:29 | BaseReq | semmle.label | BaseReq |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | semmle.label | BaseReq ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:63:51:63:65 | schema.string() | semmle.label | schema.string() |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:69:66:69:81 | CrossFileRequest | semmle.label | CrossFileRequest |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:16:33:18:1 | {\\n  bod ... Alert\\n} | semmle.label | {\\n  bod ... Alert\\n} |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:9:17:57 | schema. ... ng() }) | semmle.label | schema. ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:40:17:54 | schema.string() | semmle.label | schema.string() |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:33:21:71 | z.objec ... ng() }) | semmle.label | z.objec ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:59:21:68 | z.string() | semmle.label | z.string() |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:24:24:68 | schema. ... ng() }) | semmle.label | schema. ... ng() }) |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:51:24:65 | schema.string() | semmle.label | schema.string() |
+| test.js:35:13:37:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:36:15:36:29 | schema.string() | semmle.label | schema.string() |
+| test.js:48:13:50:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:49:15:49:31 | schema.string({}) | semmle.label | schema.string({}) |
+| test.js:61:13:63:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:62:15:62:45 | schema. ... h: 1 }) | semmle.label | schema. ... h: 1 }) |
+| test.js:74:13:76:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:75:15:75:59 | schema. ... ined }) | semmle.label | schema. ... ined }) |
+| test.js:87:13:87:27 | schema.string() | semmle.label | schema.string() |
+| test.js:98:15:100:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:99:13:99:27 | schema.string() | semmle.label | schema.string() |
+| test.js:111:14:113:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:112:17:112:31 | schema.string() | semmle.label | schema.string() |
+| test.js:124:13:128:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:125:16:125:30 | schema.string() | semmle.label | schema.string() |
+| test.js:126:22:126:36 | schema.string() | semmle.label | schema.string() |
+| test.js:127:18:127:32 | schema.string() | semmle.label | schema.string() |
+| test.js:139:13:141:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:140:15:140:46 | schema. ... ring()) | semmle.label | schema. ... ring()) |
+| test.js:140:31:140:45 | schema.string() | semmle.label | schema.string() |
+| test.js:152:13:154:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:153:15:153:43 | schema. ... ring()) | semmle.label | schema. ... ring()) |
+| test.js:153:28:153:42 | schema.string() | semmle.label | schema.string() |
+| test.js:170:18:174:9 | {\\n      ...       } | semmle.label | {\\n      ...       } |
+| test.js:171:17:173:12 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:171:17:173:12 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:171:31:173:11 | {\\n      ...       } | semmle.label | {\\n      ...       } |
+| test.js:172:20:172:34 | schema.string() | semmle.label | schema.string() |
+| test.js:181:7:181:20 | badQuerySchema | semmle.label | badQuerySchema |
+| test.js:181:24:181:38 | schema.string() | semmle.label | schema.string() |
+| test.js:186:14:188:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:187:12:187:25 | badQuerySchema | semmle.label | badQuerySchema |
+| test.js:199:13:201:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:200:15:200:49 | schema. ... : '' }) | semmle.label | schema. ... : '' }) |
+| test.js:212:13:214:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:213:15:213:47 | schema. ... true }) | semmle.label | schema. ... true }) |
+| test.js:313:13:315:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:314:15:314:24 | z.string() | semmle.label | z.string() |
+| test.js:326:13:328:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:327:15:327:24 | z.string() | semmle.label | z.string() |
+| test.js:327:15:327:31 | z.string().min(1) | semmle.label | z.string().min(1) |
+| test.js:339:13:341:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:340:15:340:24 | z.string() | semmle.label | z.string() |
+| test.js:340:15:340:35 | z.strin ... ional() | semmle.label | z.strin ... ional() |
+| test.js:352:13:354:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:353:15:353:24 | z.string() | semmle.label | z.string() |
+| test.js:353:15:353:43 | z.strin ...  name') | semmle.label | z.strin ...  name') |
+| test.js:365:13:367:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:366:15:366:24 | z.string() | semmle.label | z.string() |
+| test.js:366:15:366:31 | z.string().min(1) | semmle.label | z.string().min(1) |
+| test.js:366:15:366:42 | z.strin ... ional() | semmle.label | z.strin ... ional() |
+| test.js:378:13:380:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:379:15:379:24 | z.string() | semmle.label | z.string() |
+| test.js:379:15:379:42 | z.strin ... -Z]+$/) | semmle.label | z.strin ... -Z]+$/) |
+| test.js:387:7:387:19 | zodBodySchema | semmle.label | zodBodySchema |
+| test.js:387:23:387:32 | z.string() | semmle.label | z.string() |
+| test.js:392:13:392:25 | zodBodySchema | semmle.label | zodBodySchema |
+| test.js:403:14:406:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:404:17:404:26 | z.string() | semmle.label | z.string() |
+| test.js:405:17:405:26 | z.string() | semmle.label | z.string() |
+| test.js:405:17:405:33 | z.string().min(1) | semmle.label | z.string().min(1) |
+| test.js:417:13:419:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:418:15:418:24 | z.string() | semmle.label | z.string() |
+| test.js:418:15:418:35 | z.strin ... lable() | semmle.label | z.strin ... lable() |
+| test.js:430:13:432:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:431:15:431:24 | z.string() | semmle.label | z.string() |
+| test.js:431:15:431:31 | z.string().trim() | semmle.label | z.string().trim() |
+| test.js:809:13:815:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:810:17:814:10 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:811:19:813:12 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:812:19:812:33 | schema.string() | semmle.label | schema.string() |
+| test.js:826:13:832:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:827:17:831:10 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:828:19:830:12 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:829:19:829:28 | z.string() | semmle.label | z.string() |
+| test.js:843:13:852:8 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:844:19:847:10 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:846:24:846:38 | schema.string() | semmle.label | schema.string() |
+| test.js:848:17:851:10 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:850:18:850:32 | schema.string() | semmle.label | schema.string() |
+| test.js:863:13:872:8 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:864:19:867:10 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:866:24:866:33 | z.string() | semmle.label | z.string() |
+| test.js:868:17:871:10 | z.objec ...      }) | semmle.label | z.objec ...      }) |
+| test.js:870:18:870:27 | z.string() | semmle.label | z.string() |
+| test.js:884:13:884:58 | useVali ... a.any() | semmle.label | useVali ... a.any() |
+| test.js:884:29:884:43 | schema.string() | semmle.label | schema.string() |
+| test.js:892:10:892:24 | schema.string() | semmle.label | schema.string() |
+| test.js:895:53:895:95 | schema. ... ma() }) | semmle.label | schema. ... ma() }) |
+| test.js:895:73:895:92 | createStringSchema() | semmle.label | createStringSchema() |
+| test.js:902:12:902:21 | z.string() | semmle.label | z.string() |
+| test.js:908:23:908:73 | z.objec ... ng() }) | semmle.label | z.objec ... ng() }) |
+| test.js:908:38:908:70 | new Sch ... tring() | semmle.label | new Sch ... tring() |
+| test.js:922:13:924:8 | zv4.obj ...      }) | semmle.label | zv4.obj ...      }) |
+| test.js:923:15:923:26 | zv4.string() | semmle.label | zv4.string() |
+| test.js:935:13:937:8 | zv4.obj ...      }) | semmle.label | zv4.obj ...      }) |
+| test.js:936:15:936:26 | zv4.string() | semmle.label | zv4.string() |
+| test.js:936:15:936:33 | zv4.string().min(1) | semmle.label | zv4.string().min(1) |
+| test.js:948:13:950:8 | zv4.obj ...      }) | semmle.label | zv4.obj ...      }) |
+| test.js:949:15:949:26 | zv4.string() | semmle.label | zv4.string() |
+| test.js:949:15:949:37 | zv4.str ... ional() | semmle.label | zv4.str ... ional() |
+| test.js:991:13:993:8 | zBare.o ...      }) | semmle.label | zBare.o ...      }) |
+| test.js:992:15:992:28 | zBare.string() | semmle.label | zBare.string() |
+| test.js:1004:13:1006:8 | zBare.o ...      }) | semmle.label | zBare.o ...      }) |
+| test.js:1005:15:1005:28 | zBare.string() | semmle.label | zBare.string() |
+| test.js:1005:15:1005:35 | zBare.s ... .min(1) | semmle.label | zBare.s ... .min(1) |
+| test.js:1017:13:1019:8 | zBare.o ...      }) | semmle.label | zBare.o ...      }) |
+| test.js:1018:15:1018:28 | zBare.string() | semmle.label | zBare.string() |
+| test.js:1018:15:1018:39 | zBare.s ... lable() | semmle.label | zBare.s ... lable() |
+| test.js:1060:13:1062:8 | zNs.obj ...      }) | semmle.label | zNs.obj ...      }) |
+| test.js:1061:15:1061:26 | zNs.string() | semmle.label | zNs.string() |
+| test.js:1073:13:1075:8 | zNs.obj ...      }) | semmle.label | zNs.obj ...      }) |
+| test.js:1074:15:1074:26 | zNs.string() | semmle.label | zNs.string() |
+| test.js:1074:15:1074:33 | zNs.string().min(1) | semmle.label | zNs.string().min(1) |
+| test.js:1086:13:1088:8 | zNs.obj ...      }) | semmle.label | zNs.obj ...      }) |
+| test.js:1087:15:1087:26 | zNs.string() | semmle.label | zNs.string() |
+| test.js:1087:15:1087:37 | zNs.str ... ional() | semmle.label | zNs.str ... ional() |
+| test.js:1099:13:1101:8 | zNs.obj ...      }) | semmle.label | zNs.obj ...      }) |
+| test.js:1100:15:1100:26 | zNs.string() | semmle.label | zNs.string() |
+| test.js:1100:15:1100:37 | zNs.str ... lable() | semmle.label | zNs.str ... lable() |
+| test.js:1166:16:1170:7 | {\\n      ...       } | semmle.label | {\\n      ...       } |
+| test.js:1167:15:1169:10 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:1167:15:1169:10 | schema. ...      }) | semmle.label | schema. ...      }) |
+| test.js:1167:29:1169:9 | {\\n      ...       } | semmle.label | {\\n      ...       } |
+| test.js:1168:18:1168:32 | schema.string() | semmle.label | schema.string() |
+| test.js:1184:7:1184:24 | sharedCommonSchema | semmle.label | sharedCommonSchema |
+| test.js:1184:28:1187:2 | schema. ... lert\\n}) | semmle.label | schema. ... lert\\n}) |
+| test.js:1185:9:1185:23 | schema.string() | semmle.label | schema.string() |
+| test.js:1186:8:1186:22 | schema.string() | semmle.label | schema.string() |
+| test.js:1188:59:1188:76 | sharedCommonSchema | semmle.label | sharedCommonSchema |
+| test.js:1191:14:1191:28 | routeBodySchema | semmle.label | routeBodySchema |
+| test.js:1191:32:1193:2 | z.objec ... lert\\n}) | semmle.label | z.objec ... lert\\n}) |
+| test.js:1192:16:1192:25 | z.string() | semmle.label | z.string() |
+| test.js:1194:61:1194:75 | routeBodySchema | semmle.label | routeBodySchema |
+| test.js:1198:10:1200:4 | schema. ... rt\\n  }) | semmle.label | schema. ... rt\\n  }) |
+| test.js:1199:13:1199:27 | schema.string() | semmle.label | schema.string() |
+| test.js:1202:59:1202:76 | buildRouteSchema() | semmle.label | buildRouteSchema() |
+subpaths
+#select
+| __fixtures__/plugins/mock/server/routes/reachability.ts:27:36:27:50 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:27:36:27:50 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:26:11:28:4 | schema. ... rt\\n  }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:26:11:28:4 | schema. ... rt\\n  }) | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:34:11:34:65 | { body: ... () }) } | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:34:11:34:65 | { body: ... () }) } | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:34:46:34:60 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:34:19:34:63 | schema. ... ng() }) | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:41:14:41:56 | { body: ... () }) } | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | __fixtures__/plugins/mock/server/routes/reachability.ts:41:14:41:56 | { body: ... () }) } | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:41:42:41:51 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | __fixtures__/plugins/mock/server/routes/reachability.ts:41:22:41:54 | z.objec ... ng() }) | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:56:48:56:62 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:56:48:56:62 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:56:20:56:65 | schema. ... ng() }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:56:20:56:65 | schema. ... ng() }) | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability.ts:63:51:63:65 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:63:51:63:65 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:40:17:54 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:17:40:17:54 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:69:66:69:81 | CrossFileRequest | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:69:66:69:81 | CrossFileRequest | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:59:21:68 | z.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:59:21:68 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:50:26:50:80 | { body: ... Body) } | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | __fixtures__/plugins/mock/server/routes/reachability.ts:50:26:50:80 | { body: ... Body) } | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:59:21:68 | z.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:21:59:21:68 | z.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | __fixtures__/plugins/mock/server/routes/reachability.ts:50:34:50:78 | buildRo ... odBody) | route validation |
+| __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:51:24:65 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability_schemas.ts:24:51:24:65 | schema.string() | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | __fixtures__/plugins/mock/server/routes/reachability.ts:63:23:63:68 | BaseReq ... ng() }) | route validation |
+| test.js:36:15:36:29 | schema.string() | test.js:36:15:36:29 | schema.string() | test.js:35:13:37:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:35:13:37:8 | schema. ...      }) | route validation |
+| test.js:49:15:49:31 | schema.string({}) | test.js:49:15:49:31 | schema.string({}) | test.js:48:13:50:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:48:13:50:8 | schema. ...      }) | route validation |
+| test.js:62:15:62:45 | schema. ... h: 1 }) | test.js:62:15:62:45 | schema. ... h: 1 }) | test.js:61:13:63:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:61:13:63:8 | schema. ...      }) | route validation |
+| test.js:75:15:75:59 | schema. ... ined }) | test.js:75:15:75:59 | schema. ... ined }) | test.js:74:13:76:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:74:13:76:8 | schema. ...      }) | route validation |
+| test.js:87:13:87:27 | schema.string() | test.js:87:13:87:27 | schema.string() | test.js:87:13:87:27 | schema.string() | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:87:13:87:27 | schema.string() | route validation |
+| test.js:99:13:99:27 | schema.string() | test.js:99:13:99:27 | schema.string() | test.js:98:15:100:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:98:15:100:8 | schema. ...      }) | route validation |
+| test.js:112:17:112:31 | schema.string() | test.js:112:17:112:31 | schema.string() | test.js:111:14:113:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:111:14:113:8 | schema. ...      }) | route validation |
+| test.js:125:16:125:30 | schema.string() | test.js:125:16:125:30 | schema.string() | test.js:124:13:128:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:124:13:128:8 | schema. ...      }) | route validation |
+| test.js:126:22:126:36 | schema.string() | test.js:126:22:126:36 | schema.string() | test.js:124:13:128:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:124:13:128:8 | schema. ...      }) | route validation |
+| test.js:127:18:127:32 | schema.string() | test.js:127:18:127:32 | schema.string() | test.js:124:13:128:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:124:13:128:8 | schema. ...      }) | route validation |
+| test.js:140:31:140:45 | schema.string() | test.js:140:31:140:45 | schema.string() | test.js:139:13:141:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:139:13:141:8 | schema. ...      }) | route validation |
+| test.js:153:28:153:42 | schema.string() | test.js:153:28:153:42 | schema.string() | test.js:152:13:154:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:152:13:154:8 | schema. ...      }) | route validation |
+| test.js:172:20:172:34 | schema.string() | test.js:172:20:172:34 | schema.string() | test.js:170:18:174:9 | {\\n      ...       } | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:170:18:174:9 | {\\n      ...       } | route validation |
+| test.js:172:20:172:34 | schema.string() | test.js:172:20:172:34 | schema.string() | test.js:171:17:173:12 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:171:17:173:12 | schema. ...      }) | route validation |
+| test.js:181:24:181:38 | schema.string() | test.js:181:24:181:38 | schema.string() | test.js:186:14:188:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:186:14:188:8 | schema. ...      }) | route validation |
+| test.js:200:15:200:49 | schema. ... : '' }) | test.js:200:15:200:49 | schema. ... : '' }) | test.js:199:13:201:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:199:13:201:8 | schema. ...      }) | route validation |
+| test.js:213:15:213:47 | schema. ... true }) | test.js:213:15:213:47 | schema. ... true }) | test.js:212:13:214:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:212:13:214:8 | schema. ...      }) | route validation |
+| test.js:314:15:314:24 | z.string() | test.js:314:15:314:24 | z.string() | test.js:313:13:315:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:313:13:315:8 | z.objec ...      }) | route validation |
+| test.js:327:15:327:24 | z.string() | test.js:327:15:327:24 | z.string() | test.js:326:13:328:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:326:13:328:8 | z.objec ...      }) | route validation |
+| test.js:340:15:340:24 | z.string() | test.js:340:15:340:24 | z.string() | test.js:339:13:341:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:339:13:341:8 | z.objec ...      }) | route validation |
+| test.js:353:15:353:24 | z.string() | test.js:353:15:353:24 | z.string() | test.js:352:13:354:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:352:13:354:8 | z.objec ...      }) | route validation |
+| test.js:366:15:366:24 | z.string() | test.js:366:15:366:24 | z.string() | test.js:365:13:367:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:365:13:367:8 | z.objec ...      }) | route validation |
+| test.js:379:15:379:24 | z.string() | test.js:379:15:379:24 | z.string() | test.js:378:13:380:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:378:13:380:8 | z.objec ...      }) | route validation |
+| test.js:387:23:387:32 | z.string() | test.js:387:23:387:32 | z.string() | test.js:392:13:392:25 | zodBodySchema | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:392:13:392:25 | zodBodySchema | route validation |
+| test.js:404:17:404:26 | z.string() | test.js:404:17:404:26 | z.string() | test.js:403:14:406:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:403:14:406:8 | z.objec ...      }) | route validation |
+| test.js:405:17:405:26 | z.string() | test.js:405:17:405:26 | z.string() | test.js:403:14:406:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:403:14:406:8 | z.objec ...      }) | route validation |
+| test.js:418:15:418:24 | z.string() | test.js:418:15:418:24 | z.string() | test.js:417:13:419:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:417:13:419:8 | z.objec ...      }) | route validation |
+| test.js:431:15:431:24 | z.string() | test.js:431:15:431:24 | z.string() | test.js:430:13:432:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:430:13:432:8 | z.objec ...      }) | route validation |
+| test.js:812:19:812:33 | schema.string() | test.js:812:19:812:33 | schema.string() | test.js:809:13:815:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:809:13:815:8 | schema. ...      }) | route validation |
+| test.js:829:19:829:28 | z.string() | test.js:829:19:829:28 | z.string() | test.js:826:13:832:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:826:13:832:8 | z.objec ...      }) | route validation |
+| test.js:846:24:846:38 | schema.string() | test.js:846:24:846:38 | schema.string() | test.js:843:13:852:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:843:13:852:8 | schema. ...      }) | route validation |
+| test.js:850:18:850:32 | schema.string() | test.js:850:18:850:32 | schema.string() | test.js:843:13:852:8 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:843:13:852:8 | schema. ...      }) | route validation |
+| test.js:866:24:866:33 | z.string() | test.js:866:24:866:33 | z.string() | test.js:863:13:872:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:863:13:872:8 | z.objec ...      }) | route validation |
+| test.js:870:18:870:27 | z.string() | test.js:870:18:870:27 | z.string() | test.js:863:13:872:8 | z.objec ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:863:13:872:8 | z.objec ...      }) | route validation |
+| test.js:884:29:884:43 | schema.string() | test.js:884:29:884:43 | schema.string() | test.js:884:13:884:58 | useVali ... a.any() | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:884:13:884:58 | useVali ... a.any() | route validation |
+| test.js:892:10:892:24 | schema.string() | test.js:892:10:892:24 | schema.string() | test.js:895:53:895:95 | schema. ... ma() }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:895:53:895:95 | schema. ... ma() }) | route validation |
+| test.js:902:12:902:21 | z.string() | test.js:902:12:902:21 | z.string() | test.js:908:23:908:73 | z.objec ... ng() }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:908:23:908:73 | z.objec ... ng() }) | route validation |
+| test.js:923:15:923:26 | zv4.string() | test.js:923:15:923:26 | zv4.string() | test.js:922:13:924:8 | zv4.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:922:13:924:8 | zv4.obj ...      }) | route validation |
+| test.js:936:15:936:26 | zv4.string() | test.js:936:15:936:26 | zv4.string() | test.js:935:13:937:8 | zv4.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:935:13:937:8 | zv4.obj ...      }) | route validation |
+| test.js:949:15:949:26 | zv4.string() | test.js:949:15:949:26 | zv4.string() | test.js:948:13:950:8 | zv4.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:948:13:950:8 | zv4.obj ...      }) | route validation |
+| test.js:992:15:992:28 | zBare.string() | test.js:992:15:992:28 | zBare.string() | test.js:991:13:993:8 | zBare.o ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:991:13:993:8 | zBare.o ...      }) | route validation |
+| test.js:1005:15:1005:28 | zBare.string() | test.js:1005:15:1005:28 | zBare.string() | test.js:1004:13:1006:8 | zBare.o ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1004:13:1006:8 | zBare.o ...      }) | route validation |
+| test.js:1018:15:1018:28 | zBare.string() | test.js:1018:15:1018:28 | zBare.string() | test.js:1017:13:1019:8 | zBare.o ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1017:13:1019:8 | zBare.o ...      }) | route validation |
+| test.js:1061:15:1061:26 | zNs.string() | test.js:1061:15:1061:26 | zNs.string() | test.js:1060:13:1062:8 | zNs.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1060:13:1062:8 | zNs.obj ...      }) | route validation |
+| test.js:1074:15:1074:26 | zNs.string() | test.js:1074:15:1074:26 | zNs.string() | test.js:1073:13:1075:8 | zNs.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1073:13:1075:8 | zNs.obj ...      }) | route validation |
+| test.js:1087:15:1087:26 | zNs.string() | test.js:1087:15:1087:26 | zNs.string() | test.js:1086:13:1088:8 | zNs.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1086:13:1088:8 | zNs.obj ...      }) | route validation |
+| test.js:1100:15:1100:26 | zNs.string() | test.js:1100:15:1100:26 | zNs.string() | test.js:1099:13:1101:8 | zNs.obj ...      }) | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1099:13:1101:8 | zNs.obj ...      }) | route validation |
+| test.js:1168:18:1168:32 | schema.string() | test.js:1168:18:1168:32 | schema.string() | test.js:1166:16:1170:7 | {\\n      ...       } | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:1166:16:1170:7 | {\\n      ...       } | route validation |
+| test.js:1168:18:1168:32 | schema.string() | test.js:1168:18:1168:32 | schema.string() | test.js:1167:15:1169:10 | schema. ...      }) | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:1167:15:1169:10 | schema. ...      }) | route validation |
+| test.js:1185:9:1185:23 | schema.string() | test.js:1185:9:1185:23 | schema.string() | test.js:1188:59:1188:76 | sharedCommonSchema | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:1188:59:1188:76 | sharedCommonSchema | route validation |
+| test.js:1186:8:1186:22 | schema.string() | test.js:1186:8:1186:22 | schema.string() | test.js:1188:59:1188:76 | sharedCommonSchema | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:1188:59:1188:76 | sharedCommonSchema | route validation |
+| test.js:1192:16:1192:25 | z.string() | test.js:1192:16:1192:25 | z.string() | test.js:1194:61:1194:75 | routeBodySchema | This z.string() reaches route request validation ($@) without a .max() constraint; unbounded request input can cause Denial of Service. Add .max(N). | test.js:1194:61:1194:75 | routeBodySchema | route validation |
+| test.js:1199:13:1199:27 | schema.string() | test.js:1199:13:1199:27 | schema.string() | test.js:1202:59:1202:76 | buildRouteSchema() | This schema.string() reaches route request validation ($@) without a maxLength; unbounded request input can cause Denial of Service. Add { maxLength: N }. | test.js:1202:59:1202:76 | buildRouteSchema() | route validation |

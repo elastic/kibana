@@ -39,7 +39,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ESQLQueryStats } from '@kbn/esql-types';
+import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -49,10 +49,11 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
+import { QuerySubmitTrigger } from './query_submit_metadata';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -76,7 +77,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryMenu?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
+  // Toggle the datepicker with a boolean, or use `{ disabled: true }` to show it disabled
+  showDatePicker?: ShowDatePicker;
   showAutoRefreshOnly?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -151,6 +153,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Disables all inputs and interactive elements,
    */
   isDisabled?: boolean;
+  /**
+   * Disables only the submit / Search button, unlike `isDisabled` which
+   * greys out the entire query bar.
+   */
+  disableSubmitAction?: boolean;
 
   submitOnBlur?: boolean;
 
@@ -499,7 +506,38 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     );
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query }) => {
+  private async trackESQLQuerySubmitted(
+    query: Query | AggregateQuery | undefined,
+    trigger?: QuerySubmitTrigger
+  ) {
+    if (!query || !isOfAggregateQueryType(query)) {
+      return;
+    }
+
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    switch (trigger) {
+      case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
+        source = QuerySource.SEARCH_BUTTON;
+        break;
+      case QuerySubmitTrigger.TIME_FILTER:
+        source = QuerySource.TIME_FILTER;
+        break;
+      default:
+        return;
+    }
+
+    try {
+      const telemetryService = await this.services.esql?.getTelemetryService();
+      telemetryService?.trackQuerySubmitted({ source, query: query.esql });
+    } catch {
+      // best effort, don't block the query submission if telemetry fails
+    }
+  }
+
+  public onQueryBarSubmit = (
+    queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query },
+    trigger?: QuerySubmitTrigger
+  ) => {
     this.setState(
       {
         query: queryAndDateRange.query,
@@ -522,6 +560,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.isDirty()
           );
         }
+
+        void this.trackESQLQuerySubmitted(this.state.query, trigger);
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
           METRIC_TYPE.CLICK,
@@ -764,6 +804,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showQueryInput={this.props.showQueryInput}
           showAddFilter={this.props.showFilterBar}
           isDisabled={this.props.isDisabled}
+          disableSubmitAction={this.props.disableSubmitAction}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}

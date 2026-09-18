@@ -10,7 +10,7 @@ import datemath from '@kbn/datemath';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
@@ -47,7 +47,7 @@ export const buildScopedInternalSavedObjectsClientUnsafe = ({
 }) => {
   const fakeScopedRequest = kibanaRequestFactory({
     headers: {},
-    spaceId: asSpaceId(namespace),
+    spaceId: brandSpaceId(namespace),
   });
 
   return coreStart.savedObjects.getScopedClient(fakeScopedRequest, {

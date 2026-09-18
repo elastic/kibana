@@ -54,4 +54,6 @@ export enum WriteOperations {
   CreateGapAutoFillScheduler = 'createGapAutoFillScheduler',
   UpdateGapAutoFillScheduler = 'updateGapAutoFillScheduler',
   DeleteGapAutoFillScheduler = 'deleteGapAutoFillScheduler',
+  snoozeAlert = 'snoozeAlert',
+  unsnoozeAlert = 'unsnoozeAlert',
 }

@@ -12,39 +12,38 @@
  * surfaces anomaly badges in the APM UI that exercise the multi-detector /
  * multi-environment anomaly badge behaviour. Every service exists in MULTIPLE
  * ENVIRONMENTS (production + development), and each environment is anomalous at a
- * DIFFERENT time, so the "all environments" combined chart shows two distinct
- * anomaly clusters (each tagged with its environment in the tooltip):
+ * DIFFERENT time:
  *
  *   1. Highest score ACROSS DETECTORS (latency vs throughput vs failure rate):
  *      `synth-anomaly-detectors` (production) gets a CRITICAL failure-rate
- *      anomaly together with only a MINOR latency bump in the same window. The
- *      badge must show the failure-rate (critical) score, not the latency one.
+ *      anomaly together with only a MINOR latency bump in the same window.
  *
  *   2. Highest score ACROSS ENVIRONMENTS (when env selector = "all"):
  *      every service has a CRITICAL anomaly in `production` (earlier sub-window)
- *      and a smaller MAJOR anomaly in `development` (later sub-window). Both
- *      render in the combined chart at different times, but the badge / open
- *      anomalies link must still surface the production (highest) score.
+ *      and a smaller MAJOR anomaly in `development` (later sub-window).
  *
  *   2b. Identical anomalies side by side (same value across environments):
  *      `synth-anomaly-side-by-side` gets the SAME critical latency spike in both
  *      `production` and `development`, optionally offset in time by
- *      `sideBySideOffsetMinutes`. In the combined "all environments" view this
- *      renders two identical anomalies next to each other, exercising the tooltip
- *      when side-by-side values are the same.
+ *      `sideBySideOffsetMinutes`.
  *
  *   3. Detector coverage across environments:
  *      a dedicated service trips each detector (latency, throughput, failure
  *      rate) in both environments, critical in prod and major in dev.
  *
- *   4. All three detectors on ONE service, in BOTH environments, overlapping in
- *      time: `synth-anomaly-all-metrics` (production + development) trips latency,
- *      failure rate and throughput, each in its own sub-window at a DIFFERENT time
- *      but with intentional OVERLAPS and different intensities (failure rate ramps
- *      from major to critical). The two environments use shifted windows, so some
- *      anomalous times line up across environments and others do not. Some buckets
- *      are anomalous on two or three detectors at once, so the badge must surface
- *      the highest-scoring detector.
+ *   4. All three spike detectors on ONE service, in BOTH environments, overlapping
+ *      in time: `synth-anomaly-all-metrics` (production + development) trips
+ *      latency, failure rate and throughput, each in its own sub-window at a
+ *      DIFFERENT time but with intentional OVERLAPS and different intensities
+ *      (failure rate ramps from major to critical). The two environments use
+ *      shifted windows, so some anomalous times line up across environments and
+ *      others do not. Some buckets are anomalous on two or three detectors at once.
+ *
+ *   5. Low transaction count (drop to zero): `synth-anomaly-drop` emits a flat
+ *      baseline, then emits NO events in the per-environment anomaly window so
+ *      `low_count` sees empty buckets. Production goes silent in the earlier half
+ *      then resumes; development goes silent in the later half through the end of
+ *      the range (the classic "service stopped sending data" case).
  *
  * ANOMALY WINDOWS
  * ---------------
@@ -56,16 +55,19 @@
  *
  * APM ML DETECTORS (what each service is engineered to trip)
  * ---------------------------------------------------------
- * APM anomaly jobs run three detectors, all `by "transaction.type"` and
+ * APM anomaly jobs run four detectors, all `by "transaction.type"` and
  * `partition_field_name="service.name"` (indices match
  * common/anomaly_detection/apm_ml_detectors.ts):
  *
  *   - index 0  high_mean(transaction_latency)       -> latency, HIGH only
  *   - index 1  mean(transaction_throughput)         -> throughput, EITHER way
  *   - index 2  high_mean(failed_transaction_rate)   -> failure rate, HIGH only
+ *   - index 3  low_count                            -> document count, LOW only
+ *                                                    (empty buckets count as 0)
  *
  * Because latency and failure rate use `high_mean`, their anomalies must be
  * UPWARD deviations; throughput uses `mean`, so a large UP spike works too.
+ * `low_count` is the opposite: omit events entirely so the bucket is empty.
  * Detector -> service/environment mapping engineered below (critical in prod,
  * major in dev, at different times):
  *   - detector 2 (failure rate) + detector 0 (latency, minor)
@@ -74,8 +76,11 @@
  *       -> synth-anomaly-environments / production (critical) + development (major)
  *   - detector 1 (throughput)
  *       -> synth-anomaly-throughput / production (critical) + development (major)
- *   - detectors 0 + 1 + 2 (all three, overlapping in time)
+ *   - detectors 0 + 1 + 2 (all three spike detectors, overlapping in time)
  *       -> synth-anomaly-all-metrics / production + development (shifted windows)
+ *   - detector 3 (low count)
+ *       -> synth-anomaly-drop / production (earlier half silent) + development
+ *          (later half silent through end)
  *
  * DATA SHAPE
  * ----------
@@ -112,6 +117,12 @@
  *                                           the SAME anomaly, so the combined view
  *                                           shows identical anomalies side by side
  *                                           (0 = exact same time bucket).
+ * --scenarioOpts.singleEnv=false            When true, generate data ONLY for the
+ *                                           `production` environment (no development
+ *                                           data). Services still trip their production
+ *                                           detectors; the cross-environment behaviors
+ *                                           (side-by-side, "all environments") collapse
+ *                                           to single anomalies.
  *
  * VALIDATE + ML SETUP
  * -------------------
@@ -125,7 +136,7 @@
 import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import type { Scenario } from '@kbn/synthtrace';
-import { withClient } from '@kbn/synthtrace';
+import { getBooleanOpt, withClient } from '@kbn/synthtrace';
 
 const TRANSACTION_NAME = 'GET /api/orders';
 
@@ -164,6 +175,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
     ...DEFAULT_SCENARIO_OPTS,
     ...(runOptions.scenarioOpts || {}),
   };
+  const singleEnv = getBooleanOpt(runOptions.scenarioOpts, 'singleEnv', false);
 
   // Split the trailing anomaly span into two non-overlapping sub-windows so each
   // environment is anomalous at a DIFFERENT time. Production takes the earlier
@@ -276,6 +288,23 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
               .timestamp(timestamp)
               .duration(duration);
             return Math.random() < failProbability ? tx.failure() : tx.success();
+          });
+
+      // Low-count detector (index 3, low_count). Baseline traffic, then no
+      // events in the anomaly window so the ML bucket is empty (count = 0).
+      const dropEvents = (instance: Instance, isDropped: AnomalyPredicate) =>
+        range
+          .interval('1m')
+          .rate(baselineRate)
+          .generator((timestamp) => {
+            if (isDropped(timestamp)) {
+              return [];
+            }
+            return instance
+              .transaction({ transactionName: TRANSACTION_NAME })
+              .timestamp(timestamp)
+              .duration(BASELINE_DURATION)
+              .success();
           });
 
       // Throughput detector (index 1, mean). The anomaly window multiplies the
@@ -413,12 +442,27 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         ),
       ];
 
+      // 5) Drop-to-zero across environments at different times. Production
+      //    emits no events in the earlier half of the span (then resumes);
+      //    development goes silent from the later half through the end of
+      //    the range.
+      const dropEventsByEnv = [
+        dropEvents(instanceFor('synth-anomaly-drop', PRODUCTION), isProductionAnomaly),
+        dropEvents(instanceFor('synth-anomaly-drop', DEVELOPMENT), isDevelopmentAnomaly),
+      ];
+
+      // In single-environment mode, keep only the production stream of each
+      // [production, development] pair (production is always the first entry).
+      const selectEnvironments = <T>(streams: T[]): T[] =>
+        singleEnv ? streams.slice(0, 1) : streams;
+
       return withClient(apmEsClient, [
-        ...detectorsEvents,
-        ...environmentsEvents,
-        ...sideBySideEvents,
-        ...throughputEventsByEnv,
-        ...allMetricsEventsByEnv,
+        ...selectEnvironments(detectorsEvents),
+        ...selectEnvironments(environmentsEvents),
+        ...selectEnvironments(sideBySideEvents),
+        ...selectEnvironments(throughputEventsByEnv),
+        ...selectEnvironments(allMetricsEventsByEnv),
+        ...selectEnvironments(dropEventsByEnv),
       ]);
     },
   };

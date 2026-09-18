@@ -6,6 +6,7 @@
   "include": ["public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/as-code-data-views-schema",
     "@kbn/data-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/security-plugin",
@@ -18,6 +19,7 @@
     "@kbn/datemath",
     "@kbn/file-upload-common",
     "@kbn/test-jest-helpers",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

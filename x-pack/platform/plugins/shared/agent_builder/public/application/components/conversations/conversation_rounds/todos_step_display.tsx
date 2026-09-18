@@ -43,7 +43,7 @@ const TODO_STATUS_DISPLAY: Record<TodoStatus, TodoStatusDisplay> = {
     }),
   },
   completed: {
-    iconType: 'checkInCircleFilled',
+    iconType: 'checkCircleFill',
     iconColor: 'success',
     isInactive: true,
     label: i18n.translate('xpack.agentBuilder.conversation.todos.statusCompleted', {
@@ -82,7 +82,7 @@ export const TodosStepDisplay: React.FC<TodosStepDisplayProps> = ({ step }) => {
   const activeCount = todos.filter(isActive).length;
 
   const containerStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.base};
+    padding: ${euiTheme.size.base};
     border-radius: ${euiTheme.border.radius.medium};
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
   `;
@@ -107,13 +107,10 @@ export const TodosStepDisplay: React.FC<TodosStepDisplayProps> = ({ step }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" size="s" color="subdued" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" css={headerTextStyles}>
+            <EuiText size="s" css={headerTextStyles}>
               <strong>
                 {i18n.translate('xpack.agentBuilder.conversation.todos.header', {
-                  defaultMessage: 'To-dos {count}',
+                  defaultMessage: 'To-dos: {count}',
                   values: { count: activeCount },
                 })}
               </strong>

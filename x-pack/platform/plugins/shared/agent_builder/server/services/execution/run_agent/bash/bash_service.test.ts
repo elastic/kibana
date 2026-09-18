@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { BashService } from './bash_service';
+import type { ExecToolFn } from './exec_tool_command';
 import { FilesystemService } from '../../filesystem/filesystem_service';
 import { WorkspaceVolume } from '../../filesystem/workspace_volume';
 import { MemoryVolume } from '../../runner/store/memory_volume';
@@ -34,14 +36,17 @@ const makeFixture = async (opts?: { workspaceId?: string; generateId?: () => str
 const makeBash = (
   fsService: FilesystemService,
   workspaceVolume: WorkspaceVolume,
-  extra?: Partial<ConstructorParameters<typeof BashService>[0]>
+  extra?: { execToolFn?: ExecToolFn; timeoutMs?: number }
 ) =>
   new BashService({
     filesystemService: fsService,
     workspaceVolume,
-    execToolFn: jest.fn(),
-    resolveToolId: (id) => id,
-    ...extra,
+    toolAccess: {
+      execToolFn: extra?.execToolFn ?? jest.fn(),
+      resolveToolId: (id) => id,
+      getToolSchema: () => z.object({}),
+    },
+    timeoutMs: extra?.timeoutMs,
   });
 
 describe('BashService', () => {
@@ -91,8 +96,8 @@ describe('BashService', () => {
 
   it('returns exit_code 124 on wall-clock timeout', async () => {
     const { fsService, workspaceVolume } = await makeFixture();
-    const execToolFn = jest.fn(
-      () => new Promise((resolve) => setTimeout(() => resolve({ ok: true }), 500))
+    const execToolFn: ExecToolFn = jest.fn(
+      () => new Promise((resolve) => setTimeout(() => resolve({ results: [] }), 500))
     );
     const bash = makeBash(fsService, workspaceVolume, { timeoutMs: 50, execToolFn });
     const result = await bash.exec('exec_tool slow.tool');
@@ -102,7 +107,9 @@ describe('BashService', () => {
 
   it('exec_tool inside the script invokes the supplied callback', async () => {
     const { fsService, workspaceVolume } = await makeFixture();
-    const execToolFn = jest.fn().mockResolvedValue({ ok: true });
+    const execToolFn = jest.fn().mockResolvedValue({
+      results: [{ tool_result_id: 'r1', type: 'other', data: { ok: true } }],
+    });
     const bash = makeBash(fsService, workspaceVolume, { execToolFn });
     const result = await bash.exec('exec_tool platform.foo --args=\'{"a":1}\' | cat');
     expect(result.exit_code).toBe(0);

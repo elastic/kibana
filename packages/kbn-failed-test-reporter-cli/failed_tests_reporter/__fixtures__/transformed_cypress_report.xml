@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="13.109" tests="1" failures="1">
+  <testsuite name="Root Suite" timestamp="2026-07-15T12:00:00" tests="0" file="x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/response_actions/isolate.cy.ts" failures="0" skipped="0" time="0"/>
+  <testsuite name="Response console" timestamp="2026-07-15T12:00:00" tests="1" failures="1" skipped="0" time="13.109">
+    <testcase name="Response console should isolate a host should isolate a host" time="13.109" classname="Security Solution Cypress.x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/response_actions/isolate·cy·ts">
+      <failure message="Timed out retrying" type="CypressError"><![CDATA[CypressError: Timed out retrying]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

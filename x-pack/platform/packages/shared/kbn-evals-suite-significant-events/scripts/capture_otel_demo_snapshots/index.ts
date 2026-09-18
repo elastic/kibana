@@ -18,7 +18,7 @@ import {
   ensureMinikubeRunning,
 } from '@kbn/otel-demo';
 import type { DemoType, FailureScenario } from '@kbn/otel-demo';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
   GCS_BUCKET,
   BASELINE_WAIT_MS,
@@ -111,8 +111,8 @@ run(
     );
 
     const onboardingSteps = [
-      StreamsKIsOnboardingStep.FeaturesIdentification,
-      ...(withDiscovery ? [StreamsKIsOnboardingStep.QueriesGeneration] : []),
+      KIsOnboardingStep.FeaturesIdentification,
+      ...(withDiscovery ? [KIsOnboardingStep.QueriesGeneration] : []),
     ];
 
     const failureScenarios = getDemoScenarios(demoType as DemoType);
@@ -213,7 +213,7 @@ run(
       Prerequisites:
         - minikube running  (minikube start --cpus=4 --memory=8g)
         - Local Elasticsearch with GCS credentials in keystore:
-            yarn es snapshot --license trial \\
+            pnpm es snapshot --license trial \\
               --secure-files gcs.client.default.credentials_file=/path/to/creds.json
         - Local Kibana running with a preconfigured LLM connector
 
@@ -280,7 +280,7 @@ async function processScenario(
   extractionTimeoutMs: number = KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   withDiscovery: boolean = false,
   discoveryWaitMs: number = DISCOVERY_WAIT_MS,
-  onboardingSteps: StreamsKIsOnboardingStep[] = [StreamsKIsOnboardingStep.FeaturesIdentification]
+  onboardingSteps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
   const isFailure = isFailureScenario(scenario);
 

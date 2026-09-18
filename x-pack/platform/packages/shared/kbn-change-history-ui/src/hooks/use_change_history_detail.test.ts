@@ -9,8 +9,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useChangeHistoryDetail } from './use_change_history_detail';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
+import type { ChangeHistoryPendingChange } from '../types/change_history_pending_change';
 import { TEST_SNAPSHOT } from '../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+import { createChangeHistoryHookWrapper } from '../test_utils/create_change_history_hook_wrapper';
 
 describe('useChangeHistoryDetail', () => {
   it('does not show loading for synchronously resolved cache hits', async () => {
@@ -27,7 +28,7 @@ describe('useChangeHistoryDetail', () => {
       getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result } = renderHook(
       () =>
@@ -60,7 +61,7 @@ describe('useChangeHistoryDetail', () => {
       getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result, rerender } = renderHook(
       ({ enabled }) =>
@@ -81,5 +82,63 @@ describe('useChangeHistoryDetail', () => {
 
     expect(result.current.change).toEqual(detail);
     expect(adapter.getChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('resolves pending selection locally without calling getChange', async () => {
+    const pendingChange: ChangeHistoryPendingChange = {
+      id: '__pending__',
+      timestamp: '2026-07-03T12:00:00.000Z',
+      actor: { name: 'You' },
+      action: 'Unsaved changes',
+      snapshot: { content: 'draft' },
+    };
+
+    const committedDetail: ChangeHistoryDetail = {
+      id: 'evt-current',
+      timestamp: '2026-06-16T12:00:00.000Z',
+      actor: { name: 'Alice' },
+      action: 'Updated',
+      snapshot: TEST_SNAPSHOT,
+      metadata: { version: 3 },
+    };
+
+    const getChange = jest.fn().mockResolvedValue(committedDetail);
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges: jest.fn(),
+      getChange,
+      getPendingChange: () => pendingChange,
+    };
+
+    const { wrapper } = createChangeHistoryHookWrapper({
+      adapter,
+      features: { unsavedChanges: true },
+    });
+
+    const { result, rerender } = renderHook(
+      ({ changeId }) =>
+        useChangeHistoryDetail({
+          adapter,
+          objectId: 'obj-1',
+          changeId,
+        }),
+      { initialProps: { changeId: '__pending__' as string }, wrapper }
+    );
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.change).toMatchObject({
+      id: '__pending__',
+      snapshot: { content: 'draft' },
+      isCurrent: true,
+    });
+    expect(getChange).not.toHaveBeenCalled();
+
+    rerender({ changeId: 'evt-current' });
+
+    await waitFor(() => {
+      expect(result.current.change).toEqual(committedDetail);
+    });
+
+    expect(getChange).toHaveBeenCalledTimes(1);
   });
 });

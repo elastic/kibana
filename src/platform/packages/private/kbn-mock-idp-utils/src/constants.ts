@@ -19,6 +19,10 @@ export const MOCK_IDP_SP_BASE_URL = `http://localhost:5601`;
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';
+// A gateway-supplied secret, distinct from Kibana's own MOCK_IDP_UIAM_SHARED_SECRET. UIAM accepts
+// both, so a passing test does not by itself prove the inbound value was relayed rather than
+// replaced; that needs UIAM to report which secret it received.
+export const MOCK_IDP_GATEWAY_SHARED_SECRET = '3KyUueOHfXAbZbcxM/sL7nfyUFOgX7u8ONBKHbz2AqI=';
 export const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
   'essu_dev_TnpKcmMyVTFkMEo2WW5scU5XUm9PVWw2TVRNNmJqSXRVbWxTVEZNeVowNVRkMWhUVWpCd1l6SjBadz09AAAAAN10T0s=';
 
@@ -29,6 +33,8 @@ export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS = 'oauth-clients';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES =
   'oauth-authorization-codes';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS = 'oauth-app-connections';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS =
+  'organization-service-accounts';
 export const MOCK_IDP_UIAM_COSMOS_DB_NAME = 'uiam-db';
 // Cosmos DB emulator uses a fixed key. For production, this should be retrieved from configuration.
 export const MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY =
@@ -46,6 +52,18 @@ export const MOCK_IDP_UIAM_COSMOS_DB_URL =
 export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
 export const MOCK_IDP_UIAM_PROJECT_ID2 = 'fedcba65432109876543210987654321';
+
+// Canonical project type names used in UIAM role assignments and ES Serverless configuration.
+// Test users get one project grant per type (like an org admin with mixed projects) so they can
+// reach cross-project (CPS) linked projects of any type, not just the type of the Kibana
+// instance they logged in to.
+export const MOCK_IDP_UIAM_PROJECT_TYPES = [
+  'elasticsearch',
+  'observability',
+  'security',
+  'workplaceai',
+  'vectordb',
+] as const;
 
 // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
 // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)

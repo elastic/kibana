@@ -68,12 +68,16 @@ export interface MenuItem {
   id: string;
   /** Display text for the menu item. */
   label: string;
+  /** Optional override for the secondary menu/panel header title. Defaults to `label` when omitted. */
+  secondaryMenuTitle?: string;
   /** Optional test selector for automated testing. */
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
   badgeType?: BadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
+  /** Hover popover only. Does not open the expanded side panel. Not shown in More. */
+  popoverSections?: SecondaryMenuSection[];
 }
 
 /**
@@ -89,22 +93,6 @@ export interface NavigationStructure {
 }
 
 /**
- * Configuration for the logo displayed at the top of the sidebar.
- */
-export interface SideNavLogo {
-  /** The route ID of the logo, used for the active state. */
-  id: string;
-  /** The href of the logo link, typically the home page. */
-  href: string;
-  /** The label for the logo, typically the product name. */
-  label: string;
-  /** The logo type, e.g. `appObservability`, `appSecurity`, etc. */
-  iconType: string;
-  /** Optional `data-test-subj` attribute. */
-  'data-test-subj'?: string;
-}
-
-/**
  * Props accepted by the `SideNavigation` component.
  */
 export interface NavigationProps {
@@ -114,15 +102,16 @@ export interface NavigationProps {
   isCollapsed: boolean;
   /** The navigation structure containing primary, secondary, and footer items. */
   items: NavigationStructure;
-  /** The logo object containing the route ID, href, label, and type. */
-  logo: SideNavLogo;
   /** Required by the grid layout to set the width of the navigation slot. */
   setWidth: (width: number) => void;
   /** Callback fired when a navigation item is clicked. */
-  onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
+  onItemClick?: (item: MenuItem | SecondaryMenuItem) => void;
   /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
-  /** When true, renders a centered horizontal separator at the top of the side nav. */
+  /**
+   * When true (the default), renders a horizontal separator at the top of the side nav.
+   * Pass false for hosts that do not sit under a global header.
+   */
   showTopSeparator?: boolean;
   /** Content to display inside the side panel footer. */
   sidePanelFooter?: ReactNode;

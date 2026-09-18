@@ -6,7 +6,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { AnyAction, Reducer } from 'redux';
+import type { AnyAction, Reducer } from 'redux-v4';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { HostsState } from './hosts/store';
 import type { UsersState } from './users/store';

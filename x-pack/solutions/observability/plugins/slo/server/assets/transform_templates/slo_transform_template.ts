@@ -31,9 +31,10 @@ export const getSLOTransformTemplate = (
   groupBy: TransformPivot['group_by'] = {},
   aggregations: TransformPivot['aggregations'] = {},
   settings: TransformSettings,
-  slo: SLODefinition
+  slo: SLODefinition,
+  projectRouting?: string
 ): TransformPutTransformRequest => {
-  const formattedSource = buildSourceWithFilters(source, slo);
+  const formattedSource = buildSourceWithFilters(source, slo, projectRouting);
   return {
     transform_id: transformId,
     description,
@@ -70,11 +71,16 @@ const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
   return groups.map((group) => ({ exists: { field: group } }));
 };
 
-const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): TransformSource => {
+const buildSourceWithFilters = (
+  source: TransformSource,
+  slo: SLODefinition,
+  projectRouting?: string
+): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
   const sourceFilters = [source.query?.bool?.filter].flat().filter(Boolean);
   return {
     ...source,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
     query: {
       ...source.query,
       bool: {

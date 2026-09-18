@@ -7,6 +7,7 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ErrorGroupSampleIdsResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -21,11 +22,6 @@ import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 
 const ERROR_SAMPLES_SIZE = 10000;
-
-export interface ErrorGroupSampleIdsResponse {
-  errorSampleIds: string[];
-  occurrencesCount: number;
-}
 
 export async function getErrorGroupSampleIds({
   environment,

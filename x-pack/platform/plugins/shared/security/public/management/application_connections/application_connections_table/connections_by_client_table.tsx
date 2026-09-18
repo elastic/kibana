@@ -12,12 +12,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useSet from 'react-use/lib/useSet';
 
 import { ApplicationConnectionsEmptyPrompt } from './application_connections_empty_prompt';
+import { isRevocable, matchesActionMode } from './application_connections_filters';
 import { useApplicationConnectionsTableColumns } from './application_connections_table_columns';
 import { ApplicationConnectionsTableHeader } from './application_connections_table_header';
 import { groupedTableStyles } from './application_connections_table_styles';
 import { ConnectionRowsTable } from './connection_rows_table';
 import { labels } from '../constants/i18n';
-import type { ApplicationConnections } from '../constants/types';
+import type { ApplicationConnections, ApplicationConnectionsActionMode } from '../constants/types';
 import { useNavigation } from '../hooks/use_navigation';
 import type { OAuthConnection } from '../service/application_connections_api_client';
 
@@ -26,6 +27,7 @@ export interface ConnectionsByClientTableProps {
   totalCount: number;
   isLoading: boolean;
   selectedByClient: Record<string, OAuthConnection[]>;
+  actionMode: ApplicationConnectionsActionMode | null;
   onSelectionChange: (clientId: string, selection: OAuthConnection[]) => void;
 }
 
@@ -34,12 +36,24 @@ export const ConnectionsByClientTable = ({
   totalCount,
   isLoading,
   selectedByClient,
+  actionMode,
   onSelectionChange,
 }: ConnectionsByClientTableProps) => {
   const { mcpClientCreateUrl } = useNavigation();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [expandedRows, { toggle: toggleExpandedRow }] = useSet<string>(new Set());
+  const [expandedRows, { toggle: toggleExpandedRow, remove: collapseRow }] = useSet<string>(
+    new Set()
+  );
+
+  // If a client no longer has connections, collapse the row
+  useEffect(() => {
+    connections.forEach(({ client, connections: clientConnections }) => {
+      if (clientConnections.length === 0 && expandedRows.has(client.id)) {
+        collapseRow(client.id);
+      }
+    });
+  }, [connections, expandedRows, collapseRow]);
 
   const columns = useApplicationConnectionsTableColumns({
     expandedRows,
@@ -55,6 +69,7 @@ export const ConnectionsByClientTable = ({
               client={connection.client}
               connections={connection.connections}
               selection={selectedByClient[connection.client.id] ?? []}
+              actionMode={actionMode}
               onSelectionChange={(nextSelection) =>
                 onSelectionChange(connection.client.id, nextSelection)
               }
@@ -63,18 +78,26 @@ export const ConnectionsByClientTable = ({
         }
         return expandedRowMap;
       }, {}),
-    [connections, expandedRows, selectedByClient, onSelectionChange]
+    [connections, expandedRows, selectedByClient, actionMode, onSelectionChange]
   );
 
   const selectableConnectionsByClient = useMemo(
     () =>
       connections.reduce<Record<string, OAuthConnection[]>>((selectableByClient, row) => {
-        selectableByClient[row.client.id] = row.connections.filter(
-          (connection) => !connection.revoked
+        const inMode = row.connections.filter((connection) =>
+          matchesActionMode({ client: row.client, connection }, actionMode)
         );
+        if (actionMode !== null) {
+          selectableByClient[row.client.id] = inMode;
+          return selectableByClient;
+        }
+        const revocable = inMode.filter((connection) =>
+          isRevocable({ client: row.client, connection })
+        );
+        selectableByClient[row.client.id] = revocable.length > 0 ? revocable : inMode;
         return selectableByClient;
       }, {}),
-    [connections]
+    [connections, actionMode]
   );
 
   const selectedClientRows = useMemo(
@@ -92,10 +115,17 @@ export const ConnectionsByClientTable = ({
     () => ({
       selected: selectedClientRows,
       selectable: (row) => (selectableConnectionsByClient[row.client.id]?.length ?? 0) > 0,
-      selectableMessage: (selectable, row) =>
-        selectable
-          ? labels.groupedColumns.selectClientLabel(row.client.client_name ?? row.client.id)
-          : labels.groupedColumns.allRevokedClientLabel,
+      selectableMessage: (selectable, row) => {
+        if (selectable) {
+          return labels.groupedColumns.selectClientLabel(row.client.client_name ?? row.client.id);
+        }
+        if (row.connections.length === 0) {
+          return labels.groupedColumns.noConnectionsClientLabel;
+        }
+        return actionMode === 'delete'
+          ? labels.groupedColumns.noRevokedConnectionsClientLabel
+          : labels.groupedColumns.allRevokedClientLabel;
+      },
       onSelectionChange: (nextSelection) => {
         const nextIds = new Set(nextSelection.map((row) => row.client.id));
         const prevIds = new Set(selectedClientRows.map((row) => row.client.id));
@@ -111,7 +141,7 @@ export const ConnectionsByClientTable = ({
         }
       },
     }),
-    [selectedClientRows, selectableConnectionsByClient, onSelectionChange]
+    [selectedClientRows, selectableConnectionsByClient, actionMode, onSelectionChange]
   );
 
   useEffect(() => {

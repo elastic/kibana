@@ -49,9 +49,9 @@ groups:
         datatype: string
         default: "*"
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
       - setting: notifications.connectors.default.email
         description: |
@@ -149,7 +149,7 @@ groups:
       - setting: csp.script_src
         description: |
           Add sources for the [Content Security Policy `script-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -171,7 +171,7 @@ groups:
       - setting: csp.worker_src
         description: |
           Add sources for the [Content Security Policy `worker-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -180,7 +180,7 @@ groups:
       - setting: csp.style_src
         description: |
           Add sources for the [Content Security Policy `style-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -189,7 +189,7 @@ groups:
       - setting: csp.connect_src
         description: |
           Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -198,7 +198,7 @@ groups:
       - setting: csp.default_src
         description: |
           Add sources for the [Content Security Policy `default-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -207,7 +207,7 @@ groups:
       - setting: csp.font_src
         description: |
           Add sources for the [Content Security Policy `font-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -216,7 +216,7 @@ groups:
       - setting: csp.frame_src
         description: |
           Add sources for the [Content Security Policy `frame-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -225,7 +225,7 @@ groups:
       - setting: csp.img_src
         description: |
           Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -234,16 +234,25 @@ groups:
       - setting: csp.object_src
         description: |
           Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
-        datatype: string
+        datatype: array of strings
         applies_to:
           - "stack: ga 9.3"
+          - "ech: unavailable"
+          - "self: ga"
+
+      - setting: csp.media_src
+        description: |
+          Add sources for the [Content Security Policy `media-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/media-src).
+        datatype: array of strings
+        applies_to:
+          - "stack: ga 9.6"
           - "ech: unavailable"
           - "self: ga"
 
       - setting: csp.frame_ancestors
         description: |
           Add sources for the [Content Security Policy `frame-ancestors` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -253,7 +262,7 @@ groups:
       - setting: csp.form_action
         description: |
           Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action).
-        datatype: string
+        datatype: array of strings
         default: "'self'"
         applies_to:
           - "stack: ga 9.5"
@@ -263,7 +272,7 @@ groups:
       - setting: csp.report_only.form_action
         description: |
           Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
-        datatype: string
+        datatype: array of strings
         applies_to:
           - "stack: deprecated 9.5"
           - "ech: ga"
@@ -273,7 +282,7 @@ groups:
       - setting: csp.report_only.object_src
         description: |
           Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/object-src) in reporting mode.
-        datatype: string
+        datatype: array of strings
         applies_to:
           - "stack: deprecated 9.3"
           - "ech: unavailable"
@@ -283,7 +292,7 @@ groups:
       - setting: csp.report_only.connect_src
         description: |
           Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
-        datatype: string
+        datatype: array of strings
         applies_to:
           - "stack: ga 9.5"
           - "ech: ga"
@@ -292,7 +301,7 @@ groups:
       - setting: csp.report_uri
         description: |
           Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -301,7 +310,7 @@ groups:
       - setting: csp.report_to
         description: |
           Add sources for the [Content Security Policy `report-to` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to).
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: unavailable
@@ -699,7 +708,7 @@ groups:
       - setting: logging.loggers[]
         id: logging-loggers
         description: |
-          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records).
+          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records), including its level, appenders, and optional [meta filters](./logging-settings.md).
         datatype: string
         applies_to:
           stack: ga
@@ -1154,9 +1163,9 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
       - setting: server.cors.allowCredentials
         description: |
@@ -1164,9 +1173,9 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
       - setting: server.cors.allowOrigin
         description: |
@@ -1174,9 +1183,9 @@ groups:
         datatype: string
         default: '["*"]'
         applies_to:
-          - "stack: preview"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga
+          ech: unavailable
+          self: ga
 
   - group: Server rate limiter settings
     id: server-rate-limiter-settings
@@ -1449,7 +1458,7 @@ groups:
       - setting: server.ssl.supportedProtocols
         id: server-ssl-supportedprotocols
         description: |
-          An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. Enabling `TLSv1.1` would require both setting the `--tls-min-1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`. `HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
+          An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. Enabling `TLSv1.1` would require both setting the `--tls-min-v1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`. `HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
         datatype: string
         default: "TLSv1.2, TLSv1.3"
         applies_to:
@@ -1486,6 +1495,21 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
+
+      - setting: server.xsrf.allowedSchemes
+        id: settings-xsrf-allowedschemes
+        description: |
+          `Authorization` header schemes whose non-GET requests skip the `kbn-xsrf` check. Supported values are `apikey` and `bearer`; `basic` and all other schemes always require the header. Default is empty, which keeps the `kbn-xsrf` check for all requests.
+        note: |
+          :applies_to: serverless: ga
+          In Serverless environments, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check by default.
+        datatype: array of strings
+        default: "[]"
+        applies_to:
+          stack: ga 9.5
+          ech: ga
+          self: ga
+        warning: "Do not set this if {{kib}} sits behind an authenticating reverse proxy that adds an `Authorization` header to browser requests, since that would let ordinary browser requests bypass the check."
 
   - group: Telemetry settings
     id: telemetry-settings
@@ -1676,35 +1700,6 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "Rollups are deprecated and will be removed in a future version. Use [downsampling](docs-content://manage-data/data-store/data-streams/downsampling-time-series-data-stream.md) instead."
-
-      - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
-        description: |
-          Allow to configure the max file upload size for use with the Upload File Response action available with the Defend Integration. To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
-        datatype: string
-        applies_to:
-          stack: ga 8.9
-          ech: ga
-          self: ga
-
-      - setting: xpack.securitySolution.disableEndpointRuleAutoInstall
-        description: |
-          Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Introduced with v9.2.4.
-        datatype: bool
-        default: false
-        applies_to:
-          - "stack: ga 9.2.4+"
-          - "ech: ga"
-          - "self: ga"
-
-      - setting: xpack.securitySolution.maxEndpointScriptFileSize
-        description: |
-          The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
-        datatype: bool
-        default: 26214400
-        applies_to:
-          - "stack: ga 9.4+"
-          - "ech: ga"
-          - "self: ga"
 
       - setting: xpack.snapshot_restore.ui.enabled
         description: |

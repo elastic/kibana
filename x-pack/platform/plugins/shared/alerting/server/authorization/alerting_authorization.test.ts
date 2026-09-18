@@ -137,18 +137,53 @@ type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privilege
 };
 
 describe('AlertingAuthorization', () => {
+  const spaceId = 'space1';
   const getSpace = jest.fn();
-  const getSpaceId = () => 'space1';
+  const getSpaceId = () => spaceId;
   const allRegisteredConsumers = new Set<string>();
   const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
-  const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
+  const checkPrivileges = jest.fn<
+    Promise<CheckPrivilegesResponseWithoutES>,
+    [{ kibana: string[] }]
+  >(async () => ({
     username: 'elastic',
     hasAllRequested: true,
     privileges: { kibana: [] },
   }));
+  const atSpacesMock = jest.fn((_spaces: string[], privileges: { kibana: string[] }) =>
+    checkPrivileges(privileges)
+  );
 
   const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
+  const requiredPrivileges = {
+    kibana: [
+      'rule-type-id-1/alerts/rule/get',
+      'rule-type-id-1/alerts/rule/create',
+      'rule-type-id-1/consumer-a/rule/get',
+      'rule-type-id-1/consumer-a/rule/create',
+      'rule-type-id-1/consumer-b/rule/get',
+      'rule-type-id-1/consumer-b/rule/create',
+      'rule-type-id-2/alerts/rule/get',
+      'rule-type-id-2/alerts/rule/create',
+      'rule-type-id-2/consumer-b/rule/get',
+      'rule-type-id-2/consumer-b/rule/create',
+      'rule-type-id-3/alerts/rule/get',
+      'rule-type-id-3/alerts/rule/create',
+      'rule-type-id-3/consumer-c/rule/get',
+      'rule-type-id-3/consumer-c/rule/create',
+      'rule-type-id-4/consumer-d/rule/get',
+      'rule-type-id-4/consumer-d/rule/create',
+    ],
+  };
+  const allAuthorized = {
+    all: true,
+    read: true,
+  };
+  const readonlyAuthorized = {
+    all: false,
+    read: true,
+  };
 
   let request: KibanaRequest;
   let ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -164,6 +199,9 @@ describe('AlertingAuthorization', () => {
     securityStart = securityMock.createStart();
     securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
     securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    securityStart.authz.checkPrivilegesWithRequest.mockReturnValue({
+      atSpaces: atSpacesMock,
+    });
     request = httpServerMock.createKibanaRequest();
     getSpace.mockResolvedValue(undefined);
 
@@ -466,7 +504,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -541,7 +579,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -576,7 +614,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -759,7 +797,7 @@ describe('AlertingAuthorization', () => {
         additionalPrivileges: ['test/create'],
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -838,23 +876,19 @@ describe('AlertingAuthorization', () => {
         })
       ).filter;
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [
-              "rule-type-id-1/alerts/rule/find",
-              "rule-type-id-1/consumer-a/rule/find",
-              "rule-type-id-1/consumer-b/rule/find",
-              "rule-type-id-2/alerts/rule/find",
-              "rule-type-id-2/consumer-b/rule/find",
-              "rule-type-id-3/alerts/rule/find",
-              "rule-type-id-3/consumer-c/rule/find",
-              "rule-type-id-4/consumer-d/rule/find",
-            ],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(atSpacesMock).toHaveBeenCalledWith([spaceId], {
+        kibana: [
+          'rule-type-id-1/alerts/rule/find',
+          'rule-type-id-1/consumer-a/rule/find',
+          'rule-type-id-1/consumer-b/rule/find',
+          'rule-type-id-2/alerts/rule/find',
+          'rule-type-id-2/consumer-b/rule/find',
+          'rule-type-id-3/alerts/rule/find',
+          'rule-type-id-3/consumer-c/rule/find',
+          'rule-type-id-4/consumer-d/rule/find',
+        ],
+      });
 
       expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
         `"((path.to.rule_type_id: rule-type-id-1 AND (consumer-field: alerts OR consumer-field: consumer-a OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-2 AND (consumer-field: alerts OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-3 AND (consumer-field: consumer-c OR consumer-field: alerts)))"`
@@ -960,9 +994,7 @@ describe('AlertingAuthorization', () => {
           operation: ReadOperations.Get,
         });
 
-        expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
-          `"path.to.space.id: space1"`
-        );
+        expect(toKqlExpression(filter as KueryNode)).toEqual(`path.to.space.id: ${spaceId}`);
       });
 
       it('gets the filter correctly with security disabled', async () => {
@@ -1079,7 +1111,7 @@ describe('AlertingAuthorization', () => {
             operation: ReadOperations.Get,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unauthorized to get rules for any rule types"`
+          `"Unauthorized to get rules for any rule types."`
         );
       });
     });
@@ -1258,6 +1290,54 @@ describe('AlertingAuthorization', () => {
           `"Unauthorized by \\"consumer-b\\" to get \\"rule-type-id-1\\" rule"`
         );
       });
+
+      it('throws when it is authorized in some of the requested namespaces but not all', async () => {
+        checkPrivileges.mockResolvedValueOnce({
+          username: 'some-user',
+          hasAllRequested: false,
+          privileges: {
+            kibana: [
+              {
+                privilege: mockAuthorizationAction('rule-type-id-1', 'alerts', 'rule', 'get'),
+                authorized: true,
+                resource: 'space1',
+              },
+              {
+                privilege: mockAuthorizationAction('rule-type-id-1', 'alerts', 'rule', 'get'),
+                authorized: false,
+                resource: 'space2',
+              },
+            ],
+          },
+        });
+
+        const auth = await AlertingAuthorization.create({
+          request,
+          ruleTypeRegistry,
+          getSpaceId,
+          features,
+          getSpace,
+          authorization: securityStart.authz,
+        });
+
+        const getAuthorizationFilter = auth.getAuthorizationFilter({
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          filterOpts: {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'ruleId',
+              consumer: 'consumer',
+            },
+            namespaces: ['space1', 'space2'],
+          },
+          operation: ReadOperations.Get,
+        });
+
+        await expect(getAuthorizationFilter).rejects.toThrow(
+          'Unauthorized to get rules for any rule types. Validate that you have permissions to access spaces: space1,space2'
+        );
+        expect(atSpacesMock).toHaveBeenCalledWith(['space1', 'space2'], expect.any(Object));
+      });
     });
   });
 
@@ -1278,7 +1358,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1430,31 +1510,9 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [
-              "rule-type-id-1/alerts/rule/get",
-              "rule-type-id-1/alerts/rule/create",
-              "rule-type-id-1/consumer-a/rule/get",
-              "rule-type-id-1/consumer-a/rule/create",
-              "rule-type-id-1/consumer-b/rule/get",
-              "rule-type-id-1/consumer-b/rule/create",
-              "rule-type-id-2/alerts/rule/get",
-              "rule-type-id-2/alerts/rule/create",
-              "rule-type-id-2/consumer-b/rule/get",
-              "rule-type-id-2/consumer-b/rule/create",
-              "rule-type-id-3/alerts/rule/get",
-              "rule-type-id-3/alerts/rule/create",
-              "rule-type-id-3/consumer-c/rule/get",
-              "rule-type-id-3/consumer-c/rule/create",
-              "rule-type-id-4/consumer-d/rule/get",
-              "rule-type-id-4/consumer-d/rule/create",
-            ],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenCalledWith([spaceId], requiredPrivileges);
     });
   });
 
@@ -1475,109 +1533,59 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-2" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-2',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-3" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-3',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-4" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-4',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+      });
     });
 
     it('filters out rule types with no authorization', async () => {
@@ -1596,61 +1604,35 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-2" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-2',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+      });
     });
 
     it('returns all rule types with all consumers as authorized with disabled authorization', async () => {
@@ -1672,109 +1654,59 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-2" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-2',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-3" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-3',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-4" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-4',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+      });
     });
 
     it('filters out rule types with disabled authorization', async () => {
@@ -1796,61 +1728,35 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-            "rule-type-id-2" => Object {
-              "authorizedConsumers": Object {
-                "alerts": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-c": Object {
-                  "all": true,
-                  "read": true,
-                },
-                "consumer-d": Object {
-                  "all": true,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-2',
+            {
+              authorizedConsumers: {
+                alerts: allAuthorized,
+                'consumer-a': allAuthorized,
+                'consumer-b': allAuthorized,
+                'consumer-c': allAuthorized,
+                'consumer-d': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+      });
     });
 
     it('get authorized rule types with authorized consumers with read access only', async () => {
@@ -1883,22 +1789,20 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "consumer-a": Object {
-                  "all": false,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                'consumer-a': readonlyAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('get authorized rule types with authorized consumers with full access', async () => {
@@ -1935,22 +1839,20 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                'consumer-a': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('filters out not requested rule types', async () => {
@@ -1991,26 +1893,21 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "consumer-a": Object {
-                  "all": false,
-                  "read": true,
-                },
-                "consumer-b": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                'consumer-a': readonlyAuthorized,
+                'consumer-b': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('returns an empty map with no requested rule types', async () => {
@@ -2047,13 +1944,11 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {},
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+      ).toEqual({
+        authorizedRuleTypes: new Map(),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('get authorized rule types with authorized consumers when some rule types are not authorized', async () => {
@@ -2098,30 +1993,28 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                'consumer-a': allAuthorized,
               },
             },
-            "rule-type-id-3" => Object {
-              "authorizedConsumers": Object {
-                "consumer-c": Object {
-                  "all": false,
-                  "read": true,
-                },
+          ],
+          [
+            'rule-type-id-3',
+            {
+              authorizedConsumers: {
+                'consumer-c': readonlyAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('get authorized rule types with authorized consumers when consumers are not valid for a rule type', async () => {
@@ -2166,22 +2059,20 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {
-            "rule-type-id-1" => Object {
-              "authorizedConsumers": Object {
-                "consumer-a": Object {
-                  "all": true,
-                  "read": true,
-                },
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                'consumer-a': allAuthorized,
               },
             },
-          },
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+          ],
+        ]),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('filters out rule types that are not in the rule type registry but registered in the feature', async () => {
@@ -2216,13 +2107,11 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {},
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+      ).toEqual({
+        authorizedRuleTypes: new Map(),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('filters out rule types that are registered in the rule type registry but not in the feature', async () => {
@@ -2257,13 +2146,11 @@ describe('AlertingAuthorization', () => {
           operations: [ReadOperations.Get, WriteOperations.Create],
           authorizationEntity: AlertingAuthorizationEntity.Rule,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "authorizedRuleTypes": Map {},
-          "hasAllRequested": true,
-          "username": "some-user",
-        }
-      `);
+      ).toEqual({
+        authorizedRuleTypes: new Map(),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
 
     it('call checkPrivileges with the correct actions', async () => {
@@ -2283,31 +2170,9 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [
-              "rule-type-id-1/alerts/rule/get",
-              "rule-type-id-1/alerts/rule/create",
-              "rule-type-id-1/consumer-a/rule/get",
-              "rule-type-id-1/consumer-a/rule/create",
-              "rule-type-id-1/consumer-b/rule/get",
-              "rule-type-id-1/consumer-b/rule/create",
-              "rule-type-id-2/alerts/rule/get",
-              "rule-type-id-2/alerts/rule/create",
-              "rule-type-id-2/consumer-b/rule/get",
-              "rule-type-id-2/consumer-b/rule/create",
-              "rule-type-id-3/alerts/rule/get",
-              "rule-type-id-3/alerts/rule/create",
-              "rule-type-id-3/consumer-c/rule/get",
-              "rule-type-id-3/consumer-c/rule/create",
-              "rule-type-id-4/consumer-d/rule/get",
-              "rule-type-id-4/consumer-d/rule/create",
-            ],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenLastCalledWith([spaceId], requiredPrivileges);
     });
 
     it('call checkPrivileges with the correct actions when the rule type does not exist in the registry', async () => {
@@ -2329,14 +2194,8 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith({ kibana: [] });
     });
 
     it('call checkPrivileges with the correct actions when the rule type does not exist in the feature', async () => {
@@ -2358,14 +2217,174 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(atSpacesMock).toHaveBeenCalledWith([spaceId], { kibana: [] });
+    });
+
+    it('calls checkPrivileges with the correct spaces when namespaces are defined', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: need to test the private method
+      await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        ruleTypeIds: [...ruleTypeIds, 'rule-type-not-exist'],
+        operations: [ReadOperations.Get, WriteOperations.Create],
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
+        namespaces: ['a-random-space'],
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenCalledWith(['a-random-space'], requiredPrivileges);
+    });
+
+    // namespaces = ['default', 'test'] gets mapped to [undefined, 'test']. This ensures that 'default' space privileges are checked
+    it(`doesn't skip the check to the "default" space on checkPrivileges when included with other spaces`, async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: need to test the private method
+      await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        ruleTypeIds: [...ruleTypeIds, 'rule-type-not-exist'],
+        operations: [ReadOperations.Get, WriteOperations.Create],
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
+        namespaces: ['default', 'a-random-space'],
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenCalledWith(['default', 'a-random-space'], requiredPrivileges);
+    });
+
+    it('calls checkPrivileges when in the default space', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId: () => undefined,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: need to test the private method
+      await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        ruleTypeIds: [...ruleTypeIds, 'rule-type-not-exist'],
+        operations: [ReadOperations.Get, WriteOperations.Create],
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
+      });
+
+      expect(atSpacesMock).toHaveBeenCalledWith(['default'], requiredPrivileges);
+    });
+
+    it('excludes a rule type when its privilege is authorized in some requested spaces but not all', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // atSpaces returns one entry per (space, privilege) pair. Simulate the user
+      // having access in space-a but not space-b for consumer-a.
+      atSpacesMock.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              resource: 'space-a',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+            {
+              resource: 'space-b',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+
+      expect(
+        // @ts-expect-error: need to test the private method
+        await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+          ruleTypeIds: ['rule-type-id-1'],
+          operations: [ReadOperations.Get],
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          namespaces: ['space-a', 'space-b'],
+        })
+      ).toEqual({
+        authorizedRuleTypes: new Map(),
+        hasAllRequested: false,
+        username: 'some-user',
+      });
+    });
+
+    it('includes a rule type when its privilege is authorized in all requested spaces', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      atSpacesMock.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: {
+          kibana: [
+            {
+              resource: 'space-a',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+            {
+              resource: 'space-b',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+
+      expect(
+        // @ts-expect-error: need to test the private method
+        await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+          ruleTypeIds: ['rule-type-id-1'],
+          operations: [ReadOperations.Get],
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          namespaces: ['space-a', 'space-b'],
+        })
+      ).toEqual({
+        authorizedRuleTypes: new Map([
+          [
+            'rule-type-id-1',
+            {
+              authorizedConsumers: {
+                'consumer-a': readonlyAuthorized,
+              },
+            },
+          ],
+        ]),
+        hasAllRequested: true,
+        username: 'some-user',
+      });
     });
   });
 
@@ -2564,7 +2583,7 @@ describe('AlertingAuthorization', () => {
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
       const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: space1"`);
+      expect(kql).toEqual(`alert.attributes.spaceIds: ${spaceId}`);
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -2584,7 +2603,7 @@ describe('AlertingAuthorization', () => {
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
       const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: space1"`);
+      expect(kql).toEqual(`alert.attributes.spaceIds: ${spaceId}`);
 
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
       expect(checkPrivileges).not.toHaveBeenCalled();
@@ -2620,8 +2639,8 @@ describe('AlertingAuthorization', () => {
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
       const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(kql).toMatchInlineSnapshot(
-        `"((alert.attributes.ruleTypeId: rule-type-id-1 AND alert.attributes.spaceIds: space1) OR (alert.attributes.ruleTypeId: rule-type-id-2 AND alert.attributes.spaceIds: space1))"`
+      expect(kql).toEqual(
+        `((alert.attributes.ruleTypeId: rule-type-id-1 AND alert.attributes.spaceIds: ${spaceId}) OR (alert.attributes.ruleTypeId: rule-type-id-2 AND alert.attributes.spaceIds: ${spaceId}))`
       );
     });
 

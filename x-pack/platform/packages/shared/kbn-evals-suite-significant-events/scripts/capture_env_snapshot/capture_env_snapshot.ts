@@ -6,14 +6,18 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { extractDataStreamName } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
+import {
+  GCS_BUCKET,
+  SIGNIFICANT_EVENTS_DATA_STREAMS,
+  SIGEVENTS_OPTIONAL_STREAMS,
+} from '../lib/constants';
 import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
 import { withTempSuperuser } from '../lib/user_utils';
 
@@ -21,36 +25,48 @@ async function fetchMapping(
   esClient: Client,
   indexName: string
 ): Promise<MappingTypeMapping | undefined> {
-  const response = await esClient.indices.getMapping({ index: indexName });
-  // `getMapping` keys the response by concrete index name. For a data stream the
-  // keys are its backing indices (`.ds-…`), not the data-stream name, so fall back
-  // to the first entry when an exact-name match isn't present.
-  return response[indexName]?.mappings ?? Object.values(response)[0]?.mappings;
+  try {
+    const response = await esClient.indices.getMapping({ index: indexName });
+    // `getMapping` keys the response by concrete index name. For a data stream the
+    // keys are its backing indices (`.ds-…`), not the data-stream name, so fall back
+    // to the first entry when an exact-name match isn't present.
+    return response[indexName]?.mappings ?? Object.values(response)[0]?.mappings;
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      return undefined;
+    }
+    throw err;
+  }
 }
 
-async function captureSystemIndex({
+async function captureDataStream({
   esClient,
   log,
   config,
   sourceIndex,
+  optional = false,
 }: {
   esClient: Client;
   config: ConnectionConfig;
   log: ToolingLog;
   sourceIndex: string;
-}): Promise<string> {
+  optional?: boolean;
+}): Promise<string | undefined> {
   return withTempSuperuser(esClient, log, config, async (sysClient) => {
     const snapshotIndex = toSnapshotName(sourceIndex);
 
     const mappings = await fetchMapping(sysClient, sourceIndex);
     if (!mappings) {
-      const hint = SIGNIFICANT_EVENTS_DATA_STREAMS.includes(
-        sourceIndex as (typeof SIGNIFICANT_EVENTS_DATA_STREAMS)[number]
-      )
-        ? ' The Significant Events data stream has no backing indices — run the feature extraction / ' +
-          'discovery workflow before capturing.'
-        : '';
-      throw new Error(`Could not fetch mapping for "${sourceIndex}".${hint}`);
+      if (optional) {
+        log.info(
+          `Skipping "${sourceIndex}" — stream does not exist (discovery workflow was not run).`
+        );
+        return undefined;
+      }
+      throw new Error(
+        `Could not fetch mapping for "${sourceIndex}". ` +
+          `The Significant Events data stream has no backing indices — run the feature extraction workflow before capturing.`
+      );
     }
 
     await sysClient.indices.delete({ index: snapshotIndex, ignore_unavailable: true });
@@ -104,24 +120,34 @@ export async function captureEnvSnapshot({
   });
 
   const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
-  const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
+  const { snapshotName, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
-  const resolvedSystemIndices = await resolvePatterns(esClient, log, [
-    ...systemIndices,
+  // All SigEvents data streams are reindexed to snapshot-safe plain indices.
+  // SIGEVENTS_OPTIONAL_STREAMS (discoveries/detections) are skipped silently when absent —
+  // the user may have chosen not to run the discovery workflow.
+  const resolvedDataStreams = await resolvePatterns(esClient, log, [
     ...SIGNIFICANT_EVENTS_DATA_STREAMS,
   ]);
   const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 
-  const capturedSystemIndices: string[] = [];
-  for (const idx of resolvedSystemIndices) {
-    const snapshotIndex = await captureSystemIndex({ esClient, config, log, sourceIndex: idx });
-
-    capturedSystemIndices.push(snapshotIndex);
+  const capturedDataStreams: string[] = [];
+  for (const idx of resolvedDataStreams) {
+    const optional = (SIGEVENTS_OPTIONAL_STREAMS as readonly string[]).includes(idx);
+    const snapshotIndex = await captureDataStream({
+      esClient,
+      config,
+      log,
+      sourceIndex: idx,
+      optional,
+    });
+    if (snapshotIndex !== undefined) {
+      capturedDataStreams.push(snapshotIndex);
+    }
   }
 
-  const allSnapshotIndices = [...resolvedIndices, ...capturedSystemIndices].join(',');
+  const allSnapshotIndices = [...resolvedIndices, ...capturedDataStreams].join(',');
 
   await registerGcsRepository(esClient, log, runId);
   const actualIndices = await createSnapshot({

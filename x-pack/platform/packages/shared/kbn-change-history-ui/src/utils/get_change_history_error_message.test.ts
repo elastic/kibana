@@ -23,9 +23,9 @@ describe('getChangeHistoryErrorMessage', () => {
   it('falls back to HttpFetchError body message', () => {
     const error = new Error('Bad Request');
     (error as { body?: unknown }).body = {
-      message: 'Workflow not found',
+      message: 'Object not found',
     };
 
-    expect(getChangeHistoryErrorMessage(error)).toBe('Workflow not found');
+    expect(getChangeHistoryErrorMessage(error)).toBe('Object not found');
   });
 });

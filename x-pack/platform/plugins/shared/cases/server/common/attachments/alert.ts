@@ -9,6 +9,7 @@ import { isPlainObject } from 'lodash';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type {
   UnifiedReferenceAttachmentPayload,
+  UnifiedAttachmentPayload,
   AttachmentAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
 import type {
@@ -67,7 +68,7 @@ const toAlertMetadata = (
   index: string | string[] | undefined,
   rule: { id: string | null; name: string | null } | null | undefined
 ): UnifiedReferenceAttachmentPayload['metadata'] => {
-  const normalizedIndex = toStringOrStringArray(index);
+  const normalizedIndex = toStringOrStringArray(index, { preserveArray: true });
   const metadata: NonNullable<UnifiedReferenceAttachmentPayload['metadata']> = {};
   if (normalizedIndex != null) {
     metadata.index = normalizedIndex;
@@ -113,7 +114,7 @@ export const alertAttachmentTransformer: AttachmentTypeTransformer<
       return {
         type: AttachmentType.alert,
         alertId: attributes.attachmentId,
-        index: toStringOrStringArray(metadata?.index) ?? '',
+        index: toStringOrStringArray(metadata?.index, { preserveArray: true }) ?? '',
         rule: { id: metadata?.rule?.id ?? null, name: metadata?.rule?.name ?? null },
         owner: attributes.owner,
         ...extractCommonAttributes(attributes as AttachmentAttributesV2),
@@ -137,7 +138,7 @@ export const alertAttachmentTransformer: AttachmentTypeTransformer<
   isLegacyPayload(attachment: AttachmentRequestV2): attachment is AlertAttachmentPayload {
     return isLegacyAlertAttachment(attachment);
   },
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedAlertAttachment(attachment);
   },
   toUnifiedPayload(attachment: AlertAttachmentPayload): UnifiedReferenceAttachmentPayload {
@@ -153,7 +154,7 @@ export const alertAttachmentTransformer: AttachmentTypeTransformer<
     return {
       type: AttachmentType.alert,
       alertId: attachment.attachmentId,
-      index: toStringOrStringArray(metadata?.index) ?? '',
+      index: toStringOrStringArray(metadata?.index, { preserveArray: true }) ?? '',
       rule: { id: metadata?.rule?.id ?? null, name: metadata?.rule?.name ?? null },
       owner: attachment.owner,
     };

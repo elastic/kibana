@@ -8,13 +8,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 
 import { useWorkflowChangeHistoryRestoreEligibility } from './use_workflow_change_history';
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useSelector: jest.fn(),
 }));
 

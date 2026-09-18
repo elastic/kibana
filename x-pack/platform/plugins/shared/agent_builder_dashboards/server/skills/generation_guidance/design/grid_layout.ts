@@ -15,21 +15,25 @@ Every \`add_panels.panels[]\` item and every \`add_section.panels[]\` item requi
 
 Use these sizes — **do not make metric or gauge panels full-width**:
 
-- **Metric** → \`w: 8–16, h: 5–6\`. These are single-number panels — keep them **small**. Fit 3–6 per row.
+- **Metric** → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row.
+  - 8 metrics in a row: each \`w: 6, h: 5\`
   - 6 metrics in a row: each \`w: 8, h: 5\`
   - 4 metrics in a row: each \`w: 12, h: 5\`
-  - 3 metrics in a row: each \`w: 16, h: 6\`
-- **Gauge** → \`w: 12–16, h: 9–12\`. Gauges need extra vertical space for the dial, but should still stay compact. Fit 3–4 per row.
-  - 4 gauges in a row: each \`w: 12, h: 9\`
-  - 3 gauges in a row: each \`w: 16, h: 10–12\`
-- **XY (line / area / bar)** → \`w: 24, h: 10–12\`.
-- **Heatmap** → \`w: 24–48, h: 10–12\`. Needs height for the color matrix.
-- **Tagcloud** → \`w: 24, h: 8–10\`.
-- **Pie / Treemap / Waffle / Mosaic** → \`w: 24, h: 10–12\`.
+- **Gauge** → \`w: 12, h: 8\`. Fit up to 4 per row.
+- **XY (line / area / bar)** → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
+- **Heatmap** → \`w: 24, h: 10\`. Needs height for the color matrix.
+- **Tagcloud** → \`w: 24, h: 10\`.
+- **Pie** → \`w: 12, h: 10\`.
+- **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
 - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
-- **Datatable** → \`w: 48, h: 12–16\`. Full-width so columns are readable.
+- **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
+- **Custom content** → \`w: 24–48\`, \`h\` from what the panel actually contains — the most common sizing mistake is making these too short, which leaves the panel scrolling inside its own frame:
+  - a single KPI or status card, or one short row of them: \`h: 6–8\`
+  - a list, table or status board of rows: \`h: 10–16\`, sized for the number of rows the ES|QL query returns
+  - a multi-section layout, or anything with a drawn chart or diagram: \`h: 16–20\`
+  Size for the rows the query actually returns (respect its \`LIMIT\`) rather than padding for rows that might appear later — an over-tall panel leaves a large empty gap under its content, which reads as broken just like a scrollbar does. When genuinely between two sizes, take the larger.
 
-Prefer \`w\` values that divide 48 evenly: **8, 12, 16, 24, 48**.
+Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 **Grid Packing Rules:**
 

@@ -7,8 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
-import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
-import { RuleObjectId, RuleSignatureId, RuleVersion } from '../../model';
+import {
+  AggregatedPrebuiltRuleError,
+  DiffableAllFields,
+  DiffableRuleTypes,
+  ThreeWayDiffConflict,
+} from '../model';
+import { RequiredFieldInput, RuleObjectId, RuleSignatureId, RuleVersion } from '../../model';
 import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
@@ -61,13 +66,18 @@ export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc,
 }, {} as NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE);
 
 /**
- * Fields upgradable by the /upgrade/_perform endpoint.
- * Specific fields are omitted because they are not upgradeable, and
- * handled under the hood by endpoint logic.
+ * Fields upgradable by the /upgrade/_perform endpoint. Non-upgradeable fields
+ * are omitted because they are handled under the hood by endpoint logic.
  * See: https://github.com/elastic/kibana/issues/186544
+ *
+ * `required_fields` uses `RequiredFieldInput` instead of `RequiredField` so
+ * `ecs` isn't required on input: the server computes `ecs`, so callers don't
+ * send it.
  */
 export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
-export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
+export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit).extend({
+  required_fields: z.array(RequiredFieldInput),
+});
 
 export type FieldUpgradeSpecifier<T> = z.infer<
   ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
@@ -145,11 +155,23 @@ export const RuleUpToDateSkipReason = z.object({
   rule_id: z.string(),
 });
 
+export type RuleTypeChange = z.infer<typeof RuleTypeChange>;
+export const RuleTypeChange = z.object({
+  current: DiffableRuleTypes,
+  target: DiffableRuleTypes,
+});
+
 export type UpgradeConflictSkipReason = z.infer<typeof UpgradeConflictSkipReason>;
 export const UpgradeConflictSkipReason = z.object({
   reason: z.literal(SkipRuleUpgradeReasonEnum.CONFLICT),
   rule_id: z.string(),
   conflict: z.nativeEnum(ThreeWayDiffConflict),
+  /**
+   * Present when the target version changes the rule type. For a non-customized rule
+   * the type change is a SOLVABLE conflict that auto-resolves to the target type,
+   * so consumers need this explicit signal to warn about it.
+   */
+  rule_type_change: RuleTypeChange.optional(),
 });
 
 export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;

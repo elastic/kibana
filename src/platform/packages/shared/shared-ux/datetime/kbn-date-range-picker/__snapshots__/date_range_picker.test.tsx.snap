@@ -9,7 +9,7 @@ exports[`DateRangePicker renders 1`] = `
     data-test-subj="dateRangePickerPopoverTriggerWrapper"
   >
     <div
-      class="css-0"
+      class="css-1wuttf3-DateRangePickerControl"
       data-test-subj="dateRangePickerControlWrapper"
     >
       <div

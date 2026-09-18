@@ -13,17 +13,21 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ConnectorStep } from '@kbn/workflows/spec/schema';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { matchAllVariables } from '@kbn/workflows-yaml';
 import {
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_VALIDATION_YAML,
+  FOREACH_STEP_ESQL_CELL_YAML,
+  foreachStepEsqlCellWorkflowDefinition,
   forLoopNestedWorkflowDefinition,
   forLoopValidationWorkflowDefinition,
 } from './__fixtures__/for_loop_validation_workflow';
+import { collectAllVariables } from './collect_all_variables';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 import { extendContextWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
+import { FOREACH_ITEM_SCHEMA_DESC } from '../../workflow_context/lib/get_foreach_state_schema';
 
 describe('validateVariables for-loop integration', () => {
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(forLoopValidationWorkflowDefinition);
@@ -31,9 +35,7 @@ describe('validateVariables for-loop integration', () => {
   const model = createFakeMonacoModel(FOR_LOOP_VALIDATION_YAML);
 
   function variableItemForKey(key: string) {
-    const match = [...FOR_LOOP_VALIDATION_YAML.matchAll(VARIABLE_REGEX_GLOBAL)].find(
-      (m) => m.groups?.key === key
-    );
+    const match = matchAllVariables(FOR_LOOP_VALIDATION_YAML).find((m) => m.groups.key === key);
     expect(match).toBeDefined();
     const startOffset = match!.index ?? 0;
     const startPosition = model.getPositionAt(startOffset);
@@ -132,9 +134,7 @@ steps:
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
     const doc = parseDocument(templateYaml);
     const innerModel = createFakeMonacoModel(templateYaml);
-    const match = [...templateYaml.matchAll(VARIABLE_REGEX_GLOBAL)].find(
-      (m) => m.groups?.key === 'forloop.index'
-    );
+    const match = matchAllVariables(templateYaml).find((m) => m.groups?.key === 'forloop.index');
     expect(match).toBeDefined();
     const offset = match!.index ?? 0;
     const start = innerModel.getPositionAt(offset);
@@ -262,7 +262,7 @@ steps:
     const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
     const nestedDoc = parseDocument(FOR_LOOP_NESTED_YAML);
     const nestedModel = createFakeMonacoModel(FOR_LOOP_NESTED_YAML);
-    const innerMatch = [...FOR_LOOP_NESTED_YAML.matchAll(VARIABLE_REGEX_GLOBAL)].find(
+    const innerMatch = matchAllVariables(FOR_LOOP_NESTED_YAML).find(
       (m) => m.groups?.key === 'inner'
     );
     expect(innerMatch).toBeDefined();
@@ -290,5 +290,28 @@ steps:
       nestedModel
     );
     expect(innerResults.find((r) => r.id === 'inner-var')?.severity).toBeNull();
+  });
+
+  it('warns instead of erroring for a foreach step iterating an ES|QL result cell', () => {
+    const esqlGraph = WorkflowGraph.fromWorkflowDefinition(foreachStepEsqlCellWorkflowDefinition);
+    const esqlDoc = parseDocument(FOREACH_STEP_ESQL_CELL_YAML);
+    const esqlModel = createFakeMonacoModel(FOREACH_STEP_ESQL_CELL_YAML);
+
+    const variableItems = collectAllVariables(esqlModel, esqlDoc, esqlGraph);
+    const collectionItem = variableItems.find((item) => item.type === 'foreach');
+    expect(collectionItem?.key).toBe('steps.run_query.output.values[0][0]');
+
+    const results = validateVariables(
+      variableItems,
+      esqlGraph,
+      foreachStepEsqlCellWorkflowDefinition,
+      esqlDoc,
+      esqlModel
+    );
+
+    expect(results.filter((r) => r.severity === 'error')).toHaveLength(0);
+    const collectionResult = results.find((r) => r.id === collectionItem?.id);
+    expect(collectionResult?.severity).toBe('warning');
+    expect(collectionResult?.message).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
   });
 });

@@ -26,9 +26,9 @@ export const PatchUpdateScriptRequestSchema = {
       file: schema.maybe(ScriptFileSchema),
       fileType: schema.maybe(ScriptFileTypeSchema),
       requiresInput: schema.maybe(ScriptRequiresInputSchema),
-      description: schema.maybe(schema.string()),
-      instructions: schema.maybe(schema.string()),
-      example: schema.maybe(schema.string()),
+      description: schema.maybe(schema.string({ maxLength: 10000 })),
+      instructions: schema.maybe(schema.string({ maxLength: 10000 })),
+      example: schema.maybe(schema.string({ maxLength: 10000 })),
       pathToExecutable: schema.conditional(
         schema.siblingRef('fileType'),
         'archive',
@@ -36,7 +36,9 @@ export const PatchUpdateScriptRequestSchema = {
         schema.never()
       ),
       tags: schema.maybe(getScriptsTagSchema('patch')),
-      version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
+      version: schema.maybe(
+        schema.string({ minLength: 1, maxLength: 256, validate: validateNonEmptyString })
+      ),
     },
     {
       validate: ({ version, ...updates }) => {
@@ -47,7 +49,7 @@ export const PatchUpdateScriptRequestSchema = {
     }
   ),
   params: schema.object({
-    script_id: schema.string({ validate: validateNonEmptyString }),
+    script_id: schema.string({ maxLength: 256, validate: validateNonEmptyString }),
   }),
 };
 

@@ -117,6 +117,7 @@ export const mapSummaryToRow = (
     id: `${entry.jobId}-${entry.timestamp}-${index}`,
     jobId: entry.jobId,
     jobDisplayName: entry.jobName ?? entry.jobId,
+    recordId: entry.recordId,
     mitreTactics: entry.threatTactics ?? [],
     timestamp: new Date(entry.timestamp).getTime(),
     detectorIndex: entry.detectorIndex,

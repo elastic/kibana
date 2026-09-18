@@ -17,12 +17,17 @@ export {
   isWorkflowConflictError,
 } from './common/errors';
 export type { FormattedZodError, MockZodError, MockZodIssue } from './common/errors';
+export type { VariableMatch } from './common/regex';
 
 // Regex patterns and predicates
 export {
   VARIABLE_REGEX,
   VARIABLE_REGEX_GLOBAL,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  matchVariable,
+  matchAllVariables,
+  matchLastVariable,
+  matchLastUnfinishedVariable,
   ALLOWED_KEY_REGEX,
   PROPERTY_PATH_REGEX,
   LIQUID_FILTER_REGEX,
@@ -40,6 +45,20 @@ export {
   isVariableValue,
   isLiquidTagValue,
 } from './common/regex';
+
+// JSON Schema template-tolerance weaver
+export {
+  buildTemplateTolerantJsonSchema,
+  wholeValueStringAlternative,
+  anchorWholeValue,
+  toUnicodeSafePattern,
+  TEMPLATE_VALUE_DEF_NAME,
+} from './common/json_schema/build_template_tolerant_json_schema';
+export type {
+  BuildTemplateTolerantJsonSchemaOptions,
+  JsonObject as TemplateTolerantJsonObject,
+  JsonValue as TemplateTolerantJsonValue,
+} from './common/json_schema/build_template_tolerant_json_schema';
 
 // Liquid (template engine + cache + validation)
 export { extractLiquidErrorPosition } from './common/liquid/extract_liquid_error_position';
@@ -76,6 +95,8 @@ export {
   parseLineForCompletion,
   isVariableLineParseResult,
 } from './common/yaml/parse_line_for_completion';
+export { getStepNodesWithType, isStepLikeMap } from './common/yaml/get_step_nodes_with_type';
+export { getTriggerNodesWithType } from './common/yaml/get_trigger_nodes_with_type';
 export type {
   LineParseResult,
   VariableLineParseResult,

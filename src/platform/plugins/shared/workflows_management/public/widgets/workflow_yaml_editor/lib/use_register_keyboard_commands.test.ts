@@ -19,6 +19,7 @@ jest.mock('@kbn/monaco', () => ({
       Digit7: 38,
       KeyK: 46,
       KeyS: 54,
+      KeyF: 36,
       Enter: 3,
     },
     editor: {
@@ -60,7 +61,7 @@ describe('useRegisterKeyboardCommands', () => {
     expect(typeof result.current.unregisterKeyboardCommands).toBe('function');
   });
 
-  it('registers five keyboard actions on the editor', () => {
+  it('registers six keyboard actions on the editor', () => {
     const { result } = renderHook(() => useRegisterKeyboardCommands());
     const editor = createMockEditor();
 
@@ -74,8 +75,7 @@ describe('useRegisterKeyboardCommands', () => {
       });
     });
 
-    // toggle comment, open actions popover, save, run, save and run
-    expect(editor.addAction).toHaveBeenCalledTimes(5);
+    expect(editor.addAction).toHaveBeenCalledTimes(6);
   });
 
   it('calls save callback when save action runs on a writable editor', () => {
@@ -228,8 +228,7 @@ describe('useRegisterKeyboardCommands', () => {
       result.current.registerKeyboardCommands(params);
     });
 
-    // Each of the 5 previous disposables should have been disposed
-    expect(disposable1.dispose).toHaveBeenCalledTimes(5);
+    expect(disposable1.dispose).toHaveBeenCalledTimes(6);
   });
 
   it('unregisterKeyboardCommands disposes all actions', () => {
@@ -255,7 +254,7 @@ describe('useRegisterKeyboardCommands', () => {
       result.current.unregisterKeyboardCommands();
     });
 
-    expect(disposable.dispose).toHaveBeenCalledTimes(5);
+    expect(disposable.dispose).toHaveBeenCalledTimes(6);
   });
 
   it('triggers toggle comment on the editor for the comment action', () => {
@@ -290,5 +289,35 @@ describe('useRegisterKeyboardCommands', () => {
     });
 
     expect(editor.trigger).toHaveBeenCalledWith('keyboard', 'editor.action.commentLine', null);
+  });
+
+  it('triggers find replace on the editor for the findAndReplace action', () => {
+    const { result } = renderHook(() => useRegisterKeyboardCommands());
+    const editor = createMockEditor(false);
+
+    act(() => {
+      result.current.registerKeyboardCommands({
+        editor,
+        openActionsPopover: jest.fn(),
+        save: jest.fn(),
+        run: jest.fn(),
+        saveAndRun: jest.fn(),
+      });
+    });
+
+    const findAction = editor._actions.find(
+      (action) => action.id === 'workflows.editor.action.findAndReplace'
+    );
+    expect(findAction).toBeDefined();
+
+    act(() => {
+      findAction?.run(editor);
+    });
+
+    expect(editor.trigger).toHaveBeenCalledWith(
+      'keyboard',
+      'editor.action.startFindReplaceAction',
+      null
+    );
   });
 });

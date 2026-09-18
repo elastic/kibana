@@ -234,7 +234,7 @@ export const AttachmentsMenu = ({
                       defaultMessage: 'Attachments',
                     }
                   )}
-                  size="m"
+                  size="s"
                   color="text"
                   display="base"
                   isSelected={isActionMenuOpen}

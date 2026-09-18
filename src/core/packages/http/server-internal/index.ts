@@ -11,7 +11,7 @@ export { config, HttpConfig } from './src/http_config';
 export type { HttpConfigType } from './src/http_config';
 export { HttpService } from './src/http_service';
 export { HttpServer } from './src/http_server';
-export type { HttpServerSetup, LifecycleRegistrar } from './src/http_server';
+export type { HttpServerSetup } from './src/http_server';
 export type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
@@ -33,3 +33,9 @@ export type { PermissionsPolicyConfigType } from './src/permissions_policy';
 export { permissionsPolicyConfig } from './src/permissions_policy';
 
 export { createCookieSessionStorageFactory } from './src/cookie_session_storage';
+
+export {
+  classifyProvenance,
+  createProvenanceTelemetryPostAuthHandler,
+  PROVENANCE_TELEMETRY_COUNTER_TYPE,
+} from './src/provenance_telemetry';

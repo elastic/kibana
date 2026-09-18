@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { LensPublicStart, XYVisualizationState } from '@kbn/lens-plugin/public';
+import type {
+  LensPublicStart,
+  UserMessage,
+  XYVisualizationState,
+  EmbeddableComponentProps,
+} from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -25,6 +30,14 @@ import { useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
+// The cases plugin auto-registers its own "Add to case" action on the Lens panel
+// menu. Exploratory View already provides its own `expViewAddToCase` action, so we
+// disable the built-in one to avoid a duplicate menu entry (see issue #231475).
+const DISABLED_ACTIONS = ['embeddable_addToExistingCase'];
+
+// Compact KPI/sparkline embeddables cannot surface Lens inspector warnings usefully.
+const hideLensWarningBadges = () => [];
+
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
@@ -39,7 +52,9 @@ export interface ExploratoryEmbeddableProps {
   legendPosition?: Position;
   hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
+  onAnnotationClick?: EmbeddableComponentProps['onAnnotationClick'];
   onLoad?: (loading: boolean) => void;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
@@ -75,6 +90,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     legendPosition,
     lens,
     onBrushEnd,
+    onAnnotationClick,
     caseOwner = observabilityFeatureId,
     reportType,
     showCalculationMethod = false,
@@ -87,6 +103,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     lineHeight = 32,
     searchSessionId,
     onLoad,
+    onBeforeBadgesRender,
     analytics,
   } = props;
   const LensComponent = lens?.EmbeddableComponent;
@@ -203,10 +220,13 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         timeRange={timeRange}
         attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
+        onAnnotationClick={onAnnotationClick}
         withDefaultActions={Boolean(withActions)}
+        disabledActions={DISABLED_ACTIONS}
         extraActions={actions}
         viewMode={'view'}
         searchSessionId={searchSessionId}
+        onBeforeBadgesRender={onBeforeBadgesRender ?? hideLensWarningBadges}
         onLoad={(loading, inspectorAdapters) => {
           reportEvent(inspectorAdapters);
           onLoad?.(loading);

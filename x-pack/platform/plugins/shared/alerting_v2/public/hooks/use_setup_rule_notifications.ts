@@ -7,11 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { useMutation } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { buildInlineWorkflowYaml, type ActionDraft } from '@kbn/alerting-v2-rule-form';
+import {
+  buildInlineWorkflowYaml,
+  buildRuleScopedMatcher,
+  resolveRuleNotificationTag,
+  type ActionDraft,
+} from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import type { RuleApiResponse } from '../services/rules_api';
+import { actionPolicyKeys } from './query_key_factory';
 
 export interface SetupRuleNotificationsParams {
   rule: RuleApiResponse;
@@ -22,12 +28,14 @@ export const useSetupRuleNotifications = () => {
   const workflowApi = useService(WorkflowApi);
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const { toasts } = useService(CoreStart('notifications'));
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ rule, actions }: SetupRuleNotificationsParams) => {
       if (actions.length === 0) {
         return;
       }
+      const matcher = buildRuleScopedMatcher(resolveRuleNotificationTag(rule.metadata));
 
       const setupOne = async (action: ActionDraft): Promise<void> => {
         let createdWorkflowId: string | null = null;
@@ -54,9 +62,9 @@ export const useSetupRuleNotifications = () => {
           await actionPoliciesApi.createActionPolicy({
             name: `${rule.metadata.name} notifications`,
             description: `Notifications for rule "${rule.metadata.name}"`,
-            matcher: `rule.id: "${rule.id}"`,
+            matcher,
             destinations: [{ type: 'workflow', id: workflowId }],
-            groupingMode: 'per_episode',
+            grouping_mode: 'per_episode',
             throttle: { strategy: 'on_status_change', interval: null },
           });
         } catch (err) {
@@ -113,6 +121,9 @@ export const useSetupRuleNotifications = () => {
             'Notifications could not be fully configured. The rule was created but some action policies may not have been linked.',
         }),
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
     },
   });
 };

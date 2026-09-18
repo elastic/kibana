@@ -275,7 +275,6 @@ export const LegendControls = ({
         })}
       </EuiPopoverTitle>
       <EuiButtonGroup
-        color="primary"
         idSelected={draft.type}
         isFullWidth={true}
         legend={i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTypeLabel', {
@@ -401,7 +400,10 @@ export const LegendControls = ({
             >
               <div style={{ maxWidth: 150 }}>
                 <EuiFieldNumber
-                  data-test-subj="infraLegendControlsFieldNumber"
+                  data-test-subj="infraLegendControlsMinFieldNumber"
+                  aria-label={i18n.translate('xpack.infra.legendControls.minLabel', {
+                    defaultMessage: 'Minimum',
+                  })}
                   disabled={draft.auto}
                   step={1}
                   value={isNaN(draft.bounds.min) ? '' : draft.bounds.min}
@@ -430,7 +432,10 @@ export const LegendControls = ({
             >
               <div style={{ maxWidth: 150 }}>
                 <EuiFieldNumber
-                  data-test-subj="infraLegendControlsFieldNumber"
+                  data-test-subj="infraLegendControlsMaxFieldNumber"
+                  aria-label={i18n.translate('xpack.infra.legendControls.maxLabel', {
+                    defaultMessage: 'Maximum',
+                  })}
                   disabled={draft.auto}
                   step={1}
                   isInvalid={!boundsValidRange}

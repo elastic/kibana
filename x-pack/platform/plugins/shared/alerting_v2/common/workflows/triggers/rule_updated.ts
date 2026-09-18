@@ -15,6 +15,7 @@ export const ruleUpdatedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof ruleLifecycleEventSchema
 > = {
   id: RuleUpdatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: ruleLifecycleEventSchema,
   title: i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.title', {
     defaultMessage: 'Alerting - Rule updated',
@@ -25,7 +26,7 @@ export const ruleUpdatedTriggerCommonDefinition: CommonTriggerDefinition<
   documentation: {
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.details', {
       defaultMessage:
-        'Emitted after any rule update. When enabled state changes, ruleEnabled or ruleDisabled is also emitted. Subscribe to this trigger for all updates, or to the enable/disable triggers for state changes only.',
+        'Emitted after any rule update. The payload includes event.rule with ruleId, spaceId, and tags. When enabled state changes, ruleEnabled or ruleDisabled is also emitted. Subscribe to this trigger for all updates, or to the enable/disable triggers for state changes only.',
     }),
     examples: [
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.example', {
@@ -38,7 +39,20 @@ triggers:
 \`\`\``,
         values: { triggerId: RuleUpdatedTriggerId },
       }),
+      i18n.translate(
+        'xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.tagConditionExample',
+        {
+          defaultMessage: `## Run for rules with a tag
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.rule.tags: "critical"'
+\`\`\``,
+          values: { triggerId: RuleUpdatedTriggerId },
+        }
+      ),
     ],
   },
-  snippets: { condition: 'event.rule.ruleId: "my-rule-id"' },
+  snippets: { condition: 'event.rule.tags: "my-tag"' },
 };

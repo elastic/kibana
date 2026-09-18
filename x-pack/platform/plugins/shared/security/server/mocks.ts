@@ -46,6 +46,7 @@ function createStartMock() {
     authc: lazyObject({
       apiKeys: mockAuthc.apiKeys,
       getCurrentUser: mockAuthc.getCurrentUser,
+      systemIdentity: mockAuthc.systemIdentity,
     }),
     authz: lazyObject({
       actions: mockAuthz.actions,
@@ -56,6 +57,7 @@ function createStartMock() {
     }),
     userProfiles: lazyObject({
       getCurrent: mockUserProfiles.getCurrent,
+      getCurrentProfileId: mockUserProfiles.getCurrentProfileId,
       suggest: mockUserProfiles.suggest,
       bulkGet: mockUserProfiles.bulkGet,
     }),

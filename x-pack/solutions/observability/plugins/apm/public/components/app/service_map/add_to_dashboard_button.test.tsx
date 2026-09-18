@@ -32,7 +32,11 @@ describe('capturePageFilters', () => {
       filterManagerFilters: [],
       controlSelections: {},
     });
-    expect(result).toEqual({ kuery: undefined, service_name: undefined });
+    expect(result).toEqual({
+      kuery: undefined,
+      service_name: undefined,
+      highlighted_service_names: undefined,
+    });
   });
 
   it('passes URL service_name through and wraps URL kuery in parens', () => {
@@ -54,11 +58,12 @@ describe('capturePageFilters', () => {
       controlSelections: { 'service.name': ['payment'] },
     });
     expect(result.service_name).toBe('payment');
+    expect(result.highlighted_service_names).toBeUndefined();
     // service.name was promoted, so it should NOT also appear as a KQL clause.
     expect(result.kuery).toBeUndefined();
   });
 
-  it('keeps multi-value Controls service.name as a KQL clause', () => {
+  it('keeps multi-value Controls service.name as a KQL clause and highlighted_service_names', () => {
     const result = capturePageFilters({
       urlKuery: '',
       urlServiceName: undefined,
@@ -66,6 +71,7 @@ describe('capturePageFilters', () => {
       controlSelections: { 'service.name': ['payment', 'checkout'] },
     });
     expect(result.service_name).toBeUndefined();
+    expect(result.highlighted_service_names).toEqual(['payment', 'checkout']);
     expect(result.kuery).toBe('service.name: ("payment" or "checkout")');
   });
 

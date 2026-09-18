@@ -13,6 +13,7 @@ import {
   ENTITY_ANOMALY_TABLE_EXPANDED_ROW_DESCRIPTION,
   ENTITY_ANOMALY_TABLE_EXPANDED_ROW_KEY_FIELDS,
 } from '../translations';
+import { ANOMALIES_TABLE_EXPANDED_ROW_DESCRIPTION_TEST_ID } from '../test_ids';
 import type { TableRow } from './types';
 
 interface AnomalyExpandedRowProps {
@@ -23,8 +24,8 @@ const ExpandedSection: React.FC<{
   heading: string;
   children: React.ReactNode;
   testSubj?: string;
-}> = ({ heading, children }) => (
-  <div>
+}> = ({ heading, children, testSubj }) => (
+  <div data-test-subj={testSubj}>
     <EuiText size="xs">
       <strong>{heading}</strong>
     </EuiText>
@@ -42,7 +43,10 @@ export const AnomalyExpandedRow: React.FC<AnomalyExpandedRowProps> = ({ row }) =
       gap: 12px;
     `}
   >
-    <ExpandedSection heading={ENTITY_ANOMALY_TABLE_EXPANDED_ROW_DESCRIPTION}>
+    <ExpandedSection
+      heading={ENTITY_ANOMALY_TABLE_EXPANDED_ROW_DESCRIPTION}
+      testSubj={ANOMALIES_TABLE_EXPANDED_ROW_DESCRIPTION_TEST_ID}
+    >
       {row.description}
     </ExpandedSection>
     <ExpandedSection heading={ENTITY_ANOMALY_TABLE_EXPANDED_ROW_COUNT}>

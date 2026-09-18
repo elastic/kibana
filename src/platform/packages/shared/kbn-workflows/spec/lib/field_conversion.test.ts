@@ -404,6 +404,34 @@ describe('applyInputDefaults', () => {
     });
   });
 
+  it('should identify default and provided values when rendering', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        greeting: { type: 'string', default: '{{ default_greeting }}' },
+        name: { type: 'string' },
+        settings: {
+          type: 'object',
+          properties: {
+            theme: { type: 'string', default: '{{ default_theme }}' },
+            locale: { type: 'string' },
+          },
+        },
+      },
+    });
+
+    const renderer = jest.fn((value: unknown) => value);
+    applyInputDefaults(
+      { name: '{{ user }}', settings: { locale: '{{ locale }}' } },
+      inputsSchema,
+      renderer
+    );
+
+    expect(renderer).toHaveBeenCalledWith('{{ default_greeting }}', 'default');
+    expect(renderer).toHaveBeenCalledWith('{{ user }}', 'provided');
+    expect(renderer).toHaveBeenCalledWith('{{ default_theme }}', 'default');
+    expect(renderer).toHaveBeenCalledWith('{{ locale }}', 'provided');
+  });
+
   it('should apply defaults for nested objects', () => {
     const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {

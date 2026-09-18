@@ -13,6 +13,8 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import type { PluginConfig } from '../../config';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
@@ -25,6 +27,9 @@ export function createRulesClient(): {
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
   const { publisher: ruleEventPublisher } = createRuleEventPublisher();
+  const { loggerService } = createLoggerService();
+  const artifactTypeRegistry = new ArtifactTypeRegistry();
+  registerBuiltinArtifactTypes(artifactTypeRegistry);
 
   const config = {
     enabled: true,
@@ -44,7 +49,9 @@ export function createRulesClient(): {
     'default',
     pluginConfigAccessor,
     rulesSavedObjectService,
-    ruleEventPublisher
+    ruleEventPublisher,
+    loggerService,
+    artifactTypeRegistry
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };

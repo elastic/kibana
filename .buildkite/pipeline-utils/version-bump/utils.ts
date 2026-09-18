@@ -8,7 +8,7 @@
  */
 
 import type { RestEndpointMethodTypes } from '@octokit/rest';
-import { getPrChangesCached } from '../github';
+import { getPrChangesCached } from '../github/index.ts';
 
 const VERSION_BUMP_BRANCH_RE = /^bump-versions(-json)?-\d{4}-\d{2}-\d{2}/;
 const KIBANAMACHINE_LOGIN = 'kibanamachine';
@@ -16,6 +16,7 @@ const KIBANAMACHINE_LOGIN = 'kibanamachine';
 const VERSION_BUMP_FILE_MATCHERS = [
   /^versions\.json$/,
   /^\.backportrc\.json$/,
+  /^\.github\/CODEOWNERS$/,
   /^package\.json$/,
   /^x-pack\/package\.json$/,
   /^x-pack\/solutions\/search\/plugins\/enterprise_search\/common\/__mocks__\/initial_app_data\.ts$/,

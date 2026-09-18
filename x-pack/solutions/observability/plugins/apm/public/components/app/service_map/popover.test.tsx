@@ -55,7 +55,7 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
 }));
 
 jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => '/services/{serviceName}/service-map',
+  useApmRoutePath: () => '/service-map',
 }));
 
 // Mock APM router
@@ -367,59 +367,6 @@ describe('MapPopover', () => {
       const heading = screen.getByTestId('serviceMapPopoverTitle');
       expect(heading.tagName).toBe('H3');
       expect(heading).toHaveTextContent('postgresql');
-    });
-  });
-
-  describe('Focus map button click behaviour', () => {
-    function focusedServiceNode(name: string): ServiceMapNode {
-      return {
-        id: name,
-        type: 'service',
-        position: { x: 100, y: 100 },
-        data: {
-          id: name,
-          label: name,
-          isService: true,
-        } as ServiceNodeData,
-      };
-    }
-
-    function clickFocusButton() {
-      const button = screen.getByTestId('apmServiceContentsFocusMapButton');
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-      button.dispatchEvent(event);
-      return event;
-    }
-
-    it('re-centers the node (and prevents navigation) on the focused service by default', () => {
-      const onClose = jest.fn();
-      renderPopover({
-        selectedNode: focusedServiceNode('opbeans-go'),
-        focusedServiceName: 'opbeans-go',
-        onClose,
-        showFocusMap: true,
-      });
-
-      const event = clickFocusButton();
-      expect(event.defaultPrevented).toBe(true);
-      expect(mockSetCenter).toHaveBeenCalledTimes(1);
-      expect(onClose).not.toHaveBeenCalled();
-    });
-
-    it('navigates (closes popover, no preventDefault, no recentre) when alwaysNavigateOnFocus is set', () => {
-      const onClose = jest.fn();
-      renderPopover({
-        selectedNode: focusedServiceNode('opbeans-go'),
-        focusedServiceName: 'opbeans-go',
-        onClose,
-        showFocusMap: true,
-        alwaysNavigateOnFocus: true,
-      });
-
-      const event = clickFocusButton();
-      expect(event.defaultPrevented).toBe(false);
-      expect(mockSetCenter).not.toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });

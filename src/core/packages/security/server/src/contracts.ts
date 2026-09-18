@@ -11,6 +11,8 @@ import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
 import type { CoreSecurityDelegateContract } from './api_provider';
 import type { CoreAuditService } from './audit';
+import type { CoreServiceAccountsService } from './service_accounts';
+import type { CoreServiceAccountsSetup } from './service_account_workloads';
 /**
  * Setup contract for Core's security service.
  *
@@ -25,10 +27,11 @@ export interface SecurityServiceSetup {
   registerSecurityDelegate(api: CoreSecurityDelegateContract): void;
 
   /**
-   * Returns a function that binds a `profile_uid` to a fake request so that
+   * Returns a function that binds originating-user identity fields (currently
+   * `profile_uid` and `username`) to a fake request so that
    * `security.authc.getCurrentUser(request)` resolves to a synthetic
-   * {@link AuthenticatedUser} exposing only that `profile_uid`. Reading any
-   * other identity field on the returned user yields `undefined`.
+   * {@link AuthenticatedUser} exposing only those fields. Reading any other
+   * identity field on the returned user yields `undefined`.
    *
    * One-shot: calling it more than once throws. Reserved for Task Manager,
    * the sole legitimate consumer. The returned enricher throws on non-fake
@@ -43,6 +46,12 @@ export interface SecurityServiceSetup {
    * The {@link CoreFipsService | FIPS service}
    */
   fips: CoreFipsService;
+
+  /**
+   * The {@link CoreServiceAccountsSetup | service accounts service}, through which a plugin registers
+   * the workload types it runs as service accounts.
+   */
+  serviceAccounts: CoreServiceAccountsSetup;
 }
 
 /**
@@ -59,4 +68,8 @@ export interface SecurityServiceStart {
    * The {@link CoreAuditService | audit service}
    */
   audit: CoreAuditService;
+  /**
+   * The {@link CoreServiceAccountsService | service accounts service}
+   */
+  serviceAccounts: CoreServiceAccountsService;
 }

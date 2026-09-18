@@ -24,7 +24,7 @@ interface MatcherInputProps {
 }
 
 const matcherSuggestionsAbstraction: SuggestionsAbstraction = {
-  type: 'action_policies',
+  type: 'alerting/v2',
   fields: {},
 };
 

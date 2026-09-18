@@ -6,7 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
+import type { ChangeHistoryChangesSummaryRenderFn } from '../types/change_history_changes_summary';
 import type {
   ChangeHistoryFeatures,
   ChangeHistoryPermissions,
@@ -14,6 +16,9 @@ import type {
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import { createChangeHistoryTelemetryReporter } from '../telemetry/create_change_history_telemetry_reporter';
+import type { ChangeHistoryScope } from '../types/change_history_scope';
+import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
 import { ChangeHistoryModalContext } from './change_history_modal_context';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
@@ -23,10 +28,14 @@ export interface ChangeHistoryProviderProps {
   objectId: string;
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
+  renderChangesSummary?: ChangeHistoryChangesSummaryRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
+  scope: ChangeHistoryScope;
+  listPageSize?: number;
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   children: React.ReactNode;
 }
 
@@ -34,10 +43,14 @@ export const ChangeHistoryProvider = ({
   objectId,
   adapter,
   renderPreview,
+  renderChangesSummary,
   renderBadge,
   labels,
   features,
   permissions,
+  scope,
+  listPageSize = DEFAULT_CHANGE_HISTORY_PAGE_SIZE,
+  analytics,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,39 +61,62 @@ export const ChangeHistoryProvider = ({
     setIsOpen(false);
   }
 
-  const openModal = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
   const supports = useMemo(
     () => resolveChangeHistorySupports(adapter, { features, permissions }),
     [adapter, features, permissions]
   );
+
+  const telemetry = useMemo(
+    () =>
+      createChangeHistoryTelemetryReporter({
+        analytics,
+        scope,
+        enabled: features?.telemetry !== false,
+      }),
+    [analytics, features?.telemetry, scope]
+  );
+
+  const openModal = useCallback(() => {
+    setIsOpen((wasOpen) => {
+      if (!wasOpen) {
+        telemetry.reportOpened();
+      }
+      return true;
+    });
+  }, [telemetry]);
+
+  const closeModal = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   const configValue = useMemo(
     () => ({
       objectId,
       adapter,
       renderPreview,
+      renderChangesSummary,
       renderBadge,
       labels: {
         previewBackLabel: labels.previewBackLabel ?? i18n.BACK_TO_HOST,
         previewTitle: labels.previewTitle,
       },
       supports,
+      telemetry,
+      scope,
+      listPageSize,
     }),
     [
       adapter,
       labels.previewBackLabel,
       labels.previewTitle,
+      listPageSize,
       objectId,
       renderBadge,
+      renderChangesSummary,
       renderPreview,
+      scope,
       supports,
+      telemetry,
     ]
   );
 

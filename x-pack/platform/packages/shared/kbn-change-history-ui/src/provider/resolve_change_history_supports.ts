@@ -21,10 +21,13 @@ export const resolveChangeHistorySupports = (
   adapter: ChangeHistoryAdapter,
   { features, permissions }: ResolveChangeHistorySupportsOptions = {}
 ): ChangeHistorySupports => {
+  const compare = features?.compare !== false;
   const restore =
     features?.restore === true &&
     typeof adapter.restoreChange === 'function' &&
     permissions?.canRestore === true;
+  const unsavedChanges =
+    features?.unsavedChanges === true && typeof adapter.getPendingChange === 'function';
 
-  return { restore };
+  return { compare, restore, unsavedChanges };
 };

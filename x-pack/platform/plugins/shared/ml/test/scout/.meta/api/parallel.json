@@ -1,5 +1,8 @@
 {
-  "sha1": "2fd013cb86d878dfb51ef7931ea6a4b1672ccd01",
+  "sha1": "ced47ddfa9cfe6cbc92c73894a2a76996867826e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d5de350ea79b8d1-e52296bed230db3",
@@ -14,8 +17,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 51,
+        "column": 38
       }
     },
     {
@@ -31,8 +34,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 62,
+        "column": 16
       }
     },
     {
@@ -48,8 +51,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 81,
+        "column": 74
       }
     },
     {
@@ -66,7 +69,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
         "line": 44,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -82,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 48,
+        "column": 23
       }
     },
     {
@@ -99,8 +102,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 59,
+        "column": 37
       }
     },
     {
@@ -116,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 73,
+        "column": 40
       }
     },
     {
@@ -133,8 +136,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 71,
+        "column": 23
       }
     },
     {
@@ -150,8 +153,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 89,
+        "column": 18
       }
     },
     {
@@ -168,7 +171,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
         "line": 100,
-        "column": 12
+        "column": 100
       }
     },
     {
@@ -184,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 53,
+        "column": 25
       }
     },
     {
@@ -201,8 +204,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 63,
+        "column": 21
       }
     },
     {
@@ -218,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 75,
+        "column": 25
       }
     },
     {
@@ -235,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 87,
+        "column": 99
       }
     },
     {
@@ -252,8 +255,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 61,
+        "column": 17
       }
     },
     {
@@ -269,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 86,
+        "column": 25
       }
     },
     {
@@ -286,8 +289,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 105,
+        "column": 29
       }
     },
     {
@@ -303,8 +306,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 108,
+        "column": 42
       }
     }
   ]

@@ -107,7 +107,7 @@ export function CompositeSloToolbar({
             button={
               <EuiFilterButton
                 data-test-subj="compositeSloListTagFilter"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={handleToggleTagPopover}
                 isSelected={isTagPopoverOpen}
                 numFilters={availableTags.length}
@@ -149,7 +149,7 @@ export function CompositeSloToolbar({
             button={
               <EuiFilterButton
                 data-test-subj="compositeSloListStatusFilter"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={handleToggleStatusPopover}
                 isSelected={isStatusPopoverOpen}
                 hasActiveFilters={selectedStatuses.length > 0}

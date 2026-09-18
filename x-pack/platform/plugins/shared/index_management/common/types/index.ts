@@ -19,6 +19,7 @@ export type {
   DataStream,
   DataStreamIndex,
   DataRetention,
+  EsDataRetention,
   IndexMode,
 } from './data_streams';
 

@@ -26,7 +26,9 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
+  ActionSource,
 } from '../../../common/types/domain';
+import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -36,7 +38,7 @@ import type { PatchCasesArgs } from '../cases/types';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
-  UserActionFindRequest,
+  UserActionInternalFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 import type {
@@ -182,7 +184,14 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
-  isCasesAttachmentsEnabled?: boolean;
+  /**
+   * Cases-analytics v2 activity writer. Real implementation when v2 is
+   * enabled, `V2_NOOP_ACTIVITY_WRITER` otherwise — every call site stays
+   * unconditional (no `if (writer)` guards). Captured at factory time so
+   * the user-actions service is oblivious to v2's start lifecycle.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  actionSource?: ActionSource;
 }
 
 export interface PushTimeFrameInfo {
@@ -347,7 +356,7 @@ export interface GetUsersResponse {
   assignedAndUnassignedUsers: Set<string>;
 }
 
-export interface FindOptions extends UserActionFindRequest {
+export interface FindOptions extends UserActionInternalFindRequest {
   caseId: string;
   filter?: KueryNode;
 }
@@ -358,6 +367,14 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
   field: string;
   originalValue: unknown;
   newValue: unknown;
+  /** Resolved name of a newly-applied template, recorded on the template user-action payload. */
+  templateName?: string;
+  /**
+   * customFields keys whose edit is already recorded by the canonical
+   * `extended_fields` user action of the same update — their duplicate legacy
+   * `customFields` user actions are suppressed (#282474).
+   */
+  suppressedCustomFieldKeys?: Set<string>;
 }
 
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
@@ -377,6 +394,12 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
 export interface BuildUserActionsDictParams {
   updatedCases: PatchCasesArgs;
   user: User;
+  /**
+   * Map of applied-template `id@version` → name, used to record the template name on its user
+   * action. Keyed by version (not just id) so the recorded name matches the exact version applied,
+   * since template names can change across versions.
+   */
+  templateNamesByKey?: Map<string, string>;
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;

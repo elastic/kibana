@@ -37,6 +37,8 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
       };
     },
     isReadonly: true,
+    getAgentDescription: () =>
+      `The user's current location in Kibana (app, URL, time range). Read it before answering questions about 'this page', 'here', or anything the user is currently viewing.`,
     getTools: () => [],
   };
 };

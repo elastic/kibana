@@ -242,6 +242,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
       <EuiContextMenuItem
         key={item.text}
         icon={limit === item.numberOfRow ? 'check' : 'empty'}
+        aria-current={limit === item.numberOfRow ? 'true' : undefined}
+        data-test-subj={`loadingMorePickSizeRow-${item.numberOfRow}`}
         onClick={() => {
           closePopover();
           updateLimitPagination(item.numberOfRow);
@@ -320,6 +322,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
                       <EuiPopover
+                        aria-label={i18n.ROWS}
                         id="customizablePagination"
                         data-test-subj="loadingMoreSizeRowPopover"
                         button={button}

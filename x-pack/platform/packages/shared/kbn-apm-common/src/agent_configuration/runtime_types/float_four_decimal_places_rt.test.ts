@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { floatFourDecimalPlacesRt } from './float_four_decimal_places_rt';
-import { isRight } from 'fp-ts/Either';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { floatFourDecimalPlacesSchema } from './float_four_decimal_places_rt';
 
-describe('floatFourDecimalPlacesRt', () => {
+describe('floatFourDecimalPlacesSchema', () => {
   it('does not accept empty values', () => {
-    expect(isRight(floatFourDecimalPlacesRt.decode(undefined))).toBe(false);
-    expect(isRight(floatFourDecimalPlacesRt.decode(null))).toBe(false);
-    expect(isRight(floatFourDecimalPlacesRt.decode(''))).toBe(false);
+    expectParseError(floatFourDecimalPlacesSchema.safeParse(undefined));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse(null));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse(''));
   });
 
   it('should only accept stringified numbers', () => {
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.5'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode(0.5))).toBe(false);
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0.5'));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse(0.5));
   });
 
   it('checks if the number falls within 0, 1', () => {
-    expect(isRight(floatFourDecimalPlacesRt.decode('0'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.5'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('-0.1'))).toBe(false);
-    expect(isRight(floatFourDecimalPlacesRt.decode('1.1'))).toBe(false);
-    expect(isRight(floatFourDecimalPlacesRt.decode(NaN))).toBe(false);
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0'));
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0.5'));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse('-0.1'));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse('1.1'));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse(NaN));
   });
 
   it('checks whether the number of decimals is 4', () => {
-    expect(isRight(floatFourDecimalPlacesRt.decode('1'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.9'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.99'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.999'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.9999'))).toBe(true);
-    expect(isRight(floatFourDecimalPlacesRt.decode('0.99999'))).toBe(false);
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('1'));
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0.9'));
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0.99'));
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0.999'));
+    expectParseSuccess(floatFourDecimalPlacesSchema.safeParse('0.9999'));
+    expectParseError(floatFourDecimalPlacesSchema.safeParse('0.99999'));
   });
 });

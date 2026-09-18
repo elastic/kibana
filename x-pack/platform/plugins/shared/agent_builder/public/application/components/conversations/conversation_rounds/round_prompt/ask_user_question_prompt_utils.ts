@@ -46,10 +46,7 @@ export const labels = {
     defaultMessage: 'Back',
   }),
   skipButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.skipButton', {
-    defaultMessage: 'Skip',
-  }),
-  skipAllButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.skipAllButton', {
-    defaultMessage: 'Skip all',
+    defaultMessage: 'Skip question',
   }),
   confirmButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.confirmButton', {
     defaultMessage: 'Submit',
@@ -71,7 +68,6 @@ export const optionCardStyles = ({ euiTheme }: UseEuiTheme) => css`
   .euiSplitPanel__inner.euiPanel--primary {
     display: flex;
     align-items: center;
-    height: 100%;
   }
   .euiCheckableCard__children {
     margin-block-start: 2px;

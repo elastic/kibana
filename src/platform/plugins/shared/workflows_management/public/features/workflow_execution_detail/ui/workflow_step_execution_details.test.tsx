@@ -15,7 +15,13 @@ import { WorkflowStepExecutionDetails } from './workflow_step_execution_details'
 import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('./step_execution_data_view', () => ({
-  StepExecutionDataView: () => <div data-test-subj="step-execution-data-view" />,
+  StepExecutionDataView: ({ mode }: { mode: string }) => (
+    <div data-test-subj={`step-execution-data-view-${mode}`} />
+  ),
+}));
+
+jest.mock('./foreach_iterations_section', () => ({
+  ForeachIterationsSection: () => <div data-test-subj="workflowExecutionIterationsSection" />,
 }));
 
 jest.mock('./workflow_execution_overview', () => ({
@@ -63,7 +69,7 @@ const createRegularStep = (
 });
 
 describe('WorkflowStepExecutionDetails', () => {
-  it('shows Input and Output tabs for trigger when both input and output exist, Input first and selected by default', () => {
+  it('renders Input and Output sections for a trigger with both payloads', () => {
     const stepExecution = createTriggerStep({
       input: { foo: 'bar' },
       output: { greeting: 'hello world' },
@@ -74,18 +80,11 @@ describe('WorkflowStepExecutionDetails', () => {
       </TestWrapper>
     );
 
-    const inputTab = screen.getByRole('tab', { name: 'Input' });
-    const outputTab = screen.getByRole('tab', { name: 'Output' });
-    expect(inputTab).toBeInTheDocument();
-    expect(outputTab).toBeInTheDocument();
-
-    const tabs = screen.getAllByRole('tab');
-    expect(tabs[0]).toHaveTextContent('Input');
-    expect(tabs[1]).toHaveTextContent('Output');
-    expect(inputTab).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('step-execution-data-view-input')).toBeInTheDocument();
+    expect(screen.getByTestId('step-execution-data-view-output')).toBeInTheDocument();
   });
 
-  it('shows only Input tab for trigger when output is missing', () => {
+  it('renders only Input when output is missing', () => {
     const stepExecution = createTriggerStep({ input: { foo: 'bar' } });
     render(
       <TestWrapper>
@@ -93,11 +92,11 @@ describe('WorkflowStepExecutionDetails', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByRole('tab', { name: 'Input' })).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: 'Output' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('step-execution-data-view-input')).toBeInTheDocument();
+    expect(screen.queryByTestId('step-execution-data-view-output')).not.toBeInTheDocument();
   });
 
-  it('shows only Output tab for trigger when input is missing but output exists', () => {
+  it('renders only Output when input is missing but output exists', () => {
     const stepExecution = createTriggerStep({ output: { result: 'ok' } });
     render(
       <TestWrapper>
@@ -105,11 +104,25 @@ describe('WorkflowStepExecutionDetails', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByRole('tab', { name: 'Output' })).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: 'Input' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('step-execution-data-view-input')).not.toBeInTheDocument();
+    expect(screen.getByTestId('step-execution-data-view-output')).toBeInTheDocument();
   });
 
-  it('shows Output then Input tabs for regular steps', () => {
+  it('renders a trigger without input, output, or error', () => {
+    render(
+      <TestWrapper>
+        <WorkflowStepExecutionDetails
+          workflowExecutionId="exec-1"
+          stepExecution={createTriggerStep()}
+        />
+      </TestWrapper>
+    );
+
+    expect(screen.queryByTestId('step-execution-data-view-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('step-execution-data-view-output')).not.toBeInTheDocument();
+  });
+
+  it('renders Input then Output for regular steps', () => {
     const stepExecution = createRegularStep({
       input: { url: 'https://example.com' },
       output: { status: 200 },
@@ -120,9 +133,42 @@ describe('WorkflowStepExecutionDetails', () => {
       </TestWrapper>
     );
 
-    const tabs = screen.getAllByRole('tab');
-    expect(tabs[0]).toHaveTextContent('Output');
-    expect(tabs[1]).toHaveTextContent('Input');
+    expect(screen.getByTestId('step-execution-data-view-input')).toBeInTheDocument();
+    expect(screen.getByTestId('step-execution-data-view-output')).toBeInTheDocument();
+  });
+
+  it('renders Iterations for foreach without inventing an Output section', () => {
+    const foreachStep = createRegularStep({
+      id: 'foreach-1',
+      stepId: 'loop',
+      stepType: 'foreach',
+      input: { items: [1] },
+      output: undefined,
+    });
+    const child = createRegularStep({
+      id: 'child-1',
+      stepId: 'inner',
+      scopeStack: [
+        {
+          stepId: 'loop',
+          nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '0' }],
+        },
+      ],
+    });
+    render(
+      <TestWrapper>
+        <WorkflowStepExecutionDetails
+          workflowExecutionId="exec-1"
+          stepExecution={foreachStep}
+          allStepExecutions={[foreachStep, child]}
+          onSelectStepExecution={jest.fn()}
+        />
+      </TestWrapper>
+    );
+
+    expect(screen.getByTestId('workflowExecutionIterationsSection')).toBeInTheDocument();
+    expect(screen.getByTestId('step-execution-data-view-input')).toBeInTheDocument();
+    expect(screen.queryByTestId('step-execution-data-view-output')).not.toBeInTheDocument();
   });
 
   it('renders with workflowExecutionTrigger data-test-subj for trigger pseudo-step', () => {

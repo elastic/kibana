@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +17,9 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
-import { BadgeList } from './badge_list';
+import { BadgeList } from '../badge_list';
 import { DestinationRow } from './destination_row';
+import { MatcherSummary } from './matcher_summary';
 
 const EMPTY_VALUE = '-';
 
@@ -28,7 +28,14 @@ export interface ActionPolicyDefinitionListProps {
 }
 
 export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionListProps) => {
-  const { description, tags, matcher, groupingMode, groupBy, throttle, destinations = [] } = policy;
+  const {
+    description,
+    matcher,
+    grouping_mode: groupingMode,
+    group_by: groupBy,
+    throttle,
+    destinations = [],
+  } = policy;
 
   const items: EuiDescriptionListProps['listItems'] = [
     {
@@ -41,25 +48,10 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
 
   items.push(
     {
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.tags', {
-        defaultMessage: 'Tags',
-      }),
-      description: tags && tags.length > 0 ? <BadgeList items={tags} /> : EMPTY_VALUE,
-    },
-    {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher', {
         defaultMessage: 'Matcher',
       }),
-      description: matcher ? (
-        <EuiCode>{matcher}</EuiCode>
-      ) : (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicyDefinition.matchesAll"
-            defaultMessage="Matches all alerts."
-          />
-        </EuiText>
-      ),
+      description: <MatcherSummary matcher={matcher} />,
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.dispatchMode', {
@@ -119,5 +111,13 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
       ),
   });
 
-  return <EuiDescriptionList compressed type="column" listItems={items} />;
+  return (
+    <EuiDescriptionList
+      compressed
+      type="column"
+      columnWidths={[1, 3]}
+      descriptionProps={{ style: { minWidth: 0 } }}
+      listItems={items}
+    />
+  );
 };

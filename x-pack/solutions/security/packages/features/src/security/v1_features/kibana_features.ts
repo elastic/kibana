@@ -81,7 +81,7 @@ export const getSecurityBaseKibanaFeature = ({
   app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   description: i18n.translate(
@@ -161,7 +161,7 @@ export const getSecurityBaseKibanaFeature = ({
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: [SECURITY_UI_SHOW, SECURITY_UI_CRUD],
     },
@@ -214,7 +214,7 @@ export const getSecurityBaseKibanaFeature = ({
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: [SECURITY_UI_SHOW, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
     },

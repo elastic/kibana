@@ -9,6 +9,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import {
   DASHBOARD_SO_TYPE,
   DISCOVER_SESSION_SO_TYPE,
+  LENS_SO_TYPE,
   MAP_SO_TYPE,
 } from '../../../../../common/constants/attachments';
 import type { CaseUI } from '../../../../../common/ui/types';
@@ -44,6 +45,7 @@ export const SavedObjectInAppUrlsProvider: React.FC<SavedObjectInAppUrlsProvider
 }) => {
   const idsBySoType = useMemo(() => {
     const dashboardIds = new Set<string>();
+    const lensIds = new Set<string>();
     const mapIds = new Set<string>();
     const searchIds = new Set<string>();
     for (const attachment of caseData.comments) {
@@ -51,6 +53,8 @@ export const SavedObjectInAppUrlsProvider: React.FC<SavedObjectInAppUrlsProvider
         const attributes = getSavedObjectAttachmentAttributes(attachment);
         if (attributes.soType === DASHBOARD_SO_TYPE) {
           dashboardIds.add(attributes.attachmentId);
+        } else if (attributes.soType === LENS_SO_TYPE) {
+          lensIds.add(attributes.attachmentId);
         } else if (attributes.soType === MAP_SO_TYPE) {
           mapIds.add(attributes.attachmentId);
         } else if (attributes.soType === DISCOVER_SESSION_SO_TYPE) {
@@ -60,22 +64,25 @@ export const SavedObjectInAppUrlsProvider: React.FC<SavedObjectInAppUrlsProvider
     }
     return {
       [DASHBOARD_SO_TYPE]: Array.from(dashboardIds),
+      [LENS_SO_TYPE]: Array.from(lensIds),
       [MAP_SO_TYPE]: Array.from(mapIds),
       [DISCOVER_SESSION_SO_TYPE]: Array.from(searchIds),
     };
   }, [caseData.comments]);
 
   const dashboardUrls = useSavedObjectInAppUrlsQuery(DASHBOARD_SO_TYPE, idsBySoType.dashboard);
+  const lensUrls = useSavedObjectInAppUrlsQuery(LENS_SO_TYPE, idsBySoType.lens);
   const mapUrls = useSavedObjectInAppUrlsQuery(MAP_SO_TYPE, idsBySoType.map);
   const searchUrls = useSavedObjectInAppUrlsQuery(DISCOVER_SESSION_SO_TYPE, idsBySoType.search);
 
   const value = useMemo<UrlsBySoType>(
     () => ({
       [DASHBOARD_SO_TYPE]: dashboardUrls,
+      [LENS_SO_TYPE]: lensUrls,
       [MAP_SO_TYPE]: mapUrls,
       [DISCOVER_SESSION_SO_TYPE]: searchUrls,
     }),
-    [dashboardUrls, mapUrls, searchUrls]
+    [dashboardUrls, lensUrls, mapUrls, searchUrls]
   );
 
   return (

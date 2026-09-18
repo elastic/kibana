@@ -9,7 +9,7 @@
 #   4. Copy package.json into the output directory.
 #   5. Stamp a content-hash version onto target/package.json.
 #   6. Generate metadata.json (name, version, git SHA, timestamp, peerDeps).
-#   7. Pack into .tgz (installable via npm/yarn).
+#   7. Pack into .tgz (installable via npm).
 
 set -e
 
@@ -37,9 +37,11 @@ echo "==> Step 3: TypeScript declarations"
   --declaration --emitDeclarationOnly \
   --outDir "$TARGET_DIR" \
   --rootDir "$PACKAGING_DIR/react" \
-  --moduleResolution node \
+  --module preserve \
+  --moduleResolution bundler \
   --esModuleInterop \
-  --skipLibCheck
+  --skipLibCheck \
+  --ignoreConfig
 mv "$TARGET_DIR/types.d.ts" "$TARGET_DIR/index.d.ts"
 echo "    Declarations OK"
 

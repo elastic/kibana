@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ServiceMapNode } from '../../../../common/service_map';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import type { ServiceMapNode } from '@kbn/apm-types';
 import { isServiceNodeData } from '../../../../common/service_map';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 export type ServiceMapBadgesApiResponse =
   APIReturnType<'POST /internal/apm/service-map/service_badges'>;

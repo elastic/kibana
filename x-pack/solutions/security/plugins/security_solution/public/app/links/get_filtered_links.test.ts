@@ -133,7 +133,10 @@ describe('getFilteredLinks', () => {
       const resultIds = result.map((link) => link.id);
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alert_detections');
+      // Attack Discovery stays a normal top-level link even when alignment is enabled.
       expect(resultIds).toContain('attack_discovery');
+      const attackDiscoveryLink = result.find((link) => link.id === 'attack_discovery');
+      expect(attackDiscoveryLink?.sideNavDisabled).toBeUndefined();
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
       expect(resultIds).toContain('launchpad');

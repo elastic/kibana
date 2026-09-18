@@ -11,7 +11,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isDangerousStatus,
+  isExecuteSyncStepType,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 export interface StepListTreeItem {
@@ -26,6 +31,24 @@ export interface StepExecutionTreeItem extends StepListTreeItem {
   stepExecutionId: string | null;
   isTriggerPseudoStep?: boolean;
   isChildWorkflowStep?: boolean;
+  attemptNumber?: number;
+  /** True when this step belongs to the last attempt under an enter-retry scope. */
+  isFinalAttempt?: boolean;
+  /** True when this row is a retry attempt (not the step parent). */
+  isRetryAttempt?: boolean;
+  /** Set on the retry parent when more than one attempt ran. */
+  retryAttemptCount?: number;
+  /**
+   * True when the step ultimately succeeded after one or more failed attempts.
+   * Drives the parent `· recovered` annotation.
+   */
+  retryRecovered?: boolean;
+  /**
+   * Human-readable label to render instead of `stepId`. Used to show static
+   * parallel branch names (e.g. "virustotal") instead of the raw scope index
+   * ("0", "1", ...) the engine uses internally.
+   */
+  displayLabel?: string;
   children: StepExecutionTreeItem[];
 }
 
@@ -49,9 +72,66 @@ function getStepTreeType(
     if (previousStepExecution.stepType === 'if') {
       return 'if-branch';
     }
+
+    if (previousStepExecution.stepType === 'switch') {
+      return 'enter-case-branch';
+    }
+
+    if (previousStepExecution.stepType === 'parallel') {
+      return 'parallel-branch';
+    }
   }
 
   return 'unknown';
+}
+
+/**
+ * Resolves the human-readable name of a parallel branch from the parent parallel
+ * step execution. The engine identifies branches by their scope index ("0", "1",
+ * ...); for static `branches` mode each branch has a name which is snapshotted as
+ * the branch `key` in the parallel step's runtime state (index-aligned). We use
+ * that to display the name instead of the bare index.
+ *
+ * Returns `undefined` when the parent is not a parallel step, the scope segment is
+ * not a numeric index, or no matching branch name is found (e.g. dynamic foreach
+ * fan-out, where the index is the meaningful label).
+ */
+function resolveParallelBranchName(
+  parentStepExecution: WorkflowStepExecutionDto | undefined,
+  scopeSegment: string
+): string | undefined {
+  if (parentStepExecution?.stepType !== 'parallel') {
+    return undefined;
+  }
+
+  const index = Number(scopeSegment);
+  if (!Number.isInteger(index) || index < 0) {
+    return undefined;
+  }
+
+  const parallelState = parentStepExecution.state as
+    | { branches?: unknown; static?: unknown }
+    | undefined;
+
+  // Only static `branches` mode has meaningful author-chosen names as the branch
+  // `key`. In dynamic `foreach` fan-out the `key` is the snapshotted item (which
+  // may be arbitrary/long data, e.g. an agent prompt), so the fan-out index is
+  // the correct label — fall back to it by returning undefined here.
+  if (parallelState?.static !== true) {
+    return undefined;
+  }
+
+  const branches = parallelState.branches;
+  if (!Array.isArray(branches)) {
+    return undefined;
+  }
+
+  const branch = branches[index] as { key?: unknown } | undefined;
+  if (branch && typeof branch.key === 'string' && branch.key.length > 0) {
+    return branch.key;
+  }
+
+  return undefined;
 }
 
 function isVisibleStepType(stepType: string): boolean {
@@ -86,6 +166,41 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
     }
 
     return [stackFrame.stepId, ...scopeWithSubScope];
+  });
+}
+
+/**
+ * A parallel branch is a *scope* that can hold multiple steps, so it is rendered
+ * as an expandable grouping node (e.g. "virustotal" → scan_hash, console). When a
+ * branch contains exactly one step, that extra level is pure noise, so we collapse
+ * the branch node into its single child and surface the branch name on the step's
+ * own row. Branches with 2+ steps keep the grouping node so the per-branch timing
+ * and status stay visible.
+ */
+function collapseSingleStepParallelBranches(
+  items: StepExecutionTreeItem[]
+): StepExecutionTreeItem[] {
+  return items.map((item) => {
+    const children = collapseSingleStepParallelBranches(item.children);
+
+    // Only collapse *named* branches (static `branches` mode). Dynamic foreach
+    // fan-out branches have no name and the index is their meaningful identity, so
+    // they stay grouped under the index node.
+    const isCollapsibleBranch =
+      item.stepType === 'parallel-branch' &&
+      item.displayLabel !== undefined &&
+      children.length === 1;
+    if (isCollapsibleBranch) {
+      const [onlyChild] = children;
+      return {
+        ...onlyChild,
+        // Keep the branch name as the visible label; the row otherwise *is* the
+        // underlying step (its execution id, status, type, input/output).
+        displayLabel: item.displayLabel,
+      };
+    }
+
+    return { ...item, children };
   });
 }
 
@@ -124,6 +239,10 @@ export function buildStepExecutionsTree(
 
       if (!current[currentPart as keyof typeof current]) {
         const currentFullKey = fullPath.join('>');
+        const parentStepExecution = stepExecutionsMap.get(
+          fullPath.slice(0, fullPath.length - 1).join('>')
+        );
+        const branchName = resolveParallelBranchName(parentStepExecution, currentPart);
         let result: StepExecutionTreeItem;
         if (stepExecutionsMap.has(currentFullKey)) {
           const stepExecution = stepExecutionsMap.get(currentFullKey)!;
@@ -134,18 +253,25 @@ export function buildStepExecutionsTree(
             stepExecutionId: stepExecution.id!,
             status: stepExecution.status!,
             children: [],
+            ...(branchName ? { displayLabel: branchName } : {}),
           };
         } else {
+          const syntheticType = getStepTreeType(
+            stepExecutionsMap.get(currentFullKey),
+            parentStepExecution
+          ) as any;
+          const isSyntheticIteration =
+            syntheticType === 'foreach-iteration' || syntheticType === 'while-iteration';
           result = {
             stepId: currentPart,
-            stepType: getStepTreeType(
-              stepExecutionsMap.get(currentFullKey),
-              stepExecutionsMap.get(fullPath.slice(0, fullPath.length - 1).join('>'))
-            ) as any,
+            stepType: syntheticType,
             executionIndex: 0,
             stepExecutionId: undefined as any,
-            status: ExecutionStatus.SKIPPED,
+            // Iteration nodes are synthetic — never apply the leaf not-run fallback.
+            // Status is derived from descendants when rendering the tree.
+            status: isSyntheticIteration ? null : ExecutionStatus.SKIPPED,
             children: [],
+            ...(branchName ? { displayLabel: branchName } : {}),
           };
         }
 
@@ -162,7 +288,7 @@ export function buildStepExecutionsTree(
     }));
   }
 
-  const regularSteps = toArray(root);
+  const regularSteps = collapseSingleStepParallelBranches(toArray(root));
   // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context
   const pseudoSteps: StepExecutionTreeItem[] = [];
 
@@ -226,7 +352,99 @@ export function buildStepExecutionsTree(
     });
   }
 
-  return [...pseudoSteps, ...regularSteps];
+  return [...pseudoSteps, ...transformRetryAttempts(regularSteps)];
+}
+
+const ATTEMPT_ID_REGEX = /^(\d+)-attempt$/;
+
+/**
+ * Collapse `N-attempt` wrappers into attempt rows under the real step.
+ *
+ * The wrapper (synthetic path segment / enter-retry controller) never renders:
+ * - 1 attempt → hoist the leaf; zero retry chrome (config alone is not history)
+ * - 2+ attempts → parent is the step itself (real name + step-type); children are attempts
+ *
+ * Fallback / on-failure branch steps are out of scope until we confirm how those
+ * results are recorded; they should hang off this same parent via the shared node
+ * pattern when added.
+ */
+function transformRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTreeItem[] {
+  return nodes.map((node) => {
+    const allChildrenAreAttempts =
+      node.children.length > 0 && node.children.every((c) => ATTEMPT_ID_REGEX.test(c.stepId));
+
+    if (allChildrenAreAttempts) {
+      const attemptCount = node.children.length;
+      const builtAttempts: StepExecutionTreeItem[] = [];
+
+      for (let attemptIdx = 0; attemptIdx < node.children.length; attemptIdx++) {
+        const attemptNode = node.children[attemptIdx];
+        const match = attemptNode.stepId.match(ATTEMPT_ID_REGEX);
+        const attemptNumber = match ? parseInt(match[1], 10) : attemptIdx + 1;
+        const isFinalAttempt = attemptIdx === attemptCount - 1;
+        const leaves = attemptNode.children;
+
+        if (leaves.length === 1) {
+          const leaf = leaves[0];
+          builtAttempts.push({
+            ...leaf,
+            attemptNumber,
+            isFinalAttempt,
+            isRetryAttempt: true,
+            retryAttemptCount: attemptCount,
+            children: transformRetryAttempts(leaf.children),
+          });
+        } else {
+          builtAttempts.push({
+            stepId: attemptNode.stepId,
+            stepType: '__retry-attempt',
+            executionIndex: attemptIdx,
+            stepExecutionId: leaves[0]?.stepExecutionId ?? null,
+            status: leaves[0]?.status ?? attemptNode.status,
+            attemptNumber,
+            isFinalAttempt,
+            isRetryAttempt: true,
+            retryAttemptCount: attemptCount,
+            children: transformRetryAttempts(leaves),
+          });
+        }
+      }
+
+      // Configured retry that never retried: render as a plain step (no wrapper, no chrome).
+      if (attemptCount === 1) {
+        const [only] = builtAttempts;
+        return {
+          ...only,
+          attemptNumber: undefined,
+          isFinalAttempt: undefined,
+          isRetryAttempt: undefined,
+          retryAttemptCount: undefined,
+          children: only.children,
+        };
+      }
+
+      const tip = builtAttempts[builtAttempts.length - 1];
+      const firstLeaf = builtAttempts.find((a) => a.stepType && a.stepType !== '__retry-attempt');
+      const tipSucceeded = tip?.status === ExecutionStatus.COMPLETED;
+      const earlierFailed = builtAttempts
+        .slice(0, -1)
+        .some((a) => a.status != null && isDangerousStatus(a.status));
+
+      // Parent row IS the step — never the wrapper entity.
+      return {
+        stepId: firstLeaf?.stepId ?? tip?.stepId ?? node.stepId,
+        stepType: firstLeaf?.stepType ?? tip?.stepType ?? node.stepType,
+        executionIndex: firstLeaf?.executionIndex ?? node.executionIndex,
+        stepExecutionId: null,
+        status: tip?.status ?? node.status,
+        retryAttemptCount: attemptCount,
+        retryRecovered: Boolean(tipSucceeded && earlierFailed),
+        children: builtAttempts,
+      };
+    }
+
+    return { ...node, children: transformRetryAttempts(node.children) };
+  });
 }
 
 /**

@@ -7,21 +7,25 @@
 
 import { useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
+import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 import {
-  CHANGE_HISTORY_QUERY_KEY,
   changeHistoryObjectQueryKeyPrefix,
+  changeHistoryScopeQueryKeyPrefix,
 } from './change_history_list_query_key';
 
 export const useInvalidateChangeHistory = () => {
   const queryClient = useQueryClient();
+  const { scope } = useChangeHistoryConfig();
 
   return useCallback(
     async (objectId?: string): Promise<void> => {
       await queryClient.invalidateQueries({
-        queryKey: objectId ? changeHistoryObjectQueryKeyPrefix(objectId) : CHANGE_HISTORY_QUERY_KEY,
+        queryKey: objectId
+          ? changeHistoryObjectQueryKeyPrefix(objectId, scope)
+          : changeHistoryScopeQueryKeyPrefix(scope),
         refetchType: 'active',
       });
     },
-    [queryClient]
+    [queryClient, scope]
   );
 };

@@ -27,7 +27,7 @@ const TIMESTAMP_TRANSFORM_SCRIPT = `
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
     long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+    Instant now = Instant.parse(params.replay_now);
     ctx['@timestamp'] = now.minusMillis(deltaMillis).toString();
   }
 `;
@@ -36,7 +36,28 @@ export interface ReplayStats {
   total: number;
   created: number;
   skipped: number;
+  /** Snapshot-time max `@timestamp` across the replayed logs indices. */
+  maxTimestamp: string;
+  /** Wall-clock instant the snapshot max was shifted onto — the fixed `now` used by the transform. */
+  replayNow: string;
 }
+
+/**
+ * Maps a snapshot-time timestamp onto the replayed timeline using the same shift the
+ * replay pipeline applied to every log document: `replayNow - (maxTimestamp - timestamp)`.
+ */
+export const shiftSnapshotTimestamp = ({
+  timestamp,
+  maxTimestamp,
+  replayNow,
+}: {
+  timestamp: string;
+  maxTimestamp: string;
+  replayNow: string;
+}): string =>
+  new Date(
+    Date.parse(replayNow) - (Date.parse(maxTimestamp) - Date.parse(timestamp))
+  ).toISOString();
 
 interface ReplayArtifacts {
   runId: number;
@@ -82,8 +103,12 @@ const getLogsIndicesFromSnapshot = async ({
     throw new Error(`Snapshot "${snapshotName}" not found in repository "${repoName}"`);
   }
 
+  // Restrict to the `logs` data stream's own backing indices (`.ds-logs-<date>-<gen>`). The hyphen
+  // matters: `.startsWith('.ds-logs')` would also match sibling streams like `logs.ecs`
+  // (`.ds-logs.ecs-…`), which the discovery eval does not target — and restoring those extra backing
+  // indices is what trips `index_not_found` at reindex. The agent reads `FROM logs`, so only `logs`.
   const logsIndices = (snapshot.indices ?? []).filter(
-    (indexName) => indexName.startsWith('.ds-logs') || indexName === LOGS_STREAM_NAME
+    (indexName) => indexName.startsWith('.ds-logs-') || indexName === LOGS_STREAM_NAME
   );
   if (logsIndices.length === 0) {
     throw new Error(`No logs indices found in snapshot "${snapshotName}"`);
@@ -117,6 +142,11 @@ const restoreLogsIndicesToTemp = async ({
     include_global_state: false,
     rename_pattern: '(.+)',
     rename_replacement: `${tempPrefix}$1`,
+    // The snapshot's backing indices carry `index.lifecycle.*`; if restored intact, the cluster's
+    // lifecycle sweep reaps the temp index (its origination date is already past the delete age)
+    // before we can reindex from it — surfacing as `index_not_found` mid-replay on serverless.
+    // Strip lifecycle so the temp index stays inert until cleanup deletes it.
+    ignore_index_settings: ['index.lifecycle.name', 'index.lifecycle.prefer_ilm'],
   });
 
   return logsIndices.map((indexName) => `${tempPrefix}${indexName}`);
@@ -236,11 +266,13 @@ const createReplayPipeline = async ({
   esClient,
   pipelineName,
   maxTimestamp,
+  replayNow,
   chainedPipelineName,
 }: {
   esClient: Client;
   pipelineName: string;
   maxTimestamp: string;
+  replayNow: string;
   chainedPipelineName?: string;
 }): Promise<void> => {
   await esClient.ingest.putPipeline({
@@ -249,7 +281,7 @@ const createReplayPipeline = async ({
       {
         script: {
           lang: 'painless',
-          params: { max_timestamp: maxTimestamp },
+          params: { max_timestamp: maxTimestamp, replay_now: replayNow },
           source: TIMESTAMP_TRANSFORM_SCRIPT,
         },
       },
@@ -312,7 +344,7 @@ const reindexTempIndicesIntoManagedStream = async ({
   esClient: Client;
   tempIndices: string[];
   log: ToolingLog;
-}): Promise<ReplayStats> => {
+}): Promise<Omit<ReplayStats, 'maxTimestamp' | 'replayNow'>> => {
   log.debug('Reindexing into managed logs stream via default_pipeline');
   const reindexResult = await esClient.reindex(
     {
@@ -495,10 +527,12 @@ export async function replayIntoManagedStream(
       previousDefaultPipeline,
     });
 
+    const replayNow = new Date().toISOString();
     await createReplayPipeline({
       esClient,
       pipelineName: artifacts.pipelineName,
       maxTimestamp,
+      replayNow,
       chainedPipelineName,
     });
 
@@ -519,7 +553,7 @@ export async function replayIntoManagedStream(
     log.info(
       `Replay complete: ${stats.created}/${stats.total} docs indexed, ${stats.skipped} skipped`
     );
-    return stats;
+    return { ...stats, maxTimestamp, replayNow };
   } finally {
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }

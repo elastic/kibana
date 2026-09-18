@@ -69,19 +69,12 @@ describe('logWorkflowChanges', () => {
       workflows: [{ id: 'wf-1', document: makeDocument() }],
       changeHistoryService: { isInitialized: () => true },
       scopedChangeHistory,
-      workflowVersioningEnabled: true,
       action: WorkflowChangeHistoryAction.workflowUpdate,
       spaceId: 'default',
       timestamp: new Date(REFERENCE_TIMESTAMP_MS),
       logger,
       ...overrides,
     });
-
-  it('does not call logBulk when workflow versioning is disabled', async () => {
-    await logChanges({ workflowVersioningEnabled: false });
-
-    expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
-  });
 
   it('does not call logBulk when change history is not initialized', async () => {
     await logChanges({
@@ -196,6 +189,48 @@ describe('logWorkflowChanges', () => {
     expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(1);
     expect(delayMs).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('logs per-item actions via getAction with one bulk write per action type', async () => {
+    await logChanges({
+      workflows: [
+        { id: 'wf-new', document: makeDocument({ version: 1 }) },
+        { id: 'wf-existing', document: makeDocument({ version: 2 }) },
+      ],
+      getAction: (id) =>
+        id === 'wf-existing'
+          ? WorkflowChangeHistoryAction.workflowUpdate
+          : WorkflowChangeHistoryAction.workflowCreate,
+      correlationId: 'bulk-123',
+    });
+
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(2);
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'wf-new',
+          sequence: 1,
+        }),
+      ],
+      {
+        action: WorkflowChangeHistoryAction.workflowCreate,
+        spaceId: 'default',
+        correlationId: 'bulk-123',
+      }
+    );
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'wf-existing',
+          sequence: 2,
+        }),
+      ],
+      {
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId: 'default',
+        correlationId: 'bulk-123',
+      }
+    );
   });
 
   it('passes correlationId for bulk operations', async () => {

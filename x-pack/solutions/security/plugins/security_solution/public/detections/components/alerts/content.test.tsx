@@ -15,8 +15,10 @@ import { GO_TO_RULES_BUTTON_TEST_ID } from './header/header_section';
 import { FILTER_BY_ASSIGNEES_BUTTON } from '../../../common/components/filter_by_assignees_popover/test_ids';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
+import { useLicense } from '../../../common/hooks/use_license';
 
 jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../common/hooks/use_license');
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
@@ -25,6 +27,7 @@ const dataView: DataView = createStubDataView({ spec: {} });
 describe('AlertsPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
     mockUseUserPrivileges.mockReturnValue(
       getUserPrivilegesMockDefaultValue({
         rulesPrivileges: {

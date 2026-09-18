@@ -135,6 +135,10 @@ Object {
           "type": "string",
         },
         Object {
+          "const": "webhook-oauth2-password",
+          "type": "string",
+        },
+        Object {
           "const": null,
           "type": "null",
         },
@@ -1063,7 +1067,6 @@ Object {
           "type": "number",
         },
         "verificationMode": Object {
-          "default": "full",
           "enum": Array [
             "full",
             "certificate",
@@ -1173,6 +1176,10 @@ Object {
         },
         Object {
           "const": "webhook-oauth2-client-credentials",
+          "type": "string",
+        },
+        Object {
+          "const": "webhook-oauth2-password",
           "type": "string",
         },
         Object {
@@ -1492,7 +1499,37 @@ Object {
     },
     "query": Object {
       "additionalProperties": Object {
-        "type": "string",
+        "anyOf": Array [
+          Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "type": "number",
+              },
+              Object {
+                "type": "boolean",
+              },
+            ],
+          },
+          Object {
+            "items": Object {
+              "anyOf": Array [
+                Object {
+                  "type": "string",
+                },
+                Object {
+                  "type": "number",
+                },
+                Object {
+                  "type": "boolean",
+                },
+              ],
+            },
+            "type": "array",
+          },
+        ],
       },
       "propertyNames": Object {
         "type": "string",
@@ -1622,7 +1659,37 @@ Object {
     },
     "query": Object {
       "additionalProperties": Object {
-        "type": "string",
+        "anyOf": Array [
+          Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "type": "number",
+              },
+              Object {
+                "type": "boolean",
+              },
+            ],
+          },
+          Object {
+            "items": Object {
+              "anyOf": Array [
+                Object {
+                  "type": "string",
+                },
+                Object {
+                  "type": "number",
+                },
+                Object {
+                  "type": "boolean",
+                },
+              ],
+            },
+            "type": "array",
+          },
+        ],
       },
       "propertyNames": Object {
         "type": "string",
@@ -4883,6 +4950,10 @@ Object {
         },
         Object {
           "const": "webhook-oauth2-client-credentials",
+          "type": "string",
+        },
+        Object {
+          "const": "webhook-oauth2-password",
           "type": "string",
         },
         Object {

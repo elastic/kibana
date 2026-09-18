@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
+import {
+  SKILL_ATTACHMENT_TYPE,
+  skillAttachmentDataSchema,
+  type SkillAttachmentData,
+} from '../../common/attachments';
 
 /**
  * Server-side definition for the `skill` attachment type.
@@ -30,7 +33,7 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
 > => ({
   id: SKILL_ATTACHMENT_TYPE,
   validate: (input) => {
-    const parsed = skillCreateRequestSchema.safeParse(input);
+    const parsed = skillAttachmentDataSchema.safeParse(input);
     if (parsed.success) {
       return { valid: true, data: parsed.data };
     }
@@ -44,27 +47,29 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
   format: (attachment) => {
     return {
       getRepresentation: () => {
-        const { data } = attachment;
-        const referencedSummary = (data.referenced_content ?? [])
+        const {
+          data: { skill },
+        } = attachment;
+        const referencedSummary = (skill.referenced_content ?? [])
           .map((item) => `- ${item.relativePath}/${item.name}.md`)
           .join('\n');
         const value = [
-          `Skill (id: ${data.id})`,
-          `Name: ${data.name}`,
-          `Description: ${data.description}`,
-          `Tools: ${data.tool_ids.join(', ') || '(none)'}`,
+          `Skill (id: ${skill.id})`,
+          `Name: ${skill.name}`,
+          `Description: ${skill.description}`,
+          `Tools: ${skill.tool_ids.join(', ') || '(none)'}`,
           referencedSummary
             ? `Referenced files:\n${referencedSummary}`
             : 'Referenced files: (none)',
           '',
           'SKILL.md content:',
-          data.content,
+          skill.content,
         ].join('\n');
         return { type: 'text', value };
       },
     };
   },
   getAgentDescription: () => {
-    return `A \`skill\` attachment is a versioned, by-value snapshot of a candidate Agent Builder skill. The user reviews it as an inline card with a "Create" button. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. After patching, re-render the same attachment id so the card refreshes in place. Do not invent attachment ids — only render ids returned by propose_skill or patch_skill.`;
+    return `A \`skill\` attachment is a versioned draft of an Agent Builder skill. When \`mode\` is "create" the card shows a "Create" button (POST). When \`mode\` is "edit" the card shows an "Edit in Management" link if the skill has no unsaved changes, or a "Save changes" button (PUT) once edits are present. \`skill.id\` always identifies the persisted skill. In both cases \`skill\` holds the full content including \`id\`. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. Emit at most one render per round — if you call \`patch_skill\` after loading or proposing the skill, hold the render until after the final patch so the user sees a single up-to-date card. Do not invent attachment ids — only render ids returned by propose_skill, load_skill_for_editing, or patch_skill.`;
   },
 });

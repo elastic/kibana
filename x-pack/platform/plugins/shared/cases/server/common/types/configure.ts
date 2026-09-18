@@ -35,6 +35,13 @@ export interface ConfigurationPersistedAttributes {
   observableTypes?: PersistedObservableTypesConfiguration;
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
+  /**
+   * Set once the legacy custom-field values on this space's existing cases have been backfilled
+   * into each case's `extended_fields`. Tracked separately from `legacyCustomFieldsMigrated` so a
+   * space already marked by an earlier release still gets its cases backfilled. Stored in `_source`
+   * only (the migration task never filters/sorts by it), same as the sibling flags.
+   */
+  legacyCasesMigrated?: boolean;
 }
 
 type PersistedObservableTypesConfiguration = Array<{

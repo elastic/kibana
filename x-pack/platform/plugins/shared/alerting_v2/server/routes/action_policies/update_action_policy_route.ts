@@ -8,23 +8,25 @@
 import {
   actionPolicyResponseSchema,
   errorResponseSchema,
-  ID_MAX_LENGTH,
   updateActionPolicyBodySchema,
   type UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { updateActionPolicyOasExamples } from './update_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-
-const updateActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-});
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { actionPolicyIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class UpdateActionPolicyRoute extends BaseAlertingRoute {
@@ -36,14 +38,16 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Partially update an action policy.',
     description:
       'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
+    oasOperationObject: updateActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {
       body: updateActionPolicyBodySchema,
-      params: updateActionPolicyParamsSchema,
+      params: actionPolicyIdParamsSchema,
     },
     response: {
       200: {
@@ -52,15 +56,15 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request parameters or body.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates an action policy with the given ID does not exist.',
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description: 'Indicates the action policy was concurrently updated by another caller.',
+        description: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };
@@ -71,7 +75,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
-      z.infer<typeof updateActionPolicyParamsSchema>,
+      z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
       UpdateActionPolicyBody
     >,

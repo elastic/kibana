@@ -8,10 +8,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_HITL_GRAPH_NODE_ID_LENGTH } from '../../../common/hitl';
 import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
   KibanaStepSchema,
+  WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -19,11 +21,19 @@ import {
   WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
-export const GraphNodeSchema = z.object({
+export const BaseGraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   stepId: z.string(),
   stepType: z.string(),
+});
+
+export const SyntheticGraphNodeSchema = BaseGraphNodeSchema.extend({
+  isSynthetic: z.boolean(),
+});
+export type SyntheticGraphNode = z.infer<typeof SyntheticGraphNodeSchema>;
+
+export const GraphNodeSchema = BaseGraphNodeSchema.extend({
   templateDependencies: z.array(z.unknown()).optional(),
 });
 
@@ -47,6 +57,13 @@ export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WaitForInputStepSchema,
 });
 export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
+
+export const WaitForApprovalGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string().max(MAX_HITL_GRAPH_NODE_ID_LENGTH),
+  type: z.literal('waitForApproval'),
+  configuration: WaitForApprovalStepSchema,
+});
+export type WaitForApprovalGraphNode = z.infer<typeof WaitForApprovalGraphNodeSchema>;
 
 export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

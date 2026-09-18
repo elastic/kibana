@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -15,8 +16,11 @@ import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_p
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
+import type { ServerlessInfo } from '../../types';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../common/constants/cps';
 
 const SIZE = 1000;
+const ML_NOTIFICATIONS_INDEX_PREFIX = '.ml-notifications-';
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
 
 type LevelName = keyof typeof LEVEL;
@@ -60,7 +64,8 @@ export type JobAuditMessagesService = ReturnType<typeof jobAuditMessagesProvider
 
 export function jobAuditMessagesProvider(
   { asInternalUser }: IScopedClusterClient,
-  mlClient: MlClient
+  mlClient: MlClient,
+  serverless: ServerlessInfo
 ) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
@@ -157,6 +162,9 @@ export function jobAuditMessagesProvider(
         size: SIZE,
         sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
         query,
+        ...(serverless.isServerless && serverless.cpsEnabled
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -188,6 +196,9 @@ export function jobAuditMessagesProvider(
    * @param jobIds
    */
   async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
+    // check that the jobs exist and the user has permission to access them
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
     const maxBuckets = 10000;
@@ -262,6 +273,9 @@ export function jobAuditMessagesProvider(
             },
           },
         },
+        ...(serverless.isServerless && serverless.cpsEnabled
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -363,6 +377,15 @@ export function jobAuditMessagesProvider(
     jobId: string,
     notificationIndices: string[]
   ): Promise<{ success: boolean; last_cleared: number }> {
+    notificationIndices.forEach((index) => {
+      if (!index.startsWith(ML_NOTIFICATIONS_INDEX_PREFIX) || index.includes(',')) {
+        throw Boom.badRequest(`Invalid notification index: ${index}`);
+      }
+    });
+
+    // check that the job exists and the user has permission to access it
+    await mlClient.getJobs({ job_id: jobId });
+
     const newClearedMessage = {
       job_id: jobId,
       job_type: 'anomaly_detection',
@@ -434,6 +457,9 @@ export function jobAuditMessagesProvider(
     jobIds: string[],
     earliestMs?: number
   ): Promise<JobsErrorsResponse> {
+    // check that the jobs exist and the user has permission to access them
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     const body = await asInternalUser.search(
       {
         index: ML_NOTIFICATION_INDEX_PATTERN,
@@ -472,6 +498,9 @@ export function jobAuditMessagesProvider(
             },
           },
         },
+        ...(serverless.isServerless && serverless.cpsEnabled
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
+          : {}),
       },
       { maxRetries: 0 }
     );

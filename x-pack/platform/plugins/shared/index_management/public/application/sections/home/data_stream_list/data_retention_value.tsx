@@ -13,7 +13,11 @@ import type { DataStream } from '../../../../../common/types';
 import { ILM_PAGES_POLICY_EDIT } from '../../../constants';
 import { useAppContext } from '../../../app_context';
 import { useIlmLocator } from '../../../services/use_ilm_locator';
-import { getLifecycleValue, isNextGenIlm } from '../../../lib/data_streams';
+import {
+  getLifecycleValue,
+  isNextGenIlm,
+  resolveLifecycleForSummary,
+} from '../../../lib/data_streams';
 
 export const DataRetentionValue = ({
   dataStream,
@@ -39,8 +43,16 @@ export const DataRetentionValue = ({
         {ilmPolicyLink ? (
           <EuiLink
             data-test-subj={valueTestSubj}
-            data-href={ilmPolicyLink}
-            onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
+            href={ilmPolicyLink}
+            onClick={(event: React.MouseEvent) => {
+              // Let the browser handle modified clicks (open in new tab, etc.) natively; only
+              // intercept plain left clicks for in-app (SPA) navigation.
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+                return;
+              }
+              event.preventDefault();
+              core.application.navigateToUrl(ilmPolicyLink);
+            }}
             css={{
               whiteSpace: 'nowrap' as const,
               textOverflow: 'ellipsis',
@@ -67,5 +79,12 @@ export const DataRetentionValue = ({
     );
   }
 
-  return <>{getLifecycleValue(dataStream.lifecycle, infiniteAsIcon)}</>;
+  return (
+    <>
+      {getLifecycleValue(
+        resolveLifecycleForSummary(dataStream.lifecycle, { hasDataStream: true }),
+        infiniteAsIcon
+      )}
+    </>
+  );
 };

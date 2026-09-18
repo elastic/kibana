@@ -7,17 +7,13 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { PrevalenceDetailsRow } from './utils/get_columns';
 import { PrevalenceDetailsView } from './components/prevalence_details_view';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.prevalence.title', {
-  defaultMessage: 'Prevalence',
-});
+import { PREVALENCE_TITLE } from '../../../shared/constants/flyout_titles';
 
 export interface PrevalenceDetailsProps {
   /**
@@ -57,7 +53,7 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+        <DocumentToolsFlyoutHeader title={PREVALENCE_TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <PrevalenceDetailsView
