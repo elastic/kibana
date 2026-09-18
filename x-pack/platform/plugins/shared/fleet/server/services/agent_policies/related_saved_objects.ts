@@ -83,11 +83,16 @@ export async function fetchRelatedSavedObjects(
   // defaulting behavior that would select an OTLP output as the preferred data output, and missing monitoring output falling back to it.
   // OTLP outputs are not valid for agent monitoring.
   if (monitoringOutput && isOtlpOutput(monitoringOutput)) {
-    // defaultDataOutput cannot be OTLP — Fleet setup always ensures a default ES output.
-    monitoringOutput =
+    const fallbackOutput =
       outputs.find((o) => o.id === defaultDataOutputId) ??
-      (await outputService.get(defaultDataOutputId).catch(() => null)) ??
-      undefined;
+      (await outputService.get(defaultDataOutputId).catch(() => undefined));
+
+    // The full policy derives both `outputs` and `output_permissions` from this array, so a
+    // fallback resolved outside the bulk fetch has to join it or the monitoring reference dangles.
+    if (fallbackOutput && !outputs.some((o) => o.id === fallbackOutput.id)) {
+      outputs.push(fallbackOutput);
+    }
+    monitoringOutput = fallbackOutput;
   }
 
   if (!monitoringOutput) {

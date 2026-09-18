@@ -139,7 +139,9 @@ describe('fetchRelatedSavedObjects', () => {
     });
 
     it('fetches defaultDataOutputId individually when OTLP monitoring output is resolved but default ES was not bulk-fetched', async () => {
-      mockedOutputService.bulkGet.mockResolvedValue([otlpOutput]);
+      // Use mockImplementation so each call gets a fresh array — the fix pushes the fallback into
+      // `outputs`, and a shared array from mockResolvedValue would be mutated in place.
+      mockedOutputService.bulkGet.mockImplementation(async () => [otlpOutput]);
       mockedOutputService.get.mockResolvedValue(esOutput);
 
       const result = await fetchRelatedSavedObjects(soClientMock, {
@@ -150,6 +152,10 @@ describe('fetchRelatedSavedObjects', () => {
 
       expect(mockedOutputService.get).toHaveBeenCalledWith('default-es');
       expect(result.monitoringOutput.type).toBe('elasticsearch');
+      // The fallback must be present in outputs so that the full policy includes it in
+      // `agent.monitoring.use_output` and `output_permissions` — otherwise the monitoring
+      // reference would dangle and fleet-server would reject the policy.
+      expect(result.outputs.some((o) => o.id === 'default-es')).toBe(true);
     });
 
     it('throws OutputNotFoundError when the OTLP monitoring override cannot resolve a fallback output', async () => {

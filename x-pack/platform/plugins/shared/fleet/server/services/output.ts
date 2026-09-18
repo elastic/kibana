@@ -74,7 +74,6 @@ import {
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
-  MANAGED_OTLP_EXPORTER_DEFAULTS,
 } from '../../common/constants';
 
 import type { ValueOf } from '../../common/types';
@@ -113,7 +112,7 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
-import { isManagedOtlpEndpoint } from './utils/managed_otlp';
+import { applyManagedOtlpDefaults } from './utils/managed_otlp';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -844,18 +843,7 @@ class OutputService {
     }
 
     if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
-      if (
-        isManagedOtlpEndpoint(output.otlp_exporter.endpoint) &&
-        output.otlp_exporter.sending_queue !== null
-      ) {
-        data.otlp_exporter = {
-          ...data.otlp_exporter,
-          sending_queue: {
-            ...MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
-            ...output.otlp_exporter.sending_queue,
-          },
-        };
-      }
+      data.otlp_exporter = applyManagedOtlpDefaults(data.otlp_exporter);
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1171,14 +1159,12 @@ class OutputService {
     } as Nullable<Partial<OutputSOAttributes>> & {
       type: ValueOf<OutputType>;
     };
-    this._validateCanBeDefault(
-      {
-        type: mergedType,
-        is_default: mergedIsDefault,
-        is_default_monitoring: mergedIsDefaultMonitoring,
-      },
-      isPreconfigured
-    );
+    // Pre-populate is_default / is_default_monitoring in updateData with the merged values
+    // when they are truthy so _validateCanBeDefault can detect and sanitize them in-place.
+    // Falsy merged values need no correction and would unnecessarily pollute the SO update.
+    if (mergedIsDefault) updateData.is_default = mergedIsDefault;
+    if (mergedIsDefaultMonitoring) updateData.is_default_monitoring = mergedIsDefaultMonitoring;
+    this._validateCanBeDefault(updateData, isPreconfigured);
 
     if (outputTypeSupportPresets(updateData)) {
       if (
@@ -1414,6 +1400,10 @@ class OutputService {
       }
     }
 
+    if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
+      updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
+    }
+
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
       // ssl is omitted from updateSoData so must be read from the incoming domain payload
       const ssl = typedFullUpdateData?.ssl;
@@ -1440,8 +1430,8 @@ class OutputService {
       }
     }
 
-    // ensure only default output exists
-    if (data.is_default) {
+    // ensure only default output exists; use updateData (not data) so sanitized OTLP flags are seen
+    if (updateData.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== id) {
         await this._updateDefaultOutput(
           defaultDataOutputId,
@@ -1450,7 +1440,7 @@ class OutputService {
         );
       }
     }
-    if (data.is_default_monitoring) {
+    if (updateData.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
@@ -1676,22 +1666,29 @@ class OutputService {
   }
 
   private _validateCanBeDefault(
-    output: { type: ValueOf<OutputType>; is_default: boolean; is_default_monitoring: boolean },
+    output: {
+      type: ValueOf<OutputType>;
+      is_default?: boolean | null;
+      is_default_monitoring?: boolean | null;
+    },
     isPreconfigured: boolean
   ): void {
-    try {
-      if (output.type === outputType.Otlp && output.is_default_monitoring) {
-        throw new OutputInvalidError('An OTLP output cannot be the default monitoring output.');
+    if (output.type !== outputType.Otlp) return;
+
+    const invalidDefaults = [
+      ['is_default_monitoring', 'An OTLP output cannot be the default monitoring output.'],
+      ['is_default', 'An OTLP output cannot be the default data output.'],
+    ] as const;
+
+    for (const [flag, message] of invalidDefaults) {
+      if (!output[flag]) continue;
+      if (!isPreconfigured) {
+        throw new OutputInvalidError(message);
       }
-      if (output.type === outputType.Otlp && output.is_default) {
-        throw new OutputInvalidError('An OTLP output cannot be the default data output.');
-      }
-    } catch (e) {
-      if (isPreconfigured && e instanceof OutputInvalidError) {
-        appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);
-      } else {
-        throw e;
-      }
+      // Preconfigured outputs must not abort Fleet setup, so clear the invalid flag and leave the
+      // existing valid default in place rather than persisting a misconfigured output as default.
+      appContextService.getLogger().warn(`Preconfigured output failed validation: ${message}`);
+      output[flag] = false;
     }
   }
 
