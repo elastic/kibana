@@ -36,7 +36,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.greynoise.metadata.description', {
       defaultMessage: 'Internet scanning noise detection and classification',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

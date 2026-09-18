@@ -49,7 +49,7 @@ describe('Misp', () => {
   it('has expected metadata and auth', () => {
     expect(Misp.metadata.id).toBe('.misp');
     expect(Misp.metadata.displayName).toBe('MISP');
-    expect(Misp.metadata.minimumLicense).toBe('gold');
+    expect(Misp.metadata.minimumLicense).toBe('enterprise');
     expect(Misp.metadata.isTechnicalPreview).toBe(true);
     expect(Misp.metadata.supportedFeatureIds).toEqual(['workflows', 'agentBuilder']);
     expect(Misp.test?.enabled).toBe(true);

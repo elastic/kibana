@@ -40,6 +40,7 @@ describe('AwsXRay', () => {
     it('should have correct id, display name, and auth type', () => {
       expect(AwsXRay.metadata.id).toBe('.aws_x_ray');
       expect(AwsXRay.metadata.displayName).toBe('AWS X-Ray');
+      expect(AwsXRay.metadata.minimumLicense).toBe('enterprise');
       expect(AwsXRay.auth?.types).toEqual(['aws_credentials']);
     });
 

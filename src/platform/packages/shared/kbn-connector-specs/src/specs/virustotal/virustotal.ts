@@ -149,7 +149,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.virustotal.metadata.description', {
       defaultMessage: 'File scanning, URL and domain analysis, and threat intelligence lookups',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

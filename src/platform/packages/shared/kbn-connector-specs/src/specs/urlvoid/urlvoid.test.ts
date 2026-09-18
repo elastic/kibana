@@ -28,6 +28,10 @@ describe('URLVoidConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(URLVoidConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('scanDomain action', () => {
     it('should scan domain and return reputation details', async () => {
       const mockResponse = {

@@ -51,9 +51,11 @@ describe('Slack', () => {
   it('should have correct metadata', () => {
     expect(Slack.metadata.id).toBe('.slack2');
     expect(Slack.metadata.displayName).toBe('Slack (v2)');
-    expect(Slack.metadata.minimumLicense).toBe('enterprise');
+    expect(Slack.metadata.minimumLicense).toBe('gold');
+    expect(Slack.metadata.supportedFeatureIds).toContain('alerting');
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
     expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
+    expect(Slack.alerting).toEqual({ defaultAction: 'sendMessage', messageField: 'text' });
   });
 
   it('should support expected auth types', () => {

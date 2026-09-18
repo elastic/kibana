@@ -34,6 +34,10 @@ describe('VirusTotalConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(VirusTotalConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('scanFileHash action', () => {
     it('should scan file hash and return analysis results', async () => {
       const mockResponse = {

@@ -257,6 +257,34 @@ describe('test_connector_form', () => {
     expect(screen.getByTestId('executeActionButton')).toBeInTheDocument();
   });
 
+  it('does not disable execute when action params are hidden even if validateParams returns errors', async () => {
+    const actionTypeWithErrors = {
+      ...actionType,
+      validateParams: (): Promise<GenericValidationResult<unknown>> =>
+        Promise.resolve({ errors: { subAction: ['Select a valid action.'] } }),
+    };
+    const connector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeModel={actionTypeWithErrors}
+        hideActionParamsStep={true}
+      />
+    );
+
+    expect(screen.getByTestId('executeActionButton')).toBeEnabled();
+  });
+
   it('does not render the code block if there is no execution result', async () => {
     const connector = {
       actionTypeId: actionType.id,

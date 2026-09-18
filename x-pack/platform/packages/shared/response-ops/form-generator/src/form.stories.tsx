@@ -128,6 +128,12 @@ export const NestedObjectExample: StoryObj<StoryArgs> = {
   },
 };
 
+export const BooleanFieldExample: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return <FormWrapper schema={booleanFieldSchema} onSubmit={submit} disabled={args.disabled} />;
+  },
+};
+
 const webhookConnectorFormSchema = z.object({
   config: z.object({
     method: z
@@ -308,4 +314,12 @@ const NestedObjectSchema = z.object({
       }),
     }),
   }),
+});
+
+const booleanFieldSchema = z.object({
+  unfurlLinks: z.boolean().optional().meta({
+    label: 'Unfurl links',
+    helpText: 'Whether to enable unfurling of primarily text-based content',
+  }),
+  unfurlMedia: z.boolean().optional(),
 });

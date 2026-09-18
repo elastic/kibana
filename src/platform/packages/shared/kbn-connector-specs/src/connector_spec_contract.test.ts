@@ -10,6 +10,7 @@
 import * as authTypeSpecs from './all_auth_types';
 import * as connectorsSpecs from './all_specs';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
+import { TEST_CONNECTOR_SUB_ACTION } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from './event_type_id';
@@ -21,6 +22,18 @@ const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[]
 
 const getAuthTypeId = (authType: string | AuthTypeDef): string =>
   typeof authType === 'string' ? authType : authType.type;
+
+const getActionInputShapeKeys = (input: unknown): string[] => {
+  if (input == null || typeof input !== 'object') {
+    return [];
+  }
+  const schema = input as { shape?: unknown; def?: { shape?: unknown } };
+  const shape = schema.shape ?? schema.def?.shape;
+  if (shape == null || typeof shape !== 'object') {
+    return [];
+  }
+  return Object.keys(shape);
+};
 
 describe('connector spec contracts', () => {
   it('uses unique connector IDs', () => {
@@ -129,5 +142,28 @@ describe('connector spec contracts', () => {
     }
 
     expect(duplicates).toEqual([]);
+  });
+
+  it.each(allSpecs)('%s has a valid alerting hint', (_exportName, spec) => {
+    const supportsAlerting = spec.metadata.supportedFeatureIds.includes('alerting');
+
+    if (supportsAlerting) {
+      expect(spec.alerting).toBeDefined();
+    }
+
+    if (spec.alerting === undefined) {
+      return;
+    }
+
+    const { defaultAction, messageField } = spec.alerting;
+    expect(defaultAction in spec.actions).toBe(true);
+    expect(defaultAction).not.toBe(TEST_CONNECTOR_SUB_ACTION);
+
+    if (messageField === undefined) {
+      return;
+    }
+
+    const inputShapeKeys = getActionInputShapeKeys(spec.actions[defaultAction].input);
+    expect(inputShapeKeys).toContain(messageField);
   });
 });

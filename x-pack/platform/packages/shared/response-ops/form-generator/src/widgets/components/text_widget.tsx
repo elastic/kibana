@@ -5,26 +5,53 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { z } from '@kbn/zod/v4';
 import { TextField as FormTextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { BaseWidgetProps } from '../types';
+import { FormGeneratorFieldContext } from '../../field_context';
 
 type TextWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldTextProps>;
 
-export const TextWidget: React.FC<TextWidgetProps> = ({
-  path,
-  schema,
-  fieldProps,
-  fieldConfig,
-  formConfig,
+const TextFieldWithLabelAppend = ({
+  field,
+  labelAppend,
+  ...rest
+}: {
+  field: FieldHook;
+  labelAppend?: React.ReactNode;
+  euiFieldProps?: EuiFieldTextProps;
+  [key: string]: unknown;
 }) => {
+  const { renderLabelAppend } = useContext(FormGeneratorFieldContext);
+  const contextAppend = renderLabelAppend?.({
+    path: field.path,
+    currentValue: field.value,
+    setValue: (value: string) => field.setValue(value),
+  });
+
+  return (
+    <FormTextField
+      field={field}
+      {...rest}
+      labelAppend={
+        <>
+          {labelAppend}
+          {contextAppend}
+        </>
+      }
+    />
+  );
+};
+
+export const TextWidget: React.FC<TextWidgetProps> = ({ path, fieldProps, fieldConfig }) => {
   return (
     <UseField
       path={path}
-      component={FormTextField}
+      component={TextFieldWithLabelAppend}
       config={fieldConfig}
       componentProps={fieldProps}
     />

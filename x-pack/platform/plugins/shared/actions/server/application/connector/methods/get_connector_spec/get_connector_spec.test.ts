@@ -44,8 +44,10 @@ const configurationUtilities = {
   isEarsExperimentalEnabled: () => false,
 } as unknown as ActionsConfigurationUtilities;
 
+const logger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn(), error: jest.fn() };
+
 function createContext(): ActionsClientContext {
-  return { authorization, auditLogger } as unknown as ActionsClientContext;
+  return { authorization, auditLogger, logger } as unknown as ActionsClientContext;
 }
 
 describe('getConnectorSpecAsJsonSchema', () => {
@@ -115,6 +117,27 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result.metadata).toHaveProperty('displayName');
     expect(result.metadata).toHaveProperty('supportedFeatureIds');
     expect(result).toHaveProperty('schema');
+    expect(result).toHaveProperty('actions');
+  });
+
+  it('returns Slack sendMessage action input and alerting hint, omitting _test', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.slack2',
+      configurationUtilities,
+    });
+
+    expect(result.actions.sendMessage).toEqual(
+      expect.objectContaining({
+        scope: 'write',
+        input: expect.objectContaining({ type: 'object' }),
+      })
+    );
+    expect(result.actions._test).toBeUndefined();
+    expect(result.alerting).toEqual({
+      defaultAction: 'sendMessage',
+      messageField: 'text',
+    });
   });
 
   it('returns isTestable true when the spec opts in to testing', async () => {
