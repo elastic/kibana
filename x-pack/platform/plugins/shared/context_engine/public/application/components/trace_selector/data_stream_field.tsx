@@ -9,7 +9,6 @@ import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useEffect, useMemo, useState } from 'react';
-import { MAX_DATA_STREAM_SEARCH_RESULTS } from '../../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSearchDataStreams } from '../../hooks/use_search_data_streams';
 import type { EditableAiIndexTrace } from './types';
@@ -71,18 +70,10 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
       label={i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.label', {
         defaultMessage: 'Data stream',
       })}
-      helpText={
-        hasMore
-          ? i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.hasMoreHelpText', {
-              defaultMessage:
-                'Showing the first {count} matches. Refine your search to narrow the results.',
-              values: { count: MAX_DATA_STREAM_SEARCH_RESULTS },
-            })
-          : i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.helpText', {
-              defaultMessage:
-                'Data streams carrying OTel GenAI spans from external harnesses such as LangChain, LlamaIndex, or the OpenAI SDK.',
-            })
-      }
+      helpText={i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.helpText', {
+        defaultMessage:
+          'Data streams carrying OTel GenAI spans from external harnesses such as LangChain, LlamaIndex, or the OpenAI SDK.',
+      })}
       fullWidth
     >
       <EuiComboBox
