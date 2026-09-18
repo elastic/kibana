@@ -35,7 +35,9 @@ interface DevSseEmitterProps {
 
 const MESSAGE_ID = 'dev-message';
 const TOOL_CALL_ID = 'dev-tool-call';
-const DEV_EXECUTION_ID = 'dev-execution';
+// Must parse as a round-derived execution id, so the fold can derive step and terminal ids.
+const DEV_ROUND_ID = 'dev-round';
+const DEV_EXECUTION_ID = `${DEV_ROUND_ID}::execution`;
 
 type Phase = 'Init' | 'Reasoning' | 'Tool' | 'Message' | 'Seal';
 

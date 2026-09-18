@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useIsMutating } from '@kbn/react-query';
 import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
-import type { TimelineItem } from '../components/conversations/timeline/to_timeline_items';
+import type { TimelineItem } from '../components/conversations/timeline/types';
 import { createUserMessageEvent } from '../components/conversations/timeline/items/user_message_event.factory';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';

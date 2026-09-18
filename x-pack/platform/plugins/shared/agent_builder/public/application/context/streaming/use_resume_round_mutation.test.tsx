@@ -33,7 +33,16 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
-const vars = { prompts: {}, conversationId, agentId: 'agent-1' };
+const pausedExecutionId = 'round-1::execution';
+/** The id the server gives the answer that resumes `round-1::execution`. */
+const savedAnswerId = 'round-1::prompt_response::1';
+const vars = {
+  prompts: {},
+  promptRequestedEventId: 'round-1::execution_terminated',
+  pausedExecutionId,
+  conversationId,
+  agentId: 'agent-1',
+};
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
 const setup = () => {
@@ -64,7 +73,7 @@ describe('useResumeRoundMutation', () => {
     jest.clearAllMocks();
   });
 
-  it('releases the completed draft once the refetch contains the saved execution', async () => {
+  it('releases the live events once the refetch contains the saved execution', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [terminated] });
 
@@ -75,7 +84,7 @@ describe('useResumeRoundMutation', () => {
       source.complete();
     });
 
-    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toBeNull());
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
   });
 
@@ -89,5 +98,38 @@ describe('useResumeRoundMutation', () => {
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+  });
+
+  it('shows the answer right away, under the id the saved copy will have', async () => {
+    const { source, result, conversationStreamService } = setup();
+    mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });
+
+    act(() => result.current.mutate({ ...vars, prompts: { 'prompt-1': { allow: true } } }));
+
+    await waitFor(() => {
+      const answer = conversationStreamService
+        .getSnapshot(conversationId)
+        .find((event) => event.id === savedAnswerId);
+      expect(answer).toMatchObject({
+        type: 'prompt_response',
+        data: {
+          prompt_requested_event_id: vars.promptRequestedEventId,
+          responses: { 'prompt-1': { allow: true } },
+        },
+      });
+    });
+
+    act(() => source.complete());
+  });
+
+  it('takes the answer back when the resume never started', async () => {
+    const { source, result, conversationStreamService } = setup();
+    mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    act(() => source.error(new Error('boom')));
+
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
   });
 });

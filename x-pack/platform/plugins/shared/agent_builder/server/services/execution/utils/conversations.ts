@@ -28,6 +28,8 @@ import {
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
   TimelineEventType,
+  executionTerminatedEventId,
+  resumeExecutionId,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import {
@@ -35,9 +37,7 @@ import {
   userMessageEvent,
   promptResponseEvent,
   resumeExecutionToEvents,
-  executionTerminatedEventId,
   nextResumeIndex,
-  resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 

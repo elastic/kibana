@@ -260,23 +260,6 @@ describe('useConversation polling', () => {
     queryClient.clear();
   });
 
-  it('does not poll while the last round is awaiting a prompt', async () => {
-    const { queryClient, Wrapper } = createWrapper();
-    queryClient.setQueryData(queryKeys.conversations.byId(conversationId), {
-      id: conversationId,
-      access_control: publicAcl,
-      rounds: [{ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt }],
-    } as Conversation);
-
-    renderHook(() => useConversation(), { wrapper: Wrapper });
-
-    await advance(10_000);
-
-    expect(mockGet).not.toHaveBeenCalled();
-
-    queryClient.clear();
-  });
-
   it('keeps the conversation reference stable when a poll returns identical data', async () => {
     mockGet.mockImplementation(async () => createFetchedConversation(publicAcl));
     const { queryClient, Wrapper } = createWrapper();

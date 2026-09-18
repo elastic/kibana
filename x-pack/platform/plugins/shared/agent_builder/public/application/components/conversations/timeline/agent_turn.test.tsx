@@ -11,13 +11,27 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import {
+  createConfirmationPrompt,
+  createExecutionPausedEvent,
+} from './items/execution_paused_event.factory';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { TimelineItem } from './to_timeline_items';
+import type { TimelineItem } from './types';
 import { Timeline } from './timeline';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 
 jest.mock('../../../context/conversation/use_conversation_id', () => ({
   useConversationId: () => 'conv-1',
 }));
+jest.mock('../../../hooks/use_conversation_stream', () => ({
+  useConversationStream: jest.fn(),
+}));
+
+const mockResumeRound = jest.fn();
+jest.mocked(useConversationStream).mockReturnValue({
+  resumeRound: mockResumeRound,
+  isResuming: false,
+} as unknown as ReturnType<typeof useConversationStream>);
 jest.mock('../conversation_rounds/round_response/response_message', () => ({
   ResponseMessage: ({
     isLoading,
@@ -88,6 +102,64 @@ const renderTimeline = (item: TimelineItem, conversationAttachments?: VersionedA
       </EuiProvider>
     </I18nProvider>
   );
+
+const pauseEventId = 'round-1::execution_terminated';
+const pausedTerminal = createExecutionPausedEvent({
+  id: pauseEventId,
+  execution_id: executionId,
+});
+const awaitingPrompt: TimelineItem = {
+  ...running,
+  status: 'awaiting_prompt',
+  response: undefined,
+  terminal: pausedTerminal,
+  pendingPrompts: [createConfirmationPrompt()],
+};
+
+describe('AgentTurn awaiting a prompt', () => {
+  beforeEach(() => {
+    mockResumeRound.mockClear();
+  });
+
+  it('asks the human the prompt the paused run is waiting on', () => {
+    renderTimeline(awaitingPrompt);
+
+    expect(screen.getByTestId('agentBuilderConfirmationPrompt')).toBeInTheDocument();
+    expect(screen.queryByTestId('response')).not.toBeInTheDocument();
+  });
+
+  it('resumes the paused run when the human approves', () => {
+    renderTimeline(awaitingPrompt);
+
+    fireEvent.click(screen.getByTestId('agentBuilderConfirmationPromptConfirmButton'));
+
+    expect(mockResumeRound).toHaveBeenCalledWith({
+      prompts: { 'prompt-1': { allow: true } },
+      promptRequestedEventId: pauseEventId,
+      pausedExecutionId: executionId,
+    });
+  });
+
+  it('resumes with a refusal when the human cancels', () => {
+    renderTimeline(awaitingPrompt);
+
+    fireEvent.click(screen.getByTestId('agentBuilderConfirmationPromptCancelButton'));
+
+    expect(mockResumeRound).toHaveBeenCalledWith({
+      prompts: { 'prompt-1': { allow: false } },
+      promptRequestedEventId: pauseEventId,
+      pausedExecutionId: executionId,
+    });
+  });
+
+  it('shows the steps of an answered pause, which has no response of its own', () => {
+    renderTimeline({ ...awaitingPrompt, status: 'completed', pendingPrompts: undefined });
+
+    expect(screen.queryByTestId('agentBuilderConfirmationPrompt')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('response')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderThinkingPanel')).toBeInTheDocument();
+  });
+});
 
 describe('AgentTurn', () => {
   it('gives the response what it needs to render attachments', () => {

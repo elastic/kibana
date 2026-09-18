@@ -10,16 +10,8 @@ import {
   ConversationRoundStepType,
   EventActorType,
 } from '@kbn/agent-builder-common';
-import {
-  groupTimelineEvents,
-  toTimelineItems,
-  buildSavedItems,
-  buildLiveItems,
-  assembleTimelineItems,
-  activeExecutionToItem,
-  findSavedReplacement,
-  ACTIVE_EXECUTION_ITEM_KEY,
-} from './to_timeline_items';
+import { groupTimelineEvents, buildItems } from './to_timeline_items';
+import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
@@ -27,10 +19,15 @@ import { createExecutionFailedEvent } from './items/execution_failed_event.facto
 import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
-import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
-import type { TimelineEvent } from '@kbn/agent-builder-common';
+import {
+  createConfirmationPrompt,
+  createExecutionPausedEvent,
+} from './items/execution_paused_event.factory';
+import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../services/events';
+import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 
-const makeEventsById = (events: TimelineEvent[]) => new Map(events.map((e) => [e.id, e]));
+const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e) => [e.id, e]));
 
 describe('groupTimelineEvents', () => {
   it('returns empty array for empty input', () => {
@@ -177,14 +174,10 @@ describe('groupTimelineEvents', () => {
     }
   });
 
-  it('renders prompt_response as its own promptResponse item', () => {
-    const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
+  it('gives an answer no item of its own', () => {
+    const events = [createPromptResponseEvent({ id: 'pr-1' })];
 
-    const events = [promptResponse];
-    const items = groupTimelineEvents(events, makeEventsById(events));
-
-    expect(items).toHaveLength(1);
-    expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
+    expect(groupTimelineEvents(events, makeEventsById(events))).toEqual([]);
   });
 
   it('handles execution_aborted as aborted status', () => {
@@ -204,7 +197,325 @@ describe('groupTimelineEvents', () => {
   });
 });
 
-describe('toTimelineItems', () => {
+describe('groupTimelineEvents while a run streams', () => {
+  const streamingEvent = (
+    data: ExecutionStreamingEvent['data'],
+    executionId = 'exec-live'
+  ): ExecutionStreamingEvent => ({
+    id: 'round-live::execution_terminated',
+    type: EXECUTION_STREAMING_EVENT_TYPE,
+    created_at: '2026-01-01T00:00:00.000Z',
+    actor: { type: EventActorType.agent, id: 'agent-1' },
+    execution_id: executionId,
+    data,
+  });
+
+  it('keeps the turn running and shows the half-written answer', () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
+    const events = [started, streamingEvent({ message: 'Hel' })];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('running');
+      expect(turn.response).toEqual({ message: 'Hel' });
+    }
+  });
+
+  it('lets the real terminal replace the streaming answer', () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-live' });
+    const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-live' });
+    const events = [started, streamingEvent({ message: 'half' }), terminated];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('completed');
+      expect(turn.terminal).toBe(terminated);
+    }
+  });
+});
+
+describe('groupTimelineEvents for a paused run', () => {
+  const PAUSE_ID = 'round-1::execution_terminated';
+
+  const pausedRun = () => {
+    const started = createExecutionStartedEvent({ execution_id: 'exec-1' });
+    const paused = createExecutionPausedEvent({ id: PAUSE_ID, execution_id: 'exec-1' });
+    return { started, paused };
+  };
+
+  it('keeps a saved pause open, so a reload shows the same prompt', () => {
+    const { started, paused } = pausedRun();
+    const events = [started, paused];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+      expect(turn.terminal).toBe(paused);
+    }
+  });
+
+  it('closes the pause once an answer joins back to it', () => {
+    const { started, paused } = pausedRun();
+    const answer = createPromptResponseEvent({
+      id: 'round-1::prompt_response::1',
+      data: { prompt_requested_event_id: PAUSE_ID, responses: { 'prompt-1': { allow: true } } },
+    });
+    const events = [started, paused, answer];
+
+    const items = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(items).toHaveLength(1);
+    const [turn] = items;
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('completed');
+      expect(turn.pendingPrompts).toBeUndefined();
+    }
+  });
+
+  it('ignores an answer pointing at a different pause', () => {
+    const { started, paused } = pausedRun();
+    const answer = createPromptResponseEvent({
+      data: { prompt_requested_event_id: 'some-other-pause', responses: {} },
+    });
+    const events = [started, paused, answer];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+    }
+  });
+});
+
+describe('groupTimelineEvents for an answered question', () => {
+  // Shapes taken from a real conversation: the question step is saved without answers, and the
+  // answers only exist on the prompt_response that resumed the run.
+  const ROUND_ID = 'round-1';
+  const PROMPT_ID = 'prompt-66199c65';
+  const PAUSE_ID = `${ROUND_ID}::execution_terminated`;
+
+  const questionStep = {
+    type: ConversationRoundStepType.askUserQuestion,
+    prompt_id: PROMPT_ID,
+    questions: [
+      {
+        question: 'Which Kibana app are you most interested in exploring today?',
+        options: [{ label: 'Discover' }, { label: 'Dashboard' }],
+        multi_select: false,
+      },
+    ],
+  } as const;
+
+  const answeredQuestionEvents = () => [
+    createExecutionStartedEvent({ execution_id: `${ROUND_ID}::execution` }),
+    createExecutionStepEvent({
+      id: `${ROUND_ID}::step::0`,
+      execution_id: `${ROUND_ID}::execution`,
+      data: { step: questionStep, sequence: 0 },
+    }),
+    createExecutionPausedEvent({
+      id: PAUSE_ID,
+      execution_id: `${ROUND_ID}::execution`,
+      data: {
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: PROMPT_ID, questions: [] }],
+        },
+      } as never,
+    }),
+    createPromptResponseEvent({
+      id: `${ROUND_ID}::prompt_response::1`,
+      data: {
+        prompt_requested_event_id: PAUSE_ID,
+        responses: { [PROMPT_ID]: { answers: [{ choice: [0] }] } },
+      },
+    }),
+  ];
+
+  it('joins the answers onto the question step so the turn can show them', () => {
+    const events = answeredQuestionEvents();
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('completed');
+      expect(turn.steps).toEqual([{ ...questionStep, answers: [{ choice: [0] }] }]);
+    }
+  });
+
+  it('adds no item of its own for the answer, the step already shows it', () => {
+    const events = answeredQuestionEvents();
+
+    const items = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(items.map((item) => item.kind)).toEqual(['agentTurn']);
+  });
+});
+
+describe('groupTimelineEvents across a pause and its resume', () => {
+  const ROUND = 'round-1';
+  const PAUSE_ID = `${ROUND}::execution_terminated`;
+  const question = {
+    type: ConversationRoundStepType.askUserQuestion,
+    prompt_id: 'prompt-1',
+    questions: [{ question: 'Which app?', options: [{ label: 'Discover' }], multi_select: false }],
+  } as const;
+
+  const firstRun = () => [
+    createExecutionStartedEvent({
+      id: `${ROUND}::execution_started`,
+      execution_id: `${ROUND}::execution`,
+      trigger_event_id: `${ROUND}::user_message`,
+    }),
+    createExecutionStepEvent({
+      id: `${ROUND}::step::0`,
+      execution_id: `${ROUND}::execution`,
+      data: { step: question, sequence: 0 },
+    }),
+    createExecutionPausedEvent({
+      id: PAUSE_ID,
+      execution_id: `${ROUND}::execution`,
+      data: {
+        outcome: {
+          type: 'prompt_requested',
+          prompts: [{ type: AgentPromptType.ask_user_question, id: 'prompt-1', questions: [] }],
+        },
+      } as never,
+    }),
+  ];
+
+  const answer = () =>
+    createPromptResponseEvent({
+      id: `${ROUND}::prompt_response::1`,
+      data: {
+        prompt_requested_event_id: PAUSE_ID,
+        responses: { 'prompt-1': { answers: [{ choice: [0] }] } },
+      },
+    });
+
+  const resumeStart = () =>
+    createExecutionStartedEvent({
+      id: `${ROUND}::execution::1::execution_started`,
+      execution_id: `${ROUND}::execution::1`,
+      trigger_event_id: `${ROUND}::prompt_response::1`,
+    });
+
+  const resumeEnd = () =>
+    createExecutionTerminatedEvent({
+      id: `${ROUND}::execution::1::execution_terminated`,
+      execution_id: `${ROUND}::execution::1`,
+      trigger_event_id: `${ROUND}::prompt_response::1`,
+    });
+
+  it('renders the whole round as one turn, keyed by the round', () => {
+    const events = [...firstRun(), answer(), resumeStart(), resumeEnd()];
+
+    const items = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(items).toHaveLength(1);
+    const [turn] = items;
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.key).toBe(ROUND);
+      expect(turn.status).toBe('completed');
+      // The question and the final answer live in the same bubble.
+      expect(turn.steps).toEqual([{ ...question, answers: [{ choice: [0] }] }]);
+      expect(turn.response).toEqual({ message: 'Here is a summary of your active hosts.' });
+    }
+  });
+
+  it('keeps the turn running while the resume streams, not completed by the pause', () => {
+    const events = [...firstRun(), answer(), resumeStart()];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('running');
+      expect(turn.terminal).toBeUndefined();
+      expect(turn.executionId).toBe(`${ROUND}::execution::1`);
+    }
+  });
+
+  it('waits on the pause until an answer arrives', () => {
+    const events = firstRun();
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.executionId).toBe(`${ROUND}::execution`);
+    }
+  });
+
+  it('shows a paused tool call once, resolved, when the resume re-reports it', () => {
+    // The server persists the resolved call again as the resume's first step
+    // (add_round_complete_event.ts), so the turn would otherwise hold it twice.
+    const pausedCall = createToolCallStep({
+      tool_call_id: 'toolu_1',
+      tool_id: 'delete_index',
+      params: {},
+      results: [],
+    });
+    const resolvedCall = {
+      ...pausedCall,
+      results: [{ tool_result_id: 'r1', type: 'other', data: {} }],
+    };
+
+    const events = [
+      createExecutionStartedEvent({
+        id: `${ROUND}::execution_started`,
+        execution_id: `${ROUND}::execution`,
+      }),
+      createExecutionStepEvent({
+        id: `${ROUND}::step::0`,
+        execution_id: `${ROUND}::execution`,
+        data: { step: pausedCall, sequence: 0 },
+      }),
+      createExecutionPausedEvent({ id: PAUSE_ID, execution_id: `${ROUND}::execution` }),
+      answer(),
+      resumeStart(),
+      createExecutionStepEvent({
+        id: `${ROUND}::execution::1::step::0`,
+        execution_id: `${ROUND}::execution::1`,
+        data: { step: resolvedCall, sequence: 0 },
+      }),
+      resumeEnd(),
+    ];
+
+    const [turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.steps).toEqual([resolvedCall]);
+    }
+  });
+
+  it('keeps the round trigger as the turn author, not the answer that resumed it', () => {
+    const userMessage = createUserMessageEvent({ id: `${ROUND}::user_message` });
+    const events = [userMessage, ...firstRun(), answer(), resumeStart(), resumeEnd()];
+
+    const [, turn] = groupTimelineEvents(events, makeEventsById(events));
+
+    expect(turn.kind).toBe('agentTurn');
+    if (turn.kind === 'agentTurn') {
+      expect(turn.triggerEventId).toBe(`${ROUND}::user_message`);
+    }
+  });
+});
+
+describe('buildItems', () => {
   it('resolves origin from the trigger event for execution items', () => {
     const origin = { type: ConversationOriginType.Slack };
     const userMsg = createUserMessageEvent({
@@ -216,7 +527,7 @@ describe('toTimelineItems', () => {
       trigger_event_id: 'user-origin-1',
     });
 
-    const items = toTimelineItems({ events: [userMsg, terminated] });
+    const items = buildItems([userMsg, terminated]);
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
@@ -230,7 +541,7 @@ describe('toTimelineItems', () => {
   it('leaves origin undefined when trigger event is absent', () => {
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-no-trigger' });
 
-    const items = toTimelineItems({ events: [terminated] });
+    const items = buildItems([terminated]);
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -240,11 +551,11 @@ describe('toTimelineItems', () => {
     }
   });
 
-  it('emits agentTurn running for in-flight persisted executions and completed for terminated ones', () => {
+  it('emits agentTurn running for in-flight executions and completed for terminated ones', () => {
     const inFlight = createExecutionStartedEvent({ execution_id: 'exec-in-flight' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-done' });
 
-    const items = toTimelineItems({ events: [inFlight, terminated] });
+    const items = buildItems([inFlight, terminated]);
 
     expect(items).toHaveLength(2);
     const [inFlightItem, doneItem] = items;
@@ -256,345 +567,15 @@ describe('toTimelineItems', () => {
     if (doneItem.kind === 'agentTurn') expect(doneItem.status).toBe('completed');
   });
 
-  it('appends a pending user message item with isPending=true', () => {
-    const pending = createUserMessageEvent({ id: 'pending::user_message' });
-
-    const items = toTimelineItems({ events: [], pendingUserMessage: pending });
-
-    expect(items).toHaveLength(2);
-    const [userItem] = items;
-    expect(userItem.kind).toBe('userMessage');
-    if (userItem.kind === 'userMessage') {
-      expect(userItem.event).toBe(pending);
-      expect(userItem.isPending).toBe(true);
-    }
-  });
-
-  it('appends an agentTurn running placeholder with empty steps when pendingUserMessage is set but activeExecution is absent', () => {
-    const pending = createUserMessageEvent({ id: 'pending::user_message' });
-
-    const items = toTimelineItems({ events: [], pendingUserMessage: pending });
-
-    expect(items).toHaveLength(2);
-    const [, execItem] = items;
-    expect(execItem.kind).toBe('agentTurn');
-    if (execItem.kind === 'agentTurn') {
-      expect(execItem.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-      expect(execItem.status).toBe('running');
-      expect(execItem.steps).toHaveLength(0);
-    }
-  });
-
-  it('appends an agentTurn item from the draft when activeExecution is present', () => {
-    const pending = createUserMessageEvent({ id: 'pending::user_message' });
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: 'hello',
-    };
-
-    const items = toTimelineItems({
-      events: [],
-      pendingUserMessage: pending,
-      activeExecution: draft,
-    });
-
-    expect(items).toHaveLength(2);
-    const [, execItem] = items;
-    expect(execItem.kind).toBe('agentTurn');
-    if (execItem.kind === 'agentTurn') {
-      expect(execItem.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-      expect(execItem.status).toBe('running');
-      expect(execItem.response).toEqual({ message: 'hello' });
-    }
-  });
-
-  it('appends an agentTurn item even when pendingUserMessage is absent', () => {
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: '',
-    };
-
-    const items = toTimelineItems({ events: [], activeExecution: draft });
-
-    expect(items).toHaveLength(1);
-    const [execItem] = items;
-    expect(execItem.kind).toBe('agentTurn');
-    if (execItem.kind === 'agentTurn') {
-      expect(execItem.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-      expect(execItem.status).toBe('running');
-    }
-  });
-
-  it('returns only persisted items when both pendingUserMessage and activeExecution are absent', () => {
+  it('returns only the given items when there is nothing else to merge', () => {
     const userMsg = createUserMessageEvent({ id: 'u1' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'e1' });
 
-    const items = toTimelineItems({ events: [userMsg, terminated] });
+    const items = buildItems([userMsg, terminated]);
 
     expect(items).toHaveLength(2);
     expect(items[0].kind).toBe('userMessage');
     expect(items[1].kind).toBe('agentTurn');
-    if (items[1].kind === 'agentTurn') {
-      expect(items[1].key).not.toBe(ACTIVE_EXECUTION_ITEM_KEY);
-    }
-  });
-});
-
-describe('activeExecutionToItem', () => {
-  it('normalizes running draft', () => {
-    const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: 'partial' };
-    const item = activeExecutionToItem(draft);
-    expect(item.kind).toBe('agentTurn');
-    expect(item.status).toBe('running');
-    expect(item.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-    expect(item.response).toEqual({ message: 'partial' });
-  });
-
-  it('normalizes awaiting_prompt draft', () => {
-    const draft: ActiveExecutionDraft = {
-      status: 'awaiting_prompt',
-      steps: [],
-      message: '',
-      pendingPrompts: [],
-    };
-    const item = activeExecutionToItem(draft);
-    expect(item.status).toBe('awaiting_prompt');
-    expect(item.response).toBeUndefined();
-    expect(item.pendingPrompts).toEqual([]);
-  });
-
-  it('omits response when message is empty', () => {
-    const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: '' };
-    const item = activeExecutionToItem(draft);
-    expect(item.response).toBeUndefined();
-  });
-
-  it('uses executionId as key when present', () => {
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: '',
-      executionId: 'exec-real',
-    };
-    const item = activeExecutionToItem(draft);
-    expect(item.key).toBe('exec-real');
-    expect(item.executionId).toBe('exec-real');
-  });
-
-  it('uses startedAt from draft when present', () => {
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: '',
-      startedAt: '2026-01-01T00:00:00.000Z',
-    };
-    const item = activeExecutionToItem(draft);
-    expect(item.startedAt).toBe('2026-01-01T00:00:00.000Z');
-  });
-
-  it('sealed draft maps to completed agentTurn with terminal event and response', () => {
-    const terminal = createExecutionTerminatedEvent({
-      id: 'term-1',
-      execution_id: 'exec-sealed',
-    });
-    const draft: ActiveExecutionDraft = {
-      status: 'completed',
-      steps: [],
-      message: '',
-      executionId: 'exec-sealed',
-      startedAt: '2026-06-01T10:00:00.000Z',
-      terminalEvent: terminal,
-    };
-    const item = activeExecutionToItem(draft);
-    expect(item.status).toBe('completed');
-    expect(item.key).toBe('exec-sealed');
-    expect(item.terminal).toBe(terminal);
-    expect(item.response).toEqual({ message: 'Here is a summary of your active hosts.' });
-  });
-
-  it('sealed draft with prompt_requested outcome does not set response', () => {
-    const terminal = createExecutionTerminatedEvent({
-      id: 'term-pr',
-      execution_id: 'exec-pr',
-      data: {
-        steps: [],
-        model_usage: {
-          connector_id: '',
-          llm_calls: 1,
-          input_tokens: 10,
-          output_tokens: 5,
-          model: 'test',
-        },
-        time_to_first_token: 100,
-        time_to_last_token: 200,
-        outcome: { type: 'prompt_requested', prompts: [] },
-      },
-    });
-    const draft: ActiveExecutionDraft = {
-      status: 'completed',
-      steps: [],
-      message: '',
-      terminalEvent: terminal,
-    };
-    const item = activeExecutionToItem(draft);
-    expect(item.status).toBe('completed');
-    expect(item.response).toBeUndefined();
-  });
-});
-
-describe('toTimelineItems - dedupe', () => {
-  const completedDraft = (executionId: string, triggerEventId?: string): ActiveExecutionDraft => ({
-    status: 'completed',
-    steps: [],
-    message: '',
-    executionId,
-    triggerEventId,
-    terminalEvent: createExecutionTerminatedEvent({ execution_id: executionId }),
-  });
-
-  it('drops the draft when a completed persisted turn with the same executionId exists', () => {
-    const terminated = createExecutionTerminatedEvent({
-      id: 'term-1',
-      execution_id: 'exec-real',
-    });
-
-    const items = toTimelineItems({
-      events: [terminated],
-      activeExecution: completedDraft('exec-real'),
-    });
-
-    const agentTurns = items.filter((it) => it.kind === 'agentTurn');
-    expect(agentTurns).toHaveLength(1);
-    expect(agentTurns[0].key).toBe('exec-real');
-  });
-
-  it('appends the draft when its executionId is not yet in persisted items', () => {
-    const terminated = createExecutionTerminatedEvent({
-      id: 'term-other',
-      execution_id: 'exec-other',
-    });
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: 'in flight',
-      executionId: 'exec-new',
-    };
-
-    const items = toTimelineItems({ events: [terminated], activeExecution: draft });
-
-    const agentTurns = items.filter((it) => it.kind === 'agentTurn');
-    expect(agentTurns).toHaveLength(2);
-    expect(agentTurns.map((it) => it.key)).toEqual(['exec-other', 'exec-new']);
-  });
-
-  it('gives the live turn and its saved replacement the same key', () => {
-    const live = toTimelineItems({
-      events: [],
-      activeExecution: completedDraft('exec-1'),
-    });
-    const saved = toTimelineItems({
-      events: [createExecutionTerminatedEvent({ id: 'term-1', execution_id: 'exec-1' })],
-    });
-    expect(live[0].key).toBe('exec-1');
-    expect(saved[0].key).toBe('exec-1');
-  });
-
-  it('drops the pending user message once the saved user message it triggered is present', () => {
-    const savedUser = createUserMessageEvent({ id: 'round-1::user_message' });
-    const pending = createUserMessageEvent({ id: 'pending::user_message' });
-
-    const items = toTimelineItems({
-      events: [savedUser],
-      pendingUserMessage: pending,
-      activeExecution: completedDraft('exec-1', 'round-1::user_message'),
-    });
-
-    const userMessages = items.filter((it) => it.kind === 'userMessage');
-    expect(userMessages).toHaveLength(1);
-    expect(userMessages[0].key).toBe('round-1::user_message');
-  });
-
-  it('keeps the pending user message when the saved user message is not the trigger', () => {
-    const savedUser = createUserMessageEvent({ id: 'round-0::user_message' });
-    const pending = createUserMessageEvent({ id: 'pending::user_message' });
-
-    const items = toTimelineItems({
-      events: [savedUser],
-      pendingUserMessage: pending,
-      activeExecution: completedDraft('exec-1', 'round-1::user_message'),
-    });
-
-    expect(items.filter((it) => it.kind === 'userMessage')).toHaveLength(2);
-  });
-
-  it('keeps the pending user message while the trigger id is unknown', () => {
-    const savedUser = createUserMessageEvent({ id: 'round-1::user_message' });
-    const pending = createUserMessageEvent({ id: 'pending::user_message' });
-
-    const items = toTimelineItems({
-      events: [savedUser],
-      pendingUserMessage: pending,
-      activeExecution: { status: 'running', steps: [], message: '' },
-    });
-
-    expect(items.filter((it) => it.kind === 'userMessage')).toHaveLength(2);
-  });
-});
-
-describe('findSavedReplacement', () => {
-  it('reports both replacements once the saved user message and completed turn exist', () => {
-    const saved = buildSavedItems([
-      createUserMessageEvent({ id: 'round-1::user_message' }),
-      createExecutionTerminatedEvent({ id: 'term-1', execution_id: 'exec-1' }),
-    ]);
-
-    expect(
-      findSavedReplacement(saved, {
-        executionId: 'exec-1',
-        triggerEventId: 'round-1::user_message',
-      })
-    ).toEqual({ turn: true, userMessage: true });
-  });
-
-  it('reports nothing for a draft without identity or without saved counterparts', () => {
-    const saved = buildSavedItems([createUserMessageEvent({ id: 'round-1::user_message' })]);
-
-    expect(findSavedReplacement(saved, null)).toEqual({ turn: false, userMessage: false });
-    expect(findSavedReplacement(saved, { executionId: 'exec-1', triggerEventId: 'other' })).toEqual(
-      {
-        turn: false,
-        userMessage: false,
-      }
-    );
-  });
-});
-
-describe('assembleTimelineItems', () => {
-  it('reuses saved items without modifying them as live content changes', () => {
-    const savedItems = buildSavedItems([createUserMessageEvent({ id: 'saved-user' })]);
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: 'Hello',
-      executionId: 'live-execution',
-    };
-    const firstLiveItems = buildLiveItems({ activeExecution: draft });
-    const firstItems = assembleTimelineItems(savedItems, firstLiveItems);
-    const nextLiveItems = buildLiveItems({
-      activeExecution: { ...draft, message: 'Hello again' },
-    });
-    const nextItems = assembleTimelineItems(savedItems, nextLiveItems);
-
-    expect(savedItems).toHaveLength(1);
-    expect(firstLiveItems).toHaveLength(1);
-    expect(firstItems[0]).toBe(savedItems[0]);
-    expect(nextItems[0]).toBe(savedItems[0]);
-    expect(firstItems[1]).toBe(firstLiveItems[0]);
-    expect(nextItems[1]).toBe(nextLiveItems[0]);
-    expect(firstItems[1]).toMatchObject({ response: { message: 'Hello' } });
-    expect(nextItems[1]).toMatchObject({ response: { message: 'Hello again' } });
   });
 });
 
@@ -616,7 +597,7 @@ describe('groupTimelineEvents attachment refs', () => {
       trigger_event_id: `user-${n}`,
     }),
   ];
-  const turns = (events: TimelineEvent[]) =>
+  const turns = (events: TimelineDisplayEvent[]) =>
     groupTimelineEvents(events, makeEventsById(events)).filter((item) => item.kind === 'agentTurn');
 
   it('gives each turn the highest version of every attachment referenced so far', () => {

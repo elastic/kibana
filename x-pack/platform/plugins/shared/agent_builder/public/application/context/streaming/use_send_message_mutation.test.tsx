@@ -11,7 +11,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { of, Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { EventsService } from '../../../services/events/events_service';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
 import { propagateEvents } from '../../../services/chat/propagate_events';
@@ -76,7 +76,7 @@ const setup = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const { result } = renderHook(() => useSendMessageMutation(bindings), { wrapper: Wrapper });
-  // Keep the draft observed so the completed draft is retained until released.
+  // Keep the live events observed so they are retained until released.
   const observer = conversationStreamService.getActiveStream$(conversationId).subscribe();
 
   return { bindings, source, result, conversationStreamService, observer, queryClient };
@@ -110,7 +110,7 @@ describe('useSendMessageMutation', () => {
     });
   });
 
-  it('releases the pending message and draft once the refetch contains their saved copies', async () => {
+  it('releases the pending message and live events once the refetch has their saved copies', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
 
@@ -120,10 +120,10 @@ describe('useSendMessageMutation', () => {
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
-    expect(conversationStreamService.getSnapshot(conversationId)).toBeNull();
+    expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
   });
 
-  it('keeps the pending message and draft when the refetch lacks the saved copies', async () => {
+  it('keeps the pending message and live events when the refetch lacks the saved copies', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([createUserMessageEvent({ id: 'other' })]));
 
@@ -135,7 +135,11 @@ describe('useSendMessageMutation', () => {
     await waitFor(() => expect(mockGet).toHaveBeenCalled());
     await act(async () => {});
     expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
-    expect(conversationStreamService.getSnapshot(conversationId)?.status).toBe('completed');
+    expect(
+      conversationStreamService
+        .getSnapshot(conversationId)
+        .some((event) => event.type === TimelineEventType.executionTerminated)
+    ).toBe(true);
   });
 
   it('clears the pending message when the refetch fails', async () => {
@@ -164,6 +168,6 @@ describe('useSendMessageMutation', () => {
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
-    expect(conversationStreamService.getSnapshot(conversationId)).toBeNull();
+    expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
   });
 });

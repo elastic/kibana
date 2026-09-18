@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
-import {
-  ConversationRoundStatus,
-  isSharedConversation,
-  type Conversation,
-} from '@kbn/agent-builder-common';
+import { isSharedConversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -27,15 +23,9 @@ const POLL_INTERVAL_MS = 5_000;
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
-  const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
 
-  const cached = queryClient.getQueryData<Conversation>(queryKey);
   const isThisConversationStreaming = useIsCurrentConversationStreaming();
-
-  // @todo: HITL guard (#291069), unchanged.
-  const isAwaitingPrompt =
-    cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
 
   const {
     data: conversation,
@@ -46,7 +36,7 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    enabled: Boolean(conversationId) && !isAwaitingPrompt,
+    enabled: Boolean(conversationId),
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -163,10 +153,4 @@ export const useHasActiveConversation = () => {
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
-};
-
-export const useIsAwaitingPrompt = () => {
-  const conversationRounds = useConversationRounds();
-  const lastRound = conversationRounds.at(-1);
-  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
 };

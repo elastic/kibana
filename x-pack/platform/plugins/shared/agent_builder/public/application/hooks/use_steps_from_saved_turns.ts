@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import { buildSavedItems } from '../components/conversations/timeline/to_timeline_items';
+import { buildItems } from '../components/conversations/timeline/to_timeline_items';
 import { useConversation } from './use_conversation';
 
 /**
@@ -19,10 +19,7 @@ export const useStepsFromSavedTurns = (): ConversationRoundStep[] => {
   const events = conversation?.events;
 
   return useMemo(
-    () =>
-      buildSavedItems(events ?? []).flatMap((item) =>
-        item.kind === 'agentTurn' ? item.steps : []
-      ),
+    () => buildItems(events ?? []).flatMap((item) => (item.kind === 'agentTurn' ? item.steps : [])),
     [events]
   );
 };

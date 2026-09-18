@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { TimelineItem } from './to_timeline_items';
+import type { TimelineItem } from './types';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { Timeline } from './timeline';
 
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
-jest.mock('./items/prompt_response_event', () => ({ PromptResponseEvent: () => null }));
 jest.mock('./agent_turn', () => ({ AgentTurn: () => null }));
 
 describe('Timeline', () => {
