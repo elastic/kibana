@@ -203,6 +203,13 @@ export const DISABLE_MONITOR_LABEL = i18n.translate(
   }
 );
 
+export const LOCKED_MONITOR_TOOLTIP = i18n.translate(
+  'xpack.synthetics.management.lockedMonitorTooltip',
+  {
+    defaultMessage: 'This monitor is locked. Change it in the source project and push again.',
+  }
+);
+
 export const getMonitorEnabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledSuccessMessage', {
     defaultMessage: 'Monitor {name} enabled successfully.',

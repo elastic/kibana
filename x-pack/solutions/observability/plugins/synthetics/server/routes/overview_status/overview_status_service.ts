@@ -1334,6 +1334,7 @@ export class OverviewStatusService {
         ConfigKey.ALERT_CONFIG,
         ConfigKey.URLS,
         ConfigKey.MAINTENANCE_WINDOWS,
+        ConfigKey.LOCKED,
       ],
     });
   }
@@ -1357,6 +1358,7 @@ export class OverviewStatusService {
       spaces: monitor.namespaces,
       urls: monitor.attributes[ConfigKey.URLS],
       maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
+      ...(monitor.attributes[ConfigKey.LOCKED] ? { locked: true } : {}),
     };
   }
 }

@@ -33,7 +33,7 @@ import {
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { ConfigKey, isMonitorLocked } from '../../../../../../../common/runtime_types';
 import {
   useCanEditSynthetics,
   useCanRunTestManually,
@@ -50,6 +50,7 @@ import {
   createRemoteMonitorCloneUrl,
   createRemoteMonitorEditUrl,
 } from '../../../../utils/remote/remote_monitor_urls';
+import { LOCKED_MONITOR_TOOLTIP } from '../../management/monitor_list_table/labels';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -170,11 +171,13 @@ export function ActionsPopover({
   // this app, so the mutating actions below are disabled for them.
   const isHeartbeat = monitor.origin === 'heartbeat';
   const isReadOnly = isRemote || isHeartbeat;
+  const isLocked = isMonitorLocked(monitor);
   const readOnlyActionTooltip = isHeartbeat
     ? NOT_AVAILABLE_FOR_HEARTBEAT
     : isRemote
     ? NOT_AVAILABLE_FOR_REMOTE_MONITORS
     : undefined;
+  const lockedActionTooltip = isLocked ? LOCKED_MONITOR_TOOLTIP : undefined;
   const { space } = useKibanaSpace();
 
   // Precedence mirrors the flyout: prop → overview metadata → lazy CCS fetch.
@@ -427,15 +430,16 @@ export function ActionsPopover({
         </NoPermissionsTooltip>
       ),
       icon: 'contrast',
-      disabled: isReadOnly || !canEditSynthetics || !canUsePublicLocations,
-      toolTipContent: readOnlyActionTooltip,
-      onClick: isReadOnly
-        ? undefined
-        : () => {
-            if (status !== FETCH_STATUS.LOADING) {
-              updateMonitorEnabledState(!monitor.isEnabled);
-            }
-          },
+      disabled: isReadOnly || isLocked || !canEditSynthetics || !canUsePublicLocations,
+      toolTipContent: readOnlyActionTooltip ?? lockedActionTooltip,
+      onClick:
+        isReadOnly || isLocked
+          ? undefined
+          : () => {
+              if (status !== FETCH_STATUS.LOADING) {
+                updateMonitorEnabledState(!monitor.isEnabled);
+              }
+            },
       'data-test-subj': 'syntheticsActionsPopoverEnableMonitor',
     },
     {
@@ -453,8 +457,9 @@ export function ActionsPopover({
           {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
         </NoPermissionsTooltip>
       ),
-      disabled: isReadOnly || !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
-      toolTipContent: readOnlyActionTooltip,
+      disabled:
+        isReadOnly || isLocked || !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
+      toolTipContent: readOnlyActionTooltip ?? lockedActionTooltip,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (
@@ -462,23 +467,24 @@ export function ActionsPopover({
       ) : (
         'bell'
       ),
-      onClick: isReadOnly
-        ? undefined
-        : () => {
-            if (!alertLoading) {
-              updateAlertEnabledState({
-                monitor: {
-                  [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
-                    status: {
-                      enabled: monitor.isStatusAlertEnabled,
-                    },
-                  }),
-                },
-                configId: monitor.configId,
-                name: monitor.name,
-              });
-            }
-          },
+      onClick:
+        isReadOnly || isLocked
+          ? undefined
+          : () => {
+              if (!alertLoading) {
+                updateAlertEnabledState({
+                  monitor: {
+                    [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
+                      status: {
+                        enabled: monitor.isStatusAlertEnabled,
+                      },
+                    }),
+                  },
+                  configId: monitor.configId,
+                  name: monitor.name,
+                });
+              }
+            },
     },
     {
       name: addMonitorToDashboardLabel,

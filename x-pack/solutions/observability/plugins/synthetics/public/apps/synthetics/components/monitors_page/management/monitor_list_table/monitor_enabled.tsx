@@ -11,7 +11,7 @@ import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
-import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { ConfigKey, isMonitorLocked } from '../../../../../../../common/runtime_types';
 import {
   useCanEditSynthetics,
   useCanUsePublicLocations,
@@ -66,6 +66,8 @@ export const MonitorEnabled = ({
   };
 
   const enabledDisableLabel = enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL;
+  const locked = isMonitorLocked(monitor);
+  const switchTitle = locked ? labels.LOCKED_MONITOR_TOOLTIP : enabledDisableLabel;
 
   return (
     <>
@@ -80,11 +82,15 @@ export const MonitorEnabled = ({
             compressed={true}
             checked={enabled}
             disabled={
-              isLoading || !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed
+              isLoading ||
+              !canEditSynthetics ||
+              !canUsePublicLocations ||
+              !isServiceAllowed ||
+              locked
             }
             showLabel={false}
             label={enabledDisableLabel}
-            title={enabledDisableLabel}
+            title={switchTitle}
             data-test-subj="syntheticsIsMonitorEnabled"
             data-is-switchable={isSwitchable}
             onChange={handleEnabledChange}

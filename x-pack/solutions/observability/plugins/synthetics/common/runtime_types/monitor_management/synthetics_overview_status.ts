@@ -89,6 +89,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     // purely from local ping data (Heartbeat / Elastic Agent autodiscovery),
     // mirroring how `remote` marks a CCS-only monitor.
     origin: MonitorOriginCodec,
+    locked: t.boolean,
   }),
 ]);
 

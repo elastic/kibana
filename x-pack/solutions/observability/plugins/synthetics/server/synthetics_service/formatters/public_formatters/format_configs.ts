@@ -33,6 +33,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.CONFIG_HASH,
   ConfigKey.ALERT_CONFIG,
   ConfigKey.LABELS,
+  ConfigKey.LOCKED,
   'secrets',
 ];
 

@@ -107,6 +107,9 @@ export const monitorConfigMappings: SavedObjectsTypeMappingDefinition = {
     enabled: {
       type: 'boolean',
     },
+    locked: {
+      type: 'boolean',
+    },
     alert: {
       properties: {
         status: {

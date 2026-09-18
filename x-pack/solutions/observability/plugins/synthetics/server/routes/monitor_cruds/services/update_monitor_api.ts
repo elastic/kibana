@@ -42,7 +42,8 @@ export type UpdateMonitorErrorCode =
   | 'not_found'
   | 'invalid_origin'
   | 'validation_failed'
-  | 'forbidden';
+  | 'forbidden'
+  | 'locked';
 
 export interface UpdateMonitorPerIdError {
   code: UpdateMonitorErrorCode;
@@ -161,6 +162,15 @@ export class UpdateMonitorAPI {
     maintenanceWindows?: MaintenanceWindow[]
   ) {
     const monitorId = decryptedMonitor.id;
+    const prevLocked = decryptedMonitor.attributes[ConfigKey.LOCKED];
+
+    if (prevLocked) {
+      this.result.perIdErrors[monitorId] = {
+        code: 'locked',
+        message: monitorLockedMessage(),
+      };
+      return;
+    }
 
     if (this.shouldRejectProjectMonitor(decryptedMonitor.attributes, patch)) {
       this.result.perIdErrors[monitorId] = {
@@ -269,11 +279,12 @@ export class UpdateMonitorAPI {
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
     patch: Partial<EncryptedSyntheticsMonitor>
   ): { prevAttrs: SyntheticsMonitor; merged: EncryptedSyntheticsMonitor } {
+    const { [ConfigKey.LOCKED]: _locked, ...restPatch } = patch;
     const { attributes: prevAttrs } = normalizeSecrets(decryptedMonitor);
     const { [ConfigKey.REVISION]: _, ...prevAttrsForMerge } = prevAttrs;
     const merged = mergeSourceMonitor(
       prevAttrsForMerge as EncryptedSyntheticsMonitor,
-      patch as EncryptedSyntheticsMonitor
+      restPatch as EncryptedSyntheticsMonitor
     );
     return { prevAttrs, merged };
   }
@@ -500,6 +511,12 @@ const invalidOriginMessage = (origin: string | undefined) =>
     defaultMessage:
       'Monitors of origin "{origin}" can only be enabled or disabled via the bulk update API. Update any other fields from their source instead.',
     values: { origin: origin ?? 'unknown' },
+  });
+
+const monitorLockedMessage = () =>
+  i18n.translate('xpack.synthetics.server.bulkUpdate.locked', {
+    defaultMessage:
+      'This monitor is locked. Enable, disable, and other edits must be made in the source project and pushed again.',
   });
 
 const insufficientSpacePermissionsMessage = () =>

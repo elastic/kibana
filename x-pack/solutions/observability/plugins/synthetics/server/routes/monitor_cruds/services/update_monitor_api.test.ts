@@ -385,6 +385,39 @@ describe('UpdateMonitorAPI', () => {
       }
     );
 
+    it('rejects an `enabled`-only patch when the monitor is locked', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({
+          attributes: {
+            [ConfigKey.MONITOR_SOURCE_TYPE]: 'project',
+            [ConfigKey.LOCKED]: true,
+          },
+        }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1'].code).toBe('locked');
+    });
+
+    it('strips `locked` from the patch so bulk update cannot set it', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1'], { tags: ['tag-a', 'tag-b'], locked: true }),
+      });
+
+      expect(result.perIdErrors['mon-1']).toBeUndefined();
+      expect(result.survivors).toHaveLength(1);
+      const survivor = result.survivors[0].monitorWithRevision as Record<string, unknown>;
+      expect(survivor[ConfigKey.LOCKED]).not.toBe(true);
+    });
+
     it('does not call validateMonitor for rejected origins (short-circuit)', async () => {
       const { validateMonitor } = jest.requireMock('../monitor_validation');
       const { routeContext, mocks } = createMockRouteContext();
