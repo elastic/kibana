@@ -107,8 +107,6 @@ const userMessagesOfFinalAnswerFor = (
 const eventsOfExecution = (conversation: Conversation, executionId: string): TimelineEvent[] =>
   (conversation.events ?? []).filter((event) => event.execution_id === executionId);
 
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
 apiTest.describe(
   'Agent Builder — interrupted executions are persisted on the conversation',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
@@ -375,29 +373,21 @@ apiTest.describe(
           { headers: internalHeaders(), responseType: 'json' }
         );
         expect(abortResponse).toHaveStatusCode(200);
+        // by default the abort route returns once the interruption is recorded on the conversation
+        expect(abortResponse.body).toStrictEqual({ acknowledged: true, terminal_persisted: true });
 
         // exactly one failure callback, classified as an abort
         const failure = await waitForFailurePayload();
         expect(failure.execution_id).toBe(accepted.execution_id);
         expect(failure.error.code).toBe(AgentBuilderErrorCode.requestAborted);
 
-        // 3. the execution_aborted terminal lands on the conversation (bounded wait: the worker
-        //    winds down after the abort monitor notices the flipped status)
-        let conversation: Conversation | undefined;
-        const deadline = Date.now() + 30_000;
-        while (Date.now() < deadline) {
-          conversation = await getConversation(
-            apiClient,
-            adminCredentials.apiKeyHeader,
-            conversationId
-          );
-          if (
-            conversation.events?.some((event) => event.type === TimelineEventType.executionAborted)
-          ) {
-            break;
-          }
-          await sleep(500);
-        }
+        // 3. the execution_aborted terminal is on the conversation on the very next read: no
+        //    polling, the abort call waited for the worker to record it
+        const conversation: Conversation | undefined = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
         const aborted = (conversation?.events ?? []).filter(
           (event) => event.type === TimelineEventType.executionAborted
         );

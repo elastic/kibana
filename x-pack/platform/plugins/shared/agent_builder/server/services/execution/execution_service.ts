@@ -26,6 +26,8 @@ import {
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
 import type {
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
   ExecuteAgentParams,
@@ -33,7 +35,8 @@ import type {
   FollowExecutionOptions,
   FindExecutionsOptions,
 } from '@kbn/agent-builder-server/execution';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { ExecutionStatus, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
+import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS, FOLLOW_POLL_INTERVAL_MS } from './constants';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
@@ -156,7 +159,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           ...(params.parentExecutionId ? { parent_execution_id: params.parentExecutionId } : {}),
           ...(cause?.actor ? { actor: cause.actor } : {}),
         };
-        this.abortExecution(executionId, reason).catch(noop);
+        // fire and forget: the caller is winding down itself, nothing waits on the record
+        this.abortExecution(executionId, { reason, waitForTerminal: false }).catch(noop);
       };
       if (abortSignal.aborted) {
         onAbort();
@@ -180,14 +184,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
   async abortExecution(
     executionId: string,
-    reason: ExecutionAbortReason = { source: 'api' }
-  ): Promise<void> {
+    { reason = { source: 'api' }, waitForTerminal = true }: AbortExecutionOptions = {}
+  ): Promise<AbortExecutionResult> {
     const executionClient = this.createExecutionClient();
     const execution = await executionClient.get(executionId);
 
     if (!execution) {
       this.logger.warn(`Ignoring abort for unknown execution ${executionId}`);
-      return;
+      return { acknowledged: false, terminalPersisted: false };
     }
 
     if (
@@ -197,13 +201,60 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       this.logger.debug(
         `Ignoring abort for execution ${executionId} with terminal status ${execution.status}`
       );
-      return;
+      return { acknowledged: false, terminalPersisted: false };
     }
 
     await executionClient.updateStatus(executionId, ExecutionStatus.aborted, {
       abortReason: reason,
     });
     this.logger.debug(`Aborted execution ${executionId} (${reason.source})`);
+
+    // A scheduled execution never starts (the task handler sees `aborted` and skips it), so there
+    // is no record to wait for. A running one is wound down by the executing node, which writes
+    // the interruption to the conversation and then flushes the terminal event to the execution
+    // document: that flush is the signal the record has landed.
+    if (!waitForTerminal || execution.status !== ExecutionStatus.running) {
+      return { acknowledged: true, terminalPersisted: false };
+    }
+    const terminalPersisted = await this.waitForTerminalEvent({
+      executionClient,
+      executionId,
+      since: execution.eventCount,
+    });
+    if (!terminalPersisted) {
+      this.logger.warn(
+        `Execution ${executionId} did not record its interruption within ${ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS}ms of the abort`
+      );
+    }
+    return { acknowledged: true, terminalPersisted };
+  }
+
+  /** Polls the execution document until a terminal timeline event lands or the bound elapses. */
+  private async waitForTerminalEvent({
+    executionClient,
+    executionId,
+    since,
+  }: {
+    executionClient: AgentExecutionClient;
+    executionId: string;
+    since: number;
+  }): Promise<boolean> {
+    const deadline = Date.now() + ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS;
+    let lastEventIndex = since;
+    while (true) {
+      const peek = await executionClient.peek(executionId);
+      if (peek && peek.eventCount > lastEventIndex) {
+        const { events } = await executionClient.readEvents(executionId, lastEventIndex);
+        lastEventIndex += events.length;
+        if (events.some(isExecutionTerminalEvent)) {
+          return true;
+        }
+      }
+      if (Date.now() >= deadline) {
+        return false;
+      }
+      await new Promise<void>((resolve) => setTimeout(resolve, FOLLOW_POLL_INTERVAL_MS));
+    }
   }
 
   followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent> {

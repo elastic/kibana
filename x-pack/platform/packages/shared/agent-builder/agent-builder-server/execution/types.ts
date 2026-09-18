@@ -266,6 +266,26 @@ export interface FindExecutionsOptions {
  * The agent execution service - entry point for deferred agent execution.
  * Replaces the direct call to ChatService.converse in the request flow.
  */
+export interface AbortExecutionOptions {
+  /** Where the abort comes from; defaults to `{ source: 'api' }`. */
+  reason?: ExecutionAbortReason;
+  /**
+   * Wait for the executing node to record the interruption (the terminal timeline event) before
+   * resolving, bounded by a timeout. Defaults to true.
+   */
+  waitForTerminal?: boolean;
+}
+
+export interface AbortExecutionResult {
+  /** False when the execution was unknown or already terminal (nothing was aborted). */
+  acknowledged: boolean;
+  /**
+   * True when the interruption is recorded on the conversation. False when the abort was not
+   * awaited, the execution had not started yet (nothing to record), or the wait timed out.
+   */
+  terminalPersisted: boolean;
+}
+
 export interface AgentExecutionService {
   /**
    * Execute an agent, either locally or on a Task Manager node.
@@ -280,10 +300,16 @@ export interface AgentExecutionService {
 
   /**
    * Abort an ongoing execution.
-   * Sets the execution status to 'aborted', which the executing node detects via polling. `reason`
-   * records where the abort came from; it defaults to the abort API.
+   * Sets the execution status to 'aborted', which the executing node detects via polling and then
+   * winds down, recording the interruption on the conversation. By default the call waits (bounded)
+   * for that record to land, so a caller that re-reads the conversation afterwards sees the aborted
+   * execution rather than a dangling message; `waitForTerminal: false` returns right after the
+   * status flip. `reason` records where the abort came from; it defaults to the abort API.
    */
-  abortExecution(executionId: string, reason?: ExecutionAbortReason): Promise<void>;
+  abortExecution(
+    executionId: string,
+    options?: AbortExecutionOptions
+  ): Promise<AbortExecutionResult>;
 
   /**
    * Follow an execution by polling for events.

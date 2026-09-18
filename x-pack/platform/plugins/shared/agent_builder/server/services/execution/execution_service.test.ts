@@ -70,6 +70,7 @@ const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
+import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
@@ -487,6 +488,12 @@ describe('AgentExecutionService', () => {
   });
 
   describe('abortExecution', () => {
+    afterEach(() => {
+      // the wait-for-terminal tests install persistent peek/readEvents answers
+      mockExecutionClient.peek.mockReset();
+      mockExecutionClient.readEvents.mockReset();
+    });
+
     it('should update status to aborted for running execution', async () => {
       mockExecutionClient.get.mockResolvedValue({
         executionId: 'exec-1',
@@ -500,19 +507,105 @@ describe('AgentExecutionService', () => {
         events: [],
       });
 
-      await service.abortExecution('exec-1');
+      mockExecutionClient.peek.mockResolvedValue({
+        status: ExecutionStatus.aborted,
+        eventCount: 1,
+      });
+      mockExecutionClient.readEvents.mockResolvedValue({
+        status: ExecutionStatus.aborted,
+        events: [{ type: 'execution_aborted', id: 'r1::execution_aborted' } as never],
+      });
+
+      const result = await service.abortExecution('exec-1');
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
         ExecutionStatus.aborted,
         { abortReason: { source: 'api' } }
       );
+      expect(result).toEqual({ acknowledged: true, terminalPersisted: true });
+    });
+
+    it('waits for the terminal event to land on the execution document, reading only new events', async () => {
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        status: ExecutionStatus.running,
+        eventCount: 3,
+      } as never);
+      mockExecutionClient.peek
+        .mockResolvedValueOnce({ status: ExecutionStatus.aborted, eventCount: 3 })
+        .mockResolvedValueOnce({ status: ExecutionStatus.aborted, eventCount: 5 });
+      mockExecutionClient.readEvents.mockResolvedValue({
+        status: ExecutionStatus.aborted,
+        events: [
+          { type: 'tool_call' } as never,
+          { type: 'execution_aborted', id: 'r1::execution_aborted' } as never,
+        ],
+      });
+
+      const result = await service.abortExecution('exec-1');
+
+      expect(result.terminalPersisted).toBe(true);
+      expect(mockExecutionClient.readEvents).toHaveBeenCalledTimes(1);
+      expect(mockExecutionClient.readEvents).toHaveBeenCalledWith('exec-1', 3);
+    });
+
+    it('does not wait when asked not to, or when the execution had not started', async () => {
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        status: ExecutionStatus.running,
+        eventCount: 0,
+      } as never);
+      expect(await service.abortExecution('exec-1', { waitForTerminal: false })).toEqual({
+        acknowledged: true,
+        terminalPersisted: false,
+      });
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
+
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-2',
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+      } as never);
+      expect(await service.abortExecution('exec-2')).toEqual({
+        acknowledged: true,
+        terminalPersisted: false,
+      });
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
+    });
+
+    it('reports terminalPersisted=false when the record never lands within the bound', async () => {
+      jest.useFakeTimers();
+      try {
+        mockExecutionClient.get.mockResolvedValue({
+          executionId: 'exec-1',
+          status: ExecutionStatus.running,
+          eventCount: 0,
+        } as never);
+        mockExecutionClient.peek.mockResolvedValue({
+          status: ExecutionStatus.aborted,
+          eventCount: 0,
+        });
+
+        const promise = service.abortExecution('exec-1');
+        await jest.advanceTimersByTimeAsync(ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS + 1000);
+
+        expect(await promise).toEqual({ acknowledged: true, terminalPersisted: false });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('did not record its interruption')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('should warn and no-op for a non-existent execution', async () => {
       mockExecutionClient.get.mockResolvedValue(undefined);
 
-      await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
+      await expect(service.abortExecution('exec-1')).resolves.toEqual({
+        acknowledged: false,
+        terminalPersisted: false,
+      });
       expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalled();
     });
@@ -530,7 +623,10 @@ describe('AgentExecutionService', () => {
         events: [],
       });
 
-      await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
+      await expect(service.abortExecution('exec-1')).resolves.toEqual({
+        acknowledged: false,
+        terminalPersisted: false,
+      });
       expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
     });
@@ -544,8 +640,8 @@ describe('AgentExecutionService', () => {
       } as never);
 
       await service.abortExecution('exec-1', {
-        source: 'api',
-        actor: { id: 'u1', username: 'alice' },
+        reason: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+        waitForTerminal: false,
       });
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(

@@ -107,22 +107,37 @@ export function registerInternalExecutionRoutes({
         params: schema.object({
           executionId: schema.string(),
         }),
+        query: schema.object({
+          /**
+           * By default the call returns once the interruption is recorded on the conversation, so a
+           * client that re-reads the conversation afterwards sees the aborted execution. Pass
+           * `false` to return right after the abort is requested.
+           */
+          wait_for_terminal: schema.boolean({ defaultValue: true }),
+        }),
       },
     },
     wrapHandler(async (context, request, response) => {
       const { execution: executionService } = getInternalServices();
       const { executionId } = request.params;
+      const { wait_for_terminal: waitForTerminal } = request.query;
 
       const [coreStart] = await coreSetup.getStartServices();
       const user = coreStart.security.authc.getCurrentUser(request);
-      await executionService.abortExecution(executionId, {
-        source: 'api',
-        ...(user
-          ? { actor: { id: user.profile_uid ?? user.username, username: user.username } }
-          : {}),
-      });
+      const { acknowledged, terminalPersisted } = await executionService.abortExecution(
+        executionId,
+        {
+          reason: {
+            source: 'api',
+            ...(user
+              ? { actor: { id: user.profile_uid ?? user.username, username: user.username } }
+              : {}),
+          },
+          waitForTerminal,
+        }
+      );
 
-      return response.ok({ body: { acknowledged: true } });
+      return response.ok({ body: { acknowledged, terminal_persisted: terminalPersisted } });
     })
   );
 }

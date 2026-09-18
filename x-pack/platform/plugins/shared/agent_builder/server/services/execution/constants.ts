@@ -54,6 +54,13 @@ export const FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
  * the graceful cancellation deadline, event batching, the interruption persist and event flush,
  * one follower poll, plus a read-retry margin.
  */
+/**
+ * How long (ms) `abortExecution` waits for the executing node to record the interruption before
+ * resolving. Same chain as the follower's abort drain: abort detection + graceful cancellation +
+ * batching + one poll + margin.
+ */
+export const ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS = 15_000;
+
 export const FOLLOW_ABORT_DRAIN_TIMEOUT_MS =
   ABORT_POLL_INTERVAL_MS +
   CANCELLATION_DEADLINE_MS +
