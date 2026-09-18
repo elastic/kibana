@@ -25,7 +25,7 @@ const BadgeHost = ({
 }: {
   showBadges: boolean;
   api: typeof mockApi;
-  getActions: (triggerId: string, context: object) => Promise<Action<EmbeddableApiContext>[]>;
+  getActions: (triggerId: string, context: object) => Promise<Action[]>;
 }) => {
   const badges = useBadges(showBadges, api, getActions);
   return <>{badges}</>;
