@@ -164,6 +164,45 @@ describe('materializeDecisionTrees', () => {
     expect(apiClient.writeFiles.mock.calls[0][1]).toHaveLength(1);
   });
 
+  it('writes only the requested trees when treeIds is set', async () => {
+    const apiClient = createApiClient();
+    const other: DecisionTreeDetail = {
+      ...TREE,
+      tree_id: 'symptom:payment-errors',
+      symptom: 'payment-errors',
+    };
+
+    const materialized = await materializeDecisionTrees({
+      apiClient: apiClient as never,
+      conversationId: 'conv-1',
+      store: createStore([TREE, other]),
+      logger: loggerMock.create(),
+      treeIds: ['symptom:checkout-high-latency'],
+    });
+
+    expect(materialized.map((tree) => tree.tree_id)).toEqual(['symptom:checkout-high-latency']);
+    const paths = apiClient.writeFiles.mock.calls[0][1].map((file: { path: string }) => file.path);
+    expect(paths).toEqual([
+      '/workspace/decision-trees/monitors.md',
+      '/workspace/decision-trees/decision_tree_checkout-high-latency.md',
+    ]);
+  });
+
+  it('writes an empty index when treeIds is an empty list', async () => {
+    const apiClient = createApiClient();
+
+    const materialized = await materializeDecisionTrees({
+      apiClient: apiClient as never,
+      conversationId: 'conv-1',
+      store: createStore([TREE]),
+      logger: loggerMock.create(),
+      treeIds: [],
+    });
+
+    expect(materialized).toEqual([]);
+    expect(apiClient.writeFiles.mock.calls[0][1]).toHaveLength(1);
+  });
+
   it('still writes an index when there is nothing to hydrate', async () => {
     const apiClient = createApiClient();
 
@@ -177,5 +216,23 @@ describe('materializeDecisionTrees', () => {
     expect(materialized).toEqual([]);
     const index = apiClient.writeFiles.mock.calls[0][1][0].content.toString('utf8');
     expect(index).toContain('No decision trees yet');
+  });
+
+  it('does not write files when the hydrate signal has already aborted', async () => {
+    const apiClient = createApiClient();
+    const signal = AbortSignal.abort();
+
+    await expect(
+      materializeDecisionTrees({
+        apiClient: apiClient as never,
+        conversationId: 'conv-1',
+        store: createStore([TREE]),
+        logger: loggerMock.create(),
+        signal,
+      })
+    ).rejects.toThrow('Decision tree hydrate aborted');
+
+    expect(apiClient.mkdirs).not.toHaveBeenCalled();
+    expect(apiClient.writeFiles).not.toHaveBeenCalled();
   });
 });

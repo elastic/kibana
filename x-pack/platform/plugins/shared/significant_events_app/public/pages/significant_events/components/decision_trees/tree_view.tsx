@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -64,6 +64,10 @@ export function TreeView({ symptom }: TreeViewProps) {
   const { data: treeData, isLoading, isError } = useDecisionTree(symptom);
   const { data: versionsData } = useDecisionTreeVersions(symptom);
   const [selectedVersion, setSelectedVersion] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    setSelectedVersion(undefined);
+  }, [symptom]);
 
   const tree = treeData?.tree;
   const versions = versionsData?.versions ?? [];

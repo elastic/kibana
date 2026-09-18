@@ -37,13 +37,20 @@ export const decisionTreeHydrateStepDefinition = ({
         .min(1)
         .max(1024)
         .describe('Conversation id that namespaces the sandbox.'),
+      prompt: z
+        .string()
+        .max(500_000)
+        .optional()
+        .describe(
+          'The round message. Reinforcement messages carry an accessed-trees marker; without it every tree is written (investigator hydrate).'
+        ),
     }),
     outputSchema: z.object({
       conversation_id: z.string().describe('Conversation id that was hydrated.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
     }),
     handler: async (context) => {
-      const { conversation_id: conversationId } = context.input;
+      const { conversation_id: conversationId, prompt } = context.input;
       const manager = getConnectionManager();
 
       if (!manager) {
@@ -59,12 +66,15 @@ export const decisionTreeHydrateStepDefinition = ({
       const scopedConversationId = scopeConversationId(spaceId, conversationId);
 
       const treeCount = await withTimeout(
-        (_signal) =>
+        (signal) =>
           hydrateDecisionTreeWorkspace({
             apiClient: manager.apiClient,
             conversationId: scopedConversationId,
             esClient: context.contextManager.getScopedEsClient(),
             logger,
+            spaceId,
+            prompt,
+            signal,
           }),
         HYDRATE_TIMEOUT_MS,
         `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`

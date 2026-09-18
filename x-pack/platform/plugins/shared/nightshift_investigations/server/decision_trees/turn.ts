@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildTurnPrompt, selectTurnScript } from '@kbn/nightshift-decision-trees';
+import {
+  buildTurnPrompt,
+  selectTurnScript,
+  symptomSlugFromTreeId,
+} from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeTurnKind, LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeSummary } from './store';
 import { workspacePathForTree } from './materialize';
@@ -22,11 +26,8 @@ export const deriveCausalConfirmed = (response: string): boolean =>
   CONFIRMED_HYPOTHESIS_RE.test(response);
 
 /**
- * Decides whether this round seeds the tree or builds on it.
- *
- * The post-execution hook carries no round index, so the tree's own version history stands in for
- * it: a tree still on its first version is being established, and once it has been revised a later
- * round is a follow-up that either reinforces a confirmed path or extends the tree.
+ * Decides whether this round seeds the tree or builds on it, using only trees the investigator
+ * actually opened. A first version is still being established; a later version is a follow-up.
  */
 export const deriveTurnKind = (trees: DecisionTreeSummary[]): DecisionTreeTurnKind =>
   trees.some((tree) => tree.version > 1) ? 'feedback_reinforcement' : 'initial_investigation';
@@ -49,18 +50,31 @@ export const buildReinforcementPrompt = ({
   const script = selectTurnScript({
     turnKind,
     causalConfirmed: deriveCausalConfirmed(response),
+    // True only when the investigator read at least one tree file this round. Callers must pass
+    // that accessed subset — not every tree in the index.
     hasExistingTrees: trees.length > 0,
+  });
+
+  const relevantLearnings = learnings.filter((learning) => {
+    if (learning.tree_id === undefined) {
+      return false;
+    }
+    const learningSlug = symptomSlugFromTreeId(learning.tree_id);
+    return trees.some((tree) => learningSlug === tree.symptom);
   });
 
   const turnPrompt = buildTurnPrompt({
     editableTreePaths: trees.map(
       (tree) => `${tree.tree_id} — ${workspacePathForTree(tree.tree_id)}`
     ),
-    activeSystemLearning: learnings.find((learning) => learning.kind === 'system')?.content,
-    activeToolLearnings: learnings
+    activeSystemLearnings: relevantLearnings
+      .filter((learning) => learning.kind === 'system')
+      .map((learning) => learning.content),
+    activeToolLearnings: relevantLearnings
       .filter((learning) => learning.kind === 'tool')
       .map((learning) => `${learning.connector_name}, ${learning.category}: ${learning.content}`),
-    activeRemediation: learnings.find((learning) => learning.kind === 'remediation')?.content,
+    activeRemediation: relevantLearnings.find((learning) => learning.kind === 'remediation')
+      ?.content,
     connectorNames,
     script,
   });

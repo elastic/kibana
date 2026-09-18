@@ -182,20 +182,38 @@ export const materializeDecisionTrees = async ({
   conversationId,
   store,
   logger,
+  treeIds,
+  signal,
 }: {
   apiClient: SandboxApiClient;
   conversationId: string;
   store: DecisionTreeStore;
   logger: Logger;
+  /**
+   * When set, only these trees are written (reinforcement: trees the investigator opened).
+   * Omitted for the investigator hydrate so it can discover any matching tree via monitors.md.
+   */
+  treeIds?: string[];
+  signal?: AbortSignal;
 }): Promise<DecisionTreeSummary[]> => {
   const allTrees = await store.list();
   // Archived means a tree was retired as wrong or obsolete, so re-hydrating it would invite the
   // agent to keep building on something we already decided not to trust.
-  const trees = allTrees.filter((tree) => tree.status !== 'archived');
+  const allowed = treeIds ? new Set(treeIds) : undefined;
+  const trees = allTrees.filter((tree) => {
+    if (tree.status === 'archived') {
+      return false;
+    }
+    return allowed ? allowed.has(tree.tree_id) : true;
+  });
 
   const stored = (await Promise.all(trees.map(async (tree) => store.get(tree.tree_id)))).filter(
     (tree): tree is NonNullable<typeof tree> => tree !== undefined
   );
+
+  if (signal?.aborted) {
+    throw new Error('Decision tree hydrate aborted');
+  }
 
   await apiClient.mkdirs(conversationId, [DECISION_TREE_WORKSPACE_ROOT]);
   await apiClient.writeFiles(conversationId, [

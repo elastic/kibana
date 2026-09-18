@@ -32,7 +32,9 @@ triggers:
           description: Agent id that produced the round.
         tool_calls:
           type: array
-          description: Tool calls from the completed round. Unused by this workflow.
+          description: >
+            Tool calls from the completed round. Used to see which decision-tree
+            files the investigator actually opened.
           items:
             type: object
             additionalProperties: true
@@ -48,6 +50,7 @@ steps:
       prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
       agent_id: '{{ inputs.agent_id }}'
+      tool_calls: '{{ inputs.tool_calls }}'
 
   # Nothing else installs this agent: the investigation workflow only ensures the investigator,
   # and this workflow is the sole caller of the reinforcement agent.

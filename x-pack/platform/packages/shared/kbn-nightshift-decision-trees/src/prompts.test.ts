@@ -98,7 +98,7 @@ describe('buildTurnPrompt', () => {
   it('lists editable files and active learnings', () => {
     const prompt = buildTurnPrompt({
       editableTreePaths: ['symptom:checkout-latency: /workspace/decision-trees/x.md'],
-      activeSystemLearning: 'Checkout writes before syncing.',
+      activeSystemLearnings: ['Checkout writes before syncing.', 'Redis is the session store.'],
       activeToolLearnings: ['query_pattern, elasticsearch: Filter by service.name.'],
       activeRemediation: 'Roll back the pool-size change.',
       connectorNames: ['elasticsearch'],
@@ -107,7 +107,8 @@ describe('buildTurnPrompt', () => {
     });
 
     expect(prompt).toContain('- symptom:checkout-latency: /workspace/decision-trees/x.md');
-    expect(prompt).toContain('- system: Checkout writes before syncing.');
+    expect(prompt).toContain('- Checkout writes before syncing.');
+    expect(prompt).toContain('- Redis is the session store.');
     expect(prompt).toContain('- remediation: Roll back the pool-size change.');
     expect(prompt).toContain('Referenced memories:\nNone');
     expect(prompt).toContain(SCRIPT_REINFORCE);
@@ -116,13 +117,14 @@ describe('buildTurnPrompt', () => {
   it('renders None for every empty slot', () => {
     const prompt = buildTurnPrompt({
       editableTreePaths: [],
+      activeSystemLearnings: [],
       activeToolLearnings: [],
       connectorNames: [],
       script: SCRIPT_INITIAL_CREATE,
     });
 
     expect(prompt).toContain('Decision-tree files available for edit:\n- None');
-    expect(prompt).toContain('- system: None');
+    expect(prompt).toContain('- system:\n- None');
     expect(prompt).toContain('Enabled connectors:\nNone');
   });
 });

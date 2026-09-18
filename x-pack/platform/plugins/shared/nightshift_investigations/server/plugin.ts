@@ -305,6 +305,7 @@ export class NightshiftInvestigationsPlugin
             return createDecisionTreeStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('decision_trees'),
+              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
         },

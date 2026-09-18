@@ -38,6 +38,11 @@ describe('decision tree reinforce workflow', () => {
     ]);
   });
 
+  it('forwards the investigator tool_calls into the prepare step', () => {
+    const [prepare] = workflow.steps;
+    expect(prepare.with?.tool_calls).toBe('{{ inputs.tool_calls }}');
+  });
+
   it('runs the reinforcement agent on the message the prepare step built', () => {
     const [, , reinforce] = workflow.steps;
     expect(reinforce['agent-id']).toBe('significant-events.decision-tree-reinforcement');
