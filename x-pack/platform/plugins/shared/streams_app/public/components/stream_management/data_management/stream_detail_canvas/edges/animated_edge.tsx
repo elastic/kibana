@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { BaseEdge, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
+import { BaseEdge, type EdgeProps } from '@xyflow/react';
+import { useHopEdge } from './use_hop_edge';
 
 const DASH = 4;
 const GAP = 8;
@@ -34,30 +35,12 @@ const flowStyles = css`
   }
 `;
 
-export function AnimatedEdge({
-  id,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
-  markerEnd,
-  style,
-  selected,
-}: EdgeProps) {
+export function AnimatedEdge(props: EdgeProps) {
+  const { id, markerEnd, style, selected } = props;
   const { euiTheme } = useEuiTheme();
   const [isHovered, setIsHovered] = useState(false);
 
-  const [edgePath] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-    borderRadius: 12,
-  });
+  const hoppedPath = useHopEdge(props);
 
   const isActive = isHovered || Boolean(selected);
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
@@ -66,14 +49,14 @@ export function AnimatedEdge({
     <g onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <BaseEdge
         id={id}
-        path={edgePath}
+        path={hoppedPath}
         markerEnd={markerEnd}
         style={{ ...style, stroke: strokeColor, strokeWidth: 1 }}
         interactionWidth={24}
       />
       {isActive ? (
         <path
-          d={edgePath}
+          d={hoppedPath}
           css={flowStyles}
           stroke={euiTheme.colors.primary}
           strokeWidth={1}
