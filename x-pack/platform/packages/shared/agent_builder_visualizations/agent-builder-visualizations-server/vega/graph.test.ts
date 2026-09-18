@@ -15,9 +15,6 @@ import { createVegaGraph } from './graph';
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
-}));
-
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
   buildTimeRangeParams: jest.fn(() => undefined),
 }));
 
@@ -239,7 +236,7 @@ describe('createVegaGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: PROVIDED_ESQL })
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false })
     );
     const spec = JSON.parse(state.spec!);
     expect(spec.data.url.query).toBe(PROVIDED_ESQL);

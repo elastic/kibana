@@ -9,7 +9,7 @@ import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-bu
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
+import { generateVisualizationEsql } from './generate_visualization_esql';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
@@ -80,8 +80,8 @@ describe('generateVisualizationEsql', () => {
         index: 'logs-*',
         esClient: asCurrentUser,
         additionalInstructions: 'esql-instructions',
-        timeRange: { from: 'now-7d', to: 'now' },
         execute: 'schema',
+        timeRange: { from: 'now-7d', to: 'now' },
       })
     );
   });
@@ -136,6 +136,23 @@ describe('generateVisualizationEsql', () => {
 
     const { nlQuery } = mockedGenerateEsql.mock.calls[0][0];
     expect(nlQuery).toContain('Existing esql query to modify: "FROM logs-* | STATS c = COUNT()"');
+    expect(nlQuery).toContain('User query: count logs by status');
+  });
+
+  it('seeds the request with per-layer context for multiple existing queries', async () => {
+    mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+      ReturnType<typeof generateEsql>
+    >);
+
+    await generateVisualizationEsql({
+      ...params,
+      existingQueries: ['FROM a | STATS x', 'FROM b | STATS y'],
+    });
+
+    const { nlQuery } = mockedGenerateEsql.mock.calls[0][0];
+    expect(nlQuery).toContain('Existing esql queries from multiple layers:');
+    expect(nlQuery).toContain('Layer 1: "FROM a | STATS x"');
+    expect(nlQuery).toContain('Layer 2: "FROM b | STATS y"');
     expect(nlQuery).toContain('User query: count logs by status');
   });
 
@@ -199,30 +216,5 @@ describe('generateVisualizationEsql', () => {
       expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
       expect(getDefaultModel).not.toHaveBeenCalled();
     });
-  });
-});
-
-describe('buildEsqlEditContext', () => {
-  it('returns the request unchanged when no existing queries are given', () => {
-    expect(buildEsqlEditContext('count logs')).toBe('count logs');
-    expect(buildEsqlEditContext('count logs', [])).toBe('count logs');
-  });
-
-  it('formats a single existing query as a modify instruction', () => {
-    expect(buildEsqlEditContext('exclude 503s', ['FROM logs-* | STATS c = COUNT()'])).toBe(
-      'Existing esql query to modify: "FROM logs-* | STATS c = COUNT()"\n\nUser query: exclude 503s'
-    );
-  });
-
-  it('formats multiple existing queries as per-layer context', () => {
-    const result = buildEsqlEditContext('add a trend line', [
-      'FROM a | STATS x',
-      'FROM b | STATS y',
-    ]);
-
-    expect(result).toContain('Existing esql queries from multiple layers:');
-    expect(result).toContain('Layer 1: "FROM a | STATS x"');
-    expect(result).toContain('Layer 2: "FROM b | STATS y"');
-    expect(result).toContain('User query: add a trend line');
   });
 });

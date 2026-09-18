@@ -30,7 +30,7 @@ const getExistingChartType = (
     : undefined;
 };
 
-export interface BuildLensConfigParams {
+interface BuildLensConfigParams {
   nlQuery: string;
   index?: string;
   chartType?: SupportedChartType;

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { VisualizationConfig } from './types';
 
 export interface GenerateEsqlAction {
   type: 'generate_esql';
   success: boolean;
   query?: string;
+  columns?: EsqlEsqlColumnInfo[];
   error?: string;
 }
 
