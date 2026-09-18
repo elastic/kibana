@@ -488,6 +488,7 @@ describe('generateQueriesRoute', () => {
       server: {
         core: {
           featureFlags: {},
+          dataStreams: {},
         },
         searchInferenceEndpoints: undefined,
         agentBuilder,

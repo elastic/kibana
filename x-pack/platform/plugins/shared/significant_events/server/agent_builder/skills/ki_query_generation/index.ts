@@ -8,12 +8,8 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-import {
-  createMemoryListTool,
-  createMemoryReadTool,
-  createMemorySearchTool,
-  type MemoryToolsOptions,
-} from '../../../memory_and_investigation/tools/memory';
+import type { Logger } from '@kbn/core/server';
+import type { GetScopedClients } from '../../../routes/types';
 import { createGetFeaturesTool } from './get_features/tool';
 import { createValidateQueriesTool } from './validate_queries/tool';
 import description from './description.text';
@@ -26,7 +22,12 @@ export {
   type AcceptedQuery,
 } from './validate_queries/tool';
 
-export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
+export interface KIQueryGenerationSkillOptions {
+  getScopedClients: GetScopedClients;
+  logger: Logger;
+}
+
+export const createKIQueryGenerationSkill = (options: KIQueryGenerationSkillOptions) => {
   const { getScopedClients, logger } = options;
 
   return defineSkillType({
@@ -39,9 +40,6 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
     content,
     getRegistryTools: () => [platformSignificantEventsTools.searchEvent],
     getInlineTools: (): BuiltinSkillBoundedTool[] => [
-      createMemorySearchTool(options),
-      createMemoryReadTool(options),
-      createMemoryListTool(options),
       createGetFeaturesTool({
         getScopedClients,
         logger: logger.get('ki_features_get_tool'),

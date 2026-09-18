@@ -1,3 +1,3 @@
 ## Query-generation tools
 
-This skill provides private access to Significant Events memory, prior Significant Event and investigation history, `platform_sig_events_ki_features_get`, and terminal `platform_sig_events_ki_queries_validate`. When Semantic Code Search grounding is enabled, the agent also exposes direct `scs_*` source and git-history tools. Follow the query-generation instructions already present in the system prompt.
+This skill provides private access to prior Significant Event and investigation history, `platform_sig_events_ki_features_get`, and terminal `platform_sig_events_ki_queries_validate`. When Semantic Code Search grounding is enabled, the agent also exposes direct `scs_*` source and git-history tools. Follow the query-generation instructions already present in the system prompt.
