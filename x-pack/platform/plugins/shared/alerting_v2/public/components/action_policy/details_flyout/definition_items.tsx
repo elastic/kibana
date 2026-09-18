@@ -34,7 +34,6 @@ export const getDescriptionItem = (policy: Partial<ActionPolicyResponse>): ListI
   };
 };
 
-
 export const getMatcherItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
   const { matcher } = policy;
   return {
