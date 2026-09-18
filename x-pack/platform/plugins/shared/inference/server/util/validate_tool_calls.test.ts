@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ToolChoiceType } from '@kbn/inference-common';
+import { ToolChoiceType, isToolValidationError } from '@kbn/inference-common';
+import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { validateToolCalls } from './validate_tool_calls';
 
 describe('validateToolCalls', () => {
@@ -36,7 +37,9 @@ describe('validateToolCalls', () => {
 
   it('filters out malformed tool calls with empty names instead of throwing', () => {
     // Models under token pressure occasionally emit tool calls with empty
-    // names. These should be silently dropped, not crash the pipeline.
+    // names. These cannot be attributed to a tool at all, so they are dropped
+    // (and logged) rather than crashing the pipeline.
+    const debug = jest.fn();
     const result = validateToolCalls({
       toolCalls: [
         {
@@ -59,6 +62,7 @@ describe('validateToolCalls', () => {
           description: 'description',
         },
       },
+      logger: { debug },
     });
     expect(result).toEqual([
       {
@@ -69,6 +73,7 @@ describe('validateToolCalls', () => {
         toolCallId: '2',
       },
     ]);
+    expect(debug).toHaveBeenCalledTimes(1);
   });
 
   it('throws an error if an unknown tool was called', () => {
@@ -95,93 +100,85 @@ describe('validateToolCalls', () => {
     );
   });
 
-  it('filters out tool calls with unparseable JSON arguments instead of throwing', () => {
-    // Models under token pressure occasionally emit tool calls whose arguments
-    // are not valid JSON. These should be silently dropped (giving the model a
-    // chance to re-emit on the next turn), not crash the converse request.
-    const result = validateToolCalls({
-      toolCalls: [
-        {
-          function: {
-            name: 'my_function',
-            arguments: '{[]}',
+  it('throws a ToolValidationError for unparseable JSON arguments', () => {
+    // Malformed arguments must stay a `ToolValidationError`: `error_retry_filter`
+    // classifies it as recoverable (so the completion is retried) and the
+    // structured-output path re-prompts the model with the failure. Dropping the
+    // call instead leaves both self-correction paths with nothing to act on.
+    expect(() =>
+      validateToolCalls({
+        toolCalls: [
+          {
+            function: {
+              name: 'my_function',
+              arguments: '{[]}',
+            },
+            toolCallId: '1',
           },
-          toolCallId: '1',
-        },
-        {
-          function: {
-            name: 'my_function',
-            arguments: '{}',
-          },
-          toolCallId: '2',
-        },
-      ],
+        ],
 
-      tools: {
-        my_function: {
-          description: 'description',
+        tools: {
+          my_function: {
+            description: 'description',
+          },
         },
-      },
-    });
-    expect(result).toEqual([
-      {
-        function: {
-          name: 'my_function',
-          arguments: {},
-        },
-        toolCallId: '2',
-      },
-    ]);
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"Failed parsing arguments for my_function"`);
   });
 
-  it('filters out tool calls with schema-invalid arguments instead of throwing', () => {
-    // Models occasionally emit JSON arguments that parse but fail the tool's
-    // Zod schema (wrong types, missing required fields). Drop these rather
-    // than 500-ing — the model self-corrects on the next turn.
-    const result = validateToolCalls({
-      toolCalls: [
-        {
-          // Invalid: missing required `bar` field
-          function: {
-            name: 'my_function',
-            arguments: JSON.stringify({ foo: 'bar' }),
-          },
-          toolCallId: '1',
-        },
-        {
-          // Valid
-          function: {
-            name: 'my_function',
-            arguments: JSON.stringify({ bar: 'baz' }),
-          },
-          toolCallId: '2',
-        },
-      ],
-
-      tools: {
-        my_function: {
-          description: 'description',
-          schema: {
-            type: 'object',
-            properties: {
-              bar: {
-                type: 'string',
-              },
+  it('throws a ToolValidationError for schema-invalid arguments', () => {
+    expect(() =>
+      validateToolCalls({
+        toolCalls: [
+          {
+            // Invalid: missing required `bar` field
+            function: {
+              name: 'my_function',
+              arguments: JSON.stringify({ foo: 'bar' }),
             },
-            required: ['bar'],
+            toolCallId: '1',
+          },
+        ],
+
+        tools: {
+          my_function: {
+            description: 'description',
+            schema: {
+              type: 'object',
+              properties: {
+                bar: {
+                  type: 'string',
+                },
+              },
+              required: ['bar'],
+            },
           },
         },
-      },
-    });
-    expect(result).toEqual([
-      {
-        function: {
-          name: 'my_function',
-          arguments: { bar: 'baz' },
-        },
-        toolCallId: '2',
-      },
-    ]);
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"Tool call arguments for my_function (1) were invalid"`);
+  });
+
+  it('reports malformed arguments as a retryable ToolValidationError', () => {
+    let thrown: unknown;
+    try {
+      validateToolCalls({
+        toolCalls: [
+          {
+            function: {
+              name: 'my_function',
+              arguments: '{[]}',
+            },
+            toolCallId: '1',
+          },
+        ],
+        tools: { my_function: { description: 'description' } },
+      });
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(isToolValidationError(thrown)).toBe(true);
+    expect(getRetryFilter('auto')(thrown as Error)).toBe(true);
   });
 
   it('successfully validates and parses a valid tool call', () => {

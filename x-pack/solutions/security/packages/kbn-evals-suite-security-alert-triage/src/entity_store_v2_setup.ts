@@ -13,6 +13,8 @@ import type supertest from 'supertest';
 
 export const WEB_SERVER_01_EUID = 'host:web-server-01';
 
+const ENTITY_STORE_ENTITY_TYPES = ['user', 'host'];
+
 export async function installEntityStoreV2({
   supertest: agent,
   log,
@@ -26,7 +28,7 @@ export async function installEntityStoreV2({
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'Kibana')
     .set('elastic-api-version', '2023-10-31')
-    .send({ entityTypes: ['user', 'host'] });
+    .send({ entityTypes: ENTITY_STORE_ENTITY_TYPES });
 
   if (installRes.status !== 200 && installRes.status !== 201) {
     throw new Error(
@@ -94,19 +96,21 @@ export async function teardownEntityStoreV2({
 }): Promise<void> {
   try {
     const res = await agent
-      .delete('/api/entity_store/engines')
+      .post('/api/security/entity_store/uninstall')
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2023-10-31')
-      .query({ delete_data: true });
+      .send({ entityTypes: ENTITY_STORE_ENTITY_TYPES });
 
     if (res.status >= 400) {
       log.warning(
-        `deleteEntityEngines failed during teardown (${res.status}): ${JSON.stringify(res.body)}`
+        `Entity Store V2 uninstall failed during teardown (${res.status}): ${JSON.stringify(
+          res.body
+        )}`
       );
     }
   } catch (err) {
-    log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
+    log.warning(`Entity Store V2 uninstall failed during teardown: ${(err as Error).message}`);
   }
 }
 

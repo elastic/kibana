@@ -104,6 +104,13 @@ const createDynamicSkillInvocationEvaluator = ({
           expected,
           metadata,
         });
+        // `score: null` means the trajectory was never inspected (no trace ids, or every
+        // trace query failed). Inverting it here would turn "we could not check" into a
+        // silent pass, so propagate it instead — same rule as
+        // createExampleScopedSkillInvocationEvaluator.
+        if (result.score == null) {
+          return result;
+        }
         const invoked = result.score === 1;
         return {
           ...result,

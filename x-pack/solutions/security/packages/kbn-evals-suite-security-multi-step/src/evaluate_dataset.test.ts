@@ -89,3 +89,69 @@ describe('toDatasetExample', () => {
     expect(wrapped.input?.question).toBe('Turn 1: hello\nTurn 2: follow up');
   });
 });
+
+const VALID_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
+
+const evaluateSkillInvoked = ({
+  output,
+  query,
+}: {
+  output: Record<string, unknown>;
+  query?: jest.Mock;
+}): Promise<Awaited<ReturnType<Evaluator['evaluate']>>> => {
+  const evaluators = buildMultiStepEvaluators({
+    ...buildBuildArgs(),
+    ...(query ? { traceEsClient: { esql: { query } } as unknown as EsClient } : {}),
+  });
+
+  const evaluator = evaluators.find((e) => e.name === 'Skill Invoked');
+  if (!evaluator) {
+    throw new Error('Skill Invoked evaluator missing from the stack');
+  }
+
+  return evaluator.evaluate({
+    input: { turns: ['triage this alert'], question: 'Turn 1: triage this alert' },
+    output,
+    expected: { reference: 'ref', expected: 'ref', primary_skill: 'alert-analysis' },
+    metadata: { scenario: 'distractor_general', dataset_split: ['base'], is_distractor: true },
+  });
+};
+
+const buildSkillInvokedQuery = (skillInvoked: number) =>
+  jest.fn().mockResolvedValue({
+    columns: [
+      { name: 'total_spans', type: 'long' },
+      { name: 'total_tool_spans', type: 'long' },
+      { name: 'skill_invoked', type: 'long' },
+    ],
+    values: [[50, 4, skillInvoked]],
+  });
+
+describe('Skill Invoked evaluator on distractor scenarios', () => {
+  it('propagates an uninspectable trajectory instead of scoring it as a pass', async () => {
+    // No trace id means the distractor was never checked. Inverting the null score
+    // would report "skill correctly not invoked" for a run that proved nothing.
+    const result = await evaluateSkillInvoked({ output: { steps: [] } });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+  });
+
+  it('passes the distractor when the skill was not invoked', async () => {
+    const result = await evaluateSkillInvoked({
+      output: { traceIds: [VALID_TRACE_ID] },
+      query: buildSkillInvokedQuery(0),
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('fails the distractor when the skill was invoked', async () => {
+    const result = await evaluateSkillInvoked({
+      output: { traceIds: [VALID_TRACE_ID] },
+      query: buildSkillInvokedQuery(1),
+    });
+
+    expect(result.score).toBe(0);
+  });
+});

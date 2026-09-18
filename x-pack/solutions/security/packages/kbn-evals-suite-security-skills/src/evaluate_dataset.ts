@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
   getStringMeta,
@@ -80,6 +80,27 @@ export const toDatasetExample = (ex: SecuritySkillsExample): SecuritySkillsDatas
 });
 
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
+const FIND_RULES_TOOL_ID = 'security.find_rules';
+const DISCOVER_RULE_TAGS_TOOL_ID = 'security.discover_rule_tags';
+
+/**
+ * Domain tools that may be called alongside `expectedOnlyToolId` without failing the
+ * "only" assertion. The find-security-rules skill mandates a `security.discover_rule_tags`
+ * call before every `security.find_rules` call, so a model that follows the skill is not
+ * "using another domain tool". Mirrors the allow-list in kbn-evals-suite-agent-builder.
+ */
+function allowedDomainToolIdsForExample(
+  metadata?: Record<string, unknown> | null
+): string[] | null {
+  const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+  if (!expectedOnlyToolId) {
+    return null;
+  }
+  if (expectedOnlyToolId === FIND_RULES_TOOL_ID) {
+    return [DISCOVER_RULE_TAGS_TOOL_ID, FIND_RULES_TOOL_ID];
+  }
+  return [expectedOnlyToolId];
+}
 
 function collectUniqueExpectedSkills(examples: SecuritySkillsDatasetExample[]): string[] {
   const names = new Set<string>();
@@ -213,13 +234,16 @@ const createToolUsageOnlyEvaluator = (): Evaluator<SecuritySkillsDatasetExample,
       };
     }
 
-    const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
+    const usedToolIds = domainToolCalls
+      .map((t) => t.tool_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0);
+    const allowedToolIds = allowedDomainToolIdsForExample(metadata) ?? [expectedOnlyToolId];
     const hasExpected = usedToolIds.includes(expectedOnlyToolId);
-    const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
+    const allAllowed = usedToolIds.every((id) => allowedToolIds.includes(id));
 
     return {
-      score: hasExpected && allExpected ? 1 : 0,
-      metadata: { expectedOnlyToolId, usedToolIds },
+      score: hasExpected && allAllowed ? 1 : 0,
+      metadata: { expectedOnlyToolId, allowedToolIds, usedToolIds },
     };
   },
 });
@@ -259,10 +283,18 @@ export const buildSecuritySkillsEvaluators = ({
     outputTokens as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<SecuritySkillsDatasetExample, TaskOutput>,
     ...collectUniqueExpectedSkills(examples).map((skillName) =>
-      createSkillInvocationEvaluator({
+      createExampleScopedSkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName,
+        resolveContext: ({ expected, metadata }) => {
+          const exp = expected as SecuritySkillsDatasetExpected | undefined;
+          return {
+            expectedSkill: exp?.expectedSkill ?? getStringMeta(metadata, 'expectedSkill'),
+            shouldNotActivateSkill:
+              exp?.shouldNotActivateSkill ?? getStringMeta(metadata, 'shouldNotActivateSkill'),
+          };
+        },
       })
     ),
     ...(hasShouldNotActivateExamples(examples)

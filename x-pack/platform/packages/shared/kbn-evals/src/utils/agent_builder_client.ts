@@ -6,8 +6,6 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { withRetry } from './retry_utils';
 
 export interface ConverseStep {
   type?: string;
@@ -54,57 +52,46 @@ export interface AgentBuilderClient {
 
 export function createAgentBuilderClient({
   fetch,
-  log,
   connectorId,
 }: {
   fetch: HttpHandler;
-  log: ToolingLog;
   connectorId: string;
 }): AgentBuilderClient {
-  const converse = ({
+  const converse = async ({
     agentId,
     input,
     conversationId,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
-    const call = async (): Promise<AgentBuilderClientResponse> => {
-      const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
-        method: 'POST',
-        version: '2023-10-31',
-        body: JSON.stringify({
-          agent_id: agentId,
-          connector_id: connectorId,
-          input,
-          // Run the agent inline rather than via Task Manager (the server's auto-detect default).
-          // Inline execution runs inside this HTTP request, so the eval worker's W3C `traceparent`
-          // propagates and the agent's server-side gen_ai spans nest under the eval's trace — the
-          // same id `getCurrentTraceId()` returns. That keeps trace-based metrics correlatable
-          // against the default cluster with no `TRACING_ES_URL` (matching the inferenceClient path).
-          _execution_mode: 'local',
-          ...(conversationId ? { conversation_id: conversationId } : {}),
-        }),
-      });
-
-      return {
-        message: response.response?.message ?? '',
-        steps: response.steps ?? [],
-        structuredOutput: response.response?.structured_output,
-        conversationId: response.conversation_id,
-        traceId: response.trace_id,
-      };
-    };
-
-    // withRetry gives status-aware exponential backoff + jitter (6 attempts) and honors
-    // "retry after" guidance — far more resilient to EIS 429/502/503 bursts under the full
-    // parallel weekly load than a flat pRetry(2). See retry_utils.ts.
-    return withRetry(call, {
-      label: `AgentBuilderClient.converse(${agentId})`,
-      onRetry: ({ attempt, maxAttempts, delayMs, error }) => {
-        const message = error instanceof Error ? error.message : String(error);
-        log.warning(
-          `[AgentBuilderClient] converse(${agentId}) failed on attempt ${attempt}/${maxAttempts}; retrying in ${delayMs}ms... (${message})`
-        );
-      },
+    // Retries are owned by the single layer below this one: `httpHandlerFromKbnClient`
+    // retries 429/502/503/504 and transport errors with status-aware backoff and honors
+    // `retry-after`. Wrapping this call in `withRetry` as well multiplies the two layers
+    // (6 attempts x 4 = up to 24 requests for one turn) and re-issues a request while the
+    // handler is already backing off, which is the opposite of what an EIS saturation
+    // burst needs. Raise `KBN_EVALS_HTTP_RETRIES` if more attempts are wanted.
+    const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
+      method: 'POST',
+      version: '2023-10-31',
+      body: JSON.stringify({
+        agent_id: agentId,
+        connector_id: connectorId,
+        input,
+        // Run the agent inline rather than via Task Manager (the server's auto-detect default).
+        // Inline execution runs inside this HTTP request, so the eval worker's W3C `traceparent`
+        // propagates and the agent's server-side gen_ai spans nest under the eval's trace — the
+        // same id `getCurrentTraceId()` returns. That keeps trace-based metrics correlatable
+        // against the default cluster with no `TRACING_ES_URL` (matching the inferenceClient path).
+        _execution_mode: 'local',
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+      }),
     });
+
+    return {
+      message: response.response?.message ?? '',
+      steps: response.steps ?? [],
+      structuredOutput: response.response?.structured_output,
+      conversationId: response.conversation_id,
+      traceId: response.trace_id,
+    };
   };
 
   return { converse };

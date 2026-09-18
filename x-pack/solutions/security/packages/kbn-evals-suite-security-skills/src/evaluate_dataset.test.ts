@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { buildSecuritySkillsEvaluators, toDatasetExample } from './evaluate_dataset';
+import type { SecuritySkillsDatasetExpected } from './evaluate_dataset';
 import type { SecuritySkillsExample } from './dataset';
 import { securitySkillsExamples } from './datasets';
 
@@ -106,5 +107,132 @@ describe('securitySkillsExamples', () => {
         (ex) => ex.metadata.category === 'find-rules' || ex.metadata.category === 'distractor'
       )
     ).toBe(true);
+  });
+});
+
+const VALID_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
+
+const buildStackWithSkillInvoked = (skillInvoked: number) => {
+  const query = jest.fn().mockResolvedValue({
+    columns: [
+      { name: 'total_spans', type: 'long' },
+      { name: 'total_tool_spans', type: 'long' },
+      { name: 'skill_invoked', type: 'long' },
+    ],
+    values: [[50, 4, skillInvoked]],
+  });
+
+  return {
+    query,
+    stack: buildSecuritySkillsEvaluators({
+      ...buildBuildArgs(),
+      traceEsClient: { esql: { query } } as unknown as EsClient,
+      examples: securitySkillsExamples.map(toDatasetExample),
+    }),
+  };
+};
+
+const findEvaluator = <T extends Evaluator>(stack: T[], name: string): T => {
+  const evaluator = stack.find((e) => e.name === name);
+  if (!evaluator) {
+    throw new Error(`Evaluator "${name}" missing from the stack`);
+  }
+  return evaluator;
+};
+
+describe('ToolUsageOnly evaluator', () => {
+  const evaluateToolUsage = (
+    metadata: Record<string, unknown>,
+    toolIds: string[]
+  ): ReturnType<Evaluator['evaluate']> => {
+    const stack = buildSecuritySkillsEvaluators({
+      ...buildBuildArgs(),
+      examples: securitySkillsExamples.map(toDatasetExample),
+    });
+
+    return findEvaluator(stack, 'ToolUsageOnly').evaluate({
+      input: { question: 'List MITRE rules' },
+      output: { steps: toolIds.map((tool_id) => ({ type: 'tool_call', tool_id })) },
+      expected: { reference: 'Uses find_rules', expected: 'Uses find_rules' },
+      metadata: {
+        category: 'find-rules',
+        query_intent: 'Rule Discovery',
+        dataset_split: ['base'],
+        ...metadata,
+      },
+    });
+  };
+
+  it('accepts the discover_rule_tags call the find-rules skill mandates before find_rules', async () => {
+    const result = await evaluateToolUsage({ expectedOnlyToolId: 'security.find_rules' }, [
+      'security.discover_rule_tags',
+      'security.find_rules',
+    ]);
+
+    expect(result.score).toBe(1);
+  });
+
+  it('fails when a domain tool outside the allow-list is used', async () => {
+    const result = await evaluateToolUsage({ expectedOnlyToolId: 'security.find_rules' }, [
+      'security.discover_rule_tags',
+      'security.find_rules',
+      'security.search_alerts',
+    ]);
+
+    expect(result.score).toBe(0);
+  });
+
+  it('keeps the single-tool allow-list for non find-rules examples', async () => {
+    const result = await evaluateToolUsage(
+      { expectedOnlyToolId: 'security.create_detection_rule' },
+      ['security.discover_rule_tags', 'security.create_detection_rule']
+    );
+
+    expect(result.score).toBe(0);
+  });
+});
+
+describe('Skill Invoked evaluator scoping', () => {
+  const evaluateFindRulesSkillInvoked = (
+    skillInvoked: number,
+    expected: Partial<SecuritySkillsDatasetExpected>
+  ): Promise<Awaited<ReturnType<Evaluator['evaluate']>>> => {
+    const { stack } = buildStackWithSkillInvoked(skillInvoked);
+
+    return findEvaluator(stack, 'Skill Invoked (find-security-rules)').evaluate({
+      input: { question: 'What is the weather in Berlin?' },
+      output: { traceId: VALID_TRACE_ID },
+      expected: { reference: 'ref', expected: 'ref', ...expected },
+      metadata: {
+        category: 'distractor',
+        query_intent: 'Out of domain',
+        dataset_split: ['base'],
+        is_distractor: true,
+        shouldNotActivateSkill: 'find-security-rules',
+      },
+    });
+  };
+
+  it('passes a distractor when the skill was not invoked', async () => {
+    const result = await evaluateFindRulesSkillInvoked(0, {
+      shouldNotActivateSkill: 'find-security-rules',
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('fails a distractor when the skill was invoked', async () => {
+    const result = await evaluateFindRulesSkillInvoked(1, {
+      shouldNotActivateSkill: 'find-security-rules',
+    });
+
+    expect(result.score).toBe(0);
+  });
+
+  it('stays out of the way for examples that target another skill', async () => {
+    const result = await evaluateFindRulesSkillInvoked(1, { expectedSkill: 'alert-analysis' });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 });

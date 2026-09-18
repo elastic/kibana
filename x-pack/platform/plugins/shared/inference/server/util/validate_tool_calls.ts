@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import type { Logger } from '@kbn/logging';
 import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolCallOfToolOptions } from '@kbn/inference-common';
@@ -18,21 +20,34 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
+  logger,
+}: TToolOptions & {
+  toolCalls: UnvalidatedToolCall[];
+  logger?: Pick<Logger, 'debug'>;
+}): ToolCallOfToolOptions<TToolOptions>[];
 
 export function validateToolCalls({
   toolCalls,
   toolChoice,
   tools,
-}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
+  logger,
+}: ToolOptions & {
+  toolCalls: UnvalidatedToolCall[];
+  logger?: Pick<Logger, 'debug'>;
+}): ToolCall[] {
   // Models under token pressure occasionally emit malformed tool calls with
-  // an empty or whitespace-only name. Rather than 500-ing the entire request
-  // (which cascades and fails the conversation), filter these out early.
-  // The model will either re-emit on the next turn or proceed without —
-  // both are preferable to crashing the inference pipeline.
+  // an empty or whitespace-only name. Such a call cannot be attributed to any
+  // tool (the tools map lookup would throw `toolNotFoundError: Tool "" called`),
+  // so it is dropped here — with a log line, so the occurrence stays visible
+  // instead of silently disappearing. The model either re-emits on the next
+  // turn or proceeds without.
   const sanitizedToolCalls = toolCalls.filter((toolCall) => {
     const name = toolCall.function.name?.trim();
-    return name !== undefined && name.length > 0;
+    const isValid = name !== undefined && name.length > 0;
+    if (!isValid) {
+      logger?.debug(() => `Dropping tool call with an empty name: ${JSON.stringify(toolCall)}`);
+    }
+    return isValid;
   });
 
   if (sanitizedToolCalls.length && toolChoice === ToolChoiceType.none) {
@@ -44,20 +59,10 @@ export function validateToolCalls({
     );
   }
 
-  // Models also occasionally emit tool calls whose arguments fail JSON parsing
-  // or Zod schema validation. Previously this threw and 500-ed the whole
-  // converse request, cascading to fail the entire conversation. Instead, drop
-  // the malformed tool call and let the model re-emit corrected arguments on
-  // the next turn — same resilience principle as the empty-name filter above.
-  // We keep the `createToolValidationError` for the internal error log, but
-  // surface it as a filtered-out call rather than a thrown exception.
-  const validatedToolCalls: ToolCall[] = [];
-  for (const toolCall of sanitizedToolCalls) {
+  return sanitizedToolCalls.map((toolCall) => {
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
-      // Unknown tool is a genuine programming error (tool registered but not
-      // in the tools map) — keep throwing here, this is not model flakiness.
       throw createToolNotFoundError({
         name: toolCall.function.name,
         args: toolCall.function.arguments,
@@ -67,12 +72,20 @@ export function validateToolCalls({
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };
 
     let serializedArguments: Record<string, unknown>;
+
     try {
       serializedArguments = JSON.parse(toolCall.function.arguments);
-    } catch {
-      // Malformed JSON arguments: skip this tool call rather than 500-ing.
-      // The model will see no tool result and re-emit or proceed without.
-      continue;
+    } catch (error) {
+      // Malformed JSON arguments stay a `ToolValidationError`: `error_retry_filter`
+      // classifies it as recoverable, so `retryWithExponentialBackoff` re-issues the
+      // completion, and the structured-output path (`create_output_api`) uses the
+      // rejection to re-prompt the model with the failure. Dropping the call instead
+      // would leave both self-correction paths with nothing to act on.
+      throw createToolValidationError(`Failed parsing arguments for ${toolCall.function.name}`, {
+        name: toolCall.function.name,
+        arguments: toolCall.function.arguments,
+        toolCalls: [toolCall],
+      });
     }
 
     try {
@@ -82,21 +95,31 @@ export function validateToolCalls({
       if (zodSchema) {
         zodSchema.parse(serializedArguments);
       }
-    } catch {
-      // Arguments parsed as JSON but failed schema validation (e.g. wrong
-      // types, missing required fields). Skip rather than 500 — the model
-      // gets a chance to self-correct on the next turn.
-      continue;
+    } catch (error) {
+      const errorMessage =
+        error instanceof z.ZodError
+          ? error?.issues?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          : error instanceof Error
+          ? error.message
+          : 'Unknown validation error';
+
+      throw createToolValidationError(
+        `Tool call arguments for ${toolCall.function.name} (${toolCall.toolCallId}) were invalid`,
+        {
+          name: toolCall.function.name,
+          errorsText: errorMessage,
+          arguments: toolCall.function.arguments,
+          toolCalls,
+        }
+      );
     }
 
-    validatedToolCalls.push({
+    return {
       toolCallId: toolCall.toolCallId,
       function: {
         name: toolCall.function.name,
         arguments: serializedArguments,
       },
-    });
-  }
-
-  return validatedToolCalls;
+    };
+  });
 }

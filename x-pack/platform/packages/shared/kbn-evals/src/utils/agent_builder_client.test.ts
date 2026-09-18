@@ -6,18 +6,15 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { createAgentBuilderClient, type AgentBuilderClient } from './agent_builder_client';
 
 describe('createAgentBuilderClient', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
-  let log: ToolingLog;
   let client: AgentBuilderClient;
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
-    log = { warning: jest.fn() } as unknown as ToolingLog;
-    client = createAgentBuilderClient({ fetch: http.fetch, log, connectorId: 'my-connector' });
+    client = createAgentBuilderClient({ fetch: http.fetch, connectorId: 'my-connector' });
   });
 
   // jest types `http.fetch.mock.lastCall` from the single-arg `HttpHandler` overload, so reading the
@@ -98,5 +95,18 @@ describe('createAgentBuilderClient', () => {
       conversationId: undefined,
       traceId: undefined,
     });
+  });
+
+  // Retries belong to `httpHandlerFromKbnClient` (status-aware backoff, honors `retry-after`,
+  // covers transport errors). A second retry layer here multiplies with it — the two layers
+  // used to issue up to 24 requests for a single turn against an already-saturated gateway.
+  it('does not retry a failing request itself, leaving retries to the http handler', async () => {
+    http.fetch.mockRejectedValue(new Error('429 Too Many Requests'));
+
+    await expect(client.converse({ agentId: 'my-agent', input: 'question' })).rejects.toThrow(
+      '429 Too Many Requests'
+    );
+
+    expect(http.fetch).toHaveBeenCalledTimes(1);
   });
 });

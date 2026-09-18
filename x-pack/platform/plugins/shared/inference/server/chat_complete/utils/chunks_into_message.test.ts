@@ -226,7 +226,7 @@ describe('chunksIntoMessage', () => {
     });
   });
 
-  it('drops tool calls with invalid arguments instead of throwing', async () => {
+  it('surfaces a tool-validation error for tool calls with invalid arguments', async () => {
     async function getMessage() {
       return await lastValueFrom(
         chunksIntoMessage({
@@ -267,16 +267,13 @@ describe('chunksIntoMessage', () => {
       );
     }
 
-    // validateToolCalls now filters out tool calls whose arguments fail schema
-    // validation rather than throwing (models under token pressure emit
-    // malformed calls; throwing 500-ed the whole converse request). The
-    // malformed call is dropped and the message resolves with no tool calls.
-    const message = await getMessage();
-    expect(message).toEqual({
-      content: '',
-      toolCalls: [],
-      type: ChatCompletionEventType.ChatCompletionMessage,
-    });
+    // validateToolCalls rejects schema-invalid arguments with a ToolValidationError,
+    // which `error_retry_filter` treats as recoverable: the completion is retried and
+    // the structured-output path re-prompts the model. Swallowing the call instead
+    // left both self-correction paths with nothing to act on.
+    await expect(getMessage()).rejects.toThrow(
+      'Tool call arguments for myFunction (001) were invalid'
+    );
   });
 
   it('concatenates multiple tool calls into a single message', async () => {

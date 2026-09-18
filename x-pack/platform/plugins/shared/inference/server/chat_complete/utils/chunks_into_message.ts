@@ -48,6 +48,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
           const validatedToolCalls = validateToolCalls<TToolOptions>({
             ...toolOptions,
             toolCalls,
+            logger,
           });
 
           return {

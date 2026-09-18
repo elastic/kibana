@@ -198,7 +198,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async ({ fetch, log, connector }, use) => {
       const agentBuilderClient = createAgentBuilderClient({
         fetch,
-        log,
         connectorId: connector.id,
       });
 
