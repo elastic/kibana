@@ -178,6 +178,19 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: { pending_count: 1, pending_timeframe: '5m', pending_operator: 'OR' },
       });
     });
+
+    it.each(['last_known_status', 'none'] as const)(
+      'stays pending on a no_data event when no_data_strategy is %s (not a breach)',
+      (noDataStrategyValue) => {
+        expectTransition({
+          on: alertEventStatus.no_data,
+          to: alertEpisodeStatus.pending,
+          stateTransition,
+          noDataStrategy: noDataStrategyValue,
+          expectedStatusCount: 1,
+        });
+      }
+    );
   });
 
   describe('pendingCount threshold', () => {

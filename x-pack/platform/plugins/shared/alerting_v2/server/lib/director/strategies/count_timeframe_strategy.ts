@@ -7,7 +7,10 @@
 
 import { inject, injectable } from 'inversify';
 import { noDataStrategy } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventStatus,
+} from '../../../resources/datastreams/alert_events';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import { parseDurationToMs } from '../../duration';
@@ -195,6 +198,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     if (
       this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
     ) {
+      // Non-emitting no_data events enter pending without threshold evaluation — they are not
+      // breaches, so counting them as a match would produce false active alerts.
+      if (this.isNonEmittingNoData(alertEvent.status, rule.no_data_strategy)) {
+        return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
+      }
       return this.getFirstEntryStateTransition(this.getPendingThreshold(rule, stateTransition), {
         successStatus: alertEpisodeStatus.active,
         stayStatus: alertEpisodeStatus.pending,
@@ -258,6 +266,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     targetStatus: AlertEpisodeStatus
   ): boolean {
     return nextStatus === targetStatus && currentStatus !== targetStatus;
+  }
+
+  private isNonEmittingNoData(
+    eventStatus: AlertEventStatus,
+    noDataStrategyValue: RuleResponse['no_data_strategy']
+  ): boolean {
+    return eventStatus === alertEventStatus.no_data && noDataStrategyValue !== noDataStrategy.emit;
   }
 
   private getPendingThreshold(
