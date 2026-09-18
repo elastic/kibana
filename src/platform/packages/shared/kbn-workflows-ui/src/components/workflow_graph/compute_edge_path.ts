@@ -51,6 +51,13 @@ export interface ComputeEdgePathInput {
   readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
   readonly branchType?: EdgeBranchType;
   readonly isMerge?: boolean;
+  /**
+   * True on **both** out-edges of a fallback-lane owner. Forces fork-bus routing
+   * for the spine edge even though it carries no `branchType` — without this,
+   * the spine edge loses its dagre waypoints (fan-out clears them in apply_dagre)
+   * and silently falls back to smooth-step, breaking spine rendering.
+   */
+  readonly isFork?: boolean;
 }
 
 /**
@@ -264,6 +271,7 @@ export const computeEdgePath = ({
   points: dagrePoints,
   branchType,
   isMerge,
+  isFork,
 }: ComputeEdgePathInput): { path: string; labelX: number; labelY: number } => {
   // Single-bus routing for all fork (fan-out) edges: switch case/default,
   // if-then, and if-else. All branch edges of one fork node share the same
@@ -272,7 +280,11 @@ export const computeEdgePath = ({
   // its own target. Labels sit at a fixed offset below the bus (TB) / right of
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
-  const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
+  // `isFork` extends the allow-list to the owner's normal spine edge: both
+  // out-edges of a fallback owner must use fork-bus routing so the shared trunk
+  // stays consistent (assumption 6 in the plan).
+  const isForkEdge =
+    branchType === 'switch' || branchType === 'then' || branchType === 'else' || isFork === true;
   const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
   const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;

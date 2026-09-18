@@ -75,6 +75,12 @@ export const computeWorkflowLayout = (
     nodeSep: WORKFLOW_NODE_SEP,
     rankSep: WORKFLOW_RANK_SEP,
     compoundPadding: WORKFLOW_COMPOUND_PADDING,
+    // Exclude failure edges from cross-axis alignment so the owner node stays
+    // in the spine column rather than drifting to the midpoint of spine + lane.
+    // The edges still participate in dagre ranking and routing, and
+    // separateRankOverlapsInPlace still runs on the full graph — the
+    // non-overlap guarantee is preserved (ADR-0009).
+    alignmentIgnoredEdges: edges.filter((e) => e.isFailure).map((e) => e.id),
   });
 
   // Post-dagre pass 1: enforce fork lane declaration order.

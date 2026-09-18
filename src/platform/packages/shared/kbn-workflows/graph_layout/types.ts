@@ -59,6 +59,14 @@ export interface StepNodeData extends Record<string, unknown> {
   label: string;
   stepType: string;
   step?: Step;
+  /**
+   * Present on every node inside a fallback lane. Holds the **node id** of the
+   * owner step (the step whose `on-failure.fallback` created this lane).
+   * Absent for all other nodes. Renderers use this to tint fallback nodes and
+   * the minimap; specs 03/07 use it to derive "is this node inside a fallback
+   * lane?" without a separate nodeRefs lookup.
+   */
+  fallbackOf?: string;
 }
 
 export interface TriggerNodeData extends Record<string, unknown> {
@@ -111,6 +119,25 @@ export interface GraphEdge {
   branchIndex?: number;
   /** Display label rendered on the edge (e.g. 'true' / 'false' / case value). */
   label?: string;
+  /**
+   * True on the edge from a step's node to its fallback lane head. Always dashed;
+   * colour transitions from neutral to danger when any node in the lane has a
+   * step-execution record. Never set on spine edges or `if`/`switch` fork edges.
+   */
+  isFailure?: boolean;
+}
+
+/**
+ * One fallback lane emitted by the transform. Used by the renderer to build
+ * owner / head / leaf sets for traversal highlighting and `mergeNodeIds` widening.
+ */
+export interface FallbackLane {
+  /** Node id of the step that owns this lane (has `on-failure.fallback`). */
+  readonly owner: string;
+  /** Node id of the first step in the fallback sequence. */
+  readonly head: string;
+  /** Node ids of the last steps in the fallback sequence (the rejoin sources). */
+  readonly leaves: readonly string[];
 }
 
 /**

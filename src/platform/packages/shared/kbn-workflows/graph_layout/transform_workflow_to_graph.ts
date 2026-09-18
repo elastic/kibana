@@ -9,6 +9,7 @@
 
 import { IdAllocator } from './id_allocator';
 import type {
+  FallbackLane,
   ForeachGroup,
   GraphEdge,
   NodeRef,
@@ -55,6 +56,12 @@ export interface TransformResult {
    * reconstruct it by reading `node.data`.
    */
   nodeRefs: Record<string, NodeRef>;
+  /**
+   * One entry per `on-failure.fallback` lane in the graph. The renderer uses
+   * this to build owner/head/leaf sets for execution highlighting and to widen
+   * the `mergeNodeIds` predicate so shape-2 rejoin edges route correctly.
+   */
+  fallbackLanes: FallbackLane[];
 }
 
 interface InternalTransformResult extends TransformResult {
@@ -70,15 +77,19 @@ interface InternalTransformResult extends TransformResult {
  */
 export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): TransformResult {
   if (!workflow)
-    return { nodes: [], edges: [], foreachGroups: [], bypassLaneNodes: [], nodeRefs: {} };
+    return {
+      nodes: [],
+      edges: [],
+      foreachGroups: [],
+      bypassLaneNodes: [],
+      nodeRefs: {},
+      fallbackLanes: [],
+    };
 
   const ids = new IdAllocator();
-  const { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs } = transformInternal(
-    workflow.triggers ?? [],
-    workflow.steps ?? [],
-    ids
-  );
-  return { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs };
+  const { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes } =
+    transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids);
+  return { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes };
 }
 
 function transformInternal(
@@ -89,7 +100,13 @@ function transformInternal(
   const nodes: PreLayoutNode[] = [];
   const bypassLaneNodes: PreLayoutBypassLaneNode[] = [];
   const edges: GraphEdge[] = [];
+  // Failure edges are collected here and appended to `edges` at the end of the
+  // loop so they land after all spine and branch edges (Decision 8). This makes
+  // dagre see [spine, fallback] declaration order, keeping the fallback lane on
+  // the +cross side without any post-dagre side-correction pass.
+  const failureEdges: GraphEdge[] = [];
   const foreachGroups: ForeachGroup[] = [];
+  const fallbackLanes: FallbackLane[] = [];
   const nodeRefs: Record<string, NodeRef> = {};
 
   const triggerIds: string[] = [];
@@ -188,6 +205,7 @@ function transformInternal(
         bypassLaneNodes: inner.bypassLaneNodes,
       });
       foreachGroups.push(...inner.foreachGroups);
+      fallbackLanes.push(...inner.fallbackLanes);
 
       // The group is a self-contained "folder": one edge in (from the
       // previous sibling to the group itself), one edge out (the next sibling
@@ -222,6 +240,7 @@ function transformInternal(
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
+        fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
         if (firstId) {
           edges.push({
@@ -258,6 +277,7 @@ function transformInternal(
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
+        fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
         if (firstId) {
           edges.push({
@@ -306,6 +326,7 @@ function transformInternal(
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
+        fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
         if (firstId) {
           edges.push({
@@ -341,6 +362,7 @@ function transformInternal(
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
+        fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
         if (firstId) {
           edges.push({
@@ -362,6 +384,7 @@ function transformInternal(
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
         foreachGroups.push(...inner.foreachGroups);
+        fallbackLanes.push(...inner.fallbackLanes);
         const firstId = inner.nodes[0]?.id;
         if (firstId) {
           edges.push({
@@ -399,6 +422,7 @@ function transformInternal(
       bypassLaneNodes.push(...inner.bypassLaneNodes);
       edges.push(...inner.edges);
       foreachGroups.push(...inner.foreachGroups);
+      fallbackLanes.push(...inner.fallbackLanes);
       const firstId = inner.nodes[0]?.id;
       if (firstId) {
         edges.push({ id: `${id}:${firstId}`, source: id, target: firstId });
@@ -406,8 +430,74 @@ function transformInternal(
       // Single contained body — exit from the wrapping step.
     }
 
+    // ── fallback lane (on-failure.fallback) ──────────────────────────────
+    // Placed after all control-flow arms so exitIds is already final for
+    // this step. The failure edge goes into `failureEdges` and is appended
+    // at the end — keeping [spine, fallback] declaration order so dagre puts
+    // the lane on the +cross side (Decision 8).
+    let fallbackSteps: Step[] = [];
+    visitStepChildSlots(step, (slot, children) => {
+      if (slot.kind === 'fallback') fallbackSteps = children;
+    });
+
+    if (fallbackSteps.length > 0) {
+      const inner = transformInternal([], fallbackSteps, ids);
+      Object.assign(nodeRefs, inner.nodeRefs);
+
+      // Stamp fallbackOf on every node in the lane, including nodes inside
+      // nested foreach groups, so the minimap and renderers can identify them.
+      for (const n of inner.nodes) {
+        if (n.type === 'step') {
+          (n.data as { fallbackOf?: string }).fallbackOf = id;
+        }
+      }
+      for (const g of inner.foreachGroups) {
+        for (const n of g.innerNodes) {
+          if (n.type === 'step') {
+            (n.data as { fallbackOf?: string }).fallbackOf = id;
+          }
+        }
+      }
+
+      nodes.push(...inner.nodes);
+      bypassLaneNodes.push(...inner.bypassLaneNodes);
+      edges.push(...inner.edges);
+      foreachGroups.push(...inner.foreachGroups);
+      fallbackLanes.push(...inner.fallbackLanes);
+
+      const headId = inner.nodes[0]?.id;
+      if (headId) {
+        const laneLeaves = inner.leafIds;
+        fallbackLanes.push({ owner: id, head: headId, leaves: laneLeaves });
+
+        // Shape 2: continue → rejoin. Add fallback leaves to exitIds so the
+        // existing fan-in loop emits rejoin edges automatically on the NEXT
+        // sibling step. Uses engine's own rule verbatim (Decision 6).
+        const onFailure = (step as Record<string, unknown>)['on-failure'] as
+          | { continue?: boolean | string }
+          | undefined;
+        const hasContinuePath =
+          typeof onFailure?.continue === 'string' || onFailure?.continue === true;
+        if (hasContinuePath) {
+          exitIds = dedupeIds([...exitIds, ...laneLeaves]);
+        }
+
+        // Defer the failure edge — append after all spine/branch edges.
+        failureEdges.push({
+          id: `${id}:${headId}`,
+          source: id,
+          target: headId,
+          isFailure: true,
+          label: 'on failure',
+        });
+      }
+    }
+
     prevExitIds = exitIds;
   }
 
-  return { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, leafIds: prevExitIds };
+  // Append deferred failure edges last so dagre sees [spine, fallback] order.
+  edges.push(...failureEdges);
+
+  return { nodes, edges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes, leafIds: prevExitIds };
 }

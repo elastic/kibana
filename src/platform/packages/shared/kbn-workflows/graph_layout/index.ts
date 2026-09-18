@@ -10,6 +10,7 @@
 export {
   TRIGGER_STEP_TYPES,
   type EdgeBranchType,
+  type FallbackLane,
   type HandleSide,
   type LayoutDirection,
 } from './types';

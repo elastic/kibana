@@ -989,3 +989,44 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
     });
   });
 });
+
+// ─── fallback lane ────────────────────────────────────────────────────────────
+describe('transformWorkflowToGraph — fallback lane', () => {
+  it('emits fallback nodes and a failure edge for a mid-sequence step with on-failure.fallback', () => {
+    // Three-step workflow: start → risky (has fallback: notify-oncall) → finish
+    // The fallback node must appear in the graph and a failure edge must exist.
+    // A single-owner fixture hides the zigzag (nothing sits above the owner to be
+    // dragged), so the mid-sequence placement is load-bearing for the dagre defect.
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: 'start', type: 'http' },
+          {
+            name: 'risky',
+            type: 'http',
+            'on-failure': { fallback: [{ name: 'notify-oncall', type: 'http' }] },
+          },
+          { name: 'finish', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    // Fallback node must be present.
+    expect(r.nodes.map((n) => n.id)).toContain('notify-oncall');
+
+    // A failure edge from the owner to the fallback head must exist.
+    expect(r.edges.some((e) => (e as { isFailure?: boolean }).isFailure === true)).toBe(true);
+
+    // The failure edge must originate from the owner node ('risky') and point to
+    // the fallback head ('notify-oncall').
+    const failureEdge = r.edges.find((e) => (e as { isFailure?: boolean }).isFailure === true);
+    expect(failureEdge?.source).toBe('risky');
+    expect(failureEdge?.target).toBe('notify-oncall');
+
+    // Shape 1 (no continue) — fallback leaf must NOT fan in to 'finish'.
+    // 'finish' is reached only from 'risky' via the normal spine.
+    const finishEdges = r.edges.filter((e) => e.target === 'finish');
+    const finishSources = finishEdges.map((e) => e.source);
+    expect(finishSources).not.toContain('notify-oncall');
+  });
+});

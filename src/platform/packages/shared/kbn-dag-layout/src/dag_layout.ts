@@ -89,6 +89,7 @@ export function dagLayout(
   const compact = options.compact ?? false;
   const nodeSep = options.nodeSep ?? DEFAULT_NODE_SEP;
   const rankSep = options.rankSep ?? DEFAULT_RANK_SEP;
+  const { alignmentIgnoredEdges } = options;
   const compoundPadding: Required<NonNullable<DagLayoutOptions['compoundPadding']>> = {
     ...DEFAULT_COMPOUND_PADDING,
     ...options.compoundPadding,
@@ -182,7 +183,9 @@ export function dagLayout(
     return n;
   });
 
-  const outerLayout = applyDagre(outerNodes, edges, direction, nodeSep, rankSep);
+  // Only the outer graph gets alignment-ignored edges; compound group inner
+  // layouts use their own independent dagre pass with no ignored edges.
+  const outerLayout = applyDagre(outerNodes, edges, direction, nodeSep, rankSep, alignmentIgnoredEdges);
 
   // Index outer nodes by id once so lookups below are O(1) instead of O(n).
   const outerNodeById = new Map(outerLayout.nodes.map((n) => [n.id, n]));

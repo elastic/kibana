@@ -32,6 +32,7 @@ const EMPTY_TRANSFORM: TransformResult = {
   foreachGroups: [],
   bypassLaneNodes: [],
   nodeRefs: {},
+  fallbackLanes: [],
 };
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
@@ -179,9 +180,21 @@ export function useWorkflowLayout({
       if (arr) arr.push(e.source);
       else incomingByTarget.set(e.target, [e.source]);
     }
+    // Build fallback-lane sets for execution highlighting and merge detection.
+    // Owner ids: nodes that have an on-failure.fallback lane.
+    // Leaf ids: last nodes in each fallback lane (rejoin sources for shape 2).
+    const fallbackOwnerIds = new Set(transformed.fallbackLanes.map((l) => l.owner));
+    const fallbackLeafIds = new Set(transformed.fallbackLanes.flatMap((l) => [...l.leaves]));
+
     const mergeNodeIds = new Set<string>();
     for (const [target, sources] of incomingByTarget) {
-      if (sources.length > 1 && sources.some((s) => allBypassLaneIds.has(s))) {
+      // Original rule: bypass-lane source → merge node.
+      // Extended: fallback-lane leaf source → merge node (shape 2 rejoin edge).
+      if (
+        sources.length > 1 &&
+        (sources.some((s) => allBypassLaneIds.has(s)) ||
+          sources.some((s) => fallbackLeafIds.has(s)))
+      ) {
         mergeNodeIds.add(target);
       }
     }
@@ -193,12 +206,15 @@ export function useWorkflowLayout({
       nodeById,
       allEdges,
       mergeNodeIds,
+      fallbackOwnerIds,
+      fallbackLeafIds,
     };
   }, [
     transformed.bypassLaneNodes,
     transformed.foreachGroups,
     transformed.nodes,
     transformed.edges,
+    transformed.fallbackLanes,
   ]);
 
   // Branch-aware execution highlighting. Computes which fork edges (and which
@@ -398,7 +414,7 @@ export function useWorkflowLayout({
   ]);
 
   const derivedEdges = useMemo<Edge[]>(() => {
-    const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds } = topologyMeta;
+    const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds, fallbackOwnerIds } = topologyMeta;
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
     const { traversedForkEdgeIds, traversedBypassIds } = branchTraversal;
 
@@ -408,16 +424,50 @@ export function useWorkflowLayout({
       return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
     };
 
+    // Pre-build a map from fallback owner id → Set of lane node ids so the
+    // failure-edge traversal check is O(1) per node, not O(lane-size²).
+    const laneNodesByOwner = new Map<string, Set<string>>();
+    for (const [nodeId, node] of nodeById) {
+      const fof = (node.data as Record<string, unknown>).fallbackOf;
+      if (typeof fof === 'string') {
+        let s = laneNodesByOwner.get(fof);
+        if (!s) {
+          s = new Set();
+          laneNodesByOwner.set(fof, s);
+        }
+        s.add(nodeId);
+      }
+    }
+
     const mapped = allEdges.map((e) => {
       const laid = layoutEdgeById.get(e.id);
+      const isFailure = (e as { isFailure?: boolean }).isFailure === true;
+      // Both out-edges of a fallback owner use fork-bus routing (isFork).
+      // This includes the spine edge which carries no branchType — without isFork
+      // it would silently fall back to smooth-step after dagre clears its points.
+      const isFork = fallbackOwnerIds.has(e.source);
+
       // Fork edges (if/switch branches) highlight only for the branch that ran;
       // edges leaving an empty (bypass) lane inherit that lane's traversal;
+      // failure edges traverse when any lane node has started (third rule, see
+      // plan assumption 8 — step records are created at RUNNING, never SKIPPED);
       // everything else falls back to source-step completion.
       let traversed: boolean;
       if (e.branchType) {
         traversed = traversedForkEdgeIds.has(e.id);
       } else if (allBypassLaneIds.has(e.source)) {
         traversed = traversedBypassIds.has(e.source);
+      } else if (isFailure) {
+        // Probe the whole lane, not just the head: guards (if:) on lane steps
+        // mean the head may never have run even if a later step did.
+        // SKIPPED step records are not emitted by the engine today but the union
+        // type allows them; excluding them guards a representable-but-unemitted
+        // state (plan assumption 9).
+        const laneNodes = laneNodesByOwner.get(e.source) ?? new Set<string>();
+        traversed = [...laneNodes].some((nodeId) => {
+          const exec = getExec(nodeId);
+          return exec !== undefined && exec.status !== ExecutionStatus.SKIPPED;
+        });
       } else {
         // Trigger nodes have no persisted step execution; mirror the node's
         // synthetic "completed" status so the trigger's outgoing edge highlights
@@ -441,6 +491,8 @@ export function useWorkflowLayout({
           branchType: e.branchType,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
+          isFork,
+          isFailure,
         },
       };
     });

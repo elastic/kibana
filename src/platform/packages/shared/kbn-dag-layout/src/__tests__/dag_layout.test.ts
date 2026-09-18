@@ -586,6 +586,102 @@ describe('dagLayout — analyzeSiblings prevCross symmetry', () => {
   });
 });
 
+// ─── alignmentIgnoredEdges — asymmetric-fork spine stability ──────────────────
+//
+// When a step has both a main successor (the spine) and a fallback lane, the
+// barycenter pass (handleMultipleChildren) sets the owner's cross position to
+// the midpoint of [spine, fallback head]. Every node above the owner follows via
+// handleSingleChild, producing a visible zigzag. `alignmentIgnoredEdges` makes
+// the failure edge invisible to the alignment pass so the owner has exactly one
+// alignment successor and hits `handleSingleChild` → spine stays straight.
+
+describe('dagLayout — alignmentIgnoredEdges', () => {
+  // Helper: build the asymmetric-fork fixture used across these tests.
+  // Topology (TB): s1→s2→s3 (spine) and s2→fb1→fb2 (failure lane).
+  const ASYMMETRIC_FORK_NODES = () => [
+    node('s1'),
+    node('s2'),
+    node('s3'),
+    node('fb1'),
+    node('fb2'),
+  ];
+  const ASYMMETRIC_FORK_EDGES = () => [
+    edge('s1-s2', 's1', 's2'),
+    edge('s2-s3', 's2', 's3'),
+    edge('s2-fb1', 's2', 'fb1'),
+    edge('fb1-fb2', 'fb1', 'fb2'),
+  ];
+
+  it('baseline defect: without the option the owner jogs to the midpoint of its two children', () => {
+    // s2 has two successors (s3, fb1). handleMultipleChildren centres it at their
+    // midpoint. handleSingleChild then drags the whole spine above s2 with it, so
+    // s2's column ≠ s3's column — a visible zigzag. Assert the jog exists.
+    const { nodes: laid } = dagLayout(ASYMMETRIC_FORK_NODES(), ASYMMETRIC_FORK_EDGES());
+    const s2 = findNode(laid, 's2');
+    const s3 = findNode(laid, 's3');
+    const fb1 = findNode(laid, 'fb1');
+    const midpoint = (centerX(fb1) + centerX(s3)) / 2;
+    // s2 sits at the midpoint (baseline defect)
+    expect(Math.abs(centerX(s2) - midpoint)).toBeLessThan(CENTER_TOLERANCE);
+    // s3 is off the spine column — the jog
+    expect(Math.abs(centerX(s2) - centerX(s3))).toBeGreaterThan(100);
+  });
+
+  it('with alignmentIgnoredEdges the spine is straight and the lane has its own column', () => {
+    const { nodes: laid } = dagLayout(ASYMMETRIC_FORK_NODES(), ASYMMETRIC_FORK_EDGES(), [], {
+      alignmentIgnoredEdges: ['s2-fb1'],
+    });
+    const s1 = findNode(laid, 's1');
+    const s2 = findNode(laid, 's2');
+    const s3 = findNode(laid, 's3');
+    const fb1 = findNode(laid, 'fb1');
+    // Spine is straight: s1, s2, s3 share the same center column
+    expect(Math.abs(centerX(s1) - centerX(s2))).toBeLessThan(CENTER_TOLERANCE);
+    expect(Math.abs(centerX(s2) - centerX(s3))).toBeLessThan(CENTER_TOLERANCE);
+    // The failure lane is off-axis — dagre still placed it
+    expect(Math.abs(centerX(fb1) - centerX(s2))).toBeGreaterThan(100);
+    // No overlap
+    expectNoPairwiseOverlap(laid);
+  });
+
+  it('alignmentIgnoredEdges: [] is a zero-behaviour-change no-op for a linear chain', () => {
+    const nodes = [node('a'), node('b'), node('c')];
+    const edges = [edge('ab', 'a', 'b'), edge('bc', 'b', 'c')];
+    const { nodes: without } = dagLayout(nodes, edges);
+    const { nodes: withEmpty } = dagLayout(nodes, edges, [], { alignmentIgnoredEdges: [] });
+    for (const id of ['a', 'b', 'c']) {
+      const n1 = findNode(without, id);
+      const n2 = findNode(withEmpty, id);
+      expect(n1.x).toBeCloseTo(n2.x, 0);
+      expect(n1.y).toBeCloseTo(n2.y, 0);
+    }
+  });
+
+  it('failure lane beside a deep if — no pairwise overlap', () => {
+    // s1→s2 (owner with fallback) → s3→s4
+    // s2→fb1→fb2 (failure lane, aligned-ignored)
+    // s2→branch-a / s2→branch-b (if gate — produces its own fork)
+    const nodes = [
+      node('s1'), node('s2'), node('branch-a'), node('branch-b'), node('s3'), node('s4'),
+      node('fb1'), node('fb2'),
+    ];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-ba', 's2', 'branch-a'),
+      edge('s2-bb', 's2', 'branch-b'),
+      edge('ba-s3', 'branch-a', 's3'),
+      edge('bb-s3', 'branch-b', 's3'),
+      edge('s3-s4', 's3', 's4'),
+      edge('s2-fb1', 's2', 'fb1'),
+      edge('fb1-fb2', 'fb1', 'fb2'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      alignmentIgnoredEdges: ['s2-fb1'],
+    });
+    expectNoPairwiseOverlap(laid);
+  });
+});
+
 // ─── Invariants ───────────────────────────────────────────────────────────────
 
 describe('dagLayout — layout invariants', () => {

@@ -579,10 +579,20 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       // the minimap too so they don't appear as spurious coloured dots.
       if (n.type === 'bypassLane') return 'transparent';
       const data = n.data as
-        | { stepExecution?: { status?: string }; isTrigger?: boolean; stepType?: string }
+        | {
+            stepExecution?: { status?: string };
+            isTrigger?: boolean;
+            stepType?: string;
+            fallbackOf?: string;
+          }
         | undefined;
       const status = data?.stepExecution?.status;
       if (status === 'failed') return euiTheme.colors.danger;
+      // Fallback-lane nodes that have not yet failed render in a lighter-danger
+      // tint so they read as "the error path" without impersonating a failed step.
+      // The `status === 'failed'` arm above takes priority, so a fallback step
+      // that really failed still reads as full danger.
+      if (data?.fallbackOf !== undefined) return euiTheme.colors.dangerText;
       // Figma (node 10808:19179): the trigger node reads as pink (accent) in the
       // minimap, matching its icon accent; all other steps are blue (primary).
       // Tokens keep the light look (#0b64dd / #ee72a6) and adapt in dark mode.
@@ -590,7 +600,12 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         data?.isTrigger || (data?.stepType ? TRIGGER_STEP_TYPES.has(data.stepType) : false);
       return isTriggerNode ? euiTheme.colors.accent : euiTheme.colors.primary;
     },
-    [euiTheme.colors.danger, euiTheme.colors.accent, euiTheme.colors.primary]
+    [
+      euiTheme.colors.danger,
+      euiTheme.colors.dangerText,
+      euiTheme.colors.accent,
+      euiTheme.colors.primary,
+    ]
   );
 
   const dimmed = !isYamlValid;

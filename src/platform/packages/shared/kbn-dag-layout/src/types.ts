@@ -73,4 +73,14 @@ export interface DagLayoutOptions {
   compact?: boolean;
   /** Padding around inner content of a compound node. Defaults to all zeros. */
   compoundPadding?: Partial<{ top: number; right: number; bottom: number; left: number }>;
+  /**
+   * Edge ids that participate in dagre ranking and routing but are excluded from
+   * cross-axis alignment. The barycenter pass (`alignDagreCrossAxisInPlace`)
+   * treats nodes connected only by ignored edges as having fewer alignment
+   * successors, preventing an asymmetric fork from jogging the main spine.
+   *
+   * Ignored edges are still visible to `separateRankOverlapsInPlace`, so the
+   * overlap-prevention guarantee is preserved. Defaults to empty (no effect).
+   */
+  alignmentIgnoredEdges?: readonly string[];
 }

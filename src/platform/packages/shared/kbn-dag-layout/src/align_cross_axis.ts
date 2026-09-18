@@ -25,15 +25,36 @@ interface AlignHelpers {
   setCross: (id: string, value: number) => void;
   prevCross: Record<string, number>;
   nodeSep: number;
+  ignoredEdgeIds: ReadonlySet<string>;
 }
 
 const getNode = (g: graphlib.Graph, id: string): DagreLayoutNode => g.node(id) as DagreLayoutNode;
 
-const getFilteredSuccessors = (g: graphlib.Graph, node: string): string[] =>
-  (g.successors(node) ?? []).map((s) => s.toString());
+const getFilteredSuccessors = (
+  g: graphlib.Graph,
+  node: string,
+  ignoredEdgeIds: ReadonlySet<string>
+): string[] =>
+  (g.successors(node) ?? [])
+    .map((s) => s.toString())
+    .filter((s) => {
+      if (ignoredEdgeIds.size === 0) return true;
+      const edgeLabel = (g.edge(node, s) as { label?: string } | undefined)?.label;
+      return edgeLabel === undefined || !ignoredEdgeIds.has(edgeLabel);
+    });
 
-const getFilteredPredecessors = (g: graphlib.Graph, node: string): string[] =>
-  (g.predecessors(node) ?? []).map((p) => p.toString());
+const getFilteredPredecessors = (
+  g: graphlib.Graph,
+  node: string,
+  ignoredEdgeIds: ReadonlySet<string>
+): string[] =>
+  (g.predecessors(node) ?? [])
+    .map((p) => p.toString())
+    .filter((p) => {
+      if (ignoredEdgeIds.size === 0) return true;
+      const edgeLabel = (g.edge(p, node) as { label?: string } | undefined)?.label;
+      return edgeLabel === undefined || !ignoredEdgeIds.has(edgeLabel);
+    });
 
 const roundCross = (value: number): number => Math.round(value);
 
@@ -56,14 +77,14 @@ const findSiblingsWithSharedChildren = (
   children: string[],
   parents: string[]
 ): string[] => {
-  const { g } = helpers;
+  const { g, ignoredEdgeIds } = helpers;
   const siblingsWithSharedChildren: string[] = [];
 
   for (const parent of parents) {
-    const allSiblings = getFilteredSuccessors(g, parent);
+    const allSiblings = getFilteredSuccessors(g, parent, ignoredEdgeIds);
     for (const sibling of allSiblings) {
       if (!siblingsWithSharedChildren.includes(sibling)) {
-        const siblingChildren = getFilteredSuccessors(g, sibling);
+        const siblingChildren = getFilteredSuccessors(g, sibling, ignoredEdgeIds);
         if (children.some((child) => siblingChildren.includes(child))) {
           siblingsWithSharedChildren.push(sibling);
         }
@@ -121,9 +142,9 @@ const handleMultipleChildren = (
   currNode: string,
   children: string[]
 ): void => {
-  const { g, cross, crossSpan, setCross, prevCross, nodeSep } = helpers;
+  const { g, cross, crossSpan, setCross, prevCross, nodeSep, ignoredEdgeIds } = helpers;
   const currCross = cross(currNode);
-  const parents = getFilteredPredecessors(g, currNode);
+  const parents = getFilteredPredecessors(g, currNode, ignoredEdgeIds);
   const siblingsWithSharedChildren = findSiblingsWithSharedChildren(
     helpers,
     currNode,
@@ -134,7 +155,7 @@ const handleMultipleChildren = (
   if (siblingsWithSharedChildren.length > 1) {
     const allChildrenSet = new Set<string>();
     for (const sibling of siblingsWithSharedChildren) {
-      getFilteredSuccessors(g, sibling).forEach((child) => allChildrenSet.add(child));
+      getFilteredSuccessors(g, sibling, ignoredEdgeIds).forEach((child) => allChildrenSet.add(child));
     }
     const allChildren = Array.from(allChildrenSet);
     const commonCenter = calculateCenterCross(allChildren, cross);
@@ -154,9 +175,9 @@ const handleMultipleChildren = (
 };
 
 const handleSingleChild = (helpers: AlignHelpers, currNode: string, child: string): void => {
-  const { g, cross, crossSpan, setCross, prevCross } = helpers;
+  const { g, cross, crossSpan, setCross, prevCross, ignoredEdgeIds } = helpers;
   const currCross = cross(currNode);
-  const siblings = getFilteredPredecessors(g, child);
+  const siblings = getFilteredPredecessors(g, child, ignoredEdgeIds);
 
   if (siblings.length > 1) {
     const { lastSiblingInfo, firstSiblingInfo } = analyzeSiblings(
@@ -177,6 +198,13 @@ const handleSingleChild = (helpers: AlignHelpers, currNode: string, child: strin
     const newCross = currCross - (prevCross[child] - cross(child));
     prevCross[currNode] = currCross;
     setCross(currNode, newCross);
+  } else {
+    // Child has exactly one alignment parent (me) and was not moved during its
+    // own processing — handleSingleParent left prevCross[child] unset so that
+    // we land here. Align me directly to the child's dagre column. This is the
+    // correct direction: the parent centres over its only child, not the reverse.
+    prevCross[currNode] = currCross;
+    setCross(currNode, roundCross(cross(child)));
   }
 };
 
@@ -185,9 +213,11 @@ const handleMultipleParents = (
   currNode: string,
   parents: string[]
 ): void => {
-  const { g, cross, crossSpan, setCross, prevCross } = helpers;
+  const { g, cross, crossSpan, setCross, prevCross, ignoredEdgeIds } = helpers;
   const currCross = cross(currNode);
-  const hasSiblings = parents.some((parent) => getFilteredSuccessors(g, parent).length > 1);
+  const hasSiblings = parents.some(
+    (parent) => getFilteredSuccessors(g, parent, ignoredEdgeIds).length > 1
+  );
 
   if (hasSiblings) {
     prevCross[currNode] = currCross;
@@ -207,27 +237,25 @@ const handleMultipleParents = (
 };
 
 const handleSingleParent = (helpers: AlignHelpers, currNode: string, parent: string): void => {
-  const { g, cross, setCross, prevCross } = helpers;
+  const { g, cross, prevCross, ignoredEdgeIds } = helpers;
   const currCross = cross(currNode);
-  const siblings = getFilteredSuccessors(g, parent);
+  const siblings = getFilteredSuccessors(g, parent, ignoredEdgeIds);
 
   if (siblings.length > 1) {
     prevCross[currNode] = currCross;
-  } else {
-    // dagre coords are centers — a single child aligns center-to-center under
-    // its only parent. (Previously `- crossSpan/2`, which drifted every chain
-    // link left by half its width and desynced it from adjacent leaf lanes,
-    // causing sibling subtrees to overlap.)
-    const newCross = cross(parent);
-    prevCross[currNode] = currCross;
-    setCross(currNode, roundCross(newCross));
   }
+  // When siblings.length === 1 (I am the parent's only alignment child), the
+  // barycenter rule says the parent should centre over me — not the other way
+  // around. Leave this node untouched and do NOT record prevCross: the undefined
+  // prevCross triggers the direct-align else-branch in handleSingleChild when
+  // the parent is processed next, pulling it to my column. For symmetric chains
+  // where dagre already aligns parent and child, both behaviours are no-ops.
 };
 
 const handleNoChildren = (helpers: AlignHelpers, currNode: string): void => {
-  const { g, cross, setCross, prevCross } = helpers;
+  const { g, cross, setCross, prevCross, ignoredEdgeIds } = helpers;
   const currCross = cross(currNode);
-  const parents = getFilteredPredecessors(g, currNode);
+  const parents = getFilteredPredecessors(g, currNode, ignoredEdgeIds);
 
   if (parents.length > 1) {
     handleMultipleParents(helpers, currNode, parents);
@@ -265,15 +293,22 @@ const topsort = (g: graphlib.Graph): string[] => {
  * Re-centre a Dagre-laid-out graph on the rank cross-axis so parents sit at the
  * barycenter of their children (and merge nodes at the barycenter of parents).
  * TB layouts pass crossAxis `'x'`; LR layouts pass `'y'`.
+ *
+ * `ignoredEdgeIds` — edge ids excluded from alignment decisions. Edges in this
+ * set still participate in dagre's ranking and routing; only the barycenter pass
+ * ignores them. Use this to prevent an asymmetric fork (e.g., a failure lane)
+ * from pulling the main spine off-axis. Defaults to an empty set (no effect).
  */
 export const alignDagreCrossAxisInPlace = (
   g: graphlib.Graph,
   crossAxis: CrossAxis,
-  nodeSep: number
+  nodeSep: number,
+  ignoredEdgeIds: ReadonlySet<string> = new Set()
 ): void => {
   const helpers: AlignHelpers = {
     g,
     nodeSep,
+    ignoredEdgeIds,
     prevCross: {},
     cross: (id) => (crossAxis === 'x' ? getNode(g, id).x : getNode(g, id).y),
     crossSpan: (id) => (crossAxis === 'x' ? getNode(g, id).width : getNode(g, id).height),
@@ -289,7 +324,7 @@ export const alignDagreCrossAxisInPlace = (
 
   const topo = topsort(g);
   for (const currNode of topo.reverse()) {
-    const children = getFilteredSuccessors(g, currNode);
+    const children = getFilteredSuccessors(g, currNode, ignoredEdgeIds);
     if (children.length > 1) {
       handleMultipleChildren(helpers, currNode, children);
     } else if (children.length === 1) {

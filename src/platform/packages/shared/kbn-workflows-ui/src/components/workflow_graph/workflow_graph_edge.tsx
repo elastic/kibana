@@ -31,6 +31,17 @@ interface WorkflowEdgeData extends Record<string, unknown> {
    * arrowhead so the in-edge and out-edge form one continuous line mid-lane.
    */
   readonly hideEndMarker?: boolean;
+  /**
+   * True on both out-edges of a fallback-lane owner. Forces fork-bus routing
+   * even on the spine edge, which carries no `branchType` (see assumption 6).
+   */
+  readonly isFork?: boolean;
+  /**
+   * True on the edge from a step to its fallback lane head. Renders as always-
+   * dashed; stroke colour transitions from `borderBaseProminent` to `danger`
+   * once any node in the lane has a step-execution record (ADR-0010 decision 9).
+   */
+  readonly isFailure?: boolean;
 }
 
 const LABEL_TRUNCATE = 24;
@@ -72,13 +83,21 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     points: edgeData?.points,
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
+    isFork: edgeData?.isFork,
   });
 
   const traversed = edgeData?.traversed ?? false;
-  // Traversed edges use the `success` token to match the node's success state.
-  // Non-traversed edges use `borderBaseProminent` — two shade steps darker than
-  // `borderBasePlain` so edges read as the stronger element on the canvas.
-  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBaseProminent;
+  const isFailure = edgeData?.isFailure ?? false;
+  // Failure edges: always dashed; colour = danger when the lane has run, neutral
+  // otherwise (ADR-0010 decision 9). All other edges: success when traversed.
+  const stroke = isFailure
+    ? traversed
+      ? euiTheme.colors.danger
+      : euiTheme.colors.borderBaseProminent
+    : traversed
+    ? euiTheme.colors.success
+    : euiTheme.colors.borderBaseProminent;
+  const strokeDasharray = isFailure ? '6 3' : undefined;
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
@@ -105,7 +124,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
       </defs>
       <path
         id={id}
-        style={{ ...style, stroke, strokeWidth, fill: 'none' }}
+        style={{ ...style, stroke, strokeWidth, fill: 'none', strokeDasharray }}
         className="react-flow__edge-path"
         d={edgePath}
         markerEnd={edgeData?.hideEndMarker ? undefined : `url(#arrow-${id})`}
@@ -159,7 +178,9 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.points === nd?.points &&
     pd?.branchType === nd?.branchType &&
     pd?.isMerge === nd?.isMerge &&
-    pd?.hideEndMarker === nd?.hideEndMarker
+    pd?.hideEndMarker === nd?.hideEndMarker &&
+    pd?.isFork === nd?.isFork &&
+    pd?.isFailure === nd?.isFailure
   );
 }
 

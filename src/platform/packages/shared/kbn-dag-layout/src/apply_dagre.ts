@@ -52,7 +52,8 @@ export function applyDagre(
   edges: readonly DagEdge[],
   direction: DagLayoutDirection,
   nodeSep: number,
-  rankSep: number
+  rankSep: number,
+  alignmentIgnoredEdges?: readonly string[]
 ): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } {
   const g = new graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
@@ -77,7 +78,8 @@ export function applyDagre(
   const mainAxis: CrossAxis = direction === 'LR' ? 'x' : 'y';
   const nodeIds = nodes.map((n) => n.id);
   const centersBefore = snapshotDagreNodeCenters(g, nodeIds);
-  alignDagreCrossAxisInPlace(g, crossAxis, nodeSep);
+  const ignoredEdgeIdSet = new Set(alignmentIgnoredEdges ?? []);
+  alignDagreCrossAxisInPlace(g, crossAxis, nodeSep, ignoredEdgeIdSet);
   // The barycenter pass can pull a wide subtree's head across its rank until it
   // overlaps a sibling; restore dagre's non-overlap guarantee before positions
   // and edge deltas are read (so edge routing reflects the final coordinates).
