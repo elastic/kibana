@@ -36,6 +36,7 @@ import {
   getGroupingModeLabel,
 } from '../labels';
 import { DestinationCard } from './destination_card';
+import { Column, SubsectionColumns } from './subsection_columns';
 
 const TAKE_ACTION_BUTTON_ID = 'actionPolicyDetailsFlyoutTakeAction';
 const EMPTY_VALUE = '-';
@@ -296,25 +297,29 @@ export const ActionPolicyDetailsFlyout = ({
             hasBorder
             data-test-subj="actionPolicyDetailsFlyoutNotification"
           >
-            <Body.Section.Subsection
-              title={DISPATCH_PER_LABEL}
-              data-test-subj="actionPolicyDetailsFlyoutDispatchModeBlock"
-            >
-              <EuiText size="s">{getGroupingModeLabel(groupingMode)}</EuiText>
-            </Body.Section.Subsection>
-            {groupingMode === 'per_field' && groupBy && groupBy.length > 0 && (
-              <Body.Section.Subsection
-                title={GROUP_BY_LABEL}
-                data-test-subj="actionPolicyDetailsFlyoutGroupByBlock"
-              >
-                <BadgeList items={groupBy} />
-              </Body.Section.Subsection>
-            )}
-            <Body.Section.Subsection
-              title={FREQUENCY_LABEL}
-              data-test-subj="actionPolicyDetailsFlyoutFrequencyBlock"
-            >
-              <EuiText size="s">{getFrequencyLabel(policy.throttle, groupingMode)}</EuiText>
+            <Body.Section.Subsection>
+              <SubsectionColumns>
+                <Column
+                  title={DISPATCH_PER_LABEL}
+                  data-test-subj="actionPolicyDetailsFlyoutDispatchModeBlock"
+                >
+                  {getGroupingModeLabel(groupingMode)}
+                </Column>
+                {groupingMode === 'per_field' && (
+                  <Column
+                    title={GROUP_BY_LABEL}
+                    data-test-subj="actionPolicyDetailsFlyoutGroupByBlock"
+                  >
+                    {groupBy && groupBy.length > 0 ? <BadgeList items={groupBy} /> : EMPTY_VALUE}
+                  </Column>
+                )}
+                <Column
+                  title={FREQUENCY_LABEL}
+                  data-test-subj="actionPolicyDetailsFlyoutFrequencyBlock"
+                >
+                  {getFrequencyLabel(policy.throttle, groupingMode)}
+                </Column>
+              </SubsectionColumns>
             </Body.Section.Subsection>
           </Body.Section>
           <Body.Section

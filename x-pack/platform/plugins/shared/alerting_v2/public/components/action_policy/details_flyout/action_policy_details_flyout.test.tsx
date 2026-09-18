@@ -273,7 +273,7 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId('actionPolicyDetailsFlyoutGroupByBlock')).toBeInTheDocument();
     });
 
-    it('does not render the Group by subsection when grouping mode is per_episode', () => {
+    it('does not render the Group by column when grouping mode is per_episode', () => {
       renderFlyout({
         policy: createPolicy({
           grouping_mode: 'per_episode',
@@ -313,7 +313,7 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('service.name')).toBeInTheDocument();
     });
 
-    it('does not render the group-by block when grouping mode is per_episode', () => {
+    it('does not render group-by field badges when grouping mode is per_episode', () => {
       renderFlyout({
         policy: createPolicy({
           grouping_mode: 'per_episode',

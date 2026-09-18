@@ -150,6 +150,12 @@ describe('FlyoutSubsection', () => {
     const { container } = render(<FlyoutSubsection title="A">body</FlyoutSubsection>);
     expect(container.firstChild).not.toHaveAttribute('data-bordered');
   });
+
+  it('omits the heading when title is not provided', () => {
+    render(<FlyoutSubsection>body</FlyoutSubsection>);
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    expect(screen.getByText('body')).toBeInTheDocument();
+  });
 });
 
 // ─── FlyoutAccordion ─────────────────────────────────────────────────────────
