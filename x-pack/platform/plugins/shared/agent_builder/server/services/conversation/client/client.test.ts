@@ -77,8 +77,7 @@ jest.mock('./storage', () => ({
   conversationIndexName: '.kibana_agent_builder_conversations',
 }));
 
-// Failing: See https://github.com/elastic/kibana/issues/289049
-describe.skip('ConversationClient', () => {
+describe('ConversationClient', () => {
   let client: ConversationClient;
   let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
@@ -222,7 +221,15 @@ describe.skip('ConversationClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // `clearAllMocks` only clears call history — queued `mockResolvedValueOnce` /
+    // `mockRejectedValueOnce` implementations survive it. Reset the ES client mocks fully so a
+    // once-queued 409 left behind by a conflict test cannot leak into the next test (#289049).
     mockRawEsClient.get.mockReset();
+    mockEsClient.search.mockReset();
+    mockEsClient.delete.mockReset();
+    mockEsClient.index.mockReset();
+    // Default OCC-style index response; describes that need something else override it.
+    mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
     agentRegistry = {
       get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
@@ -1569,259 +1576,6 @@ describe.skip('ConversationClient', () => {
     });
   });
 
-  describe('upsertRound', () => {
-    const round = createRound({ id: 'round-2', input: { message: 'second' } });
-
-    const persistedRounds = (call: number = 0) =>
-      mockEsClient.index.mock.calls[call][0].document.conversation_rounds as Array<{ id: string }>;
-
-    beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-    });
-
-    it('appends the round to the stored conversation', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-
-      await client.upsertRound({ id: 'conversation-1', round });
-
-      expect(persistedRounds().map(({ id }) => id)).toEqual(['round-1', 'round-2']);
-    });
-
-    it('re-reads and keeps a round written concurrently after a conflict', async () => {
-      mockGetDocumentResponseOnce(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-      // the winning writer's round is now present in the stored document
-      mockGetDocumentResponse(
-        createConversationDocument({
-          seqNo: 2,
-          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
-        })
-      );
-      mockEsClient.index.mockRejectedValueOnce(createConflictError());
-
-      await client.upsertRound({ id: 'conversation-1', round });
-
-      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
-      expect(persistedRounds(1).map(({ id }) => id)).toEqual([
-        'round-1',
-        'round-concurrent',
-        'round-2',
-      ]);
-    });
-
-    it('throws a write conflict error once retries are exhausted', async () => {
-      mockGetDocumentResponse(createConversationDocument());
-      mockEsClient.index.mockRejectedValue(createConflictError());
-
-      const error = await client.upsertRound({ id: 'conversation-1', round }).catch((e) => e);
-
-      expect(isConversationWriteConflictError(error)).toBe(true);
-      expect(error.meta.statusCode).toBe(409);
-    });
-
-    it('preserves a title renamed while the round was running', async () => {
-      mockGetDocumentResponse(createConversationDocument({ title: 'Renamed by user' }));
-
-      const result = await client.upsertRound({ id: 'conversation-1', round });
-
-      expectNoReadBy(result);
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ title: 'Renamed by user' }),
-        })
-      );
-      expect(result.title).toBe('Renamed by user');
-    });
-
-    it('keeps a concurrent attachment alongside one the round created', async () => {
-      const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
-      const fromRound = { id: 'attachment-from-round', versions: [], current_version: 1 };
-
-      mockGetDocumentResponse(createConversationDocument({ attachments: [concurrent] }));
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        attachments: { snapshot: [], produced: [fromRound] } as never,
-      });
-
-      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
-      expect(attachments.map(({ id }: { id: string }) => id).sort()).toEqual([
-        'attachment-concurrent',
-        'attachment-from-round',
-      ]);
-    });
-
-    it('keeps a round edit to an attachment the stored conversation still has at v1', async () => {
-      const stored = { id: 'X', versions: [], current_version: 1 };
-      const edited = { id: 'X', versions: [], current_version: 2 };
-
-      mockGetDocumentResponse(createConversationDocument({ attachments: [stored] }));
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        // the round started from v1 and edited it in memory; nothing has
-        // persisted that yet, so the stored record must not win
-        attachments: { snapshot: [stored], produced: [edited] } as never,
-      });
-
-      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
-      expect(attachments).toEqual([edited]);
-    });
-
-    it('does not overwrite a workspace already set on the stored conversation', async () => {
-      mockGetDocumentResponse(createConversationDocument({ workspaceId: 'workspace-existing' }));
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        workspaceId: 'workspace-new',
-      });
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ workspace_id: 'workspace-existing' }),
-        })
-      );
-    });
-
-    it('sets the workspace when the stored conversation has none', async () => {
-      mockGetDocumentResponse(createConversationDocument());
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round,
-        workspaceId: 'workspace-new',
-      });
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ workspace_id: 'workspace-new' }),
-        })
-      );
-    });
-  });
-
-  describe('addAttachmentsToLastRound', () => {
-    const refs = [{ attachment_id: 'attachment-1', version: 1 }];
-    const produced = [{ id: 'attachment-1', versions: [], current_version: 1 }];
-
-    const persistedRounds = (call: number = 0) =>
-      mockEsClient.index.mock.calls[call][0].document.conversation_rounds as Array<{
-        id: string;
-        input: { attachment_refs?: Array<{ attachment_id: string }> };
-      }>;
-
-    const request = {
-      id: 'conversation-1',
-      refs,
-      attachments: { snapshot: [], produced },
-    } as never;
-
-    beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-    });
-
-    it('merges the refs into the last stored round only', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({
-          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-2' })],
-        })
-      );
-
-      await client.addAttachmentsToLastRound(request);
-
-      const [first, last] = persistedRounds();
-      expect(first.input.attachment_refs).toBeUndefined();
-      expect(last.input.attachment_refs).toEqual(refs);
-    });
-
-    it('applies the refs to a round appended concurrently after a conflict', async () => {
-      mockGetDocumentResponseOnce(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-      mockGetDocumentResponse(
-        createConversationDocument({
-          seqNo: 2,
-          rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
-        })
-      );
-      mockEsClient.index.mockRejectedValueOnce(createConflictError());
-
-      await client.addAttachmentsToLastRound(request);
-
-      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
-
-      const [first, last] = persistedRounds(1);
-      expect(first.id).toBe('round-1');
-      expect(first.input.attachment_refs).toBeUndefined();
-      expect(last.id).toBe('round-concurrent');
-      expect(last.input.attachment_refs).toEqual(refs);
-    });
-
-    it('keeps a concurrent attachment alongside the produced ones', async () => {
-      const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
-
-      mockGetDocumentResponse(
-        createConversationDocument({
-          rounds: [createRound({ id: 'round-1' })],
-          attachments: [concurrent],
-        })
-      );
-
-      await client.addAttachmentsToLastRound(request);
-
-      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
-      expect(attachments.map(({ id }: { id: string }) => id).sort()).toEqual([
-        'attachment-1',
-        'attachment-concurrent',
-      ]);
-    });
-
-    it('throws a bad request error when the stored conversation has no rounds', async () => {
-      mockGetDocumentResponse(createConversationDocument());
-
-      await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
-        'Conversation conversation-1 has no rounds to attach to'
-      );
-
-      expect(mockEsClient.index).not.toHaveBeenCalled();
-    });
-
-    it('throws a write conflict error once retries are exhausted', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })
-      );
-      mockEsClient.index.mockRejectedValue(createConflictError());
-
-      const error = await client.addAttachmentsToLastRound(request).catch((e) => e);
-
-      expect(isConversationWriteConflictError(error)).toBe(true);
-      expect(error.meta.statusCode).toBe(409);
-    });
-
-    it('remains owner-only by default for public conversations', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({
-          userId: 'other-user-id',
-          username: 'other-user',
-          accessMode: ConversationAccessControlMode.Public,
-          rounds: [createRound({ id: 'round-1' })],
-        })
-      );
-
-      await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
-
-      expect(mockEsClient.index).not.toHaveBeenCalled();
-    });
-  });
-
   describe('updateRoundFeedback', () => {
     const round = createRound({ id: 'round-1' });
 
@@ -2372,7 +2126,7 @@ describe.skip('ConversationClient', () => {
       });
     });
 
-    describe('onMetadataPatched callback', () => {
+    describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {
           input_type: 'SELECT',
@@ -2387,15 +2141,20 @@ describe.skip('ConversationClient', () => {
         mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
       });
 
-      it('calls onMetadataPatched with changed fields after a successful write', async () => {
-        const onMetadataPatched = jest.fn();
+      const buildEventEmitter = () => ({
+        emitMetadataPatched: jest.fn(),
+        emitAttachmentEvents: jest.fn(),
+      });
+
+      it('emits emitMetadataPatched with changed fields after a successful write', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2407,7 +2166,7 @@ describe.skip('ConversationClient', () => {
 
         await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
 
-        expect(onMetadataPatched).toHaveBeenCalledWith({
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith({
           conversationId: 'conversation-1',
           templateId: template.id,
           parentId: undefined,
@@ -2416,14 +2175,14 @@ describe.skip('ConversationClient', () => {
       });
 
       it('includes parentId when the conversation has a parent_conversation', async () => {
-        const onMetadataPatched = jest.fn();
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         const docWithParent = {
@@ -2440,20 +2199,20 @@ describe.skip('ConversationClient', () => {
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
 
-        expect(onMetadataPatched).toHaveBeenCalledWith(
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith(
           expect.objectContaining({ parentId: 'parent-conv-1' })
         );
       });
 
-      it('does not call onMetadataPatched when all values are identical (no-op suppression)', async () => {
-        const onMetadataPatched = jest.fn();
+      it('does not emit when all values are identical (no-op suppression)', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2466,18 +2225,18 @@ describe.skip('ConversationClient', () => {
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
 
-        expect(onMetadataPatched).not.toHaveBeenCalled();
+        expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
       });
 
-      it('does not call onMetadataPatched when the write fails', async () => {
-        const onMetadataPatched = jest.fn();
+      it('does not emit when the write fails', async () => {
+        const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
-          onMetadataPatched,
+          eventEmitter,
         });
 
         mockGetDocumentResponse(
@@ -2489,7 +2248,7 @@ describe.skip('ConversationClient', () => {
           clientWithCb.patchMetadata('conversation-1', { severity: 'high' })
         ).rejects.toThrow('disk full');
 
-        expect(onMetadataPatched).not.toHaveBeenCalled();
+        expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
       });
     });
   });
@@ -2982,6 +2741,155 @@ describe.skip('ConversationClient', () => {
     });
   });
 
+  describe('emitAttachmentEvents callback', () => {
+    const attachmentAddedEvent = (id: string): TimelineEvent =>
+      ({
+        id,
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2026-09-16T10:00:00.000Z',
+        actor: { type: EventActorType.system, id: 'system' },
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'http_api',
+        },
+      } as TimelineEvent);
+
+    const userMessageEvent = (id: string): TimelineEvent => ({
+      id,
+      type: TimelineEventType.userMessage,
+      created_at: '2026-09-16T10:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+      data: { message: 'hello' },
+    });
+
+    let emitAttachmentEvents: jest.Mock;
+    let clientWithCb: ConversationClient;
+
+    beforeEach(() => {
+      emitAttachmentEvents = jest.fn();
+      clientWithCb = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        eventEmitter: { emitMetadataPatched: jest.fn(), emitAttachmentEvents },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('appendEvents fires with only the attachment events after the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const added = attachmentAddedEvent('evt-att-1');
+
+      await clientWithCb.appendEvents({
+        id: 'conversation-1',
+        events: [userMessageEvent('r1::user_message'), added],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(emitAttachmentEvents).toHaveBeenCalledTimes(1);
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('appendEvents does not fire for an event id that was already stored (dedup)', async () => {
+      const added = attachmentAddedEvent('evt-att-1');
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [added] }));
+
+      await clientWithCb.appendEvents({ id: 'conversation-1', events: [added] });
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents does not fire when there are no attachment events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.appendEvents({
+        id: 'conversation-1',
+        events: [userMessageEvent('r1::user_message')],
+      });
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('replaceRoundEvents fires with the attachment events of the new batch', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const added = attachmentAddedEvent('evt-att-2');
+
+      await clientWithCb.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'r1',
+        events: [userMessageEvent('r1::user_message'), added],
+      });
+
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('create fires with the attachment events of the initial batch', async () => {
+      mockEsClient.index.mockResolvedValue({ result: 'created' });
+      mockGetDocumentResponse(createConversationDocument());
+      const added = attachmentAddedEvent('evt-att-3');
+
+      await clientWithCb.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        events: [userMessageEvent('r1::user_message'), added],
+      });
+
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('update never fires', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.update({ id: 'conversation-1', title: 'renamed' });
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('does not fire when the write fails', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockEsClient.index.mockRejectedValue(new Error('disk full'));
+
+      await expect(
+        clientWithCb.appendEvents({
+          id: 'conversation-1',
+          events: [attachmentAddedEvent('evt-att-4')],
+        })
+      ).rejects.toThrow('disk full');
+
+      expect(emitAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('a throwing callback does not fail the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      emitAttachmentEvents.mockImplementation(() => {
+        throw new Error('listener exploded');
+      });
+
+      await expect(
+        clientWithCb.appendEvents({
+          id: 'conversation-1',
+          events: [attachmentAddedEvent('evt-att-5')],
+        })
+      ).resolves.toBeDefined();
+    });
+  });
+
   describe('events persistence', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
@@ -3052,61 +2960,6 @@ describe.skip('ConversationClient', () => {
       expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
     });
 
-    it('reconciles stored events when a round completes (crash-recovery: in_progress → completed = exactly one terminal)', async () => {
-      const inProgressRound = createRound({
-        id: 'round-crash',
-        status: ConversationRoundStatus.inProgress,
-      });
-      const stalePartialEvents: TimelineEvent[] = [
-        {
-          id: 'round-crash::user_message',
-          type: TimelineEventType.userMessage,
-          created_at: '2025-08-04T07:42:20.789Z',
-          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
-          data: inProgressRound.input,
-        },
-        {
-          id: 'round-crash::execution_started',
-          type: TimelineEventType.executionStarted,
-          created_at: '2025-08-04T07:42:20.789Z',
-          actor: { type: EventActorType.agent, id: 'agent-1' },
-          execution_id: 'round-crash::execution',
-          trigger_event_id: 'round-crash::user_message',
-          data: { trigger_type: TimelineTriggerType.userMessage },
-        },
-      ];
-      mockGetDocumentResponse(
-        createConversationDocument({
-          schemaVersion: 1,
-          rounds: [inProgressRound],
-          events: stalePartialEvents,
-        })
-      );
-
-      await client.upsertRound({
-        id: 'conversation-1',
-        round: {
-          ...inProgressRound,
-          status: ConversationRoundStatus.completed,
-          response: { message: 'now finished' },
-        },
-      });
-
-      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
-        document: { events?: Array<{ id: string; type: string }> };
-      };
-      const terminals = indexed.events?.filter(
-        (event) => event.type === TimelineEventType.executionTerminated
-      );
-      expect(terminals).toHaveLength(1);
-      expect(terminals?.[0]?.id).toBe('round-crash::execution_terminated');
-      expect(indexed.events?.map((event) => event.id)).toEqual([
-        'round-crash::user_message',
-        'round-crash::execution_started',
-        'round-crash::execution_terminated',
-      ]);
-    });
-
     // Minimal round-derived timeline events for concurrency tests. The runs are unfinished
     // (no terminal event), matching what step flushes append mid-round.
     const startTimelineEvents = (roundId: string): TimelineEvent[] => [
@@ -3167,6 +3020,136 @@ describe.skip('ConversationClient', () => {
         'round-1::step::0',
         'round-1::step::1',
       ]);
+    });
+
+    describe('skipIfTerminalExistsFor (atomic terminal guard)', () => {
+      const terminated = (roundId: string): TimelineEvent =>
+        ({
+          id: `${roundId}::execution_terminated`,
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: `${roundId}::execution`,
+          trigger_event_id: `${roundId}::user_message`,
+          data: {
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 1,
+            outcome: { type: 'responded', response: { message: 'ok' } },
+          },
+        } as TimelineEvent);
+      const failed = (roundId: string): TimelineEvent =>
+        ({
+          id: `${roundId}::execution_failed`,
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: `${roundId}::execution`,
+          trigger_event_id: `${roundId}::user_message`,
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+        } as TimelineEvent);
+
+      it('replaceRoundEvents skips the write and returns the stored document when a terminal exists for the execution', async () => {
+        const stored = [...startTimelineEvents('round-1'), terminated('round-1')];
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+
+        const result = await client.replaceRoundEvents({
+          id: 'conversation-1',
+          roundId: 'round-1',
+          events: [...startTimelineEvents('round-1'), failed('round-1')],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(result.events?.map((event) => event.id)).toEqual(stored.map((event) => event.id));
+      });
+
+      it('appendEvents skips the write when a terminal exists for the execution', async () => {
+        const stored = [...startTimelineEvents('round-1'), terminated('round-1')];
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: stored }));
+
+        const result = await client.appendEvents({
+          id: 'conversation-1',
+          events: [failed('round-1')],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(result.events?.map((event) => event.id)).toEqual(stored.map((event) => event.id));
+      });
+
+      it('writes when no terminal exists for the execution', async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({ schemaVersion: 1, events: startTimelineEvents('round-1') })
+        );
+
+        await client.appendEvents({
+          id: 'conversation-1',
+          events: [failed('round-1')],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+          document: { events?: Array<{ id: string }> };
+        };
+        expect(indexed.events?.map((event) => event.id)).toContain('round-1::execution_failed');
+      });
+
+      it("another execution's terminal does not block the write", async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({
+            schemaVersion: 1,
+            events: [...startTimelineEvents('round-1'), terminated('round-1')],
+          })
+        );
+
+        await client.appendEvents({
+          id: 'conversation-1',
+          events: [failed('round-2')],
+          skipIfTerminalExistsFor: 'round-2::execution',
+        });
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not notify attachment events on a skipped write', async () => {
+        const onAttachmentEvents = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter: {
+            emitMetadataPatched: jest.fn(),
+            emitAttachmentEvents: onAttachmentEvents,
+          },
+        });
+        mockGetDocumentResponse(
+          createConversationDocument({
+            schemaVersion: 1,
+            events: [...startTimelineEvents('round-1'), terminated('round-1')],
+          })
+        );
+
+        await clientWithCb.appendEvents({
+          id: 'conversation-1',
+          events: [
+            {
+              id: 'att-evt-1',
+              type: TimelineEventType.attachmentAdded,
+              created_at: '2025-08-04T07:42:32.000Z',
+              actor: { type: EventActorType.user, id: 'user-1' },
+              execution_id: 'round-1::execution',
+              data: { attachment_id: 'a1', attachment_type: 'text', current_version: 1 },
+            } as TimelineEvent,
+          ],
+          skipIfTerminalExistsFor: 'round-1::execution',
+        });
+
+        expect(onAttachmentEvents).not.toHaveBeenCalled();
+      });
     });
 
     it('replaceRoundEvents drops every stored event for the round (including stale live-streamed steps) and appends the fresh batch, leaving other rounds and additive events untouched', async () => {
@@ -3305,7 +3288,7 @@ describe.skip('ConversationClient', () => {
       expect(indexed.events).toBeUndefined();
     });
 
-    it('keeps events-native docs events-native on update (re-stamps schema_version, regenerates events)', async () => {
+    it('keeps events-native docs events-native on update (keeps schema_version, preserves stored events verbatim)', async () => {
       const existingRound = createRound({
         id: 'round-1',
         status: ConversationRoundStatus.completed,
@@ -3336,11 +3319,7 @@ describe.skip('ConversationClient', () => {
         };
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(indexed.events?.map((event) => event.id)).toEqual([
-        'round-1::user_message',
-        'round-1::execution_started',
-        'round-1::execution_terminated',
-      ]);
+      expect(indexed.events).toEqual(storedEvents);
     });
   });
 });

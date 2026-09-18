@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -19,23 +18,24 @@ import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { assertCanEnableAgentSharding } from './agent_sharding_license';
+import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
-export const PrivateLocationSchema = schema.object({
-  label: schema.string(),
-  agentPolicyId: schema.string(),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  geo: schema.maybe(
-    schema.object({
-      lat: schema.number(),
-      lon: schema.number(),
+export const PrivateLocationSchema = z.strictObject({
+  label: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+  agentPolicyId: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+  tags: z.array(z.string().max(256)).max(100).optional(),
+  geo: z
+    .strictObject({
+      lat: z.number(),
+      lon: z.number(),
     })
-  ),
-  spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  isAgentSharding: schema.maybe(schema.boolean()),
+    .optional(),
+  spaces: z.array(z.string().max(256)).max(100).optional(),
+  isAgentSharding: z.boolean().optional(),
 });
 
-export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
+export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
 
 export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocation> = () => ({
   method: 'POST',
