@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IDataStreamClient } from '@kbn/data-streams';
+import type { IDataStreamClient } from '@kbn/core-data-streams-server';
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
