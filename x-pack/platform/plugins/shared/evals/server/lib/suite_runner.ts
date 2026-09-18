@@ -328,13 +328,20 @@ export class SuiteRunner {
       // inline-parse kbn-evals result tables so we don't rely on the
       // buffer (which only retains the last MAX_OUTPUT_LINES lines and
       // may drop early experiments in multi-project suites).
-      const appendOutput = (chunk: Buffer) => {
+      //
+      // Chunk boundaries are arbitrary — a pipe read can end mid-line — so
+      // splitting each chunk on `\n` in isolation corrupts any line that
+      // straddles two reads (e.g. "Test faile" + "d: bar\n"). That also
+      // breaks the result-table regexes below, which need whole lines.
+      // Carry the trailing partial line per stream and prepend it to the
+      // next chunk; leftovers are flushed when the process exits.
+      const pendingByStream = new Map<'stdout' | 'stderr', string>();
+
+      const consumeLines = (rawLines: string[]) => {
         const run = this.runs.get(runId);
         const internal = this.internalState.get(runId);
         if (!run) return;
-        const lines = chunk
-          .toString('utf-8')
-          .split('\n')
+        const lines = rawLines
           .map(sanitizeLine)
           .filter((line) => line.length > 0 && !isNoiseLine(line));
 
@@ -375,11 +382,35 @@ export class SuiteRunner {
         }
       };
 
+      // Each stream buffers its own partial line: stdout and stderr are
+      // interleaved arbitrarily, so a shared buffer would splice one
+      // stream's fragment onto the other's next chunk.
+      const appendOutput = (stream: 'stdout' | 'stderr') => (chunk: Buffer) => {
+        const text = (pendingByStream.get(stream) ?? '') + chunk.toString('utf-8');
+        const segments = text.split('\n');
+        // `split` always yields at least one element; the last one is the
+        // trailing partial line (empty when the chunk ended on a newline).
+        pendingByStream.set(stream, segments.pop() ?? '');
+        consumeLines(segments);
+      };
+
+      // A process that exits without a trailing newline still produced a
+      // line — emit it before the exit handler decides the run's status,
+      // since that line may be the Overall results row.
+      const flushPendingOutput = () => {
+        const leftovers: string[] = [];
+        for (const [stream, remainder] of pendingByStream) {
+          if (remainder.length > 0) leftovers.push(remainder);
+          pendingByStream.set(stream, '');
+        }
+        if (leftovers.length > 0) consumeLines(leftovers);
+      };
+
       if (child.stdout) {
-        child.stdout.on('data', appendOutput);
+        child.stdout.on('data', appendOutput('stdout'));
       }
       if (child.stderr) {
-        child.stderr.on('data', appendOutput);
+        child.stderr.on('data', appendOutput('stderr'));
       }
 
       // Timeout safety net
@@ -401,6 +432,8 @@ export class SuiteRunner {
 
       child.on('exit', (code) => {
         clearTimeout(timeout);
+        // Emit any trailing line the process wrote without a newline.
+        flushPendingOutput();
         const run = this.runs.get(runId);
         const internal = this.internalState.get(runId);
         if (run) {
@@ -432,6 +465,8 @@ export class SuiteRunner {
 
       child.on('error', (err) => {
         clearTimeout(timeout);
+        // Emit any trailing line written before the failure.
+        flushPendingOutput();
         const run = this.runs.get(runId);
         if (run) {
           run.status = 'failed';

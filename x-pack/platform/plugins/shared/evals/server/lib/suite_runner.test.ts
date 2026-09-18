@@ -557,6 +557,78 @@ describe('SuiteRunner', () => {
       expect(status?.output[0]).toBe('line 50');
       expect(status?.output[199]).toBe('line 249');
     });
+
+    // Pipe reads split wherever the kernel buffer happens to end, not on
+    // newline boundaries, so a single line routinely arrives as two chunks.
+    describe('lines split across chunk boundaries', () => {
+      it('joins a line whose halves arrive in separate chunks', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+
+        child.stdout.write(Buffer.from('Test faile'));
+        child.stdout.write(Buffer.from('d: bar\n'));
+
+        const status = runner.getStatus(runId);
+        expect(status?.output).toEqual(['Test failed: bar']);
+      });
+
+      it('keeps stdout and stderr partial lines independent', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+
+        // Both streams are mid-line at the same time; a shared carry-over
+        // buffer would splice stdout's fragment onto stderr's chunk.
+        child.stdout.write('stdout par');
+        child.stderr.write('stderr par');
+        child.stdout.write('tial\n');
+        child.stderr.write('tial\n');
+
+        const status = runner.getStatus(runId);
+        expect(status?.output).toEqual(['stdout partial', 'stderr partial']);
+      });
+
+      it('emits a trailing line that never received a newline', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+
+        child.stdout.write('no trailing newline');
+
+        // Held back until the line is complete...
+        expect(runner.getStatus(runId)?.output).toEqual([]);
+
+        child.emit('exit', 0);
+
+        // ...and flushed once the process is gone.
+        expect(runner.getStatus(runId)?.output).toEqual(['no trailing newline']);
+      });
+
+      it('still parses the Overall row when it straddles two chunks', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+
+        const table = [
+          '═══ EVALUATION RESULTS ═══',
+          '║ Dataset                  │ # │ ES|QL Functional Equivalence ║',
+          '║ esql: analytical queries │ 3 │                      mean: 0 ║',
+          '║ Overall                  │ 3 │                      mean: 0 ║',
+        ].join('\n');
+
+        // Split inside the Overall row itself — the row the status logic
+        // keys off of.
+        const splitAt = table.indexOf('║ Overall') + '║ Overall  '.length;
+        child.stdout.write(Buffer.from(table.slice(0, splitAt)));
+        child.stdout.write(Buffer.from(table.slice(splitAt)));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.output).toContain(
+          '║ Overall                  │ 3 │                      mean: 0 ║'
+        );
+        // exit 0 + an Overall row with mean 0 must still be a failure.
+        expect(status?.status).toBe('failed');
+        expect(status?.error).toBe('All evaluator scores were zero');
+      });
+    });
   });
 
   describe('syncScoutConfig', () => {
