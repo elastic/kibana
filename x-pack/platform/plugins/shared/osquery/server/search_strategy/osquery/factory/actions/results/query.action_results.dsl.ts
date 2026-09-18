@@ -32,6 +32,8 @@ export const buildActionResultsQuery = ({
   useNewDataStream,
   integrationNamespaces,
   spaceId,
+  matchMissingSpaceId,
+  matchActionDataSpaceId,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
@@ -64,7 +66,21 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer;
+  // Hit-level scoping is enforced centrally in the search strategy
+  // (enforceSpaceScope). The aggregation below is a separate filter context that
+  // the top-level query does not constrain, so it is scoped explicitly here.
+  //
+  // This read is bound to a single `action_id`, which the caller can only have
+  // learned from a space-stamped, Kibana-written action document. That binding is
+  // the authorization gate that makes honouring the agent-carried
+  // `action_data.space_id` safe here — see buildSpaceIdFilter. The strategy
+  // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
+  // aggregation cannot drift from the hit filter; default true because this
+  // builder is id-bound.
+  const spaceIdFilter = buildSpaceIdFilter(spaceId, {
+    matchMissingSpaceId: matchMissingSpaceId ?? true,
+    matchActionDataSpaceId: matchActionDataSpaceId ?? true,
+  }) as estypes.QueryDslQueryContainer;
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,

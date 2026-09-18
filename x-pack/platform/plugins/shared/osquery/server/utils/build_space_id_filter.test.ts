@@ -39,4 +39,69 @@ describe('buildSpaceIdFilter', () => {
       term: { space_id: 'my-space' },
     });
   });
+
+  describe('matchActionDataSpaceId', () => {
+    it('defaults to off, leaving every existing caller byte-identical', () => {
+      expect(buildSpaceIdFilter('my-space', {})).toEqual({ term: { space_id: 'my-space' } });
+      expect(buildSpaceIdFilter('default', {})).toEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      });
+    });
+
+    it('also matches action_data.space_id in a named space when enabled', () => {
+      expect(buildSpaceIdFilter('my-space', { matchActionDataSpaceId: true })).toEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            { term: { 'action_data.space_id': 'my-space' } },
+          ],
+        },
+      });
+    });
+
+    it('matches the top-level field, the missing field, and action_data in the default space', () => {
+      expect(buildSpaceIdFilter('default', { matchActionDataSpaceId: true })).toEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+            { term: { 'action_data.space_id': 'default' } },
+          ],
+        },
+      });
+    });
+
+    // The two flags are orthogonal: action_data.space_id is a present, exact-valued
+    // term, so it stays safe under CPS fan-out where a missing field does not.
+    it('still matches action_data.space_id when matchMissingSpaceId is false', () => {
+      const filter = buildSpaceIdFilter('default', {
+        matchMissingSpaceId: false,
+        matchActionDataSpaceId: true,
+      });
+
+      expect(filter).toEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { term: { 'action_data.space_id': 'default' } },
+          ],
+        },
+      });
+      expect(JSON.stringify(filter)).not.toContain('must_not');
+    });
+
+    it('never matches field-less documents in a named space', () => {
+      const filter = buildSpaceIdFilter('my-space', {
+        matchMissingSpaceId: true,
+        matchActionDataSpaceId: true,
+      });
+
+      expect(JSON.stringify(filter)).not.toContain('must_not');
+    });
+  });
 });

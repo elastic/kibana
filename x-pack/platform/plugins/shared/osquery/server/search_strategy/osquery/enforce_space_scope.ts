@@ -21,17 +21,30 @@ import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
  * aggregations inside a `global` aggregation, which by ES semantics ignores the
  * top-level `query` filter this helper scopes. The hit context and that global
  * aggregation context are therefore two independent filter scopes — this helper
- * cannot reach the latter, so those builders inject `buildSpaceIdFilter(spaceId)`
- * into the aggregation's own filter as well. Same value, two scopes: this one
- * scopes the returned hits (`_source`), the builder scopes the counts
- * (`rows_count` / responded / success / error) so they match the hits.
+ * cannot reach the latter, so those builders inject `buildSpaceIdFilter` with
+ * the same `matchMissingSpaceId` / `matchActionDataSpaceId` flags this helper
+ * received. Same flags, two scopes: this one scopes the returned hits
+ * (`_source`), the builder scopes the counts (`rows_count` / responded /
+ * success / error) so they match the hits.
+ *
+ * `matchActionDataSpaceId` additionally matches the agent-carried
+ * `action_data.space_id` (see {@link buildSpaceIdFilter}). It is only safe on
+ * reads already bound to an `action_id` or `schedule_id`. The search strategy
+ * enables it from `ID_BOUND_FACTORY_QUERY_TYPES` and passes that decision into
+ * both this helper and the global-agg builders so the two scopes cannot drift.
  */
 export const enforceSpaceScope = (
   dsl: ISearchRequestParams,
   spaceId: string,
-  { matchMissingSpaceId = true }: { matchMissingSpaceId?: boolean } = {}
+  {
+    matchMissingSpaceId = true,
+    matchActionDataSpaceId = false,
+  }: { matchMissingSpaceId?: boolean; matchActionDataSpaceId?: boolean } = {}
 ): ISearchRequestParams => {
-  const spaceIdFilter = buildSpaceIdFilter(spaceId, { matchMissingSpaceId });
+  const spaceIdFilter = buildSpaceIdFilter(spaceId, {
+    matchMissingSpaceId,
+    matchActionDataSpaceId,
+  });
 
   const query = (dsl.query ?? {}) as { bool?: { filter?: unknown } };
   const bool = (query.bool ?? {}) as { filter?: unknown };

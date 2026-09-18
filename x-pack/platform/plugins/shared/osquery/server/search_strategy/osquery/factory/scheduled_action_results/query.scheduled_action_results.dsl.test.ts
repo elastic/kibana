@@ -152,7 +152,15 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const filter = responsesBySchedule.filter as Record<string, Record<string, TermFilter[]>>;
     const mustFilters = filter.bool.must;
-    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
+    // Id-bound read: also matches the agent-carried action_data.space_id.
+    expect(mustFilters).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'my-space' } },
+          { term: { 'action_data.space_id': 'my-space' } },
+        ],
+      },
+    });
   });
 
   it('matches default space OR missing space_id when spaceId is "default"', () => {
@@ -171,6 +179,7 @@ describe('buildScheduledActionResultsQuery', () => {
         should: [
           { term: { space_id: 'default' } },
           { bool: { must_not: { exists: { field: 'space_id' } } } },
+          { term: { 'action_data.space_id': 'default' } },
         ],
       },
     };
@@ -205,8 +214,42 @@ describe('buildScheduledActionResultsQuery', () => {
     const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
     const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
 
-    expect(mustFilters).toContainEqual({ term: { space_id: 'default' } });
+    // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
+    // present, exact-valued term, so it survives while the missing-field
+    // allowance is dropped.
+    expect(mustFilters).toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'default' } },
+          { term: { 'action_data.space_id': 'default' } },
+        ],
+      },
+    });
     expect(JSON.stringify(mustFilters)).not.toContain('exists');
+  });
+
+  it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      spaceId: 'my-space',
+      matchActionDataSpaceId: false,
+    });
+
+    const aggs = result.aggs as Record<string, Record<string, unknown>>;
+    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
+    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
+    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
+    const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
+
+    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
+    expect(mustFilters).not.toContainEqual({
+      bool: {
+        should: [
+          { term: { space_id: 'my-space' } },
+          { term: { 'action_data.space_id': 'my-space' } },
+        ],
+      },
+    });
   });
 
   it('does not scope the top-level query (centralized in the search strategy)', () => {
@@ -216,19 +259,6 @@ describe('buildScheduledActionResultsQuery', () => {
     const hasSpaceFilter = filters.some((f) => f.term && 'space_id' in f.term);
 
     expect(hasSpaceFilter).toBe(false);
-  });
-
-  it('scopes the aggregation by space_id', () => {
-    // The aggregation runs in its own (global) filter context that the central
-    // enforceSpaceScope does not reach, so it carries a space_id clause itself.
-    const result = buildScheduledActionResultsQuery({ ...defaultOptions, spaceId: 'my-space' });
-    const aggs = result.aggs as Record<string, Record<string, unknown>>;
-    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
-    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
-    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
-    const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
-
-    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
   });
 
   it('prefixes index with *: when ccsEnabled is true', () => {

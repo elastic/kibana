@@ -28,6 +28,26 @@ import type { OsqueryFactory } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
 
+/**
+ * Factory query types whose DSL is always constrained by an `action_id` or a
+ * `schedule_id`, and which may therefore also match the agent-carried
+ * `action_data.space_id` (see {@link buildSpaceIdFilter}).
+ *
+ * SECURITY: that id binding is the authorization gate — a caller can only supply
+ * such an id if they obtained it from a space-stamped, Kibana-written action
+ * document. Do not add a query type here unless its builder unconditionally
+ * filters on one of those ids.
+ *
+ * Types not allowlisted for `action_data.space_id`: `actions` and `exportResults`
+ * enumerate across actions; `actionDetails` is an id-bound lookup of
+ * Kibana-written action metadata on `ACTIONS_INDEX`, not agent `action_data`.
+ */
+export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
+  OsqueryQueries.results,
+  OsqueryQueries.actionResults,
+  OsqueryQueries.scheduledActionResults,
+];
+
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
   esClient: CoreStart['elasticsearch']['client'],
@@ -40,11 +60,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
   return {
     search: (request, options, deps) => {
-      if (request.factoryQueryType == null) {
+      const factoryQueryType = request.factoryQueryType;
+      if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
 
-      const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
+      const queryFactory: OsqueryFactory<T> = osqueryFactory[factoryQueryType];
 
       return from(hasOsqueryReadPrivilege(osqueryContext.security, deps.request)).pipe(
         mergeMap((isAuthorized) => {
@@ -74,8 +95,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             activeSpace,
             cpsActive,
           }) => {
+            // Single decision for hit-level enforceSpaceScope and for any
+            // global-agg builder that cannot inherit the top-level query.
+            const matchActionDataSpaceId = ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType);
+
             const strictRequest = {
-              factoryQueryType: request.factoryQueryType,
+              factoryQueryType,
               kuery: request.kuery,
               ...('pagination' in request ? { pagination: request.pagination } : {}),
               ...('sort' in request ? { sort: request.sort } : {}),
@@ -93,6 +118,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               ...('matchMissingSpaceId' in request
                 ? { matchMissingSpaceId: request.matchMissingSpaceId }
                 : {}),
+              matchActionDataSpaceId,
               // exportResults factory fields — baseFilter is required and unique to this
               // factory type, so its presence is a reliable discriminator for all six fields.
               ...('baseFilter' in request
@@ -110,10 +136,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
             const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
 
-            const spaceScopeOptions =
-              'matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
+            const spaceScopeOptions = {
+              ...('matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
                 ? { matchMissingSpaceId: request.matchMissingSpaceId }
-                : undefined;
+                : {}),
+              matchActionDataSpaceId,
+            };
 
             const dsl = enforceSpaceScope(
               queryFactory.buildDsl({
@@ -178,7 +206,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             return searchLegacyIndex$.pipe(
               mergeMap((legacyIndexResponse) => {
                 if (
-                  request.factoryQueryType === OsqueryQueries.actionResults &&
+                  factoryQueryType === OsqueryQueries.actionResults &&
                   (newDataStreamIndexExists || ccsEnabled || cpsActive)
                 ) {
                   const dataStreamDsl = enforceSpaceScope(
