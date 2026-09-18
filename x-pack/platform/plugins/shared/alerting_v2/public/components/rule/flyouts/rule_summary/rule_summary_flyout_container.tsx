@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
@@ -28,8 +27,6 @@ import { SourceRuleSummaryFlyout } from '../source_rule_summary_flyout';
 interface Props {
   ruleId: string;
   sourceRuleInfo?: { category?: string };
-  /** Defaults to `push`, which keeps the flyout beside the content it was opened from. */
-  type?: EuiFlyoutProps['type'];
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -38,7 +35,6 @@ interface Props {
 export const RuleSummaryFlyoutContainer = ({
   ruleId,
   sourceRuleInfo,
-  type = 'push',
   onClose,
   onEdit,
   onClone,
@@ -76,7 +72,6 @@ export const RuleSummaryFlyoutContainer = ({
         rule={sourceRule}
         ruleCategory={sourceRuleInfo?.category}
         ruleDetailsHref={sourceRuleDetailsHref}
-        type={type}
         onClose={onClose}
       />
     );

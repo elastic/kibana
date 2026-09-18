@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -131,7 +130,6 @@ export interface SourceRuleSummaryFlyoutProps {
   ruleCategory?: string;
   ruleDetailsHref: string | null;
   onClose: () => void;
-  type?: EuiFlyoutProps['type'];
 }
 
 export const SourceRuleSummaryFlyout = ({
@@ -139,7 +137,6 @@ export const SourceRuleSummaryFlyout = ({
   ruleCategory,
   ruleDetailsHref,
   onClose,
-  type = 'push',
 }: SourceRuleSummaryFlyoutProps) => {
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const toggleActions = useCallback(() => setIsActionsOpen((prev) => !prev), []);
@@ -173,7 +170,7 @@ export const SourceRuleSummaryFlyout = ({
 
   return (
     <EuiFlyout
-      type={type}
+      type="overlay"
       hasAnimation={false}
       size="s"
       ownFocus={false}
