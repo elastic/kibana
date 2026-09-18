@@ -48,7 +48,7 @@ export const removeContainer = (name: string): void => {
 
 /** Stops a container without removing it (agent stays in Fleet as a stale check-in). */
 export const stopContainer = (name: string): void => {
-  spawnSync('docker', ['stop', '-t', '10', name], { encoding: 'utf8' });
+  runDocker(['stop', '-t', '10', name]);
 };
 
 /** Restarts a previously stopped container (same enrollment / agent id). */

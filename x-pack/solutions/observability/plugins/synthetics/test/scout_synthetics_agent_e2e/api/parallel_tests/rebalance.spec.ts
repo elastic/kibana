@@ -57,12 +57,16 @@ apiTest.describe(
     let adminHeaders: Record<string, string>;
     const createdMonitorIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, agentStack }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient, agentStack, samlAuth }) => {
       const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(editorKey, { Accept: 'application/json' });
       const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
       adminHeaders = mergeSyntheticsApiHeaders(adminKey, { Accept: 'application/json' });
-      await enableSynthetics(apiClient, editorHeaders);
+      // Data-plane veto queries as the synthetics service API key; only a
+      // canEnable user (admin cookie, not the editor API key) actually creates it.
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const enableRes = await enableSynthetics(apiClient, mergeSyntheticsApiHeaders(cookieHeader));
+      expect(enableRes.body).toMatchObject({ isEnabled: true, isValidApiKey: true });
       expect(agentStack.agents).toHaveLength(2);
       expect(agentStack.privateLocation.isAgentSharding).toBe(true);
     });
@@ -84,7 +88,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'does not fail over a live agent whose Fleet check-in looks stale',
+      'does not fail over a stopped agent that still has recent Heartbeat data',
       async ({ apiClient, esClient, agentStack }) => {
         apiTest.setTimeout(VETO_TIMEOUT_MS);
         const enrolledIds = agentStack.agents.map((agent) => agent.id);
@@ -118,6 +122,9 @@ apiTest.describe(
           agentId: staleAgentId,
           timeoutMs: CHECK_TIMEOUT_MS,
         });
+
+        // Stop so last_checkin cannot refresh; keep docs so STALE_DATA_MS vetoes.
+        agentStack.stopAgentContainer(staleAgentId);
 
         await assertAssignmentsHold(
           apiClient,
@@ -180,11 +187,13 @@ apiTest.describe(
           onPoll: () => deleteSyntheticsDocsForAgent(esClient, killedAgentId),
         });
 
+        const since = new Date().toISOString();
         const movedMonitorId = movedMonitorIds[0];
         const check = await waitForSyntheticsCheck(esClient, {
           type: 'http',
           configId: movedMonitorId,
           agentId: survivorAgentId,
+          since,
           timeoutMs: CHECK_TIMEOUT_MS,
         });
         expect(isCheckUp(check)).toBe(true);
@@ -203,7 +212,7 @@ apiTest.describe(
           )
         );
 
-        const postFailover = new Map(movedMonitorIds.map((id) => [id, survivorAgentId]));
+        const postFailover = new Map(createdMonitorIds.map((id) => [id, survivorAgentId]));
         await assertAssignmentsHold(
           apiClient,
           adminHeaders,
