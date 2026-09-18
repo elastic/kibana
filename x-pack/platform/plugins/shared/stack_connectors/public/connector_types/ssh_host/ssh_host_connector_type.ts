@@ -13,29 +13,13 @@ import { CONNECTOR_ID } from '@kbn/connector-schemas/ssh_host';
 export const getConnectorType = (): ConnectorTypeModel => ({
   id: CONNECTOR_ID,
   iconClass: 'consoleApp',
-  actionTypeTitle: i18n.translate(
-    'xpack.stackConnectors.components.sshHost.actionTypeTitle',
-    {
-      defaultMessage: 'SSH Host',
-    }
-  ),
+  actionTypeTitle: i18n.translate('xpack.stackConnectors.components.sshHost.actionTypeTitle', {
+    defaultMessage: 'SSH Host',
+  }),
   selectMessage: i18n.translate('xpack.stackConnectors.components.sshHost.selectMessage', {
     defaultMessage: 'Run scripts on any SSH-accessible host (Linux or macOS).',
   }),
-  validateParams: async (actionParams) => {
-    const errors: Record<string, string[]> = {};
-    if (!actionParams?.subActionParams?.script?.trim()) {
-      errors.script = [
-        i18n.translate(
-          'xpack.stackConnectors.components.sshHost.params.script.requiredError',
-          {
-            defaultMessage: 'Bash script is required.',
-          }
-        ),
-      ];
-    }
-    return { errors };
-  },
+  validateParams: async () => ({ errors: {} }),
   actionConnectorFields: lazy(() => import('./ssh_host_connector_fields')),
-  actionParamsFields: lazy(() => import('./ssh_host_params')),
+  actionParamsFields: lazy(async () => ({ default: () => null })),
 });

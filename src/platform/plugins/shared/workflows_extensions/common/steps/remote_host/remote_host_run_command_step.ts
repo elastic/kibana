@@ -14,7 +14,7 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const SshRunStepTypeId = 'ssh.run' as const;
 
-export const REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB
+const REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().min(1),
@@ -39,7 +39,7 @@ export const remoteHostRunCommandStepCommonDefinition: CommonStepDefinition<
 > = {
   id: SshRunStepTypeId,
   category: StepCategory.Kibana,
-  // stability: 'tech_preview',
+  stability: 'tech_preview',
   label: i18n.translate('workflowsExtensions.remoteHostRunCommandStep.label', {
     defaultMessage: 'Run Command',
   }),

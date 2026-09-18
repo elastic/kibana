@@ -11,9 +11,9 @@ import { randomUUID } from 'crypto';
 import type { ConnectorCallContext } from './execute_in_connector';
 import { execScript, uploadFile } from './execute_in_connector';
 
-export const REMOTE_HOST_JOB_ROOT = '/tmp/wf_remote_host';
+const REMOTE_HOST_JOB_ROOT = '/tmp/wf_remote_host';
 
-export interface RemoteHostJobState {
+interface RemoteHostJobState {
   jobId: string;
   stdoutOffset: number;
   stderrOffset: number;
@@ -39,7 +39,7 @@ interface JobStatusPayload {
   output: string;
 }
 
-export const createJobId = (): string => randomUUID();
+const createJobId = (): string => randomUUID();
 
 export const getWorkdir = (jobId: string): string => `${REMOTE_HOST_JOB_ROOT}/${jobId}`;
 

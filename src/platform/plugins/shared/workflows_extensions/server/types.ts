@@ -114,8 +114,7 @@ export type WorkflowsExtensionsServerPluginStart =
 /**
  * Dependencies for the server plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsServerPluginSetupDeps {}
+export type WorkflowsExtensionsServerPluginSetupDeps = Record<string, never>;
 
 export type ServerStepDefinitionOrLoader<
   Input extends z.ZodType = z.ZodType,

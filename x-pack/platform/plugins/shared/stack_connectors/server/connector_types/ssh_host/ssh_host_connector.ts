@@ -12,7 +12,7 @@ import { join } from 'path';
 import { promisify } from 'util';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
-import { AUTH_TYPE } from '@kbn/connector-schemas/ssh_host';
+import { AUTH_TYPE, SUB_ACTION } from '@kbn/connector-schemas/ssh_host';
 import type {
   Config,
   Secrets,
@@ -53,14 +53,14 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
-    this.registerSubAction({ name: 'exec', method: 'exec', schema: ExecParamsSchema });
+    this.registerSubAction({ name: SUB_ACTION.Exec, method: 'exec', schema: ExecParamsSchema });
     this.registerSubAction({
-      name: 'downloadFile',
+      name: SUB_ACTION.DownloadFile,
       method: 'downloadFile',
       schema: DownloadFileParamsSchema,
     });
     this.registerSubAction({
-      name: 'uploadFile',
+      name: SUB_ACTION.UploadFile,
       method: 'uploadFile',
       schema: UploadFileParamsSchema,
     });

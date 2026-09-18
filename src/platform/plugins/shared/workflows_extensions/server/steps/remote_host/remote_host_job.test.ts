@@ -57,13 +57,21 @@ const statusJson = (payload: {
   });
 
 describe('wrapUserScript', () => {
-  it('wraps user code with a STEP_OUTPUT EXIT trap', () => {
-    const wrapped = wrapUserScript('hostname -f');
+  it('sets STEP_OUTPUT to the workdir output file and includes the user command', () => {
+    const wrapped = wrapUserScript('hostname -f', false);
 
-    expect(wrapped).toContain("STEP_OUTPUT=''");
-    expect(wrapped).toContain('printf \'%s\' "$STEP_OUTPUT" > "$WORKDIR/output.txt"');
-    expect(wrapped).toContain("trap '_capture_output' EXIT");
+    expect(wrapped).toContain('STEP_OUTPUT="$WORKDIR/output.txt"');
+    expect(wrapped).toContain('touch "$STEP_OUTPUT"');
     expect(wrapped).toContain('hostname -f');
+    expect(wrapped).not.toContain('env.sh');
+  });
+
+  it('sources env.sh when env vars are present', () => {
+    expect(wrapUserScript('echo hi', true)).toContain('. "$WORKDIR/env.sh"');
+  });
+
+  it('cds into cwd before the user command', () => {
+    expect(wrapUserScript('echo hi', false, '/opt/app')).toContain('cd "/opt/app" || exit 1');
   });
 });
 
