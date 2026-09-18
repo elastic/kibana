@@ -79,7 +79,7 @@ const sectionIdField = z
   .max(256)
   .optional()
   .describe(
-    'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
 /** A single panel item accepted by `add_panels` (any panel type, optionally targeting a section). */

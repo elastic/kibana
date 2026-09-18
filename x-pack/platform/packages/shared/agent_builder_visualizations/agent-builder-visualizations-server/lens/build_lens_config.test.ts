@@ -23,6 +23,7 @@ jest.mock('@kbn/esql-server-utils', () => ({
 }));
 
 jest.mock('./graph_lens', () => ({
+  ...jest.requireActual('./graph_lens'),
   createVisualizationGraph: jest.fn(),
 }));
 
@@ -129,6 +130,23 @@ describe('buildLensConfig', () => {
     expect(mockedCreateGraph).not.toHaveBeenCalled();
   });
 
+  it('rejects preserving ES|QL when the existing config has no ES|QL query', async () => {
+    await expect(
+      buildLensConfig({
+        nlQuery: 'hide the title',
+        parsedExistingConfig: { type: SupportedChartType.XY, layers: [] },
+        preserveESQL: true,
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      })
+    ).rejects.toThrow(
+      'Preserving the ES|QL query requires an existing ES|QL-backed Lens configuration'
+    );
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
     const result = await run(PROVIDED_ESQL);
 
@@ -180,5 +198,35 @@ describe('buildLensConfig', () => {
 
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+  });
+
+  it.each([
+    { preserveESQL: true, applyChartRules: undefined },
+    { preserveESQL: true, applyChartRules: true },
+    { preserveESQL: false, applyChartRules: true },
+  ])('keeps query resolution independent of chart rule application: %j', async (options) => {
+    const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    await buildLensConfig({
+      nlQuery: 'hide the title',
+      parsedExistingConfig: {
+        type: SupportedChartType.Metric,
+        data_source: { type: 'esql', query: existingQuery },
+        metrics: [{ column: 'count', type: 'primary' }],
+        ignore_global_filters: false,
+        sampling: 100,
+      },
+      ...options,
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(invoke.mock.calls[0][0]).toMatchObject({
+      preserveESQL: options.preserveESQL,
+      applyChartRules: options.applyChartRules ?? false,
+      esqlQuery: options.preserveESQL ? existingQuery : '',
+    });
   });
 });

@@ -34,12 +34,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
-      notifications: {
-        toasts: {},
-      },
-      rendering: {
-        addContext: jest.fn(),
-      },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>
@@ -49,7 +43,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
         getAgentBuilderAccess: jest.fn(),
       },
       dashboard: {},
-      files: {},
       share: {
         url: {
           locators: {
@@ -76,7 +69,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
-    // TODO: Temporarily disabled.
+    // TODO: temporarily disabled
     expect(registerActionAsync).not.toHaveBeenCalledWith(
       PRETTIFY_DASHBOARD_ACTION_ID,
       expect.any(Function)
