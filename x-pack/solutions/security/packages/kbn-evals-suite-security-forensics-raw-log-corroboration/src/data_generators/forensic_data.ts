@@ -128,7 +128,20 @@ export const seedForensicTimeline = async (params: SeedParams): Promise<void> =>
   // `refresh: true` is required, not cosmetic: the worker queries these rows
   // through ES|QL seconds after seeding, and an unrefreshed bulk write is not
   // searchable yet.
-  await esClient.bulk({ operations: events, refresh: true });
+  const response = await esClient.bulk({ operations: events, refresh: true });
+
+  // The response used to be discarded, so a partial failure (a mapping
+  // conflict, a rejected document, a read-only index) left the scenario seeded
+  // with fewer events than the dataset expects and the eval scored the WORKER
+  // for a gap the SEEDER created. Fail setup instead.
+  if (response.errors) {
+    const failed = response.items.find((item) => item.index?.error);
+    const firstError = failed?.index?.error;
+    throw new Error(
+      `seedForensicTimeline: bulk index failed for scenario "${scenario.id}" ` +
+        `(${planned.length} planned events): ${JSON.stringify(firstError ?? 'unknown error')}`
+    );
+  }
 };
 
 export const cleanupSeededData = async (esClient: Client, scenarioId: string): Promise<void> => {

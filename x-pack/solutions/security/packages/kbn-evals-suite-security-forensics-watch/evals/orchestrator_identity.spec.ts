@@ -43,6 +43,7 @@ import {
   carriesAllPriorEvents,
   missingPriorEvents as missingPriorEventSignatures,
 } from '../src/gates/timeline_carryover';
+import { countMarkerDocs } from '../src/gates/marker_count';
 import {
   PND_EMIT_PROPOSAL_PATH,
   PND_API_VERSION,
@@ -407,17 +408,10 @@ evaluate.describe(
           const postReject = await pollExecution();
           const finalStatus = postReject.status;
 
-          let markerDocs = 0;
-          try {
-            markerDocs = (
-              await esClient.count({
-                index: markerIndex,
-                query: { term: { tag } },
-              })
-            ).count;
-          } catch {
-            markerDocs = 0; // index never created == step never ran
-          }
+          // Only a MISSING INDEX counts as "the write never ran"; any other
+          // failure to take the count throws, so the gate cannot pass because
+          // the count was unreadable (see src/gates/marker_count.ts).
+          const markerDocs = await countMarkerDocs({ esClient, index: markerIndex, tag });
 
           log.info(`[D4] post-reject status=${finalStatus} markerDocs=${markerDocs}`);
 

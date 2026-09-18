@@ -128,6 +128,22 @@ describe('seedForensicTimeline', () => {
 
     expect(bulk).not.toHaveBeenCalled();
   });
+
+  it('fails setup when the bulk reports per-item failures', async () => {
+    // Regression: the response used to be discarded, so a partial bulk failure
+    // left the scenario under-seeded and the eval blamed the worker for a gap
+    // the seeder created.
+    const bulk = jest.fn().mockResolvedValue({
+      errors: true,
+      items: [
+        { index: { error: { type: 'mapper_parsing_exception', reason: 'failed to parse' } } },
+      ],
+    });
+
+    await expect(
+      seedForensicTimeline({ esClient: { bulk } as unknown as Client, scenario: SCENARIO })
+    ).rejects.toThrow(/bulk index failed for scenario "unit-scenario"/);
+  });
 });
 
 describe('cleanupSeededData', () => {

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { forensicDataset } from '../dataset';
 
 /**
  * Lightweight deterministic structural validation for ES|QL queries used in
@@ -29,15 +30,22 @@ function validateQuery(query: string): string[] {
 }
 
 /**
- * L1 Schema Conformance — deterministic Jest unit tests that verify the
- * Zod input schemas for `deep_watch.package_evidence` and
- * `deep_watch.produce_draft_forensic_report` accept valid payloads and
- * reject malformed / out-of-range / extraneous ones.
+ * L1 Schema Conformance — deterministic Jest unit tests for the tool-input
+ * contract the Forensics Watch suite is written against:
+ * `deep_watch.package_evidence` and `deep_watch.produce_draft_forensic_report`.
+ *
+ * SCOPE — read before trusting these tests. The schemas below are the SUITE's
+ * own copy of the contract. The server-side skill definition they would have to
+ * import (`security_solution/server/agent_builder/skills/deep_watch_forensics/`)
+ * does not exist in this repository: `deep_watch_forensics` and
+ * `produce_draft_forensic_report` appear ONLY inside this eval package (grep
+ * over `x-pack/` and `src/`), because the skill lands separately. So these
+ * tests pin the suite's contract and the suite's own consistency with it — they
+ * CANNOT detect a server-side schema change. When the skill lands, import its
+ * schema here and delete the local copies; until then, do not read a green run
+ * as evidence that the production schema still matches.
  *
  * Also includes P4 tool allow-list checks and P3 Gate Family A tests.
- *
- * These schemas mirror the server-side definitions in
- * `security_solution/server/agent_builder/skills/deep_watch_forensics/`.
  */
 
 // ── package_evidence schema ──────────────────────────────────────────────────
@@ -423,6 +431,57 @@ describe('L1 Schema Conformance — Forensics Watch', () => {
       });
       expect(result.scope_constraints?.allowed_autonomy_level).toBe('propose');
       expect(result.scope_constraints?.sensitivity).toBe('standard');
+    });
+  });
+
+  // ── Suite contract ↔ dataset drift ──────────────────────────────────────────
+  //
+  // These schemas cannot see the server (see the file header), but they CAN
+  // decide internal drift: a scenario whose IoC type, host list or time window
+  // the contract rejects would make the whole example unrepresentative while
+  // every other test stayed green.
+
+  describe('dataset payloads satisfy the tool-input contract', () => {
+    it('every scenario is a valid package_evidence payload', () => {
+      const violations: string[] = [];
+
+      for (const example of forensicDataset) {
+        const result = packageEvidenceSchema.safeParse({
+          source_watch: 'attack-discovery',
+          hosts: example.input.hosts,
+          time_window_hours: example.input.time_window_hours,
+          iocs: example.input.iocs,
+          mitre_techniques: example.input.mitre_techniques,
+        });
+
+        if (!result.success) {
+          violations.push(
+            `${example.id}: ${result.error.issues.map((issue) => issue.path.join('.')).join('; ')}`
+          );
+        }
+      }
+
+      expect(violations).toEqual([]);
+    });
+
+    it('every expected IoC type is one the contract accepts', () => {
+      const violations: string[] = [];
+
+      for (const example of forensicDataset) {
+        for (const ioc of example.output.expectedIocs) {
+          const result = packageEvidenceSchema.safeParse({
+            source_watch: 'manual',
+            hosts: example.input.hosts,
+            iocs: [{ type: ioc.type, value: ioc.value }],
+          });
+
+          if (!result.success) {
+            violations.push(`${example.id}: ${ioc.type}=${ioc.value} is not a contract IoC type`);
+          }
+        }
+      }
+
+      expect(violations).toEqual([]);
     });
   });
 });

@@ -89,7 +89,12 @@ export const forensicDataset: ForensicExample[] = [
         {
           type: 'registry_key',
           value: 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\FlashUpdateSvc',
-          status: 'unable_to_validate',
+          // The fixture seeds this exact key path (see the rundll32 block in
+          // src/data_generators/forensic_data.ts), so a correct validator
+          // reports CONFIRMED. `unable_to_validate` scored the correct answer as
+          // a miss; src/dataset_invariants.test.ts now decides this from the
+          // fixture rather than by hand.
+          status: 'confirmed',
         },
         { type: 'process_name', value: 'rundll32.exe', status: 'unable_to_validate' },
       ],

@@ -276,13 +276,22 @@ export async function seedForensicTimeline(
   log: ToolingLog,
   baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000)
 ): Promise<void> {
-  const operations = EVENTS.flatMap((event) => {
+  const operations = EVENTS.flatMap((event, position) => {
     const agentId = AGENT_IDS[event.host];
     const timestamp = new Date(baseTime.getTime() + event.offsetMinutes * 60 * 1000).toISOString();
     const [, dataset] = event.index.match(/^logs-(endpoint\.events\.[a-z]+)-default$/) ?? [];
 
     return [
-      { create: { _index: event.index } },
+      // Deterministic `_id` + `index` (upsert) rather than `create` with an
+      // auto-generated id: a re-seed whose cleanup did not run OVERWRITES the
+      // previous documents instead of silently duplicating them, which is what
+      // used to inflate the timeline/event counts the suite asserts.
+      {
+        index: {
+          _index: event.index,
+          _id: `${DEEP_WATCH_EVAL_AGENT_ID_PREFIX}${position}-${event.host}`,
+        },
+      },
       {
         '@timestamp': timestamp,
         agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
@@ -302,7 +311,9 @@ export async function seedForensicTimeline(
   const response = await esClient.bulk({ operations, refresh: true });
 
   if (response.errors) {
-    const firstError = response.items.find((item) => item.create?.error)?.create?.error;
+    // The bulk uses the `index` action, so per-item failures surface under
+    // `items[].index.error` — checking `create` here would have missed them.
+    const firstError = response.items.find((item) => item.index?.error)?.index?.error;
     throw new Error(
       `seedForensicTimeline: bulk index failed: ${JSON.stringify(firstError ?? 'unknown error')}`
     );
