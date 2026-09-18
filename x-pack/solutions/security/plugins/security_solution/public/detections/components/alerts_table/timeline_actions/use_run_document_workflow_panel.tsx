@@ -26,6 +26,12 @@ import {
 import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
 import { getRunWorkflowTelemetry } from '../../../../common/lib/telemetry/run_workflow_telemetry';
+import type { RunWorkflowSelectionScope } from './use_run_workflow_selection';
+import {
+  RunWorkflowSelectionStatus,
+  useResolvedRunWorkflowSelection,
+  useRunWorkflowSelectionSearch,
+} from './use_run_workflow_selection';
 
 // Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
 const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
@@ -121,7 +127,55 @@ export interface UseRunDocumentWorkflowPanelProps {
   originEventId?: string;
   /** Reports the run as a bulk run outside a case. Bulk actions set it. */
   isBulk?: boolean;
+  /**
+   * True when the user chose "select all N". A table only hands over its loaded rows, so the
+   * rest of the selection has to be resolved from `selectionScope` before the run payload can
+   * be built. Ignored unless `selectionScope` is also supplied.
+   */
+  isAllSelected?: boolean;
+  /**
+   * Query context used to resolve a select-all beyond the loaded rows. Callers that cannot
+   * describe their selection as a query omit it, and the run stays scoped to the loaded rows.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
 }
+
+/**
+ * Resolves a select-all into concrete ids, then renders the run panel against them.
+ *
+ * Split out as a component so the search only runs once the context menu actually opens this
+ * panel, rather than on every render of the hook that declares it.
+ */
+const ResolvingDocumentWorkflowsPanel = ({
+  pageSelections,
+  selectionScope,
+  onClose,
+  isBulk,
+}: {
+  pageSelections: DocumentSelection[];
+  selectionScope: RunWorkflowSelectionScope;
+  onClose: () => void;
+  isBulk?: boolean;
+}) => {
+  const searchDocumentIds = useRunWorkflowSelectionSearch(selectionScope);
+  const selection = useResolvedRunWorkflowSelection({
+    isAllSelected: true,
+    pageSelections,
+    searchSelectionIds: searchDocumentIds,
+  });
+
+  return (
+    <RunWorkflowSelectionStatus selection={selection}>
+      {selection.status === 'ready' && (
+        <DocumentWorkflowsPanel
+          documentIds={selection.selections}
+          onClose={onClose}
+          isBulk={isBulk}
+        />
+      )}
+    </RunWorkflowSelectionStatus>
+  );
+};
 
 export interface UseRunDocumentWorkflowPanelResult {
   /** Context menu action that opens the run workflow panel. */
@@ -135,6 +189,8 @@ export const useRunDocumentWorkflowPanel = ({
   documentIds,
   originEventId,
   isBulk,
+  isAllSelected = false,
+  selectionScope,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
@@ -146,6 +202,30 @@ export const useRunDocumentWorkflowPanel = ({
   const canRunWorkflow = useMemo(
     () => workflowUIEnabled && canExecuteWorkflow && canRunInCase,
     [workflowUIEnabled, canExecuteWorkflow, canRunInCase]
+  );
+
+  // Only resolve a select-all when the caller described its selection as a query; otherwise the
+  // loaded rows are all there is to run on.
+  const selectAllScope = isAllSelected ? selectionScope : undefined;
+
+  const panelContent = useMemo(
+    () =>
+      selectAllScope !== undefined ? (
+        <ResolvingDocumentWorkflowsPanel
+          pageSelections={documentIds}
+          selectionScope={selectAllScope}
+          onClose={closePopover}
+          isBulk={isBulk}
+        />
+      ) : (
+        <DocumentWorkflowsPanel
+          documentIds={documentIds}
+          onClose={closePopover}
+          originEventId={originEventId}
+          isBulk={isBulk}
+        />
+      ),
+    [selectAllScope, documentIds, closePopover, originEventId, isBulk]
   );
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
@@ -169,17 +249,10 @@ export const useRunDocumentWorkflowPanel = ({
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'document-workflow-context-menu-panel',
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
-        content: (
-          <DocumentWorkflowsPanel
-            documentIds={documentIds}
-            onClose={closePopover}
-            originEventId={originEventId}
-            isBulk={isBulk}
-          />
-        ),
+        content: panelContent,
       },
     ],
-    [closePopover, documentIds, isBulk, originEventId]
+    [panelContent]
   );
 
   return useMemo(
