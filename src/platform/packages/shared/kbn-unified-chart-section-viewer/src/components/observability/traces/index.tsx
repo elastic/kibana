@@ -14,6 +14,7 @@ import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import { DataViewSource } from '@kbn/data-source';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
+import { getTracesBreakdownField } from './get_traces_breakdown_field';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
@@ -63,8 +64,14 @@ function TraceMetricsGrid({
   }, [esqlQuery.metadataFields, filters]);
 
   const breakdownDataViewField = useMemo(
-    () => (breakdownField && dataView ? dataView.getFieldByName(breakdownField) : undefined),
-    [breakdownField, dataView]
+    () =>
+      getTracesBreakdownField({
+        breakdownField,
+        isESQLQuery,
+        columns,
+        dataView,
+      }),
+    [breakdownField, isESQLQuery, columns, dataView]
   );
 
   const handleBreakdownFieldChange = useCallback(
