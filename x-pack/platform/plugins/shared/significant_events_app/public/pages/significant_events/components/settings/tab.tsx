@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBadge,
@@ -51,6 +51,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
@@ -62,6 +63,7 @@ import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
+import { DeveloperModeBadge } from '../../../../components/developer_mode_badge/developer_mode_badge';
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
@@ -91,6 +93,7 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canConfigureEngines = canManage && canConfigure;
   const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
+  const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
   // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
 
@@ -178,11 +181,18 @@ export function SettingsTab() {
     useState<SignificantEventsTuningConfig | null>(null);
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
+  useEffect(() => {
+    if (!isDeveloperMode) {
+      setDraftConfigYaml(savedConfigYamlState);
+      setParsedTuningConfig(null);
+    }
+  }, [isDeveloperMode, savedConfigYamlState]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
   const zeroMatchConfirmModalTitleId = useGeneratedHtmlId({ prefix: 'zeroMatchConfirmModalTitle' });
 
-  const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
+  const hasTuningConfigChanges = isDeveloperMode && draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
     canEditSettings &&
     (indexPatterns !== savedIndexPatterns ||
@@ -219,7 +229,7 @@ export function SettingsTab() {
         await scheduledDiscovery.save();
       }
 
-      if (canEditSettings && hasTuningConfigChanges && parsedTuningConfig) {
+      if (canEditSettings && isDeveloperMode && hasTuningConfigChanges && parsedTuningConfig) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -251,6 +261,7 @@ export function SettingsTab() {
     hasTuningConfigChanges,
     parsedTuningConfig,
     canEditSettings,
+    isDeveloperMode,
   ]);
 
   const handleSave = useCallback(() => {
@@ -801,59 +812,127 @@ export function SettingsTab() {
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+      <EuiPanel
+        hasBorder={true}
+        hasShadow={false}
+        paddingSize="none"
+        grow={false}
+        data-test-subj="nightshiftDeveloperModeSection"
+      >
         <EuiPanel hasShadow={false} color="subdued">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <h3>
-                  {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
-                    defaultMessage: 'Significant Events tuning',
-                  })}
-                </h3>
+          <EuiText size="s">
+            <h3>
+              {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
+                defaultMessage: 'Developer mode',
+              })}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
+                  defaultMessage:
+                    'The Significant Events tuning YAML editor is only visible while this is on.',
+                })}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="refresh"
-                isDisabled={!canEditSettings}
-                onClick={() => {
-                  const defaultYaml = configToAnnotatedYaml(
-                    DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
-                  );
-                  setDraftConfigYaml(defaultYaml);
-                  setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
-                }}
-              >
-                {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
-                  defaultMessage: 'Reset to defaults',
-                })}
-              </EuiButtonEmpty>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="nightshiftDeveloperModeSwitch"
+                    label={i18n.translate(
+                      'xpack.significantEventsApp.settings.developerModeToggleSwitch',
+                      { defaultMessage: 'Enable developer mode' }
+                    )}
+                    checked={isDeveloperMode}
+                    onChange={(e) => {
+                      void setDeveloperMode(e.target.checked);
+                    }}
+                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
+                  />
+                </EuiFormRow>
+              </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            iconType="warning"
-            title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
-              defaultMessage:
-                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
-            })}
-          />
-          <EuiSpacer size="m" />
-          <SignificantEventsTuningConfigEditor
-            value={draftConfigYaml}
-            isReadOnly={!canEditSettings}
-            onChange={(yaml, parsed) => {
-              setDraftConfigYaml(yaml);
-              setParsedTuningConfig(parsed);
-            }}
-          />
-        </EuiPanel>
       </EuiPanel>
+
+      {isDeveloperMode && (
+        <>
+          <EuiSpacer />
+
+          <EuiPanel
+            hasBorder={true}
+            hasShadow={false}
+            paddingSize="none"
+            grow={false}
+            data-test-subj="nightshiftSettingsTuningPanel"
+          >
+            <EuiPanel hasShadow={false} color="subdued">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <DeveloperModeBadge />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <h3>
+                          {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
+                            defaultMessage: 'Significant Events tuning',
+                          })}
+                        </h3>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="refresh"
+                    isDisabled={!canEditSettings}
+                    onClick={() => {
+                      const defaultYaml = configToAnnotatedYaml(
+                        DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
+                      );
+                      setDraftConfigYaml(defaultYaml);
+                      setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
+                    }}
+                  >
+                    {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
+                      defaultMessage: 'Reset to defaults',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiPanel hasShadow={false} hasBorder={false}>
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="warning"
+                iconType="warning"
+                title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
+                  defaultMessage:
+                    'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
+                })}
+              />
+              <EuiSpacer size="m" />
+              <SignificantEventsTuningConfigEditor
+                value={draftConfigYaml}
+                isReadOnly={!canEditSettings}
+                onChange={(yaml, parsed) => {
+                  setDraftConfigYaml(yaml);
+                  setParsedTuningConfig(parsed);
+                }}
+              />
+            </EuiPanel>
+          </EuiPanel>
+        </>
+      )}
 
       {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
