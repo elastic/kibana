@@ -484,6 +484,27 @@ describe('formatExecutionFailedNotice', () => {
     expect(notice).not.toContain('<tag>');
   });
 
+  it('renders the cause chain under the error, outermost first, escaped and bounded', () => {
+    const notice = formatExecutionFailedNotice({
+      code: 'internalError',
+      message: 'Error executing agent: Error calling connector',
+      causes: [
+        { name: 'Error', message: 'Error calling connector', code: 'connector_error' },
+        { name: 'Error', message: `status <404> ${'z'.repeat(10_000)}` },
+      ],
+    } as never);
+
+    const causes = [...notice.matchAll(/<cause(?: code="([^"]*)")?>([\s\S]*?)<\/cause>/g)];
+    expect(causes).toHaveLength(2);
+    expect(causes[0][1]).toBe('connector_error');
+    expect(causes[0][2].trim()).toBe('Error calling connector');
+    expect(causes[1][1]).toBeUndefined();
+    expect(causes[1][2]).toContain('status &lt;404&gt;');
+    // bounded before escaping: the 10 kB tail is cut, marked with an ellipsis
+    expect(causes[1][2].trim().endsWith('…')).toBe(true);
+    expect(causes[1][2]).not.toContain('z'.repeat(EXECUTION_FAILED_NOTICE_MAX_LENGTH));
+  });
+
   it('truncates long messages to the bound', () => {
     const notice = formatExecutionFailedNotice({
       code: 'internalError',

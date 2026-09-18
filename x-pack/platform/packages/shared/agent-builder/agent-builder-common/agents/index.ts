@@ -40,6 +40,7 @@ export {
   type ExecutionAbortReason,
   type ExecutionAbortSource,
   type SerializedExecutionError,
+  type SerializedErrorCause,
 } from './execution_status';
 export type {
   AutoApprovedApi,

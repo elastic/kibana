@@ -459,10 +459,17 @@ export const EXECUTION_FAILED_NOTICE_MAX_LENGTH = 500;
  * `generateXmlTree` and bounded to {@link EXECUTION_FAILED_NOTICE_MAX_LENGTH}.
  */
 export const formatExecutionFailedNotice = (error: SerializedExecutionError): string => {
-  const message =
-    error.message.length > EXECUTION_FAILED_NOTICE_MAX_LENGTH
-      ? `${error.message.slice(0, EXECUTION_FAILED_NOTICE_MAX_LENGTH)}…`
-      : error.message;
+  const bounded = (text: string) =>
+    text.length > EXECUTION_FAILED_NOTICE_MAX_LENGTH
+      ? `${text.slice(0, EXECUTION_FAILED_NOTICE_MAX_LENGTH)}…`
+      : text;
+  // The cause chain (outermost first) is what usually says why the run failed; the wrapper's
+  // message alone ("Error executing agent: …") rarely does.
+  const causes = (error.causes ?? []).map((cause) => ({
+    tagName: 'cause',
+    ...(cause.code ? { attributes: { code: cause.code } } : {}),
+    children: [bounded(cause.message)],
+  }));
   return generateXmlTree({
     tagName: 'system_notice',
     children: [
@@ -472,7 +479,11 @@ export const formatExecutionFailedNotice = (error: SerializedExecutionError): st
           "The agent's attempt to answer the previous message failed. No response was produced.",
         ],
       },
-      { tagName: 'error', attributes: { code: error.code }, children: [message] },
+      {
+        tagName: 'error',
+        attributes: { code: error.code },
+        children: [bounded(error.message), ...causes],
+      },
     ],
   });
 };

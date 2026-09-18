@@ -45,6 +45,14 @@ describe('toClientError', () => {
     );
   });
 
+  it('keeps the wrapped error as the cause so its message survives serialization', () => {
+    const original = new Error('Error calling connector: 404');
+
+    const converted = toClientError(original);
+
+    expect((converted as Error & { cause?: unknown }).cause).toBe(original);
+  });
+
   it('wraps a non-Error value', () => {
     expect(toClientError('boom').message).toBe('Error executing agent: boom');
   });

@@ -31,10 +31,11 @@ export const toClientError = (err: unknown): AgentBuilderError<AgentBuilderError
     return err;
   }
   const message = err instanceof Error ? err.message : String(err);
-  return createInternalError(`Error executing agent: ${message}`, {
-    statusCode: 500,
-    traceId,
-  });
+  return createInternalError(
+    `Error executing agent: ${message}`,
+    { statusCode: 500, traceId },
+    { cause: err }
+  );
 };
 
 export function convertErrors<T>({

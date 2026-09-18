@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { AgentBuilderErrorCode, createBadRequestError } from '@kbn/agent-builder-common';
-import { serializeExecutionError } from './serialize_execution_error';
+import {
+  MAX_SERIALIZED_CAUSES,
+  MAX_SERIALIZED_CAUSE_MESSAGE_LENGTH,
+  serializeExecutionError,
+} from './serialize_execution_error';
 
 describe('serializeExecutionError', () => {
   it('passes through AgentBuilderError code, message, and meta', () => {
@@ -54,5 +58,57 @@ describe('serializeExecutionError', () => {
       code: AgentBuilderErrorCode.internalError,
       message: 'weird',
     });
+  });
+
+  it('serializes the cause chain, outermost first, with names and codes', () => {
+    const root = Object.assign(new Error('ECONNREFUSED 127.0.0.1:9200'), { code: 'ECONNREFUSED' });
+    const middle = new Error('Error calling connector', { cause: root });
+    const wrapper = new Error('Error executing agent', { cause: middle });
+
+    expect(serializeExecutionError(wrapper)).toEqual({
+      code: AgentBuilderErrorCode.internalError,
+      message: 'Error executing agent',
+      causes: [
+        { name: 'Error', message: 'Error calling connector' },
+        { name: 'Error', message: 'ECONNREFUSED 127.0.0.1:9200', code: 'ECONNREFUSED' },
+      ],
+    });
+  });
+
+  it('keeps causes on an AgentBuilderError too', () => {
+    const err = createBadRequestError('bad input');
+    (err as Error & { cause?: unknown }).cause = new Error('field x is required');
+
+    expect(serializeExecutionError(err).causes).toEqual([
+      { name: 'Error', message: 'field x is required' },
+    ]);
+  });
+
+  it('bounds the chain depth and each message, and survives cycles and non-Error causes', () => {
+    const chain = new Error('c0');
+    let current: Error = chain;
+    for (let i = 1; i < 10; i++) {
+      const next = new Error(`c${i}`);
+      (current as Error & { cause?: unknown }).cause = next;
+      current = next;
+    }
+    expect(serializeExecutionError(chain).causes).toHaveLength(MAX_SERIALIZED_CAUSES);
+
+    const long = new Error('x', { cause: new Error('y'.repeat(5_000)) });
+    expect(serializeExecutionError(long).causes![0].message).toHaveLength(
+      MAX_SERIALIZED_CAUSE_MESSAGE_LENGTH + 1
+    );
+
+    const loop = new Error('loop');
+    (loop as Error & { cause?: unknown }).cause = loop;
+    expect(serializeExecutionError(loop)).not.toHaveProperty('causes');
+
+    expect(serializeExecutionError(new Error('x', { cause: 'plain string' })).causes).toEqual([
+      { message: 'plain string' },
+    ]);
+  });
+
+  it('omits causes when there are none', () => {
+    expect(serializeExecutionError(new Error('boom'))).not.toHaveProperty('causes');
   });
 });

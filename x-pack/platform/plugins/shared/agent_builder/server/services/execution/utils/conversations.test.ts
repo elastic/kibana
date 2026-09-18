@@ -1097,6 +1097,8 @@ describe('conversations utils', () => {
           code: AgentBuilderErrorCode.internalError,
           message: 'Error executing agent: boom',
           meta: { statusCode: 500, traceId: 'trace-1' },
+          // the wrapped failure survives as the cause chain
+          causes: [{ name: 'Error', message: 'boom' }],
         },
       });
       expect(written.map((e) => e.type)).toEqual([TimelineEventType.executionFailed]);

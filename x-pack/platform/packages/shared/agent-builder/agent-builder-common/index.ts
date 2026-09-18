@@ -170,6 +170,7 @@ export {
   SubagentMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type SerializedErrorCause,
   type ExecutionAbortReason,
   type ExecutionAbortSource,
   isExecutionAbortReason,

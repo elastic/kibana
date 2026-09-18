@@ -45,6 +45,15 @@ export const isExecutionAbortReason = (value: unknown): value is ExecutionAbortR
   value !== null &&
   EXECUTION_ABORT_SOURCES.includes((value as { source?: unknown }).source as string);
 
+/** One link of a serialized error's `cause` chain. */
+export interface SerializedErrorCause {
+  /** The cause's class name, when it was an `Error`. */
+  name?: string;
+  message: string;
+  /** The cause's `code`, when it carried one (an `AgentBuilderError`, a Node system error…). */
+  code?: string;
+}
+
 /**
  * Serialized error stored in the execution document when the execution fails.
  */
@@ -55,4 +64,9 @@ export interface SerializedExecutionError {
   message: string;
   /** Optional metadata associated with the error. */
   meta?: Record<string, any>;
+  /**
+   * The error's `cause` chain, outermost first, when it carried one. Most failures wrap a root
+   * cause (a connector call, an ES query…) whose message is the actionable part; this keeps it.
+   */
+  causes?: SerializedErrorCause[];
 }
