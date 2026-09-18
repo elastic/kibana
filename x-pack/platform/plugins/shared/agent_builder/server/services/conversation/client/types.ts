@@ -88,6 +88,14 @@ export interface AppendEventsRequest {
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
+  /**
+   * When set, the write is skipped — the stored document is returned unchanged — if the stored
+   * events already contain a terminal lifecycle event (`execution_terminated`, `execution_failed`
+   * or `execution_aborted`) for this execution id. Evaluated inside the OCC read-modify-write, so
+   * it cannot race a concurrent write. Callers detect a skip by looking for their terminal event
+   * on the returned conversation.
+   */
+  skipIfTerminalExistsFor?: string;
 }
 
 export interface ReplaceRoundEventsRequest {
@@ -106,6 +114,14 @@ export interface ReplaceRoundEventsRequest {
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
+  /**
+   * When set, the write is skipped — the stored document is returned unchanged — if the stored
+   * events already contain a terminal lifecycle event (`execution_terminated`, `execution_failed`
+   * or `execution_aborted`) for this execution id. Evaluated inside the OCC read-modify-write, so
+   * it cannot race a concurrent write. Callers detect a skip by looking for their terminal event
+   * on the returned conversation.
+   */
+  skipIfTerminalExistsFor?: string;
 }
 
 export interface ConversationListOptions {
