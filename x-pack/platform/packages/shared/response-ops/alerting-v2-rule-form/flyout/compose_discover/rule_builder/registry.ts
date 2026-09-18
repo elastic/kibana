@@ -15,6 +15,8 @@ import {
   getAvailableMetricLabels,
   getSeverityValidationError,
   hasReservedSeverityLabel,
+  isMultiSeveritySupported,
+  isSeveritySupported,
   reconcileAlertConditionMetrics,
 } from './threshold/form_types';
 import { getInvalidExpressionReferences } from './threshold/validate_metric_references';
@@ -33,6 +35,22 @@ const areAllEvaluationReferencesValid = (values: ThresholdFormValues): boolean =
   );
 };
 
+const isSeverityConfigValid = (values: ThresholdFormValues): boolean => {
+  // Severity must be representable by ES|QL generation, which only emits it for a single,
+  // non-reserved-label condition. Reject unsupported states explicitly.
+  if (!values.severity) return true;
+
+  if (!isSeveritySupported(values.alertConditions)) return false;
+  if (hasReservedSeverityLabel(values.stats, values.evaluations)) return false;
+  const [firstCondition] = values.alertConditions;
+  if (values.severity.mode === 'multi' && !isMultiSeveritySupported(firstCondition.comparator)) {
+    return false;
+  }
+  if (getSeverityValidationError(values.severity, firstCondition) !== null) return false;
+
+  return true;
+};
+
 const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   if (!values.indexPattern.trim()) return false;
 
@@ -45,16 +63,8 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   );
   if (!hasValidCondition) return false;
 
-  // Severity only applies to a single alert condition, whose comparator and threshold it uses.
-  if (getSeverityValidationError(values.severity, values.alertConditions[0]) !== null) {
-    return false;
-  }
 
-  // A stat/evaluation named `severity` would collide with the generated severity column.
-  // The UI clears severity in this case; this guards against externally-crafted queries.
-  if (values.severity && hasReservedSeverityLabel(values.stats, values.evaluations)) {
-    return false;
-  }
+  if (!isSeverityConfigValid(values)) return false;
 
   if (values.recovery) {
     const hasValidRecovery = values.recovery.conditions.some(
