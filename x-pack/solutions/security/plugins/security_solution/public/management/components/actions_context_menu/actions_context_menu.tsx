@@ -71,13 +71,16 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
     }, [handleCloseMenu, items]);
 
     const menuButton = useMemo(() => {
-      const button = (
+      const openLabel = i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
+        defaultMessage: 'Open',
+      });
+      const showDisabledTooltip = Boolean(isDisabled && disabledTooltip);
+
+      return (
         <EuiToolTip
           // Kept short, as the tooltip sits right next to the name of the item it belongs to
-          content={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
-            defaultMessage: 'Open',
-          })}
-          disableScreenReaderOutput
+          content={showDisabledTooltip ? disabledTooltip : openLabel}
+          disableScreenReaderOutput={!showDisabledTooltip}
         >
           <EuiButtonIcon
             data-test-subj={getTestId('button')}
@@ -91,12 +94,6 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
           />
         </EuiToolTip>
       );
-
-      if (isDisabled && disabledTooltip) {
-        return <EuiToolTip content={disabledTooltip}>{button}</EuiToolTip>;
-      }
-
-      return button;
     }, [disabledTooltip, getTestId, handleToggleMenu, icon, isDisabled, itemName]);
 
     return (

@@ -32,8 +32,10 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useArtifactActionsDisabled } from '../../../hooks/artifacts';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { artifactListPageLabels } from '../translations';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 import { PolicyAssignmentCell } from './policy_assignment_cell';
+import { ArtifactEnabledSwitch } from './artifact_enabled_switch';
 
 const EMPTY_OS_TYPES: OsType[] = [];
 const EMPTY_SORTABLE_FIELDS: readonly string[] = [];
@@ -60,6 +62,9 @@ export interface ArtifactSimpleTableProps {
   error?: string;
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
+  showEnabledColumn?: boolean;
+  apiClient: ExceptionsListApiClient;
+  onEnabledChangeSuccess?: () => Promise<void>;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   sortableFields?: readonly string[];
@@ -97,6 +102,9 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     error,
     allowCardEditAction = true,
     allowCardDeleteAction = true,
+    showEnabledColumn = false,
+    apiClient,
+    onEnabledChangeSuccess,
     sortField,
     sortOrder,
     sortableFields = EMPTY_SORTABLE_FIELDS,
@@ -173,6 +181,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         },
         {
           field: 'updated_by',
+          truncateText: true,
           name: labels.tableColumnUpdatedByLabel,
           render: (updatedBy: string) => (
             <EuiFlexGroup
@@ -220,6 +229,23 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           ),
         },
       ];
+
+      if (showEnabledColumn) {
+        tableColumns.push({
+          name: labels.tableColumnEnabledLabel,
+          width: '100px',
+          render: (item: ExceptionListItemSchema) => (
+            <ArtifactEnabledSwitch
+              item={item}
+              apiClient={apiClient}
+              labels={labels}
+              isReadOnly={!allowCardEditAction}
+              onSuccess={onEnabledChangeSuccess}
+              data-test-subj={getTestId('columnEnabled')}
+            />
+          ),
+        });
+      }
 
       if (allowCardEditAction || allowCardDeleteAction) {
         tableColumns.push({
@@ -276,10 +302,13 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     }, [
       allowCardDeleteAction,
       allowCardEditAction,
+      showEnabledColumn,
+      apiClient,
       getTestId,
       labels,
       loadingPoliciesList,
       onAction,
+      onEnabledChangeSuccess,
       policies,
       sortableFields,
     ]);

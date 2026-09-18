@@ -16,9 +16,10 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { BulkTagEpisodeActionItem } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkTagEpisodeActions } from './bulk_create_alert_actions';
-import { successOrPartialToast } from './helpers';
+import { executeCompositeAction } from './execute_composite_action';
 import * as i18n from './translations';
 import { openTagsFlyout } from '../components/tags_flyout';
 
@@ -30,32 +31,48 @@ export interface EditTagsActionDeps {
   expressions: ExpressionsStart;
   spaces: SpacesPluginStart;
   queryClient: QueryClient;
+  fetchAdditionalTagSuggestions?: () => Promise<string[]>;
 }
 
-export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction => ({
-  id: 'ALERTING_V2_EDIT_EPISODE_TAGS',
+export const EDIT_TAGS_ACTION_ID = 'ALERTING_V2_EDIT_EPISODE_TAGS';
+
+export const createEditTagsAction = (
+  deps: EditTagsActionDeps,
+  extension?: EpisodeActionExtension<{ tags: string[] }>
+): EpisodeAction => ({
+  id: EDIT_TAGS_ACTION_ID,
   order: 40,
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
-  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) =>
+    episodes.some((ep) => (ep.source_id == null ? true : extension?.isCompatible(ep) ?? false)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
       spaces: deps.spaces,
       queryClient: deps.queryClient,
+      fetchAdditionalSuggestions: deps.fetchAdditionalTagSuggestions,
     });
     if (tags == null) return;
 
-    const items: BulkTagEpisodeActionItem[] = episodes.map((ep) => ({
-      episode_id: ep['episode.id'],
-      tags,
-    }));
-    if (!items.length) return;
-
     try {
-      const response = await bulkTagEpisodeActions(deps.http, items);
-      deps.notifications.toasts.add(successOrPartialToast(response));
+      await executeCompositeAction<{ tags: string[] }>({
+        episodes,
+        nativeExecute: (eps, http) =>
+          bulkTagEpisodeActions(
+            http,
+            eps.map(
+              (ep): BulkTagEpisodeActionItem => ({
+                episode_id: ep['episode.id'],
+                tags,
+              })
+            )
+          ),
+        extension,
+        extensionContext: { tags },
+        deps,
+      });
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
