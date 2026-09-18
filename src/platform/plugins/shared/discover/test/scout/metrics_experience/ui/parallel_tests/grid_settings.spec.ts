@@ -261,5 +261,37 @@ spaceTest.describe(
         await expect(gridSettings.counterSelect).toContainText('Maximum');
       });
     });
+
+    spaceTest(
+      'never shows the configuration and insights flyouts at the same time',
+      async ({ pageObjects }) => {
+        const { metricsExperience } = pageObjects;
+        const { gridSettings, flyout } = metricsExperience;
+
+        await spaceTest.step('open the configuration', async () => {
+          await metricsExperience.openInsightsFlyout(0);
+          await expect(flyout.container).toBeVisible();
+
+          await gridSettings.open();
+
+          await expect(flyout.container).toBeHidden();
+          await expect(gridSettings.flyout).toBeVisible();
+        });
+
+        await spaceTest.step('opening the insights flyout closes the configuration', async () => {
+          await metricsExperience.openInsightsFlyout(0);
+
+          await expect(gridSettings.flyout).toBeHidden();
+          await expect(flyout.container).toBeVisible();
+        });
+
+        await spaceTest.step('closing the surviving flyout leaves both closed', async () => {
+          await flyout.closeButton.click();
+
+          await expect(flyout.container).toBeHidden();
+          await expect(gridSettings.flyout).toBeHidden();
+        });
+      }
+    );
   }
 );

@@ -12,7 +12,19 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { GridSettingsFlyout } from './grid_settings_flyout';
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import { dismissAllFlyoutsExceptFor, type MetricsGridSettings } from '@kbn/discover-utils';
+
+jest.mock('@kbn/discover-utils', () => {
+  const { METRICS_GRID_HISTOGRAM_PERCENTILES, METRICS_GRID_SIMPLE_AGGREGATIONS } =
+    jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+
+  return {
+    DiscoverFlyouts: { metricGridSettings: 'metricGridSettings' },
+    METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_SIMPLE_AGGREGATIONS,
+    dismissAllFlyoutsExceptFor: jest.fn(),
+  };
+});
 
 const mockTrackAggregationConfigChanged = jest.fn();
 
@@ -39,6 +51,40 @@ const histogramSelect = new EuiSuperSelectTestHarness(
 describe('GridSettingsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('dismisses the other Discover flyouts when it mounts', () => {
+    render(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricGridSettings');
+  });
+
+  it('clears stale inline push padding from the app scroll container on unmount', () => {
+    // Simulate the stale padding EUI restores when a previous push flyout (e.g. the
+    // Inspector) shared the same container.
+    const appScrollContainer = document.createElement('div');
+    appScrollContainer.id = 'app-main-scroll';
+    appScrollContainer.style.paddingInlineEnd = '544px';
+    document.body.appendChild(appScrollContainer);
+
+    const { unmount } = render(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+    unmount();
+
+    expect(appScrollContainer.style.paddingInlineEnd).toBe('');
+
+    appScrollContainer.remove();
   });
 
   it('renders the aggregation settings inside an accordion that is open by default', () => {
