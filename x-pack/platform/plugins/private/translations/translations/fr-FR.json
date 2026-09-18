@@ -21628,7 +21628,6 @@
     "xpack.fleet.agentPolicyForm.diagnosticsRateLimitDescription": "Limite de taux pour la requête de diagnostics du gestionnaire d'actions. N'affecte pas les diagnostics collectés par le biais du CLI. {learnMoreLink}.",
     "xpack.fleet.agentPolicyForm.diagnosticsRateLimitDescription.learnMoreLinkLabel": "En savoir plus",
     "xpack.fleet.agentPolicyForm.diagnosticsRateLimitLabel": "Limitation du taux de diagnostic",
-    "xpack.fleet.agentPolicyForm.downloadSourceDescription": "Lorsqu'une action de mise à niveau sera émise, les agents téléchargeront le binaire à partir de cet emplacement.",
     "xpack.fleet.agentPolicyForm.downloadSourceLabel": "Téléchargement du binaire des agents",
     "xpack.fleet.agentPolicyForm.enableHttpMonitoringLabel": "Activer le point de terminaison HTTP sur {monitoringEndpoint}",
     "xpack.fleet.agentPolicyForm.enableHttpMonitoringPprofLabel": "Activer le profilage sur {profilingEndpoint}",
