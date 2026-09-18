@@ -242,7 +242,9 @@ describe('createFeedbackAnalysisScheduleService', () => {
     });
   });
 
-  it('installs independent schedules per space for the same AI index id', async () => {
+  it('pins the schedule to the default space regardless of which space enables it', async () => {
+    // The managed workflow lives in the default space so its document id is stable: a request
+    // from 'marketing' and one from 'default' converge on the same workflow instance.
     await service.reconcile({
       aiIndexId: 'orders',
       spaceId: 'default',
@@ -256,31 +258,25 @@ describe('createFeedbackAnalysisScheduleService', () => {
       request,
     });
 
-    // The workflow document id is the ES `_id` and is not namespaced by space, so a suffix of
-    // just the AI index id would point both spaces at one document.
     expect(client.install).toHaveBeenCalledTimes(2);
-    expect(client.install.mock.calls[0][1]).toEqual(
-      expect.objectContaining({
-        spaceId: 'default',
-        workflowIdSuffix: suffixFor('orders', 'default'),
-      })
-    );
-    expect(client.install.mock.calls[1][1]).toEqual(
-      expect.objectContaining({
-        spaceId: 'marketing',
-        workflowIdSuffix: suffixFor('orders', 'marketing'),
-      })
-    );
+    for (const [, options] of client.install.mock.calls) {
+      expect(options).toEqual(
+        expect.objectContaining({
+          spaceId: DEFAULT_SPACE,
+          workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
+        })
+      );
+    }
     expect(workflowsManagement.updateWorkflow.mock.calls.map(([workflowId]) => workflowId)).toEqual(
-      [documentIdFor('orders', 'default'), documentIdFor('orders', 'marketing')]
+      [WORKFLOW_DOCUMENT_ID, WORKFLOW_DOCUMENT_ID]
     );
 
     await service.remove({ aiIndexId: 'orders', spaceId: 'marketing' });
 
     expect(client.uninstall).toHaveBeenCalledTimes(1);
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'marketing',
-      workflowIdSuffix: suffixFor('orders', 'marketing'),
+      spaceId: DEFAULT_SPACE,
+      workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
     });
   });
 
@@ -335,7 +331,10 @@ describe('createFeedbackAnalysisScheduleService', () => {
       expect(client.execute).toHaveBeenCalledWith(
         request,
         CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
-        expect.objectContaining({ workflowIdSuffix: 'orders', triggeredBy: 'manual' })
+        expect.objectContaining({
+          workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
+          triggeredBy: 'manual',
+        })
       );
     });
 

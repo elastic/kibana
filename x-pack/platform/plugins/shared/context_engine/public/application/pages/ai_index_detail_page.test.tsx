@@ -286,9 +286,9 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextTracesAutoImproveSwitch')).toBeInTheDocument();
   });
 
-  it('keeps the traces panel but drops automatic improvements when the feedback loop is off', async () => {
-    // Trace selection is independent of the loop: it feeds automation generation and the index
-    // description too, so it stays visible when nothing is analyzing it.
+  it('hides the feedback loop panel entirely when the feature flag is off', async () => {
+    // The panel has no trace-source picker anymore, so there is nothing to show when the
+    // feedback loop feature is disabled — the whole panel is hidden.
     mockUseFeedbackLoopEnabled.mockReturnValue(false);
 
     const services = createServices();
@@ -298,7 +298,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.getByTestId('contextTracesPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextTracesPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextTracesAutoImproveSwitch')).not.toBeInTheDocument();
   });
 
