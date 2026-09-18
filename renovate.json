@@ -801,15 +801,6 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "stack traces",
-      "matchDepNames": ["trace", "clarify"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
-    },
-    {
       "groupName": "@elastic/ebt",
       "matchDepNames": ["@elastic/ebt"],
       "reviewers": ["team:kibana-core"],
@@ -851,7 +842,6 @@
         "@hapi/cookie",
         "@hapi/h2o2",
         "@hapi/hapi",
-        "@hapi/hoek",
         "@hapi/inert",
         "@hapi/wreck",
         "brok",
