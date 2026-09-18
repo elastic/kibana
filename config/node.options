@@ -10,5 +10,3 @@
 
 ## restore < Node 16 default DNS lookup behavior
 --dns-result-order=ipv4first
-
---use-system-ca
