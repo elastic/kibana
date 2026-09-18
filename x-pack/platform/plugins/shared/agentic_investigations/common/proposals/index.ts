@@ -32,7 +32,6 @@ export {
   dismissProposalRequestSchema,
   dismissReasonSchema,
   isDecided,
-  isTerminal,
   isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,

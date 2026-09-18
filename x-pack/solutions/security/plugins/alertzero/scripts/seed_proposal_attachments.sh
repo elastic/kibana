@@ -23,6 +23,7 @@ set -euo pipefail
 #   ES_URL=http://localhost:9200 \
 #   KIBANA_USER=elastic \
 #   KIBANA_PASSWORD=changeme \
+#   KIBANA_SPACE=default \
 #   AGENT_ID=elastic-ai-agent \
 #   bash x-pack/solutions/security/plugins/alertzero/scripts/seed_proposal_attachments.sh
 
@@ -30,9 +31,17 @@ KIBANA_URL="${KIBANA_URL:-http://localhost:5601}"
 ES_URL="${ES_URL:-http://localhost:9200}"
 KIBANA_USER="${KIBANA_USER:-elastic}"
 KIBANA_PASSWORD="${KIBANA_PASSWORD:-changeme}"
+KIBANA_SPACE="${KIBANA_SPACE:-default}"
 AGENT_BUILDER_API_VERSION="2023-10-31"
 PROPOSAL_ATTACHMENT_TYPE="investigation_proposal"
 PROPOSALS_INDEX=".kibana-investigation-proposals"
+
+# Build the URL base that includes the space path prefix when not "default".
+if [ "$KIBANA_SPACE" = "default" ]; then
+  KIBANA_API_BASE="${KIBANA_URL}"
+else
+  KIBANA_API_BASE="${KIBANA_URL}/s/${KIBANA_SPACE}"
+fi
 
 # ---- helpers ---------------------------------------------------------------
 
@@ -62,7 +71,7 @@ create_conversation() {
     -X POST \
     -H "Content-Type: application/json" \
     -H "elastic-api-version: ${AGENT_BUILDER_API_VERSION}" \
-    "${KIBANA_URL}/api/agent_builder/conversations" \
+    "${KIBANA_API_BASE}/api/agent_builder/conversations" \
     -d "$(jq -n --arg t "$title" --arg a "$AGENT_ID" '{ title: $t, agent_id: $a, template_id: "investigation", access_control: { access_mode: "public" } }')" \
     | jq -r '.id'
 }
@@ -91,7 +100,7 @@ add_attachment() {
     -X POST \
     -H "Content-Type: application/json" \
     -H "elastic-api-version: ${AGENT_BUILDER_API_VERSION}" \
-    "${KIBANA_URL}/api/agent_builder/conversations/${conversation_id}/attachments" \
+    "${KIBANA_API_BASE}/api/agent_builder/conversations/${conversation_id}/attachments" \
     -d "$payload" \
     | jq -r '.attachment.id'
 }
@@ -110,8 +119,9 @@ index_proposal "$P1_ID" "$(jq -n \
   --arg cid "$CONV1" \
   --arg now "$NOW" \
   --arg id "$P1_ID" \
+  --arg space "$KIBANA_SPACE" \
   '{
-    spaceId: "default",
+    spaceId: $space,
     conversationId: $cid,
     comment: "Block outbound traffic from the compromised host to prevent data exfiltration. This change applies only to the host running qualys-scan on the DMZ scan pool.",
     actionWorkflowId: "system-alertzero-action-create-rule",
@@ -135,13 +145,14 @@ ATTACH1=$(add_attachment "$CONV1" "$(jq -n \
   --arg origin "$P1_ID" \
   --arg cid "$CONV1" \
   --arg now "$NOW" \
+  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
       id: $origin,
-      spaceId: "default",
+      spaceId: $space,
       conversationId: $cid,
       comment: "Block outbound traffic from the compromised host to prevent data exfiltration.",
       actionWorkflowId: "system-alertzero-action-create-rule",
@@ -166,8 +177,9 @@ index_proposal "$P2_ID" "$(jq -n \
   --arg cid "$CONV2" \
   --arg now "$NOW" \
   --arg expiry "$FUTURE_EXPIRY" \
+  --arg space "$KIBANA_SPACE" \
   '{
-    spaceId: "default",
+    spaceId: $space,
     conversationId: $cid,
     comment: "Create a detection rule for repeated SSH login failures from external IP ranges. The pattern observed correlates with credential-stuffing campaigns in our threat intel feed.",
     actionWorkflowId: "system-alertzero-action-create-rule",
@@ -193,13 +205,14 @@ ATTACH2=$(add_attachment "$CONV2" "$(jq -n \
   --arg cid "$CONV2" \
   --arg now "$NOW" \
   --arg expiry "$FUTURE_EXPIRY" \
+  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
       id: $origin,
-      spaceId: "default",
+      spaceId: $space,
       conversationId: $cid,
       comment: "Create a detection rule for repeated SSH login failures from external IP ranges.",
       actionWorkflowId: "system-alertzero-action-create-rule",
@@ -224,11 +237,13 @@ P3_ID=$(gen_uuid)
 index_proposal "$P3_ID" "$(jq -n \
   --arg cid "$CONV3" \
   --arg now "$NOW" \
+  --arg space "$KIBANA_SPACE" \
   '{
-    spaceId: "default",
+    spaceId: $space,
     conversationId: $cid,
     comment: "Create a detection rule for repeated failed logins from this IP range.",
-    status: "dismissed",
+    status: "no_action",
+    decision: "dismissed",
     impact: "medium",
     confidence: "medium",
     origin: "worker",
@@ -246,16 +261,18 @@ ATTACH3=$(add_attachment "$CONV3" "$(jq -n \
   --arg origin "$P3_ID" \
   --arg cid "$CONV3" \
   --arg now "$NOW" \
+  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
       id: $origin,
-      spaceId: "default",
+      spaceId: $space,
       conversationId: $cid,
       comment: "Create a detection rule for repeated failed logins from this IP range.",
-      status: "dismissed",
+      status: "no_action",
+      decision: "dismissed",
       impact: "medium",
       confidence: "medium",
       origin: "worker",

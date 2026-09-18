@@ -323,11 +323,6 @@ export const isDecided = (status: ProposalStatus): boolean => status !== 'pendin
 export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'pending';
 
-/** Proposal has reached its final state (approved/succeeded/failed/dismissed). Does not include
- * `executing`, which is in-flight and still resolving. */
-export const isTerminal = (status: ProposalStatus): boolean =>
-  status !== 'pending' && status !== 'executing';
-
 export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
   if (!proposal.expiresAt) {
     return false;
