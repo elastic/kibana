@@ -155,12 +155,16 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
         { headers: operatorApiKeyHeader, responseType: 'json', body: {} }
       );
       expect(enableResponse.statusCode).toBe(404);
+      expect(enableResponse.body.error).toBe('Not Found');
+      expect(enableResponse.body.message).toContain('not installed');
 
       const disableResponse = await apiClient.put(
         ENTITY_STORE_ROUTES.public.DISABLE_HISTORY_SNAPSHOT,
         { headers: operatorApiKeyHeader, responseType: 'json', body: {} }
       );
       expect(disableResponse.statusCode).toBe(404);
+      expect(disableResponse.body.error).toBe('Not Found');
+      expect(disableResponse.body.message).toContain('not installed');
     }
   );
 
