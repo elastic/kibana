@@ -6,7 +6,7 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ChatEventType, ToolOrigin } from '@kbn/agent-builder-common';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
@@ -36,6 +36,8 @@ jest.mock('./utils', () => ({
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
   estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
+  estimateFailedEntryTokens: jest.fn(() => new Map()),
+  survivingFailedEntryTokens: jest.fn(() => 0),
 }));
 
 jest.mock('./tools/register_internal_tools', () => ({
@@ -385,5 +387,110 @@ describe('runDefaultAgentMode', () => {
     expect(createPromptFactoryMock.mock.calls[0][0].imageResolver).toBe(
       createImageResolverMock.mock.results[0].value
     );
+  });
+
+  describe('round_interrupted', () => {
+    const setup = () => {
+      const context = createAgentHandlerContextMock();
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector', connectorId: 'connector-1' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      (context.attachmentStateManager.getAccessedRefs as jest.Mock).mockReturnValue([]);
+      (context.attachmentStateManager.getAll as jest.Mock).mockReturnValue([]);
+      getPendingRoundMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      return context;
+    };
+
+    it('emits round_interrupted with the steps so far when the graph stream errors', async () => {
+      const context = setup();
+      const failure = new Error('llm exploded');
+      createAgentGraphMock.mockReturnValue({
+        streamEvents: jest.fn(() => ({
+          async *[Symbol.asyncIterator]() {
+            // A tool call emitted by the run before it blows up (via the tool manager's emitter).
+            const emit = context.toolManager.setEventEmitter.mock.calls[0][0];
+            emit({
+              type: ChatEventType.toolCall,
+              data: { tool_call_id: 'call-1', tool_id: 'my_tool', params: {} },
+            } as any);
+            throw failure;
+          },
+        })),
+      } as any);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          roundId: 'round-1',
+        },
+        context
+      );
+
+      const emitted = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event);
+      const interrupted = emitted.find((event) => event.type === ChatEventType.roundInterrupted);
+      expect(interrupted).toBeDefined();
+      expect(interrupted.data).toMatchObject({
+        round_id: 'round-1',
+        input: { message: 'hello' },
+        attachments: [],
+        steps: [expect.objectContaining({ tool_call_id: 'call-1', results: [] })],
+      });
+      expect(interrupted.data.summary.time_to_last_token).toBeGreaterThanOrEqual(0);
+      expect(interrupted.data.summary.model_usage).toMatchObject({ connector_id: 'connector-1' });
+      // it is the last event of the stream, after every event of the run
+      expect(emitted[emitted.length - 1]).toBe(interrupted);
+      expect(emitted.map((event) => event.type)).toContain(ChatEventType.roundStarted);
+    });
+
+    it('does not emit round_interrupted when the run completes', async () => {
+      const context = setup();
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      const types = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event.type);
+      expect(types).not.toContain(ChatEventType.roundInterrupted);
+    });
+
+    it('still surfaces the original error when the summary cannot be built', async () => {
+      const context = setup();
+      (context.attachmentStateManager.getAccessedRefs as jest.Mock).mockImplementation(() => {
+        throw new Error('state manager broken');
+      });
+      createAgentGraphMock.mockReturnValue({
+        streamEvents: jest.fn(() => ({
+          async *[Symbol.asyncIterator]() {
+            throw new Error('llm exploded');
+          },
+        })),
+      } as any);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      const types = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event.type);
+      expect(types).not.toContain(ChatEventType.roundInterrupted);
+      expect(context.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to build round_interrupted summary')
+      );
+    });
   });
 });

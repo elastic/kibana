@@ -78,6 +78,22 @@ describe('shouldTriggerCompaction', () => {
     expect(shouldTriggerCompaction([], budget)).toBe(false);
   });
 
+  it('counts surviving failed-entry tokens: they alone can cross the threshold', () => {
+    expect(shouldTriggerCompaction([100], budget, undefined, 0)).toBe(false);
+    expect(shouldTriggerCompaction([100], budget, undefined, 80_000)).toBe(true);
+  });
+
+  it('adds failed-entry tokens on top of an existing summary', () => {
+    const existingSummary = createSummary(2, 1_000);
+    // 1_000 + 5_000 = 6_000 without failed entries; 70_000 of failed entries push it over
+    expect(shouldTriggerCompaction([60_000, 60_000, 5_000], budget, existingSummary, 0)).toBe(
+      false
+    );
+    expect(shouldTriggerCompaction([60_000, 60_000, 5_000], budget, existingSummary, 70_000)).toBe(
+      true
+    );
+  });
+
   it('should count only rounds beyond an existing summary plus the summary cost', () => {
     const counts = [60_000, 60_000, 5_000];
     const existingSummary = createSummary(2, 1_000);

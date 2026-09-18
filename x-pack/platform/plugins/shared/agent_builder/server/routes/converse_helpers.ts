@@ -13,7 +13,7 @@ import {
   createBadRequestError,
   AgentExecutionMode,
   isExecutionStartedEvent,
-  isExecutionTerminatedEvent,
+  isExecutionTerminalEvent,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type {
@@ -30,9 +30,7 @@ import { validateSkillIds } from '../services/agents/persisted/client/utils/skil
 import type { RouteDependencies } from './types';
 
 export const filterLegacyApiEvents = (): MonoTypeOperatorFunction<ChatEvent> =>
-  filter(
-    (event: ChatEvent) => !isExecutionStartedEvent(event) && !isExecutionTerminatedEvent(event)
-  );
+  filter((event: ChatEvent) => !isExecutionStartedEvent(event) && !isExecutionTerminalEvent(event));
 
 export const filterEventsNativeApiEvents = (): MonoTypeOperatorFunction<ChatEvent> =>
   filter((event: ChatEvent) => !isRoundCompleteEvent(event));

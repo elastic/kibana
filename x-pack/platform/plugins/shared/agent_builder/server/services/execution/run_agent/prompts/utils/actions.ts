@@ -15,6 +15,7 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { isImageResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -447,6 +448,44 @@ const isExecutionError = <TCode extends AgentExecutionErrorCode>(
   code: TCode
 ): error is AgentBuilderAgentExecutionError<TCode> => {
   return error.meta.errCode === code;
+};
+
+/** Upper bound on the error message rendered in a failed-execution notice. */
+export const EXECUTION_FAILED_NOTICE_MAX_LENGTH = 500;
+
+/**
+ * System notice telling the model that a previous attempt to answer failed and produced no
+ * response. The error text is untrusted (it may echo tool or model output): it is XML-escaped by
+ * `generateXmlTree` and bounded to {@link EXECUTION_FAILED_NOTICE_MAX_LENGTH}.
+ */
+export const formatExecutionFailedNotice = (error: SerializedExecutionError): string => {
+  const bounded = (text: string) =>
+    text.length > EXECUTION_FAILED_NOTICE_MAX_LENGTH
+      ? `${text.slice(0, EXECUTION_FAILED_NOTICE_MAX_LENGTH)}…`
+      : text;
+  // The cause chain (outermost first) is what usually says why the run failed; the wrapper's
+  // message alone ("Error executing agent: …") rarely does.
+  const causes = (error.causes ?? []).map((cause) => ({
+    tagName: 'cause',
+    ...(cause.code ? { attributes: { code: cause.code } } : {}),
+    children: [bounded(cause.message)],
+  }));
+  return generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          "The agent's attempt to answer the previous message failed. No response was produced.",
+        ],
+      },
+      {
+        tagName: 'error',
+        attributes: { code: error.code },
+        children: [bounded(error.message), ...causes],
+      },
+    ],
+  });
 };
 
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {

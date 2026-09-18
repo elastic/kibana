@@ -78,9 +78,15 @@ export const isInternalError = (err: unknown): err is AgentBuilderInternalError 
 
 export const createInternalError = (
   message: string,
-  meta?: Record<string, any>
+  meta?: Record<string, any>,
+  { cause }: { cause?: unknown } = {}
 ): AgentBuilderInternalError => {
-  return new AgentBuilderError(AgentBuilderErrorCode.internalError, message, meta ?? {});
+  const error = new AgentBuilderError(AgentBuilderErrorCode.internalError, message, meta ?? {});
+  if (cause !== undefined) {
+    // Keep the wrapped failure reachable: its message is usually the actionable part.
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
 };
 
 /**

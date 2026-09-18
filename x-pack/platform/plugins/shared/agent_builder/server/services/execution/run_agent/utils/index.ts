@@ -11,9 +11,13 @@ export { prepareMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export {
   groupTimelineRounds,
+  groupTimelineFailedExecutions,
   sliceTimelineRounds,
+  isTimelineFailedExecution,
+  MAX_FAILED_EXECUTIONS_IN_CONTEXT,
   type ProcessedTimelineEvent,
   type TimelineRound,
+  type TimelineFailedExecution,
 } from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
@@ -31,5 +35,10 @@ export {
   type ToolCallResultTransformerOptions,
   createSummarizationTransformer,
 } from './tool_summarization';
-export { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+export {
+  estimateMessagesTokens,
+  estimatePerRoundTokens,
+  estimateFailedEntryTokens,
+  survivingFailedEntryTokens,
+} from './estimate_conversation_tokens';
 export { createImageResolver, type CreateImageResolverOptions } from './image_resolver';
