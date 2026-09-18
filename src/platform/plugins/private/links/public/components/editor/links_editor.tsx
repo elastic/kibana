@@ -32,11 +32,10 @@ import {
   EuiSplitButton,
   EuiTitle,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 import type { LinksLayoutType } from '../../../common/types';
-import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
@@ -69,7 +68,7 @@ export interface LinksEditorProps {
   initialLayout?: LinksLayoutType;
   parentDashboardId?: string;
   isByReference: boolean;
-  flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
+  historyKey: symbol;
   onDraftChange?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
   onCancelEdit?: () => void;
 }
@@ -82,13 +81,12 @@ export const LinksEditor = ({
   initialLayout,
   parentDashboardId,
   isByReference,
-  flyoutId,
+  historyKey,
   onDraftChange,
   onCancelEdit,
 }: LinksEditorProps) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
-  const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
   const didCommitRef = useRef(false);
 
   const [currentLayout, setCurrentLayout] = useState<LinksLayoutType>(
@@ -160,8 +158,7 @@ export const LinksEditor = ({
       const newLink = await openLinkEditorFlyout({
         parentDashboardId,
         link: linkToEdit,
-        mainFlyoutId: flyoutId,
-        ref: editLinkFlyoutRef,
+        historyKey,
       });
       if (newLink) {
         if (linkToEdit) {
@@ -178,7 +175,7 @@ export const LinksEditor = ({
         }
       }
     },
-    [editLinkFlyoutRef, orderedLinks, parentDashboardId, flyoutId]
+    [orderedLinks, parentDashboardId, historyKey]
   );
 
   const hasZeroLinks = useMemo(() => {
@@ -192,14 +189,12 @@ export const LinksEditor = ({
           return link.id !== linkId;
         })
       );
-      focusMainFlyout(flyoutId);
     },
-    [orderedLinks, flyoutId]
+    [orderedLinks]
   );
 
   return (
     <>
-      <div css={styles.flyoutStyles} ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="links--panelEditor--title">
           <h2>
@@ -362,50 +357,4 @@ const styles = {
       transform: 'none',
     },
   }),
-  flyoutStyles: ({ euiTheme }: UseEuiTheme) => {
-    const euiFlyoutOpenAnimation = keyframes`
-    0% {
-      opacity: 0;
-      transform: translateX(100%);
-    }
-
-    100% {
-      opacity: 1;
-      transform: translateX(0%);
-    }
-  `;
-
-    const euiFlyoutCloseAnimation = keyframes`
-    0% {
-      opacity: 1;
-      transform: translateX(0%);
-    }
-
-    100% {
-      opacity: 0;
-      transform: translateX(100%);
-    }`;
-
-    return css({
-      '.linkEditor': {
-        maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
-        height: 'var(--kbn-layout--application-height)',
-        position: 'fixed',
-        display: 'flex',
-        inlineSize: '50vw',
-        zIndex: euiTheme.levels.flyout,
-        alignItems: 'stretch',
-        flexDirection: 'column',
-        borderLeft: euiTheme.border.thin,
-        background: euiTheme.colors.backgroundBasePlain,
-        minWidth: `calc((${euiTheme.size.xl} * 13) + ${euiTheme.size.s})`, // 424px
-        '&.in': {
-          animation: `${euiFlyoutOpenAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
-        },
-        '&.out': {
-          animation: `${euiFlyoutCloseAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
-        },
-      },
-    });
-  },
 };

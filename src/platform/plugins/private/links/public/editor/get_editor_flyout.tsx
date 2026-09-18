@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 
@@ -34,6 +33,7 @@ export function getEditorFlyout({
   closeFlyout,
   onDraftChange,
   onCancelEdit,
+  historyKey,
 }: {
   initialState?: EditorState;
   parentDashboard?: unknown;
@@ -41,11 +41,11 @@ export function getEditorFlyout({
   closeFlyout: () => void;
   onDraftChange?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
   onCancelEdit?: () => void;
+  historyKey: symbol;
 }) {
-  const flyoutId = `linksEditorFlyout-${uuidv4()}`;
   return (
     <LinksEditor
-      flyoutId={flyoutId}
+      historyKey={historyKey}
       initialLinks={initialState?.links}
       initialLayout={initialState?.layout}
       onClose={() => {

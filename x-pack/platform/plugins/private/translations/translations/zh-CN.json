@@ -6906,7 +6906,6 @@
     "links.externalUrl.encodeDescription": "如果启用，将使用百分比编码转义 URL",
     "links.externalUrl.encodeUrl": "编码 URL",
     "links.externalUrl.openInNewTabLabel": "在新选项卡中打开 URL",
-    "links.linkEditor.goBackAriaLabel": "返回到面板编辑器。",
     "links.linkEditor.linkDestinationLabel": "选择目标",
     "links.linkEditor.linkOptionsLabel": "选项",
     "links.linkEditor.linkTextLabel": "文本",

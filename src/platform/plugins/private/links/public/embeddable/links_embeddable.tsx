@@ -36,6 +36,7 @@ import {
 } from '../../common/constants';
 import { isLinksParentApiCompatible } from '../actions/add_links_panel_action';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
+import { LinksStrings } from '../components/links_strings';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
 import { hasLibraryItemWithTitle, linksClient } from '../links_client';
@@ -158,6 +159,7 @@ export const getLinksEmbeddableFactory = () => {
         canUnlinkFromLibrary: async () => isByReference,
         hasLibraryItemWithTitle,
         onEdit: async () => {
+          const historyKey = Symbol('linksEditor');
           openLazySystemFlyout({
             core: coreServices,
             parentApi,
@@ -166,6 +168,7 @@ export const getLinksEmbeddableFactory = () => {
               const initialLayout = layout$.getValue();
               const initialLinks = resolvedLinks$.getValue();
               return getEditorFlyout({
+                historyKey,
                 initialState: {
                   description:
                     titleManager.api.description$.getValue() ?? defaultDescription$.getValue(),
@@ -215,6 +218,8 @@ export const getLinksEmbeddableFactory = () => {
             },
             flyoutProps: {
               'data-test-subj': 'links--panelEditor--flyout',
+              historyKey,
+              title: LinksStrings.editor.panelEditor.getEditFlyoutTitle(),
             },
           });
         },

@@ -18,13 +18,13 @@ import {
   apiIsPresentationContainer,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
 import type { LinksEmbeddableState } from '../../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
-import { getEditorFlyout } from '../editor/get_editor_flyout';
+import { LinksStrings } from '../components/links_strings';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 
 export const isLinksParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
@@ -43,12 +43,15 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   execute: async ({ embeddable, returnFocus }) => {
     if (!isLinksParentApiCompatible(embeddable)) throw new IncompatibleActionError();
 
-    openLazyFlyout({
+    const historyKey = Symbol('linksEditor');
+    openLazySystemFlyout({
       core: coreServices,
       parentApi: embeddable,
       returnFocus,
       loadContent: async ({ closeFlyout }) => {
+        const { getEditorFlyout } = await import('../editor/get_editor_flyout');
         return getEditorFlyout({
+          historyKey,
           parentDashboard: embeddable,
           closeFlyout,
           onCompleteEdit: async (newState) => {
@@ -79,6 +82,8 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       },
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
+        historyKey,
+        title: LinksStrings.editor.panelEditor.getCreateFlyoutTitle(),
         isResizable: false,
       },
     });

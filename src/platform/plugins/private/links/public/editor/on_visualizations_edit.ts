@@ -14,6 +14,7 @@ import { resolveLinks } from '../lib/resolve_links';
 import { coreServices } from '../services/kibana_services';
 
 export async function onVisualizationsEdit(refId: string) {
+  const historyKey = Symbol('linksEditor');
   openLazySystemFlyout({
     core: coreServices,
     loadContent: async ({ closeFlyout }) => {
@@ -27,6 +28,7 @@ export async function onVisualizationsEdit(refId: string) {
 
       const { getEditorFlyout } = await import('./get_editor_flyout');
       return getEditorFlyout({
+        historyKey,
         initialState: {
           refId,
           ...linksState,
@@ -37,6 +39,7 @@ export async function onVisualizationsEdit(refId: string) {
     },
     flyoutProps: {
       'data-test-subj': 'links--panelEditor--flyout',
+      historyKey,
       title: LinksStrings.editor.panelEditor.getEditFlyoutTitle(),
     },
   });

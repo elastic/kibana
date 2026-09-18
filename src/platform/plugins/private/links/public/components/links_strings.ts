@@ -115,10 +115,6 @@ export const LinksStrings = {
         }),
     },
     linkEditor: {
-      getGoBackAriaLabel: () =>
-        i18n.translate('links.linkEditor.goBackAriaLabel', {
-          defaultMessage: 'Go back to panel editor.',
-        }),
       getLinkTypePickerLabel: () =>
         i18n.translate('links.linkEditor.linkTypeFormLabel', {
           defaultMessage: 'Go to',

@@ -6903,7 +6903,6 @@
     "links.externalUrl.encodeDescription": "有効な場合、URLはパーセントエンコーディングを使用してエスケープされます",
     "links.externalUrl.encodeUrl": "URLをエンコード",
     "links.externalUrl.openInNewTabLabel": "URLを新しいタブで開く",
-    "links.linkEditor.goBackAriaLabel": "パネルエディターに戻ります。",
     "links.linkEditor.linkDestinationLabel": "ターゲットを選択",
     "links.linkEditor.linkOptionsLabel": "オプション",
     "links.linkEditor.linkTextLabel": "Text",

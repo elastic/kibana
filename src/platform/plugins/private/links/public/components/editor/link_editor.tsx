@@ -19,13 +19,10 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFocusTrap,
   EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiRadioGroup,
-  EuiTitle,
 } from '@elastic/eui';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-navigation-options-components';
@@ -102,24 +99,7 @@ export const LinkEditor = ({
   );
 
   return (
-    <EuiFocusTrap className={'linkEditor in'}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiButtonEmpty
-          className="linkEditorBackButton"
-          flush="left"
-          color="text"
-          iconType={'chevronSingleLeft'}
-          onClick={() => onClose()}
-        >
-          <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
-            <h2>
-              {link
-                ? LinksStrings.editor.getEditLinkTitle()
-                : LinksStrings.editor.getAddButtonLabel()}
-            </h2>
-          </EuiTitle>
-        </EuiButtonEmpty>
-      </EuiFlyoutHeader>
+    <>
       <EuiFlyoutBody data-test-subj="links--linkEditor--flyout">
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
@@ -211,8 +191,6 @@ export const LinkEditor = ({
                     title: defaultLinkLabel ?? '',
                     description: linkDescription,
                   } as ResolvedLink);
-
-                  onClose();
                 }
               }}
               data-test-subj="links--linkEditor--saveBtn"
@@ -224,6 +202,6 @@ export const LinkEditor = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFocusTrap>
+    </>
   );
 };

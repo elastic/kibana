@@ -6884,7 +6884,6 @@
     "links.externalUrl.encodeDescription": "Falls aktiviert, wird die URL mit Prozent-Codierung maskiert",
     "links.externalUrl.encodeUrl": "URL kodieren",
     "links.externalUrl.openInNewTabLabel": "URL in neuem Tab öffnen",
-    "links.linkEditor.goBackAriaLabel": "Zurück zum Panel-Editor.",
     "links.linkEditor.linkDestinationLabel": "Wählen Sie das Ziel",
     "links.linkEditor.linkOptionsLabel": "Optionen",
     "links.linkEditor.linkTextLabel": "Text",

@@ -67,7 +67,7 @@ describe('LinksEditor', () => {
       onAddToDashboard: jest.fn(),
       onClose: jest.fn(),
       isByReference: false,
-      flyoutId: 'test-id',
+      historyKey: Symbol('test'),
     };
     return render(
       <EuiThemeProvider>

@@ -6885,7 +6885,6 @@
     "links.externalUrl.encodeDescription": "Si cette option est activée, l'URL sera échappée à l'aide de l'encodage en pourcentage",
     "links.externalUrl.encodeUrl": "Encoder l'URL",
     "links.externalUrl.openInNewTabLabel": "Ouvrir l'URL dans un nouvel onglet",
-    "links.linkEditor.goBackAriaLabel": "Retourner à l'éditeur de panneau.",
     "links.linkEditor.linkDestinationLabel": "Choisir une destination",
     "links.linkEditor.linkOptionsLabel": "Options",
     "links.linkEditor.linkTextLabel": "Texte",
