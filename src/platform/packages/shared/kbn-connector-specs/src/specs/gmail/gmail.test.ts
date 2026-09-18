@@ -181,9 +181,9 @@ describe('actions wiring', () => {
     }
   });
 
-  it('outbound-email actions are NOT tools', () => {
+  it('outbound-email actions are tools', () => {
     for (const name of ['sendMessage', 'replyMessage']) {
-      expect(GmailConnector.actions[name].isTool).toBeFalsy();
+      expect(GmailConnector.actions[name].isTool).toBeTruthy();
     }
   });
 

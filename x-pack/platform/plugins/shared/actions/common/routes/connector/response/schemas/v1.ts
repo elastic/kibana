@@ -328,4 +328,30 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
+  actions: schema.arrayOf(
+    schema.object({
+      name: schema.string({
+        meta: { description: 'The action key, e.g. "listIncidents".' },
+      }),
+      description: schema.maybe(
+        schema.string({
+          meta: { description: 'Human-readable description of what this action does.' },
+        })
+      ),
+      is_tool: schema.boolean({
+        meta: { description: 'Whether this action is exposed as an agent tool.' },
+      }),
+      scope: schema.maybe(
+        schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
+          meta: { description: 'Permission scope of this action (read, write, or destroy).' },
+        })
+      ),
+    }),
+    {
+      maxSize: 500,
+      meta: {
+        description: 'The actions available on this connector type.',
+      },
+    }
+  ),
 });

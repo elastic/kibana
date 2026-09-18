@@ -18,6 +18,7 @@ import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
+  ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
 }));
 
@@ -200,6 +201,59 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain(
           '"connectorId":"connector-123","subAction":"<sub-action name>","params":{ ... }'
         );
+      });
+
+      it('filters sub-actions by selected_actions allowlist', () => {
+        const inputSchema = z.object({ query: z.string() });
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Slack connector',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            searchMessages: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Search Slack messages',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+            sendMessage: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Send a message to a channel',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+            internalAction: {
+              isTool: false,
+              scope: 'read' as const,
+              description: 'Internal only',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+        });
+        formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_type: '.slack2',
+          selected_actions: ['sendMessage', 'internalAction'],
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain('sendMessage: Send a message to a channel');
+        expect(representation.value).not.toContain('internalAction');
+        expect(representation.value).not.toContain('searchMessages');
       });
 
       it('includes skill content when spec has skill', () => {

@@ -270,8 +270,8 @@ describe('MondayCom', () => {
   });
 
   describe('createItem action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.createItem.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.createItem.isTool).toBe(true);
     });
 
     it('calls create_item with required fields and empty columnValues default', async () => {
@@ -307,8 +307,8 @@ describe('MondayCom', () => {
   });
 
   describe('changeItemColumnValues action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(true);
     });
 
     it('calls change_item_column_values with camelCase keys and JSON-stringified columnValues', async () => {
@@ -331,8 +331,8 @@ describe('MondayCom', () => {
   });
 
   describe('createSubitem action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.createSubitem.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.createSubitem.isTool).toBe(true);
     });
 
     it('posts a CreateSubitem GraphQL mutation with parentItemId and subitemName', async () => {
@@ -357,8 +357,8 @@ describe('MondayCom', () => {
   });
 
   describe('moveItemToGroup action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.moveItemToGroup.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.moveItemToGroup.isTool).toBe(true);
     });
 
     it('posts a MoveItem GraphQL mutation', async () => {
