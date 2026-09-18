@@ -175,6 +175,28 @@ export const parseIacProvisionerErrors = (
   return [];
 };
 
+/**
+ * Resolve's request schema nests each enabled input in an object (`{ name }`,
+ * optionally with `enabledDataStreams`), unlike render's bare input-name
+ * strings — the two endpoints' specs diverged in the provisioner. Kibana
+ * keeps the render shape internally and translates on the wire.
+ */
+const toResolveWireIntegrations = (
+  integrations: IacProvisionerRenderIntegration[]
+): Array<{
+  name: string;
+  version: string;
+  policyTemplates: Array<{ name: string; enabledInputs: Array<{ name: string }> }>;
+}> =>
+  integrations.map(({ name, version, policyTemplates }) => ({
+    name,
+    version,
+    policyTemplates: policyTemplates.map(({ name: templateName, enabledInputs }) => ({
+      name: templateName,
+      enabledInputs: enabledInputs.map((inputName) => ({ name: inputName })),
+    })),
+  }));
+
 class IacProvisionerServiceImpl implements IacProvisionerService {
   public async renderTemplate(
     request: IacProvisionerRenderRequest
@@ -217,7 +239,10 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
 
     const resolved = await this.request<IacProvisionerResolveResponse>(
       RESOLVE_ENDPOINT,
-      request,
+      {
+        provider: request.provider,
+        integrations: toResolveWireIntegrations(request.integrations),
+      },
       logger
     );
     if (!isIacProvisionerResolveResponse(resolved)) {
@@ -312,17 +337,29 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
   }
 
   private async responseToError(
-    response: { status: number; json: () => Promise<unknown> },
+    response: { status: number; text: () => Promise<string> },
     logger: Logger,
     latencyMs: number,
     traceId?: string
   ): Promise<Error> {
     const status = response.status;
-    const providerErrors = parseIacProvisionerErrors(await response.json().catch(() => undefined));
+    const rawBody = await response.text().catch(() => '');
+    let parsedBody: unknown;
+    try {
+      parsedBody = JSON.parse(rawBody);
+    } catch {
+      parsedBody = undefined;
+    }
+    const providerErrors = parseIacProvisionerErrors(parsedBody);
     const codes = providerErrors.map(({ code }) => code);
     const details = providerErrors.map(({ code, message }) => `${code}: ${message}`).join('; ');
+    // Request-validation rejections (e.g. the OpenAPI middleware's 400s)
+    // don't use the MultiErrorResponse shape — log a bounded raw-body
+    // snippet so contract mismatches are diagnosable, but keep the thrown
+    // (client-facing) message to parsed errors only.
+    const logDetails = details || rawBody.slice(0, 500);
     logger.error(
-      `[IaC Provisioner] Request failed with status ${status} after ${latencyMs}ms, errors: [${details}] [Request Id: ${traceId}]`
+      `[IaC Provisioner] Request failed with status ${status} after ${latencyMs}ms, errors: [${logDetails}] [Request Id: ${traceId}]`
     );
     if (status >= 500) {
       return new IacProvisionerUnavailableError(`request failed with status ${status}`, status);

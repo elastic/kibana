@@ -71,6 +71,15 @@ const jsonResponse = (status: number, body: unknown) =>
     ok: status >= 200 && status < 300,
     status,
     json: async () => body,
+    text: async () => JSON.stringify(body),
+  } as any);
+
+const textResponse = (status: number, body: string) =>
+  ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => JSON.parse(body),
+    text: async () => body,
   } as any);
 
 function mockFeatureFlag(enabled = true) {
@@ -476,6 +485,19 @@ describe('IacProvisionerService', () => {
       'https://iac-provisioner.example/api/v1/resolve',
       expect.objectContaining({ method: 'POST' })
     );
+    // Resolve's request schema nests inputs in objects, unlike render's
+    // bare strings — the translation must happen on the wire.
+    const [, fetchOptions] = mockedFetch.mock.calls[mockedFetch.mock.calls.length - 1];
+    expect(JSON.parse(fetchOptions.body as string)).toEqual({
+      provider: 'aws',
+      integrations: [
+        {
+          name: 'cloud_security_posture',
+          version: '3.5.0',
+          policyTemplates: [{ name: 'cspm', enabledInputs: [{ name: 'cloudbeat/cis_aws' }] }],
+        },
+      ],
+    });
     const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
     expect(debugLogged).toContain('federated_identity');
     expect(debugLogged).not.toContain('X-Amz-Signature');
@@ -493,6 +515,28 @@ describe('IacProvisionerService', () => {
     await expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
     await promise.catch((error: IacProvisionerUnavailableError) => {
       expect(error.statusCode).toBe(501);
+    });
+  });
+
+  it('logs a raw-body snippet when a 400 has no MultiErrorResponse shape', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      textResponse(400, "request body has an error: doesn't match schema")
+    );
+
+    const promise = iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+    await expect(promise).rejects.toThrow(IacProvisionerRequestError);
+
+    const errorLogged = logger.error.mock.calls.flat().map(String).join(' ');
+    expect(errorLogged).toContain("doesn't match schema");
+    // The client-facing message stays generic — the snippet is log-only.
+    await promise.catch((error: IacProvisionerRequestError) => {
+      expect(error.message).toBe('Error calling IaC Provisioner, request rejected with status 400');
+      expect(error.errorCodes).toEqual([]);
     });
   });
 
