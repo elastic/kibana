@@ -21,7 +21,7 @@ import type {
   AddArgs,
   DeleteAllArgs,
   DeleteArgs,
-  FindCommentsArgs,
+  FindAttachmentsArgs,
   GetAllDocumentsAttachedToCase,
   GetAllArgs,
   GetArgs,
@@ -61,7 +61,7 @@ export interface AttachmentsSubClient {
   /**
    * Finds attachments for a case, optionally filtered by `type`.
    */
-  find(findArgs: FindCommentsArgs): Promise<UnifiedAttachmentsFindResponse>;
+  find(findArgs: FindAttachmentsArgs): Promise<UnifiedAttachmentsFindResponse>;
   /**
    * Retrieves all documents attached to a case given a single case ID
    */
@@ -135,7 +135,7 @@ export const createAttachmentsSubClient = (
       clientArgs,
       (params: BulkDeleteFileArgs) => bulkDeleteFileAttachments(params, clientArgs, casesClient)
     ),
-    find: (params: FindCommentsArgs) => find(params, clientArgs),
+    find: (params: FindAttachmentsArgs) => find(params, clientArgs),
     getAllDocumentsAttachedToCase: (params: GetAllDocumentsAttachedToCase) =>
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),

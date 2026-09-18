@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { find } from './get';
+import { find, get } from './get';
 
 describe('get', () => {
   describe('find', () => {
@@ -48,7 +49,15 @@ describe('get', () => {
       expect(call?.options?.filter).toBeDefined();
     });
 
-    // Type-resolution precision (legacy bucket/subtype mapping) is covered by
+    it('rejects an empty `type` array', async () => {
+      await expect(
+        find({ caseID: 'mock-id', findQueryParams: { type: [] } }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to find attachments case id: mock-id: Error: Invalid value \\"[]\\" supplied to \\"type\\",The length of the field type is too short. Array must be of length >= 1."`
+      );
+    });
+
+    // Type-resolution precision (leftover bucket/subtype mapping) is covered by
     // `type_filter.test.ts`; these tests only check `find` wires the filter through.
 
     it('Invalid total items results in error', async () => {
@@ -76,6 +85,31 @@ describe('get', () => {
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to find attachments case id: mock-id: Error: invalid keys \\"foo\\""`
+      );
+    });
+  });
+
+  describe('get', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const attachmentSO = mockCaseUnifiedAttachments[0];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.attachmentService.getter.get.mockResolvedValue(attachmentSO as never);
+    });
+
+    it('returns the attachment when it belongs to the case', async () => {
+      const res = await get({ caseID: 'mock-id-1', savedObjectId: attachmentSO.id }, clientArgs);
+
+      expect(res.id).toBe(attachmentSO.id);
+      expect(res.type).toBe('comment');
+    });
+
+    it('404s when the attachment belongs to a different case', async () => {
+      await expect(
+        get({ caseID: 'other-case', savedObjectId: attachmentSO.id }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to get attachment case id: other-case attachment id: mock-attachment-1: Error: This attachment mock-attachment-1 does not exist in case other-case."`
       );
     });
   });

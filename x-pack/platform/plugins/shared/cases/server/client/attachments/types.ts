@@ -77,7 +77,7 @@ export interface DeleteArgs {
 /**
  * Parameters for finding attachments of a case
  */
-export interface FindCommentsArgs {
+export interface FindAttachmentsArgs {
   /**
    * The case ID for finding associated attachments
    */

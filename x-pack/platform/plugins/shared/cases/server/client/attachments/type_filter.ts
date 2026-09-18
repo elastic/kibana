@@ -6,12 +6,14 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { AttachmentType } from '../../../common';
-import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import {
-  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  LEGACY_EXTERNAL_REFERENCE_TYPE,
+  LEGACY_PERSISTABLE_STATE_TYPE,
   PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
-} from '../../../common/constants/attachments';
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
+} from '../../../common/constants';
 import {
   toLegacyAttachmentType,
   toLegacyPersistableStateAttachmentType,
@@ -42,7 +44,7 @@ export const buildAttachmentTypeFilter = (types: string[] | undefined): KueryNod
       legacyPersistableStateIds.add(toLegacyPersistableStateAttachmentType(type));
     } else {
       const legacyBucket = toLegacyAttachmentType(type);
-      if (legacyBucket === AttachmentType.externalReference) {
+      if (legacyBucket === LEGACY_EXTERNAL_REFERENCE_TYPE) {
         legacyExternalReferenceIds.add(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP[type]);
       } else if (legacyBucket && legacyBucket !== type) {
         legacyTypes.add(legacyBucket);
@@ -81,12 +83,12 @@ export const buildAttachmentTypeFilter = (types: string[] | undefined): KueryNod
         type: CASE_COMMENT_SAVED_OBJECT,
       }),
       legacySubtypeFilter(
-        AttachmentType.externalReference,
+        LEGACY_EXTERNAL_REFERENCE_TYPE,
         'externalReferenceAttachmentTypeId',
         legacyExternalReferenceIds
       ),
       legacySubtypeFilter(
-        AttachmentType.persistableState,
+        LEGACY_PERSISTABLE_STATE_TYPE,
         'persistableStateAttachmentTypeId',
         legacyPersistableStateIds
       ),

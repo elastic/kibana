@@ -38,7 +38,7 @@ const AttachmentTypeQueryParamRt = rt.union([
   AttachmentTypeStringRt,
   limitedArraySchema({
     codec: AttachmentTypeStringRt,
-    min: 0,
+    min: 1,
     max: MAX_ATTACHMENT_TYPES_PER_QUERY,
     fieldName: 'type',
   }),

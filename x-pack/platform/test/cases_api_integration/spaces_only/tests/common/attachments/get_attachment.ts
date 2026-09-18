@@ -49,6 +49,25 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
+    it('404s when the attachment belongs to a different case', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      const otherCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      const patchedCase = await createComment({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        auth: authSpace1,
+      });
+
+      await getAttachmentV2({
+        supertest: supertestWithoutAuth,
+        caseId: otherCase.id,
+        attachmentId: patchedCase.comments![0].id,
+        auth: authSpace1,
+        expectedHttpCode: 404,
+      });
+    });
+
     it('should not get an attachment in space2 when it was created in space1', async () => {
       const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({

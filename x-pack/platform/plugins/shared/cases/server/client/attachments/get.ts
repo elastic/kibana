@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 
 import type {
@@ -21,7 +22,12 @@ import {
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
-import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
+import type {
+  FindAttachmentsArgs,
+  GetAllDocumentsAttachedToCase,
+  GetAllArgs,
+  GetArgs,
+} from './types';
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
@@ -33,6 +39,7 @@ import {
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
+import { getCaseReferenceId } from '../../common/references';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../utils';
 import { Operations } from '../../authorization';
@@ -118,7 +125,7 @@ export const getAllDocumentsAttachedToCase = async (
  * Omitting `type` returns every attachment type across both storage models.
  */
 export async function find(
-  { caseID, findQueryParams }: FindCommentsArgs,
+  { caseID, findQueryParams }: FindAttachmentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<UnifiedAttachmentsFindResponse> {
   const {
@@ -195,16 +202,20 @@ export async function get(
   } = clientArgs;
 
   try {
-    const comment = await attachmentService.getter.get({
+    const attachment = await attachmentService.getter.get({
       savedObjectId,
     });
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: comment.attributes.owner, id: comment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.getComment,
     });
 
-    const res = flattenAttachmentSavedObject(comment);
+    if (getCaseReferenceId(attachment.references) !== caseID) {
+      throw Boom.notFound(`This attachment ${savedObjectId} does not exist in case ${caseID}.`);
+    }
+
+    const res = flattenAttachmentSavedObject(attachment);
 
     return decodeOrThrow(UnifiedAttachmentRt)(res);
   } catch (error) {

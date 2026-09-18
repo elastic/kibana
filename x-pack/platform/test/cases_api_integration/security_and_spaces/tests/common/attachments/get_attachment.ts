@@ -66,6 +66,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('404s when the attachment belongs to a different case', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const otherCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await getAttachmentV2({
+        supertest,
+        caseId: otherCase.id,
+        attachmentId: patchedCase.comments![0].id,
+        expectedHttpCode: 404,
+      });
+    });
+
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
