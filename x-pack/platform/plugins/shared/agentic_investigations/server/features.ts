@@ -25,6 +25,14 @@ import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from './investigations/constants';
+import {
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+} from '../common/investigations/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -55,6 +63,41 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       },
     },
     subFeatures: [
+      {
+        name: i18n.translate('xpack.agenticInvestigations.investigationsSubFeatureName', {
+          defaultMessage: 'Investigations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'investigations_all',
+                name: i18n.translate('xpack.agenticInvestigations.investigationsAllPrivilegeName', {
+                  defaultMessage: 'Update and view investigations',
+                }),
+                includeIn: 'all',
+                api: [INVESTIGATIONS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [INVESTIGATIONS_UI_CAPABILITY_SHOW, INVESTIGATIONS_UI_CAPABILITY_MANAGE],
+              },
+              {
+                id: 'investigations_read',
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.investigationsReadPrivilegeName',
+                  {
+                    defaultMessage: 'View investigations',
+                  }
+                ),
+                includeIn: 'read',
+                api: [INVESTIGATIONS_API_PRIVILEGE_READ],
+                savedObject: { all: [], read: [] },
+                ui: [INVESTIGATIONS_UI_CAPABILITY_SHOW],
+              },
+            ],
+          },
+        ],
+      },
       {
         name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
           defaultMessage: 'Escalations',

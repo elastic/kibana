@@ -6,14 +6,14 @@
  */
 
 import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
+export { INVESTIGATION_TEMPLATE_ID } from '../investigations/constants';
 
 export const ESCALATIONS_INTERNAL_URL =
   `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/escalations` as const;
 export const ESCALATION_BY_ID_URL = `${ESCALATIONS_INTERNAL_URL}/{id}` as const;
 
-/** Template ids. Owned by agent_builder_platform; referenced here for guard checks. */
+/** Template id for escalation conversations. */
 export const ESCALATION_TEMPLATE_ID = 'escalation' as const;
-export const INVESTIGATION_TEMPLATE_ID = 'investigation' as const;
 
 /** The escalation template field that holds linked investigation conversation ids. */
 export const ESCALATION_LINKED_INVESTIGATIONS_FIELD = 'linked_investigations' as const;

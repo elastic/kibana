@@ -272,7 +272,7 @@ export const ConversationsPage: React.FC = () => {
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
-        initialAssignee={actionInvestigation?.assignee}
+        initialAssignee={actionInvestigation?.assignees[0] ?? null}
         approvalInvestigation={selectedRecommendedActionConversation}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
