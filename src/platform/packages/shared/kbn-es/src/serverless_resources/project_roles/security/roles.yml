@@ -101,6 +101,8 @@ viewer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
+        - feature_alertzero.read
+        - feature_agenticInvestigations.read
       resources: '*'
   run_as: []
 
@@ -244,6 +246,9 @@ editor:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
 
@@ -351,6 +356,9 @@ t1_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_alertzero.manage_incidents
+        - feature_agenticInvestigations.all
       resources: '*'
 
 t2_analyst:
@@ -458,6 +466,9 @@ t2_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_alertzero.manage_incidents
+        - feature_agenticInvestigations.all
       resources: '*'
 
 t3_analyst:
@@ -588,6 +599,9 @@ t3_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 threat_intelligence_analyst:
@@ -697,6 +711,9 @@ threat_intelligence_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_alertzero.manage_incidents
+        - feature_agenticInvestigations.all
       resources: '*'
 
 rule_author:
@@ -815,6 +832,9 @@ rule_author:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 soc_manager:
@@ -947,6 +967,9 @@ soc_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 detections_admin:
@@ -1039,6 +1062,9 @@ detections_admin:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 platform_engineer:
@@ -1160,6 +1186,9 @@ platform_engineer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 endpoint_operations_analyst:
@@ -1290,6 +1319,9 @@ endpoint_operations_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_alertzero.manage_incidents
+        - feature_agenticInvestigations.all
       resources: '*'
 
 endpoint_policy_manager:
@@ -1404,6 +1436,9 @@ endpoint_policy_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_alertzero.manage_incidents
+        - feature_agenticInvestigations.all
       resources: '*'
 
 # admin role defined in elasticsearch controller
