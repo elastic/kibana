@@ -193,7 +193,11 @@ export const DiscoverSessionSaveModalContainer = ({
 
       if (errorMessage) {
         // The HTTP wrapper's client stack is not part of the server error details.
-        const { stack: _stack, ...toastError } = error;
+        const toastError: Error & { code?: string } = {
+          name: error.name,
+          code: error.code,
+          message: error.message,
+        };
         services.toastNotifications.addError(toastError, {
           title: errorMessage.title,
           toastMessage: errorMessage.description,
