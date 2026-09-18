@@ -4444,6 +4444,19 @@ describe('Output Service', () => {
       expect(kuery).toContain('not fleet-agent-policies.data_output_id:*');
     });
 
+    it('adds is_default_monitoring fallback clause for default monitoring output', async () => {
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+        is_default_monitoring: true,
+      } as any);
+
+      const kuery = mockedAgentPolicyService.fetchAllAgentPolicyIds.mock.calls[0][1]
+        ?.kuery as string;
+      expect(kuery).toContain('not fleet-agent-policies.monitoring_output_id:*');
+      expect(kuery).not.toContain('not fleet-agent-policies.data_output_id:*');
+    });
+
     it('includes package-policy-derived policy IDs', async () => {
       mockedPackagePolicyService.fetchAllItems.mockResolvedValue(
         makePkgPages([{ policy_ids: ['policy-from-pkg'] }]) as any
