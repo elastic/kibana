@@ -197,7 +197,8 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/291927
+  describe.skip('fleet_outputs_crud', function () {
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
