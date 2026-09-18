@@ -595,7 +595,6 @@ function DiscoverDocumentsComponent({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             externalAdditionalControls={
-            externalAdditionalControls={
               approximationApplied ? (
                 <span style={{ marginRight: 4 }}>
                   <ApproximationBadge
