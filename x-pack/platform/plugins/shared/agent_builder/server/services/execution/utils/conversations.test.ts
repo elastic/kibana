@@ -1371,7 +1371,7 @@ describe('conversations utils', () => {
       });
 
       expect(written).toEqual([]);
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('already had a terminal'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already had a terminal'));
     });
 
     it('never throws: a failing write is logged and resolves to []', async () => {

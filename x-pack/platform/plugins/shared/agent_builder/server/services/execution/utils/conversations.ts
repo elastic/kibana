@@ -492,8 +492,11 @@ export const persistExecutionInterruption = async (
         persisted.events?.some((event) => event.id === terminal.id)
       );
       if (!landed) {
-        logger.debug(
-          `Execution ${executionId} already had a terminal event; interruption write skipped`
+        // The stored winner is another terminal (typically a success write whose response was
+        // lost). The stream still surfaces the original error, so the live client and the stored
+        // record disagree for this execution — see the follow-ups in the design doc.
+        logger.warn(
+          `Execution ${executionId} already had a terminal event; interruption write skipped and the stream error may disagree with the stored record`
         );
         return [];
       }
