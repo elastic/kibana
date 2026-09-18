@@ -18,6 +18,13 @@ const MANAGED_WORKFLOW_IDS = [
   'system-significant-events-discovery',
 ];
 
+// Memory workflows removed in this release; reconciliation should prune them.
+const REMOVED_MEMORY_WORKFLOW_IDS = [
+  'system-significant-events-memory-synthesis',
+  'system-significant-events-memory-consolidation',
+  'system-significant-events-memory-conversation-scraper',
+];
+
 /**
  * Verifies that managed workflows are installed and marked as valid. Significant events
  * availability is enabled in global setup. Installation is asynchronous (triggered by a
@@ -42,6 +49,26 @@ apiTest.describe(
               return response.statusCode === 200 ? response.body.valid : false;
             },
             { timeout: 20_000, intervals: [1_000] }
+          )
+          .toBe(true);
+      });
+    }
+
+    for (const workflowId of REMOVED_MEMORY_WORKFLOW_IDS) {
+      apiTest(`${workflowId}: is absent after reconciliation`, async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };
+
+        await expect
+          .poll(
+            async () => {
+              const response = await apiClient.get(`api/workflows/workflow/${workflowId}`, {
+                headers,
+                responseType: 'json',
+              });
+              return response.statusCode === 404;
+            },
+            { timeout: 30_000, intervals: [2_000] }
           )
           .toBe(true);
       });

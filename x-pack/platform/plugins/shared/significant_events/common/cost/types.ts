@@ -80,4 +80,12 @@ export const FEATURE_ID_TO_COST_BUDGET_GROUP: Readonly<Record<string, CostBudget
   [SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID]: 'investigation',
   [SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID]: 'ki_extraction',
   [SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID]: 'ki_extraction',
+  // Historical memory feature IDs removed in this release; map to ki_extraction so
+  // pre-upgrade token documents are attributed rather than counted as unknown.
+  significant_events_memory: 'ki_extraction',
+  significant_events_memory_synthesis: 'ki_extraction',
+  significant_events_memory_conversation_scraper: 'ki_extraction',
+  significant_events_memory_gap_detection: 'ki_extraction',
+  significant_events_memory_consolidation: 'ki_extraction',
+  significant_events_memory_investigation_gaps: 'ki_extraction',
 };
