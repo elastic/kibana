@@ -355,10 +355,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
             <span>content</span>
           </FlyoutTemplate.Body>
           <FlyoutTemplate.Footer>
-            <FlyoutTemplate.Footer.PrimaryActionMenu
-              label="Take action"
-              panels={SIMPLE_PANELS}
-            />
+            <FlyoutTemplate.Footer.PrimaryActionMenu label="Take action" panels={SIMPLE_PANELS} />
           </FlyoutTemplate.Footer>
         </FlyoutTemplate>
       </form>
