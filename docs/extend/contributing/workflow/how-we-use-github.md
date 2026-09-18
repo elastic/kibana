@@ -125,7 +125,7 @@ Many of our labels follow the pattern of `{key}:{value}`.
 
 ### Team labels
 
-Examples: `Team:Security`, `Team:Operations`.
+Examples: `Team:Security`, `Team:Dashboards`.
 
 These labels map the issue to the team that owns the particular area. Every issue should have at least one team label applied.
 
@@ -164,12 +164,12 @@ These labels categorize the type of work. For example:
 These labels affect whether your PR appears in the release notes (that is to say,
 it's notable and affects our users) and which section it appears in. For example:
 
-- `release_note:breaking`: Specifies a breaking change and adds the PR to the Breaking changes section in the release notes. Breaking changes between minors should be rare and limited to experimental or preview features or features with very low usage. 
+- `release_note:breaking`: Specifies a breaking change and adds the PR to the Breaking changes section in the release notes. Elasticians must follow the internal Breaking Change procedures. Breaking changes within a major should be very rare and limited to experimental or preview features or unused features.
 - `release_note:deprecation`: Specifies a deprecated feature and adds the PR to the Deprecations section in the release notes. This section warns users about features that will be removed at a later date, usually the next major version.
 - `release_note:feature`: Specifies a new feature and adds the PR to the  Features section in the release notes. Use the feature label for a brand new capability or major functionality that did not exist before.
 - `release_note:enhancement`: Specifies a feature enhancement and adds the PR to the Enhancements section in the release notes. Use the enhancement label for improvements, optimizations, or extensions to an existing feature.
 - `release_note:fix`: Specifies a bug fix and adds the PR to the Bug fixes section in the release notes.
-- `release_node:plugin_api_changes`: Specifies a changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide.
+- `release_node:plugin_api_changes`: Specifies changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide.
 - `release_note:skip`: Omits the PR from release notes.
 
 The following labels are related to backporting PRs:
@@ -194,15 +194,15 @@ node scripts/backport --sha <commit-sha> --branch 9.2 --branch 9.1
 
 {{kib}} publishes [Release Notes](/release-notes/index.md) for major and minor releases, and for every Serverless rollout. Release Notes summarize merged PRs in user-friendly language. A script generates these notes by collecting merged PRs for each release.
 
-Features, enhancements and fixes are sourced from your PR title and will include a link back to the PR. Ensure the initial PR description is informative.
+PRs that are included in release notes must have clear and concise titles and descriptions that are informative and well-written.
 
-Deprecations, breaking changes and known issues require additional context. todo
+Features, enhancements and fixes are sourced from your PR title and will include a link back to the PR. Deprecations, breaking changes and known issues require additional context. Include the impact, action and workarounds needed within the PR description and this will be included in the release notes when published.
 
-You may optionally provide a custom paragraph within the initial PR description. Use a `Release note:` or `## Release note` header, followed by the text. This is the place to give a clear, user-focussed summary, rather than implementation detail.
+You may optionally provide a custom paragraph within the PR description. Use a `Release note:` or `## Release note` header, followed by the text. This is the place to give a clear, user-focussed summary, rather than technical implementation detail.
 
 When creating a PR title:
 - Use sentence case.
-- Start PR titles with action words such as `Add`, `Fix`, `Improve`, `Show`, `Deprecate`
-- Keep it short. Try to keep the title less than 80 characters.
-- Describe what was fixed, rather than just stating that a fix happened. (e.g. `Fix timeout` is not informative; this is better described as `Fix duplicate API call prevent timeout on initialization`)
+- Start PR titles with action words such as `Add`, `Fix`, `Improve`, `Show`, `Deprecate`, `Prevent`
+- Keep it short. Be clear. Be concise. Aim to keep the title less than 80 characters.
+- Describe what was fixed. (e.g. `Fix timeout` is not informative; this is better described as `Fix duplicate API call to prevent initialization timeout`)
 
