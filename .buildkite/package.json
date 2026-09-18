@@ -10,18 +10,18 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
-    "fallow": "2.76.0",
     "@slack/web-api": "^7.0.0",
     "adm-zip": "^0.6.0",
     "axios": "^1.13.4",
     "diff": "^9.0.0",
+    "fallow": "2.76.0",
     "globby": "^16.2.4",
     "json5": "^2.2.3",
-    "yaml": "^2.8.1",
     "minimatch": "^10.2.6",
     "minimist": "^1.2.8",
     "p-limit": "^3.1.0",
-    "tslib": "*"
+    "tslib": "*",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -29,6 +29,7 @@
     "@types/minimatch": "^6.0.0",
     "@types/minimist": "^1.2.5",
     "@types/node": "24.10.13",
+    "ajv": "^8.20.0",
     "jest": "^30.0.3",
     "jscodeshift": "^17.1.2",
     "nock": "^14.0.17",
@@ -43,6 +44,7 @@
     "#pipeline-utils": "./pipeline-utils/index.ts",
     "#pipeline-utils/affected-packages": "./pipeline-utils/affected-packages/index.ts",
     "#pipeline-utils/buildkite": "./pipeline-utils/buildkite/index.ts",
+    "#pipeline-utils/ci-summary": "./pipeline-utils/ci-summary/index.ts",
     "#pipeline-utils/ci-stats": "./pipeline-utils/ci-stats/index.ts",
     "#pipeline-utils/github": "./pipeline-utils/github/index.ts",
     "#pipeline-utils/scout": "./pipeline-utils/scout/index.ts",

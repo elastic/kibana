@@ -21,6 +21,11 @@ fi
 # post-build step on an API hiccup.
 node "$(dirname "${0}")/build_timing.ts" || true
 
+# Publish a machine-readable summary of every job's outcome to
+# https://ci-artifacts.kibana.dev/ci-summary/build/<BUILDKITE_BUILD_ID>.json
+# (see .buildkite/pipeline-utils/ci-summary/schema.json). Best-effort.
+node "$(dirname "${0}")/build_summary.ts" || true
+
 if is_pr_with_label "ci:collect-ftr-timing"; then
   node "$(dirname "${0}")/aggregate_ftr_timing.ts"
 fi

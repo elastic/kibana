@@ -10,7 +10,7 @@
 import { execSync } from 'child_process';
 import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { BuildkiteClient } from '../index.ts';
+import { BuildkiteClient } from '../buildkite/client.ts';
 import type { Artifact } from '../buildkite/types/artifact.ts';
 
 const buildkite = new BuildkiteClient();
@@ -45,6 +45,22 @@ const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
 
   return allFiles;
 };
+
+/** Parses every `*.json` under `dir` (recursively) as a TestFailure, sorted by test name. */
+export const loadTestFailures = (dir: string): TestFailure[] =>
+  recursiveReadDir(dir)
+    .map((file) => {
+      try {
+        if (file.endsWith('.json')) {
+          return JSON.parse(readFileSync(file).toString());
+        }
+      } catch (ex) {
+        console.error((ex as Error).message);
+      }
+      return null;
+    })
+    .filter((f) => f)
+    .sort((a, b) => a.name.localeCompare(b.name));
 
 export const getAnnotation = (
   failures: TestFailure[],
@@ -156,19 +172,7 @@ export const annotateTestFailures = async () => {
     `.buildkite/scripts/common/download_artifact.sh --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`
   );
 
-  const failures: TestFailure[] = recursiveReadDir(failureDir)
-    .map((file) => {
-      try {
-        if (file.endsWith('.json')) {
-          return JSON.parse(readFileSync(file).toString());
-        }
-      } catch (ex) {
-        console.error((ex as Error).message);
-      }
-      return null;
-    })
-    .filter((f) => f)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const failures = loadTestFailures(failureDir);
 
   buildkite.setAnnotation('test_failures', 'error', getAnnotation(failures, failureHtmlArtifacts));
 
