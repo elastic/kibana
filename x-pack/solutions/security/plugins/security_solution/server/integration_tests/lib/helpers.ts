@@ -142,7 +142,7 @@ export function updateTimestamps(data: object[]): object[] {
   });
 }
 
-export function mockAxiosPost(
+export function mockFetchPost(
   postSpy: jest.SpyInstance,
   routes: Array<[RegExp, unknown]> = DEFAULT_POST_ROUTES
 ) {
@@ -156,7 +156,7 @@ export function mockAxiosPost(
   });
 }
 
-export function mockAxiosGet(
+export function mockFetchGet(
   getSpy: jest.SpyInstance,
   routes: Array<[RegExp, unknown]> = DEFAULT_GET_ROUTES
 ) {
@@ -168,6 +168,20 @@ export function mockAxiosGet(
     }
     return { status: 404 };
   });
+}
+
+export function createFetchResponse(value: {
+  status: number;
+  data?: unknown;
+  headers?: HeadersInit;
+}): Response {
+  let body: BodyInit | null = null;
+  if (typeof value.data === 'string') {
+    body = value.data.endsWith('.zip') ? Fs.readFileSync(value.data) : value.data;
+  } else if (value.data !== undefined) {
+    body = JSON.stringify(value.data);
+  }
+  return new Response(body, { status: value.status, headers: value.headers });
 }
 
 export function getRandomInt(min: number, max: number): number {
