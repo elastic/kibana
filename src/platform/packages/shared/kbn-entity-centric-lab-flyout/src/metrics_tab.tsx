@@ -42,15 +42,16 @@ import { formatIncidentTick } from './time_domain';
 
 interface MetricsTabProps {
   readonly metrics: MetricsTabData;
+  readonly hideEvents?: boolean;
 }
 
 const NO_EVENTS: readonly MetricEvent[] = [];
 
-export const MetricsTab = ({ metrics }: MetricsTabProps) => {
+export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => {
   const goldenAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabMetricsGolden' });
   const otherAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabMetricsOther' });
-  const [surfaceEvents, setSurfaceEvents] = useState(true);
-  const events = surfaceEvents ? metrics.events : NO_EVENTS;
+  const [surfaceEvents, setSurfaceEvents] = useState(!hideEvents);
+  const events = hideEvents ? NO_EVENTS : surfaceEvents ? metrics.events : NO_EVENTS;
 
   // Layout follows the design: latency + error rate side-by-side, throughput
   // full-width below them.
@@ -59,15 +60,15 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
 
   return (
     <>
-      <EuiSwitch
+      {hideEvents ? null : <EuiSwitch
         label={i18n.translate('entityCentricLabFlyout.flyout.metrics.surfaceEventsToggle', {
           defaultMessage: 'Surface events on graphs',
         })}
         checked={surfaceEvents}
         onChange={(e) => setSurfaceEvents(e.target.checked)}
         data-test-subj="entityCentricLabMetricsSurfaceEventsToggle"
-      />
-      <EuiSpacer size="m" />
+      />}
+      {hideEvents ? null : <EuiSpacer size="m" />}
 
       <EuiAccordion
         id={goldenAccordionId}

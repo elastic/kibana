@@ -908,9 +908,48 @@ function createNavTree({
       defaultMessage: 'Universal Profiling',
     }),
     children: [
-      { link: 'profiling:stacktraces' as const },
-      { link: 'profiling:flamegraphs' as const },
-      { link: 'profiling:functions' as const },
+      {
+        id: 'profiling-stacktraces',
+        title: i18n.translate('xpack.observability.obltNav.profiling.stacktraces', {
+          defaultMessage: 'Stacktraces',
+        }),
+        href: toAbsoluteHref('/app/profiling/stacktraces'),
+        getIsActive: ({
+          pathNameSerialized,
+          prepend,
+        }: {
+          pathNameSerialized: string;
+          prepend: (path: string) => string;
+        }) => pathNameSerialized.startsWith(prepend('/app/profiling/stacktraces')),
+      },
+      {
+        id: 'profiling-flamegraphs',
+        title: i18n.translate('xpack.observability.obltNav.profiling.flamegraphs', {
+          defaultMessage: 'Flamegraphs',
+        }),
+        href: toAbsoluteHref('/app/profiling/flamegraphs'),
+        getIsActive: ({
+          pathNameSerialized,
+          prepend,
+        }: {
+          pathNameSerialized: string;
+          prepend: (path: string) => string;
+        }) => pathNameSerialized.startsWith(prepend('/app/profiling/flamegraphs')),
+      },
+      {
+        id: 'profiling-functions',
+        title: i18n.translate('xpack.observability.obltNav.profiling.functions', {
+          defaultMessage: 'Functions',
+        }),
+        href: toAbsoluteHref('/app/profiling/functions'),
+        getIsActive: ({
+          pathNameSerialized,
+          prepend,
+        }: {
+          pathNameSerialized: string;
+          prepend: (path: string) => string;
+        }) => pathNameSerialized.startsWith(prepend('/app/profiling/functions')),
+      },
     ],
   };
 

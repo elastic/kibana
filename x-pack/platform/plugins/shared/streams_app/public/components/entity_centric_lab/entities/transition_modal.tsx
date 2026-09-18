@@ -24,7 +24,7 @@ import {
 import { css } from '@emotion/react';
 
 import oldHostsPageUrl from './assets/old_hosts_page.jpg';
-import newExperiencePreviewUrl from './assets/new_experience_preview.png';
+import newExperiencePreviewUrl from './assets/new_experience_preview.jpg';
 
 const TOUR_FLAG_KEY = 'elasticOn_showTour';
 
@@ -153,6 +153,9 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
               width: 280px;
               flex-shrink: 0;
               margin-top: 32px;
+              overflow: hidden;
+              border-radius: 6px;
+              line-height: 0;
             `}
           >
             <img
@@ -160,8 +163,7 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
               alt="Preview of the new infrastructure experience"
               css={css`
                 width: 100%;
-                border-radius: 6px;
-                border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                display: block;
               `}
             />
           </EuiFlexItem>
@@ -203,7 +205,6 @@ export const OldExperiencePage = ({ onSwitch }: OldExperiencePageProps) => {
   const [showModal, setShowModal] = useState(true);
 
   const handleSwitch = () => {
-    setTourFlag();
     onSwitch();
   };
 

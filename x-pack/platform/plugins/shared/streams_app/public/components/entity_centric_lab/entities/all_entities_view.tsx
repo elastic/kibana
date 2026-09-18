@@ -678,9 +678,10 @@ const AllEntitiesViewInner = ({
     setTourStep(0);
   }, []);
 
+  const [transitionCompleted, setTransitionCompleted] = useState(false);
   const handleTransitionSwitch = useCallback(() => {
-    variationCtx.set('scenario', 'default');
-  }, [variationCtx]);
+    setTransitionCompleted(true);
+  }, []);
 
   const handleRevertToClassic = useCallback(() => {
     variationCtx.set('scenario', 'transition');
@@ -700,7 +701,17 @@ const AllEntitiesViewInner = ({
     prevNewInfraRef.current = newInfraEnabled;
   }, [newInfraEnabled, handleRevertToClassic]);
 
-  const isTransitionScenario = scenarioVariation === 'transition';
+  const isTransitionScenario = scenarioVariation === 'transition' && !transitionCompleted;
+  const isBannerScenario =
+    (scenarioVariation === 'transition' && transitionCompleted) ||
+    scenarioVariation === 'banner-admin' ||
+    scenarioVariation === 'banner-user';
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    setBannerDismissed(false);
+    setTransitionCompleted(false);
+  }, [scenarioVariation]);
 
   const flyoutSize = detailVariation === 'largeFlyout' ? 'l' : 'm';
   const dataset = useMemo(() => buildFakeEntities(dataVariation), [dataVariation]);
@@ -1695,8 +1706,11 @@ const AllEntitiesViewInner = ({
                         content={
                           <p>
                             Have feedback? Found something that could work better? Let us know —
-                            your input shapes what comes next. You can switch back to the classic
-                            view anytime from <strong>Advanced Settings &gt; Observability</strong>.
+                            your input shapes what comes next.
+                            {scenarioVariation !== 'banner-user' ? (
+                              <> You can switch back to the classic
+                              view anytime from <strong>Advanced Settings &gt; Observability</strong>.</>
+                            ) : null}
                           </p>
                         }
                         onFinish={closeTour}
@@ -2030,6 +2044,38 @@ const AllEntitiesViewInner = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
+                {isBannerScenario && !bannerDismissed ? (
+                  <>
+                    <EuiCallOut
+                      title={'\uD83C\uDF89 Your infrastructure view has been updated'}
+                      color="primary"
+                    >
+                      <p>
+                        {scenarioVariation === 'transition'
+                          ? 'You\u2019ve successfully enabled the new infrastructure experience for all users on this deployment. It brings faster load times, hex map visualizations, and richer flyout context.'
+                          : scenarioVariation === 'banner-admin'
+                          ? 'An admin on your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'
+                          : 'Your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'}
+                      </p>
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink onClick={() => { setBannerDismissed(true); setIsTourActive(true); setTourStep(1); }}>
+                            Take a tour
+                          </EuiLink>
+                        </EuiFlexItem>
+                        {scenarioVariation === 'transition' || scenarioVariation === 'banner-admin' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiLink onClick={() => {}}>Revert in Advanced Settings</EuiLink>
+                          </EuiFlexItem>
+                        ) : null}
+                        <EuiFlexItem grow={false}>
+                          <EuiLink onClick={() => setBannerDismissed(true)}>Dismiss</EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiCallOut>
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
                 {effectiveViewMode === 'grid' ? (
                   <GroupedGridView
                     key={`grid-${phaseVariation}`}
@@ -2223,6 +2269,38 @@ const AllEntitiesViewInner = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
+                {isBannerScenario && !bannerDismissed ? (
+                  <>
+                    <EuiCallOut
+                      title={'\uD83C\uDF89 Your infrastructure view has been updated'}
+                      color="primary"
+                    >
+                      <p>
+                        {scenarioVariation === 'transition'
+                          ? 'You\u2019ve successfully enabled the new infrastructure experience for all users on this deployment. It brings faster load times, hex map visualizations, and richer flyout context.'
+                          : scenarioVariation === 'banner-admin'
+                          ? 'An admin on your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'
+                          : 'Your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'}
+                      </p>
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink onClick={() => { setBannerDismissed(true); setIsTourActive(true); setTourStep(1); }}>
+                            Take a tour
+                          </EuiLink>
+                        </EuiFlexItem>
+                        {scenarioVariation === 'transition' || scenarioVariation === 'banner-admin' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiLink onClick={() => {}}>Revert in Advanced Settings</EuiLink>
+                          </EuiFlexItem>
+                        ) : null}
+                        <EuiFlexItem grow={false}>
+                          <EuiLink onClick={() => setBannerDismissed(true)}>Dismiss</EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiCallOut>
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
                 {effectiveViewMode === 'grid' ? (
                   <GroupedGridView
                     entities={filteredEntities}
@@ -2274,6 +2352,7 @@ const AllEntitiesViewInner = ({
             alertsActiveCount={isPhase1 ? selectedEntity?.alerts?.active : undefined}
             hideAiSummary={isPhase1}
             hideOwnership={isPhase1}
+            hideEvents={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
           />
           {childEntityName ? (
@@ -2296,6 +2375,7 @@ const AllEntitiesViewInner = ({
               alertsActiveCount={isPhase1 ? childEntity?.alerts?.active : undefined}
               hideAiSummary={isPhase1}
               hideOwnership={isPhase1}
+              hideEvents={isPhase1}
               hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
             />
           ) : null}

@@ -34,7 +34,7 @@ export interface VariationDimension {
 // Starter dimensions
 // ---------------------------------------------------------------------------
 
-export type DataVariation = 'default' | 'full' | 'degraded' | 'overflow' | 'empty';
+export type DataVariation = 'default' | 'full' | 'overflow' | 'empty';
 
 /** Maximum number of entities surfaced in the UI at once. */
 export const MAX_VISIBLE_ENTITIES = 10_000;
@@ -46,11 +46,6 @@ export const DATA_DIMENSION: VariationDimension = {
   options: [
     { id: 'default', label: 'Default', description: 'Standard demo dataset' },
     { id: 'full', label: 'Full', description: 'High entity counts across all categories' },
-    {
-      id: 'degraded',
-      label: 'Degraded',
-      description: 'Most entities unhealthy with active alerts',
-    },
     {
       id: 'overflow',
       label: '10k+',
@@ -102,7 +97,7 @@ export const PHASE_DIMENSION: VariationDimension = {
   ],
 };
 
-export type ScenarioVariation = 'default' | 'transition';
+export type ScenarioVariation = 'default' | 'transition' | 'banner-admin' | 'banner-user';
 
 export const SCENARIO_DIMENSION: VariationDimension = {
   id: 'scenario',
@@ -112,8 +107,18 @@ export const SCENARIO_DIMENSION: VariationDimension = {
     { id: 'default', label: 'Default', description: 'Normal experience — no onboarding flow' },
     {
       id: 'transition',
-      label: 'Transition',
+      label: 'Case 1 — Admin (initiator)',
       description: 'Old experience → modal → new experience with feature tour',
+    },
+    {
+      id: 'banner-admin',
+      label: 'Case 2 — Admin (passive)',
+      description: 'New experience with banner — another admin enabled it',
+    },
+    {
+      id: 'banner-user',
+      label: 'Case 3 — Non-admin',
+      description: 'New experience with banner — no revert option',
     },
   ],
 };

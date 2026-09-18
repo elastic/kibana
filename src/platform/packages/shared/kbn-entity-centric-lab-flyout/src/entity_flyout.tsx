@@ -29,6 +29,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -49,6 +50,7 @@ import { MetricsTab } from './metrics_tab';
 import { LogsTab } from './logs_tab';
 import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
+import { ServicesTab } from './services_tab';
 import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
 import { DashboardsTab } from './dashboards_tab';
@@ -185,6 +187,8 @@ interface EntityFlyoutProps {
   readonly hideAiSummary?: boolean;
   /** When true the Ownership section is hidden from the Overview tab (Phase 1). */
   readonly hideOwnership?: boolean;
+  /** When true the "Surface events on graphs" toggle and event annotations are hidden from the Metrics tab (Phase 1). */
+  readonly hideEvents?: boolean;
   /**
    * Tab IDs to exclude from the flyout. Used by Phase 1 to hide
    * Relationships and Custom. Filtered after the allowed-set and
@@ -199,6 +203,7 @@ type BuiltInTabId =
   | 'logs'
   | 'traces'
   | 'alerts'
+  | 'services'
   | 'relationships'
   | 'dashboards'
   | 'custom'
@@ -219,6 +224,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'logs',
   'traces',
   'alerts',
+  'services',
   'relationships',
   'custom',
   'profiling',
@@ -242,6 +248,7 @@ const CORE_TAB_IDS: readonly string[] = [
   'logs',
   'traces',
   'alerts',
+  'services',
   'dashboards',
   'custom',
   'profiling',
@@ -281,6 +288,7 @@ export const EntityFlyout = ({
   alertsActiveCount,
   hideAiSummary = false,
   hideOwnership = false,
+  hideEvents = false,
   hiddenTabIds,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
@@ -291,6 +299,12 @@ export const EntityFlyout = ({
   // the first position will land on Metrics.
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [dateStart, setDateStart] = useState('now-15m');
+  const [dateEnd, setDateEnd] = useState('now');
+  const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
+    setDateStart(start);
+    setDateEnd(end);
+  }, []);
   const {
     agentBuilder,
     notifications,
@@ -637,6 +651,16 @@ export const EntityFlyout = ({
           return count > 0 ? count : undefined;
         })(),
       },
+      ...(kind === 'host'
+        ? [
+            {
+              id: 'services' as TabId,
+              label: i18n.translate('entityCentricLabFlyout.flyout.tabs.services', {
+                defaultMessage: 'Services',
+              }),
+            },
+          ]
+        : []),
       // Relationships (the topology map) only surfaces in the long-term
       // entity-centric scenario — filtered out below when `minimalTabs` is set.
       {
@@ -689,7 +713,7 @@ export const EntityFlyout = ({
     }
 
     return overrideTabs;
-  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, alertsActiveCount, minimalTabs]);
+  }, [templateOverride, tabsData.traces, tabsData.alerts.activeCount, alertsActiveCount, minimalTabs, kind]);
 
   // Phase-1 exclusion: drop tabs the caller explicitly hides.
   const visibleTabs = useMemo(
@@ -855,6 +879,20 @@ export const EntityFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={dateStart}
+              end={dateEnd}
+              onTimeChange={handleTimeChange}
+              isAutoRefreshOnly={false}
+              compressed
+              width="auto"
+              updateButtonProps={{ iconOnly: true, fill: false, color: 'text' }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <TabContent
           activeTab={activeTab}
           activeTabLabel={visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
@@ -867,6 +905,7 @@ export const EntityFlyout = ({
           onSelectEntity={onSelectEntity}
           hideAiSummary={hideAiSummary}
           hideOwnership={hideOwnership}
+          hideEvents={hideEvents}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -968,6 +1007,7 @@ const TabContent = ({
   onSelectEntity,
   hideAiSummary = false,
   hideOwnership = false,
+  hideEvents = false,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -980,6 +1020,7 @@ const TabContent = ({
   readonly onSelectEntity?: OnSelectEntity;
   readonly hideAiSummary?: boolean;
   readonly hideOwnership?: boolean;
+  readonly hideEvents?: boolean;
 }) => {
   const { resourceCopy = false, renderTabDashboard } = useEntityFlyoutServices();
 
@@ -1010,7 +1051,7 @@ const TabContent = ({
     case 'overview':
       return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} />;
     case 'metrics':
-      return <MetricsTab metrics={tabsData.metrics} />;
+      return <MetricsTab metrics={tabsData.metrics} hideEvents={hideEvents} />;
     case 'logs':
       return <LogsTab entityName={entityName} logs={tabsData.logs} />;
     case 'traces':
@@ -1020,6 +1061,8 @@ const TabContent = ({
       return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
+    case 'services':
+      return <ServicesTab entityName={entityName} />;
     case 'relationships':
       return (
         <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />
