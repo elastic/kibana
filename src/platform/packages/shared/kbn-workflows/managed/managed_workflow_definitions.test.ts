@@ -227,7 +227,10 @@ function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): voi
 }
 
 const AI_AGENT_STEP_TYPE = 'ai.agent';
+/** Attack Discovery's custom LLM step, which names its tier as a `with.feature_id` input. */
+const ATTACK_DISCOVERY_RUN_STEP_TYPE = 'security.attack-discovery.run';
 const CONNECTOR_ID_BY_FEATURE = 'connector-id-by-feature';
+const FEATURE_ID = 'feature_id';
 const PLUGIN_ID = 'plugin-id';
 const AGGREGATE_BY = 'aggregate-by';
 /** Mirrors ALERTZERO_INFERENCE_PARENT_FEATURE_ID; @kbn/alertzero-common is not a dependency here. */
@@ -245,32 +248,44 @@ const ALERTZERO_TIER_IDS = new Set([
 ]);
 
 /**
- * Collects `ai.agent` steps from anywhere in a parsed workflow, walking the whole tree rather than
- * the step containers known today so nesting added later (`foreach`, `if`/`else`, `parallel`
+ * Collects steps of a given type from anywhere in a parsed workflow, walking the whole tree rather
+ * than the step containers known today so nesting added later (`foreach`, `if`/`else`, `parallel`
  * branches, `switch` cases) is covered without touching this.
  */
-function collectAiAgentSteps(
+function collectStepsOfType(
+  stepType: string,
   node: unknown,
   collected: Array<Record<string, unknown>> = []
 ): Array<Record<string, unknown>> {
   if (Array.isArray(node)) {
     for (const item of node) {
-      collectAiAgentSteps(item, collected);
+      collectStepsOfType(stepType, item, collected);
     }
     return collected;
   }
 
   if (node !== null && typeof node === 'object') {
     const candidate = node as Record<string, unknown>;
-    if (candidate.type === AI_AGENT_STEP_TYPE) {
+    if (candidate.type === stepType) {
       collected.push(candidate);
     }
     for (const value of Object.values(candidate)) {
-      collectAiAgentSteps(value, collected);
+      collectStepsOfType(stepType, value, collected);
     }
   }
 
   return collected;
+}
+
+/** The tier a step names, whether it is an `ai.agent` field or a custom step's `with` input. */
+function getNamedTier(step: Record<string, unknown>, field: string): unknown {
+  if (field in step) {
+    return step[field];
+  }
+  const withInputs = step.with;
+  return withInputs !== null && typeof withInputs === 'object'
+    ? (withInputs as Record<string, unknown>)[field]
+    : undefined;
 }
 
 describe('managedWorkflowDefinitions', () => {
@@ -357,9 +372,30 @@ describe('managedWorkflowDefinitions', () => {
   it.each(alertZeroDefinitionsById)(
     '%s resolves every ai.agent step through an inference feature',
     (id, definition) => {
-      const aiAgentSteps = collectAiAgentSteps(parse(renderWorkflowYaml(definition)));
+      const aiAgentSteps = collectStepsOfType(
+        AI_AGENT_STEP_TYPE,
+        parse(renderWorkflowYaml(definition))
+      );
       const unpinnedStepNames = aiAgentSteps
         .filter((step) => !ALERTZERO_TIER_IDS.has(step[CONNECTOR_ID_BY_FEATURE] as string))
+        .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
+
+      expect(unpinnedStepNames).toEqual([]);
+    }
+  );
+
+  // Attack Discovery's LLM call is a custom step rather than `ai.agent`, so the guard above cannot
+  // see it: it names its tier as a `with.feature_id` input. Dropping or mistyping that input fails
+  // exactly as silently, and puts scheduled Attack Discovery back on the deployment-wide default.
+  it.each(alertZeroDefinitionsById)(
+    '%s resolves every Attack Discovery run step through an inference feature',
+    (id, definition) => {
+      const runSteps = collectStepsOfType(
+        ATTACK_DISCOVERY_RUN_STEP_TYPE,
+        parse(renderWorkflowYaml(definition))
+      );
+      const unpinnedStepNames = runSteps
+        .filter((step) => !ALERTZERO_TIER_IDS.has(getNamedTier(step, FEATURE_ID) as string))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);
@@ -371,7 +407,10 @@ describe('managedWorkflowDefinitions', () => {
   it.each(alertZeroDefinitionsById)(
     '%s attributes every ai.agent step to a Worker and the AlertZero rollup',
     (id, definition) => {
-      const aiAgentSteps = collectAiAgentSteps(parse(renderWorkflowYaml(definition)));
+      const aiAgentSteps = collectStepsOfType(
+        AI_AGENT_STEP_TYPE,
+        parse(renderWorkflowYaml(definition))
+      );
       const unattributedStepNames = aiAgentSteps
         .filter(
           (step) =>
