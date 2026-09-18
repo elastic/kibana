@@ -56,7 +56,9 @@ describe('Lens config prompt', () => {
     expect(system).toEqual(['system', expect.not.stringContaining('EDIT RULES')]);
     expect(system).toEqual([
       'system',
-      expect.stringContaining('No column information is available; infer fields from the ES|QL query'),
+      expect.stringContaining(
+        'No column information is available; infer fields from the ES|QL query'
+      ),
     ]);
     expect(human).toEqual(['human', expect.stringContaining('Resolved ES|QL query:')]);
   });
@@ -119,10 +121,12 @@ describe('Lens config prompt', () => {
   });
 });
 
+const ESQL_QUERY = 'FROM logs-* | STATS count = COUNT(*) BY status';
+
 const systemText = (columns?: EsqlEsqlColumnInfo[]): string => {
   const [system] = createGenerateConfigPrompt({
     nlQuery: 'count logs by status',
-    esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY status',
+    esqlQuery: ESQL_QUERY,
     columns,
     chartType: SupportedChartType.Metric,
     schema: {},
@@ -130,33 +134,53 @@ const systemText = (columns?: EsqlEsqlColumnInfo[]): string => {
   return String((system as [string, string])[1]);
 };
 
+const dataSourceRulesSection = (text: string): string => {
+  const start = text.indexOf('DATA SOURCE RULES:');
+  const end = text.indexOf('\nCHART RULES FOR');
+  if (start === -1 || end === -1) {
+    throw new Error('DATA SOURCE RULES section not found');
+  }
+  return text.slice(start, end).trimEnd();
+};
+
+const expectedDataSourceRules = (rule2: string): string =>
+  `DATA SOURCE RULES:
+1. The ES|QL query is owned and injected by the system automatically. DO NOT output a 'data_source' field, and do not restate, copy, or modify the query anywhere in the config.
+2. ${rule2}
+3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query.
+4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`;
+
 describe('createGenerateConfigPrompt', () => {
   it('lists executed ES|QL columns as the only bindable names', () => {
-    const text = systemText([
-      { name: 'count', type: 'long' },
-      { name: 'status', type: 'keyword' },
-    ]);
-
-    expect(text).toContain('<columns>');
-    expect(text).toContain('- "count" (long)');
-    expect(text).toContain('- "status" (keyword)');
-    expect(text).toContain('2. Bind only these executed result columns, using their exact names');
-    expect(text).not.toContain('No column information is available');
+    expect(
+      dataSourceRulesSection(
+        systemText([
+          { name: 'count', type: 'long' },
+          { name: 'status', type: 'keyword' },
+        ])
+      )
+    ).toBe(
+      expectedDataSourceRules(`Bind only these executed result columns, using their exact names:
+<columns>
+- "count" (long)
+- "status" (keyword)
+</columns>`)
+    );
   });
 
   it('falls back to query-text inference when execute returned no columns', () => {
-    const text = systemText([]);
-    expect(text).toContain(
-      'No column information is available; infer fields from the ES|QL query: FROM logs-* | STATS count = COUNT(*) BY status'
+    expect(dataSourceRulesSection(systemText([]))).toBe(
+      expectedDataSourceRules(
+        `No column information is available; infer fields from the ES|QL query: ${ESQL_QUERY}`
+      )
     );
-    expect(text).not.toContain('<columns>');
   });
 
   it('falls back to query-text inference when columns were never executed', () => {
-    const text = systemText();
-    expect(text).toContain(
-      'No column information is available; infer fields from the ES|QL query: FROM logs-* | STATS count = COUNT(*) BY status'
+    expect(dataSourceRulesSection(systemText())).toBe(
+      expectedDataSourceRules(
+        `No column information is available; infer fields from the ES|QL query: ${ESQL_QUERY}`
+      )
     );
-    expect(text).not.toContain('<columns>');
   });
 });
