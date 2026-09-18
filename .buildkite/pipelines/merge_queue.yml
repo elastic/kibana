@@ -18,34 +18,28 @@ steps:
 
   # E2E suites (FTR, Scout, Cypress) intentionally do not run in the merge queue.
   # Only Jest unit tests gate the queue.
-  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
+  - command: |
+      set -euxo pipefail
+      (.buildkite/scripts/steps/store_cache.sh > .buildkite/scripts/steps/store_cache.txt) &
+      store_cache_pid=$!
+      echo "Store cache running in background with PID $store_cache_pid, picking test group run order..."
+      .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+      echo "Test group run order completed, waiting for store cache to finish..."
+      wait $store_cache_pid
+      echo "Store cache completed, printing results..."
+      cat .buildkite/scripts/steps/store_cache.txt
+    label: 'Pick Test Group Run Order and Store Cache'
     agents:
-      provider: k8s
-      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-      imageUID: 1000
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-highcpu-8
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_UNIT_MAX_MINUTES: '15.0'
       LIMIT_CONFIG_TYPE: 'unit'
-    plugins:
-      - sparse-checkout#v1.6.0:
-          no_cone: true
-          paths:
-            - '/.buildkite/'
-            - '/.node-version'
-            - '/package.json'
-            - '/tsconfig.base.json'
-            - '/versions.json'
-            - '**/jest.config.js'
-            - '**/*.test.js'
-            - '**/*.test.mjs'
-            - '**/*.test.ts'
-            - '**/*.test.tsx'
-          cleanup_sparse_state: true
-          post_checkout:
-            unshallow: true
     retry:
       automatic:
         - exit_status: '*'
@@ -69,7 +63,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      preemptible: true
+      preemptible: false
     timeout_in_minutes: 10
     retry:
       automatic:
@@ -101,7 +95,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-8
-      preemptible: true
+      preemptible: false
       spotZones: us-central1-b,us-central1-c,us-central1-f
     key: quick_checks
     timeout_in_minutes: 60
@@ -117,7 +111,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-2
-      preemptible: true
+      preemptible: false
       spotZones: us-central1-b,us-central1-c,us-central1-f
     key: checks
     timeout_in_minutes: 60
@@ -134,7 +128,7 @@ steps:
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
-      preemptible: true
+      preemptible: false
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting
     timeout_in_minutes: 60
@@ -151,7 +145,7 @@ steps:
       provider: gcp
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
-      preemptible: true
+      preemptible: false
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting_with_types
     timeout_in_minutes: 60
@@ -168,7 +162,7 @@ steps:
       provider: gcp
       machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
-      preemptible: true
+      preemptible: false
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: check_types
     timeout_in_minutes: 60

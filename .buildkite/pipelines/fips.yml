@@ -53,6 +53,7 @@ steps:
     depends_on: build
     timeout_in_minutes: 15
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
       diskSizeGb: 130
     env:
