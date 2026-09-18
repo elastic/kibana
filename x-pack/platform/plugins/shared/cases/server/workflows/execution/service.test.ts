@@ -253,6 +253,22 @@ describe('CasesWorkflowRunService', () => {
       ).rejects.toThrow('Alert inputs can only be used with a single case.');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
+
+    // SECURITY REGRESSION TEST: documentIds are expanded server-side with an mget, and Cases has
+    // no attached-document set to check them against, so a case run must never accept them —
+    // otherwise a run could pull in documents unrelated to the case it is audited against.
+    it('rejects documentIds inputs', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a'],
+          inputs: {
+            event: { triggerType: 'document', documentIds: [{ _id: 'd-1', _index: 'logs' }] },
+          },
+          origin: { type: 'cases.case', caseId: 'case-a' },
+        })
+      ).rejects.toThrow('inputs.event.documentIds cannot be used with a case workflow run.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   describe('single-case (sub-entity) origin types reject multiple caseIds', () => {

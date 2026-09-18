@@ -70,6 +70,26 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertP
 };
 
 /**
+ * Rejects `inputs.event.documentIds` on a case workflow run.
+ *
+ * Unlike `alertIds`, a document selection has no membership source to validate against — Cases
+ * only tracks attached alerts — so there is no way to prove a selected document belongs to the
+ * case. Since the server expands `documentIds` with an `mget`, accepting them would let a
+ * case-scoped run pull in unrelated documents while the audit trail still reads "ran workflow
+ * from case X". No Cases caller has ever sent `documentIds`, so rejecting breaks nothing.
+ *
+ * Pre-expanded `inputs.event.documents` are deliberately not rejected here: they are forwarded
+ * verbatim to the workflow engine exactly as before, and are client-supplied either way.
+ */
+export const rejectDocumentIdSelections = (inputs: Record<string, unknown>): void => {
+  const { documentIds } = getRecord(inputs.event) ?? {};
+
+  if (documentIds !== undefined && documentIds !== null) {
+    throw Boom.badRequest('inputs.event.documentIds cannot be used with a case workflow run.');
+  }
+};
+
+/**
  * Validates that the requested workflow `origin` is consistent with `caseId`
  * and, when alert inputs are present, that every selected alert is attached
  * to the case.
