@@ -17,7 +17,7 @@ import type { PluginConfig } from '../config';
  * Mirrors the security plugin's own UIAM dispatcher. Undefined when no custom TLS is
  * configured, which is plain `fetch` behaviour.
  */
-export function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
+function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
   const { certificate, key, certificateAuthorities, verificationMode } = ssl;
 
   const read = (file: string) => readFileSync(file, 'utf8');
@@ -45,4 +45,22 @@ export function createDispatcher(ssl: PluginConfig['ssl']): Agent | undefined {
       ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
     },
   });
+}
+
+/**
+ * Defers reading the certificate until the first render. `config/serverless.yml` points at
+ * paths that only exist in an ECP pod, but that file is also loaded by serverless FTR and
+ * Scout runs -- reading at startup fails those with ENOENT before Kibana is available.
+ */
+export function createDispatcherProvider(ssl: PluginConfig['ssl']): () => Agent | undefined {
+  let agent: Agent | undefined;
+  let created = false;
+
+  return () => {
+    if (!created) {
+      agent = createDispatcher(ssl);
+      created = true;
+    }
+    return agent;
+  };
 }

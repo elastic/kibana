@@ -59,15 +59,15 @@ export function createGetScreenshots({
   security,
   publicBaseUrl,
   getSystemIdentity,
-  dispatcher,
+  getDispatcher = () => undefined,
 }: {
   config: PluginConfig;
   logger: Logger;
   security: SecurityServiceStart;
   /** Resolved per call: the security plugin's start contract does not exist at setup. */
   getSystemIdentity: () => SystemIdentity | undefined;
-  /** Presents Kibana's client certificate. */
-  dispatcher?: unknown;
+  /** Presents Kibana's client certificate. Resolved per call: see `render/dispatcher.ts`. */
+  getDispatcher?: () => unknown;
   /** `server.publicBaseUrl`, substituted into capture URLs so the remote render service can
    * reach Kibana. See the note in `server/plugin.ts`. */
   publicBaseUrl?: string;
@@ -115,7 +115,7 @@ export function createGetScreenshots({
           }
           return systemIdentity.createEphemeralToken(signal);
         },
-        dispatcher,
+        dispatcher: getDispatcher(),
       },
       options.taskInstanceFields.retryAt,
       logger

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { PluginConfig } from './config';
-import { createDispatcher } from './render/dispatcher';
+import { createDispatcherProvider } from './render/dispatcher';
 import { createGetScreenshots } from './get_screenshots';
 import type { PageRenderScreenshottingStart } from './get_screenshots';
 
@@ -71,7 +71,7 @@ export class PageRenderScreenshottingPlugin
         security: core.security,
         publicBaseUrl,
         getSystemIdentity: () => plugins.security.authc.systemIdentity,
-        dispatcher: createDispatcher(this.config.ssl),
+        getDispatcher: createDispatcherProvider(this.config.ssl),
       }),
     };
   }
