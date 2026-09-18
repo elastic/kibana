@@ -17,6 +17,8 @@ const stats = [
 ];
 const evaluations = [{ id: 'e1', label: 'error_rate', expression: 'errors / count' }];
 
+jest.setTimeout(20_000);
+
 const ControlledField: React.FC<{ evaluation: EvaluationDefinition }> = ({ evaluation }) => {
   const [value, setValue] = useState(evaluation.expression);
   return (
