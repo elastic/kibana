@@ -33,9 +33,18 @@ const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
+
 export interface DocumentWorkflowsPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  /**
+   * The selected documents as `(id, index)` pairs. The server fetches each document's fields,
+   * so the request stays small no matter how many are selected, and every caller produces the
+   * same document shape.
+   */
+  documentIds: DocumentSelection[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -50,7 +59,7 @@ export interface DocumentWorkflowsPanelProps {
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
 export const DocumentWorkflowsPanel = ({
-  documents,
+  documentIds,
   onClose,
   onExecute,
   originEventId,
@@ -59,8 +68,8 @@ export const DocumentWorkflowsPanel = ({
     (): CaseAttachmentWorkflowTarget =>
       originEventId !== undefined
         ? { attachmentId: originEventId }
-        : { attachmentIds: documents.map(({ _id }) => _id) },
-    [documents, originEventId]
+        : { attachmentIds: documentIds.map(({ _id }) => _id) },
+    [documentIds, originEventId]
   );
   const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -71,10 +80,10 @@ export const DocumentWorkflowsPanel = ({
     () => ({
       event: {
         triggerType: 'document' as const,
-        documents,
+        documentIds,
       },
     }),
-    [documents]
+    [documentIds]
   );
 
   return (
@@ -92,8 +101,7 @@ export const DocumentWorkflowsPanel = ({
 export const RUN_DOCUMENT_WORKFLOW_PANEL_ID = 'RUN_DOCUMENT_WORKFLOW_PANEL_ID';
 export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
 export interface UseRunDocumentWorkflowPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  documentIds: DocumentSelection[];
   closePopover: () => void;
   /**
    * Pass `ecsRowData._id` from a row action so a run inside a case uses a `cases.attachment`
@@ -112,14 +120,14 @@ export interface UseRunDocumentWorkflowPanelResult {
 
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
-  documents,
+  documentIds,
   originEventId,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   // Inside a case, only offer the action when the run can be recorded on the case.
   const caseRouting = useCaseAttachmentWorkflowRouting();
-  const hasCaseTarget = originEventId !== undefined || documents.length > 0;
+  const hasCaseTarget = originEventId !== undefined || documentIds.length > 0;
   const canRunInCase = caseRouting === 'outside' || (caseRouting === 'available' && hasCaseTarget);
 
   const canRunWorkflow = useMemo(
@@ -150,14 +158,14 @@ export const useRunDocumentWorkflowPanel = ({
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
         content: (
           <DocumentWorkflowsPanel
-            documents={documents}
+            documentIds={documentIds}
             onClose={closePopover}
             originEventId={originEventId}
           />
         ),
       },
     ],
-    [closePopover, documents, originEventId]
+    [closePopover, documentIds, originEventId]
   );
 
   return useMemo(
