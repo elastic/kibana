@@ -16,8 +16,8 @@ export const MAX_DATE_RANGE_LENGTH = 4096;
 export const MAX_MONITOR_BATCH_SIZE = 500;
 // Public bulk id lists were unbounded; decrypt finder paginates past perPage 500.
 export const MAX_MONITOR_BULK_SIZE = 10_000;
-// Bulk update preprocess + Fleet sync; temporary raise from the product 500.
-export const MAX_MONITOR_UPDATE_BULK_SIZE = 1000;
+// Per-id SO fan-out (bulk update, health); temporary raise from the product 500.
+export const MAX_MONITOR_FANOUT_SIZE = 1000;
 // Param id lists are SO-only, so they can match the public bulk cap.
 export const MAX_PARAM_BULK_SIZE = 10_000;
 // Params hold PEM chains / keys; 10KB 400s those. 1MB is a DoS cap, not a product limit.

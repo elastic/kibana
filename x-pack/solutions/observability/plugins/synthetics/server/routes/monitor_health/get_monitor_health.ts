@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { MAX_MONITOR_BULK_SIZE, routeId } from '../zod_query';
+import { MAX_MONITOR_FANOUT_SIZE, routeId } from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
@@ -16,7 +16,7 @@ export const getMonitorsHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: false,
   validate: {
     body: z.object({
-      monitorIds: z.array(routeId).min(1).max(MAX_MONITOR_BULK_SIZE),
+      monitorIds: z.array(routeId).min(1).max(MAX_MONITOR_FANOUT_SIZE),
     }),
   },
   handler: async (routeContext) => {

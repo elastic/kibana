@@ -7,7 +7,7 @@
 
 import type { z } from '@kbn/zod';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { MAX_MONITOR_UPDATE_BULK_SIZE, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
+import { MAX_MONITOR_FANOUT_SIZE, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import { updateSyntheticsMonitorBulkRoute } from './update_monitor_bulk';
 
 jest.mock('../services/update_monitor_api', () => ({
@@ -145,13 +145,13 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       expect(value.updates[0].attributes).toEqual({});
     });
 
-    it(`rejects more than ${MAX_MONITOR_UPDATE_BULK_SIZE} updates`, () => {
-      const updates = Array.from({ length: MAX_MONITOR_UPDATE_BULK_SIZE + 1 }, (_, i) => ({
+    it(`rejects more than ${MAX_MONITOR_FANOUT_SIZE} updates`, () => {
+      const updates = Array.from({ length: MAX_MONITOR_FANOUT_SIZE + 1 }, (_, i) => ({
         id: `monitor-id-${i}`,
         attributes: { enabled: false },
       }));
       expect(() => bodySchema.parse({ updates })).toThrow(
-        new RegExp(`too big|maximum|<=${MAX_MONITOR_UPDATE_BULK_SIZE}`, 'i')
+        new RegExp(`too big|maximum|<=${MAX_MONITOR_FANOUT_SIZE}`, 'i')
       );
     });
 
