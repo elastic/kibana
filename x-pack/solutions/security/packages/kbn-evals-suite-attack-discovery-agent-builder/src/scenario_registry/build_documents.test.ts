@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AD2_SCENARIO_SEED_LABEL } from './constants';
 import { buildAd2SeedPlan, getAd2ScenarioAlertIds } from './registry';
 
 describe('AD2 scenario registry (clean profile)', () => {
@@ -29,6 +30,20 @@ describe('AD2 scenario registry (clean profile)', () => {
           'ad_portable_seed' in (alert.source.labels as Record<string, unknown>)
       )
     ).toBe(true);
+  });
+
+  it('carries the fixture marker in root tags, the field a retrieval can filter on', () => {
+    const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+
+    // `labels` is the cleanup marker; root `tags` is the RETRIEVAL marker — an
+    // ECS keyword field, which is what the live-retrieval datasets scope their
+    // query by. Losing it silently turns the dense profile's exact-population
+    // expectation into a count of whatever else is in the shared alerts index.
+    const tagged = plan.alerts.filter((alert) =>
+      ((alert.source.tags as string[] | undefined) ?? []).includes(AD2_SCENARIO_SEED_LABEL)
+    );
+    expect(tagged).toHaveLength(plan.alerts.length);
+    expect(plan.alerts.length).toBeGreaterThan(0);
   });
 
   it('uses deterministic scenario-registry ids and labels', () => {

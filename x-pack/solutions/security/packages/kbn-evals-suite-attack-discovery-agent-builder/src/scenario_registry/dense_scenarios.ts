@@ -50,8 +50,14 @@ interface BackgroundTemplate {
   readonly steps: readonly Ad2ScenarioStep[];
 }
 
-/** Background chains: plausible, lower severity, and NOT part of the four target chains. */
-const BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
+/**
+ * Background chains: plausible, lower severity, and NOT part of the four target
+ * chains. Exported because the dense-profile tests assert each emitted chain
+ * against its TEMPLATE length — a check drawn from the emitted definition cannot
+ * detect truncation, since a builder that trims `steps` shrinks both sides in
+ * lockstep.
+ */
+export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
   {
     key: 'bg-rdp-bruteforce',
     title: 'Repeated RDP authentication failures',
@@ -69,12 +75,19 @@ const BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
         'network',
         '10.14.9.77'
       ),
+      // The failure burst is CONTAINED by a control, not escalated into a
+      // successful logon. A `Successful Logon After Repeated Failures` step here
+      // reads as a brute-force compromise chain, and the dense ground truth
+      // holds only the four clean chains — so the Rubric, which scores alertId
+      // overlap with that reference, would penalize a model for correctly
+      // surfacing it. Background activity has to be non-actionable for
+      // "precision against noise" to mean anything.
       step(
-        'Successful Logon After Repeated Failures',
-        'medium',
-        52,
-        'A successful RDP logon followed the failure burst',
-        'winlogon.exe',
+        'Account Lockout Policy Triggered',
+        'low',
+        21,
+        'The source address was locked out by policy after the failure burst',
+        'svchost.exe',
         null,
         'network',
         '10.14.9.77'
@@ -210,8 +223,12 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
   while (budget > 0) {
     let placedThisRound = false;
 
-    for (let templateIndex = 0; templateIndex < BACKGROUND_TEMPLATES.length; templateIndex++) {
-      const template = BACKGROUND_TEMPLATES[templateIndex];
+    for (
+      let templateIndex = 0;
+      templateIndex < AD2_DENSE_BACKGROUND_TEMPLATES.length;
+      templateIndex++
+    ) {
+      const template = AD2_DENSE_BACKGROUND_TEMPLATES[templateIndex];
 
       // Truncate at a chain boundary rather than emitting a partial chain.
       if (template.steps.length <= budget) {

@@ -60,6 +60,12 @@ export const buildAlertDocument = (
       outcome: 'success',
     },
     data_stream: { type: 'logs', dataset, namespace: 'default' },
+    // Root `tags` is the fixture's RETRIEVAL marker: an ECS `keyword` field on
+    // the alerts index, which is what the live-retrieval datasets scope their
+    // query by (the golden-path fixture filters on the same field). `labels` is
+    // the cleanup marker only — it is an object field, so it is not a contract
+    // a generated ES|QL filter can be written against.
+    tags: [AD2_SCENARIO_SEED_LABEL],
     labels: { ad_portable_seed: AD2_SCENARIO_SEED_LABEL, ad_test_scenario: scenarioKey },
     agent: {
       id: `${AD2_SCENARIO_ID_PREFIX}agent-${scenario.host}`,

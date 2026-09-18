@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AD2_CLEAN_SCENARIO_KEYS } from '../scenario_registry';
+import { AD2_CLEAN_SCENARIO_KEYS, AD2_SCENARIO_SEED_LABEL } from '../scenario_registry';
 import { AD2_DENSE_TARGET_ALERTS } from '../scenario_registry/dense_scenarios';
 import type { AttackDiscoveryAgentBuilderExample } from '../types';
 import { CLEAN_PROFILE_REFERENCE_DISCOVERIES } from './clean_profile_provided_alerts';
@@ -20,11 +20,20 @@ import { CLEAN_PROFILE_REFERENCE_DISCOVERIES } from './clean_profile_provided_al
  * Here the model retrieves from an index holding AD2_DENSE_TARGET_ALERTS
  * alerts, of which only the four clean chains are real. Finding them is the
  * task. This is the volume-sensitive measurement the clean profile cannot make.
+ *
+ * The retrieval is scoped to the fixture marker, the same way the golden-path
+ * live-retrieval example scopes its own. That scope is load-bearing rather than
+ * cosmetic: the expectation below is an EXACT population, and
+ * `.alerts-security.alerts-default` is a shared index — the sibling
+ * golden-path spec seeds its own alerts into it, and anything else present at
+ * retrieval time changes the observed count, scoring a correct full retrieval
+ * as a failure. The window is 24h because the background chains are spread up
+ * to 20 hours back (see `startHoursAgo` in `dense_scenarios.ts`), so the marker
+ * is the only bound that matters here.
  */
 export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExample = {
   input: {
-    question:
-      'Run Attack Discovery over the alerts currently in the environment and return the validated discoveries.',
+    question: `Run Attack Discovery by retrieving alerts with the marker ${AD2_SCENARIO_SEED_LABEL} from the last 24 hours and return the validated discoveries.`,
     triageType: 'live-retrieval',
     expectedSkills: ['attack-discovery-generator'],
     expectedToolPath: ['security.attack-discovery.run'],
@@ -32,7 +41,8 @@ export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExampl
   output: {
     expectedToolPath: ['security.attack-discovery.run'],
     expectedWorkflowStages: ['generation', 'validation'],
-    // The model retrieves the whole seeded population.
+    // The model retrieves the whole seeded population (scoped by the marker in
+    // `input.question`).
     expectedRetrievedAlertCount: AD2_DENSE_TARGET_ALERTS,
     // Deliberately ABSENT (not `null`): how many alerts SHOULD survive triage
     // is a judgement, and pinning a number here would score correlation
@@ -51,7 +61,7 @@ export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExampl
     criteria: [
       'The response identifies attack chains rather than restating individual alerts.',
       'Discoveries are grounded in alerts that exist in the retrieved set.',
-      'Background noise (isolated logon failures, share enumeration, cron edits) is not promoted into a discovery on its own.',
+      'Background noise (logon failure bursts contained by the lockout policy, share enumeration, cron edits) is not promoted into a discovery on its own.',
     ],
   },
   metadata: {
