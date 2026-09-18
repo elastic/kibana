@@ -24,7 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateOptionItem } from '../create_options';
 import { CreateOptionsPanel } from '../create_options';
-import type { AgentBuilderSkillsRequirements } from '../../hooks/use_are_agent_builder_skills_available';
+import {
+  type AgentBuilderSkillsRequirements,
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
@@ -38,17 +42,6 @@ interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
-  /**
-   * When `true`, the "With AI Agent" option is rendered disabled (click is a no-op). Independent
-   * of `createWithAgentTooltipText` — a disabled option need not have a tooltip, and a tooltip can be
-   * shown without disabling.
-   */
-  createWithAgentDisabled?: boolean;
-  /**
-   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
-   * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
-   */
-  createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -135,10 +128,12 @@ const flyoutCardDisabledStyle = css({
 const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
 }) => {
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
   const primaryItems = useMemo<CreateOptionItem[]>(
     () => [
       {
@@ -155,12 +150,17 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         title: AI_AGENT_TITLE,
         description: AI_AGENT_DESCRIPTION,
         onClick: onCreateWithAgent,
-        disabled: createWithAgentDisabled,
+        disabled: !areAgentBuilderSkillsAvailable,
         tooltipText: createWithAgentTooltipText,
         'data-test-subj': 'createWithAgentCard',
       },
     ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
+    [
+      onCreateEsqlRule,
+      onCreateWithAgent,
+      areAgentBuilderSkillsAvailable,
+      createWithAgentTooltipText,
+    ]
   );
 
   const secondaryItems = useMemo<CreateOptionItem[]>(
@@ -278,12 +278,14 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
   legacyRuleTypes,
 }) => {
-  const isAgentDisabled = createWithAgentDisabled === true;
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
+  const isAgentDisabled = !areAgentBuilderSkillsAvailable;
   const hasAgentTooltip = createWithAgentTooltipText !== undefined;
   const agentCard = (
     <EuiCard

@@ -16,6 +16,12 @@ import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-d
 import { useHostTabs } from '../../application/tabs_context';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
   defaultMessage: 'Rules',
@@ -102,9 +108,6 @@ export interface RulesListHeaderProps {
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   onBuildSequence: () => void;
-  showBuildSequence: boolean;
-  createWithAgentDisabled?: boolean;
-  createWithAgentTooltipText?: string;
 }
 
 /**
@@ -118,9 +121,6 @@ export const RulesListHeader = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onBuildSequence,
-  showBuildSequence,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
 }: RulesListHeaderProps) => {
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
@@ -128,6 +128,11 @@ export const RulesListHeader = ({
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const hostTabs = useHostTabs();
+  const showBuildSequence = useAlertingV2ExperimentalFeatures();
+  const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
 
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
     const headerTabs: AppHeaderTab[] = [

@@ -279,9 +279,6 @@ export const ActionPoliciesTable = () => {
           canWrite={canWrite}
           onCreatePolicy={navigateToCreate}
           onCreateWithAgent={navigateToAgentBuilder}
-          showCreateWithAgent={showExperimentalFeatures}
-          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
-          createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent

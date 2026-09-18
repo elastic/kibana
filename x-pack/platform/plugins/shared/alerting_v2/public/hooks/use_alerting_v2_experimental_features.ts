@@ -6,11 +6,21 @@
  */
 
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
+
+/**
+ * Whether a uiSettings client has Alerting V2 experimental features enabled.
+ *
+ * This keeps consumers rendered outside the Alerting V2 DI context able to use
+ * the same space-scoped setting as the hook below.
+ */
+export const isAlertingV2ExperimentalFeaturesEnabled = (uiSettings: IUiSettingsClient): boolean =>
+  uiSettings.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID) === true;
 
 /** Whether the current space has opted into Alerting V2 experimental features. */
 export const useAlertingV2ExperimentalFeatures = (): boolean => {
   const uiSettings = useService(CoreStart('uiSettings'));
 
-  return uiSettings.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID) === true;
+  return isAlertingV2ExperimentalFeaturesEnabled(uiSettings);
 };
