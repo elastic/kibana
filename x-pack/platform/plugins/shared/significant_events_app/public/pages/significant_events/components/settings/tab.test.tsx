@@ -96,17 +96,17 @@ const setDeveloperMode = jest.fn();
 
 const setup = ({
   isDeveloperMode = false,
-  canEditDeveloperMode = true,
+  isSaving = false,
   canSaveAdvancedSettings = true,
 }: {
   isDeveloperMode?: boolean;
-  canEditDeveloperMode?: boolean;
+  isSaving?: boolean;
   canSaveAdvancedSettings?: boolean;
 } = {}) => {
   mockUseDeveloperMode.mockReturnValue({
     isDeveloperMode,
+    isSaving,
     setDeveloperMode,
-    canEditDeveloperMode,
   });
   mockUseKibana.mockReturnValue({
     core: {
@@ -168,18 +168,22 @@ describe('SettingsTab developer mode', () => {
     setup({ isDeveloperMode: false });
 
     expect(screen.getByTestId('streams-settings-tuning-editor')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftDeveloperModeBadge')).not.toBeInTheDocument();
   });
 
   it('keeps the tuning YAML panel visible when developer mode is on', () => {
     setup({ isDeveloperMode: true });
 
     expect(screen.getByTestId('streams-settings-tuning-editor')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftDeveloperModeBadge')).not.toBeInTheDocument();
   });
 
   it('disables the switch without advancedSettings.save', () => {
-    setup({ canEditDeveloperMode: false, canSaveAdvancedSettings: false });
+    setup({ canSaveAdvancedSettings: false });
+
+    expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
+  });
+
+  it('disables the switch while a save is in flight', () => {
+    setup({ isSaving: true });
 
     expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
   });
