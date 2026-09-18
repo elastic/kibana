@@ -9,6 +9,8 @@ import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useFetchContext } from '@kbn/presentation-publishing';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import {
   renderWithReduxStore,
@@ -71,6 +73,7 @@ jest.mock('@kbn/presentation-publishing', () => ({
 const getSuggestionsMock = getSuggestions as jest.MockedFunction<typeof getSuggestions>;
 const getGridAttrsMock = getGridAttrs as jest.MockedFunction<typeof getGridAttrs>;
 const addColumnsToCacheMock = addColumnsToCache as jest.MockedFunction<typeof addColumnsToCache>;
+const useFetchContextMock = useFetchContext as jest.MockedFunction<typeof useFetchContext>;
 
 describe('ESQLEditor', () => {
   const coreStart = coreMock.createStart();
@@ -138,6 +141,7 @@ describe('ESQLEditor', () => {
       ReturnType<typeof getGridAttrs>
     >);
     addColumnsToCacheMock.mockClear();
+    useFetchContextMock.mockReturnValue({ esqlVariables: [], isApproximate: false });
   });
 
   it('runs the same query again after the previous run was aborted', async () => {
@@ -195,6 +199,33 @@ describe('ESQLEditor', () => {
       expect(submitCacheCallIndex).toBeGreaterThanOrEqual(0);
       expect(onLayerQuerySubmit.mock.invocationCallOrder[0]).toBeLessThan(
         addColumnsToCacheMock.mock.invocationCallOrder[submitCacheCallIndex]
+      );
+    });
+
+    it('maps identifier variables before submitting layer columns', async () => {
+      const variableQuery = { esql: 'FROM index1 | STATS count = COUNT(*) BY ??field' };
+      const columns = [
+        { id: 'bytes', name: 'bytes', meta: { type: 'number' as const } },
+        { id: 'count', name: 'count', meta: { type: 'number' as const } },
+      ];
+      getGridAttrsMock.mockResolvedValue({
+        columns,
+        rows: [],
+      } as unknown as Awaited<ReturnType<typeof getGridAttrs>>);
+      useFetchContextMock.mockReturnValue({
+        esqlVariables: [{ key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS }],
+        isApproximate: false,
+      });
+      const onLayerQuerySubmit = jest.fn().mockResolvedValue(undefined);
+
+      renderEditor({ onLayerQuerySubmit });
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      await act(() => capturedOnSubmit!(variableQuery, new AbortController()));
+
+      expect(onLayerQuerySubmit).toHaveBeenCalledWith(
+        variableQuery,
+        [{ ...columns[0], variable: 'field' }, columns[1]],
+        expect.any(AbortController)
       );
     });
 

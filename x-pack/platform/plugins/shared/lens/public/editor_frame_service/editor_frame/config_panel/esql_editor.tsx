@@ -17,6 +17,7 @@ import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQLLangEditor, useESQLQueryStats } from '@kbn/esql/public';
+import { mapVariableToColumn } from '@kbn/esql-utils';
 import { type ESQLControlVariable, type ESQLQueryStats } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -197,12 +198,13 @@ export function ESQLEditor({
             esqlVariables,
             isApproximate
           );
+          const columns = mapVariableToColumn(q.esql, esqlVariables, gridAttrs.columns);
           // Commit the grid and fieldlist cache only after the layer accepted the
           // query; otherwise a rejected query (e.g. missing-dimension validation)
           // would leave them showing results the layer state does not reflect.
-          await onLayerQuerySubmit(q, gridAttrs.columns, abortController);
-          addColumnsToCache(q, gridAttrs.columns);
-          setDataGridAttrs(gridAttrs);
+          await onLayerQuerySubmit(q, columns, abortController);
+          addColumnsToCache(q, columns);
+          setDataGridAttrs({ ...gridAttrs, columns });
           prevQuery.current = q;
           setSubmittedQuery(q);
         } catch (error) {
@@ -297,8 +299,13 @@ export function ESQLEditor({
       isApproximate
     )
       .then((gridAttrs) => {
-        addColumnsToCache(lastSubmittedQuery, gridAttrs.columns);
-        setDataGridAttrs(gridAttrs);
+        const columns = mapVariableToColumn(
+          lastSubmittedQuery.esql,
+          esqlVariables,
+          gridAttrs.columns
+        );
+        addColumnsToCache(lastSubmittedQuery, columns);
+        setDataGridAttrs({ ...gridAttrs, columns });
       })
       .catch(() => {
         if (abortController.signal.aborted) {

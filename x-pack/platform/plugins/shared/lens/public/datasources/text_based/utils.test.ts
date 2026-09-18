@@ -126,6 +126,35 @@ describe('Text based languages utils', () => {
       ]);
     });
 
+    it('preserves the stable identifier variable when its concrete field changes', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        {
+          columnId: 'x-axis',
+          fieldName: '??field',
+          variable: 'field',
+          meta: { type: 'number' },
+        },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        {
+          id: 'bytes',
+          name: 'bytes',
+          variable: 'field',
+          meta: { type: 'number' },
+        },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'x-axis',
+          fieldName: '??field',
+          variable: 'field',
+          label: 'bytes',
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
     it('uses query column IDs for new incompatible fields', () => {
       const existingColumns: TextBasedLayerColumn[] = [
         { columnId: 'metric', fieldName: 'COUNT(*)', meta: { type: 'number' } },

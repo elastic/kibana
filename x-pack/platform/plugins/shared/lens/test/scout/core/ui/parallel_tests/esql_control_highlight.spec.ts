@@ -7,14 +7,24 @@
 
 import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { getImportedDashboardId, getImportedSavedObjectId, spaceTest, testData } from '../fixtures';
+import {
+  applyLensInlineEditorAndWaitClosed,
+  getImportedDashboardId,
+  getImportedSavedObjectId,
+  openInlineEditorAndWaitVisible,
+  spaceTest,
+  testData,
+} from '../fixtures';
 
 const RELATED_PANEL_ID = testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA;
 const UNRELATED_PANEL_ID = testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA;
 const CONTROL_LABEL = 'os';
-const VARIABLE_LAYER_ID = 'os_layer';
-const VARIABLE_QUERY =
+const FIELD_CONTROL_LABEL = 'metric_field';
+const VARIABLE_LAYER_ID = 'variable_layer';
+const VALUE_VARIABLE_QUERY =
   'FROM logstash-* | WHERE machine.os.raw == ?os | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+const FIELD_VARIABLE_QUERY =
+  'FROM logstash-* | STATS AVG(??metric_field) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
 
 /**
  * Reuses the multi-layer fixture dashboard and patches the imported saved object:
@@ -25,7 +35,8 @@ const VARIABLE_QUERY =
 const addVariableControlAndLayer = async (
   kbnClient: KbnClient,
   space: string,
-  dashboardId: string
+  dashboardId: string,
+  controlType: 'values' | 'fields'
 ) => {
   const { attributes, references } = await kbnClient.savedObjects.get<Record<string, unknown>>({
     type: 'dashboard',
@@ -40,7 +51,12 @@ const addVariableControlAndLayer = async (
   const { state } = dataPanel.embeddableConfig.attributes;
   state.datasourceStates.textBased.layers[VARIABLE_LAYER_ID] = {
     index: 'logstash-*',
-    query: { esql: VARIABLE_QUERY },
+    query: {
+      esql:
+        controlType === 'values'
+          ? VALUE_VARIABLE_QUERY
+          : 'FROM logstash-* | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+    },
     timeField: '@timestamp',
     columns: [
       {
@@ -78,20 +94,31 @@ const addVariableControlAndLayer = async (
       panelsJSON: JSON.stringify(panels),
       pinned_panels: {
         panels: {
-          'esql-os-control': {
+          'esql-variable-control': {
             type: 'esql_control',
             order: 0,
             grow: false,
             width: 'medium',
-            config: {
-              control_type: 'VALUES_FROM_QUERY',
-              esql_query: 'FROM logstash-* | STATS BY machine.os.raw',
-              selected_options: ['ios'],
-              single_select: true,
-              title: CONTROL_LABEL,
-              variable_name: CONTROL_LABEL,
-              variable_type: 'values',
-            },
+            config:
+              controlType === 'values'
+                ? {
+                    control_type: 'VALUES_FROM_QUERY',
+                    esql_query: 'FROM logstash-* | STATS BY machine.os.raw',
+                    selected_options: ['ios'],
+                    single_select: true,
+                    title: CONTROL_LABEL,
+                    variable_name: CONTROL_LABEL,
+                    variable_type: 'values',
+                  }
+                : {
+                    control_type: 'STATIC_VALUES',
+                    available_options: ['bytes', 'memory'],
+                    selected_options: ['bytes'],
+                    single_select: true,
+                    title: FIELD_CONTROL_LABEL,
+                    variable_name: FIELD_CONTROL_LABEL,
+                    variable_type: 'fields',
+                  },
           },
         },
       },
@@ -116,12 +143,13 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, kbnClient, pageObjects, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, kbnClient, pageObjects, scoutSpace }, testInfo) => {
       const savedObjects = await scoutSpace.savedObjects.load(
         testData.KBN_ARCHIVE_PATHS.ESQL_MULTI_LAYER_DASHBOARD
       );
       const dashboardId = getImportedDashboardId(savedObjects, 'ESQL Multi-layer Dashboard');
-      await addVariableControlAndLayer(kbnClient, scoutSpace.id, dashboardId);
+      const controlType = testInfo.title.includes('identifier variable') ? 'fields' : 'values';
+      await addVariableControlAndLayer(kbnClient, scoutSpace.id, dashboardId, controlType);
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.dashboard.openDashboardWithIdInEditMode(dashboardId);
       await pageObjects.dashboard.waitForPanelsToLoad(2);
@@ -131,6 +159,31 @@ spaceTest.describe(
       await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
+
+    spaceTest(
+      'keeps a secondary layer bound to an identifier variable after the control changes',
+      async ({ pageObjects }) => {
+        const { dashboard, lens } = pageObjects;
+        await openInlineEditorAndWaitVisible(pageObjects, RELATED_PANEL_ID);
+        await lens.layers.activateLayerTab(1);
+
+        // Submit through the secondary-layer editor to exercise the regression path:
+        // raw grid columns previously lost their identifier-variable metadata here.
+        await lens.workspace.submitEsqlQuery(FIELD_VARIABLE_QUERY);
+        await dashboard.waitForRenderComplete();
+        await applyLensInlineEditorAndWaitClosed({ lens });
+
+        await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
+        const controlId = await dashboard.getOnlyControlId();
+        await dashboard.optionsListOpenPopover(controlId);
+        await dashboard.optionsListPopoverSelectOption('memory');
+        await dashboard.waitForRenderComplete();
+
+        const panel = dashboard.getPanelByEmbeddableId(RELATED_PANEL_ID);
+        await expect(panel.locator('[data-test-subj="embeddableError"]')).toHaveCount(0);
+        await expect(panel.locator('[data-test-subj="xyVisChart"]')).toBeVisible();
+      }
+    );
 
     spaceTest(
       'highlights the panel that uses the variable in a non-first ES|QL layer',

@@ -99,10 +99,13 @@ export const reconcileQueryColumns = (
     ) ?? existingColumns.find(predicate);
 
   return columnsFromQuery.map((queryColumn, index) => {
+    const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
     const exactMatch = findPreferredFirst(
       (column) =>
         !usedColumnIds.has(column.columnId) &&
-        (column.fieldName === queryColumn.id || column.fieldName === queryColumn.name)
+        (column.fieldName === queryFieldName ||
+          column.fieldName === queryColumn.id ||
+          column.fieldName === queryColumn.name)
     );
     const positionalMatch = existingColumns[index];
     // A positional match must not shadow an unused dimension-bound column of the
@@ -131,7 +134,7 @@ export const reconcileQueryColumns = (
     if (!existingColumn) {
       return {
         columnId: queryColumn.id,
-        fieldName: queryColumn.id,
+        fieldName: queryFieldName,
         label: queryColumn.name,
         meta: queryColumn.meta,
         ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
@@ -142,7 +145,7 @@ export const reconcileQueryColumns = (
     const { variable, ...restOfExistingColumn } = existingColumn;
     return {
       ...restOfExistingColumn,
-      fieldName: queryColumn.id,
+      fieldName: queryFieldName,
       label: existingColumn.customLabel ? existingColumn.label : queryColumn.name,
       meta: queryColumn.meta,
       ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
