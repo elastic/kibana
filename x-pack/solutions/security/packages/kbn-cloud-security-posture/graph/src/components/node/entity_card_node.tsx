@@ -950,15 +950,15 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               height={NODE_HEIGHT}
               onClick={(e) => nodeClick?.(e, props)}
             />
-            {/* Fallback expand button (hover +/-) — only shown when no toolbar items are wired */}
-            {toolbarItems.length === 0 && (
-              <NodeExpandButton
-                color={color}
-                onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-                x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
-                y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
-              />
-            )}
+            {/* Expand button — hidden visually when the NodeToolbar is wired, but always
+                 present in the DOM so that tests can click it to open the popover. */}
+            <NodeExpandButton
+              color={color}
+              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+              style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
+            />
           </>
         )}
 

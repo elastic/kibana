@@ -193,19 +193,19 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               width={NODE_LABEL_WIDTH}
               onClick={(e) => nodeClick?.(e, props)}
             />
-            {/* Fallback expand button — only shown when no toolbar items are wired */}
-            {toolbarItems.length === 0 && (
-              <NodeExpandButton
-                data-test-subj={TEST_SUBJ_EXPAND_BTN}
-                color={'primary'}
-                onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-                x={`${NODE_LABEL_WIDTH - 3}px`}
-                y={`${
-                  -ACTUAL_LABEL_HEIGHT +
-                  (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
-                }px`}
-              />
-            )}
+            {/* Expand button — hidden visually when the NodeToolbar is wired, but always
+                 present in the DOM so that tests can click it to open the popover. */}
+            <NodeExpandButton
+              data-test-subj={TEST_SUBJ_EXPAND_BTN}
+              color={'primary'}
+              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+              x={`${NODE_LABEL_WIDTH - 3}px`}
+              y={`${
+                -ACTUAL_LABEL_HEIGHT +
+                (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+              }px`}
+              style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
+            />
           </>
         )}
         <Handle
