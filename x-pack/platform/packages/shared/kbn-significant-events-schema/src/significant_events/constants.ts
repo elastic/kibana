@@ -16,6 +16,13 @@ export const MAX_SIGNAL_DESCRIPTION_LENGTH = 350;
 export const MAX_SYMPTOM_HYPOTHESIS_LENGTH = 300;
 export const MAX_SUMMARY_LENGTH = 600;
 export const MAX_ASSESSMENT_NOTE_LENGTH = 400;
+
+/**
+ * Stable source identifier for Significant Event alert documents in `.rule-events`.
+ * Part of `group_hash = sha256(space:source:fingerprint)` — never change after first write.
+ * Used by readers and action policies to filter Significant Events by source.
+ */
+export const SIGNIFICANT_EVENTS_ALERT_SOURCE = 'significant_events' as const;
 export const MAX_TIMESTAMP_LENGTH = 64;
 
 export const SYMPTOM_HYPOTHESIS_ROLE_RULE =
