@@ -167,7 +167,7 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
   supervised: i18n.translate('xpack.alertzero.watches.settings.autonomy.supervised.description', {
     defaultMessage:
-      'This Worker acts within its allow-list and tells you afterwards. Consequential actions still gate.',
+      'False positives auto-close with rationale logged. You are notified after the fact and can undo.',
   }),
 };
 
