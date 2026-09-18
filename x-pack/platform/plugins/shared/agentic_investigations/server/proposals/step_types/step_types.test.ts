@@ -561,6 +561,7 @@ describe('proposals.getProposal step', () => {
       id: 'proposal-1',
       status: 'failed',
       decision: 'approved',
+      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null, profileUid: 'uid-1' },
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
@@ -573,10 +574,19 @@ describe('proposals.getProposal step', () => {
     expect(result.output).toEqual({
       status: 'failed',
       decision: 'approved',
+      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null, profileUid: 'uid-1' },
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
     });
+  });
+
+  it('should leave decidedBy undefined when the stored proposal has no decider', async () => {
+    const get = jest.fn().mockResolvedValue({ status: 'pending' });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output?.decidedBy).toBeUndefined();
   });
 
   it('should assert read rather than manage', async () => {
