@@ -13,11 +13,13 @@ import type {
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
+  CONVERSATION_EVENT_ID_DELIMITER,
   createAttachmentPermanentDeleteBlockedError,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
+import { eventsToRounds } from './events_to_rounds';
 import { isRoundDerivedEventId, roundToEvents } from './rounds_to_events';
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
@@ -27,35 +29,81 @@ const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boo
     return execution?.roundId === roundId && execution.index > 0;
   });
 
+/** The round id a round-derived event id belongs to (the part before the first delimiter). */
+const roundIdOfDerivedEvent = (id: string): string => id.split(CONVERSATION_EVENT_ID_DELIMITER)[0];
+
+/** Stored round-derived events grouped by round id, in order of first stored position. */
+const storedRoundBlocks = (stored: TimelineEvent[]): Map<string, TimelineEvent[]> => {
+  const blocks = new Map<string, TimelineEvent[]>();
+  for (const event of stored) {
+    if (!isRoundDerivedEventId(event.id)) {
+      continue;
+    }
+    const roundId = roundIdOfDerivedEvent(event.id);
+    const block = blocks.get(roundId);
+    if (block) {
+      block.push(event);
+    } else {
+      blocks.set(roundId, [event]);
+    }
+  }
+  return blocks;
+};
+
 /**
- * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
- * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
- * original user message. Undefined refs mean no update; an empty array explicitly clears them.
+ * The events of a round present in `rounds`: its stored events when the round spans a resume
+ * execution (only the `user_message` attachment refs are refreshed — the folded message belongs
+ * to the resume, not the original user message), else regenerated from the round.
+ */
+const eventsForKnownRound = (
+  round: ConversationRound,
+  storedForRound: TimelineEvent[],
+  conversation: Conversation
+): TimelineEvent[] => {
+  if (!hasResumeExecution(round.id, storedForRound)) {
+    return roundToEvents(round, conversation);
+  }
+  const userMessageId = `${round.id}${CONVERSATION_EVENT_ID_DELIMITER}user_message`;
+  return storedForRound.map((event) => {
+    if (event.id !== userMessageId || !round.input.attachment_refs) {
+      return event;
+    }
+    const data = event.data as RoundInput;
+    return {
+      ...event,
+      data: { ...data, attachment_refs: round.input.attachment_refs },
+    } as TimelineEvent;
+  });
+};
+
+/**
+ * Rebuilds round-derived events on a rounds-path write, preserving resumed executions, additive
+ * events and stored round blocks that cannot be expressed as a round.
+ *
+ * Stored blocks are emitted at their stored position. A block whose round is in `rounds` follows
+ * the per-round rule ({@link eventsForKnownRound}). A block whose round is *not* in `rounds` is
+ * kept untouched when it does not fold into a round (an in-progress round, or an execution that
+ * failed or was aborted before producing an outcome) and dropped when it does fold — the caller's
+ * `rounds` is authoritative for rounds it deliberately removed. Rounds with no stored block yet
+ * are appended in `rounds` order. Additive events are re-inserted by `created_at`.
  */
 export const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
   const stored = merged.events ?? [];
   const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
+  const roundsById = new Map(merged.rounds.map((round) => [round.id, round]));
 
   const roundDerived: TimelineEvent[] = [];
+  const blocks = storedRoundBlocks(stored);
+  for (const [roundId, block] of blocks) {
+    const round = roundsById.get(roundId);
+    if (round) {
+      roundDerived.push(...eventsForKnownRound(round, block, merged));
+    } else if (eventsToRounds(block).length === 0) {
+      roundDerived.push(...block);
+    }
+  }
   for (const round of merged.rounds) {
-    const storedForRound = stored.filter(
-      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
-    );
-    if (hasResumeExecution(round.id, storedForRound)) {
-      const userMessageId = `${round.id}::user_message`;
-      roundDerived.push(
-        ...storedForRound.map((event) => {
-          if (event.id !== userMessageId || !round.input.attachment_refs) {
-            return event;
-          }
-          const data = event.data as RoundInput;
-          return {
-            ...event,
-            data: { ...data, attachment_refs: round.input.attachment_refs },
-          } as TimelineEvent;
-        })
-      );
-    } else {
+    if (!blocks.has(round.id)) {
       roundDerived.push(...roundToEvents(round, merged));
     }
   }

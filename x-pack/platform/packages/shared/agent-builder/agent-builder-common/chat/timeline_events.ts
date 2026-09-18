@@ -6,7 +6,7 @@
  */
 
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
-import type { SerializedExecutionError } from '../agents/execution_status';
+import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type {
   AssistantResponse,
@@ -221,9 +221,27 @@ export type ExecutionTerminatedEvent = BaseTimelineEvent<
   ExecutionTerminatedEventData
 >;
 
+/**
+ * The run summary of an execution that did not complete. Same fields as `ExecutionRunSummary`
+ * minus `steps` (stored as separate `execution_step` events), `state` (an interrupted execution is
+ * never resumed) and `time_to_first_token` (unknown when no answer streamed).
+ *
+ * Invariants: an execution has at most one terminal event (`execution_terminated`,
+ * `execution_failed` or `execution_aborted`), and exactly one whenever the conversation store
+ * accepted the terminal write. An execution with no `execution_terminated` never forms a round
+ * and never answers a prompt.
+ */
+export type ExecutionPartialRunSummary = Pick<
+  ExecutionRunSummary,
+  'time_to_last_token' | 'trace_id' | 'configuration_overrides'
+> & {
+  /** Model usage; absent when the run failed before the model provider was resolved. */
+  model_usage?: RoundModelUsageStats;
+};
+
 /** A run that ended in an error. */
-export interface ExecutionFailedEventData {
-  /** The serialized error. */
+export interface ExecutionFailedEventData extends ExecutionPartialRunSummary {
+  /** The serialized error, identical to what the client received. */
   error: SerializedExecutionError;
 }
 export type ExecutionFailedEvent = BaseTimelineEvent<
@@ -232,10 +250,10 @@ export type ExecutionFailedEvent = BaseTimelineEvent<
 >;
 
 /** A run that was stopped before it completed. */
-export interface ExecutionAbortedEventData {
-  /** Who aborted the run, when known. */
-  aborted_by?: EventActor;
-}
+export type ExecutionAbortedEventData = ExecutionPartialRunSummary & {
+  /** Where the abort came from and who asked for it, when known. */
+  aborted_by?: ExecutionAbortReason;
+};
 export type ExecutionAbortedEvent = BaseTimelineEvent<
   TimelineEventType.executionAborted,
   ExecutionAbortedEventData
@@ -304,6 +322,23 @@ const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
 export const isAttachmentEvent = (event: { type: string }): event is AttachmentTimelineEvent =>
   ATTACHMENT_EVENT_TYPES.has(event.type);
 
+const EXECUTION_TERMINAL_EVENT_TYPES: ReadonlySet<string> = new Set([
+  TimelineEventType.executionTerminated,
+  TimelineEventType.executionFailed,
+  TimelineEventType.executionAborted,
+]);
+
+/** The three events that end an execution: with an outcome, with an error, or by cancellation. */
+export type ExecutionTerminalEvent =
+  | ExecutionTerminatedEvent
+  | ExecutionFailedEvent
+  | ExecutionAbortedEvent;
+
+/** True for any of the three events that end an execution. */
+export const isExecutionTerminalEvent = (event: {
+  type: string;
+}): event is ExecutionTerminalEvent => EXECUTION_TERMINAL_EVENT_TYPES.has(event.type);
+
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
@@ -353,6 +388,8 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   userMessage: '::user_message',
   executionStarted: '::execution_started',
   executionTerminated: '::execution_terminated',
+  executionFailed: '::execution_failed',
+  executionAborted: '::execution_aborted',
   execution: '::execution',
   stepPrefix: '::step::',
   promptResponse: '::prompt_response',
