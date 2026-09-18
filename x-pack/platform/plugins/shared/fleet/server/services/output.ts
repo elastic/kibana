@@ -287,6 +287,8 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
 }
 
 const OTLP_SCAN_POLICY_ID_CHUNK_SIZE = 100;
+// ES filters aggregation creates one bucket per ID; stay well under search.max_buckets (default 65536).
+const AGENT_COUNT_POLICY_ID_CHUNK_SIZE = 1000;
 
 async function validateOtlpOutputOnlyUsedInOtelPolicies(
   outputId: string,
@@ -1641,8 +1643,7 @@ class OutputService {
 
     let agentCount = 0;
     if (agentPolicyCount > 0) {
-      // Chunk to stay within ES search.max_buckets (filters agg creates one bucket per ID).
-      const chunks = _.chunk(uniqueIds, 1000);
+      const chunks = _.chunk(uniqueIds, AGENT_COUNT_POLICY_ID_CHUNK_SIZE);
       const chunkResults = await pMap(
         chunks,
         (chunk) => getAgentCountForAgentPolicies(esClient, chunk),

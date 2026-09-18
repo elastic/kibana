@@ -11,12 +11,12 @@ import type { Output } from '../../../types';
 export async function getAgentAndPolicyCountForOutput(output: Output) {
   const result = await sendGetOutputAgentPolicyCount(output.id);
 
-  if (result.error) {
-    throw result.error;
+  if (result.error || !result.data) {
+    throw result.error ?? new Error('No data returned from agent policy count endpoint');
   }
 
   return {
-    agentPolicyCount: result.data!.agentPolicyCount,
-    agentCount: result.data!.agentCount,
+    agentPolicyCount: result.data.agentPolicyCount,
+    agentCount: result.data.agentCount,
   };
 }
