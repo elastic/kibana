@@ -38,7 +38,7 @@ import type {
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
-import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
 import type {
   MonitorInspectResponse,
