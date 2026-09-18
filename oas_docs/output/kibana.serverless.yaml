@@ -52062,6 +52062,92 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/outputs/{outputId}/agent_policy_count:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs/{outputId}/agent_policy_count</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the number of agent policies and active agents using an output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
+      operationId: get-fleet-outputs-outputid-agent-policy-count
+      parameters:
+        - description: The ID of the output
+          in: path
+          name: outputId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  agentCount:
+                    description: Number of active agents assigned to those policies
+                    type: number
+                  agentPolicyCount:
+                    description: Number of agent policies using this output
+                    type: number
+                required:
+                  - agentPolicyCount
+                  - agentCount
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Not found.
+      summary: Get output agent and policy count
+      tags:
+        - Fleet outputs
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/outputs/{outputId}/health:
     get:
       description: |-
