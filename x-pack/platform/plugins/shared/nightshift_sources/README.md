@@ -50,7 +50,8 @@ A source is rows only. On create and update the ES|QL must:
 - contain nothing but `WHERE` after the source command (this also rejects subqueries);
 - not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
 - not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
-- not `FROM` a Nightshift source view (`$.nightshift.sources.*`), or the new view can match itself.
+- not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
+  `$.nightshift.*`, `$.*`), or the new view can match itself.
 
 Wildcards, several sources and date math are fine. The query is then executed as
 `<esql> | LIMIT 0` as the calling user. A pattern that matches no index yet is accepted, which

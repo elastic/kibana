@@ -281,6 +281,17 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
+    it('rejects a $ wildcard that would match Nightshift source views', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(client.create({ title: 't', tags: [], esql: 'FROM $.*' })).rejects.toMatchObject(
+        { output: { statusCode: 400 } }
+      );
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('accepts a concrete index that does not exist yet', async () => {
       const { client, dataEsClient } = setup();
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
@@ -388,6 +399,22 @@ describe('SourcesClient', () => {
           title: 'nginx errors',
           tags: ['nginx'],
           esql: 'FROM $.nightshift.sources.abc',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a $ wildcard that would match Nightshift source views without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM $.nightshift.*',
         })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       expect(dataEsClient.esql.query).not.toHaveBeenCalled();

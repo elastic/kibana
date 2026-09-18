@@ -12,13 +12,37 @@ const SOURCE_COMMANDS = new Set(['from', 'ts']);
 const ALLOWED_PROCESSING_COMMANDS = new Set(['where']);
 // Drop the trailing `.` so `$.nightshift.sources` and `$.nightshift.sources*` match too.
 const NIGHTSHIFT_SOURCE_VIEW_NAMESPACE = NIGHTSHIFT_SOURCE_VIEW_PREFIX.slice(0, -1);
+const NIGHTSHIFT_SOURCE_VIEW_EXAMPLE = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}x`;
+
+/**
+ * ES `simpleMatch`: `*` is multi-segment, so `$.nightshift.*` hits `$.nightshift.sources.<id>`.
+ * Index wildcards (`*`, `logs-*`) never enter the `$.` namespace; leave those alone.
+ */
+const isNightshiftSourceViewPattern = (name: string): boolean => {
+  const pattern = name.toLowerCase();
+  if (!pattern.startsWith('$')) {
+    return false;
+  }
+  return (
+    pattern.startsWith(NIGHTSHIFT_SOURCE_VIEW_NAMESPACE) ||
+    esWildcardMatches(pattern, NIGHTSHIFT_SOURCE_VIEW_EXAMPLE)
+  );
+};
+
+const esWildcardMatches = (pattern: string, candidate: string): boolean => {
+  const regexSource = pattern
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.');
+  return new RegExp(`^${regexSource}$`).test(candidate);
+};
 
 /**
  * Validates that an ES|QL query is a valid Nightshift source: `FROM` or `TS` (time-series),
  * optionally narrowed by `WHERE`. Anything that reshapes rows belongs to the engines reading
  * the view. `METADATA` is rejected because ES|QL returns nulls for it through a view,
  * remote-cluster prefixes because views cannot reference remote indices, and Nightshift source
- * views because a source cannot `FROM` itself or another source.
+ * views (including `$` wildcards that would match them) because a source cannot `FROM` itself.
  *
  * Returns `undefined` when valid, or an error message string when invalid.
  * Browser-safe: does not depend on any server-only module.
@@ -65,7 +89,7 @@ export const validateSourceQuery = (esql: string): string | undefined => {
       node.type === 'source' &&
       node.sourceType === 'index' &&
       typeof node.name === 'string' &&
-      node.name.toLowerCase().startsWith(NIGHTSHIFT_SOURCE_VIEW_NAMESPACE)
+      isNightshiftSourceViewPattern(node.name)
   );
   if (nightshiftView) {
     return `Nightshift source views cannot be used as a source (found "${nightshiftView.name}")`;

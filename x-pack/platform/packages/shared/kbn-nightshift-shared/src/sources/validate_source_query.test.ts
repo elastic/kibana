@@ -25,7 +25,9 @@ describe('validateSourceQuery', () => {
       'TS metrics-*',
       'TS metrics-* | WHERE host.name == "a"',
       'FROM <logs-{now/d}>',
+      'FROM *',
       'FROM $.logs.nginx',
+      'FROM $.logs.*',
     ])('%s', (esql) => {
       expect(validateSourceQuery(esql)).toBeUndefined();
     });
@@ -86,6 +88,12 @@ describe('validateSourceQuery', () => {
         'FROM logs-*, $.nightshift.sources.foo | WHERE status >= 500',
         'found "$.nightshift.sources.foo"'
       );
+    });
+
+    it('a $ wildcard that overlaps the Nightshift source namespace', () => {
+      expectRejected('FROM $.*', 'found "$.*"');
+      expectRejected('FROM $.nightshift.*', 'found "$.nightshift.*"');
+      expectRejected('FROM logs-*, $.nightshift.* | WHERE status >= 500', 'found "$.nightshift.*"');
     });
   });
 });
