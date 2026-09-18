@@ -8,7 +8,6 @@ import {
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,6 +36,7 @@ import {
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isScopedQueryError } from '../../common';
@@ -451,14 +451,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         {(isAlertingV1Enabled && !!alertingV1Payload) || showMultipleSolutionsWarning ? (
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
               title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
-              color="warning"
-            >
-              <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
-            </EuiCallOut>
+              text={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
