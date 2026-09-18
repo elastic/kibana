@@ -58,7 +58,6 @@ export {
   conf as cssConf,
   language as cssLanguage,
 } from 'monaco-editor/languages/definitions/css/css.js';
-export { cssDefaults } from 'monaco-editor/languages/features/css/register.js';
 export {
   conf as markdownConf,
   language as markdownLanguage,
