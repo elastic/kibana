@@ -38,7 +38,7 @@ const cortexConfigSchema = schema.object({
 
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   sandbox: schema.maybe(sandboxConfigSchema),
   cortex: cortexConfigSchema,
 });
