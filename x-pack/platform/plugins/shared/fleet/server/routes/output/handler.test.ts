@@ -403,7 +403,9 @@ describe('Outputs handler', () => {
 
     it('surfaces non-404 errors as 500', async () => {
       const unexpectedError = new Error('ES cluster down');
-      jest.spyOn(outputService, 'getAgentAndPolicyCountForOutput').mockRejectedValueOnce(unexpectedError);
+      jest
+        .spyOn(outputService, 'getAgentAndPolicyCountForOutput')
+        .mockRejectedValueOnce(unexpectedError);
 
       const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
         mockContext,

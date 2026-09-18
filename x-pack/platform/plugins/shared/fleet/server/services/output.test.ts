@@ -4384,8 +4384,18 @@ describe('Output Service', () => {
       getMockedSoClient();
       mockedGetAgentCountForAgentPolicies.mockReset();
       mockedGetAgentCountForAgentPolicies.mockResolvedValue({});
-      mockedAgentPolicyService.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: SO_SEARCH_LIMIT } as any);
-      mockedPackagePolicyService.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: SO_SEARCH_LIMIT } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
+      mockedPackagePolicyService.list.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+      } as any);
     });
 
     it('returns zero counts when no policies reference the output', async () => {
@@ -4463,7 +4473,10 @@ describe('Output Service', () => {
         page: 1,
         perPage: SO_SEARCH_LIMIT,
       } as any);
-      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ 'shared-policy': 1, 'extra-policy': 3 });
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({
+        'shared-policy': 1,
+        'extra-policy': 3,
+      });
 
       const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
         id: 'output-test',
