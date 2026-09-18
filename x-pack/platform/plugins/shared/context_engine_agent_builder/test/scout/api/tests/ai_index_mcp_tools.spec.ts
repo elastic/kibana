@@ -202,6 +202,7 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
     await esClient.indices.delete({ index: INDEX }, { ignore: [404] });
     await kbnClient.spaces.delete(OTHER_SPACE_ID);
     await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
   });
 
   apiTest(
