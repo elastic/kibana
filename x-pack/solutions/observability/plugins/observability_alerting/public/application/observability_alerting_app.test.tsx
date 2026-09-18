@@ -17,9 +17,10 @@ import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -132,14 +133,26 @@ describe('ObservabilityAlertingApp', () => {
     mockTriggersActionsUi.getClassicRulesPage.mockClear();
   });
 
-  it('redirects / to inbox', () => {
+  it('redirects / to alerts', () => {
     const { history } = renderAt('/');
 
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
-  it('renders EpisodesPage at /inbox with observability host', async () => {
-    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_INBOX_PATH);
+  it('redirects /inbox to /alerts', () => {
+    const { history } = renderAt(OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH);
+
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
+  });
+
+  it('redirects /inbox/:episodeId to /alerts/:episodeId', () => {
+    const { history } = renderAt(`${OBSERVABILITY_ALERTING_LEGACY_INBOX_PATH}/ep-1`);
+
+    expect(history.location.pathname).toBe(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/ep-1`);
+  });
+
+  it('renders EpisodesPage at /alerts with observability host', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
@@ -239,15 +252,15 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('redirects unknown paths to inbox', () => {
+  it('redirects unknown paths to alerts', () => {
     const { history } = renderAt('/unknown');
 
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
   it.each([
     {
-      path: OBSERVABILITY_ALERTING_INBOX_PATH,
+      path: OBSERVABILITY_ALERTING_ALERTS_PATH,
       testId: `episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
     },
     {

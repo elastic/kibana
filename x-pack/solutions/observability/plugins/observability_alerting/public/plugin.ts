@@ -17,21 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { from, map, switchMap } from 'rxjs';
-import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
-  OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_RULES_V1_PATH,
-  OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_RULES_V2_PATH,
-  OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-  OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-} from './constants';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from './constants';
+import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 import type {
   ObservabilityAlertingPublicSetup,
   ObservabilityAlertingPublicStart,
@@ -58,6 +45,7 @@ export class ObservabilityAlertingPlugin
       title: i18n.translate('xpack.observabilityAlerting.appTitle', {
         defaultMessage: 'Alerting',
       }),
+      euiIconType: 'logoObservability',
       appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
       status: AppStatus.inaccessible,
@@ -67,69 +55,23 @@ export class ObservabilityAlertingPlugin
           coreStart.settings.globalClient.get$<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false).pipe(
             map(
               (settingEnabled): AppUpdater =>
-                () => ({
-                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-                })
+                () => {
+                  if (!settingEnabled) {
+                    return { status: AppStatus.inaccessible };
+                  }
+
+                  return {
+                    status: AppStatus.accessible,
+                    deepLinks: getObservabilityAlertingDeepLinks(
+                      coreStart.application.capabilities
+                    ),
+                  };
+                }
             )
           )
         )
       ),
-      deepLinks: [
-        {
-          id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.inboxTitle', {
-            defaultMessage: 'Alerts (Inbox)',
-          }),
-          path: OBSERVABILITY_ALERTING_INBOX_PATH,
-          visibleIn: [],
-          keywords: ['alerting', 'episodes', 'inbox'],
-        },
-        {
-          id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
-            defaultMessage: 'Rules (v1)',
-          }),
-          path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
-          visibleIn: [],
-          keywords: ['alerting', 'rules', 'classic', 'v1'],
-        },
-        {
-          id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV2Title', {
-            defaultMessage: 'Rules',
-          }),
-          path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-          visibleIn: [],
-          keywords: ['alerting', 'rules', 'esql'],
-        },
-        {
-          id: OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.ruleLibraryTitle', {
-            defaultMessage: 'Rule Library',
-          }),
-          path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-          visibleIn: [],
-          keywords: ['alerting', 'templates', 'library'],
-        },
-        {
-          id: OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.actionPoliciesTitle', {
-            defaultMessage: 'Action Policies',
-          }),
-          path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-          visibleIn: [],
-          keywords: ['alerting', 'actions', 'policies'],
-        },
-        {
-          id: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
-          title: i18n.translate('xpack.observabilityAlerting.deepLinks.executionHistoryTitle', {
-            defaultMessage: 'Execution History',
-          }),
-          path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-          visibleIn: [],
-          keywords: ['alerting', 'history', 'executions'],
-        },
-      ],
+      deepLinks: getObservabilityAlertingDeepLinks(),
       mount: async (params: AppMountParameters) => {
         const [coreStart, depsStart] = await startServices;
         const { mountObservabilityAlertingApp } = await import('./application/mount');

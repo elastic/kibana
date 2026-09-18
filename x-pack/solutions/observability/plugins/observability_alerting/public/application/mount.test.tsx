@@ -23,7 +23,7 @@ describe('mountObservabilityAlertingApp', () => {
   it('renders into the mount element and unmounts', () => {
     const coreStart = coreMock.createStart();
     const params = coreMock.createAppMountParameters();
-    params.history.push('/inbox');
+    params.history.push('/alerts');
 
     const alertingVTwo = {
       RulesPage: () => null,

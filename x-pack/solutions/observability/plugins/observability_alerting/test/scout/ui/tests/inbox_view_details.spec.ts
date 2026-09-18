@@ -17,7 +17,7 @@ import {
   MANAGEMENT_ALERTING_V2_EPISODES_URL_RE,
   MANAGEMENT_ALERTING_V2_RULES_URL_RE,
   MANAGEMENT_ALERTING_V2_URL_RE,
-  OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE,
+  OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE,
   OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE,
 } from '../fixtures/page_objects';
 
@@ -63,9 +63,9 @@ test.describe(
         );
 
         await alerting.clickViewDetails();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE);
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_EPISODES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/inbox/${episodeId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/alerts/${episodeId}(/|$|\\?|#)`));
         await expect(alerting.episodeDetailsPage).toBeVisible();
       });
     });
@@ -106,9 +106,9 @@ test.describe(
 
       await test.step('open the seeded episode details page', async () => {
         await alerting.gotoEpisodeDetails(episodeId);
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE);
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_EPISODES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/inbox/${episodeId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/alerts/${episodeId}(/|$|\\?|#)`));
         await expect(alerting.episodeDetailsPage).toBeVisible();
       });
 
