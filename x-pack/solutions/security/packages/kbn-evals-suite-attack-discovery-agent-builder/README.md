@@ -40,6 +40,10 @@ Kibana-native scenario definitions for multi-stage attack chains. All seeding is
 - **Seed label:** `ad-scenario-registry-2026-07`
 - One provided-alerts eval per chain; rubric/criteria are chain-specific.
 
+### FP/TP twin pair (`src/fp_tp_twins/`)
+
+One authored Attack Discovery plus the `encoded-powershell` alerts, cloned into a true-positive world and a false-positive world. The alerts and discovery are identical; entity store documents and raw-event overlays differ. This is a fixture for a future FP/TP *analyzer* eval, not a generation eval. See `src/fp_tp_twins/README.md` for the twin layout, the local seed CLI, and the importable Workflows UI YAML.
+
 ### Full profile (out of scope for this package)
 
 Includes clean profile plus cloud scenarios (AWS, Azure, macOS) and background noise (~110 unrelated alerts + a 40-alert noisy rule cluster). Not automated until discrimination/FPR evaluators exist.
