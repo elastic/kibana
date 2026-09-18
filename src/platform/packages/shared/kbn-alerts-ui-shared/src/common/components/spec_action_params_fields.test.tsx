@@ -155,4 +155,106 @@ describe('SpecActionParamsFields', () => {
     expect(editAction).toHaveBeenCalledWith('subAction', 'searchMessages', 0);
     expect(editAction).toHaveBeenCalledWith('subActionParams', {}, 0);
   });
+
+  it('shows the add-variable button for string fields and inserts a variable', async () => {
+    const user = userEvent.setup();
+    const editAction = jest.fn();
+
+    render(
+      <SpecActionParamsFields
+        spec={singleActionSpec()}
+        actionParams={{
+          subAction: 'sendMessage',
+          subActionParams: { channel: 'C1', text: 'hello' },
+        }}
+        editAction={editAction}
+        index={0}
+        errors={{}}
+        messageVariables={[{ name: 'alert.id', description: 'Alert id' }]}
+      />,
+      { wrapper }
+    );
+
+    await user.click(screen.getByTestId('textAddVariableButton'));
+    await user.click(await screen.findByTestId('alert.id-selectableOption'));
+
+    await waitFor(() => {
+      expect(editAction).toHaveBeenCalledWith(
+        'subActionParams',
+        expect.objectContaining({ text: 'hello{{alert.id}}' }),
+        0
+      );
+    });
+  });
+
+  it('pre-fills the message field with defaultMessage when empty', async () => {
+    const editAction = jest.fn();
+
+    render(
+      <SpecActionParamsFields
+        spec={singleActionSpec()}
+        actionParams={{ subAction: 'sendMessage', subActionParams: {} }}
+        editAction={editAction}
+        index={0}
+        errors={{}}
+        defaultMessage="Rule fired"
+      />,
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('generator-field-text')).toHaveValue('Rule fired');
+    });
+    await waitFor(() => {
+      expect(editAction).toHaveBeenCalledWith(
+        'subActionParams',
+        expect.objectContaining({ text: 'Rule fired' }),
+        0
+      );
+    });
+  });
+
+  it('re-applies defaultMessage when useDefaultMessage toggles', async () => {
+    const editAction = jest.fn();
+    const spec = singleActionSpec();
+    const props = {
+      spec,
+      actionParams: { subAction: 'sendMessage' as const, subActionParams: { text: 'custom' } },
+      editAction,
+      index: 0,
+      errors: {},
+      defaultMessage: 'Rule fired',
+    };
+
+    const { rerender } = render(<SpecActionParamsFields {...props} useDefaultMessage={false} />, {
+      wrapper,
+    });
+
+    expect(screen.getByTestId('generator-field-text')).toHaveValue('custom');
+
+    rerender(<SpecActionParamsFields {...props} useDefaultMessage={true} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('generator-field-text')).toHaveValue('Rule fired');
+    });
+  });
+
+  it('does not pre-fill when the spec has no messageField', async () => {
+    const spec = singleActionSpec();
+    delete spec.alerting;
+
+    render(
+      <SpecActionParamsFields
+        spec={spec}
+        actionParams={{ subAction: 'sendMessage', subActionParams: {} }}
+        editAction={jest.fn()}
+        index={0}
+        errors={{}}
+        defaultMessage="Rule fired"
+      />,
+      { wrapper }
+    );
+
+    expect(screen.getByTestId('generator-field-text')).toHaveValue('');
+  });
 });
