@@ -75,7 +75,6 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     setExceptionToDelete(null);
   }, [exceptionToDelete, onDeleteException]);
 
-
   return (
     <>
       {showAddExceptionFlyout ? (
