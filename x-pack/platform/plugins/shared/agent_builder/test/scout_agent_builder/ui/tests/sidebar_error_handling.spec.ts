@@ -29,10 +29,8 @@ test.describe(
     test('embeddable sidebar error handling', async ({ page, pageObjects, llmProxy }) => {
       test.setTimeout(180_000);
 
-      await test.step('shows an error message and allows the user to retry', async () => {
+      await test.step('shows a failed turn as a collapsible error', async () => {
         const MOCKED_INPUT = 'sidebar error test message';
-        const MOCKED_RESPONSE = 'Successful response after retry';
-        const MOCKED_TITLE = 'Sidebar Error Retry Test';
 
         await pageObjects.agentBuilder.prepareEmbeddableSidebarWithNewChat();
         await setupAgentDirectError({
@@ -46,26 +44,11 @@ test.describe(
         await expect(async () => {
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
         }).toPass({ timeout: 60_000 });
-        await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-        await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
+        await expect(page.testSubj.locator('agentBuilderRoundError')).toBeHidden();
 
-        await setupAgentDirectAnswer({
-          proxy: llmProxy,
-          title: MOCKED_TITLE,
-          response: MOCKED_RESPONSE,
-        });
-        await pageObjects.agentBuilder.clickRetryButton();
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        await expect(async () => {
-          await expect(
-            page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
-              hasText: MOCKED_RESPONSE,
-            })
-          ).toContainText(MOCKED_RESPONSE);
-        }).toPass({ timeout: 120_000 });
-        await expect(async () => {
-          expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(false);
-        }).toPass({ timeout: 60_000 });
+        await pageObjects.agentBuilder.expandError();
+        await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
+        await expect(page.testSubj.locator('agentBuilderGenericRoundError')).toBeVisible();
       });
 
       await test.step('can start a new chat when there is an error', async () => {
@@ -140,7 +123,6 @@ test.describe(
         await expect(async () => {
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
         }).toPass({ timeout: 60_000 });
-        await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
 
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.selectEmbeddableConversation(successfulConversationId);
@@ -194,7 +176,6 @@ test.describe(
         await expect(async () => {
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
         }).toPass({ timeout: 60_000 });
-        await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
         await expect(async () => {
           await expect(
             page.locator('[data-test-subj="agentBuilderResponseMessage"]', {
