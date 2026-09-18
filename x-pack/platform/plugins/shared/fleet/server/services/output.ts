@@ -1643,8 +1643,10 @@ class OutputService {
     if (agentPolicyCount > 0) {
       // Chunk to stay within ES search.max_buckets (filters agg creates one bucket per ID).
       const chunks = _.chunk(uniqueIds, 1000);
-      const chunkResults = await Promise.all(
-        chunks.map((chunk) => getAgentCountForAgentPolicies(esClient, chunk))
+      const chunkResults = await pMap(
+        chunks,
+        (chunk) => getAgentCountForAgentPolicies(esClient, chunk),
+        { concurrency: 5 }
       );
       agentCount = chunkResults
         .flatMap((counts) => Object.values(counts))
