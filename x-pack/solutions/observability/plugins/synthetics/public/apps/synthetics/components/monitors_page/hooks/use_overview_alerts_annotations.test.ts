@@ -13,6 +13,7 @@ import {
 import { useOverviewAlertsAnnotations } from './use_overview_alerts_annotations';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as filtersHook from './use_monitor_filters';
+import * as spaceHook from '../../../../../hooks/use_kibana_space';
 
 const mockAlertsDataView = { id: 'alerts-data-view', title: '.alerts-observability*' };
 
@@ -37,12 +38,14 @@ jest.mock('@elastic/eui', () => ({
 describe('useOverviewAlertsAnnotations', () => {
   const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
   const filtersSpy = jest.spyOn(filtersHook, 'useMonitorFilters');
+  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseFetcher.mockReturnValue({ data: mockAlertsDataView });
     filtersSpy.mockReturnValue([]);
     paramSpy.mockReturnValue({} as any);
+    spaceSpy.mockReturnValue({ loading: false } as any);
   });
 
   const getQuery = (result: { current: ReturnType<typeof useOverviewAlertsAnnotations> }) => {
@@ -52,6 +55,18 @@ describe('useOverviewAlertsAnnotations', () => {
 
   it('returns undefined until the alerts data view resolves', () => {
     mockUseFetcher.mockReturnValue({ data: undefined });
+
+    const { result } = renderHook(() => useOverviewAlertsAnnotations());
+
+    expect(result.current).toBeUndefined();
+  });
+
+  it('returns undefined while the active space is still resolving, even if the data view is ready', () => {
+    // Spaces are a security boundary for alert data — `alertsFilters` omits
+    // `kibana.space_ids` until the space resolves, so building the layer
+    // before that would transiently expose alert tooltip data from every
+    // space.
+    spaceSpy.mockReturnValue({ loading: true } as any);
 
     const { result } = renderHook(() => useOverviewAlertsAnnotations());
 

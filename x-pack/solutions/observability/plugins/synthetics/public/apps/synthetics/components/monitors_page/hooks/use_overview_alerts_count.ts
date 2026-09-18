@@ -19,6 +19,7 @@ import {
 } from '../../../../../../common/constants/synthetics_alerts';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useGetUrlParams } from '../../../hooks';
+import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { useMonitorFilters } from './use_monitor_filters';
 
 const ALERT_STATUS_FIELD = 'kibana.alert.status';
@@ -32,6 +33,12 @@ export function useOverviewAlertsCount({ from, to }: Props) {
   const { http } = useKibana<ClientPluginsStart>().services;
   const { locations, query: searchQuery } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
+  // Spaces are a security boundary for alert data — `alertsFilters` omits the
+  // `kibana.space_ids` clause until the active space resolves (see
+  // `useKibanaSpace`), which would otherwise let this fire unscoped and
+  // transiently expose counts from every space. Gate the query on it instead
+  // of treating "not resolved yet" as "no filter".
+  const { loading: spaceLoading } = useKibanaSpace();
 
   const abortCtrlRef = useRef(new AbortController());
 
@@ -81,12 +88,15 @@ export function useOverviewAlertsCount({ from, to }: Props) {
   );
 
   useEffect(() => {
+    if (spaceLoading) {
+      return;
+    }
     refetch();
-  }, [refetch]);
+  }, [refetch, spaceLoading]);
 
   return {
     count: state.value ?? 0,
-    loading: Boolean(state.loading),
+    loading: spaceLoading || Boolean(state.loading),
     error: state.error,
   };
 }

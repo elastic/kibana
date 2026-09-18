@@ -508,6 +508,70 @@ describe('current status route', () => {
         }
       `);
     });
+
+    it('builds the paginated upIds/downIds/pendingIds/staleIds from monitorQueryId, not the configId bucket key', async () => {
+      // A managed/project monitor's saved-object `id` (monitorQueryId, what
+      // ping docs' `monitor.id` actually holds) can differ from its
+      // `config_id` (the bucket key) — this must survive that distinction.
+      const monitorsWithDifferingIds = [
+        {
+          attributes: {
+            ...testMonitors[0].attributes,
+            config_id: 'config-up',
+            id: 'query-up',
+          },
+        },
+        {
+          attributes: {
+            ...testMonitors[1].attributes,
+            config_id: 'config-down',
+            id: 'query-down',
+          },
+        },
+      ];
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'query-up', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+            {
+              key: { monitorId: 'query-down', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2022-09-15T16:19:16.724Z'] },
+                ],
+              },
+            },
+          ],
+        })
+      );
+      const routeContext: any = {
+        request: { query: { page: 1, perPage: 10 } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue(monitorsWithDifferingIds as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.upIds).toEqual(['query-up']);
+      expect(result.downIds).toEqual(['query-down']);
+      expect(result.upIds).not.toContain('config-up');
+      expect(result.downIds).not.toContain('config-down');
+    });
   });
 
   describe('processOverviewStatus grouping logic', () => {

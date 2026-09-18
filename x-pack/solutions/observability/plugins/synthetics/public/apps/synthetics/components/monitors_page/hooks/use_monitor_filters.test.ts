@@ -133,6 +133,36 @@ describe('useMonitorFilters', () => {
     expect(result.current[0].values![0]).not.toEqual('');
   });
 
+  it('should return the same non-matching id across renders (not a fresh one each time)', () => {
+    // A fresh id per render changes this hook's output identity every render,
+    // which callers keying an async-fetch dependency array off that output
+    // (e.g. via `JSON.stringify`) would see as a perpetually-changing
+    // dependency — refetching, re-rendering, and never settling.
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'stale' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1'], staleIds: [] } });
+
+    const { result, rerender } = renderHook(() => useMonitorFilters({}), {
+      wrapper: WrappedHelper,
+    });
+    const firstValue = result.current[0].values![0];
+    rerender();
+
+    expect(result.current[0].values![0]).toEqual(firstValue);
+  });
+
+  it('should scope to disabledMonitorQueryIds for the disabled status filter', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'disabled' } as any);
+    selSPy.mockReturnValue({
+      status: { allIds: ['id1', 'id2'], disabledMonitorQueryIds: ['id2'] },
+    });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual([{ field: 'monitor.id', values: ['id2'] }]);
+  });
+
   it('should intersect the status filter with the allIds-based schedules filter', () => {
     spaceSpy.mockReturnValue({} as any);
     paramSpy.mockReturnValue({ schedules: 'daily', statusFilter: 'up' } as any);
