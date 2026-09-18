@@ -45,6 +45,7 @@ export const OutputFilterControls = () => {
       </EuiButtonEmpty>
       {!isExpanded && isActive && (
         <span
+          data-test-subj="consoleOutputFilterActiveIndicator"
           style={{
             position: 'absolute',
             top: 4,
