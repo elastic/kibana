@@ -22,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
+  const esArchiver = getService('esArchiver');
   const apiClient = new SpaceTestApiClient(supertest);
 
   const getPackagePolicyById = async (id: string) => {
@@ -1364,12 +1365,14 @@ export default function (providerContext: FtrProviderContext) {
       // Associated agent policy that was created for agentless deployment should be deleted
       await supertest.get(`/api/fleet/agent_policies/${deletableTestPolicyId}`).expect(404);
     });
-    // TODO: Fix this test
-    describe.skip('Cloud Connector Integration', () => {
+    describe('Cloud Connector Integration', () => {
       let agentPolicyWithCloudConnectorsId: string;
       let agentPolicyWithoutCloudConnectorsId: string;
 
       before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await apiClient.installPackage({ pkgName: 'cspm', pkgVersion: '1.0.0' });
+
         // Create agent policies for cloud connector testing
         const policy1Response = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -1411,7 +1414,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
-        // Clean up test agent policies
         await supertest
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
@@ -1420,6 +1422,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId: agentPolicyWithoutCloudConnectorsId });
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it('should create package policy with cloud connector when conditions are met', async () => {
@@ -1443,7 +1448,7 @@ export default function (providerContext: FtrProviderContext) {
                     enabled: true,
                     data_stream: {
                       type: 'logs',
-                      dataset: 'log.findings',
+                      dataset: 'cspm.findings',
                     },
                     vars: {
                       paths: {
@@ -1503,7 +1508,7 @@ export default function (providerContext: FtrProviderContext) {
                     enabled: true,
                     data_stream: {
                       type: 'logs',
-                      dataset: 'log.findings',
+                      dataset: 'cspm.findings',
                     },
                     vars: {
                       paths: {
