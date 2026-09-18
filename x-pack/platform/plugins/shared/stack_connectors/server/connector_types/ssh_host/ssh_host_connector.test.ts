@@ -171,5 +171,43 @@ describe('SshHostConnector', () => {
       expect(args).toContain('alice@example.com:/var/log/app.log"; id; echo "');
       expect((args as string[]).some((arg) => arg.includes(':"/'))).toBe(false);
     });
+
+    it('rejects files larger than maxBytes', async () => {
+      mockedExecFile.mockImplementation((bin, args, options, callback) => {
+        const cb = typeof options === 'function' ? options : callback;
+        const localPath = (args as string[])[(args as string[]).length - 1];
+        writeFileSync(localPath, 'too-large-payload');
+        cb?.(null, '', '');
+        return {} as ReturnType<typeof execFile>;
+      });
+
+      await expect(
+        createConnector().downloadFile({
+          remotePath: '/var/log/huge.log',
+          maxBytes: 4,
+        })
+      ).rejects.toThrow(/exceeds max-step-size/);
+    });
+  });
+
+  describe('uploadFile', () => {
+    it('uploads with scp argv instead of stuffing the payload into ssh exec', async () => {
+      const connector = createConnector();
+      await connector.uploadFile({
+        remotePath: '/opt/app/config.json',
+        content: Buffer.from('{"ok":true}').toString('base64'),
+        encoding: 'base64',
+      });
+
+      expect(mockedExecFile).toHaveBeenCalledTimes(2);
+      const [mkdirBin, mkdirArgs] = mockedExecFile.mock.calls[0];
+      expect(mkdirBin).toBe('ssh');
+      expect(mkdirArgs).toContain('mkdir -p -- "/opt/app"');
+
+      const [scpBin, scpArgs] = mockedExecFile.mock.calls[1];
+      expect(scpBin).toBe('scp');
+      expect(scpArgs).toContain('alice@example.com:/opt/app/config.json');
+      expect((scpArgs as string[]).join(' ')).not.toContain('openssl');
+    });
   });
 });

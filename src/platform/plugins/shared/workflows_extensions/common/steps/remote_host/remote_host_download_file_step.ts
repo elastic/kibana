@@ -64,6 +64,8 @@ Download a file from a remote host via an SSH connector.
 
 - **remotePath** (required): Absolute path on the remote host of the file to download.
 
+The file must fit in this step's \`max-step-size\` (default 10mb). Larger files fail before the content is returned.
+
 ## Output
 
 Returns an object with:

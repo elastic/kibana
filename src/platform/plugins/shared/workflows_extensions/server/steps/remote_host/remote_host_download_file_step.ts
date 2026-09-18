@@ -30,7 +30,10 @@ export const createRemoteHostDownloadFileStepDefinition = ({ getActionsStart }: 
           actionsStart: getActionsStart(),
           abortSignal: context.abortSignal,
         },
-        remotePath
+        remotePath,
+        context.maxStepSizeBytes && context.maxStepSizeBytes > 0
+          ? context.maxStepSizeBytes
+          : 10 * 1024 * 1024
       );
 
       return { output: { content } };

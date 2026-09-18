@@ -7,7 +7,17 @@
 
 import { createHash } from 'crypto';
 import { execFile } from 'child_process';
-import { closeSync, existsSync, openSync, readFileSync, unlinkSync, writeSync } from 'fs';
+import {
+  closeSync,
+  existsSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  unlinkSync,
+  writeSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
@@ -28,6 +38,7 @@ import {
 
 const MAX_BUFFER_BYTES = 100 * 1024 * 1024;
 const DEFAULT_SSH_PORT = 22;
+const DEFAULT_DOWNLOAD_MAX_BYTES = 10 * 1024 * 1024;
 
 interface CommandTarget {
   bin: string;
@@ -118,9 +129,12 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     params: DownloadFileParams
   ): Promise<{ content: string; encoding: 'base64' }> {
     const { remotePath } = params;
+    const maxBytes =
+      params.maxBytes && params.maxBytes > 0 ? params.maxBytes : DEFAULT_DOWNLOAD_MAX_BYTES;
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
-    const tempDownloadPath = join(tmpdir(), `ssh_host_download_${Date.now()}`);
+    const tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_download_'));
+    const tempDownloadPath = join(tempDir, 'file');
     const { scp, authArgs, env, cleanup } = await this.resolveCredentials();
 
     const args = [
@@ -135,22 +149,67 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       if (code !== 0) {
         throw new Error(stderr || `scp exited with code ${code}`);
       }
+      const { size } = statSync(tempDownloadPath);
+      if (size > maxBytes) {
+        throw new Error(
+          `Remote file exceeds max-step-size (${size} bytes > ${maxBytes} bytes). Increase max-step-size on this step or download a smaller file.`
+        );
+      }
       return { content: readFileSync(tempDownloadPath).toString('base64'), encoding: 'base64' };
     } finally {
       cleanup();
-      if (existsSync(tempDownloadPath)) unlinkSync(tempDownloadPath);
+      rmSync(tempDir, { recursive: true, force: true });
     }
   }
 
   public async uploadFile(params: UploadFileParams): Promise<void> {
     const { remotePath, content } = params;
+    const { hostname, port } = parseHost(this.config.host);
+    const { username } = this.secrets;
+    const tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_upload_'));
+    const localPath = join(tempDir, 'payload');
+    const { ssh, scp, authArgs, env, cleanup } = await this.resolveCredentials();
+
+    const bytes = Buffer.from(content, 'base64');
+    const fd = openSync(localPath, 'w', 0o600);
+    writeSync(fd, bytes);
+    closeSync(fd);
+
     const remoteDir = remotePath.substring(0, remotePath.lastIndexOf('/'));
-    const mkdirPart = remoteDir ? `mkdir -p "${remoteDir}" && ` : '';
-    const { code, stderr } = await this.execCommand({
-      script: `${mkdirPart}printf '%s' '${content}' | openssl base64 -d -A > "${remotePath}"`,
-    });
-    if (code !== 0) {
-      throw new Error(`Failed to upload file to ${remotePath}: ${stderr}`);
+
+    try {
+      if (remoteDir) {
+        const mkdir = await runExecFile(
+          ssh.bin,
+          [
+            ...ssh.prefixArgs,
+            ...this.getTransportArgs('-p', port, authArgs),
+            `${username}@${hostname}`,
+            `mkdir -p -- ${JSON.stringify(remoteDir)}`,
+          ],
+          env
+        );
+        if (mkdir.code !== 0) {
+          throw new Error(`Failed to create remote directory ${remoteDir}: ${mkdir.stderr}`);
+        }
+      }
+
+      const { stderr, code } = await runExecFile(
+        scp.bin,
+        [
+          ...scp.prefixArgs,
+          ...this.getTransportArgs('-P', port, authArgs),
+          localPath,
+          `${username}@${hostname}:${remotePath}`,
+        ],
+        env
+      );
+      if (code !== 0) {
+        throw new Error(`Failed to upload file to ${remotePath}: ${stderr}`);
+      }
+    } finally {
+      cleanup();
+      rmSync(tempDir, { recursive: true, force: true });
     }
   }
 

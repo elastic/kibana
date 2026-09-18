@@ -8,8 +8,8 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
 import { SUB_ACTION } from '@kbn/connector-schemas/ssh_host';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 
 export interface ConnectorCallContext {
@@ -78,11 +78,15 @@ export async function uploadFile(
   });
 }
 
-export async function downloadFile(ctx: ConnectorCallContext, remotePath: string): Promise<string> {
+export async function downloadFile(
+  ctx: ConnectorCallContext,
+  remotePath: string,
+  maxBytes: number
+): Promise<string> {
   const result = await executeSubAction<{ content: string; encoding: 'base64' }>({
     ...ctx,
     subAction: SUB_ACTION.DownloadFile,
-    subActionParams: { remotePath },
+    subActionParams: { remotePath, maxBytes },
   });
   return Buffer.from(result.content, 'base64').toString('utf-8');
 }
