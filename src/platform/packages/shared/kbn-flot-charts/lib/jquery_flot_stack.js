@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Flot plugin for stacking data sets rather than overlaying them.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.

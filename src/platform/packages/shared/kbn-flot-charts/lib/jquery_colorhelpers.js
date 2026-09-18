@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Plugin for jQuery for working with colors.
  * 
  * Version 1.1.

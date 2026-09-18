@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Flot plugin for plotting error bars.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.

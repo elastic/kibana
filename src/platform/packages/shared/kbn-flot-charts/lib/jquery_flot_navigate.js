@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Flot plugin for adding the ability to pan and zoom the plot.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.

@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* @notice
  *
  * Pretty handling of logarithmic axes.

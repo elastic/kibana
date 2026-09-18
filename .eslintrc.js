@@ -2321,7 +2321,7 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
-      globals: { canvas: true, $: true },
+      globals: { canvas: true },
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/public/**/*.js'],
@@ -2330,12 +2330,37 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-flot-charts/lib/**/*.js'],
-      env: {
-        jquery: true,
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/**/*.{js,ts,tsx,d.ts}',
+        'x-pack/platform/plugins/private/canvas/public/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/chart/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/sparkline/**/*.{js,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          ...require('@kbn/eslint-config/restricted_globals'),
+          {
+            name: '$',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+          {
+            name: 'jQuery',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+        ],
       },
     },
-
+    {
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/index.js',
+        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
     /**
      * TSVB overrides
      */
