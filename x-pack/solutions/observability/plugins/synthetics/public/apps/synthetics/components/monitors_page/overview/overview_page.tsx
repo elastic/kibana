@@ -38,6 +38,15 @@ import {
 } from './overview/overview_activity_chart';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
+import { LastRefreshed } from '../../common/components/last_refreshed';
+import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
+import { MonitorsListingPage, SyntheticsHeaderToolbar } from '../../common/app_header';
+
+const OVERVIEW_DEFAULT_DATE_RANGE = {
+  from: CLIENT_DEFAULTS_SYNTHETICS.OVERVIEW_DATE_RANGE_START,
+  to: CLIENT_DEFAULTS_SYNTHETICS.DATE_RANGE_END,
+};
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -142,7 +151,15 @@ export const OverviewPage: React.FC = () => {
   const hasMonitors = !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
 
   return (
-    <>
+    <MonitorsListingPage
+      selectedTab="overview"
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <SyntheticsDatePicker defaultDateRange={OVERVIEW_DEFAULT_DATE_RANGE} />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <DisabledCallout total={absoluteTotal} />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
@@ -173,6 +190,6 @@ export const OverviewPage: React.FC = () => {
       ) : (
         <NoMonitorsFound />
       )}
-    </>
+    </MonitorsListingPage>
   );
 };
