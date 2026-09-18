@@ -113,6 +113,10 @@ export interface NavigationProps {
    * Pass false for hosts that do not sit under a global header.
    */
   showTopSeparator?: boolean;
+  /** Chrome controls rendered at the top of the side nav, above primary items. */
+  navTopControls?: ReactNode;
+  /** Chrome controls rendered at the bottom of the side nav footer. */
+  navFooterControls?: ReactNode;
   /** Content to display inside the side panel footer. */
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */

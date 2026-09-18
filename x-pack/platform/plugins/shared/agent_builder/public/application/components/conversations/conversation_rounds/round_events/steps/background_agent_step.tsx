@@ -25,6 +25,7 @@ import { ExecutionStatus, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common
 import { getEbtProps } from '@kbn/ebt-click';
 import { StepLayout } from '../step_layout';
 import { JsonCodeBlock } from '../json_code_block';
+import { useAgentColumnFlyoutProps } from '../../../../../hooks/use_agent_panel_width';
 
 const viewJsonLabel = i18n.translate(
   'xpack.agentBuilder.roundEvents.steps.backgroundAgent.viewJson',
@@ -48,6 +49,16 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container,
+    session,
+    hasAnimation,
+    type,
+    resizable,
+    css: agentColumnCss,
+  } = useAgentColumnFlyoutProps(isFlyoutOpen);
 
   const isFailure =
     step.status === ExecutionStatus.failed || step.status === ExecutionStatus.aborted;
@@ -100,7 +111,19 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
         </EuiLink>
       </EuiFlexItem>
       {isFlyoutOpen && (
-        <EuiFlyout onClose={closeFlyout} aria-labelledby="backgroundAgentFlyoutTitle" size="m">
+        <EuiFlyout
+          onClose={closeFlyout}
+          aria-labelledby="backgroundAgentFlyoutTitle"
+          size="m"
+          ownFocus={!isAgentWorkspaceMount}
+          outsideClickCloses={isAgentWorkspaceMount ? isOverlay : undefined}
+          container={container}
+          session={session}
+          hasAnimation={hasAnimation}
+          type={type}
+          resizable={resizable}
+          css={agentColumnCss}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id="backgroundAgentFlyoutTitle">{flyoutTitle}</h2>

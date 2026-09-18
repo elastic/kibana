@@ -34,3 +34,7 @@ export type {
   NavigateToUrlOptions,
 } from './src/contracts';
 export type { ScopedHistory } from './src/scoped_history';
+export {
+  registerBeforeNavigateToApp,
+  notifyBeforeNavigateToApp,
+} from './src/before_navigate_to_app';

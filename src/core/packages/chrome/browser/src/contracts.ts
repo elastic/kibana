@@ -281,6 +281,30 @@ export interface ChromeStart {
   };
 
   /**
+   * Agent-first application workspace column (native apps beside the agent column).
+   */
+  applicationWorkspace: {
+    getIsOpen$(): Observable<boolean>;
+    getIsOpen(): boolean;
+    setIsOpen(isOpen: boolean): void;
+    open(): void;
+    close(): void;
+    registerOnClose(handler: () => void): () => void;
+  };
+
+  /**
+   * Agent-first agent workspace column (Agent Builder beside the application column).
+   */
+  agentWorkspace: {
+    getIsOpen$(): Observable<boolean>;
+    getIsOpen(): boolean;
+    setIsOpen(isOpen: boolean): void;
+    open(): void;
+    close(): void;
+    registerOnClose(handler: () => void): () => void;
+  };
+
+  /**
    * {@link SidebarStart}
    */
   sidebar: SidebarStart;

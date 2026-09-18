@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
+import { CanvasProvider } from '../application/components/conversations/conversation_rounds/round_response/attachments/canvas_context';
 import { EmbeddableConversationHeader } from '../application/components/conversations/embeddable_conversation_header/embeddable_conversation_header';
 import { conversationBackgroundStyles } from '../application/components/conversations/conversation.styles';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
@@ -69,7 +70,9 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
           </EuiFlyoutHeader>
           <EmbeddableWelcomeMessage />
           <EuiFlyoutBody css={bodyStyles}>
-            <Conversation />
+            <CanvasProvider>
+              <Conversation />
+            </CanvasProvider>
           </EuiFlyoutBody>
         </EmbeddableAccessBoundary>
       </EmbeddableConversationsProvider>

@@ -43,7 +43,6 @@ import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
-import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
 import { RoundsScreenReaderStatus } from './conversation_rounds/rounds_screen_reader_status';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
@@ -161,6 +160,7 @@ export const Conversation: React.FC<{}> = () => {
     ${useEuiOverflowScroll('y')}
     scrollbar-gutter: stable both-edges;
     overflow-anchor: none;
+    overscroll-behavior-y: contain;
   `;
 
   const inputPaddingStyles = css`
@@ -185,7 +185,7 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   return (
-    <CanvasProvider>
+    <>
       <RoundsScreenReaderStatus lastRound={lastRound} />
       <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
         <EuiFlexItem grow={true} css={scrollWrapperStyles}>
@@ -223,6 +223,6 @@ export const Conversation: React.FC<{}> = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />
-    </CanvasProvider>
+    </>
   );
 };

@@ -65,6 +65,10 @@ export interface ChromeLayoutConfig {
   applicationMarginTop?: number;
   applicationMarginBottom?: number;
   applicationMarginRight?: number;
+  agentWidth?: number;
+  agentMarginLeft?: number;
+  applicationWorkspaceOpen?: boolean;
+  agentWorkspaceOpen?: boolean;
   appearance?: LayoutAppearance;
 }
 
@@ -142,6 +146,7 @@ export declare const layoutLevels: {
 };
 
 export declare const APP_MAIN_SCROLL_CONTAINER_ID: string;
+export declare const AGENT_MAIN_CONTAINER_ID: string;
 export declare const FLYOUT_SELECTOR: string;
 export declare const MAIN_CONTENT_SELECTORS: string[];
 export declare const SIDE_PANEL_CONTENT_GAP: number;

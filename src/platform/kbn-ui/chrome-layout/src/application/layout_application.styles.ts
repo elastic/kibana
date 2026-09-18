@@ -113,10 +113,20 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
   flex-shrink: 0;
 `;
 
+const closed = css`
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+`;
+
 export const styles = {
   root,
   scrollContainer,
   content,
   topBar,
   bottomBar,
+  closed,
 };

@@ -18,6 +18,7 @@ import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../../../../../hooks/use_navigation';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
@@ -69,7 +70,10 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   } = useCanvasContext();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
+
+  const useOverlayPreview = isAgentWorkspaceMount && !isSidebar;
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
@@ -115,11 +119,14 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         openCanvas,
         openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
         isCanvas: false,
-        setPreviewBadgeState: (nextPreviewState) => {
-          setPreviewedAttachmentKey(
-            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
-          );
-        },
+        openTarget: useOverlayPreview ? 'nativeApp' : undefined,
+        setPreviewBadgeState: useOverlayPreview
+          ? undefined
+          : (nextPreviewState) => {
+              setPreviewedAttachmentKey(
+                nextPreviewState === 'previewing' ? attachmentPreviewKey : null
+              );
+            },
       }) ?? [],
     [
       uiDefinition,
@@ -131,6 +138,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
+      useOverlayPreview,
     ]
   );
 
@@ -144,8 +152,9 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
 
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
-  const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+  const resolvedPreviewBadgeState: AttachmentPreviewState = useOverlayPreview
+    ? 'none'
+    : previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
 
   if (!uiDefinition) {
     return null;

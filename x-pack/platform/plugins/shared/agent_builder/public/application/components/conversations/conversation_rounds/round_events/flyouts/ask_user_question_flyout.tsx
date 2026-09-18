@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { AskUserQuestionItem, AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents';
 import { QuestionAnswerList } from './question_answer_list';
+import { useAgentColumnFlyoutProps } from '../../../../../hooks/use_agent_panel_width';
 
 const flyoutTitle = i18n.translate('xpack.agentBuilder.conversation.askUserQuestionFlyout.title', {
   defaultMessage: 'Clarification',
@@ -35,6 +36,17 @@ export const AskUserQuestionFlyout: React.FC<AskUserQuestionFlyoutProps> = ({
   questions,
   answers,
 }) => {
+  const {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container,
+    session,
+    hasAnimation,
+    type,
+    resizable,
+    css: agentColumnCss,
+  } = useAgentColumnFlyoutProps(isOpen);
+
   if (!isOpen) return null;
 
   const total = questions.length;
@@ -54,7 +66,14 @@ export const AskUserQuestionFlyout: React.FC<AskUserQuestionFlyoutProps> = ({
       onClose={onClose}
       aria-labelledby="askUserQuestionFlyoutTitle"
       size="600px"
-      ownFocus={false}
+      ownFocus={!isAgentWorkspaceMount}
+      outsideClickCloses={isAgentWorkspaceMount ? isOverlay : undefined}
+      container={container}
+      session={session}
+      hasAnimation={hasAnimation}
+      type={type}
+      resizable={resizable}
+      css={agentColumnCss}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

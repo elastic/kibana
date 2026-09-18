@@ -24,20 +24,35 @@ const cssProp = css`
   display: grid;
 
   grid-template-areas:
-    'banner banner banner'
-    'header header header'
-    'navigation application sidebar'
-    'footer footer footer';
+    'banner banner banner banner'
+    'header header header header'
+    'navigation agent application sidebar'
+    'footer footer footer footer';
 `;
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { navigationWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
+  const {
+    navigationWidth,
+    agentWidth,
+    sidebarWidth,
+    bannerHeight,
+    headerHeight,
+    footerHeight,
+    applicationMarginRight,
+    applicationWorkspaceOpen,
+    agentWorkspaceOpen,
+    hasAgent,
+  } = layoutState;
+
+  const applicationColumn = applicationWorkspaceOpen === false ? '0px' : '1fr';
+  const agentColumnGutter = hasAgent && agentWorkspaceOpen ? applicationMarginRight : 0;
 
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px
-      1fr
+      ${agentWidth + agentColumnGutter}px
+      ${applicationColumn}
       ${sidebarWidth}px
     `,
     gridTemplateRows: `

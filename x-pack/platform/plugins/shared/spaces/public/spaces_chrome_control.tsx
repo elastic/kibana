@@ -24,6 +24,7 @@ interface SpacesChromeControlProps {
   eventTracker: EventTracker;
   cloud?: CloudStart;
   isServerless?: boolean;
+  iconOnly?: boolean;
 }
 
 function SpacesChromeControl({
@@ -33,6 +34,7 @@ function SpacesChromeControl({
   eventTracker,
   cloud,
   isServerless,
+  iconOnly,
 }: SpacesChromeControlProps) {
   const chromeStyle = useChromeStyle();
 
@@ -45,6 +47,7 @@ function SpacesChromeControl({
           cloud={cloud}
           isServerless={isServerless}
           allowSolutionVisibility={config.allowSolutionVisibility}
+          iconOnly={iconOnly}
         />
       );
     case 'classic':

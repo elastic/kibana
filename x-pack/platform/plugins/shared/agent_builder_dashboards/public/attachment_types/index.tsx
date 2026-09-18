@@ -137,13 +137,52 @@ export const registerDashboardAttachmentUiDefinition = ({
         />
       </React.Suspense>
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
+    getActionButtons: ({
+      attachment,
+      openCanvas,
+      isCanvas,
+      isSidebar,
+      updateOrigin,
+      openTarget,
+    }) => {
       // Capture the framework-provided updater keyed by attachment id so that
       // dashboard-save origin sync (outside the React tree) can reuse it.
       updateOriginByAttachmentId.set(attachment.id, updateOrigin);
       if (isCanvas) {
         return [];
       }
+
+      if (openTarget === 'nativeApp') {
+        return [
+          {
+            label: i18n.translate(
+              'xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel',
+              {
+                defaultMessage: 'Edit in Dashboards',
+              }
+            ),
+            icon: 'kqlFunction',
+            type: ActionButtonType.PRIMARY,
+            handler: async () => {
+              const { handlePreview } = await import('./async_services');
+
+              chrome.applicationWorkspace.open();
+
+              return handlePreview({
+                attachment,
+                dashboardApi: undefined,
+                canWriteDashboards,
+                isSidebar,
+                dashboardLocator,
+                checkSavedDashboardExist,
+                openCanvas,
+                preferCanvasPreview: false,
+              });
+            },
+          },
+        ];
+      }
+
       return [
         {
           label: i18n.translate(

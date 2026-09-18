@@ -94,6 +94,11 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
    * Use to mark an attachment as currently previewed outside canvas.
    */
   setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
+  /**
+   * Where the user activated the attachment. Agent workspace uses `nativeApp`
+   * to prefer opening in the owning Kibana app instead of canvas.
+   */
+  openTarget?: 'preview' | 'nativeApp';
 }
 
 /**

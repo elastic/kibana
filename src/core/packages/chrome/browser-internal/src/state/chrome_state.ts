@@ -56,6 +56,18 @@ export interface ChromeState {
     width: State<number>;
   };
 
+  /** Agent-first application workspace column visibility */
+  applicationWorkspace: {
+    isOpen: State<boolean>;
+    onCloseHandlers: ArrayState<() => void>;
+  };
+
+  /** Agent-first agent workspace column visibility */
+  agentWorkspace: {
+    isOpen: State<boolean>;
+    onCloseHandlers: ArrayState<() => void>;
+  };
+
   /** Breadcrumbs state (includes legacy badge from setBadge()) */
   breadcrumbs: {
     classic: ArrayState<ChromeBreadcrumb>;
@@ -114,6 +126,12 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
   const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
 
+  const applicationWorkspaceIsOpen = createState<boolean>(true);
+  const applicationWorkspaceOnCloseHandlers = createArrayState<() => void>();
+
+  const agentWorkspaceIsOpen = createState<boolean>(true);
+  const agentWorkspaceOnCloseHandlers = createArrayState<() => void>();
+
   // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
     breadcrumbs,
@@ -155,6 +173,14 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     sideNav: {
       collapsed: sideNavCollapsed,
       width: sideNavWidth,
+    },
+    applicationWorkspace: {
+      isOpen: applicationWorkspaceIsOpen,
+      onCloseHandlers: applicationWorkspaceOnCloseHandlers,
+    },
+    agentWorkspace: {
+      isOpen: agentWorkspaceIsOpen,
+      onCloseHandlers: agentWorkspaceOnCloseHandlers,
     },
     breadcrumbs: {
       classic: breadcrumbs,

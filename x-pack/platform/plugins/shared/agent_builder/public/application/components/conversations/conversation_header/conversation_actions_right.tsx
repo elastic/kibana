@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationShareButton } from './conversation_share_button';
 import { ChatInfoButton } from './chat_info_button';
-import { useConversation } from '../../../hooks/use_conversation';
+import { ApplicationWorkspaceCollapseButton } from './application_workspace_collapse_button';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -19,9 +19,6 @@ const labels = {
 };
 
 export const ConversationRightActions = () => {
-  const { conversation } = useConversation();
-  const hasTemplate = Boolean(conversation?.template_id);
-
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -33,11 +30,12 @@ export const ConversationRightActions = () => {
       <EuiFlexItem grow={false}>
         <ConversationShareButton />
       </EuiFlexItem>
-      {hasTemplate && (
-        <EuiFlexItem grow={false}>
-          <ChatInfoButton />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <ChatInfoButton />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ApplicationWorkspaceCollapseButton />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

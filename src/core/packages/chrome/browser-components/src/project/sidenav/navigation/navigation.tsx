@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import { combineLatest, distinctUntilChanged, map, switchMap } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
@@ -25,6 +25,9 @@ export interface ChromeNavigationProps {
   isCollapsed: boolean;
   setWidth: (width: number) => void;
   onToggleCollapsed?: (isCollapsed: boolean) => void;
+  navTopControls?: ReactNode;
+  navFooterControls?: ReactNode;
+  showTopSeparator?: boolean;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -46,6 +49,9 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onToggleCollapsed={props.onToggleCollapsed}
         onCustomizeNavigation={onCustomizeNavigation}
         activeItemId={activeItemId}
+        showTopSeparator={props.showTopSeparator}
+        navTopControls={props.navTopControls}
+        navFooterControls={props.navFooterControls}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
@@ -56,7 +62,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+export const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
 

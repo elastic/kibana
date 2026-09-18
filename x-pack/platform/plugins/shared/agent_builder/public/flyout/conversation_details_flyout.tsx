@@ -25,10 +25,17 @@ import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
+import { AGENT_MAIN_CONTAINER_ID } from '@kbn/ui-chrome-layout';
+import {
+  agentPanelFlyoutStyles,
+  useAgentPanelWidth,
+  useClearAgentPanelPushOffsetOnUnmount,
+} from '../application/hooks/use_agent_panel_width';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../application/hooks/use_navigation';
 
 const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
@@ -37,6 +44,29 @@ const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyou
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
+
+const EmptyChatInfoTab = () => null;
+
+const builtinTabFallbacks: Record<string, ConversationTemplateTabDefinition> = {
+  overview: {
+    label: i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabs.overview', {
+      defaultMessage: 'Overview',
+    }),
+    content: EmptyChatInfoTab,
+  },
+  attachments: {
+    label: i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabs.attachments', {
+      defaultMessage: 'Attachments',
+    }),
+    content: EmptyChatInfoTab,
+  },
+  timeline: {
+    label: i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabs.timeline', {
+      defaultMessage: 'Timeline',
+    }),
+    content: EmptyChatInfoTab,
+  },
+};
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
@@ -53,7 +83,7 @@ const buildTabs = (
   const tabIds = [...templateTabIds, ...builtinTabIds];
 
   return tabIds.flatMap((id) => {
-    const tab = conversationTemplatesService.getTab(id);
+    const tab = conversationTemplatesService.getTab(id) ?? builtinTabFallbacks[id];
     return tab ? [{ id, ...tab }] : [];
   });
 };
@@ -225,6 +255,9 @@ export interface ConversationDetailsFlyoutProps {
   onClose: () => void;
 }
 
+/** Push Chat info when the agent column is at least this wide. */
+const CHAT_INFO_PUSH_MIN_AGENT_WIDTH = 1000;
+
 /** Live variant backed by the active conversation cache. */
 export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyoutProps) => {
   const titleId = useGeneratedHtmlId({
@@ -232,6 +265,12 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
+  const euiThemeContext = useEuiTheme();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const agentPanelWidth = useAgentPanelWidth(isAgentWorkspaceMount);
+  const isPushFlyout =
+    !isAgentWorkspaceMount || agentPanelWidth >= CHAT_INFO_PUSH_MIN_AGENT_WIDTH;
+  useClearAgentPanelPushOffsetOnUnmount(isAgentWorkspaceMount);
 
   return (
     <EuiFlyout
@@ -240,11 +279,17 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{}}
       size="s"
-      type="push"
+      type={isPushFlyout ? 'push' : 'overlay'}
+      resizable={isPushFlyout}
+      hasAnimation={false}
+      container={isAgentWorkspaceMount ? `#${AGENT_MAIN_CONTAINER_ID}` : undefined}
+      ownFocus={!isAgentWorkspaceMount}
+      outsideClickCloses={false}
       paddingSize="m"
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
+      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles(euiThemeContext) : undefined}
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent

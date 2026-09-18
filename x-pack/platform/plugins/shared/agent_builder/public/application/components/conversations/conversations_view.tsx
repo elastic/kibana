@@ -12,6 +12,7 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
+import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -20,6 +21,8 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     display: flex;
     flex-direction: column;
     height: var(--kbn-application--content-height);
+    min-height: 0;
+    overflow: hidden;
     ${conversationBackgroundStyles(euiTheme)}
   `;
 
@@ -34,6 +37,7 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const contentStyles = css`
     width: 100%;
     flex: 1;
+    min-height: 0;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
     justify-content: center;
@@ -43,14 +47,16 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
 
   return (
     <RoutedConversationsProvider>
-      <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-        <div css={headerStyles}>
-          <ConversationHeader />
+      <CanvasProvider>
+        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+          <div css={headerStyles}>
+            <ConversationHeader />
+          </div>
+          <div css={contentStyles}>
+            <Conversation />
+          </div>
         </div>
-        <div css={contentStyles}>
-          <Conversation />
-        </div>
-      </div>
+      </CanvasProvider>
     </RoutedConversationsProvider>
   );
 };

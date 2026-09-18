@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export const OVERVIEW_TAB_ID = 'overview';
+export const ATTACHMENTS_TAB_ID = 'attachments';
 export const TIMELINE_TAB_ID = 'timeline';
 
 /**
  * Agent Builder's own tabs, always appended to the conversation metadata flyout after
  * the template's tabs.
  */
-export const BUILTIN_TAB_IDS = [] as const;
+export const BUILTIN_TAB_IDS = [OVERVIEW_TAB_ID, ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID] as const;

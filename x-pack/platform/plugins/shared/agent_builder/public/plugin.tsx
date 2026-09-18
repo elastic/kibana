@@ -24,8 +24,10 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import React from 'react';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { isAgentFirst } from '@kbn/ui-chrome-layout';
 import { registerLocators } from './locator/register_locators';
-import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
+import { buildAgentBuilderAppUpdate, registerAnalytics, registerApp } from './register';
+import { registerAgentWorkspaceSlot, unregisterAgentWorkspaceSlot } from './agent_workspace/register_agent_workspace';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -199,16 +201,38 @@ export class AgentBuilderPlugin
     const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const agentBuilderSidebar = core.chrome.sidebar.getApp('agentBuilder');
-    this.sidebarOpenSubscription = agentBuilderSidebar.isOpen$().subscribe((isOpen) => {
-      if (!isOpen) {
-        this.activeSidebarRef = null;
-        this.sidebarCallbacks = null;
-        clearSidebarRuntimeContext();
-      }
-    });
+    const isAgentFirstChrome = isAgentFirst(core.featureFlags);
+    const sidebar =
+      isAgentFirstChrome || !core.chrome.sidebar.hasApp('agentBuilder')
+        ? undefined
+        : core.chrome.sidebar.getApp('agentBuilder');
+    const agentBuilderSidebar = sidebar;
+
+    if (agentBuilderSidebar) {
+      this.sidebarOpenSubscription = agentBuilderSidebar.isOpen$().subscribe((isOpen) => {
+        if (!isOpen) {
+          this.activeSidebarRef = null;
+          this.sidebarCallbacks = null;
+          clearSidebarRuntimeContext();
+        }
+      });
+    }
+
+    const noopSidebarChatRef = { close: () => {} };
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
+      if (isAgentFirstChrome) {
+        if (this.activeSidebarRef) {
+          return { chatRef: this.activeSidebarRef };
+        }
+
+        return { chatRef: noopSidebarChatRef };
+      }
+
+      if (!agentBuilderSidebar) {
+        return { chatRef: noopSidebarChatRef };
+      }
+
       const { conversationId, ...openOptions } = options ?? {};
       const config =
         Object.keys(openOptions).length > 0 ? openOptions : this.conversationActiveConfig;
@@ -342,9 +366,12 @@ export class AgentBuilderPlugin
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
       .subscribe((experimentalFeaturesEnabled) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
-        }));
+        this.appUpdater$.next(() =>
+          buildAgentBuilderAppUpdate({
+            experimentalFeaturesEnabled,
+            isAgentFirstChrome,
+          })
+        );
       });
 
     const publicAttachmentsService = createPublicAttachmentContract({ attachmentsService });
@@ -360,7 +387,10 @@ export class AgentBuilderPlugin
             openSidebarInternal({ conversationId });
           },
           openFullscreenConversation: ({ conversationId, agentId }) => {
-            agentBuilderSidebar.close();
+            agentBuilderSidebar?.close();
+            if (isAgentFirstChrome) {
+              return Promise.resolve();
+            }
             return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
               path: appPaths.agent.conversations.byId({ agentId, conversationId }),
             });
@@ -405,7 +435,11 @@ export class AgentBuilderPlugin
         return openSidebarInternal(options);
       },
       toggleChat: (options?: OpenConversationSidebarOptions) => {
-        if (agentBuilderSidebar.isOpen()) {
+        if (isAgentFirstChrome) {
+          return;
+        }
+
+        if (agentBuilderSidebar?.isOpen()) {
           agentBuilderSidebar.close();
           return;
         }
@@ -420,7 +454,13 @@ export class AgentBuilderPlugin
       openConversationDetails,
     };
 
-    if (hasAgentBuilder) {
+    registerAgentWorkspaceSlot({
+      core,
+      plugins: startDependencies,
+      getServices: () => internalServices,
+    });
+
+    if (hasAgentBuilder && !isAgentFirstChrome) {
       core.chrome.controls.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
@@ -436,6 +476,7 @@ export class AgentBuilderPlugin
   }
 
   stop() {
+    unregisterAgentWorkspaceSlot();
     this.experimentalDeepLinksSubscription?.unsubscribe();
     this.sidebarOpenSubscription?.unsubscribe();
   }

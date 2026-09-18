@@ -237,4 +237,12 @@ describe('ContextSwitcher', () => {
     await waitForEuiPopoverClose();
     expect(trigger).toHaveAttribute('aria-pressed', 'false');
   });
+
+  it('renders an icon-only trigger without the space name label', () => {
+    render(<ContextSwitcher {...buildProps({ iconOnly: true })} />);
+
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    expect(trigger).toHaveAttribute('aria-label', 'Default');
+    expect(screen.queryByText('Default')).not.toBeInTheDocument();
+  });
 });

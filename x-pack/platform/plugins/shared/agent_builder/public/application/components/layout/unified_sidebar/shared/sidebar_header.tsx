@@ -46,6 +46,8 @@ interface SidebarHeaderProps {
   agentId: string;
   getNavigationPath: (newAgentId: string) => string;
   isCondensed: boolean;
+  /** When true, this header is inside the floating nav panel rather than a push sidebar. */
+  isPopoverMode?: boolean;
   onToggleCondensed: () => void;
 }
 
@@ -54,6 +56,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   agentId,
   getNavigationPath,
   isCondensed,
+  isPopoverMode = false,
   onToggleCondensed,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -154,16 +157,18 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="transitionLeftOut"
+                iconType={isPopoverMode ? 'transitionLeftIn' : 'transitionLeftOut'}
                 aria-label={labels.toggleSidebar}
-                aria-expanded={true}
+                aria-expanded={!isPopoverMode}
                 color="text"
                 size="s"
                 onClick={onToggleCondensed}
                 {...getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.sidebar,
                   action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
-                  detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.CONDENSE,
+                  detail: isPopoverMode
+                    ? AGENT_BUILDER_UI_EBT.detail.sidebarToggle.EXPAND
+                    : AGENT_BUILDER_UI_EBT.detail.sidebarToggle.CONDENSE,
                 })}
               />
             </EuiToolTip>

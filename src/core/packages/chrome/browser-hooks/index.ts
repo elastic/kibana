@@ -13,4 +13,6 @@ export { useIsChromeVisible } from './use_is_chrome_visible';
 export { useSidebarWidth } from './use_sidebar_width';
 export { useSideNavCollapsed } from './use_side_nav_collapsed';
 export { useSideNavWidth } from './use_side_nav_width';
+export { useApplicationWorkspaceOpen } from './use_application_workspace_open';
+export { useAgentWorkspaceOpen } from './use_agent_workspace_open';
 export { RegisterAppMenu } from './components';

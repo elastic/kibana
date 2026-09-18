@@ -30,10 +30,14 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const { appearance } = useLayoutConfig();
+  const { appearance, applicationWorkspaceOpen = true } = useLayoutConfig();
 
   return (
-    <div css={styles.root(appearance)}>
+    <div
+      css={[styles.root(appearance), !applicationWorkspaceOpen && styles.closed]}
+      data-application-workspace-open={applicationWorkspaceOpen}
+      aria-hidden={!applicationWorkspaceOpen}
+    >
       <div
         css={styles.scrollContainer}
         id={APP_MAIN_SCROLL_CONTAINER_ID}

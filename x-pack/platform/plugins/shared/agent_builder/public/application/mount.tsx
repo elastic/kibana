@@ -30,6 +30,7 @@ export const mountApp = async ({
   history,
   services,
   onAppLeave,
+  isAgentWorkspaceMount = false,
 }: {
   core: CoreStart;
   plugins: AgentBuilderStartDependencies;
@@ -37,10 +38,11 @@ export const mountApp = async ({
   history: ScopedHistory;
   services: AgentBuilderInternalService;
   onAppLeave: OnAppLeave;
+  isAgentWorkspaceMount?: boolean;
 }) => {
   const ApplicationUsageTrackingProvider =
     services.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-  const kibanaServices = { ...core, plugins, appParams: { history } };
+  const kibanaServices = { ...core, plugins, appParams: { history, isAgentWorkspaceMount } };
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
   const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;

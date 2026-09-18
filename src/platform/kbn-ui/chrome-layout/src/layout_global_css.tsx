@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { layoutVarName } from './constants';
+import { AGENT_FIRST_NAV_MARGIN_TOP, layoutVarName } from './constants';
 import { useLayoutState } from './layout_state_context';
 
 /**
@@ -23,12 +23,16 @@ export const LayoutGlobalCSS = () => {
     footerHeight,
     headerHeight,
     navigationWidth,
+    agentWidth,
     sidebarWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
     applicationMarginTop,
     applicationMarginBottom,
     applicationMarginRight,
+    agentMarginLeft,
+    agentWorkspaceOpen,
+    hasAgent,
   } = useLayoutState();
 
   // Pre-calculate composite values for simplified CSS expressions
@@ -36,7 +40,11 @@ export const LayoutGlobalCSS = () => {
   const applicationTop = headerAndBannerHeight + applicationMarginTop;
   const applicationBottom = footerHeight + applicationMarginBottom;
   const applicationRight = applicationMarginRight + sidebarWidth;
-  const applicationHorizontalOffset = navigationWidth + applicationRight;
+  const agentAppGutter = hasAgent && agentWorkspaceOpen ? applicationMarginRight : 0;
+  const applicationLeft = navigationWidth + agentWidth + agentMarginLeft + agentAppGutter;
+  const navigationMarginTop = hasAgent ? AGENT_FIRST_NAV_MARGIN_TOP : 0;
+  const navigationMarginBottom = hasAgent ? applicationMarginBottom : 0;
+  const applicationHorizontalOffset = applicationLeft + applicationRight;
   const contentTop = applicationTop + applicationTopBarHeight;
   const contentBottom = applicationBottom + applicationBottomBarHeight;
 
@@ -68,12 +76,29 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const navigation = css`
-    ${layoutVarName('navigation.top')}: ${headerAndBannerHeight}px;
-    ${layoutVarName('navigation.bottom')}: ${footerHeight}px;
+    ${layoutVarName('navigation.marginTop')}: ${navigationMarginTop}px;
+    ${layoutVarName('navigation.marginBottom')}: ${navigationMarginBottom}px;
+    ${layoutVarName('navigation.top')}: ${headerAndBannerHeight + navigationMarginTop}px;
+    ${layoutVarName('navigation.bottom')}: ${footerHeight + navigationMarginBottom}px;
     ${layoutVarName('navigation.left')}: 0;
     ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth}px);
-    ${layoutVarName('navigation.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
+    ${layoutVarName('navigation.height')}: calc(
+      100vh -
+        ${headerAndBannerHeight + footerHeight + navigationMarginTop + navigationMarginBottom}px
+    );
     ${layoutVarName('navigation.width')}: ${navigationWidth}px;
+  `;
+
+  const agent = css`
+    ${layoutVarName('agent.marginLeft')}: ${agentMarginLeft}px;
+    ${layoutVarName('agent.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('agent.bottom')}: ${footerHeight}px;
+    ${layoutVarName('agent.left')}: ${navigationWidth + agentMarginLeft}px;
+    ${layoutVarName('agent.right')}: calc(100vw - ${navigationWidth +
+    agentWidth +
+    agentMarginLeft}px);
+    ${layoutVarName('agent.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
+    ${layoutVarName('agent.width')}: ${agentWidth}px;
   `;
 
   const sidebar = css`
@@ -91,7 +116,7 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
     ${layoutVarName('application.top')}: ${applicationTop}px;
     ${layoutVarName('application.bottom')}: ${applicationBottom}px;
-    ${layoutVarName('application.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.left')}: ${applicationLeft}px;
     ${layoutVarName('application.right')}: ${applicationRight}px;
     ${layoutVarName('application.height')}: calc(100vh - ${applicationTop + applicationBottom}px);
     ${layoutVarName('application.width')}: calc(100vw - ${applicationHorizontalOffset}px);
@@ -100,7 +125,7 @@ export const LayoutGlobalCSS = () => {
   const applicationTopBar = css`
     ${layoutVarName('application.topBar.height')}: ${applicationTopBarHeight}px;
     ${layoutVarName('application.topBar.top')}: ${applicationTop}px;
-    ${layoutVarName('application.topBar.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.topBar.left')}: ${applicationLeft}px;
     ${layoutVarName('application.topBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.topBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
     ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${applicationTop +
@@ -111,7 +136,7 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.bottomBar.height')}: ${applicationBottomBarHeight}px;
     ${layoutVarName('application.bottomBar.top')}: calc(100vh - ${footerHeight +
     applicationBottomBarHeight}px);
-    ${layoutVarName('application.bottomBar.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.bottomBar.left')}: ${applicationLeft}px;
     ${layoutVarName('application.bottomBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.bottomBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
     ${layoutVarName('application.bottomBar.bottom')}: ${footerHeight}px;
@@ -123,7 +148,7 @@ export const LayoutGlobalCSS = () => {
   const applicationContent = css`
     ${layoutVarName('application.content.top')}: ${contentTop}px;
     ${layoutVarName('application.content.bottom')}: ${contentBottom}px;
-    ${layoutVarName('application.content.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.content.left')}: ${applicationLeft}px;
     ${layoutVarName('application.content.right')}: ${applicationRight}px;
     ${layoutVarName('application.content.height')}: calc(100vh - ${contentTop + contentBottom}px);
     ${layoutVarName('application.content.width')}: calc(100vw - ${applicationHorizontalOffset}px);
@@ -134,6 +159,7 @@ export const LayoutGlobalCSS = () => {
       ${banner}
       ${header}
       ${navigation}
+      ${agent}
       ${sidebar}
       ${application}
       ${applicationTopBar}

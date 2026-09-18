@@ -8,10 +8,22 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import {
+  AGENT_FIRST_LAYOUT_OVERRIDES,
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+  DEFAULT_AGENT_WIDTH,
+  clampAgentWorkspaceWidth,
+  isAgentFirst,
+  resolveAgentPanelTargetWidth,
+} from '@kbn/ui-chrome-layout';
+import {
+  AgentFirstApplicationWorkspaceBridge,
+  AgentFirstProjectSideNav,
+  AgentWorkspacePanel,
+  AgentWorkspaceSlot,
   ChromeComponentsProvider,
   ClassicHeader,
   ChromeNextGlobalHeader,
@@ -25,6 +37,8 @@ import {
 } from '@kbn/core-chrome-browser-components';
 import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
+  useAgentWorkspaceOpen,
+  useApplicationWorkspaceOpen,
   useChromeStyle,
   useIsChromeVisible,
   useSidebarWidth,
@@ -72,10 +86,11 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding } = this.deps;
+    const { application, overlays, http, docLinks, customBranding, featureFlags } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
+    const agentFirstEnabled = isAgentFirst(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -93,11 +108,83 @@ export class GridLayout implements LayoutService {
       const footer = useGlobalFooter();
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
+      const applicationWorkspaceOpen = useApplicationWorkspaceOpen();
+      const agentWorkspaceOpen = useAgentWorkspaceOpen();
 
       const layoutConfigKey = chromeStyle === 'classic' ? 'classic' : 'project';
+      const showAgentWorkspace = agentFirstEnabled && chromeVisible && chromeStyle === 'project';
+      const effectiveApplicationWorkspaceOpen = showAgentWorkspace
+        ? applicationWorkspaceOpen
+        : true;
+      const effectiveAgentWorkspaceOpen = showAgentWorkspace ? agentWorkspaceOpen : true;
+
+      const [agentWorkspaceWidth, setAgentWorkspaceWidth] = useState(DEFAULT_AGENT_WIDTH);
+
+      const setAgentWorkspaceWidthClamped = useCallback(
+        (width: number) => {
+          setAgentWorkspaceWidth(
+            clampAgentWorkspaceWidth(
+              width,
+              navigationWidth,
+              sidebarWidth,
+              effectiveApplicationWorkspaceOpen,
+              effectiveAgentWorkspaceOpen
+            )
+          );
+        },
+        [
+          effectiveAgentWorkspaceOpen,
+          effectiveApplicationWorkspaceOpen,
+          navigationWidth,
+          sidebarWidth,
+        ]
+      );
+
+      useLayoutEffect(() => {
+        if (!showAgentWorkspace) {
+          return;
+        }
+
+        const reclamp = () => {
+          setAgentWorkspaceWidth((current) =>
+            clampAgentWorkspaceWidth(
+              current,
+              navigationWidth,
+              sidebarWidth,
+              effectiveApplicationWorkspaceOpen,
+              effectiveAgentWorkspaceOpen
+            )
+          );
+        };
+
+        reclamp();
+        window.addEventListener('resize', reclamp);
+        return () => window.removeEventListener('resize', reclamp);
+      }, [
+        effectiveAgentWorkspaceOpen,
+        effectiveApplicationWorkspaceOpen,
+        navigationWidth,
+        showAgentWorkspace,
+        sidebarWidth,
+      ]);
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
+        ...(showAgentWorkspace ? AGENT_FIRST_LAYOUT_OVERRIDES : {}),
+        ...(showAgentWorkspace
+          ? {
+              agentWidth: resolveAgentPanelTargetWidth({
+                agentWorkspaceOpen: effectiveAgentWorkspaceOpen,
+                applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
+                agentPreferredWidth: agentWorkspaceWidth,
+                navigationWidth,
+                sidebarWidth,
+                applicationMarginRight: AGENT_FIRST_LAYOUT_OVERRIDES.applicationMarginRight ?? 0,
+              }),
+              applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
+              agentWorkspaceOpen: effectiveAgentWorkspaceOpen,
+            }
+          : {}),
         sidebarWidth,
         navigationWidth,
       };
@@ -107,10 +194,25 @@ export class GridLayout implements LayoutService {
       let navigation: ReactNode;
       let banner: ReactNode;
       let applicationTopBar: ReactNode;
+      let agent: ReactNode;
 
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
+        } else if (showAgentWorkspace) {
+          navigation = <AgentFirstProjectSideNav />;
+          agent = (
+            <AgentWorkspacePanel
+              width={agentWorkspaceWidth}
+              navigationWidth={navigationWidth}
+              sidebarWidth={sidebarWidth}
+              applicationWorkspaceOpen={effectiveApplicationWorkspaceOpen}
+              agentWorkspaceOpen={effectiveAgentWorkspaceOpen}
+              onWidthChange={setAgentWorkspaceWidthClamped}
+            >
+              <AgentWorkspaceSlot />
+            </AgentWorkspacePanel>
+          );
         } else {
           header = <ChromeNextGlobalHeader />;
           if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
@@ -128,9 +230,11 @@ export class GridLayout implements LayoutService {
       return (
         <>
           <KibanaGridLayoutGlobalStyles appearance={layoutConfig.appearance ?? 'plain'} />
+          {showAgentWorkspace && <AgentFirstApplicationWorkspaceBridge />}
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}
+              agent={agent}
               sidebar={<Sidebar />}
               footer={footer}
               navigation={navigation}
