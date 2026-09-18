@@ -53,10 +53,18 @@ describe('toClientError', () => {
     expect((converted as Error & { cause?: unknown }).cause).toBe(original);
   });
 
-  it('preserves a validated HTTP status carried by the wrapped error', () => {
+  it('answers 500 for a wrapped error by default, even when it carries an upstream status', () => {
+    const upstream404 = Object.assign(new Error('model endpoint not found'), { statusCode: 404 });
+    expect(toClientError(upstream404).meta).toEqual(expect.objectContaining({ statusCode: 500 }));
+  });
+
+  it('preserves a validated HTTP status when asked to (setup window)', () => {
     const forbidden = Object.assign(new Error('nope'), { statusCode: 403 });
-    expect(toClientError(forbidden).meta).toEqual(expect.objectContaining({ statusCode: 403 }));
-    expect(toClientError(Object.assign(new Error('weird'), { statusCode: 200 })).meta).toEqual(
+    expect(toClientError(forbidden, { preserveHttpStatus: true }).meta).toEqual(
+      expect.objectContaining({ statusCode: 403 })
+    );
+    const weird = Object.assign(new Error('weird'), { statusCode: 200 });
+    expect(toClientError(weird, { preserveHttpStatus: true }).meta).toEqual(
       expect.objectContaining({ statusCode: 500 })
     );
   });

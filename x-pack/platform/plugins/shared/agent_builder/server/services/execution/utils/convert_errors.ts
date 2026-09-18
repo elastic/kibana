@@ -21,8 +21,16 @@ import { getHttpStatusFromError } from './serialize_execution_error';
  * for downstream `isRequestAbortedError`-style checks); anything else is wrapped as an internal
  * error. Idempotent. Shared by {@link convertErrors} (the stream) and the interruption persister
  * so the stored error is exactly the one the client saw.
+ *
+ * `preserveHttpStatus` keeps a validated 4xx/5xx carried by the wrapped error as the client's
+ * status. It is meant for the setup window, where a Boom-style error (auth, not found) used to
+ * escape to the route unchanged; a dependency failing mid-run stays a 500, since a 404 from the
+ * model's endpoint must not read as a 404 of the converse call itself.
  */
-export const toClientError = (err: unknown): AgentBuilderError<AgentBuilderErrorCode> => {
+export const toClientError = (
+  err: unknown,
+  { preserveHttpStatus = false }: { preserveHttpStatus?: boolean } = {}
+): AgentBuilderError<AgentBuilderErrorCode> => {
   const traceId = getCurrentTraceId();
   if (isAgentBuilderError(err)) {
     err.meta = {
@@ -32,10 +40,10 @@ export const toClientError = (err: unknown): AgentBuilderError<AgentBuilderError
     return err;
   }
   const message = err instanceof Error ? err.message : String(err);
-  // A Boom-style 4xx from a dependency (auth, not found…) stays actionable for the client.
+  const statusCode = (preserveHttpStatus ? getHttpStatusFromError(err) : undefined) ?? 500;
   return createInternalError(
     `Error executing agent: ${message}`,
-    { statusCode: getHttpStatusFromError(err) ?? 500, traceId },
+    { statusCode, traceId },
     { cause: err }
   );
 };

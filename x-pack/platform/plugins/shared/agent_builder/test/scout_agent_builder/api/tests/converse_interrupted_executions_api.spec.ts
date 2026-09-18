@@ -234,12 +234,14 @@ apiTest.describe(
             { input: `second ${mode}`, conversation_id: conversationId, connector_id: connectorId },
             mode
           );
-          // the failure is surfaced as the agent's error: a 500 whose message is the connector
-          // failure, and that same message is what gets persisted (checked below)
-          expect(second).toHaveStatusCode(500);
+          // the failure is surfaced as the agent's execution error. Its HTTP status echoes the
+          // upstream connector failure (pre-existing contract: an agentExecutionError carries the
+          // connector's status), so it is asserted against the persisted error below rather than
+          // hard-coded here; the message is the connector failure.
+          expect(second.statusCode).toBeGreaterThanOrEqual(400);
           const failureBody = second.body as { message: string };
           expect(typeof failureBody.message).toBe('string');
-          expect(failureBody.message.length).toBeGreaterThan(0);
+          expect(failureBody.message).toContain('Error calling connector');
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
           // 3. the failed execution is on the conversation as a full projection, not as a round
@@ -267,13 +269,14 @@ apiTest.describe(
           expect(trigger?.type).toBe(TimelineEventType.userMessage);
           expect((trigger?.data as { message: string }).message).toBe(`second ${mode}`);
           const failedData = failed[0].data as {
-            error: { code: string; message: string };
+            error: { code: string; message: string; meta?: { statusCode?: number } };
             time_to_last_token: number;
           };
           expect(typeof failedData.error.code).toBe('string');
           expect(typeof failedData.time_to_last_token).toBe('number');
-          // parity: the persisted error is the one the API returned
+          // parity: the persisted error is the one the API returned — same message, same status
           expect(failedData.error.message).toBe(failureBody.message);
+          expect(failedData.error.meta?.statusCode ?? 500).toBe(second.statusCode);
 
           // 4. a third, successful round sees the failed message followed by the failure notice
           await setupAgentDirectAnswer({

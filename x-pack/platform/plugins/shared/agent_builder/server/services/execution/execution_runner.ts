@@ -451,7 +451,11 @@ const handleConversationExecution = async ({
   } catch (err) {
     // Normalised once so the conversation terminal, the execution document and the client all
     // carry the same error.
-    const normalized = abortSignal.aborted ? createAbortedError(abortSignal) : toClientError(err);
+    // A Boom-style 4xx from a setup dependency (auth, not found) used to reach the route unchanged;
+    // keep its status. Mid-run dependency failures stay 500 (see `toClientError`).
+    const normalized = abortSignal.aborted
+      ? createAbortedError(abortSignal)
+      : toClientError(err, { preserveHttpStatus: true });
     const terminals = storeConversation
       ? await persistExecutionInterruption({
           conversation,
