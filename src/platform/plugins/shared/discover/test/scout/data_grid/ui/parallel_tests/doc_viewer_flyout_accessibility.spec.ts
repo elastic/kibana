@@ -38,11 +38,7 @@ const FIELDS_GRID_TEST_SUBJ = '[data-test-subj="UnifiedDocViewerTableGrid"]';
 
 const FLYOUT_TEST_SUBJ = '[data-test-subj="docViewerFlyout"]';
 
-/**
- * The grid's cell popover renders through an EUI portal, so it can land outside
- * the flyout subtree. Scans of the expanded cell include both selectors rather
- * than assuming where it mounts.
- */
+/** Scanned alongside the flyout: the cell popover mounts in an EUI portal. */
 const EXPANSION_POPOVER_TEST_SUBJ = '[data-test-subj="euiDataGridExpansionPopover"]';
 
 spaceTest.describe(
@@ -221,8 +217,7 @@ spaceTest.describe(
 
         await spaceTest.step('source tab', async () => {
           await docViewer.openTab('doc_view_source');
-          // The JSON editor replaces the fields table, so the grid exclusion
-          // that the other scans need does not apply here.
+          // No grid exclusion needed: the JSON editor replaces the fields table.
           const { violations } = await page.checkA11y({ include: [FLYOUT_TEST_SUBJ] });
           expect(violations).toStrictEqual([]);
         });

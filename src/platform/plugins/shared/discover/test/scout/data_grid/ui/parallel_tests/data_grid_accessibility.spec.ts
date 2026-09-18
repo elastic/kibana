@@ -8,13 +8,10 @@
  */
 
 /**
- * Automated a11y scans of the Discover data grid: the grid with extra columns,
- * the column actions menu, the sort and display toolbar popovers, and
- * full-screen mode.
+ * Automated a11y scans of the Discover data grid.
  *
- * The toolbar popovers and the column menu render through EUI portals, so they
- * can mount outside the grid subtree. Each scan is scoped to the element it is
- * actually testing rather than to the grid.
+ * The toolbar popovers and the column menu render through EUI portals, so each
+ * of those scans targets the popover rather than the grid.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -24,25 +21,18 @@ const GRID_TEST_SUBJ = '[data-test-subj="discoverDocTable"]';
 const SORT_POPOVER_TEST_SUBJ = '[data-test-subj="dataGridColumnSortingPopover"]';
 const DISPLAY_POPOVER_TEST_SUBJ = '[data-test-subj="dataGridDisplaySelectorPopover"]';
 
-/** Added from the sidebar. Both are present in every `logstash-*` document. */
 const SIDEBAR_COLUMNS = ['extension', 'geo.src'];
 
-/**
- * Added from the doc-viewer flyout. Restricted to fields the flyout's
- * "toggle column" action is known to expose for the first row.
- */
+/** Fields the flyout's "toggle column" action exposes for the first row. */
 const FLYOUT_COLUMNS = ['agent', '_index'];
 
 spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful-classic' }, () => {
-  // EUI DataGrid hides and truncates its inline cell actions and toolbar
-  // controls at narrow widths, so the flyout's "toggle column" action and the
-  // toolbar buttons need the room. Matches the sibling data-grid specs.
+  // EUI truncates inline cell actions and toolbar controls at narrow widths.
   spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
-    // Popovers animate in; axe can otherwise scan a half-rendered frame and
-    // report transient violations.
+    // Popovers animate in; axe can otherwise scan a half-rendered frame.
     await discoverScoutSpace.uiSettings.set({ 'accessibility:disableAnimations': true });
   });
 
@@ -123,8 +113,7 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
       });
 
       await spaceTest.step('display settings popover', async () => {
-        // Both popovers hang off the same toolbar; close the first so its
-        // trigger does not stay expanded behind the second.
+        // Close the sort popover so its trigger is not left expanded.
         await page.keyboard.press('Escape');
         await dataGrid.openGridDisplaySettings();
 

@@ -9,11 +9,8 @@
 
 /**
  * Automated a11y scans of the saved query menu, walked as one journey: open the
- * menu, open the save form, fill it, then delete the saved query and scan the
- * resulting empty list.
- *
- * The steps share a single popover, so they run as `test.step`s inside one test
- * rather than as separate tests.
+ * menu, save a query, then delete it and scan the resulting empty list. The
+ * steps share a single popover, hence one test rather than four.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -23,15 +20,10 @@ const MENU_PANEL_TEST_SUBJ = '[data-test-subj="queryBarMenuPanel"]';
 const SAVE_FORM_TEST_SUBJ = '[data-test-subj="saveQueryForm"]';
 
 /**
- * Excluded from the post-deletion scan. Once the last saved query is removed the
- * list is replaced by the selectable's `emptyMessage`, which leaves the search
- * input with invalid ARIA attribute values (`aria-valid-attr-value`). Carried
- * over from the FTR suite, which scoped out the same subject for the same
- * reason; it can be dropped once the underlying control is fixed.
+ * Excluded from the post-deletion scan: the empty-state search input has
+ * invalid `aria-valid-attr-value` attributes. Carried over from the FTR suite.
  */
 const SEARCH_INPUT_TEST_SUBJ = '[data-test-subj="saved-query-management-search-input"]';
-
-const SAVED_QUERY_NAME = 'a11yQuery';
 
 spaceTest.describe(
   'Discover saved queries - accessibility',
@@ -60,8 +52,11 @@ spaceTest.describe(
 
     spaceTest(
       'has no automated a11y violations across the saved query lifecycle',
-      async ({ page, pageObjects }) => {
+      async ({ page, pageObjects }, testInfo) => {
         const { discover, savedQueryManagementMenu } = pageObjects;
+        // Per-attempt name: cleanup only runs after retries, and the form
+        // rejects a duplicate.
+        const savedQueryName = `a11yQuery-${testInfo.retry}`;
 
         // "Save query" stays disabled until there is a query to save.
         await discover.writeAndSubmitKqlQuery('extension : "png"');
@@ -82,7 +77,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('save form filled', async () => {
-          await savedQueryManagementMenu.fillSaveQueryForm(SAVED_QUERY_NAME, {
+          await savedQueryManagementMenu.fillSaveQueryForm(savedQueryName, {
             includeFilters: false,
           });
 
@@ -93,9 +88,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('list after deleting the query', async () => {
-          // Deletion happens with the load submenu open, so the list re-renders
-          // in place as the empty state — the view this scan targets.
-          await savedQueryManagementMenu.deleteSavedQuery(SAVED_QUERY_NAME);
+          // Deletion leaves the load submenu open, re-rendered as the empty state.
+          await savedQueryManagementMenu.deleteSavedQuery(savedQueryName);
 
           const { violations } = await page.checkA11y({
             include: [MENU_PANEL_TEST_SUBJ],

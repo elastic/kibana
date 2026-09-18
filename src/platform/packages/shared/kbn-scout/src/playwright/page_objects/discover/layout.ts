@@ -282,6 +282,7 @@ export abstract class LayoutMixin extends SaveMixin {
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
 
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
   async openAddFieldEditorFromSidebar() {
     await this.page.testSubj.click('dataView-add-field_btn');
     await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });

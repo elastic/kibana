@@ -586,8 +586,8 @@ export class DataGrid {
   }
 
   /**
-   * Toggles the grid's full-screen mode. The same toolbar button enters and
-   * exits, so callers pair the calls; `aria-pressed` carries the current state.
+   * Toggles the grid's full-screen mode. The same button enters and exits, so
+   * callers pair the calls.
    */
   async toggleFullScreen() {
     const button = this.page.testSubj.locator('dataGridFullScreenButton');

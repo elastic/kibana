@@ -122,10 +122,9 @@ export class SavedQueryManagementMenu {
   }
 
   /**
-   * Opens the save-query form and leaves it open. Split out of
-   * {@link saveNewQuery} so callers can inspect the form between steps; the
-   * "Save query" item is disabled until the live query differs from the loaded
-   * one, so submit a query before calling this.
+   * Opens the save-query form and leaves it open. The "Save query" item is
+   * disabled until the live query differs from the loaded one, so submit a
+   * query first.
    */
   async openSaveQueryForm(): Promise<void> {
     await this.open();

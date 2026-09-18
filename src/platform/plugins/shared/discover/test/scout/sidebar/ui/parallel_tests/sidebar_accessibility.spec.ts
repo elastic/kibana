@@ -11,9 +11,7 @@
  * Automated a11y scans of the Discover sidebar: the field-type filter popover,
  * the collapsed state, and the field editor opened from "Add a field".
  *
- * Runs as a privileged user rather than a viewer: the "Add a field" button is
- * gated on `canEditDataView`, and the extra controls a privileged user sees
- * put more of the sidebar under the scan.
+ * Runs as a privileged user: "Add a field" is gated on `canEditDataView`.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -21,19 +19,13 @@ import { spaceTest } from '../fixtures';
 
 const SIDEBAR_TEST_SUBJ = '[data-test-subj="discover-sidebar"]';
 
-/**
- * Discover page root. Used as the scan root once the sidebar is collapsed:
- * `discover-sidebar` is unmounted in that state (only the re-expand button
- * remains), and `discoverLayout` is not rendered either, because collapsing
- * switches `ResizableLayout` to its static mode, which drops the test subject.
- */
+/** Scan root for the collapsed state, where the sidebar itself is unmounted. */
 const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
 
 spaceTest.describe('Discover sidebar - accessibility', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
-    // Popovers and the field-editor flyout animate in; axe can otherwise scan a
-    // half-rendered frame and report transient violations.
+    // Overlays animate in; axe can otherwise scan a half-rendered frame.
     await discoverScoutSpace.uiSettings.set({ 'accessibility:disableAnimations': true });
   });
 

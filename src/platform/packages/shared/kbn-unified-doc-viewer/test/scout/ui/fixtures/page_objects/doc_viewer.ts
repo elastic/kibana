@@ -393,11 +393,10 @@ export class DocViewer {
   }
 
   /**
-   * Opens the `EuiDataGrid` cell popover for a field's name cell in the fields
-   * table, revealing the cell-level actions. Distinct from
-   * {@link openFieldDescription}, which opens the field's description instead:
-   * the expand button only mounts once the cell is hovered and focused, so both
-   * the hover and the click on the cell are required before it can be clicked.
+   * Opens the cell popover for a field's name cell, revealing the cell-level
+   * actions — unlike {@link openFieldDescription}, which opens the field's
+   * description. The expand button only mounts once the cell is hovered and
+   * focused, hence the hover and click before it.
    */
   async expandFieldNameCell(fieldName: string) {
     await this.openTab('doc_view_table');

@@ -8,61 +8,34 @@
  */
 
 /**
- * Automated a11y scans of the Discover page and its top-nav surfaces: the
- * default view, the save-search flow, the open-search flyout, the inspector,
- * the share modal, the histogram controls, and the field statistics view.
+ * Automated a11y scans of the Discover page and its top-nav surfaces.
  *
- * Page-level scans are scoped to `dscPage`, which covers the Discover page
- * including its top nav. Two things sit outside it: the global Kibana chrome,
- * which other suites own, and the unified tabs bar, which carries a known
- * `aria-required-children` violation (see the note on PAGE_TEST_SUBJ below).
- * They also leave out the data grid, which has its own a11y spec (see the note
- * on DOC_TABLE_TEST_SUBJ).
- *
- * Modals, flyouts and popovers render through EUI portals and so mount outside
- * `dscPage`; each of those scans targets the overlay directly.
+ * Overlays render through EUI portals, so they mount outside the page root and
+ * each of those scans targets the overlay directly.
  */
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 
 /**
- * Discover page root, including the top nav.
- *
- * Deliberately excludes the unified tabs bar, which renders above it: the tabs
- * bar sets `role="tablist"` on a container whose children are the drag-and-drop
- * wrapper rather than `role="tab"` elements, which axe reports as
- * `aria-required-children` (critical). That is a pre-existing `@kbn/unified-tabs`
- * defect the FTR suite never surfaced, because `AXE_CONFIG` narrows that rule to
- * the KQL input's subtree. Scanning the tabs bar here would fail on a defect
- * this suite does not own; it should be covered again once that is fixed.
+ * Page root, including the top nav but not the tabs bar above it — the tabs bar
+ * has a pre-existing `aria-required-children` violation in `@kbn/unified-tabs`.
  */
 const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
 
 /**
- * Excluded from the page-level scans below. EUI's virtualized data-grid body
- * (`.euiDataGrid__virtualized`) scrolls without being keyboard focusable, which
- * axe reports as `scrollable-region-focusable` (serious). The violation is
- * pre-existing EUI behaviour — the doc-viewer a11y spec scopes out its own
- * fields grid for the identical rule — and it only fires when the body actually
- * overflows, so it depends on viewport and row count rather than on anything
- * these scans are testing. The grid is covered directly by
- * `data_grid_accessibility.spec.ts`, so page-level scans leave it out.
+ * Excluded from page scans: EUI's virtualized grid body reports
+ * `scrollable-region-focusable` whenever it overflows. Covered instead by
+ * `data_grid_accessibility.spec.ts`.
  */
 const DOC_TABLE_TEST_SUBJ = '[data-test-subj="discoverDocTable"]';
 
 const SAVE_MODAL_TEST_SUBJ = '[data-test-subj="savedObjectSaveModal"]';
-const OPEN_SEARCH_FLYOUT_TEST_SUBJ = '[data-test-subj="loadSearchForm"]';
-const INSPECTOR_PANEL_TEST_SUBJ = '[data-test-subj="inspectorPanel"]';
-const SHARE_MODAL_TEST_SUBJ = '[data-test-subj="shareContextModal"]';
-const INTERVAL_POPOVER_TEST_SUBJ =
-  '[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"]';
 
 spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
-    // Modals, flyouts and popovers animate in; axe can otherwise scan a
-    // half-rendered frame and report transient violations.
+    // Overlays animate in; axe can otherwise scan a half-rendered frame.
     await discoverScoutSpace.uiSettings.set({ 'accessibility:disableAnimations': true });
   });
 
@@ -101,34 +74,40 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
     }
   );
 
-  spaceTest('has no automated a11y violations in the save flow', async ({ page, pageObjects }) => {
-    const { discover } = pageObjects;
+  spaceTest(
+    'has no automated a11y violations in the save flow',
+    async ({ page, pageObjects }, testInfo) => {
+      const { discover } = pageObjects;
+      // Per-attempt title: cleanup only runs after retries, and the save modal
+      // disables its confirm button on a duplicate.
+      const savedSearchTitle = `a11ySearch-${testInfo.retry}`;
 
-    await spaceTest.step('save modal opened', async () => {
-      await discover.openSaveSearchModal();
+      await spaceTest.step('save modal opened', async () => {
+        await discover.openSaveSearchModal();
 
-      const { violations } = await page.checkA11y({ include: [SAVE_MODAL_TEST_SUBJ] });
-      expect(violations).toStrictEqual([]);
-    });
-
-    await spaceTest.step('title entered', async () => {
-      await discover.saveModal.fillTitle('a11ySearch');
-
-      const { violations } = await page.checkA11y({ include: [SAVE_MODAL_TEST_SUBJ] });
-      expect(violations).toStrictEqual([]);
-    });
-
-    await spaceTest.step('save confirmed', async () => {
-      await discover.saveModal.confirm();
-      await discover.waitUntilTabIsLoaded();
-
-      const { violations } = await page.checkA11y({
-        include: [PAGE_TEST_SUBJ],
-        exclude: [DOC_TABLE_TEST_SUBJ],
+        const { violations } = await page.checkA11y({ include: [SAVE_MODAL_TEST_SUBJ] });
+        expect(violations).toStrictEqual([]);
       });
-      expect(violations).toStrictEqual([]);
-    });
-  });
+
+      await spaceTest.step('title entered', async () => {
+        await discover.saveModal.fillTitle(savedSearchTitle);
+
+        const { violations } = await page.checkA11y({ include: [SAVE_MODAL_TEST_SUBJ] });
+        expect(violations).toStrictEqual([]);
+      });
+
+      await spaceTest.step('save confirmed', async () => {
+        await discover.saveModal.confirm();
+        await discover.waitUntilTabIsLoaded();
+
+        const { violations } = await page.checkA11y({
+          include: [PAGE_TEST_SUBJ],
+          exclude: [DOC_TABLE_TEST_SUBJ],
+        });
+        expect(violations).toStrictEqual([]);
+      });
+    }
+  );
 
   spaceTest(
     'has no automated a11y violations in the top nav overlays',
@@ -136,23 +115,27 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
       const { discover, inspector } = pageObjects;
 
       await spaceTest.step('open-search flyout', async () => {
+        const loadSearchForm = page.testSubj.locator('loadSearchForm');
+
         // Populated by the standard Discover archive, which ships saved searches.
         await discover.clickAppMenuItem('discoverOpenButton');
-        await page.testSubj.locator('loadSearchForm').waitFor({ state: 'visible' });
+        await loadSearchForm.waitFor({ state: 'visible' });
 
         const { violations } = await page.checkA11y({
-          include: [OPEN_SEARCH_FLYOUT_TEST_SUBJ],
+          include: ['[data-test-subj="loadSearchForm"]'],
         });
         expect(violations).toStrictEqual([]);
 
         await page.testSubj.click('euiFlyoutCloseButton');
-        await page.testSubj.locator('loadSearchForm').waitFor({ state: 'hidden' });
+        await loadSearchForm.waitFor({ state: 'hidden' });
       });
 
       await spaceTest.step('inspector flyout', async () => {
         await inspector.open();
 
-        const { violations } = await page.checkA11y({ include: [INSPECTOR_PANEL_TEST_SUBJ] });
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="inspectorPanel"]'],
+        });
         expect(violations).toStrictEqual([]);
 
         await inspector.close();
@@ -162,7 +145,9 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
         await discover.clickAppMenuItem('shareTopNavButton');
         await page.testSubj.locator('shareContextModal').waitFor({ state: 'visible' });
 
-        const { violations } = await page.checkA11y({ include: [SHARE_MODAL_TEST_SUBJ] });
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="shareContextModal"]'],
+        });
         expect(violations).toStrictEqual([]);
 
         await discover.closeShareModal();
@@ -190,7 +175,9 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
       await spaceTest.step('interval selector popover', async () => {
         await discover.openChartIntervalSelector();
 
-        const { violations } = await page.checkA11y({ include: [INTERVAL_POPOVER_TEST_SUBJ] });
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"]'],
+        });
         expect(violations).toStrictEqual([]);
       });
     }
