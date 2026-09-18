@@ -6,7 +6,11 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { CreateSourceRequest, SourceWithHealth } from '@kbn/nightshift-shared';
+import type {
+  CreateSourceRequest,
+  SourceWithHealth,
+  UpdateSourceRequest,
+} from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout';
 import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
 
@@ -60,7 +64,7 @@ export const updateSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
   id: string,
-  body: CreateSourceRequest,
+  body: UpdateSourceRequest,
   { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
   apiClient.put(spacePath(`${SOURCES_PATH}/${id}`, spaceId), {

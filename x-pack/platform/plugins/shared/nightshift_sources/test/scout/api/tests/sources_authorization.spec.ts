@@ -79,7 +79,9 @@ apiTest.describe(
       expect(fetched.body.health).toBe('ok');
 
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
-      expect(await updateSource(apiClient, cookieHeader, sourceId, body)).toHaveStatusCode(403);
+      expect(
+        await updateSource(apiClient, cookieHeader, sourceId, { ...body, tags: [] })
+      ).toHaveStatusCode(403);
       expect(await setSourceEnabled(apiClient, cookieHeader, sourceId, false)).toHaveStatusCode(
         403
       );

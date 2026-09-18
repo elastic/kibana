@@ -134,7 +134,9 @@ apiTest.describe(
           tags: [],
           esql: `FROM ${index} | WHERE status >= 500`,
         };
-        const { source } = (await createSource(apiClient, manager.cookieHeader, body)).body;
+        const created = await createSource(apiClient, manager.cookieHeader, body);
+        expect(created).toHaveStatusCode(200);
+        const { source } = created.body;
 
         const renamed = await updateSource(apiClient, manager.cookieHeader, source.id, {
           ...body,
@@ -163,12 +165,12 @@ apiTest.describe(
     );
 
     apiTest('flips enabled through _disable and _enable', async ({ apiClient }) => {
-      const { source } = (
-        await createSource(apiClient, manager.cookieHeader, {
-          title: `${TITLE_PREFIX}-${suffix}-enabled`,
-          esql: `FROM ${index}`,
-        })
-      ).body;
+      const created = await createSource(apiClient, manager.cookieHeader, {
+        title: `${TITLE_PREFIX}-${suffix}-enabled`,
+        esql: `FROM ${index}`,
+      });
+      expect(created).toHaveStatusCode(200);
+      const { source } = created.body;
 
       const disabled = await setSourceEnabled(apiClient, manager.cookieHeader, source.id, false);
       expect(disabled).toHaveStatusCode(200);
@@ -213,10 +215,12 @@ apiTest.describe(
       const pagePrefix = `${TITLE_PREFIX}-${suffix}-page-`;
       const ids: string[] = [];
       for (const title of titles) {
-        const { source } = (
-          await createSource(apiClient, manager.cookieHeader, { title, esql: `FROM ${index}` })
-        ).body;
-        ids.push(source.id);
+        const created = await createSource(apiClient, manager.cookieHeader, {
+          title,
+          esql: `FROM ${index}`,
+        });
+        expect(created).toHaveStatusCode(200);
+        ids.push(created.body.source.id);
       }
 
       const listPage = (page: number) =>

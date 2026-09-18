@@ -66,6 +66,8 @@ export const updateSourceRequestSchema = z.object({
   esql: sourceEsqlSchema,
 });
 
+export type UpdateSourceRequest = z.input<typeof updateSourceRequestSchema>;
+
 export const listSourcesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   per_page: z.coerce

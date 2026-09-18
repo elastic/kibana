@@ -61,6 +61,7 @@ export {
   type SourceInput,
   type SourceMutationResponse,
   type SourceWithHealth,
+  type UpdateSourceRequest,
 } from './src/sources/schema';
 
 export {
