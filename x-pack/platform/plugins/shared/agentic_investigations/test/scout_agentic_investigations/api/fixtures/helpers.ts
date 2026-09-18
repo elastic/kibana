@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout/api';
+import type { ApiClientFixture } from '@kbn/scout';
 import { AB_CONVERSATION_BY_ID_PATH, PUBLIC_HEADERS } from './constants';
 
 interface CreatedResponse {
