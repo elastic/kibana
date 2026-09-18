@@ -52079,6 +52079,7 @@ paths:
           name: outputId
           required: true
           schema:
+            maxLength: 500
             type: string
       responses:
         '200':
