@@ -36,4 +36,16 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
     fireEvent.change(amount, { target: { value: '0' } });
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it('keeps a fractional amount on screen flagged instead of saving a floored cadence', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+
+    fireEvent.change(amount, { target: { value: '1.9' } });
+
+    // Committing here would persist 1h — a cadence the analyst never asked for.
+    expect(onChange).not.toHaveBeenCalled();
+    expect(amount).toHaveValue(1.9);
+    expect(amount).toBeInvalid();
+  });
 });

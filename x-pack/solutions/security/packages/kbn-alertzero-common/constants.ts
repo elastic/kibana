@@ -97,7 +97,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     deepLinkId: SecurityPageName.alertZeroWatchFloor,
-    name: 'Watch Floor',
+    name: 'Triage Watch',
     color: '#16b3a6',
   },
   {
@@ -116,7 +116,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_DEEP_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDeep,
-    name: 'Deep Watch',
+    name: 'Forensics Watch',
     color: '#8b5cf6',
     isBeta: true,
   },

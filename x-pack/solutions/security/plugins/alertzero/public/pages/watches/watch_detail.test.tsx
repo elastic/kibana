@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
@@ -31,26 +33,59 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: 
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
 jest.mock('./components/watches_section_layout', () => ({
-  WatchesSectionLayout: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <div>
-      <h1>{title}</h1>
-      {children}
-    </div>
-  ),
+  WatchesSectionLayout: ({
+    children,
+    title,
+    headerPrimaryActionItem,
+    headerItems,
+  }: {
+    children: React.ReactNode;
+    title: string;
+    headerPrimaryActionItem?: {
+      label: string;
+      testId?: string;
+      disableButton?: boolean | (() => boolean);
+      isLoading?: boolean;
+      run: () => void;
+    };
+    headerItems?: Array<{
+      label: string;
+      testId?: string;
+      disableButton?: boolean | (() => boolean);
+      run: () => void;
+    }>;
+  }) => {
+    const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
+      typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
+    return (
+      <div>
+        <h1>{title}</h1>
+        {headerItems?.map((item) => (
+          <button
+            key={item.testId}
+            type="button"
+            data-test-subj={item.testId}
+            disabled={resolveDisabled(item.disableButton)}
+            onClick={() => item.run()}
+          >
+            {item.label}
+          </button>
+        ))}
+        {headerPrimaryActionItem ? (
+          <button
+            type="button"
+            data-test-subj={headerPrimaryActionItem.testId}
+            disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+            onClick={() => headerPrimaryActionItem.run()}
+          >
+            {headerPrimaryActionItem.label}
+          </button>
+        ) : null}
+        {children}
+      </div>
+    );
+  },
 }));
-
-// jsdom ships no IntersectionObserver; the two-column layout's scroll-spy depends on it.
-class IntersectionObserverMock {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-  takeRecords = jest.fn(() => []);
-  root = null;
-  rootMargin = '';
-  thresholds: number[] = [];
-}
-
-global.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
 
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
@@ -246,6 +281,35 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
+  });
+
+  it('lays the accordion out with its own nodes and keeps the enable switch out of the toggle button', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const header = screen.getByTestId(`alertZeroWorkerAccordionHeader-${worker.id}`);
+      const body = screen.getByTestId(`alertZeroWorkerSettingsBody-${worker.id}`);
+      expect(header).toBeInTheDocument();
+      expect(body).toBeInTheDocument();
+      // The band and the body carry the padding: EUI's own accordion nodes stay untouched.
+      expect(getComputedStyle(header).padding).toBe('16px');
+      expect(getComputedStyle(body).padding).toBe('16px');
+
+      // The switch is interactive content; EUI renders it beside the toggle, never inside it.
+      expect(
+        screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`).closest('button')
+      ).toBeNull();
+    }
+  });
+
+  it('styles its accordion through EuiAccordion props, not through EUI private classes', () => {
+    // `.euiAccordion__*` is EUI internals rather than a public contract, so an EUI update may
+    // reshape it — the panel has to carry its own nodes and style them instead.
+    const panelSource = readFileSync(
+      join(__dirname, 'components/worker_settings_panel.tsx'),
+      'utf8'
+    );
+    expect(panelSource).not.toMatch(/\.euiAccordion__/);
   });
 
   it('renders each member as a section in a single column — no summary rail', () => {

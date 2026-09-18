@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { WatchAutonomyLevel } from '@kbn/alertzero-common';
 import {
+  factValueParts,
   getAutonomyLevelCards,
   workerNameForCards,
   supervisedWarnForWorker,
@@ -116,7 +117,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
                 color: ${euiTheme.colors.textSubdued};
               `}
             >
-              <FactParts parts={fact.parts} />
+              <FactParts parts={factValueParts(fact.value)} />
             </dd>
           </div>
         ))}
@@ -182,27 +183,12 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
 
   return (
     <div data-test-subj="alertZeroAutonomyLevelControl">
-      {cards.intro ? (
-        <EuiText size="xs" color="subdued">
-          <p
-            data-test-subj="alertZeroAutonomyIntro"
-            css={css`
-              margin: 0 0 8px;
-            `}
-          >
-            {cards.intro}
-          </p>
-        </EuiText>
-      ) : null}
       <div
         role="radiogroup"
         aria-label={i18n.AUTONOMY_RADIOGROUP_ARIA_LABEL}
         css={css`
-          display: grid;
-          grid-template-columns: repeat(
-            ${levels.length <= 1 ? 1 : levels.length === 2 ? 2 : 3},
-            minmax(0, 1fr)
-          );
+          display: flex;
+          flex-direction: column;
           gap: 10px;
         `}
       >

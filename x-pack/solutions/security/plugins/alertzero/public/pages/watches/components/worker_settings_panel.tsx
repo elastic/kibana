@@ -26,7 +26,9 @@ import {
   type WorkerSettingsWrite,
 } from '@kbn/alertzero-common';
 import { AutonomyLevelControl } from './autonomy_level_control';
+import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
+import { SettingRow } from './setting_row';
 import { WorkerSkillsTable } from './worker_skills_table';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
@@ -82,33 +84,56 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       : settingsI18n.MANUAL_RUN_LABEL;
   const controlsDisabled = settingsLocked || isSaving;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
+  const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 
-  const accordionCss = useMemo(
+  const accordionHeaderStyles = useMemo(
     () => css`
-      .euiAccordion__triggerWrapper {
-        align-items: flex-start;
-        padding: ${euiTheme.size.base};
-        /* Full-width rule under the header, mirroring the static single-Worker band. */
-        border-bottom: ${isExpanded ? euiTheme.border.thin : 'none'};
-      }
-      .euiAccordion__button {
-        width: auto;
+      align-self: flex-start;
+      width: 100%;
+      min-width: 0;
+      padding: ${euiTheme.size.base};
+      text-align: left;
+    `,
+    [euiTheme]
+  );
 
-        &,
-        &:hover,
-        &:focus,
-        &:hover *,
-        &:focus * {
-          text-decoration: none;
-        }
+  const accordionHeaderActionStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      padding: ${euiTheme.size.base};
+    `,
+    [euiTheme]
+  );
+
+  const accordionArrowStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      margin-left: ${euiTheme.size.base};
+      margin-top: ${euiTheme.size.base};
+    `,
+    [euiTheme]
+  );
+
+  const accordionButtonStyles = useMemo(
+    () => css`
+      width: auto;
+
+      &,
+      &:hover,
+      &:focus,
+      &:hover *,
+      &:focus * {
+        text-decoration: none;
       }
-      .euiAccordion__optionalAction {
-        align-self: flex-start;
-        padding-block-start: 0;
-      }
-      .euiAccordion__children {
-        padding: ${euiTheme.size.base};
-      }
+    `,
+    []
+  );
+
+  const accordionBodyStyles = useMemo(
+    () => css`
+      padding: ${euiTheme.size.base};
+      /* Full-width rule under the header, mirroring the static single-Worker band. */
+      border-top: ${isExpanded ? euiTheme.border.thin : 'none'};
     `,
     [euiTheme, isExpanded]
   );
@@ -191,24 +216,33 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         </>
       ) : null}
       <EuiSpacer size="m" />
-      <AutonomyLevelControl
-        workerId={worker.id}
-        current={settings.autonomy}
-        allowedAutonomyLevels={getAllowedAutonomyLevels(worker.id)}
-        isDisabled={controlsDisabled}
-        onChange={(autonomy) => onSettingsChange({ autonomy })}
-      />
+      <SettingRow
+        label={settingsI18n.AUTONOMY_SECTION_TITLE}
+        labelHelp={autonomyIntro}
+        data-test-subj={`alertZeroAutonomyRow-${worker.id}`}
+      >
+        <AutonomyLevelControl
+          workerId={worker.id}
+          current={settings.autonomy}
+          allowedAutonomyLevels={getAllowedAutonomyLevels(worker.id)}
+          isDisabled={controlsDisabled}
+          onChange={(autonomy) => onSettingsChange({ autonomy })}
+        />
+      </SettingRow>
       {/* Only schedule-driven Workers project an interval; its presence is the signal. */}
       {settings.scheduleInterval != null ? (
-        <>
-          <EuiSpacer size="m" />
+        <SettingRow
+          label={settingsI18n.TRIGGER_LABEL}
+          labelHelp={settingsI18n.TRIGGER_HELP_TEXT}
+          data-test-subj={`alertZeroTriggerRow-${worker.id}`}
+        >
           <ScheduleIntervalField
             workerId={worker.id}
             current={settings.scheduleInterval}
             isDisabled={controlsDisabled}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
           />
-        </>
+        </SettingRow>
       ) : null}
       {/* Watch-owned settings for this Worker's `extras`; extras replaces whole-object on save. */}
       {CustomSettings ? (
@@ -237,16 +271,31 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}
           onToggle={(isOpen) => onToggle(worker.id, isOpen)}
-          buttonContent={headerBandContent(`${worker.id}-heading`, 'span')}
           buttonContentClassName="alertZeroWorkerAccordion__buttonContent"
+          buttonContent={
+            <div
+              css={accordionHeaderStyles}
+              data-test-subj={`alertZeroWorkerAccordionHeader-${worker.id}`}
+            >
+              {headerBandContent(`${worker.id}-heading`, 'span')}
+            </div>
+          }
+          // Layout rides on EuiAccordion's own props and on nodes we render: EUI's internal
+          // `.euiAccordion__*` classes are not part of its public contract, so an EUI update may
+          // reshape them without notice.
+          buttonProps={{ css: accordionButtonStyles }}
+          arrowProps={{ css: accordionArrowStyles }}
           extraAction={
-            <div onClick={stopAccordionToggle} onKeyDown={stopAccordionToggle}>
+            <div
+              css={accordionHeaderActionStyles}
+              onClick={stopAccordionToggle}
+              onKeyDown={stopAccordionToggle}
+            >
               {enabledSwitch}
             </div>
           }
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
           css={css`
-            ${accordionCss}
             .alertZeroWorkerAccordion__buttonContent {
               flex: 1;
               min-width: 0;
@@ -254,7 +303,12 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             }
           `}
         >
-          {settingsBody}
+          <div
+            css={accordionBodyStyles}
+            data-test-subj={`alertZeroWorkerSettingsBody-${worker.id}`}
+          >
+            {settingsBody}
+          </div>
         </EuiAccordion>
       </EuiPanel>
     );

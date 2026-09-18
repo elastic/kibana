@@ -25,7 +25,8 @@ export type LevelCardFactPart =
 export interface LevelCardFact {
   /** Sentence-case fact label (same size as value; rendered semibold). */
   label: string;
-  parts: LevelCardFactPart[];
+  /** Complete sentence; `<you>`/`<worker>` mark where an actor pill is inserted. */
+  value: string;
 }
 
 export interface AutonomyLevelCard {
@@ -41,8 +42,34 @@ export interface AutonomyLevelCardsCopy {
   levels: AutonomyLevelCard[];
 }
 
+/**
+ * Actor tokens inside a fact value. A value is one whole sentence rather than a chain of English
+ * fragments, so a translation can place the pills anywhere in it (including dropping or reordering
+ * them) instead of inheriting the word order of the source string. `ignoreTag` keeps the tokens
+ * literal: without it the ICU parser would read them as tags and demand closing ones.
+ */
+const ACTOR_TOKENS: Record<LevelCardActor, string> = { you: '<you>', worker: '<worker>' };
+
+const ACTOR_TOKEN_PATTERN = /(<you>|<worker>)/;
+
+const factValue = (id: string, defaultMessage: string): string =>
+  i18n.translate(id, { defaultMessage, ignoreTag: true });
+
 const pill = (actor: LevelCardActor): LevelCardFactPart => ({ kind: 'pill', actor });
 const text = (t: string): LevelCardFactPart => ({ kind: 'text', text: t });
+
+/** Splits a translated fact value into the pill/text parts the card renders. */
+export const factValueParts = (value: string): LevelCardFactPart[] =>
+  value
+    .split(ACTOR_TOKEN_PATTERN)
+    .filter((chunk) => chunk.length > 0)
+    .map((chunk) =>
+      chunk === ACTOR_TOKENS.you
+        ? pill('you')
+        : chunk === ACTOR_TOKENS.worker
+        ? pill('worker')
+        : text(chunk)
+    );
 
 const actorLabel = (actor: LevelCardActor): string =>
   actor === 'you'
@@ -53,9 +80,11 @@ const actorLabel = (actor: LevelCardActor): string =>
         defaultMessage: 'Worker',
       });
 
-/** Resolves pill parts to plain text for aria-labels and tests. */
-export const factPartsToText = (parts: LevelCardFactPart[]): string =>
-  parts.map((part) => (part.kind === 'pill' ? actorLabel(part.actor) : part.text)).join('');
+/** Resolves a fact value to plain text for aria-labels and tests. */
+export const factValueToText = (value: string): string =>
+  factValueParts(value)
+    .map((part) => (part.kind === 'pill' ? actorLabel(part.actor) : part.text))
+    .join('');
 
 const supervisedWarn = (workerName: string): string =>
   i18n.translate('xpack.alertzero.watches.settings.autonomyCards.supervisedWarn', {
@@ -94,6 +123,11 @@ export const supervisedWarnForWorker = (workerName: string): string => supervise
  * Consequence-forward level cards per Worker, ported from the Sep 14 prototype
  * (notdaybreak_mvp workerAutonomyLevelCards.ts). Copy describes what each
  * level does for THIS Worker — not a generic autonomy definition.
+ *
+ * Card copy may only name behaviour the Worker has: Alert Triage's cards describe
+ * who decides a closure (the level's own contract, as the card intro frames it),
+ * not a confidence threshold, because no Worker settings field or consumer for one
+ * exists.
  */
 const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: {
@@ -117,7 +151,10 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidents',
               { defaultMessage: 'Incidents' }
             ),
-            parts: [pill('you'), text(' approve each escalation')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidentsValue',
+              '<you> approve each escalation'
+            ),
           },
         ],
       },
@@ -136,7 +173,10 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.incidents',
               { defaultMessage: 'Incidents' }
             ),
-            parts: [pill('worker'), text(' escalates Investigations automatically')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.incidentsValue',
+              '<worker> escalates Investigations automatically'
+            ),
           },
         ],
       },
@@ -162,17 +202,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.classifies',
               { defaultMessage: 'Classifies' }
             ),
-            parts: [pill('worker'), text(' every batch')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.classifiesValue',
+              '<worker> every batch'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.closures',
               { defaultMessage: 'Closures' }
             ),
-            parts: [
-              pill('you'),
-              text(' answer each Proposal — accept to close, or reject and re-tag'),
-            ],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.closuresValue',
+              '<you> answer each Proposal — accept to close, or reject and re-tag'
+            ),
           },
         ],
       },
@@ -181,8 +224,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.who',
           {
-            defaultMessage:
-              'Closes false positives automatically at or above the confidence score.',
+            defaultMessage: 'Closes false positives on its own; you review and can reopen.',
           }
         ),
         facts: [
@@ -191,19 +233,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.classifies',
               { defaultMessage: 'Classifies' }
             ),
-            parts: [pill('worker'), text(' every batch')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.classifiesValue',
+              '<worker> every batch'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closures',
               { defaultMessage: 'Closures' }
             ),
-            parts: [
-              pill('worker'),
-              text(' answers Proposals automatically at ≥ confidence — '),
-              pill('you'),
-              text(' reopen any you disagree with'),
-            ],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closuresValue',
+              '<worker> closes false positives on its own — <you> reopen any you disagree with'
+            ),
           },
         ],
       },
@@ -212,8 +255,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
           {
-            defaultMessage:
-              'Closes false positives automatically — same as Assisted for this Worker.',
+            defaultMessage: 'Closes false positives on its own — same as Assisted for this Worker.',
           }
         ),
         facts: [
@@ -222,19 +264,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.classifies',
               { defaultMessage: 'Classifies' }
             ),
-            parts: [pill('worker'), text(' every batch')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.classifiesValue',
+              '<worker> every batch'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closures',
               { defaultMessage: 'Closures' }
             ),
-            parts: [
-              pill('worker'),
-              text(' answers Proposals automatically at ≥ confidence — '),
-              pill('you'),
-              text(' reopen any you disagree with'),
-            ],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closuresValue',
+              '<worker> closes false positives on its own — <you> reopen any you disagree with'
+            ),
           },
         ],
       },
@@ -260,14 +303,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.hunt',
               { defaultMessage: 'Hunt' }
             ),
-            parts: [pill('you'), text(' approve before it hunts')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.huntValue',
+              '<you> approve before it hunts'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.proposalsValue',
+              '<you> approve each'
+            ),
           },
         ],
       },
@@ -285,14 +334,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.hunt',
               { defaultMessage: 'Hunt' }
             ),
-            parts: [pill('worker'), text(' hunts every report automatically')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.huntValue',
+              '<worker> hunts every report automatically'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.proposalsValue',
+              '<you> approve each'
+            ),
           },
         ],
       },
@@ -310,19 +365,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.hunt',
               { defaultMessage: 'Hunt' }
             ),
-            parts: [pill('worker'), text(' hunts every report automatically')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.huntValue',
+              '<worker> hunts every report automatically'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [
-              pill('worker'),
-              text(' answers them automatically — reversible by '),
-              pill('you'),
-              text('. Every action is recorded.'),
-            ],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposalsValue',
+              '<worker> answers them automatically — reversible by <you>. Every action is recorded.'
+            ),
           },
         ],
       },
@@ -349,14 +405,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.analysis',
               { defaultMessage: 'Analysis' }
             ),
-            parts: [pill('you'), text(' approve before it analyzes a rule')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.analysisValue',
+              '<you> approve before it analyzes a rule'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.proposalsValue',
+              '<you> approve each'
+            ),
           },
         ],
       },
@@ -374,14 +436,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.analysis',
               { defaultMessage: 'Analysis' }
             ),
-            parts: [pill('worker'), text(' analyzes every qualifying rule automatically')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.analysisValue',
+              '<worker> analyzes every qualifying rule automatically'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.proposalsValue',
+              '<you> approve each'
+            ),
           },
         ],
       },
@@ -408,14 +476,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.drafting',
               { defaultMessage: 'Drafting' }
             ),
-            parts: [pill('you'), text(' approve before it drafts against a gap')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.draftingValue',
+              '<you> approve before it drafts against a gap'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.proposalsValue',
+              '<you> approve each'
+            ),
           },
         ],
       },
@@ -434,14 +508,20 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.drafting',
               { defaultMessage: 'Drafting' }
             ),
-            parts: [pill('worker'), text(' drafts against every gap signal automatically')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.draftingValue',
+              '<worker> drafts against every gap signal automatically'
+            ),
           },
           {
             label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposalsValue',
+              '<you> approve each'
+            ),
           },
         ],
       },

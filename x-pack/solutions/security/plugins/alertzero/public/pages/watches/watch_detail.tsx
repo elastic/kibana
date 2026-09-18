@@ -71,6 +71,32 @@ export const WatchDetailPage: React.FC = () => {
 
   const isMultiWorker = members.length > 1;
 
+  const headerPrimaryActionItem = useMemo(
+    () => ({
+      id: 'alertZeroWatchSettingsSave',
+      label: settingsI18n.SAVE_WATCH_SETTINGS,
+      iconType: 'save' as const,
+      isLoading: isSaving,
+      disableButton: !isDirty || isSaving || Boolean(workersError),
+      testId: 'alertZeroWatchSettingsSave',
+      run: onSave,
+    }),
+    [isSaving, isDirty, workersError, onSave]
+  );
+
+  const headerItems = useMemo(
+    () => [
+      {
+        id: 'alertZeroWatchSettingsDiscard',
+        label: settingsI18n.DISCARD_WATCH_SETTINGS,
+        iconType: 'cross' as const,
+        disableButton: !isDirty || isSaving,
+        testId: 'alertZeroWatchSettingsDiscard',
+        run: onDiscard,
+      },
+    ],
+    [isDirty, isSaving, onDiscard]
+  );
   // Track which Workers the reader has collapsed (default: all expanded). Resets when
   // navigating to another Watch (state is keyed on watchId via the parent route change).
   const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
@@ -86,18 +112,6 @@ export const WatchDetailPage: React.FC = () => {
       return next;
     });
   }, []);
-
-  const layoutStyles = useMemo(
-    () => ({
-      singleColumn: css`
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.m};
-        max-width: 720px;
-      `,
-    }),
-    [euiTheme]
-  );
 
   const hasCurrentWatch = watch?.id === watchId;
   const isNotFound =
@@ -173,7 +187,13 @@ export const WatchDetailPage: React.FC = () => {
     }
 
     return (
-      <div css={layoutStyles.singleColumn}>
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: ${euiTheme.size.m};
+        `}
+      >
         {members.map((worker) => {
           const draft = resolve(worker);
           return (
@@ -199,41 +219,20 @@ export const WatchDetailPage: React.FC = () => {
   };
 
   return (
-    <WatchesSectionLayout active={watchId} title={watch.name}>
+    <WatchesSectionLayout
+      active={watchId}
+      title={watch.name}
+      headerPrimaryActionItem={headerPrimaryActionItem}
+      headerItems={headerItems}
+    >
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-            {saveBlockedByInvalidDraft ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
-                  <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onDiscard}
-                disabled={!isDirty || isSaving}
-                data-test-subj="alertZeroWatchSettingsDiscard"
-              >
-                {settingsI18n.DISCARD_WATCH_SETTINGS}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onSave}
-                // A failed reload leaves stale Workers in the cache; do not write against them
-                // until Retry in the load-error prompt has succeeded.
-                disabled={!isDirty || isSaving || Boolean(workersError)}
-                isLoading={isSaving}
-                data-test-subj="alertZeroWatchSettingsSave"
-              >
-                {settingsI18n.SAVE_WATCH_SETTINGS}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {saveBlockedByInvalidDraft ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
+              <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
 
         {intro ? (
           <EuiFlexItem grow={false}>
