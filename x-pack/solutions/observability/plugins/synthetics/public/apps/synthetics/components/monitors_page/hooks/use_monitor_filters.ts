@@ -71,6 +71,13 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
   const statusIds = idsForStatusFilter(overviewStatus, statusFilter);
+  // Applied in every branch below — omitting it here (as the schedules/AND-locations
+  // branch previously did) would leave a `monitor.id`-only filter, which for
+  // alerts is not itself a space boundary: the alerts-as-data index isn't
+  // guaranteed to scope by space just because a `monitor.id` value matches.
+  const spaceFilter: UrlFilter[] = space
+    ? [{ field: forAlerts ? 'kibana.space_ids' : 'meta.space_id', values: [space.id] }]
+    : [];
 
   // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
   // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
@@ -80,7 +87,10 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
     // schedule or (AND-ed) location filter is also active.
     const ids = statusIds ? allIds.filter((id) => statusIds.includes(id)) : allIds;
     // If ids is empty we return a fixed non-matching id just to not get any result.
-    return [{ field: 'monitor.id', values: ids.length ? ids : [NO_MATCHING_MONITOR_ID] }];
+    return [
+      { field: 'monitor.id', values: ids.length ? ids : [NO_MATCHING_MONITOR_ID] },
+      ...spaceFilter,
+    ];
   }
 
   return [
@@ -95,9 +105,7 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
       values: tags,
     }),
     ...(locations?.length ? [{ field: 'observer.geo.name', values: getValues(locations) }] : []),
-    ...(space
-      ? [{ field: forAlerts ? 'kibana.space_ids' : 'meta.space_id', values: [space.id] }]
-      : []),
+    ...spaceFilter,
   ];
 };
 

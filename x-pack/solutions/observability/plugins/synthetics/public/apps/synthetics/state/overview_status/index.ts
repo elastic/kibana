@@ -218,6 +218,16 @@ const applyStaleBeforeWindow = (state: OverviewStatusStateReducer) => {
       locations,
     };
     delete status.pendingConfigs[configId];
+    // `pendingIds`/`staleIds` are the unpaginated id arrays a `statusFilter`
+    // scopes to (see `useMonitorFilters`) — keep them in step with this
+    // promotion, or a monitor moved here would still be excluded when
+    // filtering to "Stale" and wrongly included when filtering to "Pending".
+    if (status.pendingIds) {
+      status.pendingIds = status.pendingIds.filter((id) => id !== meta.monitorQueryId);
+    }
+    if (status.staleIds && !status.staleIds.includes(meta.monitorQueryId)) {
+      status.staleIds.push(meta.monitorQueryId);
+    }
     changed = true;
   }
 

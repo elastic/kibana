@@ -8,7 +8,6 @@
 import { useEffect, useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { estypes } from '@elastic/elasticsearch';
-import { escapeQuotes } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
@@ -23,6 +22,13 @@ import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { useMonitorFilters } from './use_monitor_filters';
 
 const ALERT_STATUS_FIELD = 'kibana.alert.status';
+// See the matching `escapeKuery`-based clause in `use_overview_alerts_annotations.ts`
+// for why this mirrors the annotation layer's `monitor.name: *value*` KQL
+// wildcard exactly: a `wildcard` query, not `query_string`, so a literal `*`/`?`
+// in the search text can be escaped without also having to defend against
+// Lucene query syntax (booleans, field qualifiers, grouping) the way a raw
+// `query_string` value would require.
+const escapeWildcardValue = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
 
 interface Props {
   from: string;
@@ -33,19 +39,24 @@ export function useOverviewAlertsCount({ from, to }: Props) {
   const { http } = useKibana<ClientPluginsStart>().services;
   const { locations, query: searchQuery } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
-  // Spaces are a security boundary for alert data — `alertsFilters` omits the
-  // `kibana.space_ids` clause until the active space resolves (see
-  // `useKibanaSpace`), which would otherwise let this fire unscoped and
-  // transiently expose counts from every space. Gate the query on it instead
-  // of treating "not resolved yet" as "no filter".
-  const { loading: spaceLoading } = useKibanaSpace();
+  // Spaces are a security boundary for alert data. `useKibanaSpace` reports
+  // `loading: false` with `space: undefined` both before the first resolve
+  // *and* if the lookup fails — checking `loading` alone would treat a failed
+  // lookup as "ready" and let `alertsFilters` (built from the same call inside
+  // `useMonitorFilters`) go out unscoped. Require an actually-resolved space.
+  const { space, loading: spaceLoading } = useKibanaSpace();
+  const spaceReady = !spaceLoading && Boolean(space);
 
   const abortCtrlRef = useRef(new AbortController());
 
   const query: estypes.QueryDslQueryContainer = {
     bool: {
       filter: [
-        { range: { '@timestamp': { gte: from, lte: to } } },
+        // Anchored on the alert's onset, matching the annotation markers this
+        // count should agree with — `@timestamp` is the last write (e.g. the
+        // recovery check), which can land outside the window a `kibana.alert.start`
+        // inside it would still be counted for by the markers.
+        { range: { 'kibana.alert.start': { gte: from, lte: to } } },
         ...alertsFilters.map(
           (filter): estypes.QueryDslQueryContainer => ({
             terms: { [filter.field]: (filter.values ?? []).map(String) },
@@ -55,19 +66,16 @@ export function useOverviewAlertsCount({ from, to }: Props) {
           ? [{ terms: { 'observer.geo.name': locations } } as estypes.QueryDslQueryContainer]
           : []),
         // Same free-text search box the ping chart and monitor grid already
-        // scope to (see `getQueryFilters` in `common/constants/client_defaults.ts`
-        // for the matching pattern) — see the KQL clause in
-        // `use_overview_alerts_annotations.ts` for why this only matches
-        // `monitor.name` rather than the ping index's full field set. Quoted,
-        // like `getQueryFilters`, so the query is a phrase match rather than
-        // raw Lucene `query_string` syntax the search box's free text isn't
-        // meant to be interpreted as.
+        // scope to — see the KQL clause in `use_overview_alerts_annotations.ts`
+        // for why this only matches `monitor.name` rather than the ping
+        // index's full field set. A `wildcard` (not `query_string`) query, and
+        // deliberately not `case_insensitive`, to match that clause's `*value*`
+        // KQL wildcard semantics against the same keyword field exactly.
         ...(searchQuery
           ? [
               {
-                query_string: {
-                  query: `"${escapeQuotes(searchQuery)}"`,
-                  fields: ['monitor.name'],
+                wildcard: {
+                  'monitor.name': { value: `*${escapeWildcardValue(searchQuery)}*` },
                 },
               } as estypes.QueryDslQueryContainer,
             ]
@@ -88,15 +96,15 @@ export function useOverviewAlertsCount({ from, to }: Props) {
   );
 
   useEffect(() => {
-    if (spaceLoading) {
+    if (!spaceReady) {
       return;
     }
     refetch();
-  }, [refetch, spaceLoading]);
+  }, [refetch, spaceReady]);
 
   return {
     count: state.value ?? 0,
-    loading: spaceLoading || Boolean(state.loading),
+    loading: !spaceReady || Boolean(state.loading),
     error: state.error,
   };
 }

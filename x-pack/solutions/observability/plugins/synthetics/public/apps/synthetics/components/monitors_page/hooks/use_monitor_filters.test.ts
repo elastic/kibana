@@ -177,6 +177,25 @@ describe('useMonitorFilters', () => {
     expect(result.current).toEqual([{ field: 'monitor.id', values: ['id2', 'id3'] }]);
   });
 
+  it('should append the alerts space filter in the schedules/AND-locations monitor.id branch', () => {
+    // That branch used to return only the `monitor.id` filter — for alerts,
+    // matching a `monitor.id` value is not itself a space boundary, so
+    // omitting the space filter here could scope an alert query across
+    // spaces whenever a schedule filter is active.
+    spaceSpy.mockReturnValue({ space: { id: 'space1' } } as any);
+    paramSpy.mockReturnValue({ schedules: 'daily' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
+
+    const { result } = renderHook(() => useMonitorFilters({ forAlerts: true }), {
+      wrapper: WrappedHelper,
+    });
+
+    expect(result.current).toEqual([
+      { field: 'monitor.id', values: ['id1', 'id2'] },
+      { field: 'kibana.space_ids', values: ['space1'] },
+    ]);
+  });
+
   it('should handle a combination of parameters', () => {
     spaceSpy.mockReturnValue({ space: { id: 'space3' } } as any);
     paramSpy.mockReturnValue({
