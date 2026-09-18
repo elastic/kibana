@@ -146,8 +146,19 @@ evaluate.describe(
               intervalMs: 2_000,
               until: (value) => value != null,
               attempt: async () => {
+                // A fresh stack has no `pnd-worker-evaluations` index until the
+                // FIRST write creates it, and that write is exactly what this
+                // poll is waiting for. A bare search throws
+                // `index_not_found_exception`, and `pollUntil` retries returned
+                // values but does not catch a rejected attempt — so the poll
+                // aborted on its first attempt and the gate reported a false
+                // `persisted=false`. `ignore_unavailable` turns a missing index
+                // into an empty result, which is the "not written yet" the poll
+                // is meant to keep retrying; every other ES failure still
+                // propagates.
                 const searchRes = await esClient.search({
                   index: WORKER_EVAL_INDEX,
+                  ignore_unavailable: true,
                   size: 1,
                   query: {
                     bool: {

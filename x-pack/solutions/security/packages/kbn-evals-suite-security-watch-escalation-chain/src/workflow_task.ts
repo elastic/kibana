@@ -141,6 +141,12 @@ export const readProposalsForInvestigation = async ({
 }): Promise<Array<Record<string, unknown>>> => {
   const res = await esClient.search({
     index,
+    // The index does not exist until the FIRST proposal write creates it, and
+    // this read is the poll's attempt — a bare search throws
+    // `index_not_found_exception` before any write lands, which aborts a
+    // `pollUntil` loop that only retries returned values. A missing index means
+    // "nothing persisted yet", not a failure; other ES errors still propagate.
+    ignore_unavailable: true,
     size: 50,
     query: { term: { investigationId } },
     sort: [{ createdAt: { order: 'asc' as const, unmapped_type: 'date' as const } }],
