@@ -13,11 +13,13 @@ export class File {
   public readonly path: string;
   private relativePath: string;
   private ext: string;
+  private gitStatus: string;
 
-  constructor(path: string) {
+  constructor(path: string, gitStatus: string = 'unknown') {
     this.path = resolve(path);
     this.relativePath = relative(process.cwd(), this.path);
     this.ext = extname(this.path);
+    this.gitStatus = gitStatus;
   }
 
   public getAbsolutePath() {
@@ -26,6 +28,10 @@ export class File {
 
   public getRelativePath() {
     return this.relativePath;
+  }
+
+  public getGitStatus() {
+    return this.gitStatus;
   }
 
   public getWithoutExtension() {
@@ -48,6 +54,10 @@ export class File {
 
   public isSass() {
     return this.ext === '.sass' || this.ext === '.scss';
+  }
+
+  public isYaml() {
+    return this.ext === '.yml' || this.ext === '.yaml';
   }
 
   public getRelativeParentDirs() {

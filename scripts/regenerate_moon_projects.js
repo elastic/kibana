@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/moon').regenerateMoonProjects();
+require('@kbn/moon').regenerateMoonProjectsCLI();
