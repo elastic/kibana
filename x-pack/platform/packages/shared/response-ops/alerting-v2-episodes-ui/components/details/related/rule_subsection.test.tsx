@@ -124,7 +124,7 @@ describe('RelatedEpisodesRuleSubsection', () => {
 
   it.each([
     ['a heading when not compressed', false, 'H4'],
-    ['bold text when compressed', true, 'STRONG'],
+    ['a heading when compressed', true, 'H4'],
   ])('renders the subsection label as %s', (_name, compressed, tagName) => {
     mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
 
@@ -140,7 +140,6 @@ describe('RelatedEpisodesRuleSubsection', () => {
       </I18nProvider>
     );
 
-    // Drops to bold text when compressed, to stay under the panel title.
     expect(screen.getByText('Other groups for this rule').tagName).toBe(tagName);
   });
 });

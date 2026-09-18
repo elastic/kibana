@@ -53,4 +53,20 @@ describe('CopyableShortId', () => {
 
     expect(await screen.findByText(`Click to copy the full ID: ${FULL_ID}`)).toBeInTheDocument();
   });
+
+  it('keeps the non-copying variant out of the tab order and exposes the full id', () => {
+    render(
+      <a href="/episode">
+        <CopyableShortId
+          id={FULL_ID}
+          copyTooltip={`Full ID: ${FULL_ID}`}
+          disableCopy
+          data-test-subj="shortId"
+        />
+      </a>
+    );
+
+    expect(screen.getByTestId('shortId')).not.toHaveAttribute('tabindex');
+    expect(screen.getByRole('link')).toHaveAccessibleName(`abcdefg ${FULL_ID}`);
+  });
 });

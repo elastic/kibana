@@ -71,7 +71,11 @@ export const EpisodeAssigneeInlineControl = ({
         data-test-subj={dataTestSubj ?? 'alertingV2EpisodeAssigneeChangeButton'}
         onClick={togglePopover}
       >
-        <AlertEpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={userProfile} />
+        <AlertEpisodeAssigneeCell
+          assigneeUid={assigneeUid}
+          userProfile={userProfile}
+          isTooltipFocusable={false}
+        />
         <EuiScreenReaderOnly>
           <span>{i18n.ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL}</span>
         </EuiScreenReaderOnly>

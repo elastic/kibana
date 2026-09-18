@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiCopy, EuiLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiCopy, EuiLink, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
@@ -60,11 +60,12 @@ export const CopyableShortId = ({
 
   if (disableCopy) {
     return (
-      <EuiToolTip content={copyTooltip}>
-        <span data-test-subj={dataTestSubj} tabIndex={0}>
-          {chip}
-        </span>
-      </EuiToolTip>
+      <span data-test-subj={dataTestSubj}>
+        {chip}
+        <EuiScreenReaderOnly>
+          <span>{id}</span>
+        </EuiScreenReaderOnly>
+      </span>
     );
   }
 

@@ -37,7 +37,8 @@ describe('AlertEpisodeRunbook', () => {
     );
 
     const preview = screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview');
-    expect(preview).toHaveAttribute('inert');
+    expect(preview).not.toHaveAttribute('inert');
+    expect(screen.getByRole('link', { name: 'Some link' })).toHaveAttribute('tabindex', '-1');
     expect(preview).toContainElement(screen.getByTestId('alertingV2EpisodeDetailsRunbookContent'));
   });
 

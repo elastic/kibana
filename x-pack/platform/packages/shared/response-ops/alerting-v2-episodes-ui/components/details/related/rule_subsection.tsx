@@ -102,20 +102,11 @@ export function RelatedEpisodesRuleSubsection({
 
   return (
     <div data-test-subj="alertingV2RelatedEpisodesRuleSubsection">
-      {/* Bold text when compressed, so it stays under the panel title above. */}
-      {compressed ? (
-        <EuiText size="xs">
-          <strong>
-            {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}
-          </strong>
-        </EuiText>
-      ) : (
-        <EuiTitle size="xs">
-          <h4>
-            {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}
-          </h4>
-        </EuiTitle>
-      )}
+      <EuiTitle size={compressed ? 'xxs' : 'xs'}>
+        <h4>
+          {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}
+        </h4>
+      </EuiTitle>
       <EuiText
         size={compressed ? 'xs' : 's'}
         color="subdued"

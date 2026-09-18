@@ -23,11 +23,13 @@ import * as i18n from './translations';
 export interface AlertEpisodeAssigneeCellProps {
   assigneeUid: string | null | undefined;
   userProfile: UserProfileService;
+  isTooltipFocusable?: boolean;
 }
 
 export const AlertEpisodeAssigneeCell = ({
   assigneeUid,
   userProfile,
+  isTooltipFocusable = true,
 }: AlertEpisodeAssigneeCellProps) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['alertingV2EpisodeAssigneeProfile', assigneeUid],
@@ -71,7 +73,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (isError) {
     return (
       <EuiToolTip content={assigneeUid}>
-        <EuiText tabIndex={0} color="danger" size="s">
+        <EuiText tabIndex={isTooltipFocusable ? 0 : undefined} color="danger" size="s">
           {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
         </EuiText>
       </EuiToolTip>
@@ -83,7 +85,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (!profile) {
     return (
       <EuiToolTip content={assigneeUid}>
-        <EuiText tabIndex={0} color="subdued" size="s">
+        <EuiText tabIndex={isTooltipFocusable ? 0 : undefined} color="subdued" size="s">
           {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
         </EuiText>
       </EuiToolTip>

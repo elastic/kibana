@@ -431,6 +431,32 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByText('Resolved by')).toBeInTheDocument();
   });
 
+  it('shows who snoozed the episode in an info block', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episode: {
+        ...mockEpisode,
+        last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        snooze_expiry: '2030-01-01T00:00:00.000Z',
+      } as AlertEpisode,
+      groupAction: {
+        groupHash: 'gh-1',
+        ruleId: 'rule-1',
+        lastDeactivateAction: null,
+        lastDeactivateActor: null,
+        lastSnoozeAction: null,
+        lastSnoozeActor: 'user-snoozer',
+        snoozeExpiry: null,
+        tags: [],
+      },
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByText('Snoozed by')).toBeInTheDocument();
+    expect(screen.getByText('user-snoozer')).toBeInTheDocument();
+  });
+
   describe('assignee header value', () => {
     it('falls back to the assignee cell when the action is incompatible', () => {
       mockUseEpisodeDetailsHeaderData.mockReturnValue({
@@ -527,12 +553,17 @@ describe('AlertEpisodeDetailsFlyout', () => {
     const user = userEvent.setup();
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
+      episode: {
+        ...mockEpisode,
+        last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        snooze_expiry: '2035-06-15T14:30:00.000Z',
+      } as AlertEpisode,
       groupAction: {
         groupHash: 'group-1',
         ruleId: 'rule-1',
         lastDeactivateAction: null,
-        lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snoozeExpiry: '2035-06-15T14:30:00.000Z',
+        lastSnoozeAction: null,
+        snoozeExpiry: null,
         tags: [],
         lastSnoozeActor: null,
         lastDeactivateActor: null,

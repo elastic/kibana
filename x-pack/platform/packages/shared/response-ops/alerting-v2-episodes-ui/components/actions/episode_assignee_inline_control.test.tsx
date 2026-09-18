@@ -24,8 +24,16 @@ jest.mock('./episode_assignee_panel', () => ({
 }));
 
 jest.mock('../assignee_cell', () => ({
-  AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null }) => (
-    <span data-test-subj="assigneeCellStub">{assigneeUid}</span>
+  AlertEpisodeAssigneeCell: ({
+    assigneeUid,
+    isTooltipFocusable,
+  }: {
+    assigneeUid: string | null;
+    isTooltipFocusable?: boolean;
+  }) => (
+    <span data-test-subj="assigneeCellStub" data-tooltip-focusable={String(isTooltipFocusable)}>
+      {assigneeUid}
+    </span>
   ),
 }));
 
@@ -97,6 +105,10 @@ describe('EpisodeAssigneeInlineControl', () => {
       const button = screen.getByTestId('alertingV2EpisodeAssigneeChangeButton');
       expect(button).toHaveAccessibleName('uid-existing Change assignee');
       expect(screen.getByTestId('assigneeCellStub')).toHaveTextContent('uid-existing');
+      expect(screen.getByTestId('assigneeCellStub')).toHaveAttribute(
+        'data-tooltip-focusable',
+        'false'
+      );
     });
 
     it('opens the picker when the assignee is clicked', async () => {

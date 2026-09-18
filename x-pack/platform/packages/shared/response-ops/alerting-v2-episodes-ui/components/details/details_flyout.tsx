@@ -239,7 +239,7 @@ export const AlertEpisodeDetailsFlyout = ({
   // Header badge data
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = status === ALERT_EPISODE_STATUS.INACTIVE;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const isSnoozed = isEpisodeSnoozed(episode?.last_snooze_action, episode?.snooze_expiry);
   const tags = groupAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
@@ -320,7 +320,7 @@ export const AlertEpisodeDetailsFlyout = ({
           {/* Snoozed badge */}
           {isSnoozed && (
             <FlyoutTemplate.Header.Badge iconType="bellSlash">
-              <SnoozedBadgeLabel expiry={groupAction?.snoozeExpiry} dateFormat={dateFormat} />
+              <SnoozedBadgeLabel expiry={episode?.snooze_expiry} dateFormat={dateFormat} />
             </FlyoutTemplate.Header.Badge>
           )}
 
@@ -403,6 +403,15 @@ export const AlertEpisodeDetailsFlyout = ({
             <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_RESOLVED_BY}>
               <AlertEpisodeAssigneeCell
                 assigneeUid={groupAction?.lastDeactivateActor}
+                userProfile={services.userProfile}
+              />
+            </FlyoutTemplate.Header.InfoBlock>
+          )}
+
+          {isSnoozed && (
+            <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_SNOOZED_BY}>
+              <AlertEpisodeAssigneeCell
+                assigneeUid={groupAction?.lastSnoozeActor}
                 userProfile={services.userProfile}
               />
             </FlyoutTemplate.Header.InfoBlock>

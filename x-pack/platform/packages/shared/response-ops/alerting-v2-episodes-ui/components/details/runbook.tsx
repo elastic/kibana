@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
@@ -29,12 +29,6 @@ export const AlertEpisodeRunbook = ({ content, compressed, preview }: AlertEpiso
   const previewRef = useRef<HTMLDivElement | null>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
-  // React 18 does not support `inert` as a prop, so set it directly on the preview node.
-  const registerPreview = useCallback((node: HTMLDivElement | null) => {
-    previewRef.current = node;
-    node?.setAttribute('inert', '');
-  }, []);
-
   useEffect(() => {
     const node = previewRef.current;
     if (!node) {
@@ -44,6 +38,13 @@ export const AlertEpisodeRunbook = ({ content, compressed, preview }: AlertEpiso
 
     const measure = () => setIsOverflowing(node.scrollHeight > node.clientHeight);
     measure();
+
+    for (const interactiveElement of node.querySelectorAll<HTMLElement>(
+      'a, button, input, select, textarea, [tabindex]'
+    )) {
+      interactiveElement.tabIndex = -1;
+      interactiveElement.setAttribute('aria-disabled', 'true');
+    }
 
     if (typeof ResizeObserver === 'undefined') {
       return;
@@ -84,13 +85,17 @@ export const AlertEpisodeRunbook = ({ content, compressed, preview }: AlertEpiso
 
   return (
     <div
-      ref={registerPreview}
+      ref={previewRef}
       // A mask fades the cut-off edge instead of a gradient overlay, so it works on any
       // panel background without having to know the colour.
       css={[
         css`
           max-block-size: ${RUNBOOK_PREVIEW_MAX_HEIGHT}px;
           overflow: hidden;
+
+          :is(a, button, input, select, textarea, [tabindex]) {
+            pointer-events: none;
+          }
         `,
         isOverflowing
           ? css`

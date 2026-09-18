@@ -51,4 +51,21 @@ describe('AlertEpisodeAssigneeCell', () => {
 
     expect(await screen.findByText('jdoe')).toBeInTheDocument();
   });
+
+  it('does not make an unknown assignee tooltip focusable when embedded in a button', async () => {
+    mockBulkGet.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeAssigneeCell
+          assigneeUid="u-1"
+          userProfile={mockUserProfile}
+          isTooltipFocusable={false}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByText('Unknown user')).not.toHaveAttribute('tabindex');
+  });
 });
