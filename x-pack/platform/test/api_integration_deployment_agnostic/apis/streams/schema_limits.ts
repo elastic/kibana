@@ -164,7 +164,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
             params: {
               path: { name: 'logs.otel.query-limit-test' },
-              body: { query: { esql: 'FROM logs.otel | WHERE message == "' + 'x'.repeat(65502) + '"' } },
+              body: {
+                query: { esql: 'FROM logs.otel | WHERE message == "' + 'x'.repeat(65502) + '"' },
+              },
             },
           })
           .expect(400);
