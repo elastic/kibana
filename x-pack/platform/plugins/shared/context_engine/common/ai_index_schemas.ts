@@ -70,9 +70,9 @@ export const aiIndexTraceSchema = z.discriminatedUnion('type', [
 export const aiIndexPropertiesSchema = z.object({
   description: z.string().max(MAX_AI_INDEX_DESCRIPTION_LENGTH).optional(),
   dest: aiIndexDestSchema,
-  sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES),
-  automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS),
-  traces: z.array(aiIndexTraceSchema).max(MAX_AI_INDEX_TRACES),
+  sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES).default([]),
+  automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS).default([]),
+  traces: z.array(aiIndexTraceSchema).max(MAX_AI_INDEX_TRACES).default([]),
 });
 
 export const aiIndexIdFieldSchema = z

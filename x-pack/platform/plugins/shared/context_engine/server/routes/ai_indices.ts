@@ -289,7 +289,11 @@ const aiIndexPropertiesSchema = {
     }),
     {
       maxSize: MAX_AI_INDEX_AUTOMATIONS,
-      meta: { description: 'Automations associated with the AI index.' },
+      defaultValue: [],
+      meta: {
+        description:
+          'Automations associated with the AI index. Defaults to an empty array when omitted.',
+      },
     }
   ),
   sources: schema.arrayOf(
@@ -313,13 +317,19 @@ const aiIndexPropertiesSchema = {
     ]),
     {
       maxSize: MAX_AI_INDEX_SOURCES,
-      meta: { description: 'Additional sources that provide context for the AI index.' },
+      defaultValue: [],
+      meta: {
+        description:
+          'Additional sources that provide context for the AI index. Defaults to an empty array when omitted.',
+      },
     }
   ),
   traces: schema.arrayOf(aiIndexTraceSchema, {
     maxSize: MAX_AI_INDEX_TRACES,
+    defaultValue: [],
     meta: {
-      description: 'Trace sources linked to this AI index. A write replaces the whole array.',
+      description:
+        'Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.',
     },
   }),
 };

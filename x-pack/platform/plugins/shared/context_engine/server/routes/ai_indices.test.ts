@@ -1713,9 +1713,14 @@ describe('ai indices routes', () => {
       expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
 
-    it('rejects a missing traces array', () => {
+    it('defaults traces to an empty array when omitted', () => {
       const { traces, ...bodyWithoutTraces } = validBody;
-      expect(() => validateBody(bodyWithoutTraces)).toThrow();
+      expect(validateBody(bodyWithoutTraces)).toMatchObject({ traces: [] });
+    });
+
+    it('defaults sources to an empty array when omitted', () => {
+      const { sources, ...bodyWithoutSources } = validBody;
+      expect(validateBody(bodyWithoutSources)).toMatchObject({ sources: [] });
     });
 
     it('accepts each traces type', () => {
@@ -1838,9 +1843,9 @@ describe('ai indices routes', () => {
       ).toThrow();
     });
 
-    it('rejects a missing automations array', () => {
+    it('defaults automations to an empty array when omitted', () => {
       const { automations, ...bodyWithoutAutomations } = validBody;
-      expect(() => validateBody(bodyWithoutAutomations)).toThrow();
+      expect(validateBody(bodyWithoutAutomations)).toMatchObject({ automations: [] });
     });
 
     it('rejects automations exceeding the max size', () => {
@@ -1859,9 +1864,14 @@ describe('ai indices routes', () => {
       expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
 
-    it('rejects a missing traces array', () => {
+    it('defaults traces to an empty array when omitted', () => {
       const { traces, ...bodyWithoutTraces } = validBody;
-      expect(() => validateBody(bodyWithoutTraces)).toThrow();
+      expect(validateBody(bodyWithoutTraces)).toMatchObject({ traces: [] });
+    });
+
+    it('defaults sources to an empty array when omitted', () => {
+      const { sources, ...bodyWithoutSources } = validBody;
+      expect(validateBody(bodyWithoutSources)).toMatchObject({ sources: [] });
     });
 
     it('rejects an index trace value with more than 50 comma-separated expressions', () => {
