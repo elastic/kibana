@@ -494,6 +494,7 @@ export const createNavigationTree = ({
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:data_federation' },
+              { link: 'management:esqlViews' },
               { link: 'management:data_quality' },
               { link: 'management:data_usage' },
             ],

@@ -49,6 +49,7 @@ export type ManagementId =
   | 'episodes'
   | 'content_connectors'
   | 'data_federation'
+  | 'esqlViews'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'
