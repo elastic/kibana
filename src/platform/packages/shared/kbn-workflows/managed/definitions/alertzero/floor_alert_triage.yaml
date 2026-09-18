@@ -415,6 +415,18 @@ steps:
             # Autonomy → autoApprove mapping. One site: update here if semantics change.
             autoApprove: "${{ consts.worker_settings.autonomy == 'supervised' }}"
 
+      # Fetch proposal details for the outcome comment attribution.
+      # TODO: once proposals.getProposal exposes decidedBy, add
+      #   "by @{{ steps.get_proposal.output.decidedBy.username }}" to both outcome
+      #   comments below (guard with {% if steps.get_proposal.output.decidedBy %}
+      #   for the Supervised/auto-approve case where no human decided).
+      - name: get_proposal
+        type: proposals.getProposal
+        on-failure:
+          continue: true
+        with:
+          proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
+
       # After the gate resolves (human approve or auto-approved), verify the
       # close landed by comparing the action workflow's output closed_count
       # against the proposed alert count. A mismatch means alerts stayed open
@@ -457,6 +469,8 @@ steps:
                 close_reason: false_positive
 
           # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+          # TODO: add "by @{{ steps.get_proposal.output.decidedBy.username }}" once
+          #   proposals.getProposal exposes decidedBy (see get_proposal step above).
           - name: post_comment_outcome_approved
             type: kibana.request
             on-failure:
@@ -472,10 +486,12 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal approved. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default('approved') }}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
         else:
           # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+          # TODO: add "by @{{ steps.get_proposal.output.decidedBy.username }}" once
+          #   proposals.getProposal exposes decidedBy (see get_proposal step above).
           - name: post_comment_outcome_dismissed
             type: kibana.request
             on-failure:
@@ -491,7 +507,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal dismissed. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default('dismissed') }}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
 
   # ---------------------------------------------------------------------------
   # 9. No-FP branch: close the Investigation immediately (D31, D41).
