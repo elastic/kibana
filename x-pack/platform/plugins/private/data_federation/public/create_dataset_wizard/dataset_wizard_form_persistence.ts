@@ -75,6 +75,20 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
   }
 
   if (
+    candidate.timeseries_mapping_enabled !== undefined &&
+    typeof candidate.timeseries_mapping_enabled !== 'boolean'
+  ) {
+    return false;
+  }
+
+  if (
+    candidate.timeseries_field_path !== undefined &&
+    typeof candidate.timeseries_field_path !== 'string'
+  ) {
+    return false;
+  }
+
+  if (
     !Object.values(candidate.manual_mappings).every(
       (mappingValue) => mappingValue !== null && typeof mappingValue === 'object'
     )
@@ -126,6 +140,8 @@ export const mergeWizardFormValues = (
   },
   settings_custom_json: draft.settings_custom_json ?? base.settings_custom_json,
   dynamic_fields_enabled: draft.dynamic_fields_enabled ?? base.dynamic_fields_enabled,
+  timeseries_mapping_enabled: draft.timeseries_mapping_enabled ?? base.timeseries_mapping_enabled,
+  timeseries_field_path: draft.timeseries_field_path ?? base.timeseries_field_path,
   automatic_field_source_names:
     draft.automatic_field_source_names ?? base.automatic_field_source_names,
 });

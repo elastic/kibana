@@ -323,10 +323,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem>
-                  <SourceNameParameter />
+                  <RenameFieldParameter />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <RenameFieldParameter />
+                  <SourceNameParameter />
                 </EuiFlexItem>
                 {showInlineOptionalDateFormat ? (
                   <EuiFlexItem>

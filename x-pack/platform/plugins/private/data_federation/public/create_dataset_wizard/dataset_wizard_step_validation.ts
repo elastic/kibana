@@ -132,6 +132,15 @@ export const isFlow396DefineSchemaMissingFieldMappings = (
   values.dynamic_fields_enabled === false &&
   Object.keys(values.automatic_field_types ?? {}).length === 0;
 
+/** Flow 3 9.6 with timeseries mapping on requires a source field path before leaving schema mappings. */
+export const isFlow396TimeseriesMappingMissingFieldPath = (
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant
+): boolean =>
+  isDatasetWizardFlow396(flowVariant) &&
+  values.timeseries_mapping_enabled !== false &&
+  !values.timeseries_field_path?.trim();
+
 export const getSchemaMappingsStepFields = (
   values: DatasetWizardFormValues,
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
@@ -147,7 +156,7 @@ export const getSchemaMappingsStepFields = (
   return [
     ...glueFields,
     ...(isDatasetWizardFlow396(flowVariant)
-      ? []
+      ? (['timeseries_field_path'] as const)
       : toSettingsFieldPaths(getSchemaMappingSettingsFieldIds(format, errorMode))),
   ];
 };
@@ -231,7 +240,11 @@ export const findFirstInvalidWizardStep = async ({
   flowVariant?: DatasetWizardFlowVariant;
 }): Promise<DatasetWizardStep | undefined> => {
   for (const step of getWizardStepsThrough(targetStep, flowVariant)) {
-    if (step === SCHEMA_MAPPINGS_STEP && isFlow396DefineSchemaMissingFieldMappings(values, flowVariant)) {
+    if (
+      step === SCHEMA_MAPPINGS_STEP &&
+      (isFlow396DefineSchemaMissingFieldMappings(values, flowVariant) ||
+        isFlow396TimeseriesMappingMissingFieldPath(values, flowVariant))
+    ) {
       return SCHEMA_MAPPINGS_STEP;
     }
 

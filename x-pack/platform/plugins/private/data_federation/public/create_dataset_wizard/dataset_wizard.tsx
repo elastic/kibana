@@ -65,6 +65,7 @@ import {
   findFirstInvalidWizardStep,
   getWizardStepFields,
   isFlow396DefineSchemaMissingFieldMappings,
+  isFlow396TimeseriesMappingMissingFieldPath,
 } from './dataset_wizard_step_validation';
 import { validateResourceForDataSource } from './validate_dataset_resource';
 import { inferRegionFromResource } from './infer_region_from_resource';
@@ -640,8 +641,12 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
     if (
       currentStep === SCHEMA_MAPPINGS_STEP &&
-      isFlow396DefineSchemaMissingFieldMappings(values, flowVariant)
+      (isFlow396DefineSchemaMissingFieldMappings(values, flowVariant) ||
+        isFlow396TimeseriesMappingMissingFieldPath(values, flowVariant))
     ) {
+      if (isFlow396TimeseriesMappingMissingFieldPath(values, flowVariant)) {
+        await trigger(['timeseries_field_path'], { shouldFocus: true });
+      }
       return;
     }
 
@@ -706,7 +711,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       : datasetWizardStrings.nextButton();
   const isNextDisabled =
     currentStep === SCHEMA_MAPPINGS_STEP &&
-    isFlow396DefineSchemaMissingFieldMappings(wizardFormValues, flowVariant);
+    (isFlow396DefineSchemaMissingFieldMappings(wizardFormValues, flowVariant) ||
+      isFlow396TimeseriesMappingMissingFieldPath(wizardFormValues, flowVariant));
   const showTestConfiguration = isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
 
   const renderStepContent = () => (

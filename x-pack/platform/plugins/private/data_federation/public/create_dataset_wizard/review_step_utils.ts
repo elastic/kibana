@@ -308,6 +308,33 @@ export const getReviewSettingsRows = (
   return rows;
 };
 
+const appendFlow396TimeseriesReviewRows = (
+  rows: ReviewSummaryRow[],
+  values: DatasetWizardFormValues
+) => {
+  const isTimeseriesEnabled = values.timeseries_mapping_enabled !== false;
+
+  rows.push({
+    label: datasetWizardStrings.timestampMappingSectionTitle(),
+    displayValue: isTimeseriesEnabled
+      ? datasetWizardStrings.reviewDynamicFieldsOn()
+      : datasetWizardStrings.reviewDynamicFieldsOff(),
+    badge: isTimeseriesEnabled ? 'default' : 'modified',
+  });
+
+  if (!isTimeseriesEnabled) {
+    return;
+  }
+
+  const fieldPath = values.timeseries_field_path?.trim() ?? '';
+
+  rows.push({
+    label: datasetWizardStrings.timestampMappingPathLabel(),
+    displayValue: fieldPath || datasetWizardStrings.reviewNoneValue(),
+    badge: fieldPath ? 'modified' : undefined,
+  });
+};
+
 export const getReviewSchemaMappingRows = (
   values: DatasetWizardFormValues,
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_2
@@ -341,6 +368,7 @@ export const getReviewSchemaMappingRows = (
       const isDynamicEnabled = values.dynamic_fields_enabled !== false;
 
       if (isDatasetWizardFlow396(flowVariant)) {
+        appendFlow396TimeseriesReviewRows(rows, values);
         rows.push({
           label: datasetWizardStrings.schemaInferenceModeReviewLabel(),
           displayValue: isDynamicEnabled

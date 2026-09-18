@@ -207,6 +207,11 @@ export interface MappedFieldsEditorProps {
     placeholder?: string;
     requiredErrorMessage?: string;
   };
+  /** Overrides copy for the mapped (query) name field when {@link showFieldRename} is enabled. */
+  renameFieldField?: {
+    label: string;
+    helpText?: string;
+  };
   /**
    * When false, the create-field form stays collapsed until the user clicks Add field,
    * even if there are no mapped fields yet. Defaults to true.
@@ -229,6 +234,9 @@ export interface MappedFieldsEditorProps {
     label: string;
     helpText?: string;
     placeholder?: string;
+    presets?: ReadonlyArray<{ value: string; label: string }>;
+    defaultPresetValue?: string;
+    defaultPresetLiteral?: string;
   };
   /** Source names keyed by mapped (display) field name. */
   fieldSourceNames?: Record<string, string>;

@@ -20,6 +20,7 @@ import {
   getSchemaMappingsStepFields,
   getWizardStepFields,
   isFlow396DefineSchemaMissingFieldMappings,
+  isFlow396TimeseriesMappingMissingFieldPath,
 } from './dataset_wizard_step_validation';
 import {
   ADDITIONAL_SETTINGS_STEP,
@@ -99,7 +100,7 @@ describe('dataset_wizard_step_validation', () => {
 
     expect(
       getWizardStepFields(SCHEMA_MAPPINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
-    ).toEqual([]);
+    ).toEqual(['timeseries_field_path']);
     expect(
       getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
     ).toEqual(expect.arrayContaining(['settings.schema_resolution']));
@@ -243,6 +244,7 @@ describe('dataset_wizard_step_validation', () => {
     const withMappedField = {
       ...defineSchemaValues,
       automatic_field_types: { message: 'keyword' },
+      timeseries_field_path: 'event_time',
     };
 
     expect(
@@ -277,5 +279,51 @@ describe('dataset_wizard_step_validation', () => {
         flowVariant: DATASET_WIZARD_FLOW_VARIANT_3_9_6,
       })
     ).resolves.toBeUndefined();
+  });
+
+  it('requires a timeseries field path when timeseries mapping is on in flow 3 9.6', async () => {
+    const timeseriesOnEmptyPath = {
+      ...emptyDatasetWizardFormValues(),
+      timeseries_mapping_enabled: true,
+      timeseries_field_path: '',
+    };
+    const timeseriesOnWithPath = {
+      ...timeseriesOnEmptyPath,
+      timeseries_field_path: 'event_time',
+    };
+    const timeseriesOffEmptyPath = {
+      ...timeseriesOnEmptyPath,
+      timeseries_mapping_enabled: false,
+    };
+
+    expect(
+      isFlow396TimeseriesMappingMissingFieldPath(
+        timeseriesOnEmptyPath,
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      )
+    ).toBe(true);
+    expect(
+      isFlow396TimeseriesMappingMissingFieldPath(
+        timeseriesOnWithPath,
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      )
+    ).toBe(false);
+    expect(
+      isFlow396TimeseriesMappingMissingFieldPath(
+        timeseriesOffEmptyPath,
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      )
+    ).toBe(false);
+
+    const trigger = jest.fn(async () => true);
+
+    await expect(
+      findFirstInvalidWizardStep({
+        targetStep: REVIEW_STEP,
+        values: timeseriesOnEmptyPath,
+        trigger,
+        flowVariant: DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+      })
+    ).resolves.toBe(SCHEMA_MAPPINGS_STEP);
   });
 });

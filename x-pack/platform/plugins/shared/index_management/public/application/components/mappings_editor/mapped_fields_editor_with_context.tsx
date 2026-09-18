@@ -67,6 +67,7 @@ export const MappedFieldsEditorWithContext = React.memo(
     allowMultiFields,
     showFieldRename,
     sourceNameField,
+    renameFieldField,
     fieldSourceNames,
     onFieldSourceNameChange,
     autoOpenCreateFieldWhenEmpty,
@@ -128,6 +129,7 @@ export const MappedFieldsEditorWithContext = React.memo(
         allowMultiFields,
         showFieldRename,
         sourceNameField,
+        renameFieldField,
         fieldSourceNames,
         onFieldSourceNameChange: showFieldRename ? onFieldSourceNameChange : undefined,
         allowedRootFieldTypes,
@@ -146,6 +148,7 @@ export const MappedFieldsEditorWithContext = React.memo(
         inlineOptionalDateFormatField,
         onFieldSourceNameChange,
         showFieldRename,
+        renameFieldField,
         sourceNameField,
       ]
     );
@@ -167,6 +170,7 @@ export const MappedFieldsEditorWithContext = React.memo(
                   allowMultiFields={allowMultiFields}
                   showFieldRename={showFieldRename}
                   sourceNameField={sourceNameField}
+                  renameFieldField={renameFieldField}
                   fieldSourceNames={fieldSourceNames}
                   onFieldSourceNameChange={onFieldSourceNameChange}
                   autoOpenCreateFieldWhenEmpty={autoOpenCreateFieldWhenEmpty}

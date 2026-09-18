@@ -142,10 +142,7 @@ describe('AdditionalSettingsStep', () => {
     );
     expect(renderedFields.indexOf(region)).toBeLessThan(renderedFields.indexOf(format));
     expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
-      'Additional settings'
-    );
-    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toHaveTextContent(
-      'Additional settings (optional)'
+      'Optional settings'
     );
   });
 
@@ -200,7 +197,7 @@ describe('AdditionalSettingsStep', () => {
   it('renders format field and accordions when format is auto-detected', async () => {
     const { getByTestId, getByText } = render(<TestHarness resource="s3://bucket/data.csv" />);
 
-    expect(getByText('Additional settings (optional)')).toBeInTheDocument();
+    expect(getByText('Optional settings')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
 
     await waitFor(() => {

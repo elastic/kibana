@@ -37,6 +37,10 @@ export interface MappedFieldsEditorProps {
     placeholder?: string;
     requiredErrorMessage?: string;
   };
+  renameFieldField?: {
+    label: string;
+    helpText?: string;
+  };
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
   autoOpenCreateFieldWhenEmpty?: boolean;
@@ -47,6 +51,9 @@ export interface MappedFieldsEditorProps {
     label: string;
     helpText?: string;
     placeholder?: string;
+    presets?: ReadonlyArray<{ value: string; label: string }>;
+    defaultPresetValue?: string;
+    defaultPresetLiteral?: string;
   };
   indexSettings?: IndexSettings;
   docLinks: DocLinksStart;
@@ -64,6 +71,7 @@ export const MappedFieldsEditor = React.memo(
     allowMultiFields = true,
     showFieldRename,
     sourceNameField,
+    renameFieldField,
     fieldSourceNames,
     onFieldSourceNameChange,
     autoOpenCreateFieldWhenEmpty,
@@ -111,6 +119,7 @@ export const MappedFieldsEditor = React.memo(
         allowMultiFields,
         showFieldRename,
         sourceNameField,
+        renameFieldField,
         fieldSourceNames,
         onFieldSourceNameChange: showFieldRename ? stableOnFieldSourceNameChange : undefined,
         allowedRootFieldTypes,
@@ -126,6 +135,7 @@ export const MappedFieldsEditor = React.memo(
       allowMultiFields,
       showFieldRename,
       sourceNameField,
+      renameFieldField,
       fieldSourceNames,
       stableOnFieldSourceNameChange,
       allowedRootFieldTypes,

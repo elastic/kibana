@@ -25,6 +25,10 @@ export interface ContextState {
     placeholder?: string;
     requiredErrorMessage?: string;
   };
+  renameFieldField?: {
+    label: string;
+    helpText?: string;
+  };
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
   allowedRootFieldTypes?: readonly string[];
@@ -34,6 +38,9 @@ export interface ContextState {
     label: string;
     helpText?: string;
     placeholder?: string;
+    presets?: ReadonlyArray<{ value: string; label: string }>;
+    defaultPresetValue?: string;
+    defaultPresetLiteral?: string;
   };
 }
 

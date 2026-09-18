@@ -251,10 +251,10 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem>
-                  <SourceNameParameter />
+                  <RenameFieldParameter />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <RenameFieldParameter />
+                  <SourceNameParameter />
                 </EuiFlexItem>
                 {showInlineOptionalDateFormat ? (
                   <EuiFlexItem>

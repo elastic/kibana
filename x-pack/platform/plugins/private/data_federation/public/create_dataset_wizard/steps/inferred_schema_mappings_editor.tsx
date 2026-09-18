@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import type { FieldSourceNameChange, MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { debounce } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -48,7 +48,9 @@ import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
 import { MappingSubsectionTitle } from '../mapping_subsection_title';
 import { SchemaInferenceModeCards } from '../schema_inference_mode_cards';
+import { getMappingDateFormatFieldConfig } from '../mapping_date_format_field_config';
 import { TimestampFieldMappingSection } from '../timestamp_field_mapping_section';
+import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 
 export interface InferredSchemaMappingsEditorProps {
   control: Control<DatasetWizardFormValues>;
@@ -172,6 +174,14 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     name: 'dynamic_fields_enabled',
   });
   const isDynamicEnabled = dynamicFieldsEnabledField.value !== false;
+  const datasetFormat = useWatch({
+    control,
+    name: 'settings.format',
+  }) as DatasetFormatFormValue;
+  const inlineOptionalDateFormatField = useMemo(
+    () => getMappingDateFormatFieldConfig(datasetFormat),
+    [datasetFormat]
+  );
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
   const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
@@ -322,19 +332,21 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     addFieldButtonRef.current?.click();
   }, [isFlow396]);
 
-  const timestampFieldMappingSection = useMemo(
+  const fieldMappingsSectionHeader = useMemo(
     () =>
       isFlow396 ? (
         <>
-          <TimestampFieldMappingSection isRequired={false} />
-          <EuiSpacer size="xl" />
           <div
             css={fieldMappingsSectionDividerCss}
             data-test-subj="datasetWizardFieldMappingsSectionTopDivider"
           />
           <EuiSpacer size="m" />
           <MappingSubsectionTitle
-            title={datasetWizardStrings.fieldMappingsSectionTitle()}
+            title={
+              isDynamicEnabled
+                ? datasetWizardStrings.fieldMappingsSectionTitleOptional()
+                : datasetWizardStrings.fieldMappingsSectionTitle()
+            }
             data-test-subj="datasetWizardFieldMappingsSectionTitle"
             trailing={
               !isDynamicEnabled ? (
@@ -344,6 +356,24 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
               ) : undefined
             }
           />
+          <>
+            <EuiSpacer size="s" />
+            <EuiText
+              size="s"
+              color="subdued"
+              data-test-subj={
+                isDynamicEnabled
+                  ? 'datasetWizardFieldMappingsOptionalDescription'
+                  : 'datasetWizardFieldMappingsRequiredDescription'
+              }
+            >
+              <p>
+                {isDynamicEnabled
+                  ? datasetWizardStrings.inferSchemaFieldMappingsOptionalDescription()
+                  : datasetWizardStrings.defineSchemaFieldMappingsRequiredDescription()}
+              </p>
+            </EuiText>
+          </>
         </>
       ) : undefined,
     [fieldMappingsSectionDividerCss, isDynamicEnabled, isFlow396]
@@ -433,25 +463,24 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
             showFieldSearch: false as const,
             fieldsDescription: false as const,
             allowMultiFields: false as const,
-            // Timestamp is always shown above, so keep the add-field form collapsed.
+            // Timestamp and schema mode sit above mapped fields; keep the add-field form collapsed.
             autoOpenCreateFieldWhenEmpty: false as const,
             allowedRootFieldTypes: DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES,
             closeCreateFieldOnOutsideClick: false,
             autoFocusCreateFieldType: false as const,
-            inlineOptionalDateFormatField: {
-              label: datasetWizardStrings.timestampMappingFormatLabel(),
-              helpText: datasetWizardStrings.timestampMappingFormatHelp(),
-              placeholder: datasetWizardStrings.timestampMappingFormatPlaceholder(),
+            inlineOptionalDateFormatField,
+            renameFieldField: {
+              label: datasetWizardStrings.mappedFieldQueryNameLabel(),
+              helpText: datasetWizardStrings.mappedFieldQueryNameHelp(),
             },
             sourceNameField: {
-              label: datasetWizardStrings.timestampMappingPathLabel(),
-              helpText: datasetWizardStrings.timestampMappingPathHelp(),
-              placeholder: datasetWizardStrings.timestampMappingPathPlaceholder(),
+              label: datasetWizardStrings.mappedFieldOriginalNameLabel(),
+              helpText: datasetWizardStrings.mappedFieldOriginalNameHelp(),
               requiredErrorMessage: datasetWizardStrings.mappedFieldPathRequiredError(),
             },
           }
         : {})}
-      afterFieldsDescription={timestampFieldMappingSection}
+      afterFieldsDescription={isFlow396 ? fieldMappingsSectionHeader : undefined}
       showFieldRename={isFlow396}
       fieldSourceNames={mappedFieldSourceNames}
       onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
@@ -484,7 +513,20 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     >
       {isFlow396 ? (
         <>
+          <TimestampFieldMappingSection
+            control={control}
+            isRequired={false}
+            format={datasetFormat}
+            omitLeadingSpacer
+          />
+          <EuiSpacer size="l" />
+          <div
+            css={fieldMappingsSectionDividerCss}
+            data-test-subj="datasetWizardTimestampSchemaModeDivider"
+          />
+          <EuiSpacer size="l" />
           <SchemaInferenceModeCards control={control} />
+          <EuiSpacer size="l" />
           <div data-test-subj="datasetWizardMappedFields">
             {mappedFieldsEditor}
             <div data-test-subj="datasetWizardAddFieldFooter">

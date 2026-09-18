@@ -200,7 +200,7 @@ describe('DatasetWizard step navigation', () => {
     });
 
     const currentStepIndicator = container.querySelector('[data-step-status="current"]');
-    expect(currentStepIndicator).toHaveTextContent('Additional settings');
+    expect(currentStepIndicator).toHaveTextContent('Optional settings');
   });
 
   it('restores persisted form values on load', () => {

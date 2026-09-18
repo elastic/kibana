@@ -47,7 +47,7 @@ export const datasetWizardStrings = {
 
   stepAdditionalSettings: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.stepAdditionalSettings', {
-      defaultMessage: 'Additional settings',
+      defaultMessage: 'Optional settings',
     }),
 
   stepSchemaMappings: () =>
@@ -324,7 +324,19 @@ export const datasetWizardStrings = {
 
   defineSchemaFieldMappingsRequiredTooltip: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.defineSchemaFieldMappingsRequiredTooltip', {
-      defaultMessage: 'Add at least one field mapping when using Define schema.',
+      defaultMessage: 'Map at least one field.',
+    }),
+
+  defineSchemaFieldMappingsRequiredDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.defineSchemaFieldMappingsRequiredDescription', {
+      defaultMessage:
+        'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
+    }),
+
+  inferSchemaFieldMappingsOptionalDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.inferSchemaFieldMappingsOptionalDescription', {
+      defaultMessage:
+        "Schema will be inferred at query time for fields you don't map.",
     }),
 
   saveAndContinueButton: () =>
@@ -395,12 +407,12 @@ export const datasetWizardStrings = {
 
   additionalSettingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsTitle', {
-      defaultMessage: 'Additional settings (optional)',
+      defaultMessage: 'Optional settings',
     }),
 
   additionalSettingsTitleFlow3: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsTitleFlow3', {
-      defaultMessage: 'Additional settings',
+      defaultMessage: 'Optional settings',
     }),
 
   additionalSettingsDescription: () =>
@@ -643,12 +655,22 @@ export const datasetWizardStrings = {
 
   timestampMappingSectionTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingSectionTitle', {
-      defaultMessage: 'Timestamp field',
+      defaultMessage: 'Timeseries data',
+    }),
+
+  timestampMappingEnabledToggle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingEnabledToggle', {
+      defaultMessage: 'Map timeseries data',
     }),
 
   fieldMappingsSectionTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.fieldMappingsSectionTitle', {
       defaultMessage: 'Field mappings',
+    }),
+
+  fieldMappingsSectionTitleOptional: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fieldMappingsSectionTitleOptional', {
+      defaultMessage: 'Field mappings (optional)',
     }),
 
   timestampMappingRequiredBadge: () =>
@@ -685,6 +707,26 @@ export const datasetWizardStrings = {
       defaultMessage: 'Source column or JSON path.',
     }),
 
+  mappedFieldQueryNameLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldQueryNameLabel', {
+      defaultMessage: 'Field name',
+    }),
+
+  mappedFieldQueryNameHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldQueryNameHelp', {
+      defaultMessage: 'How this field should be named in queries.',
+    }),
+
+  mappedFieldOriginalNameLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldOriginalNameLabel', {
+      defaultMessage: 'Original field name (optional)',
+    }),
+
+  mappedFieldOriginalNameHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldOriginalNameHelp', {
+      defaultMessage: 'If field name is different in your files, you can set it up.',
+    }),
+
   timestampMappingPathPlaceholder: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingPathPlaceholder', {
       defaultMessage: 'e.g. event_time or $.@timestamp',
@@ -693,6 +735,11 @@ export const datasetWizardStrings = {
   mappedFieldPathRequiredError: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldPathRequiredError', {
       defaultMessage: 'Enter a path.',
+    }),
+
+  timeseriesFieldNameRequiredError: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timeseriesFieldNameRequiredError', {
+      defaultMessage: 'Enter a field name.',
     }),
 
   timestampMappingFormatLabel: () =>
@@ -707,7 +754,7 @@ export const datasetWizardStrings = {
 
   timestampMappingFormatPlaceholder: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingFormatPlaceholder', {
-      defaultMessage: 'e.g. yyyy-MM-dd HH:mm:ss.SSS',
+      defaultMessage: 'Select or enter a format',
     }),
 
   mapFieldButton: () =>
@@ -990,7 +1037,7 @@ export const datasetWizardStrings = {
 
   reviewSettingsSectionTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewSettingsSectionTitle', {
-      defaultMessage: 'Additional settings',
+      defaultMessage: 'Optional settings',
     }),
 
   reviewSchemaMappingsSectionTitle: () =>

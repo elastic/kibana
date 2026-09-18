@@ -620,6 +620,11 @@ describe('review_step_utils', () => {
     expect(inferRows).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
+          label: 'Timeseries data',
+          displayValue: 'On',
+          badge: 'default',
+        }),
+        expect.objectContaining({
           label: 'Schema',
           displayValue: 'Infer schema',
           badge: 'default',
@@ -635,6 +640,46 @@ describe('review_step_utils', () => {
         }),
       ])
     );
+  });
+
+  it('summarizes timeseries mapping in flow 3 9.6 review', () => {
+    const timeseriesOn = {
+      ...emptyDatasetWizardFormValues(),
+      schema_mapping_mode: 'automatic' as const,
+      timeseries_mapping_enabled: true,
+      timeseries_field_path: 'event_time',
+    };
+    const timeseriesOff = {
+      ...timeseriesOn,
+      timeseries_mapping_enabled: false,
+      timeseries_field_path: 'event_time',
+    };
+
+    const onRows = getReviewSchemaMappingRows(timeseriesOn, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    const offRows = getReviewSchemaMappingRows(timeseriesOff, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+
+    expect(onRows.slice(0, 2)).toEqual([
+      {
+        label: 'Timeseries data',
+        displayValue: 'On',
+        badge: 'default',
+      },
+      {
+        label: 'Field name',
+        displayValue: 'event_time',
+        badge: 'modified',
+      },
+    ]);
+    expect(offRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Timeseries data',
+          displayValue: 'Off',
+          badge: 'modified',
+        }),
+      ])
+    );
+    expect(offRows.map(({ label }) => label)).not.toContain('Field name');
   });
 
   it('returns Glue schema mapping rows when AWS Glue table mode is selected', () => {

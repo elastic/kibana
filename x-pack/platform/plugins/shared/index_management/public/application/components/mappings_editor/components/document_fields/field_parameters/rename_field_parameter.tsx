@@ -12,12 +12,23 @@ import type { FieldConfig, ValidationFunc } from '../../../shared_imports';
 import { TextField, UseField } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
+import { useConfig } from '../../../config_context';
 import { useMappingsState } from '../../../mappings_state_context';
 
 const { validations: _validations, ...rest } = PARAMETERS_DEFINITION.name
   .fieldConfig as FieldConfig;
 
+const defaultRenameFieldLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.renameFieldToLabel', {
+  defaultMessage: 'Rename field to (optional)',
+});
+const defaultRenameFieldHelp = i18n.translate('xpack.idxMgmt.mappingsEditor.renameFieldToHelpText', {
+  defaultMessage: 'How this field should be named in queries.',
+});
+
 export const RenameFieldParameter: React.FC = () => {
+  const {
+    value: { renameFieldField },
+  } = useConfig();
   const {
     fields: { rootLevelFields, byId },
     documentFields: { fieldToAddFieldTo, fieldToEdit },
@@ -42,19 +53,15 @@ export const RenameFieldParameter: React.FC = () => {
   const renameConfig: FieldConfig = useMemo(
     () => ({
       ...rest,
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.renameFieldToLabel', {
-        defaultMessage: 'Rename field to (optional)',
-      }),
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.renameFieldToHelpText', {
-        defaultMessage: 'How this field should be named in queries.',
-      }),
+      label: renameFieldField?.label ?? defaultRenameFieldLabel,
+      helpText: renameFieldField?.helpText ?? defaultRenameFieldHelp,
       validations: [
         {
           validator: uniqueNameValidator,
         },
       ],
     }),
-    [uniqueNameValidator]
+    [renameFieldField, uniqueNameValidator]
   );
 
   return (

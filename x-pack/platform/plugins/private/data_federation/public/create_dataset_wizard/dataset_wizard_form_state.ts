@@ -37,6 +37,10 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   automatic_field_source_names: Record<string, string>;
   /** Prototype-only. When off, only mapped fields are used (closed schema). */
   dynamic_fields_enabled: boolean;
+  /** Flow 3 9.6: when on, @timestamp mapping fields are shown and field path is required. */
+  timeseries_mapping_enabled: boolean;
+  /** Flow 3 9.6: source column or JSON path for @timestamp when timeseries mapping is enabled. */
+  timeseries_field_path: string;
   /** Prototype-only field; not persisted to the API yet. */
   glue_database: string;
   /** Prototype-only field; not persisted to the API yet. */
@@ -57,6 +61,8 @@ export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   automatic_field_types: {},
   automatic_field_source_names: {},
   dynamic_fields_enabled: true,
+  timeseries_mapping_enabled: true,
+  timeseries_field_path: '',
   glue_database: '',
   glue_table_name: '',
   glue_catalog_region: '',
@@ -72,6 +78,8 @@ export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardF
   automatic_field_types: {},
   automatic_field_source_names: {},
   dynamic_fields_enabled: true,
+  timeseries_mapping_enabled: true,
+  timeseries_field_path: '',
   glue_database: '',
   glue_table_name: '',
   glue_catalog_region: '',

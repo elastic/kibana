@@ -34,6 +34,7 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
   closeCreateFieldOnOutsideClick,
   inlineOptionalDateFormatField,
   sourceNameField,
+  renameFieldField,
 }) => {
   const [mappings, setMappings] = useState(value ?? {});
   const propertiesCount = Object.keys(
@@ -87,6 +88,9 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
       </div>
       <div data-test-subj="fakeSourceNameField">
         {JSON.stringify(sourceNameField ?? null)}
+      </div>
+      <div data-test-subj="fakeRenameFieldField">
+        {JSON.stringify(renameFieldField ?? null)}
       </div>
       {fieldsDescription ? (
         <div data-test-subj="fakeMappedFieldsDescription">{fieldsDescription}</div>
@@ -339,6 +343,30 @@ describe('InferredSchemaMappingsEditor', () => {
     });
   });
 
+  it('orders timestamp mapping, schema mode cards, then field mappings in flow 3 9.6', () => {
+    const { getByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    const timestampSection = getByTestId('datasetWizardTimestampMappingSection');
+    const schemaModeCards = getByTestId('datasetWizardSchemaInferenceModeCards');
+    const fieldMappingsTitle = getByTestId('datasetWizardFieldMappingsSectionTitle');
+
+    const timestampSchemaModeDivider = getByTestId('datasetWizardTimestampSchemaModeDivider');
+
+    expect(
+      timestampSection.compareDocumentPosition(timestampSchemaModeDivider) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      timestampSchemaModeDivider.compareDocumentPosition(schemaModeCards) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      schemaModeCards.compareDocumentPosition(fieldMappingsTitle) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it('renders schema inference mode cards instead of the mapped fields accordion in flow 3 9.6', async () => {
     const { getByRole, getByTestId, queryByTestId, queryByText } = render(
       <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
@@ -355,14 +383,51 @@ describe('InferredSchemaMappingsEditor', () => {
     expect(queryByTestId('fakeMappedFieldsDescription')).toBeNull();
     expect(queryByText(/Define the fields for your indexed documents/i)).toBeNull();
     expect(queryByTestId('datasetWizardFieldMappingsRequiredBadge')).toBeNull();
+    expect(getByTestId('datasetWizardFieldMappingsSectionTitle')).toHaveTextContent(
+      'Field mappings (optional)'
+    );
+    expect(getByTestId('datasetWizardFieldMappingsOptionalDescription')).toHaveTextContent(
+      "Schema will be inferred at query time for fields you don't map."
+    );
+    expect(queryByTestId('datasetWizardFieldMappingsRequiredDescription')).toBeNull();
 
     fireEvent.click(getByRole('radio', { name: /Define schema/i }));
 
     await waitFor(() => {
       expect(getByRole('radio', { name: /Define schema/i })).toBeChecked();
       expect(getByRole('radio', { name: /Infer schema/i })).not.toBeChecked();
+      expect(getByTestId('datasetWizardFieldMappingsSectionTitle')).toHaveTextContent(
+        'Field mappings'
+      );
       expect(getByTestId('datasetWizardFieldMappingsRequiredBadge')).toHaveTextContent('Required');
+      expect(getByTestId('datasetWizardFieldMappingsRequiredDescription')).toHaveTextContent(
+        'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.'
+      );
+      expect(queryByTestId('datasetWizardFieldMappingsOptionalDescription')).toBeNull();
     });
+  });
+
+  it('toggles timeseries mapping fields in flow 3 9.6', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(getByTestId('datasetWizardTimestampMappingSectionTitle')).toHaveTextContent(
+      'Timeseries data'
+    );
+    const timeseriesToggle = getByTestId('datasetWizardTimestampMappingEnabled');
+    expect(timeseriesToggle).toHaveAttribute('aria-checked', 'true');
+    expect(getByTestId('datasetWizardTimestampMappingDescription')).toHaveTextContent(
+      'Mapping @timestamp is required so queries and dashboards can filter by time.'
+    );
+    expect(getByTestId('datasetWizardTimestampMappingFields')).toBeInTheDocument();
+
+    fireEvent.click(timeseriesToggle);
+
+    expect(queryByTestId('datasetWizardTimestampMappingFields')).toBeNull();
+    expect(getByTestId('datasetWizardTimestampMappingDescription')).toHaveTextContent(
+      'If you have timeseries data, you need to define @timestamp in order to ensure we process your data correctly.'
+    );
   });
 
   it('keeps the create field form collapsed until Add field is clicked in flow 3 9.6', async () => {
@@ -374,7 +439,7 @@ describe('InferredSchemaMappingsEditor', () => {
     expect(getByTestId('datasetWizardAddField')).not.toHaveAttribute('aria-hidden', 'true');
     expect(getByTestId('datasetWizardTimestampMappingSection')).toBeInTheDocument();
     expect(getByTestId('datasetWizardFieldMappingsSectionTitle')).toHaveTextContent(
-      'Field mappings'
+      'Field mappings (optional)'
     );
 
     fireEvent.click(getByTestId('datasetWizardAddField'));
@@ -418,21 +483,31 @@ describe('InferredSchemaMappingsEditor', () => {
     expect(JSON.parse(getByTestId('fakeInlineOptionalDateFormatField').textContent ?? 'null')).toEqual(
       {
         label: 'Format (optional)',
-        helpText: 'Pattern for text timestamps.',
-        placeholder: 'e.g. yyyy-MM-dd HH:mm:ss.SSS',
+        placeholder: 'Select or enter a format',
+        presets: [
+          { value: 'ISO-8601', label: 'ISO-8601' },
+          { value: 'strict_date_optional_time', label: 'strict_date_optional_time' },
+          { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
+          { value: 'yyyy-MM-dd HH:mm:ss', label: 'yyyy-MM-dd HH:mm:ss' },
+        ],
+        defaultPresetValue: 'ISO-8601',
+        defaultPresetLiteral: 'ISO-8601',
       }
     );
   });
 
-  it('uses field name copy for the mapped field source input in flow 3 9.6', () => {
+  it('uses mapped field rename and source copy in flow 3 9.6', () => {
     const { getByTestId } = render(
       <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
     );
 
-    expect(JSON.parse(getByTestId('fakeSourceNameField').textContent ?? 'null')).toEqual({
+    expect(JSON.parse(getByTestId('fakeRenameFieldField').textContent ?? 'null')).toEqual({
       label: 'Field name',
-      helpText: 'Source column or JSON path.',
-      placeholder: 'e.g. event_time or $.@timestamp',
+      helpText: 'How this field should be named in queries.',
+    });
+    expect(JSON.parse(getByTestId('fakeSourceNameField').textContent ?? 'null')).toEqual({
+      label: 'Original field name (optional)',
+      helpText: 'If field name is different in your files, you can set it up.',
       requiredErrorMessage: 'Enter a path.',
     });
   });
