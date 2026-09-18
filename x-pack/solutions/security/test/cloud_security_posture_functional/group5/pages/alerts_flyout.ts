@@ -269,7 +269,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    describe('ECS fields only', function () {
+    // Failing: See https://github.com/elastic/kibana/issues/292038
+    describe.skip('ECS fields only', function () {
       // Entity store v2 is installed at the parent level for graph visibility.
       // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
       before(async () => {
