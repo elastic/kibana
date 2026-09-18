@@ -13,6 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import type { LensXYConfig } from '@kbn/lens-embeddable-utils';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import {
   DiscoverFlyouts,
@@ -41,9 +42,11 @@ import {
   ACTION_OPEN_IN_DISCOVER,
   ACTION_VIEW_DETAILS,
 } from '../../../common/constants';
+import { createExemplarsLayer } from '../../../common/utils/exemplars/create_exemplars_layer';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+import type { ExemplarsAvailabilityResult } from './hooks/use_exemplars_availability';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -91,6 +94,7 @@ export type MetricsGridProps = Pick<
   whereStatements?: string[];
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
+  exemplarsAvailability: ExemplarsAvailabilityResult;
   /**
    * Whether the owning Discover tab is the currently active one.
    *
@@ -123,6 +127,7 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
+  exemplarsAvailability,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -268,6 +273,7 @@ export const MetricsGrid = ({
                   profileId={profileId}
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
+                  exemplarsAvailability={exemplarsAvailability}
                 />
               </EuiFlexItem>
             );
@@ -310,6 +316,7 @@ interface ChartItemProps
   profileId: string;
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
+  exemplarsAvailability: ExemplarsAvailabilityResult;
 }
 
 const ChartItem = React.memo(
@@ -339,6 +346,7 @@ const ChartItem = React.memo(
     profileId,
     gridSettings,
     onMetricExplored,
+    exemplarsAvailability,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -386,12 +394,33 @@ const ChartItem = React.memo(
     }, [metricItem.metricTypes, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({
+    const metricLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
       color,
       gridSettings,
     });
+
+    // Exemplars ride along as a Lens points layer rather than a separate fetch: Lens runs
+    // the query under the host's time range and filters, which is what keeps the overlay
+    // live when the chart is copied to a dashboard. Breakdown dimensions are deliberately
+    // not applied to it.
+    const exemplarsLayer = useMemo(
+      () =>
+        createExemplarsLayer({
+          metricItem,
+          availableMetrics: exemplarsAvailability.availableMetrics,
+          whereStatements,
+          originalSource: userSource,
+        }),
+      [metricItem, exemplarsAvailability.availableMetrics, whereStatements, userSource]
+    );
+
+    const chartLayers = useMemo<LensXYConfig['layers']>(
+      () => (exemplarsLayer ? [...metricLayers, exemplarsLayer] : metricLayers),
+      [metricLayers, exemplarsLayer]
+    );
+
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]

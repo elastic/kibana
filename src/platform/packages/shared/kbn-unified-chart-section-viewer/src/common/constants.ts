@@ -82,6 +82,26 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   [FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]: false,
 };
 
+// Exemplars are written to a parallel `exemplars-*` data stream whose mappings are
+// composed from `metrics-otel@mappings`, so an OTel metrics stream and its exemplars
+// stream differ only by this prefix.
+export const METRICS_INDEX_PREFIX = 'metrics-';
+export const EXEMPLARS_INDEX_PREFIX = 'exemplars-';
+// The `exemplars-otel@template` index pattern is `exemplars-*.otel-*`, so only datasets
+// carrying this marker have a backing template. Deriving an exemplars index for any other
+// dataset produces a name that does not exist, and ES|QL answers that with an HTTP 400
+// rather than an empty result.
+export const EXEMPLARS_OTEL_DATASET_MARKER = '.otel';
+// The metric chart aggregates into this many time buckets (`TBUCKET(n)`). Exemplar
+// sampling groups by the same count so exemplar coverage lines up with the x-axis.
+export const METRICS_CHART_TARGET_BUCKETS = 100;
+// Exemplars kept per time bucket. A global `LIMIT n` piles the newest n rows at the right
+// edge of any window with more than n exemplars, and ES|QL silently truncates at 10,000
+// rows anyway. Limiting per bucket instead bounds the response at
+// `METRICS_CHART_TARGET_BUCKETS * EXEMPLARS_PER_BUCKET` rows while covering the whole window.
+// TODO(observability-dev#6073): revisit once `TS_EXEMPLARS` owns sampling server-side.
+export const EXEMPLARS_PER_BUCKET = 10;
+
 // Metrics grid sort options
 export const METRICS_SORT_BY = {
   alphabetically: 'alphabetically',

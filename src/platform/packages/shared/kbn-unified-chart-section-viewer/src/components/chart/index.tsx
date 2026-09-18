@@ -9,11 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type {
-  LensLegendConfig,
-  LensSeriesLayer,
-  LensYBoundsConfig,
-} from '@kbn/lens-embeddable-utils';
+import type { LensLegendConfig, LensXYConfig, LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
@@ -35,7 +31,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     esqlQuery: string;
     title: string;
     description?: string;
-    chartLayers: LensSeriesLayer[];
+    chartLayers: LensXYConfig['layers'];
     yBounds?: LensYBoundsConfig;
     legend?: LensLegendConfig;
     yAxisTitle?: string;

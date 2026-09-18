@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Action values for metrics execution context page labels. */
-export enum MetricsExecutionContextAction {
-  FETCH = 'fetch',
-}
-
-/** Name values for metrics execution context page labels. */
-export enum MetricsExecutionContextName {
-  METRICS_INFO = 'metrics_info',
-  EXEMPLARS = 'exemplars',
+/** A single point to render in the points overlay layer */
+export interface PointData {
+  /** Unix timestamp (ms) for the X axis */
+  x: number;
+  /** Metric value for the Y axis */
+  y: number;
+  /** Arbitrary key-value metadata from the exemplar document (e.g. trace_id, span_id) */
+  details: Array<{ field: string; value: string }>;
 }
