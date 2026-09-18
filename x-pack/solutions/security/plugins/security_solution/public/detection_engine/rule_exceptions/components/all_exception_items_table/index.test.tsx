@@ -414,8 +414,8 @@ describe('ExceptionsViewer', () => {
         </TestProviders>
       );
 
-      fireEvent.click(wrapper.getByTestId('exceptionItemCardHeader-actionButton'));
-      fireEvent.click(wrapper.getByTestId('exceptionItemCardHeader-actionItem-delete'));
+      fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderButtonIcon'));
+      fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderActionItemdelete'));
 
       return wrapper;
     };
