@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "integration_tests/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -17,9 +18,11 @@
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/logging-mocks",
+    "@kbn/security-plugin-types-server",
     "@kbn/spaces-plugin",
     "@kbn/storage-adapter",
     "@kbn/workflows",
+    "@kbn/workflows-execution-engine",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
