@@ -101,13 +101,19 @@ On the FP world, `entity.sub_type` is `mdm_management`. On the TP world it is `e
 
 ## Run from the Workflows UI
 
-1. Create a user workflow and paste `fp_tp_analysis_user_workflow.yaml`.
-2. **Run** with `attack_discovery_id` omitted or set to `ad-fp-tp-encoded-powershell-attack`.
-3. Compare `classification` plus cited entity/event ids to `encoded_powershell.{fp,tp}/gold.yaml`.
+Paste **one** YAML per workflow so you can run both against the same seed:
+
+| File | Prompt |
+| --- | --- |
+| `fp_tp_analysis_user_workflow.yaml` | Twin-specific (Intune/SCCM vs WINWORD/C2). Prefers recall. |
+| `fp_tp_analysis_checks_user_workflow.yaml` | Named corroboration checks. Prefers `inconclusive` when evidence is mixed or missing. |
+
+1. **Run** with `attack_discovery_id` omitted or set to `ad-fp-tp-encoded-powershell-attack`.
+2. Compare `classification` plus cited entity/event ids to `encoded_powershell.{fp,tp}/gold.yaml`.
 
 | Seeded variant | Expected `classification` | Why |
 | --- | --- | --- |
 | `fp` | `false_positive` | Host is Intune/SCCM (`mdm_management`); parent is `ccmexec.exe`; destination is `manage.microsoft.com` |
 | `tp` | `true_positive` | Host is an employee workstation; WINWORD → encoded PowerShell; C2 to `malicious-c2.example.com` |
 
-The workflow is not a managed AlertZero workflow.
+The workflows are not managed AlertZero workflows.
