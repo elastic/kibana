@@ -101,27 +101,39 @@ export class Optimizer {
 
     const log = this.createLog(options, '@kbn/optimizer');
 
-    return new Rx.Observable<void>((subscriber) => {
-      subscriber.add(
-        runOptimizer(config)
-          .pipe(
-            logOptimizerProgress(log),
-            logOptimizerState(log, config),
-            tap(({ state }) => {
-              this.phase$.next(state.phase);
-              this.ready$.next(state.phase === 'success' || state.phase === 'issue');
-            }),
-            ignoreElements()
-          )
-          .subscribe(subscriber)
-      );
-
-      // complete state subjects when run$ completes
-      subscriber.add(() => {
-        this.phase$.complete();
-        this.ready$.complete();
+    return Rx.defer(async () => {
+      const { buildSharedPackages } = await import('@kbn/rspack-optimizer');
+      await buildSharedPackages({
+        repoRoot: options.repoRoot,
+        dist: options.dist,
+        cache: options.cache,
+        log,
       });
-    });
+    }).pipe(
+      Rx.switchMap(
+        () =>
+          new Rx.Observable<void>((subscriber) => {
+            subscriber.add(
+              runOptimizer(config)
+                .pipe(
+                  logOptimizerProgress(log),
+                  logOptimizerState(log, config),
+                  tap(({ state }) => {
+                    this.phase$.next(state.phase);
+                    this.ready$.next(state.phase === 'success' || state.phase === 'issue');
+                  }),
+                  ignoreElements()
+                )
+                .subscribe(subscriber)
+            );
+
+            subscriber.add(() => {
+              this.phase$.complete();
+              this.ready$.complete();
+            });
+          })
+      )
+    );
   }
 
   /**

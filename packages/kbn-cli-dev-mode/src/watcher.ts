@@ -14,6 +14,7 @@ import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { ImportResolver } from '@kbn/import-resolver';
 import { makeMatcher } from '@kbn/picomatcher';
 import Path from 'path';
+import Fs from 'fs';
 
 import type { Log } from './log';
 
@@ -167,6 +168,8 @@ export class Watcher {
       'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets'
     );
     const manifestName = 'kbn-ui-shared-deps-npm-manifest.json';
+    const manifestPath = Path.join(sharedDepsDir, manifestName);
+    const manifestChanged = createManifestChangeDetector(readManifest(manifestPath));
 
     // check for shared dependencies manifest update and restart Optimizer
     Pw.subscribe(sharedDepsDir, (err, events) => {
@@ -177,8 +180,8 @@ export class Watcher {
           Path.basename(e.path) === manifestName && (e.type === 'update' || e.type === 'create')
       );
 
-      if (isManifestChanged) {
-        fireOptimizer(Path.relative(this.repoRoot, Path.join(sharedDepsDir, manifestName)));
+      if (isManifestChanged && manifestChanged(readManifest(manifestPath))) {
+        fireOptimizer(Path.relative(this.repoRoot, manifestPath));
       }
     }).then(
       (sub) => subscriber.add(() => sub.unsubscribe()),
@@ -200,5 +203,27 @@ export class Watcher {
 
   optimizerShouldRestart$() {
     return this.restartOptimizer$.asObservable();
+  }
+}
+
+export function createManifestChangeDetector(initialManifest?: Buffer) {
+  let previousManifest = initialManifest;
+
+  return (manifest?: Buffer): boolean => {
+    if (!manifest) {
+      return false;
+    }
+
+    const changed = previousManifest !== undefined && !previousManifest.equals(manifest);
+    previousManifest = manifest;
+    return changed;
+  };
+}
+
+function readManifest(path: string): Buffer | undefined {
+  try {
+    return Fs.readFileSync(path);
+  } catch {
+    return undefined;
   }
 }
