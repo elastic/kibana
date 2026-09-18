@@ -302,7 +302,7 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter).toEqual([
           {
             meta: {
-              index: 'logs*',
+              index: 'mock-dataview-id',
               negate: true,
             },
             query: {

@@ -20,6 +20,7 @@ import {
 } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
+  buildExistsFilter,
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
   buildPhraseFilter,
@@ -180,7 +181,7 @@ const createFilterFromRawColumnsESQL = async (
   // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
   // real document value and must produce a phrase filter, not a negated exists filter.
   if (value == null) {
-    const existsFilter = buildSimpleExistFilter(fieldName, indexPattern);
+    const existsFilter = buildExistsFilter(field, dataView);
     existsFilter.meta.negate = true;
     return [existsFilter];
   }
