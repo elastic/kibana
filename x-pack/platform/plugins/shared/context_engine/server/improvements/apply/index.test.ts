@@ -67,6 +67,7 @@ const improvement = (
   revision_id: 'rev-1',
   latest: true,
   ai_index_id: 'support',
+  space: 'default',
   '@timestamp': '2026-08-20T09:00:00.000Z',
   status: 'suggested',
   suggested_at: '2026-08-20T09:00:00.000Z',

@@ -52,7 +52,7 @@ describe('addWorkflow', () => {
 
     expect(id).toBe('wf-1');
     expect(workflows.create).toHaveBeenCalledWith({ ...context, yaml });
-    expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', {
+    expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', 'default', {
       type: 'workflow',
       value: 'wf-1',
     });
@@ -157,7 +157,7 @@ describe('removeWorkflow', () => {
       enabled: false,
     });
     expect(workflows.delete).not.toHaveBeenCalled();
-    expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', {
+    expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', 'default', {
       type: 'workflow',
       value: 'wf-1',
     });

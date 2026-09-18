@@ -389,10 +389,11 @@ export const registerImprovementRoutes = ({
         const core = await ctx.core;
         const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
 
         let aiIndex;
         try {
-          aiIndex = await getAiIndexService().get(aiIndexId);
+          aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
         } catch (error) {
           return handleAiIndexError(error, response);
         }

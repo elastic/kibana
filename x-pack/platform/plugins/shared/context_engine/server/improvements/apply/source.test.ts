@@ -42,7 +42,7 @@ const createContext = (sources: AiIndexSource[]) => {
     put: jest.fn().mockResolvedValue('updated'),
   } as unknown as jest.Mocked<AiIndexService>;
 
-  return { aiIndexService, aiIndexId: 'support', actions, request };
+  return { aiIndexService, aiIndexId: 'support', spaceId: 'default', actions, request };
 };
 
 beforeEach(() => {
@@ -57,7 +57,7 @@ describe('addSource', () => {
     const id = await addSource(context, connectorSource);
 
     expect(id).toBe('connector-1');
-    expect(context.aiIndexService.put).toHaveBeenCalledWith('support', {
+    expect(context.aiIndexService.put).toHaveBeenCalledWith('support', 'default', {
       description: 'Support knowledge',
       dest: { type: 'index', value: 'ai-index-support' },
       automations: [{ type: 'workflow', value: 'wf-1' }],
@@ -94,6 +94,7 @@ describe('editSource', () => {
     expect(id).toBe('FROM logs-2026-*');
     expect(context.aiIndexService.put).toHaveBeenCalledWith(
       'support',
+      'default',
       expect.objectContaining({
         sources: [{ type: 'esql', value: 'FROM logs-2026-*' }, connectorSource],
       })
@@ -119,6 +120,7 @@ describe('removeSource', () => {
     expect(id).toBe('FROM logs-*');
     expect(context.aiIndexService.put).toHaveBeenCalledWith(
       'support',
+      'default',
       expect.objectContaining({ sources: [connectorSource] })
     );
   });
