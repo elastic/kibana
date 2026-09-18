@@ -190,8 +190,9 @@ describe('CreateDataSourceFlyout', () => {
 
     fireEvent.click(await findByTestId('createDataSourceFlyoutSubmit'));
 
-    expect(await findByTestId('createDataSourceFlyoutSaveError')).toHaveTextContent(
-      'validation_exception: something went wrong'
-    );
+    const banner = await findByTestId('createDataSourceFlyoutSaveError');
+    expect(banner).toHaveTextContent('Could not save the data source');
+    expect(banner).toHaveTextContent('validation_exception: something went wrong');
+    expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
   });
 });

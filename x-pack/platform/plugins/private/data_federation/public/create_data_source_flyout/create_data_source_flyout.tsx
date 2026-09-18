@@ -337,7 +337,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           />
         </EuiForm>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
+      <EuiFlyoutFooter data-test-subj="createDataSourceFlyoutFooter">
         {saveError ? (
           <FlyoutErrorBanner
             title={
