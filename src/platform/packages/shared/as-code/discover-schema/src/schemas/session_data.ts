@@ -91,8 +91,8 @@ export const discoverSessionDefaultTabTypeStateSchema = z
       .default(DiscoverTabType.Default)
       .meta({
         description:
-          'A tab with no type-specific saved state. ' +
-          'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
+          'Identifies the type of profile settings saved with the tab. ' +
+          'The `default` value indicates that no profile settings are included.',
       }),
   })
   .strict();

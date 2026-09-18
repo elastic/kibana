@@ -420,7 +420,6 @@ const processPeriodAggregations = ({
     discovery: createEmptyAccumulator(),
     investigation: createEmptyAccumulator(),
     ki_extraction: createEmptyAccumulator(),
-    memory: createEmptyAccumulator(),
   };
   const unmatchedModelIds = new Set<string>();
   if (!isRecord(aggregations)) {
