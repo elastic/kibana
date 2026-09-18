@@ -1604,7 +1604,6 @@ class OutputService {
       `${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
 
     if (output.is_default) {
-    if (output.is_default) {
       agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
     }
     if (output.is_default_monitoring) {
