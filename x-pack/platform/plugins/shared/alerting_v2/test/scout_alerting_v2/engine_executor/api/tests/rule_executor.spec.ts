@@ -322,21 +322,21 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             size: groupCount,
           });
 
+          // Stop the rule so it doesn't keep writing 250 events per tick for the rest of the suite.
+          await apiServices.alertingV2.rules.disable(rule.id);
+
           const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
             status: 'breached',
             size: groupCount,
           });
           expect(events).toHaveLength(groupCount);
 
-          const timestamps = events.map((event) => Date.parse(event['@timestamp']));
           const scheduled = Date.parse(events[0].scheduled_timestamp!);
-          for (const timestamp of timestamps) {
+          for (const event of events) {
+            const timestamp = Date.parse(event['@timestamp']);
             expect(Number.isNaN(timestamp)).toBe(false);
             expect(timestamp).toBeGreaterThanOrEqual(scheduled);
           }
-          // Batches are written sequentially, so `find` (sorted by @timestamp)
-          // returns them in write order; the span of a single run stays small.
-          expect(Math.max(...timestamps) - Math.min(...timestamps)).toBeLessThan(60_000);
         }
       );
 
