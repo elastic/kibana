@@ -118,6 +118,35 @@ describe('getConnectorRoute', () => {
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
+  it('maps inboundEventsEnabled to inbound_events_enabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getConnectorRoute(router, licenseState);
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.inboundWebhook',
+        name: 'inbound',
+        inboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        inbound_events_enabled: true,
+      }),
+    });
+  });
+
   it('ensures the license check prevents getting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

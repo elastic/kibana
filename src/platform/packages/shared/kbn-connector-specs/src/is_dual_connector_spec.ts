@@ -12,13 +12,13 @@ import { connectorSpecHasEvents } from './connector_spec_has_events';
 import { getConnectorSpec } from './get_connector_spec';
 
 /**
- * Inbound-only types have events and no outbound actions.
+ * Dual types have inbound events and outbound actions on the same spec.
  */
-export const isInboundOnlyConnectorSpec = (spec: ConnectorSpec): boolean =>
-  connectorSpecHasEvents(spec) && Object.keys(spec.actions).length === 0;
+export const isDualConnectorSpec = (spec: ConnectorSpec): boolean =>
+  connectorSpecHasEvents(spec) && Object.keys(spec.actions).length > 0;
 
-/** True when the registered spec for this type id is inbound-only. */
-export const connectorTypeIsInboundOnly = (actionTypeId: string): boolean => {
+/** True when the registered spec for this type id is dual (events + actions). */
+export const connectorTypeIsDual = (actionTypeId: string): boolean => {
   const spec = getConnectorSpec(actionTypeId);
-  return spec !== undefined && isInboundOnlyConnectorSpec(spec);
+  return spec !== undefined && isDualConnectorSpec(spec);
 };

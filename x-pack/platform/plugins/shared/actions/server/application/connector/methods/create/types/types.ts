@@ -13,6 +13,7 @@ export interface ConnectorCreate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
+  inboundEventsEnabled?: boolean;
 }
 
 export interface ConnectorCreateParams {

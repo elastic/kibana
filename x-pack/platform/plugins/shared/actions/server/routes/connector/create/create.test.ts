@@ -228,6 +228,47 @@ describe('createConnectorRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
   });
 
+  it('forwards inbound_events_enabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    createConnectorRoute(router, licenseState);
+    const [, handler] = router.post.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'Datadog prod',
+        actionTypeId: '.dual',
+        inboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'Datadog prod',
+          connector_type_id: '.dual',
+          config: {},
+          secrets: {},
+          inbound_events_enabled: true,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledWith({
+      action: expect.objectContaining({ inboundEventsEnabled: true }),
+      options: undefined,
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ inbound_events_enabled: true }),
+    });
+  });
+
   test('validates body to prevent empty strings', async () => {
     const body = {
       name: 'My name',

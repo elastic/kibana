@@ -6,13 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 
 import type { RawAction } from '../../../../types';
 import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
 import { mintIngressCredential } from '../../../../inbound/ingress_credential';
+import { hasInboundEventIdentityAttributes } from '../../../../inbound/instance_inbound_events';
 import type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';
 
 export async function rotateInboundIngress({
@@ -33,6 +34,17 @@ export async function rotateInboundIngress({
     throw Boom.badRequest(
       i18n.translate('xpack.actions.serverSideErrors.rotateInboundIngressNotSupported', {
         defaultMessage: 'This connector does not use inbound ingest credentials.',
+      })
+    );
+  }
+
+  if (
+    connectorTypeIsDual(actionTypeId) &&
+    !hasInboundEventIdentityAttributes(rawAction.attributes)
+  ) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.rotateInboundIngressNotEnabled', {
+        defaultMessage: 'Inbound events are not enabled for this connector.',
       })
     );
   }

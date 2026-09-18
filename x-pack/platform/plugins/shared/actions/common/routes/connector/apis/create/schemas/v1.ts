@@ -39,6 +39,14 @@ export const createConnectorRequestBodySchema = schema.object(
     secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
       defaultValue: {},
     }),
+    inbound_events_enabled: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.',
+        },
+      })
+    ),
   },
   { meta: { id: 'new_connector' } }
 );

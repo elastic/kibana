@@ -13,9 +13,11 @@ export const transformCreateConnectorBody = ({
   name,
   config,
   secrets,
+  inbound_events_enabled: inboundEventsEnabled,
 }: CreateConnectorRequestBodyV1): ConnectorCreateParams['action'] => ({
   actionTypeId,
   name,
   config,
   secrets,
+  ...(inboundEventsEnabled !== undefined ? { inboundEventsEnabled } : {}),
 });
