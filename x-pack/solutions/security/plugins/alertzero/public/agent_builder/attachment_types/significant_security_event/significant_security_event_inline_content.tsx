@@ -157,6 +157,56 @@ export const SignificantSecurityEventInlineContent: React.FC<
         )}
       </EuiText>
       <EuiSpacer size="s" />
+      <EuiText size="s">
+        <strong>
+          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.alerts', {
+            defaultMessage: 'Alerts',
+          })}
+        </strong>
+      </EuiText>
+      <EuiText size="s">
+        {parsed.alerts.length === 0 ? (
+          <span css={cellStyles}>
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.alertsEmpty', {
+              defaultMessage: 'No alerts recorded',
+            })}
+          </span>
+        ) : (
+          parsed.alerts.map((alert) => (
+            <EuiBadge key={alert} color="hollow" css={{ marginRight: 4, marginBottom: 4 }}>
+              {alert}
+            </EuiBadge>
+          ))
+        )}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <strong>
+          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.events', {
+            defaultMessage: 'Events',
+          })}
+        </strong>
+      </EuiText>
+      <EuiText size="s">
+        {parsed.events.length === 0 ? (
+          <span css={cellStyles}>
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.eventsEmpty', {
+              defaultMessage: 'No events recorded',
+            })}
+          </span>
+        ) : (
+          parsed.events.map((event) => (
+            <EuiBadge
+              key={`${event.event_id}-${event.source_index}`}
+              color="hollow"
+              css={{ marginRight: 4, marginBottom: 4 }}
+            >
+              {`${event.event_id} (${event.source_index})`}
+            </EuiBadge>
+          ))
+        )}
+      </EuiText>
+      <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
         {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.evidenceCounts', {
           defaultMessage:

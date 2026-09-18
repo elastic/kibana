@@ -18,6 +18,11 @@ export interface TimelineEntry {
   what: string;
 }
 
+export interface SignificantSecurityEventRef {
+  event_id: string;
+  source_index: string;
+}
+
 export interface MapsToProposal {
   category?: string;
   impact?: string;
@@ -40,7 +45,7 @@ export interface SignificantSecurityEventAttachmentData {
   security_knowledge_indicators: SecurityKnowledgeIndicator[];
   entities: string[];
   alerts?: string[];
-  events?: string[];
+  events?: SignificantSecurityEventRef[];
   timeline: TimelineEntry[];
   hypothesis_tested: string;
   evidence_for: string[];
@@ -73,6 +78,14 @@ const isValidIndicator = (candidate: unknown): candidate is SecurityKnowledgeInd
       typeof (candidate as SecurityKnowledgeIndicator).value === 'string'
   );
 
+const isValidEventRef = (candidate: unknown): candidate is SignificantSecurityEventRef =>
+  Boolean(
+    candidate &&
+      typeof candidate === 'object' &&
+      typeof (candidate as SignificantSecurityEventRef).event_id === 'string' &&
+      typeof (candidate as SignificantSecurityEventRef).source_index === 'string'
+  );
+
 /**
  * Structural, defensive parser: the server already validates this payload against
  * `significantSecurityEventAttachmentDataSchema` on write, but the renderer must not throw
@@ -90,6 +103,8 @@ export interface ParsedSignificantSecurityEvent {
   hypothesisTested?: string;
   timeline: TimelineEntry[];
   entities: string[];
+  alerts: string[];
+  events: SignificantSecurityEventRef[];
   indicators: SecurityKnowledgeIndicator[];
   evidenceForCount: number;
   evidenceAgainstCount: number;
@@ -116,6 +131,10 @@ export const parseSignificantSecurityEventData = (
     entities: Array.isArray(record.entities)
       ? record.entities.filter((entity): entity is string => typeof entity === 'string')
       : [],
+    alerts: Array.isArray(record.alerts)
+      ? record.alerts.filter((alert): alert is string => typeof alert === 'string')
+      : [],
+    events: Array.isArray(record.events) ? record.events.filter(isValidEventRef) : [],
     indicators: Array.isArray(record.security_knowledge_indicators)
       ? record.security_knowledge_indicators.filter(isValidIndicator)
       : [],

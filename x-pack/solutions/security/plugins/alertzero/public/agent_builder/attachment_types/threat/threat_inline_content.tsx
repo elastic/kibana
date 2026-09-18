@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiDescriptionList, EuiPanel, EuiSkeletonText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiDescriptionList,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { KbnWarningCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -16,7 +24,12 @@ import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import { THREAT_REPORT_API_PATH, THREAT_REPORT_API_VERSION } from './threat_report_api';
 import { threatAttachmentQueryClient } from './query_client';
 import { isValidThreatAttachmentData } from './types';
-import type { ThreatAttachment, ThreatReportLiveData } from './types';
+import type {
+  ThreatAttachment,
+  ThreatReportDiamondVertex,
+  ThreatReportIoc,
+  ThreatReportLiveData,
+} from './types';
 
 export const THREAT_ATTACHMENT_TEST_ID = 'alertzeroThreatAttachment';
 export const THREAT_ATTACHMENT_EMPTY_TEST_ID = 'alertzeroThreatAttachmentEmpty';
@@ -28,10 +41,37 @@ const cellStyles = css`
 
 interface ThreatReportResponse {
   reportId?: string;
-  content?: { title?: string };
+  content?: {
+    title?: string;
+    external_references?: Array<{ source_name?: string; url?: string; external_id?: string }>;
+  };
   severity?: { level?: string; score?: number };
   source?: { name?: string };
+  extracted?: {
+    iocs?: Array<{ type?: string; value?: string; severity?: string; tier?: string }>;
+    ttps?: { tactics?: string[]; techniques?: string[] };
+    categories?: string[];
+    diamond?: {
+      adversary?: { signal?: string; summary?: string };
+      capability?: { signal?: string; summary?: string };
+      infrastructure?: { signal?: string; summary?: string };
+      victim?: { signal?: string; summary?: string };
+      signal_count?: number;
+      suitable?: boolean;
+    };
+  };
+  geography?: { regions?: string[] };
+  rank_score?: number;
+  evidence?: {
+    alert_hits_total?: number;
+    last_hunt_status?: string;
+    last_hunted_at?: string;
+    last_hunt_run_id?: string;
+    corroborated_rank_score?: number;
+  };
 }
+
+const DIAMOND_VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 
 const fetchThreatReport = async ({
   http,
@@ -46,11 +86,59 @@ const fetchThreatReport = async ({
     THREAT_REPORT_API_PATH.replace('{reportId}', encodeURIComponent(reportId)),
     { version: THREAT_REPORT_API_VERSION, method: 'GET', signal }
   );
+
+  const diamondSource = response?.extracted?.diamond;
+  const diamondVertices = diamondSource
+    ? DIAMOND_VERTICES.filter((vertex) => diamondSource[vertex] != null).map((vertex) => ({
+        vertex,
+        signal: diamondSource[vertex]?.signal,
+        summary: diamondSource[vertex]?.summary,
+      }))
+    : [];
+
   return {
     title: response?.content?.title,
     severityLevel: response?.severity?.level,
     severityScore: response?.severity?.score,
     sourceName: response?.source?.name,
+    iocs: response?.extracted?.iocs?.map((ioc) => ({
+      type: ioc.type ?? 'unknown',
+      value: ioc.value ?? '',
+      severity: ioc.severity,
+      tier: ioc.tier,
+    })),
+    ttps:
+      response?.extracted?.ttps &&
+      (response.extracted.ttps.tactics?.length || response.extracted.ttps.techniques?.length)
+        ? {
+            tactics: response.extracted.ttps.tactics ?? [],
+            techniques: response.extracted.ttps.techniques ?? [],
+          }
+        : undefined,
+    diamond: diamondVertices.length
+      ? {
+          vertices: diamondVertices,
+          signalCount: diamondSource?.signal_count,
+          suitable: diamondSource?.suitable,
+        }
+      : undefined,
+    categories: response?.extracted?.categories,
+    regions: response?.geography?.regions,
+    corroboratedRankScore: response?.evidence?.corroborated_rank_score,
+    evidence: response?.evidence
+      ? {
+          alertHitsTotal: response.evidence.alert_hits_total,
+          lastHuntStatus: response.evidence.last_hunt_status,
+          lastHuntedAt: response.evidence.last_hunted_at,
+          lastHuntRunId: response.evidence.last_hunt_run_id,
+          corroboratedRankScore: response.evidence.corroborated_rank_score,
+        }
+      : undefined,
+    externalReferences: response?.content?.external_references?.map((ref) => ({
+      sourceName: ref.source_name,
+      url: ref.url,
+      externalId: ref.external_id,
+    })),
   };
 };
 
@@ -59,6 +147,201 @@ const SEVERITY_COLOR_MAP: Record<string, string> = {
   medium: 'warning',
   high: 'danger',
   critical: 'danger',
+};
+
+const sectionHeading = (id: string, defaultMessage: string) => (
+  <EuiText size="s">
+    <strong>{i18n.translate(id, { defaultMessage })}</strong>
+  </EuiText>
+);
+
+const renderEnrichedSections = (liveData?: ThreatReportLiveData): React.ReactNode => {
+  if (!liveData) {
+    return null;
+  }
+
+  const sections: React.ReactNode[] = [];
+
+  if (liveData.iocs?.length) {
+    const iocsByType = new Map<string, ThreatReportIoc[]>();
+    for (const ioc of liveData.iocs) {
+      const bucket = iocsByType.get(ioc.type) ?? [];
+      bucket.push(ioc);
+      iocsByType.set(ioc.type, bucket);
+    }
+    sections.push(
+      <div key="iocs">
+        {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.iocs', 'Indicators')}
+        {[...iocsByType.entries()].map(([type, iocs]) => (
+          <div key={type} css={{ marginBottom: 4 }}>
+            <EuiText size="xs" color="subdued" css={cellStyles}>
+              {type}
+            </EuiText>
+            {iocs.map((ioc) => (
+              <EuiBadge key={ioc.value} color="hollow" css={{ marginRight: 4 }}>
+                {ioc.value}
+                {ioc.tier ? ` (${ioc.tier})` : ''}
+              </EuiBadge>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (liveData.ttps?.tactics.length || liveData.ttps?.techniques.length) {
+    sections.push(
+      <div key="ttps">
+        {sectionHeading('xpack.alertzero.agentBuilder.attachments.threat.ttps', 'TTPs')}
+        {liveData.ttps.tactics.length > 0 && (
+          <div css={{ marginBottom: 4 }}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.tactics', {
+                defaultMessage: 'Tactics',
+              })}
+            </EuiText>
+            {liveData.ttps.tactics.map((tactic) => (
+              <EuiBadge key={tactic} color="hollow" css={{ marginRight: 4 }}>
+                {tactic}
+              </EuiBadge>
+            ))}
+          </div>
+        )}
+        {liveData.ttps.techniques.length > 0 && (
+          <div>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.techniques', {
+                defaultMessage: 'Techniques',
+              })}
+            </EuiText>
+            {liveData.ttps.techniques.map((technique) => (
+              <EuiBadge key={technique} color="hollow" css={{ marginRight: 4 }}>
+                {technique}
+              </EuiBadge>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (liveData.diamond?.vertices.length) {
+    sections.push(
+      <div key="diamond">
+        {sectionHeading(
+          'xpack.alertzero.agentBuilder.attachments.threat.diamond',
+          'Diamond model'
+        )}
+        <EuiBasicTable<ThreatReportDiamondVertex>
+          tableCaption={i18n.translate(
+            'xpack.alertzero.agentBuilder.attachments.threat.diamondTableCaption',
+            { defaultMessage: 'Diamond model signals' }
+          )}
+          items={liveData.diamond.vertices}
+          columns={[
+            {
+              field: 'vertex',
+              name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertex', {
+                defaultMessage: 'Vertex',
+              }),
+            },
+            {
+              field: 'signal',
+              name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.signal', {
+                defaultMessage: 'Signal',
+              }),
+              render: (signal?: string) => <span css={cellStyles}>{signal}</span>,
+            },
+            {
+              field: 'summary',
+              name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.summary', {
+                defaultMessage: 'Summary',
+              }),
+              render: (summary?: string) => <span css={cellStyles}>{summary}</span>,
+            },
+          ]}
+        />
+        {(liveData.diamond.signalCount != null || liveData.diamond.suitable != null) && (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.diamondCaption', {
+              defaultMessage: 'signal_count={signalCount}, suitable={suitable}',
+              values: {
+                signalCount: liveData.diamond.signalCount ?? 0,
+                suitable: String(liveData.diamond.suitable ?? false),
+              },
+            })}
+          </EuiText>
+        )}
+      </div>
+    );
+  }
+
+  if (liveData.evidence) {
+    sections.push(
+      <EuiText key="evidence" size="xs" color="subdued">
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.evidence', {
+          defaultMessage:
+            'alert_hits_total={alertHitsTotal}, last_hunt_status={lastHuntStatus}, corroborated_rank_score={corroboratedRankScore}',
+          values: {
+            alertHitsTotal: liveData.evidence.alertHitsTotal ?? 0,
+            lastHuntStatus: liveData.evidence.lastHuntStatus ?? 'unknown',
+            corroboratedRankScore: liveData.evidence.corroboratedRankScore ?? liveData.corroboratedRankScore ?? 0,
+          },
+        })}
+      </EuiText>
+    );
+  }
+
+  if (liveData.regions?.length || liveData.categories?.length) {
+    sections.push(
+      <div key="geo-categories">
+        {liveData.regions?.length ? (
+          <div css={{ marginBottom: 4 }}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
+                defaultMessage: 'Regions',
+              })}
+            </EuiText>
+            {liveData.regions.map((region) => (
+              <EuiBadge key={region} color="hollow" css={{ marginRight: 4 }}>
+                {region}
+              </EuiBadge>
+            ))}
+          </div>
+        ) : null}
+        {liveData.categories?.length ? (
+          <div>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
+                defaultMessage: 'Categories',
+              })}
+            </EuiText>
+            {liveData.categories.map((category) => (
+              <EuiBadge key={category} color="hollow" css={{ marginRight: 4 }}>
+                {category}
+              </EuiBadge>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (sections.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      {sections.map((section, index) => (
+        <React.Fragment key={index}>
+          {index > 0 && <EuiSpacer size="s" />}
+          {section}
+        </React.Fragment>
+      ))}
+    </>
+  );
 };
 
 export interface ThreatAttachmentInlineContentProps
@@ -167,6 +450,7 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
       ) : (
         <>
           <EuiDescriptionList type="column" compressed listItems={listItems} />
+          {useLive && renderEnrichedSections(liveData)}
           {!useLive && (
             <KbnInfoCallout
               announceOnMount

@@ -30,6 +30,11 @@ const timelineEntrySchema = z.object({
 
 const evidenceItemSchema = z.string().max(2000);
 
+const significantSecurityEventRefSchema = z.object({
+  event_id: z.string().max(512),
+  source_index: z.string().max(256),
+});
+
 const mapsToProposalSchema = z
   .object({
     category: z.string().max(256).optional(),
@@ -63,7 +68,7 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
   entities: z.array(z.string().max(2048)).max(50),
   alerts: z.array(z.string().max(2048)).max(50).optional(),
-  events: z.array(z.string().max(2048)).max(50).optional(),
+  events: z.array(significantSecurityEventRefSchema).max(50).optional(),
   timeline: z.array(timelineEntrySchema).max(50),
   hypothesis_tested: z.string().max(4000),
   evidence_for: z.array(evidenceItemSchema).max(50),
@@ -126,7 +131,9 @@ const formatSignificantSecurityEventForAgent = (
 
   if (data.events && data.events.length > 0) {
     lines.push('', 'Events:');
-    lines.push(`  ${data.events.join(', ')}`);
+    lines.push(
+      `  ${data.events.map((event) => `${event.event_id} (${event.source_index})`).join(', ')}`
+    );
   }
 
   lines.push('', 'Evidence for:');

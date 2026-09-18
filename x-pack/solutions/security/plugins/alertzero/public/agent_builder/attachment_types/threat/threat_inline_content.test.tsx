@@ -66,6 +66,46 @@ describe('ThreatAttachmentInlineContent', () => {
     expect(screen.queryByTestId(THREAT_ATTACHMENT_UNAVAILABLE_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('renders enriched fields (iocs, ttps, diamond, evidence) when the live report has them', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-2',
+        content: { title: 'Enriched Title' },
+        severity: { level: 'high', score: 0.9 },
+        source: { name: 'Enriched Source' },
+        extracted: {
+          iocs: [{ type: 'ip', value: '203.0.113.5', tier: 'high' }],
+          ttps: { tactics: ['Initial Access'], techniques: ['T1078'] },
+          categories: ['credential-access'],
+          diamond: {
+            adversary: { signal: 'aws-iam', summary: 'Adversary summary' },
+            capability: { signal: 'assume-role-chaining', summary: 'Capability summary' },
+            signal_count: 2,
+            suitable: true,
+          },
+        },
+        geography: { regions: ['us-east-1'] },
+        evidence: {
+          alert_hits_total: 5,
+          last_hunt_status: 'completed',
+          corroborated_rank_score: 0.71,
+        },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-2' });
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Enriched Title')).toBeInTheDocument();
+    });
+    expect(screen.getByText('203.0.113.5 (high)')).toBeInTheDocument();
+    expect(screen.getByText('Initial Access')).toBeInTheDocument();
+    expect(screen.getByText('T1078')).toBeInTheDocument();
+    expect(screen.getByText('aws-iam')).toBeInTheDocument();
+    expect(screen.getByText('us-east-1')).toBeInTheDocument();
+    expect(screen.getByText('credential-access')).toBeInTheDocument();
+  });
+
   it('falls back to captured fields when the fetch fails (no status-code branching)', async () => {
     const http = {
       fetch: jest.fn().mockRejectedValue(new Error('403')),
