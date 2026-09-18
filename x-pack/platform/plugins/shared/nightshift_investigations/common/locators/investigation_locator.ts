@@ -12,7 +12,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 export const NIGHTSHIFT_INVESTIGATION_LOCATOR_ID = 'NIGHTSHIFT_INVESTIGATION_LOCATOR';
 
 export interface InvestigationLocatorParams extends SerializableRecord {
-  investigationId: string;
+  investigationId?: string;
 }
 
 export type InvestigationLocator = LocatorPublic<InvestigationLocatorParams>;
@@ -22,10 +22,16 @@ export class InvestigationLocatorDefinition
 {
   public readonly id = NIGHTSHIFT_INVESTIGATION_LOCATOR_ID;
 
-  public readonly getLocation = async (params: InvestigationLocatorParams) => {
+  public readonly getLocation = async (params?: InvestigationLocatorParams) => {
+    const searchParams = new URLSearchParams();
+    if (params?.investigationId) {
+      searchParams.set('investigationId', params.investigationId);
+    }
+    const queryString = searchParams.toString();
+
     return {
       app: NIGHTSHIFT_APP_ID,
-      path: `?investigationId=${encodeURIComponent(params.investigationId)}`,
+      path: queryString ? `?${queryString}` : '',
       state: {},
     };
   };

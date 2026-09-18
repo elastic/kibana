@@ -35,4 +35,20 @@ describe('InvestigationLocatorDefinition', () => {
       state: {},
     });
   });
+
+  it('returns empty path when investigationId is not provided', async () => {
+    const locationWithoutParams = await definition.getLocation();
+    expect(locationWithoutParams).toEqual({
+      app: NIGHTSHIFT_APP_ID,
+      path: '',
+      state: {},
+    });
+
+    const locationWithEmptyParams = await definition.getLocation({});
+    expect(locationWithEmptyParams).toEqual({
+      app: NIGHTSHIFT_APP_ID,
+      path: '',
+      state: {},
+    });
+  });
 });
