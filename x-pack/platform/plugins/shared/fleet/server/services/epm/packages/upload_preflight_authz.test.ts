@@ -449,7 +449,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
-  it('includes primary installed_kibana_space_id and additional spaces in privilege check', async () => {
+  it('fans out to all additional spaces when upgrading from primary space', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
     );
@@ -458,7 +458,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (getInstallationObject as jest.Mock).mockResolvedValue({
       attributes: {
-        installed_kibana_space_id: 'primary-space',
+        // Primary space matches the request space, so this is a primary-space upgrade.
+        installed_kibana_space_id: mockSpaceId,
         additional_spaces_installed_kibana: {
           'space-a': [],
           'space-b': [],
@@ -476,39 +477,46 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
-      expect.arrayContaining([mockSpaceId, 'primary-space', 'space-a', 'space-b']),
+      expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']),
       expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
     );
   });
 
-  it('enforces privileges in primary space when request originates from a different space', async () => {
+  it('checks only the request space when uploading from an additional (non-primary) space', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
     );
 
-    // Caller has privileges in 'space-x' (the request space) but not in 'primary-space'
-    const security = makeSecurity(false, ['api:rules-all']);
+    const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (getInstallationObject as jest.Mock).mockResolvedValue({
       attributes: {
         installed_kibana_space_id: 'primary-space',
-        additional_spaces_installed_kibana: {},
+        additional_spaces_installed_kibana: {
+          'space-x': [],
+          'space-y': [],
+        },
       },
     });
 
-    await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        'space-x',
-        mockSavedObjectsClient
-      )
-    ).rejects.toThrow(FleetUnauthorizedError);
+    // Request from 'space-x', which is an additional space (not the primary).
+    // installKibanaAssetsAndReferencesMultispace only writes to 'space-x' in this case,
+    // so the privilege check must not require privileges in unrelated spaces.
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      'space-x',
+      mockSavedObjectsClient
+    );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
-      expect.arrayContaining(['space-x', 'primary-space']),
+      ['space-x'],
+      expect.anything()
+    );
+    expect(atSpaces).not.toHaveBeenCalledWith(
+      expect.arrayContaining(['primary-space']),
       expect.anything()
     );
   });
@@ -557,7 +565,37 @@ describe('checkUploadPackageAssetPrivileges', () => {
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   });
 
-  it('returns the exact authorized destination spaces so callers can cap propagation', async () => {
+  it('returns all destination spaces for a primary-space upgrade (used to cap propagation)', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        additional_spaces_installed_kibana: {
+          'space-a': [],
+          'space-b': [],
+        },
+      },
+    });
+
+    // Request from primary space → fan-out: result includes request space + all additional spaces.
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      mockSavedObjectsClient
+    );
+
+    expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']));
+    expect(result).toHaveLength(3);
+  });
+
+  it('returns only the request space for an additional-space install (no fan-out)', async () => {
     (createArchiveIterator as jest.Mock).mockReturnValue(
       makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
     );
@@ -568,7 +606,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       attributes: {
         installed_kibana_space_id: 'primary-space',
         additional_spaces_installed_kibana: {
-          'space-a': [],
+          'space-x': [],
+          'space-y': [],
         },
       },
     });
@@ -581,7 +620,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockSavedObjectsClient
     );
 
-    expect(result).toEqual(expect.arrayContaining(['space-x', 'primary-space', 'space-a']));
-    expect(result).toHaveLength(3);
+    expect(result).toEqual(['space-x']);
   });
 });

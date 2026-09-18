@@ -55,6 +55,9 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
+      // Wait out the process-wide upload rate-limit (10 s) that may have been set by
+      // fleetAndAgents.setup() or by the preceding upload suite.
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     });
 
     afterEach(async () => {

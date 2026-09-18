@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
@@ -137,11 +138,11 @@ export async function checkUploadPackageAssetPrivileges(
 
   const actions = buildRequiredActions(signals, security);
 
-  // Upgrades propagate Kibana assets into every Space the package is already installed in.
-  // Check the caller has the required privileges in all destination Spaces, not just the
-  // current one, to prevent privilege escalation into Spaces the caller cannot access.
-  // Include installed_kibana_space_id (primary Space) because the upload path does not
-  // require the request Space to match the primary; upgrades write into every Space.
+  // Determine which Spaces will actually receive Kibana assets, mirroring the logic in
+  // installKibanaAssetsAndReferencesMultispace:
+  //   • First install or additional-space install: assets go only to the request Space.
+  //   • Upgrade from the primary Space: assets fan out to every installed Space.
+  // Only check privileges in the Spaces that will actually be written.
   const installation = signals.pkgName
     ? await getInstallationObject({
         savedObjectsClient,
@@ -150,14 +151,18 @@ export async function checkUploadPackageAssetPrivileges(
       })
     : undefined;
 
-  const primarySpace = installation?.attributes?.installed_kibana_space_id;
-  const additionalSpaces = Object.keys(
-    installation?.attributes?.additional_spaces_installed_kibana ?? {}
-  );
+  const effectivePrimarySpace =
+    installation?.attributes?.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+  const isAdditionalSpaceInstall = !!installation && effectivePrimarySpace !== spaceId;
 
-  const destinationSpaces = [
-    ...new Set([spaceId, ...(primarySpace ? [primarySpace] : []), ...additionalSpaces]),
-  ];
+  const destinationSpaces = isAdditionalSpaceInstall
+    ? [spaceId]
+    : [
+        ...new Set([
+          spaceId,
+          ...Object.keys(installation?.attributes?.additional_spaces_installed_kibana ?? {}),
+        ]),
+      ];
 
   const checkResult = await security.authz
     .checkPrivilegesWithRequest(request)
