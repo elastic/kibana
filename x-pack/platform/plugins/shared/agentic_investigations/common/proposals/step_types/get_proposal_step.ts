@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { proposalDecisionSchema, proposalStatusSchema } from '../proposal';
+import { proposalDecisionSchema, proposalStatusSchema, proposalUserSchema } from '../proposal';
 
 export const GetProposalStepId = 'proposals.getProposal' as const;
 
@@ -22,6 +22,7 @@ export const getProposalStepOutputSchema = z.object({
   // Extracted from the stored schemas so the two vocabularies cannot drift.
   status: proposalStatusSchema,
   decision: proposalDecisionSchema.optional(),
+  decidedBy: proposalUserSchema.optional(),
   supersededBy: z.string().optional(),
   expiresAt: z.string().optional(),
   actionWorkflowId: z.string().optional(),
