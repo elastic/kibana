@@ -32,5 +32,7 @@ if [[ ${STORE_CACHE} == "true" ]]; then
   store_cache_exit=0
   wait "$store_cache_pid" || store_cache_exit=$?
   cat $STORE_CACHE_OUTPUT
-  exit $store_cache_exit
+  if [[ $store_cache_exit -ne 0 ]]; then
+    echo "^^^ +++ store_cache failed with exit code $store_cache_exit (non-fatal)"
+  fi
 fi
