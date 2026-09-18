@@ -12,7 +12,7 @@
     "server": true,
     "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["spaces", "agentBuilder"],
+    "optionalPlugins": ["security", "spaces", "agentBuilder"],
     "extraPublicDirs": ["common"]
   }
 }

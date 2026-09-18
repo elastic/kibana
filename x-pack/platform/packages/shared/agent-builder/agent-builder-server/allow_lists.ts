@@ -200,7 +200,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Streams
   'streams-management',
-  'significant-events-memory',
   'significant-events-management',
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
@@ -209,11 +208,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'knowledge-indicators-management',
   'ki-identification-management',
   'feature-identification',
-  'streams-memory-synthesis',
-  'streams-memory-consolidation',
-  'streams-conversation-scraper',
-  'significant-events-onboarding',
-  'streams-gap-detection',
 
   // Platform – Context Engine
   'ki-retrieval',
@@ -353,6 +347,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity_analytics_dashboard',
   'security.entity_graph',
   'security.entity_risk_score_history',
+  'security.investigation.iocs',
+  'security.investigation.timeline',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
