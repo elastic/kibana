@@ -6,19 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  catchError,
-  concat,
-  filter,
-  finalize,
-  from,
-  merge,
-  of,
-  ReplaySubject,
-  shareReplay,
-  tap,
-  throwError,
-} from 'rxjs';
+import { filter, finalize, from, merge, ReplaySubject, shareReplay, tap } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
@@ -73,6 +61,7 @@ import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
 import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
+import { emitRoundInterruptedOnError } from './utils/emit_round_interrupted_on_error';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
@@ -539,22 +528,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     evictInternalEvents(),
     // Placed after eviction so `round_interrupted` reaches the runner like any other chat event.
-    // The original error is always rethrown; the summary is best effort.
-    catchError((err) => {
-      try {
-        return concat(
-          of(toRoundInterrupted()),
-          throwError(() => err)
-        );
-      } catch (summaryError) {
-        logger.warn(
-          `Failed to build round_interrupted summary: ${
-            summaryError instanceof Error ? summaryError.message : String(summaryError)
-          }`
-        );
-        return throwError(() => err);
-      }
-    }),
+    emitRoundInterruptedOnError({ buildEvent: toRoundInterrupted, logger }),
     shareReplay()
   );
 
