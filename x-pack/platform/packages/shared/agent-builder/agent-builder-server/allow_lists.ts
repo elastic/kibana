@@ -362,6 +362,12 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // gated behind the workflows feature flag
   'diagnostic_report',
 
+  // Security Solution – AlertZero (Hunt Watch)
+  // gated behind xpack.alertzero.enabled
+  'security.threat',
+  'security.significant_security_event',
+  'security.hunt_correlation',
+
   // Observability
   'observability.ai_insight',
   'observability.error',

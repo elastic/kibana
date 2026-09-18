@@ -24,6 +24,7 @@ import {
 import type { GetInvestigationResponse } from '@kbn/alertzero-common';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -108,6 +109,13 @@ export class AlertZeroPublicPlugin
         return investigation;
       },
     });
+
+    registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, core.http).catch(
+      (error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to register AlertZero attachment UI definitions', error);
+      }
+    );
 
     return {};
   }
