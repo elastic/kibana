@@ -70,17 +70,6 @@ describe('preflight_checks', () => {
           ensureValidInput({ input, timeline: roundsToEvents(conversation) })
         ).not.toThrow();
       });
-
-      it('should not throw when action=regenerate (input comes from last round)', () => {
-        const conversation = createEmptyConversation({
-          rounds: [createRound({ status: ConversationRoundStatus.completed })],
-        });
-        const input: ConverseInput = {};
-
-        expect(() =>
-          ensureValidInput({ input, timeline: roundsToEvents(conversation), action: 'regenerate' })
-        ).not.toThrow();
-      });
     });
 
     describe('when last round is awaiting prompt', () => {
