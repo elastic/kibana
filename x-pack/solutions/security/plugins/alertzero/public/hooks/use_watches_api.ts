@@ -13,7 +13,10 @@ import type { GetWatchResponse, ListWatchesResponse } from '@kbn/alertzero-commo
 import { queryKeys } from '../query_keys';
 
 export const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
-  if (failureCount >= 3) {
+  // Retry a transient (5xx) error exactly once. A second consecutive failure means the
+  // backend is not going to recover in the time a user is looking at the page, so we
+  // surface the empty state instead of leaving the onboarding gate stuck on a spinner.
+  if (failureCount >= 1) {
     return false;
   }
   if (isHttpFetchError(error)) {
@@ -26,7 +29,7 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
   return true;
 };
 
-export const useWatches = () => {
+export const useWatches = (options?: { enabled?: boolean }) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -35,6 +38,7 @@ export const useWatches = () => {
       services.http!.get<ListWatchesResponse>(ALERTZERO_WATCHES_URL, {
         version: API_VERSIONS.internal.v1,
       }),
+    enabled: options?.enabled,
     keepPreviousData: true,
     retry: retryOnTransientError,
   });
