@@ -17,6 +17,7 @@ import type {
   PointStyle,
   AreaSeriesStyle,
   LineSeriesStyle,
+  PartialTheme,
 } from '@elastic/charts';
 import {
   AreaSeries,
@@ -38,7 +39,7 @@ import {
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQL_TABLE_TYPE, getAggsFormats } from '@kbn/data-plugin/common';
@@ -1105,6 +1106,54 @@ describe('XYChart component', () => {
     expect(barSeries.at(0).prop('yAccessors')).toEqual(['a']);
     expect(barSeries.at(1).prop('yAccessors')).toEqual(['b']);
     expect(component.find(Settings).prop('rotation')).toEqual(90);
+  });
+
+  describe('adds bar width safeguard on sparse categorical charts', () => {
+    const getBarRectStyle = (rows: DatatableRow[], xScaleType: 'ordinal' | 'time' = 'ordinal') => {
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={createArgsWithLayers({
+            ...sampleLayer,
+            seriesType: 'bar',
+            xAccessor: 'b',
+            xScaleType,
+            table: createSampleDatatableWithRows(rows),
+          })}
+        />
+      );
+      const [themeOverrides] = component.find(Settings).prop('theme') as PartialTheme[];
+      return themeOverrides.barSeriesStyle?.rect;
+    };
+
+    test('caps bar width at 50% of the band for a single category', () => {
+      const rect = getBarRectStyle([{ v: 1, b: 'A' }]);
+      expect(rect?.widthPixel).toBe(400);
+      expect(rect?.widthRatio).toBe(0.5);
+    });
+
+    test('caps bar width at 90% of the band for two categories', () => {
+      const rect = getBarRectStyle([
+        { v: 1, b: 'A' },
+        { v: 2, b: 'B' },
+      ]);
+      expect(rect?.widthPixel).toBe(400);
+      expect(rect?.widthRatio).toBe(0.9);
+    });
+
+    test('only caps the pixel width for three or more categories', () => {
+      const rect = getBarRectStyle([
+        { v: 1, b: 'A' },
+        { v: 2, b: 'B' },
+        { v: 3, b: 'C' },
+      ]);
+      expect(rect).toEqual({ widthPixel: 400 });
+    });
+
+    test('does not cap bar width on non-categorical x axes', () => {
+      const rect = getBarRectStyle([{ v: 1, d: 1652034840000 }], 'time');
+      expect(rect).toBeUndefined();
+    });
   });
 
   test('it renders regular bar empty placeholder for no results', () => {

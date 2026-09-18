@@ -250,6 +250,12 @@ export const MAX_HYPOTHESES = 50;
  * live stream or reading the persisted final result.
  */
 export const investigationStateSchema = z.object({
+  /**
+   * Short headline naming the affected entity and the problem, shown as the investigation's title
+   * in the list and flyout. Seeded from the trigger (event title, alert rule name) and sharpened
+   * as the cause becomes clear. Optional so a snapshot without one keeps the seeded title.
+   */
+  title: z.string().max(MAX_TITLE_LENGTH).optional(),
   /** Current ("what's happening now") or final narrative summary of the investigation. */
   summary: z.string().max(MAX_TEXT_LENGTH),
   hypotheses: z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES),

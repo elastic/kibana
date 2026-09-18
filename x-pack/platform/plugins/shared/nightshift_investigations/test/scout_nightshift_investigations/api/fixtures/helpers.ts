@@ -98,6 +98,7 @@ export const ensureInvestigation = (
 
 export interface SeedInvestigationOptions {
   id: string;
+  title?: string;
   space?: string;
   status?: string;
   subject_type?: string;
@@ -122,6 +123,7 @@ export const seedInvestigation = async (
 ): Promise<void> => {
   const {
     id,
+    title = 'Test investigation',
     space,
     status = 'running',
     subject_type = 'alert',
@@ -137,6 +139,7 @@ export const seedInvestigation = async (
     overwrite: true,
     space,
     attributes: {
+      title,
       status,
       subject_type,
       subject_id,

@@ -576,6 +576,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:deductiveEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
+  },
+  'agentBuilder:deductiveEndpoint': {
+    type: 'keyword',
+    _meta: { description: 'Base URL of the external Deductive backend.' },
+  },
+  'agentBuilder:deductiveApiKey': {
+    type: 'keyword',
+    _meta: { description: 'API key for the external Deductive backend (redacted from telemetry).' },
+  },
   'contextEngine:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
@@ -1002,6 +1014,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
+    },
+  },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
     },
   },
   'elasticRamen:enabled': {
