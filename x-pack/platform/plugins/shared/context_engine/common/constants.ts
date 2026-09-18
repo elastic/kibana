@@ -60,6 +60,10 @@ export const AI_INDEX_DEST_PREFIX = 'ai-index-';
 export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
 export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 
+/** The ES|QL view agents retrieve an AI index through. */
+export const AI_INDEX_VIEW_PREFIX = 'v-ai-index-';
+export const aiIndexViewName = (aiIndexId: string): string => `${AI_INDEX_VIEW_PREFIX}${aiIndexId}`;
+
 /**
  * Hard limit on the number of AI indices returned by the list API.
  * TODO: Remove this limit (or make it configurable) and add pagination support to List API.

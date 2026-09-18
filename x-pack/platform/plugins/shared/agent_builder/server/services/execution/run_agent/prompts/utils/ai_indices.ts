@@ -41,7 +41,7 @@ export const getAiIndicesInstructions = ({
   // Mirrors `buildVisibilityFilter` in the SML service, minus its `terms_set` privilege check —
   // the agent only scopes by space.
   //
-  // `ignore_unmapped` is the one addition: this filter runs across every `ai-index-*` the agent can
+  // `ignore_unmapped` is the one addition: this filter runs across every AI index the agent can
   // reach and most do not map `permissions.kibana.privileges` at all, where a `nested` clause errors
   // out by default instead of leaving those documents alone.
   const spaceFilter = {
@@ -78,7 +78,7 @@ export const getAiIndicesInstructions = ({
   return cleanPrompt(`
 ## AI INDICES
 
-An AI index stores Knowledge Indicators (KIs): context prepared for agents, such as data descriptions, summaries, access patterns, queries, or records of Kibana resources. A KI may answer a question directly or help locate and use another source. AI indices are Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`. Use \`execute_esql\` for direct AI-index queries, and follow specialized tool instructions when they apply.
+An AI index stores Knowledge Indicators (KIs): context prepared for agents, such as data descriptions, summaries, access patterns, queries, or records of Kibana resources. A KI may answer a question directly or help locate and use another source. Each AI index is queried through an ES|QL view named \`v-ai-index-<id>\`, which returns its current, active, unexpired KIs; \`v-ai-index-*\` reaches every AI index you can read. A view already exposes \`_id\`, \`_index\` and \`_score\`, so never add \`METADATA\` to a view query. Use \`execute_esql\` for direct AI-index queries, and follow specialized tool instructions when they apply.
 
 Search relevant AI indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools. Fields differ between AI indices, so check what an index holds before filtering on one.
 
@@ -93,7 +93,7 @@ An index is space-aware when its documents carry \`${PRIVILEGES_PATH}\`: one ent
 When you query AI indices with \`execute_esql\`, pass the query and space \`filter\` together. Adapt the query to the task, but copy the filter verbatim:
 
 \`\`\`json
-${JSON.stringify({ query: 'FROM ai-index-* | LIMIT 100', filter: spaceFilter })}
+${JSON.stringify({ query: 'FROM v-ai-index-* | LIMIT 100', filter: spaceFilter })}
 \`\`\`
 
 Two caveats:

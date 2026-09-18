@@ -72,6 +72,10 @@ A **KI** is a structured fact stored in a searchable AI index or datastream (bac
 `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise). Workflows write KIs through the
 `context-engine` steps using the AI index id — never by indexing into the backing store directly.
 
+Agents retrieve through the AI index's ES|QL view, `v-ai-index-<id>`, which returns only current,
+active, unexpired KIs and drops the `governance` fields. Diagnosis reads the backing store, where
+deleted and expired KIs, every revision, and the governance fields remain.
+
 Each KI does two things:
 
 1. **Orients** — describes a class of information: its purpose, when to use it, what it does and
@@ -94,8 +98,12 @@ The AI index schema has these base fields:
 | `description` | text + semantic | Routing heuristic — what the source does *not* contain, key fields, joins. When sibling KIs share a similar title, this **must** carry the differentiator (sub-category, product, time window). Title alone will not separate near-duplicates for the retriever. |
 | `content` | text + semantic | Free text for semantic retrieval: purpose, questions answered, access patterns. |
 | `tags` | keyword[] | Filter facets. |
-| `attributes` | flattened | Structured, keyword-queryable metadata, plus every quality and lifecycle field. |
-| `@timestamp` | date | When the KI was last profiled. Set by `context-engine.createKi` at write time — never supplied in the step input. |
+| `attributes` | flattened | Structured, keyword-queryable metadata, plus every quality field. |
+| `references` | object[] | URIs the KI relates to: `{ uri, relation, description }`, with `relation` one of `derived_from`, `relates_to`, `supersedes`. A KI generated from an index carries `derived_from` with `index://<name>`. |
+| `expires_at` | date | ISO date after which the view hides the KI. Unset for durable immutable-fact KIs, which never age out. |
+| `@timestamp` | date | When the KI was last written. Set by the `context-engine` steps — never supplied in the step input. On a data stream every write appends a revision and the newest `@timestamp` is the current one. |
+| `governance.provenance` | object | `created_by` and `updated_by`, each `{ uri, metadata }`. The steps stamp `workflow://<workflow id>` with the run id and space; a KI is attributed to its automation by this field. |
+| `governance.lifecycle.status` | keyword | `active` or `deleted`. Unset reads as active. `deleteKi` sets `deleted` on a data stream; the view hides such KIs. |
 
 **Everything else lives inside `attributes`.** It is `flattened`, so arbitrary nested keys are
 keyword-queryable with no declared mapping and can never cause a mapping conflict on a long-lived
@@ -106,7 +114,6 @@ index. The fields that matter when diagnosing an index:
 | `attributes.confidence` | **Correctness** — how sure we are the facts are right, on the calibration bands below. |
 | `attributes.coverage` | **Completeness** — how fully the access patterns cover the source's question classes. Optional; most meaningful on `index_metadata` KIs. |
 | `attributes.evidence` | Observed values justifying the KI; each string quotes a real distribution. |
-| `attributes.expires_at` | ISO date, ~30 days out. **Omitted entirely for durable immutable-fact KIs**, which never age out. |
 | `attributes.excluded` | Soft exclude: the KI exists but agents skip it. |
 | `attributes.esql` | **The canonical location for any ES\|QL the KI carries** — a detection's materialized query, an index profile's runnable examples. This is the field the verifiers read. |
 
@@ -116,8 +123,7 @@ A value in only one of the two is invisible to half the retrieval paths, and tha
 common and easily missed cause of empty retrievals.
 
 Because `attributes` is `flattened`, numbers and dates inside it index as keywords. In ES|QL, cast
-before comparing: `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))`,
-`TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))`.
+before comparing: `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))`.
 
 ## Access patterns
 
@@ -275,11 +281,13 @@ Before proposing a change to something, read it.
   are worded. `ai-index-automations` covers how to read one, and how to attribute a KI when several
   write to the same index. A proposal that misquotes what a workflow does will be rejected on
   sight.
-- **The KIs themselves.** `platform.core.list_indices` finds the `ai-index-*` indices;
+- **The KIs themselves.** `platform.core.list_indices` finds the `ai-index-*` backing stores;
   `platform.core.execute_esql` samples them. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
   content" or "content that exists under a name the agent did not guess". This is the step signals
-  cannot substitute for.
+  cannot substitute for. Compare with the view, `v-ai-index-<id>`: a KI present in the backing
+  store and absent from the view is deleted, expired, or superseded by a newer revision, and
+  `governance.provenance.created_by.uri` names the automation that wrote it.
 - **Sources, and the filter on them.** A coverage gap on data that is not in any source is a source
   problem, and a different fix from anything about generation. `ai-index-sources` covers how to
   tell those apart — an `esql` source is a query you can run, so run it with and without its filter

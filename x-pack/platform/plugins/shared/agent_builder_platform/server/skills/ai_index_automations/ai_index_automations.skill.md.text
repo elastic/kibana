@@ -22,9 +22,10 @@ the prompt is phrased. Look for that before looking at wording.
 
 Misquoting what an automation does is the most expensive mistake available here: every claim built
 on it inherits the error, and a reviewer who catches one stops trusting the rest. When several
-automations write to the same index, attribute an indicator to one by reading the definitions and
-seeing which writes to that destination and id pattern. If that does not settle it, say attribution
-was not established rather than guessing.
+automations write to the same index, attribute an indicator to one by its
+`governance.provenance.created_by.uri`, which the steps stamp as `workflow://<workflow id>`, and
+confirm against the definition that writes to that destination and id pattern. If that does not
+settle it, say attribution was not established rather than guessing.
 
 The syntax these automations need — Liquid templating, `on-failure` handling, `if` conditions — is
 written out below, alongside the `context-engine` step contracts that no other skill or tool
@@ -80,7 +81,7 @@ written out here — this skill is the only place they exist.
   type: context-engine.createKi
   with:
     ai_index_id: 'my-ai-index' # required
-    ki_id: 'logs-index-profile' # optional, index-backed destinations only
+    ki_id: 'logs-index-profile' # optional, generated when omitted
     ki: # required
       type: 'index_metadata' # required
       title: 'logs-* index profile' # required
@@ -89,19 +90,29 @@ written out here — this skill is the only place they exist.
       tags: ['logs'] # optional, <= 100 entries
       attributes: # optional, <= 100 keys
         esql: 'FROM logs-* | LIMIT 10'
+      references: # optional, <= 100 entries
+        - uri: 'index://logs-*'
+          relation: 'derived_from' # derived_from | relates_to | supersedes
+          description: 'The indices this profile describes'
+      expires_at: '2026-10-17T00:00:00Z' # optional; unset never expires
 ```
 
-Passing the same `ki_id` again replaces the indicator, which is the whole of what makes a re-run
-idempotent rather than duplicative. On a data-stream destination `ki_id` is rejected outright and
-Elasticsearch generates the ids.
+Passing the same `ki_id` again is what makes a re-run idempotent rather than duplicative. On an
+index it replaces the indicator; on a data stream it appends a new revision and the newest one is
+the current one. Put the source of an indicator in `references` as `derived_from`. The step stamps
+`governance.provenance` with the workflow id and run; never set it yourself.
 
 **`context-engine.updateKi`** takes `ai_index_id` and `ki_id` plus a `ki` carrying only the fields to
-change, and outputs `id` and `result` (`updated` or `noop`). It fails when the indicator does not
-exist, so it belongs to the cumulative strategy that reads before it merges — it is not a substitute
-for `createKi`.
+change, and outputs `id` and `result` (`updated` or `noop`). Arrays are replaced, and a null
+`expires_at` clears the expiry. `lifecycle: { status: active | deleted }` sets the lifecycle
+status. It fails when the indicator does not exist, or is deleted unless `force: true` is set, so
+it belongs to the cumulative strategy that reads before it merges — it is not a substitute for
+`createKi`.
 
-**`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. It fails when the
-indicator does not exist. This is what pilot cleanup runs.
+**`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. On an index it
+removes the indicator; on a data stream it marks the indicator deleted and the view hides it, while
+the backing store keeps every revision. It fails when the indicator does not exist. This is what
+pilot cleanup runs.
 
 **`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
 and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
@@ -441,7 +452,8 @@ looking for a fault in the workflow that isn't there. Expanding first gives one 
 `WHERE` then matches the row carrying the pilot tag.
 
 `<destination>` is the `dest.value` from the brief. `FROM ai-index-*` works too when you are unsure
-of it, at the cost of scanning every AI index.
+of it, at the cost of scanning every AI index. Read the backing store here, not the view: the view
+drops `governance` and hides what a cleanup deleted, and you want to see exactly what was written.
 
 Judge those against what the brief asked for. When one step is what is wrong,
 `platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can
@@ -453,8 +465,10 @@ query, the reason and the mapping. Fix and run again, within your attempt budget
 are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will
 know to look for. Run a second inline workflow: an `elasticsearch.esql.query` selecting `_id` for the
 tag as above, then a `foreach` over the results calling `context-engine.deleteKi` with `ki_id` set to
-each `_id`. Query the tag once more afterwards and confirm it returns nothing. Do this for every
-`runId` you used, not only the last.
+each `_id`. Confirm through the view, `FROM v-ai-index-<ai_index_id> | MV_EXPAND tags | WHERE tags
+== "ce-pilot-<runId>" | LIMIT 1`, which returns nothing once the cleanup has run; on a data stream
+the backing store still holds the revisions marked deleted. Do this for every `runId` you used, not
+only the last.
 
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
 widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the

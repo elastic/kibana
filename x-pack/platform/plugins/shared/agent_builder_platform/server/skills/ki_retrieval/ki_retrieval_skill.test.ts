@@ -29,10 +29,11 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('references the correct AI index pattern in content', () => {
-    expect(kiRetrievalSkill.content).toContain('ai-index-*');
-    expect(kiRetrievalSkill.content).not.toContain('ai-index-idx-*');
-    expect(kiRetrievalSkill.content).not.toContain('ai-index-ds-*');
+  it('queries the AI index views in content', () => {
+    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-*');
+    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-<id>');
+    expect(kiRetrievalSkill.content).not.toContain('FROM ai-index-*');
+    expect(kiRetrievalSkill.content).not.toContain('METADATA _id, _index, _score');
   });
 
   it('requires the prompt-provided space filter on every AI-index query', () => {

@@ -31,7 +31,7 @@ describe('getAiIndicesInstructions', () => {
     expect(getAiIndicesInstructions({ enabled: true, catalog: [], spaceId: 'default' })).toBe('');
   });
 
-  it('explains what an AI index is and how it is named', () => {
+  it('explains what an AI index is and how it is queried', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: defaultCatalog,
@@ -39,8 +39,8 @@ describe('getAiIndicesInstructions', () => {
     });
 
     expect(instructions).toContain('## AI INDICES');
-    expect(instructions).toContain('`ai-index-idx-*`');
-    expect(instructions).toContain('`ai-index-ds-*`');
+    expect(instructions).toContain('`v-ai-index-<id>`');
+    expect(instructions).toContain('never add `METADATA` to a view query');
   });
 
   it('describes KIs as context that may answer directly or lead to another source', () => {
@@ -112,7 +112,7 @@ describe('getAiIndicesInstructions', () => {
     });
 
     expect(instructions).toContain('## AI INDICES');
-    expect(instructions).toContain('FROM ai-index-*');
+    expect(instructions).toContain('FROM v-ai-index-*');
     expect(instructions).not.toContain('Available to this agent:');
     expect(instructions).not.toContain('unresolved-custom');
   });
@@ -163,7 +163,7 @@ describe('getAiIndicesInstructions', () => {
     const params = JSON.parse(match[1]);
 
     expect(params).toEqual({
-      query: 'FROM ai-index-* | LIMIT 100',
+      query: 'FROM v-ai-index-* | LIMIT 100',
       filter: {
         bool: {
           should: [
