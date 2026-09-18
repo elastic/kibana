@@ -733,7 +733,10 @@ async function installKibanaSavedObjectsChunk({
         (so) => so.id === r.id && so.type === r.type
       )?.originId;
       if (originId) {
-        r.destinationId = r.id;
+        // Preserve an importer-provided destinationId (e.g. when overwrite:true remaps to an
+        // existing object sharing the same origin). Fall back to the input id only when the
+        // importer did not supply a remapping.
+        r.destinationId = r.destinationId ?? r.id;
         r.id = originId;
       }
     }

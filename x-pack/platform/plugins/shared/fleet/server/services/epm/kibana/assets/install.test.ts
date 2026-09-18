@@ -122,6 +122,48 @@ describe('installKibanaSavedObjects', () => {
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
   });
 
+  it('preserves importer-provided destinationId in initial import success results for additional-space objects', async () => {
+    // When overwrite:true finds a single existing object sharing the same origin, core's
+    // import returns { id: spaceScopedId, destinationId: existingObjectId }. The initial
+    // normalization must preserve that destinationId rather than overwriting it with
+    // spaceScopedId, otherwise Fleet persists the wrong id and upgrades/uninstalls/markdown
+    // rewrites target the wrong saved object.
+    const archiveId = 'my-dashboard-archive-id';
+    const spaceId = 'my-space';
+    const existingDestId = 'existing-dest-uuid';
+
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    const { getSpaceScopedAssetId } = await import('./install');
+    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+
+    // Initial import succeeds and returns the existing object as destinationId
+    mockImporter.import.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: existingDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // id must be the archive id; destinationId must be the importer-chosen existing object
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: existingDestId }),
+      ])
+    );
+  });
+
   it('resolves ambiguous_conflict by calling resolveImportErrors with the most-recently-updated destinationId', async () => {
     const asset = createAsset({ id: 'dashboard-abc', attributes: { hello: 'world' } });
     const ambiguousError: SavedObjectsImportFailure = {
