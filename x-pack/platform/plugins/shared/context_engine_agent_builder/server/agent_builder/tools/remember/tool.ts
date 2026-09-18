@@ -107,11 +107,11 @@ export const createRememberTool = ({
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
-    const { request, spaceId, esClient, runContext, logger } = context;
+    const { request, spaceId, esClient, runContext, logger, callContext } = context;
     const agent = getAgentFromRunContext(runContext);
     const conversationId = agent?.conversationId;
 
-    if (!conversationId) {
+    if (!conversationId && callContext?.callSource !== 'mcp') {
       return {
         results: [
           {
