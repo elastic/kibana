@@ -14,6 +14,25 @@ export interface AttackDiscoveryAgentBuilderInput extends Record<string, unknown
   expectedToolPath: string[];
   attachments?: Array<{ type: 'security.alerts'; data: { alertIds: string[] } }>;
   executionUuid?: string;
+  /**
+   * The fixture marker this example's alert retrieval must carry, when the
+   * example asserts a retrieved population (`expectedRetrievedAlertCount`).
+   *
+   * `.alerts-security.alerts-default` is a SHARED index: the golden-path spec
+   * seeds its own alerts into the same index the dense profile seeds 95 into,
+   * so a query that reads the index without the fixture's marker observes a
+   * population that is not this fixture's. `FROM
+   * .alerts-security.alerts-default | LIMIT 95` returns 95 rows and would
+   * otherwise be scored as a complete retrieval of the dense fixture without
+   * touching a single seeded alert. A retrieval is therefore counted for this
+   * example only when its query carries this string
+   * (`extractAgentAlertRetrievalRowCounts` in `evaluate_dataset.ts`); the query
+   * is the observable that proves the scope, because the AD default query's
+   * `KEEP` list returns no marker-bearing field.
+   *
+   * Omitted on examples that do not assert a retrieved population.
+   */
+  retrievalScope?: string;
 }
 
 export interface AttackDiscovery {
@@ -110,6 +129,14 @@ export interface AttackDiscoveryRetrievalEvidence {
   workflowExecutionsTrackingKeys: Record<string, boolean>;
   /** Row counts of every `platform.core.execute_esql` result the agent received. */
   agentEsqlRowCounts: number[];
+  /** The marker the example's retrieval had to carry (`input.retrievalScope`);
+   *  `null` when the example declares no scope. */
+  retrievalScope: string | null;
+  /** Row counts of the agent's alerts-index retrievals that did NOT carry
+   *  `retrievalScope`, and therefore produced no retrieved count. Non-empty
+   *  means the agent retrieved alerts unscoped: the count is unattributable to
+   *  this fixture, which is a different finding from "no retrieval happened". */
+  unscopedAgentAlertRetrievalRowCounts: number[];
 }
 
 /** Empty retrieval evidence, for fixtures that do not exercise retrieval. */
@@ -119,6 +146,8 @@ export const EMPTY_RETRIEVAL_EVIDENCE: AttackDiscoveryRetrievalEvidence = {
   pipelineCombinedAlerts: null,
   workflowExecutionsTrackingKeys: {},
   agentEsqlRowCounts: [],
+  retrievalScope: null,
+  unscopedAgentAlertRetrievalRowCounts: [],
 };
 
 export interface AttackDiscoveryAgentBuilderTaskOutput {

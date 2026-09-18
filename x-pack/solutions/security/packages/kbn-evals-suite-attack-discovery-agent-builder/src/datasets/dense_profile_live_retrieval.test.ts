@@ -60,6 +60,11 @@ describe('dense profile live-retrieval dataset', () => {
   it('scopes the retrieval to the marker the seeded population carries', () => {
     const question = denseProfileLiveRetrievalExample.input?.question ?? '';
     expect(question).toContain(AD2_SCENARIO_SEED_LABEL);
+    // Instructing the scope is not enough: the example DECLARES it, and the
+    // extraction counts a retrieval only when its query carries the declared
+    // marker. Without this the exact 95-row assertion is satisfiable by any
+    // 95-row query against the shared alerts index.
+    expect(denseProfileLiveRetrievalExample.input?.retrievalScope).toBe(AD2_SCENARIO_SEED_LABEL);
 
     const plan = buildAd2SeedPlan({
       profile: 'dense',

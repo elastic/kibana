@@ -152,19 +152,80 @@ export const extractAgentEsqlRowCounts = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
 ): number[] => collectAgentEsqlResults(steps).map((result) => result.rowCount);
 
+const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
+  result.query?.includes(ALERT_INDEX_FAMILY) === true;
+
 /**
- * Row counts of the agent's own ALERT retrieval: the ES|QL results whose query
- * reads the alerts index. A run can execute ES|QL for other reasons — measured
- * on golden, two clean-profile reps queried
- * `logs-endpoint.events.process-default` and received 0 rows — and those are
- * not retrievals of the alert population, so they must not produce a count.
+ * Whether the result's query carries the example's retrieval scope. A `null`
+ * scope (the example declares none) accepts every query: the check belongs to
+ * the EXAMPLE, not to the extraction.
+ */
+const carriesRetrievalScope = (result: AgentEsqlResult, retrievalScope: string | null): boolean =>
+  retrievalScope == null || result.query?.includes(retrievalScope) === true;
+
+/**
+ * The agent's alerts-index retrievals, split by whether they carry the
+ * example's scope (`input.retrievalScope`).
+ *
+ * Reading the alerts index is necessary but NOT sufficient for a retrieval to
+ * be this fixture's population: the index is shared (the golden-path spec seeds
+ * two of its own alerts into the same `.alerts-security.alerts-default` the
+ * dense profile seeds 95 into), so an unscoped query's row count describes
+ * whatever the index held at that moment. `FROM
+ * .alerts-security.alerts-default | LIMIT 95` returns 95 rows and was accepted
+ * as a complete retrieval of the dense fixture while touching none of its
+ * alerts.
+ *
+ * Measured on the recorded reps: all 18 recorded dense example-runs ran the
+ * unscoped AD default query (0/18 carried the marker — and its `KEEP` list
+ * returns no marker-bearing field, so the rows cannot carry it either), while
+ * 6/6 recorded golden reps whose question names a marker carried it in the
+ * query, in four different forms (`tags == "x"`, `tags LIKE "*x*"`,
+ * `QSTR("x")`, an OR-chain). All four contain the marker literal, which is why
+ * the scope check is a substring test rather than a predicate parse.
+ */
+const classifyAgentAlertRetrievals = (
+  steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
+  retrievalScope: string | null
+): { scoped: number[]; unscoped: number[] } => {
+  const scoped: number[] = [];
+  const unscoped: number[] = [];
+
+  for (const result of collectAgentEsqlResults(steps)) {
+    if (readsAlertsIndex(result)) {
+      (carriesRetrievalScope(result, retrievalScope) ? scoped : unscoped).push(result.rowCount);
+    }
+  }
+
+  return { scoped, unscoped };
+};
+
+/**
+ * Row counts of the agent's own retrieval OF THE EXAMPLE'S alert population:
+ * the ES|QL results that read the alerts index and carry the example's scope. A
+ * run can execute ES|QL for other reasons — measured on golden, two
+ * clean-profile reps queried `logs-endpoint.events.process-default` and
+ * received 0 rows — and those are not retrievals of the alert population, so
+ * they must not produce a count.
  */
 export const extractAgentAlertRetrievalRowCounts = (
-  steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
-): number[] =>
-  collectAgentEsqlResults(steps)
-    .filter((result) => result.query?.includes(ALERT_INDEX_FAMILY) === true)
-    .map((result) => result.rowCount);
+  steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
+  retrievalScope: string | null = null
+): number[] => classifyAgentAlertRetrievals(steps, retrievalScope).scoped;
+
+/**
+ * Row counts of the alerts-index retrievals that did NOT carry the example's
+ * scope — the ones `extractAgentAlertRetrievalRowCounts` excludes, and which
+ * therefore produced no retrieved count. Persisted as evidence so an `N/A`
+ * reads as "the agent retrieved N rows unscoped" rather than "the agent did not
+ * retrieve": those are different findings, and only the second is a retrieval
+ * failure. Always empty when the example declares no scope, since nothing can
+ * then be out of scope.
+ */
+export const extractUnscopedAlertRetrievalRowCounts = (
+  steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
+  retrievalScope: string | null = null
+): number[] => classifyAgentAlertRetrievals(steps, retrievalScope).unscoped;
 
 /**
  * `alert_retrieval` extraction strategies that are NOT retrievals:
@@ -267,9 +328,13 @@ export const computeWorkflowAlertCounts = ({
 export const extractRetrievalEvidence = ({
   pipeline,
   agentEsqlRowCounts = [],
+  retrievalScope = null,
+  unscopedAgentAlertRetrievalRowCounts = [],
 }: {
   pipeline?: AttackDiscoveryPipelineResponse | null;
   agentEsqlRowCounts?: number[];
+  retrievalScope?: string | null;
+  unscopedAgentAlertRetrievalRowCounts?: number[];
 }): AttackDiscoveryRetrievalEvidence => {
   const entries = pipeline?.alert_retrieval;
   const combined = pipeline?.combined_alerts ?? null;
@@ -292,6 +357,8 @@ export const extractRetrievalEvidence = ({
           },
     workflowExecutionsTrackingKeys: trackedStageKeys(pipeline?.workflow_executions_tracking),
     agentEsqlRowCounts,
+    retrievalScope,
+    unscopedAgentAlertRetrievalRowCounts,
   };
 };
 
@@ -306,11 +373,15 @@ export const buildWorkflow = ({
   adToolResult,
   agentEsqlRowCounts,
   agentAlertRetrievalRowCounts,
+  retrievalScope = null,
+  unscopedAgentAlertRetrievalRowCounts = [],
 }: {
   pipeline: AttackDiscoveryPipelineResponse | null;
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
   agentEsqlRowCounts: number[];
   agentAlertRetrievalRowCounts: number[];
+  retrievalScope?: string | null;
+  unscopedAgentAlertRetrievalRowCounts?: number[];
 }): AttackDiscoveryAgentBuilderTaskOutput['workflow'] => {
   const { retrievedAlertCount, retrievedAlertCountSource, passedAlertCount } =
     computeWorkflowAlertCounts({
@@ -327,7 +398,12 @@ export const buildWorkflow = ({
     validatedDiscoveryCount: Array.isArray(pipeline?.validated_discoveries)
       ? pipeline.validated_discoveries.length
       : adToolResult?.discoveryCount ?? null,
-    retrievalEvidence: extractRetrievalEvidence({ pipeline, agentEsqlRowCounts }),
+    retrievalEvidence: extractRetrievalEvidence({
+      pipeline,
+      agentEsqlRowCounts,
+      retrievalScope,
+      unscopedAgentAlertRetrievalRowCounts,
+    }),
   };
 };
 
@@ -337,12 +413,16 @@ const inspectWorkflow = async ({
   adToolResult,
   agentEsqlRowCounts,
   agentAlertRetrievalRowCounts,
+  retrievalScope,
+  unscopedAgentAlertRetrievalRowCounts,
 }: {
   fetch: HttpHandler;
   executionId: string;
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
   agentEsqlRowCounts: number[];
   agentAlertRetrievalRowCounts: number[];
+  retrievalScope: string | null;
+  unscopedAgentAlertRetrievalRowCounts: number[];
 }): Promise<AttackDiscoveryAgentBuilderTaskOutput['workflow']> => {
   const tracking = (await fetch(`/internal/attack_discovery/executions/${executionId}/tracking`, {
     method: 'GET',
@@ -364,6 +444,8 @@ const inspectWorkflow = async ({
     adToolResult,
     agentEsqlRowCounts,
     agentAlertRetrievalRowCounts,
+    retrievalScope,
+    unscopedAgentAlertRetrievalRowCounts,
   });
 };
 
@@ -385,8 +467,19 @@ const buildTask =
     // The agent's own retrieval, read from the recorded steps: in `provided`
     // mode this is the only observable retrieval source (the pipeline skips the
     // retrieval phase by design, so its response carries no retrieved count).
+    // `retrievalScope` is the marker the example's question instructs the agent
+    // to retrieve by; a retrieval that does not carry it is not this fixture's
+    // population and produces no count (see `extractAgentAlertRetrievalRowCounts`).
+    const retrievalScope = input?.retrievalScope ?? null;
     const agentEsqlRowCounts = extractAgentEsqlRowCounts(response.steps);
-    const agentAlertRetrievalRowCounts = extractAgentAlertRetrievalRowCounts(response.steps);
+    const agentAlertRetrievalRowCounts = extractAgentAlertRetrievalRowCounts(
+      response.steps,
+      retrievalScope
+    );
+    const unscopedAgentAlertRetrievalRowCounts = extractUnscopedAlertRetrievalRowCounts(
+      response.steps,
+      retrievalScope
+    );
     const executionId = adToolResult?.executionUuid;
     const workflow = executionId
       ? await inspectWorkflow({
@@ -395,12 +488,16 @@ const buildTask =
           adToolResult,
           agentEsqlRowCounts,
           agentAlertRetrievalRowCounts,
+          retrievalScope,
+          unscopedAgentAlertRetrievalRowCounts,
         })
       : buildWorkflow({
           pipeline: null,
           adToolResult,
           agentEsqlRowCounts,
           agentAlertRetrievalRowCounts,
+          retrievalScope,
+          unscopedAgentAlertRetrievalRowCounts,
         });
     return {
       ...response,

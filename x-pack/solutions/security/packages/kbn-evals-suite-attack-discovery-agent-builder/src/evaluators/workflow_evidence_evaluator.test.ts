@@ -238,4 +238,35 @@ describe('createWorkflowEvidenceEvaluator', () => {
     expect(result.metadata?.retrievedAlertCountSource).toBe('none');
     expect(result.metadata?.agentEsqlRowCounts).toEqual([]);
   });
+
+  // The scope-excluded shape: the agent DID retrieve (97 rows from the alerts
+  // index) but not under the marker the example declares, so no count is
+  // attributable to this fixture. The metadata must name both, otherwise this
+  // `N/A` is indistinguishable from "the agent never retrieved anything".
+  it('names the declared scope and the retrievals excluded for not carrying it', async () => {
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({
+        retrievedAlertCountSource: 'none',
+        passedAlertCount: 16,
+        retrievalEvidence: {
+          ...EMPTY_RETRIEVAL_EVIDENCE,
+          agentEsqlRowCounts: [97],
+          retrievalScope: 'ad-scenario-registry-2026-07',
+          unscopedAgentAlertRetrievalRowCounts: [97],
+        },
+      }),
+      expected: baseExpected({ expectedRetrievedAlertCount: 95 }),
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('incomplete');
+    expect(result.label).toBe('N/A');
+    expect(result.score).toBeNull();
+    expect(result.metadata?.retrievalScope).toBe('ad-scenario-registry-2026-07');
+    expect(result.metadata?.unscopedAgentAlertRetrievalRowCounts).toEqual([97]);
+    expect(result.metadata?.agentEsqlRowCounts).toEqual([97]);
+  });
 });

@@ -12,11 +12,13 @@ import {
   extractAgentAlertRetrievalRowCounts,
   extractAgentEsqlRowCounts,
   extractRetrievalEvidence,
+  extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
   trackedStageKeys,
   trackedStages,
 } from './evaluate_dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
+import { AD2_SCENARIO_SEED_LABEL } from './scenario_registry';
 import { EMPTY_RETRIEVAL_EVIDENCE, type AttackDiscoveryAgentBuilderTaskOutput } from './types';
 
 /**
@@ -234,6 +236,77 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     expect(extractAgentAlertRetrievalRowCounts(steps)).toEqual([95]);
   });
 
+  // The dense profile's retrieval question names the fixture marker and its
+  // assertion is an EXACT population of a SHARED index, so a retrieval is
+  // counted only when its query carries that marker.
+  it('does not count an alerts query that omits the scope the example declares', () => {
+    const steps = [
+      // The reported payload: 95 rows read from the alerts index, none of them
+      // this fixture's — accepted as a complete retrieval before the scope check.
+      recordedEsqlStep({ query: 'FROM .alerts-security.alerts-default | LIMIT 95', rows: 95 }),
+      // And the query the recorded dense reps actually ran (the AD default
+      // query): all 18 recorded dense example-runs ran unscoped — 0/18 carried
+      // the marker — so their 95 rows described the index at that moment.
+      recordedEsqlStep({ query: denseRetrievalQuery, rows: 95 }),
+    ];
+
+    expect(extractAgentAlertRetrievalRowCounts(steps, AD2_SCENARIO_SEED_LABEL)).toEqual([]);
+    expect(extractUnscopedAlertRetrievalRowCounts(steps, AD2_SCENARIO_SEED_LABEL)).toEqual([
+      95, 95,
+    ]);
+    // The check belongs to the EXAMPLE, not to the extraction: with no scope
+    // declared the same results still count, which is the shape the recorded
+    // reps are replayed in.
+    expect(extractAgentAlertRetrievalRowCounts(steps)).toEqual([95, 95]);
+  });
+
+  it('counts the retrieval when the query carries the scope the example declares', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: `FROM .alerts-security.alerts-default\n  | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"\n  | LIMIT 100`,
+        rows: 95,
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalRowCounts(steps, AD2_SCENARIO_SEED_LABEL)).toEqual([95]);
+    expect(extractUnscopedAlertRetrievalRowCounts(steps, AD2_SCENARIO_SEED_LABEL)).toEqual([]);
+  });
+
+  // Every recorded golden rep whose question names a marker carried it in its
+  // query, in four different spellings. A predicate parse would reject three of
+  // them; the check is therefore a substring test on the query text.
+  it('accepts every recorded spelling of the scope, not one predicate form', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const forms = [
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE tags LIKE "*${scope}*"`,
+      `FROM .alerts-security.alerts-default | WHERE QSTR("${scope}")`,
+      `FROM .alerts-security.alerts-default | WHERE message LIKE "*${scope}*" OR tags LIKE "*${scope}*"`,
+    ];
+
+    expect(
+      forms.map((query) =>
+        extractAgentAlertRetrievalRowCounts([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([[95], [95], [95], [95]]);
+  });
+
+  // The shared index at its worst: 95 fixture alerts plus two foreign ones. The
+  // unscoped 97 describes the index, not the fixture, so it cannot become the
+  // observed population while a scoped 95 can.
+  it('keeps the scoped retrieval and excludes the unscoped one in the same run', () => {
+    const steps = [
+      recordedEsqlStep({ query: denseRetrievalQuery, rows: 97 }),
+      recordedEsqlStep({
+        query: `FROM .alerts-security.alerts-default\n  | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"`,
+        rows: 95,
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalRowCounts(steps, AD2_SCENARIO_SEED_LABEL)).toEqual([95]);
+    expect(extractUnscopedAlertRetrievalRowCounts(steps, AD2_SCENARIO_SEED_LABEL)).toEqual([97]);
+  });
+
   it('ignores the query-echo result and steps that are not ES|QL', () => {
     // `results[0]` has no `values`; a `security.attack-discovery.run` step is a
     // different tool whose count is a PASSED count. Neither may contribute.
@@ -365,6 +438,8 @@ describe('retrieval evidence persisted on the task output', () => {
         validation: true,
       },
       agentEsqlRowCounts: [95],
+      retrievalScope: null,
+      unscopedAgentAlertRetrievalRowCounts: [],
     });
     // The raw alerts are the anonymized alert text: unbounded in size and copied
     // once per evaluator score document, while the set the agent saw is already
@@ -394,7 +469,25 @@ describe('retrieval evidence persisted on the task output', () => {
         validation: true,
       },
       agentEsqlRowCounts: [95],
+      retrievalScope: null,
+      unscopedAgentAlertRetrievalRowCounts: [],
     });
+  });
+
+  // The scope a retrieval had to carry, and the retrievals excluded for not
+  // carrying it, are persisted together: that is what makes an `N/A` read as
+  // "the agent retrieved 97 rows unscoped" instead of "no retrieval happened".
+  it('persists the declared scope and the retrievals it excluded', () => {
+    const evidence = extractRetrievalEvidence({
+      pipeline: null,
+      agentEsqlRowCounts: [97, 95],
+      retrievalScope: AD2_SCENARIO_SEED_LABEL,
+      unscopedAgentAlertRetrievalRowCounts: [97],
+    });
+
+    expect(evidence.retrievalScope).toBe(AD2_SCENARIO_SEED_LABEL);
+    expect(evidence.unscopedAgentAlertRetrievalRowCounts).toEqual([97]);
+    expect(evidence.agentEsqlRowCounts).toEqual([97, 95]);
   });
 
   it('records empty evidence when there is no pipeline response at all', () => {
@@ -437,5 +530,34 @@ describe('retrieval evidence persisted on the task output', () => {
       validatedDiscoveryCount: 4,
       retrievalEvidence: { ...EMPTY_RETRIEVAL_EVIDENCE, agentEsqlRowCounts: [95] },
     });
+  });
+
+  // The same run, with the dense example's declared scope and a retrieval that
+  // does not carry it (the recorded dense shape): nothing reported a count that
+  // belongs to this fixture, so the run stays unscored and the evidence says why
+  // — 97 rows retrieved unscoped, not "no retrieval".
+  it('leaves the retrieved count null when the only alerts retrieval was unscoped', () => {
+    const steps = [recordedEsqlStep({ query: denseRetrievalQuery, rows: 97 })];
+    const workflow = buildWorkflow({
+      pipeline: null,
+      adToolResult: { status: 'completed', alertsContextCount: 16, discoveryCount: 4 },
+      agentEsqlRowCounts: extractAgentEsqlRowCounts(steps),
+      agentAlertRetrievalRowCounts: extractAgentAlertRetrievalRowCounts(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      retrievalScope: AD2_SCENARIO_SEED_LABEL,
+      unscopedAgentAlertRetrievalRowCounts: extractUnscopedAlertRetrievalRowCounts(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+    });
+
+    expect(workflow.retrievedAlertCount).toBeNull();
+    expect(workflow.retrievedAlertCountSource).toBe('none');
+    expect(workflow.passedAlertCount).toBe(16);
+    expect(workflow.retrievalEvidence.retrievalScope).toBe(AD2_SCENARIO_SEED_LABEL);
+    expect(workflow.retrievalEvidence.unscopedAgentAlertRetrievalRowCounts).toEqual([97]);
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([97]);
   });
 });

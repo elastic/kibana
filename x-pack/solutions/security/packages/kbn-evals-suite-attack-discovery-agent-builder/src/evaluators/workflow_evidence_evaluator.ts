@@ -71,6 +71,13 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         retrievedAlertCountSource: output.workflow.retrievedAlertCountSource ?? 'none',
         alertRetrievalMode: output.workflow.retrievalEvidence?.alertRetrievalMode ?? null,
         agentEsqlRowCounts: output.workflow.retrievalEvidence?.agentEsqlRowCounts ?? [],
+        // The scope the example's retrieval had to carry, and the alerts-index
+        // retrievals it excluded for not carrying it. Both are here so an `N/A`
+        // reads as "the agent retrieved N rows unscoped" (the count is
+        // unattributable to this fixture) instead of "no retrieval happened".
+        retrievalScope: output.workflow.retrievalEvidence?.retrievalScope ?? null,
+        unscopedAgentAlertRetrievalRowCounts:
+          output.workflow.retrievalEvidence?.unscopedAgentAlertRetrievalRowCounts ?? [],
         stages,
         expectedRetrievedAlertCount,
         expectedPassedAlertCount,

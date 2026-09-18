@@ -37,6 +37,10 @@ export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExampl
     triageType: 'live-retrieval',
     expectedSkills: ['attack-discovery-generator'],
     expectedToolPath: ['security.attack-discovery.run'],
+    // The scope the retrieval is counted under, not just the scope the question
+    // asks for: a retrieval that does not carry the marker observes whatever the
+    // shared index held, so its row count is not this fixture's population.
+    retrievalScope: AD2_SCENARIO_SEED_LABEL,
   },
   output: {
     expectedToolPath: ['security.attack-discovery.run'],
