@@ -426,10 +426,11 @@ export class PackageInstaller {
     let zipArchive: ZipArchive | undefined;
     let artifactFullPath: string | undefined;
     // The persisted status is only touched once the new archive is ready to replace the index, so a
-    // failure before that point leaves an installed version reported as such
-    const previousStatus = (await this.productDocClient.getInstallationStatus({ inferenceId }))?.[
-      productName
-    ]?.status;
+    // failure before that point leaves an installed version reported as such. A status read failure
+    // propagates rather than being mistaken for a fresh install.
+    const previousStatus = (
+      await this.productDocClient.getInstallationStatusOrThrow({ inferenceId })
+    )[productName]?.status;
     let replacing = false;
     try {
       if (

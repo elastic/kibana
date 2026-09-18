@@ -82,6 +82,7 @@ describe('PackageInstaller', () => {
     validateArtifactArchiveMock.mockReturnValue({ valid: true });
     validateOpenApiArtifactArchiveMock.mockReturnValue({ valid: true });
     checkArtifactAvailableMock.mockResolvedValue(undefined);
+    productDocClient.getInstallationStatusOrThrow.mockResolvedValue({} as never);
     productDocClient.getSecurityLabsInstallationStatus.mockResolvedValue({ status: 'uninstalled' });
     productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({ status: 'uninstalled' });
   });
@@ -166,7 +167,7 @@ describe('PackageInstaller', () => {
     });
 
     it('keeps a previously installed status when the new archive cannot be prepared', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
       } as never);
       downloadToDiskMock.mockRejectedValue(new Error('network down'));
@@ -180,8 +181,19 @@ describe('PackageInstaller', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Keeping the installed'));
     });
 
+    it('propagates a status read failure instead of treating it as a fresh install', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockRejectedValue(new Error('es unavailable'));
+
+      await expect(
+        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+      ).rejects.toThrow('es unavailable');
+
+      expect(downloadToDiskMock).not.toHaveBeenCalled();
+      expect(productDocClient.setInstallationFailed).not.toHaveBeenCalled();
+    });
+
     it('marks a fresh install as failed when the archive cannot be prepared', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'uninstalled' },
       } as never);
       downloadToDiskMock.mockRejectedValue(new Error('network down'));
@@ -198,7 +210,7 @@ describe('PackageInstaller', () => {
     });
 
     it('marks the install as failed when it fails after the index was replaced', async () => {
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
       } as never);
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
@@ -595,7 +607,7 @@ describe('PackageInstaller', () => {
         elasticsearch: ['8.16'],
         openapi: [],
       });
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
         security: { status: 'installed', version: '8.16' },
         elasticsearch: { status: 'uninstalled' },
@@ -614,7 +626,7 @@ describe('PackageInstaller', () => {
         security: ['8.16'],
         openapi: [],
       });
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.16' },
         security: { status: 'installed', version: '8.16' },
         elasticsearch: { status: 'uninstalled' },
@@ -1023,7 +1035,7 @@ describe('PackageInstaller', () => {
       fetchArtifactVersionsMock.mockResolvedValue({
         kibana: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
       });
-      productDocClient.getInstallationStatus.mockResolvedValue({
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: 'latest-2026-08-20T23:08:00.384Z' },
       } as never);
 
