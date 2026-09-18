@@ -7,6 +7,7 @@
 
 import type { FlattenRecord } from '@kbn/streams-schema';
 import {
+  MAX_STREAM_NAME_LENGTH,
   flattenRecord,
   isEnabledFailureStore,
   namedFieldDefinitionConfigSchema,
@@ -49,7 +50,7 @@ const simulationBaseBodySchema = {
 const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
 
 const paramsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.union([
     z.object({
       ...simulationBaseBodySchema,
@@ -277,12 +278,12 @@ export const processingDateSuggestionsRoute = createServerRoute({
 });
 
 const failureStoreSamplesParamsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   query: z
     .object({
       size: z.coerce.number().optional(),
-      start: z.string().optional(),
-      end: z.string().optional(),
+      start: z.string().max(64).optional(),
+      end: z.string().max(64).optional(),
     })
     .optional(),
 });

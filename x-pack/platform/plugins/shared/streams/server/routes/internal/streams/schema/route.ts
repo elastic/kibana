@@ -12,6 +12,7 @@ import type {
 } from '@kbn/streams-schema';
 import {
   FIELD_DEFINITION_TYPES,
+  MAX_STREAM_NAME_LENGTH,
   namedFieldDefinitionConfigSchema,
   isDescendantOf,
   Streams,
@@ -93,7 +94,7 @@ export const unmappedFieldsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
@@ -139,7 +140,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({
       field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
@@ -370,7 +371,7 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({
       field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),

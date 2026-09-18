@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { partitionStream } from '@kbn/streams-ai';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { conditionSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
@@ -33,14 +33,15 @@ export interface SuggestPartitionsParams {
 }
 
 export const suggestPartitionsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    connector_id: z.string(),
+    connector_id: z.string().max(256),
     start: z.number(),
     end: z.number(),
     user_prompt: z.string().max(2000).optional(),
     existing_partitions: z
-      .array(z.object({ name: z.string(), condition: conditionSchema }))
+      .array(z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH), condition: conditionSchema }))
+      .max(100)
       .optional(),
   }),
 }) satisfies z.Schema<SuggestPartitionsParams>;

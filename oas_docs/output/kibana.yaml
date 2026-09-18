@@ -79904,6 +79904,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -79942,6 +79943,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80048,6 +80050,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80150,6 +80153,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80179,6 +80183,7 @@ paths:
                   type: object
                   properties:
                     name:
+                      maxLength: 200
                       type: string
                   required:
                     - name
@@ -80214,6 +80219,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80296,6 +80302,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80528,6 +80535,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80573,6 +80581,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80588,6 +80597,7 @@ paths:
               properties:
                 field_descriptions:
                   additionalProperties:
+                    maxLength: 1000
                     type: string
                   type: object
                 query:
@@ -80595,6 +80605,7 @@ paths:
                   type: object
                   properties:
                     esql:
+                      maxLength: 65535
                       type: string
                   required:
                     - esql
@@ -80634,6 +80645,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80652,12 +80664,15 @@ paths:
               type: object
               properties:
                 description:
+                  maxLength: 1000
                   type: string
                 include:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_ContentPackIncludedObjects'
                 name:
+                  maxLength: 256
                   type: string
                 version:
+                  maxLength: 100
                   type: string
               required:
                 - name
@@ -80698,6 +80713,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80713,6 +80729,7 @@ paths:
               properties:
                 content: {}
                 include:
+                  maxLength: 65535
                   type: string
               required:
                 - include
@@ -80744,12 +80761,14 @@ paths:
           name: streamName
           required: true
           schema:
+            maxLength: 200
             type: string
         - description: Search query to filter attachments by title
           in: query
           name: query
           required: false
           schema:
+            maxLength: 1000
             type: string
         - description: Filter by attachment types (single value or array)
           in: query
@@ -80769,6 +80788,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 256
               type: string
             type: array
       requestBody:
@@ -80836,6 +80856,7 @@ paths:
           name: streamName
           required: true
           schema:
+            maxLength: 200
             type: string
       requestBody:
         content:
@@ -80863,6 +80884,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 256
                                 type: string
                               type:
                                 enum:
@@ -80881,6 +80903,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 256
                                 type: string
                               type:
                                 enum:
@@ -80936,6 +80959,7 @@ paths:
           name: streamName
           required: true
           schema:
+            maxLength: 200
             type: string
         - description: The type of the attachment
           in: path
@@ -80952,6 +80976,7 @@ paths:
           name: attachmentId
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -81005,6 +81030,7 @@ paths:
           name: streamName
           required: true
           schema:
+            maxLength: 200
             type: string
         - description: The type of the attachment
           in: path
@@ -81021,6 +81047,7 @@ paths:
           name: attachmentId
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -119707,14 +119734,16 @@ components:
       additionalProperties:
         anyOf:
           - anyOf:
-              - type: string
+              - maxLength: 65535
+                type: string
               - type: number
               - type: boolean
               - {}
             nullable: true
           - items:
               anyOf:
-                - type: string
+                - maxLength: 65535
+                  type: string
                 - type: number
                 - type: boolean
                 - {}

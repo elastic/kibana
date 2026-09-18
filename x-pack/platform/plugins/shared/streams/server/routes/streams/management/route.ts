@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
-import { routingStatus } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -47,10 +47,13 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the parent stream to fork from.'),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the parent stream to fork from.'),
     }),
     body: z.object({
-      stream: z.object({ name: z.string() }),
+      stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
       where: conditionSchema,
       status: routingStatus.optional(),
       draft: z.boolean().optional(),
