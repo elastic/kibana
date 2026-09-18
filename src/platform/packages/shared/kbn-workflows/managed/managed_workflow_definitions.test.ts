@@ -232,6 +232,17 @@ const PLUGIN_ID = 'plugin-id';
 const AGGREGATE_BY = 'aggregate-by';
 /** Mirrors ALERTZERO_INFERENCE_PARENT_FEATURE_ID; @kbn/alertzero-common is not a dependency here. */
 const ALERTZERO_ROLLUP_ID = 'alertzero_parent';
+/**
+ * Mirrors the four ALERTZERO_*_INFERENCE_FEATURE_IDs, for the same reason as the rollup id above.
+ * Matching the exact set matters: an unregistered id resolves to the deployment default at runtime
+ * exactly as an absent one does, so accepting any string would let a typo through the guard.
+ */
+const ALERTZERO_TIER_IDS = new Set([
+  'alertzero_triage',
+  'alertzero_generation',
+  'alertzero_investigation',
+  'alertzero_summarization',
+]);
 
 /**
  * Collects `ai.agent` steps from anywhere in a parsed workflow, walking the whole tree rather than
@@ -348,7 +359,7 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const aiAgentSteps = collectAiAgentSteps(parse(renderWorkflowYaml(definition)));
       const unpinnedStepNames = aiAgentSteps
-        .filter((step) => typeof step[CONNECTOR_ID_BY_FEATURE] !== 'string')
+        .filter((step) => !ALERTZERO_TIER_IDS.has(step[CONNECTOR_ID_BY_FEATURE] as string))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);
