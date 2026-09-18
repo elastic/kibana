@@ -17,7 +17,7 @@ import { EntityStoreNotInstalledError } from '../../domain/errors';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 
 const bodySchema = z.object({
-  clearHistorySnapshots: z.boolean().optional(),
+  clearHistorySnapshots: z.boolean().default(false),
 });
 
 export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) {
@@ -57,7 +57,7 @@ export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) 
 
         try {
           await historySnapshotClient.disable(req, {
-            clearHistorySnapshots: req.body?.clearHistorySnapshots,
+            clearHistorySnapshots: req.body.clearHistorySnapshots,
           });
         } catch (error) {
           if (error instanceof EntityStoreNotInstalledError) {
