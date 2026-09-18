@@ -12,16 +12,14 @@ import type { EventTypeOpts } from '@elastic/ebt/client';
  * the server (render calls, brokered through the internal route) and the
  * browser (static-template fallback usage) can register and report them.
  *
- * `flow` distinguishes the consumer: 'cloud_connector' for the package-policy
- * form; 'unified_onboarding' for the AWS unified onboarding wizard.
+ * `flow` identifies the consumer. Every caller today acts on behalf of the
+ * cloud connector setup — the package-policy form directly, and the AWS
+ * onboarding wizard's resolve call ahead of it.
  */
 
 export const CLOUD_CONNECTOR_RENDER_FLOW = 'cloud_connector' as const;
-export const UNIFIED_ONBOARDING_RENDER_FLOW = 'unified_onboarding' as const;
 
-export type IacProvisionerRenderFlow =
-  | typeof CLOUD_CONNECTOR_RENDER_FLOW
-  | typeof UNIFIED_ONBOARDING_RENDER_FLOW;
+export type IacProvisionerRenderFlow = typeof CLOUD_CONNECTOR_RENDER_FLOW;
 
 /**
  * `reason` values for IAC_PROVISIONER_RENDER_FALLBACK_EVENT — telemetry

@@ -509,7 +509,7 @@ describe('resolveIacBlueprintsHandler', () => {
 
   const resolveBody = (overrides: Record<string, unknown> = {}) => ({
     provider: 'aws',
-    flow: 'unified_onboarding',
+    flow: 'cloud_connector',
     integrations: [cspmSelection],
     ...overrides,
   });
@@ -570,7 +570,7 @@ describe('resolveIacBlueprintsHandler', () => {
       },
     });
     expect(reportIacProvisionerResolveRequested).toHaveBeenCalledWith(
-      expect.objectContaining({ flow: 'unified_onboarding', integrationCount: 1 })
+      expect.objectContaining({ flow: 'cloud_connector', integrationCount: 1 })
     );
     expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
       expect.objectContaining({

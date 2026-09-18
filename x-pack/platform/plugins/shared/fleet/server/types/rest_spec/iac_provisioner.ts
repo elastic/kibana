@@ -14,19 +14,13 @@ import {
   IAC_FEDERATED_IDENTITY_WORKFLOW,
   IAC_NOT_COVERED_REASONS,
 } from '../../../common/types/rest_spec/iac_provisioner';
-import {
-  CLOUD_CONNECTOR_RENDER_FLOW,
-  UNIFIED_ONBOARDING_RENDER_FLOW,
-} from '../../../common/telemetry/iac_provisioner_events';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
-const IacProvisionerFlowSchema = schema.oneOf(
-  [schema.literal(CLOUD_CONNECTOR_RENDER_FLOW), schema.literal(UNIFIED_ONBOARDING_RENDER_FLOW)],
-  {
-    meta: {
-      description: 'The Kibana flow requesting the call; reported in telemetry.',
-    },
-  }
-);
+const IacProvisionerFlowSchema = schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
+  meta: {
+    description: 'The Kibana flow requesting the call; reported in telemetry.',
+  },
+});
 
 const IacPolicyTemplateSelectionSchema = schema.object({
   name: schema.string({

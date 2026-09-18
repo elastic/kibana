@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import {
   sendResolveIacBlueprints,
   useIacProvisioner,
-  UNIFIED_ONBOARDING_RENDER_FLOW,
+  CLOUD_CONNECTOR_RENDER_FLOW,
 } from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from './onboarding_flow_context';
@@ -64,7 +64,9 @@ export function useResolveIacBlueprints(): (
 
       sendResolveIacBlueprints({
         provider: 'aws',
-        flow: UNIFIED_ONBOARDING_RENDER_FLOW,
+        // This resolve runs on behalf of the cloud connector setup the auth
+        // step renders, so it reports the same flow as the render call.
+        flow: CLOUD_CONNECTOR_RENDER_FLOW,
         integrations,
       })
         .then(({ data, error }) => {

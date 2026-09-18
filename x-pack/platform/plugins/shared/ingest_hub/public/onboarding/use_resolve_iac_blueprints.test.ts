@@ -8,7 +8,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
-  UNIFIED_ONBOARDING_RENDER_FLOW: 'unified_onboarding',
+  CLOUD_CONNECTOR_RENDER_FLOW: 'cloud_connector',
   sendResolveIacBlueprints: jest.fn(),
   useIacProvisioner: jest.fn(),
 }));
@@ -93,7 +93,7 @@ describe('useResolveIacBlueprints', () => {
 
     expect(mockSendResolve).toHaveBeenCalledWith({
       provider: 'aws',
-      flow: 'unified_onboarding',
+      flow: 'cloud_connector',
       integrations: [
         {
           name: 'aws',

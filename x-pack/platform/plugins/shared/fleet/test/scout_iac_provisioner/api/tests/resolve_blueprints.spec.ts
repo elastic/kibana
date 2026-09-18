@@ -17,7 +17,7 @@ import { apiTest, testData } from '../fixtures';
  */
 const VALID_RESOLVE_BODY = {
   provider: 'aws',
-  flow: 'unified_onboarding',
+  flow: 'cloud_connector',
   integrations: [
     {
       name: 'this_package_does_not_exist',

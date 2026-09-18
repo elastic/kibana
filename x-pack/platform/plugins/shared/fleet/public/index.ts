@@ -164,7 +164,7 @@ export type {
   ResolveIacBlueprintsResponse,
 } from '../common/types/rest_spec/iac_provisioner';
 export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
-export { UNIFIED_ONBOARDING_RENDER_FLOW } from '../common/telemetry/iac_provisioner_events';
+export { CLOUD_CONNECTOR_RENDER_FLOW } from '../common/telemetry/iac_provisioner_events';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 

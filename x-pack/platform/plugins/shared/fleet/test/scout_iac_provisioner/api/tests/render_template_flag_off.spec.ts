@@ -60,7 +60,7 @@ apiTest.describe(
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
           body: {
             provider: 'aws',
-            flow: 'unified_onboarding',
+            flow: 'cloud_connector',
             integrations: testData.VALID_RENDER_BODY.integrations,
           },
           responseType: 'json',

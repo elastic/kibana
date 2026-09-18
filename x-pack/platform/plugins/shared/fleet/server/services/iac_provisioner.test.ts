@@ -487,17 +487,21 @@ describe('IacProvisionerService', () => {
     );
     // Resolve's request schema nests inputs in objects, unlike render's
     // bare strings — the translation must happen on the wire.
-    const [, fetchOptions] = mockedFetch.mock.calls[mockedFetch.mock.calls.length - 1];
-    expect(JSON.parse(fetchOptions.body as string)).toEqual({
-      provider: 'aws',
-      integrations: [
-        {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          policyTemplates: [{ name: 'cspm', enabledInputs: [{ name: 'cloudbeat/cis_aws' }] }],
-        },
-      ],
-    });
+    expect(mockedFetch).toHaveBeenLastCalledWith(
+      'https://iac-provisioner.example/api/v1/resolve',
+      expect.objectContaining({
+        body: JSON.stringify({
+          provider: 'aws',
+          integrations: [
+            {
+              name: 'cloud_security_posture',
+              version: '3.5.0',
+              policyTemplates: [{ name: 'cspm', enabledInputs: [{ name: 'cloudbeat/cis_aws' }] }],
+            },
+          ],
+        }),
+      })
+    );
     const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
     expect(debugLogged).toContain('federated_identity');
     expect(debugLogged).not.toContain('X-Amz-Signature');
