@@ -68,82 +68,81 @@ export class HistorySnapshotClient {
 
     const globalState = await this.globalStateClient.findOrThrow();
 
+    if (globalState.historySnapshot?.status !== 'started') {
+      this.logger.debug('History snapshot status is not started, skipping run');
+      return { ok: true, skipped: true };
+    }
+
+    const timestampNow = moment.utc().toISOString();
+    const snapshotDate = moment.utc().toDate();
+    const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    const historySnapshotIndex =
+      latestIndex === getLatestEntitiesIndexName(this.namespace)
+        ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
+        : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
+
+    let result: RunHistorySnapshotResult;
     try {
-      if (globalState.historySnapshot?.status !== 'started') {
-        this.logger.debug('History snapshot status is not started, skipping run');
-        return { ok: true, skipped: true };
-      }
+      await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
 
-      const timestampNow = moment.utc().toISOString();
-      const snapshotDate = moment.utc().toDate();
-      const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
-      const historySnapshotIndex =
-        latestIndex === getLatestEntitiesIndexName(this.namespace)
-          ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
-          : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
+      const reindexStart = Date.now();
+      const reindexResult = await reindex(this.esClient, {
+        source: { index: latestIndex },
+        dest: { index: historySnapshotIndex },
+        signal: abortSignal,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
+      });
+      entityStoreMetrics.historySnapshotReindexDurationMs.record(Date.now() - reindexStart, {
+        namespace: this.namespace,
+      });
 
-      try {
-        await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
-
-        const reindexStart = Date.now();
-        const reindexResult = await reindex(this.esClient, {
-          source: { index: latestIndex },
-          dest: { index: historySnapshotIndex },
-          signal: abortSignal,
-          waitForTask: {
-            logger: this.logger,
-            minTimeout: POLL_MIN_INTERVAL_MS,
-            maxTimeout: POLL_INTERVAL_MS,
-            forever: true,
-          },
-        });
-        entityStoreMetrics.historySnapshotReindexDurationMs.record(Date.now() - reindexStart, {
-          namespace: this.namespace,
-        });
-
-        const docCount = reindexResult.total;
-        if (docCount === 0) {
-          await this.updateGlobalStateOnSuccess(globalState);
-          entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
-          entityStoreMetrics.historySnapshotDocCount.record(0, { namespace: this.namespace });
-          return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
-        }
-
-        const resetStart = Date.now();
-        const updateResult = await updateByQueryWithScript(this.esClient, {
-          index: latestIndex,
-          query: { match_all: {} },
-          script: HISTORY_SNAPSHOT_RESET_SCRIPT,
-          params: { timestampNow },
-          signal: abortSignal,
-          waitForTask: {
-            logger: this.logger,
-            minTimeout: POLL_MIN_INTERVAL_MS,
-            maxTimeout: POLL_INTERVAL_MS,
-            forever: true,
-          },
-        });
-        entityStoreMetrics.historySnapshotResetDurationMs.record(Date.now() - resetStart, {
-          namespace: this.namespace,
-        });
-
+      const docCount = reindexResult.total;
+      if (docCount === 0) {
         await this.updateGlobalStateOnSuccess(globalState);
         entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
-        entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
-        return {
-          ok: true,
-          historySnapshotIndex,
-          docCount,
-          resetCount: updateResult.updated,
-        };
-      } catch (err) {
-        const caughtError = err instanceof Error ? err : new Error(String(err));
-        this.logger.error(`history snapshot failed: ${caughtError.message}`, {
-          error: caughtError,
-        });
-        await this.updateGlobalStateOnError(globalState, caughtError);
-        return { ok: false, error: new Error('History snapshot failed') };
+        entityStoreMetrics.historySnapshotDocCount.record(0, { namespace: this.namespace });
+        return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
       }
+
+      const resetStart = Date.now();
+      const updateResult = await updateByQueryWithScript(this.esClient, {
+        index: latestIndex,
+        query: { match_all: {} },
+        script: HISTORY_SNAPSHOT_RESET_SCRIPT,
+        params: { timestampNow },
+        signal: abortSignal,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
+      });
+      entityStoreMetrics.historySnapshotResetDurationMs.record(Date.now() - resetStart, {
+        namespace: this.namespace,
+      });
+
+      await this.updateGlobalStateOnSuccess(globalState);
+      entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
+      entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
+      result = {
+        ok: true,
+        historySnapshotIndex,
+        docCount,
+        resetCount: updateResult.updated,
+      };
+    } catch (err) {
+      const caughtError = err instanceof Error ? err : new Error(String(err));
+      this.logger.error(`history snapshot failed: ${caughtError.message}`, {
+        error: caughtError,
+      });
+      await this.updateGlobalStateOnError(globalState, caughtError);
+      result = { ok: false, error: new Error('History snapshot failed') };
     } finally {
       try {
         await deleteExpiredHistorySnapshots({
@@ -160,6 +159,8 @@ export class HistorySnapshotClient {
         );
       }
     }
+
+    return result;
   }
 
   private async updateGlobalStateOnSuccess(globalState: EntityStoreGlobalState): Promise<void> {
