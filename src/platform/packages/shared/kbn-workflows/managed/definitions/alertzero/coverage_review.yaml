@@ -284,7 +284,9 @@ steps:
   # the API response instead. `emit_result` reports the same three values.
   #
   # A dismissed approval leaves every flag false. A dismissal is a decision, so the
-  # indicator is processed.
+  # indicator is processed. `creation_unreviewed` is the same class of hole for the
+  # no_coverage path: the child can finish with `created: false` and no error without
+  # asking anyone when the draft has an empty query or no attachment.
   - name: resolve_outcome
     type: data.set
     with:
@@ -301,12 +303,16 @@ steps:
           or steps.install_prebuilt_rule.output.summary.skipped > 0)
           and not (steps.enable_installed_rule.output.succeeded > 0
             or steps.enable_installed_rule.output.skipped > 0) }}
+      creation_unreviewed: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
+          and steps.run_rule_creation.output.reviewed != true }}
 
   # Step 6 of 6: mark the indicator processed. This is the only write to the indicator
   # and the last step. It runs only after an applied decision. A timed-out approval
   # failed the run earlier. A check without a verdict asked nobody. A failed rule-creation
-  # run decided nothing. An approved action that changed nothing did not apply the
-  # decision. In each case the indicator stays pending for the next sweep.
+  # run decided nothing. A rule-creation run that asked nobody (empty query or missing
+  # attachment) also decided nothing. An approved action that changed nothing did not
+  # apply the decision. In each case the indicator stays pending for the next sweep.
   #
   # Only `attributes.status` is written. `attributes` merges on update. `tags` is a list,
   # and a partial update replaces the full list. This workflow does not write tags.
@@ -316,12 +322,14 @@ steps:
     # stays pending for the next sweep.
     on-failure:
       continue: true
-    # `run_rule_creation` is a child run, so it either fails or returns; `error` is the
-    # right test there. The three action flags come from step 5.
+    # `error == null` is not enough for `run_rule_creation`. Step `if` cannot group with
+    # parentheses, so `creation_unreviewed` from step 5 carries that test. The other
+    # three action flags also come from step 5.
     if: >-
       ${{ steps.coverage_check.output.structured_output.verdict != null
         and steps.coverage_check.output.structured_output.verdict != ''
         and steps.run_rule_creation.error == null
+        and steps.resolve_outcome.output.creation_unreviewed == false
         and steps.resolve_outcome.output.enable_approved_not_applied == false
         and steps.resolve_outcome.output.install_approved_not_applied == false
         and steps.resolve_outcome.output.installed_not_enabled == false }}

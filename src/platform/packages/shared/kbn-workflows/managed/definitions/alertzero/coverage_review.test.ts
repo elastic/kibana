@@ -8,7 +8,12 @@
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_COVERAGE_REVIEW_WORKFLOW, ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID } from '.';
+import {
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_RULE_CREATION_WORKFLOW,
+} from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on
@@ -61,6 +66,58 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
 const allReviewSteps = flatten(reviewDefinition.steps);
 const stepByName = (name: string) => allReviewSteps.find((step) => step.name === name);
 const verdictSwitch = stepByName('handle_verdict');
+
+const creationDefinition = parse(ALERTZERO_RULE_CREATION_WORKFLOW.yaml) as {
+  steps: YamlStep[];
+  outputs?: Array<{ name: string }>;
+};
+const creationEmit = flatten(creationDefinition.steps).find((step) => step.name === 'emit_result')
+  ?.with as Record<string, string> | undefined;
+
+const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown => {
+  const trimmed = expression.trim();
+  if (!(trimmed.startsWith('${{') && trimmed.endsWith('}}'))) {
+    throw new Error(`Expected \${{ }} expression, got: ${expression}`);
+  }
+  return createWorkflowLiquidEngine().evalValueSync(trimmed.slice(3, -2).trim(), context);
+};
+
+const appliedOutcome = {
+  enable_approved_not_applied: false,
+  install_approved_not_applied: false,
+  installed_not_enabled: false,
+};
+
+const creationUnreviewedTemplate = (): string => {
+  const outcome = stepByName('resolve_outcome')?.with as Record<string, string> | undefined;
+  return outcome?.creation_unreviewed ?? '';
+};
+
+const evaluateMarkProcessed = ({
+  verdict = 'no_coverage',
+  created = false,
+  reviewed,
+  error = null,
+}: {
+  verdict?: string | null;
+  created?: boolean;
+  reviewed?: boolean;
+  error?: unknown;
+}): unknown => {
+  const childContext = {
+    steps: {
+      coverage_check: { output: { structured_output: { verdict } } },
+      run_rule_creation: { error, output: { created, reviewed } },
+    },
+  };
+  const creationUnreviewed = evaluateExpression(creationUnreviewedTemplate(), childContext);
+  return evaluateExpression(stepByName('mark_processed')?.if ?? '', {
+    steps: {
+      ...childContext.steps,
+      resolve_outcome: { output: { ...appliedOutcome, creation_unreviewed: creationUnreviewed } },
+    },
+  });
+};
 
 describe('Detection Coverage review', () => {
   it('is registered as a review workflow, not a catalog watch', () => {
@@ -147,15 +204,18 @@ describe('Detection Coverage review', () => {
     );
 
     // The indicator leaves the queue only after an applied decision. No verdict means no
-    // approval was asked. A failed rule-creation run decided nothing. An approved enable
-    // or install that changed nothing did not apply the decision. Each case must leave
-    // the indicator pending.
+    // approval was asked. A failed rule-creation run decided nothing. A rule-creation run
+    // that asked nobody also decided nothing. An approved enable or install that changed
+    // nothing did not apply the decision. Each case must leave the indicator pending.
     it('marks the indicator processed only after an applied decision', () => {
       const condition = stepByName('mark_processed')?.if ?? '';
       expect(condition).toContain('structured_output.verdict != null');
       expect(condition).toContain("structured_output.verdict != ''");
-      // A child run either fails or returns, so its `error` is the right test.
       expect(condition).toContain('steps.run_rule_creation.error == null');
+      // `error == null` is true when the child skipped the human gate. Step `if` cannot
+      // group with parentheses, so `creation_unreviewed` from `resolve_outcome` carries
+      // the no_coverage review test.
+      expect(condition).toContain('steps.resolve_outcome.output.creation_unreviewed == false');
       for (const flag of [
         'enable_approved_not_applied',
         'install_approved_not_applied',
@@ -163,6 +223,28 @@ describe('Detection Coverage review', () => {
       ]) {
         expect(condition).toContain(`steps.resolve_outcome.output.${flag} == false`);
       }
+    });
+
+    // The child can complete with `created: false` without asking anyone when the draft
+    // has an empty query or no attachment. That must not drop the indicator.
+    it('leaves the indicator pending when rule creation completes with created: false and no review', () => {
+      expect(evaluateMarkProcessed({ created: false, reviewed: false })).toBe(false);
+    });
+
+    it.each([
+      ['dismisses the draft', { created: false, reviewed: true }, true],
+      ['creates the rule', { created: true, reviewed: true }, true],
+      [
+        'fails the child run',
+        { created: false, reviewed: false, error: { message: 'boom' } },
+        false,
+      ],
+    ])('on no_coverage, mark_processed after the child %s', (_scenario, child, expected) => {
+      expect(evaluateMarkProcessed(child)).toBe(expected);
+    });
+
+    it('still marks other verdicts processed when the rule-creation child did not run', () => {
+      expect(evaluateMarkProcessed({ verdict: 'covered_disabled' })).toBe(true);
     });
 
     // `error` is null for a step its own `if` skipped, for a step in a branch that never
@@ -224,6 +306,19 @@ describe('Detection Coverage review', () => {
     ])('%s is computed once and forwarded to the output', (flag) => {
       expect(outcome?.[flag]).toBeDefined();
       expect(emit?.[flag]).toBe(`\${{ steps.resolve_outcome.output.${flag} }}`);
+      expect(stepByName('mark_processed')?.if ?? '').toContain(
+        `steps.resolve_outcome.output.${flag} == false`
+      );
+    });
+
+    it('computes creation_unreviewed from the child reviewed output', () => {
+      expect(outcome?.creation_unreviewed).toContain("verdict == 'no_coverage'");
+      expect(outcome?.creation_unreviewed).toContain(
+        'steps.run_rule_creation.output.reviewed != true'
+      );
+      expect(stepByName('mark_processed')?.if ?? '').toContain(
+        'steps.resolve_outcome.output.creation_unreviewed == false'
+      );
     });
 
     it('treats an installation skipped because the rule is already present as available', () => {
@@ -265,6 +360,28 @@ describe('Detection Coverage review', () => {
     it('propagates the creation worker outcome', () => {
       expect(emit?.rule_created).toContain('steps.run_rule_creation.output.created');
       expect(emit?.created_rule_name).toContain('steps.run_rule_creation.output.rule_name');
+    });
+
+    it('reads reviewed from the creation worker, not created, so a dismissal still processes', () => {
+      expect(creationDefinition.outputs?.map((output) => output.name)).toEqual(
+        expect.arrayContaining(['created', 'reviewed', 'rule_name'])
+      );
+      expect(creationEmit?.reviewed).toContain(
+        'steps.review_creation.output.response.approved == true'
+      );
+      expect(creationEmit?.reviewed).toContain(
+        'steps.review_creation.output.response.approved == false'
+      );
+      expect(
+        evaluateExpression(creationEmit?.reviewed ?? '', {
+          steps: { review_creation: { output: { response: { approved: false } } } },
+        })
+      ).toBe(true);
+      expect(
+        evaluateExpression(creationEmit?.reviewed ?? '', {
+          steps: { review_creation: { output: {} } },
+        })
+      ).toBe(false);
     });
   });
 
