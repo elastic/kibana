@@ -112,9 +112,9 @@ describe('CSV exporter', () => {
     const datatable = getDataTable();
     datatable.rows[0].col1 = null;
 
-    expect(
-      datatableToCSV(datatable, { ...getDefaultOptions(), quoteValues: false })
-    ).toMatch('columnOne\r\n-\r\n');
+    expect(datatableToCSV(datatable, { ...getDefaultOptions(), quoteValues: false })).toMatch(
+      'columnOne\r\n-\r\n'
+    );
   });
 
   test('should keep raw exports untouched for missing values', () => {
