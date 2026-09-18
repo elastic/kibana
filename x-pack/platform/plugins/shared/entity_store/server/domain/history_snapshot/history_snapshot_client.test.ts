@@ -10,22 +10,23 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HistorySnapshotClient } from './history_snapshot_client';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
-import {
-  createIndex,
-  deleteIndex,
-  reindex,
-  updateByQueryWithScript,
-} from '../../infra/elasticsearch';
+import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
 import {
   resolveHistorySnapshotIndexPatterns,
   resolveLatestEntitiesIndexName,
 } from '../asset_manager/resolve_entity_store_indices';
 
-jest.mock('../../infra/elasticsearch');
+jest.mock('../../infra/elasticsearch', () => ({
+  ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
+    '../../infra/elasticsearch'
+  ),
+  chunkByUrlLength: jest.requireActual<typeof import('../../infra/elasticsearch')>(
+    '../../infra/elasticsearch'
+  ).chunkByUrlLength,
+}));
 jest.mock('../asset_manager/resolve_entity_store_indices');
 
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
-const mockDeleteIndex = deleteIndex as jest.MockedFunction<typeof deleteIndex>;
 const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
 const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
   typeof updateByQueryWithScript
@@ -346,6 +347,7 @@ describe('HistorySnapshotClient', () => {
 
     describe('with clearHistorySnapshots', () => {
       let mockResolveIndex: jest.Mock;
+      let mockIndicesDelete: jest.Mock;
 
       beforeEach(() => {
         mockResolveIndex = jest.fn().mockResolvedValue({
@@ -356,14 +358,14 @@ describe('HistorySnapshotClient', () => {
           aliases: [],
           data_streams: [],
         });
+        mockIndicesDelete = jest.fn().mockResolvedValue({});
         mockEsClient = {
           ...mockEsClient,
-          indices: { resolveIndex: mockResolveIndex },
+          indices: { resolveIndex: mockResolveIndex, delete: mockIndicesDelete },
         } as unknown as jest.Mocked<ElasticsearchClient>;
         mockResolveHistorySnapshotIndexPatterns.mockResolvedValue([
           '.entities.v2.history.default.*',
         ]);
-        mockDeleteIndex.mockResolvedValue(undefined as never);
         client = createClient();
       });
 
@@ -372,7 +374,7 @@ describe('HistorySnapshotClient', () => {
         await flushPromises();
 
         expect(mockResolveHistorySnapshotIndexPatterns).not.toHaveBeenCalled();
-        expect(mockDeleteIndex).not.toHaveBeenCalled();
+        expect(mockIndicesDelete).not.toHaveBeenCalled();
       });
 
       it('does not clear indices when clearHistorySnapshots is false', async () => {
@@ -380,14 +382,14 @@ describe('HistorySnapshotClient', () => {
         await flushPromises();
 
         expect(mockResolveHistorySnapshotIndexPatterns).not.toHaveBeenCalled();
-        expect(mockDeleteIndex).not.toHaveBeenCalled();
+        expect(mockIndicesDelete).not.toHaveBeenCalled();
       });
 
       it('asynchronously deletes all resolved history snapshot indices', async () => {
         await client.disable(request, { clearHistorySnapshots: true });
 
         // deletion fires in the background — not yet called synchronously
-        expect(mockDeleteIndex).not.toHaveBeenCalled();
+        expect(mockIndicesDelete).not.toHaveBeenCalled();
 
         await flushPromises();
 
@@ -398,14 +400,14 @@ describe('HistorySnapshotClient', () => {
         expect(mockResolveIndex).toHaveBeenCalledWith({
           name: '.entities.v2.history.default.*',
         });
-        expect(mockDeleteIndex).toHaveBeenCalledTimes(2);
-        expect(mockDeleteIndex).toHaveBeenCalledWith(
-          mockEsClient,
-          '.entities.v2.history.default.2024-01-01-00'
-        );
-        expect(mockDeleteIndex).toHaveBeenCalledWith(
-          mockEsClient,
-          '.entities.v2.history.default.2024-01-02-00'
+        expect(mockIndicesDelete).toHaveBeenCalledWith(
+          {
+            index: [
+              '.entities.v2.history.default.2024-01-01-00',
+              '.entities.v2.history.default.2024-01-02-00',
+            ],
+          },
+          { ignore: [404] }
         );
         expect(mockLogger.info).toHaveBeenCalledWith(
           'Deleted 2 history snapshot indices after disabling'
@@ -418,12 +420,12 @@ describe('HistorySnapshotClient', () => {
         await client.disable(request, { clearHistorySnapshots: true });
         await flushPromises();
 
-        expect(mockDeleteIndex).not.toHaveBeenCalled();
+        expect(mockIndicesDelete).not.toHaveBeenCalled();
         expect(mockLogger.info).toHaveBeenCalledWith('No history snapshot indices to delete.');
       });
 
       it('does not throw and logs an error if index deletion fails', async () => {
-        mockDeleteIndex.mockRejectedValue(new Error('ES unavailable'));
+        mockIndicesDelete.mockRejectedValue(new Error('ES unavailable'));
 
         await expect(
           client.disable(request, { clearHistorySnapshots: true })
@@ -433,6 +435,34 @@ describe('HistorySnapshotClient', () => {
 
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringContaining('Failed to clear history snapshot indices')
+        );
+      });
+
+      it('splits deletion into multiple requests when indices exceed the URL length limit', async () => {
+        // Each name is ~1202 bytes. Two fit in one chunk (1202 + 3 + 1202 = 2407 < 3500),
+        // the third would push it to 2407 + 3 + 1202 = 3612 > 3500, so it starts a new chunk.
+        const index1 = `${'a'.repeat(1200)}-1`;
+        const index2 = `${'a'.repeat(1200)}-2`;
+        const index3 = `${'a'.repeat(1200)}-3`;
+        mockResolveIndex.mockResolvedValue({
+          indices: [{ name: index1 }, { name: index2 }, { name: index3 }],
+          aliases: [],
+          data_streams: [],
+        });
+
+        await client.disable(request, { clearHistorySnapshots: true });
+        await flushPromises();
+
+        expect(mockIndicesDelete).toHaveBeenCalledTimes(2);
+        expect(mockIndicesDelete).toHaveBeenNthCalledWith(
+          1,
+          { index: [index1, index2] },
+          { ignore: [404] }
+        );
+        expect(mockIndicesDelete).toHaveBeenNthCalledWith(
+          2,
+          { index: [index3] },
+          { ignore: [404] }
         );
       });
     });

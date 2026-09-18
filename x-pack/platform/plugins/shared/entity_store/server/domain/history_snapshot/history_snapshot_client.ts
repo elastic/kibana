@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import pLimit from 'p-limit';
 import moment from 'moment';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
@@ -15,8 +16,8 @@ import type {
   HistorySnapshotStatus,
 } from '../saved_objects';
 import {
+  chunkByUrlLength,
   createIndex,
-  deleteIndex,
   reindex,
   updateByQueryWithScript,
 } from '../../infra/elasticsearch';
@@ -46,6 +47,8 @@ export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 const POLL_INTERVAL_MS = 30 * 1000;
 const POLL_MIN_INTERVAL_MS = 5 * 1000;
+
+const BATCH_CONCURRENCY_LIMIT = 10;
 
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
@@ -118,7 +121,12 @@ export class HistorySnapshotClient {
     );
     const indices = resolvedPerPattern.flat();
     if (indices.length > 0) {
-      await Promise.all(indices.map((index) => deleteIndex(this.esClient, index)));
+      const limit = pLimit(BATCH_CONCURRENCY_LIMIT);
+      await Promise.all(
+        chunkByUrlLength(indices).map((chunk) =>
+          limit(() => this.esClient.indices.delete({ index: chunk }, { ignore: [404] }))
+        )
+      );
       this.logger.debug(`Cleared history snapshot indices: ${indices.join(', ')}`);
     }
     return indices.length;
