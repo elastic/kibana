@@ -81,8 +81,6 @@ export class AbortMonitor {
       }
       if (execution.status === ExecutionStatus.aborted) {
         this.logger.info(`Execution ${this.executionId} was aborted, propagating abort signal`);
-        // The recorded reason rides on `signal.reason` so the cancellation handler can stamp it
-        // on the abort error and the conversation can persist who aborted.
         this.abortController.abort(execution.abortReason);
         this.stop();
       } else if (
