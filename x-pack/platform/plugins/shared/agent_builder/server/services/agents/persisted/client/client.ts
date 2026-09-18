@@ -71,7 +71,6 @@ import {
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
   buildReadAccessFilter,
-  matchesAccessControlEntry,
   sourceToOwner,
 } from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
@@ -697,6 +696,11 @@ class AgentClientImpl implements AgentClient {
   }
 }
 
+const isRedundantOwnerEntry = (entry: AgentAccessControlEntry, owner: UserIdAndName): boolean =>
+  entry.id !== undefined
+    ? owner.id !== undefined && entry.id === owner.id
+    : owner.id === undefined && entry.name !== undefined && entry.name === owner.username;
+
 const validatePrincipal = (entry: AgentAccessControlEntry): string | undefined => {
   const hasId = entry.id !== undefined;
   const hasName = entry.name !== undefined;
@@ -756,7 +760,7 @@ export const validateAccessControlEntries = ({
       throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
     }
 
-    if (owner !== undefined && matchesAccessControlEntry(entry, owner)) {
+    if (owner !== undefined && isRedundantOwnerEntry(entry, owner)) {
       continue;
     }
 

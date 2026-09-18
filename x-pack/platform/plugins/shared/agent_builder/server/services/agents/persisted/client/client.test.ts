@@ -757,9 +757,22 @@ describe('validateAccessControlEntries', () => {
     expect(
       validate({
         entries: [{ type: 'user', name: 'owner', role: AgentAccessControlRole.User }],
+        currentEntries: [{ type: 'user', name: 'owner', role: AgentAccessControlRole.User }],
         owner: { username: 'owner' },
       })
     ).toEqual([]);
+  });
+
+  test('keeps a name-only entry naming an id-backed owner', () => {
+    const nameOnly = { type: 'user' as const, name: 'owner', role: AgentAccessControlRole.User };
+
+    expect(
+      validate({
+        entries: [nameOnly],
+        currentEntries: [nameOnly],
+        owner: { id: 'u_owner', username: 'owner' },
+      })
+    ).toEqual([expect.objectContaining({ name: 'owner' })]);
   });
 
   test('stamps added_at on new entries and preserves it for existing ones', () => {
