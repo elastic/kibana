@@ -77,7 +77,7 @@ describe('bulkDeleteExceptionList', () => {
   });
 
   describe('core deletion', () => {
-    test('deletes lists via bulkGet validation then per-list item cascade and container delete', async () => {
+    test('deletes lists via bulkGet validation then per-list container and item cascade', async () => {
       const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
       const list2 = getListMock({ id: 'so-2', list_id: 'list-2' });
 
@@ -107,11 +107,11 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toEqual([list1, list2]);
       expect(result.errors).toEqual([]);
       expect(result.summary).toEqual({ failed: 0, skipped: 0, succeeded: 2, total: 2 });
-      expect(callOrder.indexOf('delete items list-1')).toBeLessThan(
-        callOrder.indexOf('delete container so-1')
+      expect(callOrder.indexOf('delete container so-1')).toBeLessThan(
+        callOrder.indexOf('delete items list-1')
       );
-      expect(callOrder.indexOf('delete items list-2')).toBeLessThan(
-        callOrder.indexOf('delete container so-2')
+      expect(callOrder.indexOf('delete container so-2')).toBeLessThan(
+        callOrder.indexOf('delete items list-2')
       );
     });
 
@@ -268,7 +268,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 1, total: 2 });
     });
 
-    test('reports per-list error when container delete fails', async () => {
+    test('reports per-list error when container delete fails and does not cascade to items', async () => {
       const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
 
       const savedObjectsClient = savedObjectsClientMock.create();
@@ -276,7 +276,6 @@ describe('bulkDeleteExceptionList', () => {
       savedObjectsClient.delete.mockRejectedValue(
         Object.assign(new Error('conflict deleting object'), { statusCode: 409 })
       );
-      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-1'],
@@ -293,6 +292,7 @@ describe('bulkDeleteExceptionList', () => {
           status_code: 409,
         },
       ]);
+      expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
     });
 
     test('never runs more than the configured concurrency of list pipelines at once', async () => {

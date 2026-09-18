@@ -71,6 +71,24 @@ const deleteListWithItems = async ({
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: SavedObjectType;
 }): Promise<{ list: ExceptionListSchema; error?: BulkDeleteExceptionListError }> => {
+  // Delete the container first so detection rules can no longer reference the
+  // list. Orphaned items left behind by a subsequent cleanup failure are inert
+  // (unreachable without a container) and preferable to a half-emptied list
+  // that rules still execute against.
+  try {
+    await savedObjectsClient.delete(savedObjectType, list.id);
+  } catch (err) {
+    const { message, statusCode } = transformError(err);
+    return {
+      error: {
+        lists: [{ id: list.id, list_id: list.list_id }],
+        message,
+        status_code: statusCode,
+      },
+      list,
+    };
+  }
+
   try {
     await deleteExceptionListItemsByListStreamed({
       listId: list.list_id,
@@ -89,20 +107,7 @@ const deleteListWithItems = async ({
     };
   }
 
-  try {
-    await savedObjectsClient.delete(savedObjectType, list.id);
-    return { list };
-  } catch (err) {
-    const { message, statusCode } = transformError(err);
-    return {
-      error: {
-        lists: [{ id: list.id, list_id: list.list_id }],
-        message,
-        status_code: statusCode,
-      },
-      list,
-    };
-  }
+  return { list };
 };
 
 const checkAndDeleteList = async ({
