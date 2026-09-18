@@ -2498,7 +2498,6 @@ export const PayloadWorkflow = lazySchema(() =>
          */
         executionId: z.string().describe('The execution ID returned by the Workflows engine.'),
       })
-      .optional()
       .describe('Identifies the workflow that was run.'),
     /**
      * The context from which the workflow was triggered.
