@@ -150,7 +150,6 @@ describe('FlyoutSubsection', () => {
     const { container } = render(<FlyoutSubsection title="A">body</FlyoutSubsection>);
     expect(container.firstChild).not.toHaveAttribute('data-bordered');
   });
-
 });
 
 // ─── FlyoutAccordion ─────────────────────────────────────────────────────────
