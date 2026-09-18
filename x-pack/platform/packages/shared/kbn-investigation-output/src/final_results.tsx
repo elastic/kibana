@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  EuiAccordion,
+  EuiBadge,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownFormat,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -54,42 +62,79 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   </EuiTitle>
 );
 
-const RecommendationRow: React.FC<{ recommendation: InvestigationRecommendation }> = ({
-  recommendation: { title, description, code },
-}) => (
-  <EuiFlexItem grow={false}>
-    <AgentText text={title} bold />
-    {description && (
-      <>
-        <EuiSpacer size="xs" />
-        <AgentText text={description} subdued />
-      </>
-    )}
-    {code && (
-      <>
-        <EuiSpacer size="xs" />
-        <EuiCodeBlock language="shell" fontSize="s" paddingSize="s" isCopyable>
-          {code}
-        </EuiCodeBlock>
-      </>
-    )}
-  </EuiFlexItem>
-);
+const RecommendationRow: React.FC<{
+  recommendation: InvestigationRecommendation;
+  isRecommended: boolean;
+  isLast: boolean;
+  onClick: () => void;
+}> = ({ recommendation: { title }, isRecommended, isLast, onClick }) => {
+  const { euiTheme } = useEuiTheme();
 
-const BlindSpotRow: React.FC<{ blindSpot: InvestigationBlindSpot }> = ({
-  blindSpot: { title, description },
-}) => (
-  <EuiFlexItem grow={false}>
-    <AgentText text={title} bold />
-    {/* Recovered legacy gaps carry the same sentence as both title and description. */}
-    {description !== title && (
-      <>
-        <EuiSpacer size="xs" />
-        <AgentText text={description} subdued />
-      </>
-    )}
-  </EuiFlexItem>
-);
+  return (
+    <EuiPanel
+      element="button"
+      type="button"
+      hasShadow={false}
+      paddingSize="m"
+      onClick={onClick}
+      css={css`
+        border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+        border-radius: 0;
+        text-align: left;
+        width: 100%;
+      `}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem>
+          <AgentText text={title} bold />
+        </EuiFlexItem>
+        {isRecommended && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">
+              {i18n.translate('xpack.investigationOutput.recommendedLabel', {
+                defaultMessage: 'Recommended',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+const BlindSpotRow: React.FC<{
+  blindSpot: InvestigationBlindSpot;
+  isMostImpactful: boolean;
+  isLast: boolean;
+}> = ({ blindSpot: { title, description }, isMostImpactful, isLast }) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationBlindSpot' });
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiAccordion
+      id={accordionId}
+      data-test-subj="investigationOutputBlindSpot"
+      paddingSize="s"
+      buttonContent={<AgentText text={title} bold />}
+      extraAction={
+        isMostImpactful ? (
+          <EuiBadge color="primary">
+            {i18n.translate('xpack.investigationOutput.mostImpactfulLabel', {
+              defaultMessage: 'Most impactful',
+            })}
+          </EuiBadge>
+        ) : undefined
+      }
+      css={css`
+        border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+      `}
+    >
+      {/* Recovered legacy gaps carry the same sentence as both title and description. */}
+      {description !== title && <AgentText text={description} subdued />}
+    </EuiAccordion>
+  );
+};
 
 /**
  * The agent's own prose `conclusion`, followed by its `recommendations` and `blind_spots` as
@@ -97,8 +142,10 @@ const BlindSpotRow: React.FC<{ blindSpot: InvestigationBlindSpot }> = ({
  * when to show it — a mid-run conclusion is still a draft.
  */
 export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state }) => {
-  const { euiTheme } = useEuiTheme();
   const { conclusion, recommendations, blind_spots: blindSpots } = state;
+  const [selectedRecommendation, setSelectedRecommendation] =
+    useState<InvestigationRecommendation>();
+  const recommendationModalTitleId = useGeneratedHtmlId({ prefix: 'investigationRecommendation' });
 
   if (!conclusion && !recommendations?.length && !blindSpots?.length) {
     return null;
@@ -109,9 +156,6 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
       direction="column"
       gutterSize="l"
       data-test-subj="investigationOutputFinalResults"
-      css={css`
-        padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.base};
-      `}
     >
       {conclusion && (
         <EuiFlexItem grow={false}>
@@ -122,23 +166,29 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
       {recommendations && recommendations.length > 0 && (
         <EuiFlexItem grow={false}>
           <SectionTitle>
-            {i18n.translate('xpack.investigationOutput.nextStepsTitle', {
-              defaultMessage: 'Next steps',
+            {i18n.translate('xpack.investigationOutput.proposedActionsTitle', {
+              defaultMessage: 'Proposed actions',
             })}
           </SectionTitle>
           <EuiSpacer size="s" />
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="m"
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
             data-test-subj="investigationOutputRecommendations"
           >
-            {recommendations.map((recommendation, index) => (
-              <RecommendationRow
-                key={`${recommendation.title}-${index}`}
-                recommendation={recommendation}
-              />
-            ))}
-          </EuiFlexGroup>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              {recommendations.map((recommendation, index) => (
+                <RecommendationRow
+                  key={`${recommendation.title}-${index}`}
+                  recommendation={recommendation}
+                  isRecommended={index === 0}
+                  isLast={index === recommendations.length - 1}
+                  onClick={() => setSelectedRecommendation(recommendation)}
+                />
+              ))}
+            </EuiFlexGroup>
+          </EuiPanel>
         </EuiFlexItem>
       )}
 
@@ -149,17 +199,55 @@ export const FinalResults: React.FC<{ state: InvestigationState }> = ({ state })
               defaultMessage: 'Blind spots',
             })}
           </SectionTitle>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.investigationOutput.blindSpotsCountDescription', {
+              defaultMessage: '{count} identified',
+              values: { count: blindSpots.length },
+            })}
+          </EuiText>
           <EuiSpacer size="s" />
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="m"
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
             data-test-subj="investigationOutputBlindSpots"
           >
             {blindSpots.map((blindSpot, index) => (
-              <BlindSpotRow key={`${blindSpot.title}-${index}`} blindSpot={blindSpot} />
+              <BlindSpotRow
+                key={`${blindSpot.title}-${index}`}
+                blindSpot={blindSpot}
+                isMostImpactful={index === 0}
+                isLast={index === blindSpots.length - 1}
+              />
             ))}
-          </EuiFlexGroup>
+          </EuiPanel>
         </EuiFlexItem>
+      )}
+
+      {selectedRecommendation && (
+        <EuiModal
+          aria-labelledby={recommendationModalTitleId}
+          onClose={() => setSelectedRecommendation(undefined)}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={recommendationModalTitleId}>
+              {selectedRecommendation.title}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            {selectedRecommendation.description && (
+              <>
+                <AgentText text={selectedRecommendation.description} />
+                {selectedRecommendation.code && <EuiSpacer size="m" />}
+              </>
+            )}
+            {selectedRecommendation.code && (
+              <EuiCodeBlock language="shell" fontSize="s" paddingSize="s" isCopyable>
+                {selectedRecommendation.code}
+              </EuiCodeBlock>
+            )}
+          </EuiModalBody>
+        </EuiModal>
       )}
     </EuiFlexGroup>
   );

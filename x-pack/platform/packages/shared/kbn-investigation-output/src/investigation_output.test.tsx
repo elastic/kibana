@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import { InvestigationOutput } from './investigation_output';
@@ -51,7 +52,13 @@ const finalState: InvestigationState = {
     {
       title: 'Roll back the deployment that introduced the regression',
       confidence: 0.95,
+      description: 'Restore the last known-good checkout deployment.',
       code: 'kubectl rollout undo deployment/checkout-service',
+    },
+    {
+      title: 'Add a connection-pool saturation alert',
+      confidence: 0.7,
+      description: 'Alert before queued checkout requests begin to time out.',
     },
   ],
   blind_spots: [
@@ -59,6 +66,11 @@ const finalState: InvestigationState = {
       title: 'No profiling data available',
       confidence: 0.7,
       description: 'Could not confirm whether a leak compounded the exhaustion.',
+    },
+    {
+      title: 'No database query samples available',
+      confidence: 0.6,
+      description: 'Could not rule out a slower query path after the deployment.',
     },
   ],
 };
@@ -143,7 +155,7 @@ describe('InvestigationOutput', () => {
     expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });
 
-  it('renders the final state with the confirmed hypothesis and the final results appended, always visible', () => {
+  it('renders structured final findings without numeric confidence', () => {
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
     expect(screen.getByText('Investigation complete')).toBeInTheDocument();
@@ -154,12 +166,16 @@ describe('InvestigationOutput', () => {
     expect(finalResults).toHaveTextContent(
       'A deploy at 14:02 introduced a connection leak in the checkout service.'
     );
-    expect(finalResults).toHaveTextContent('Next steps');
+    expect(finalResults).toHaveTextContent('Proposed actions');
     expect(finalResults).toHaveTextContent(
       'Roll back the deployment that introduced the regression'
     );
+    expect(finalResults).toHaveTextContent('Recommended');
     expect(finalResults).toHaveTextContent('Blind spots');
+    expect(finalResults).toHaveTextContent('2 identified');
     expect(finalResults).toHaveTextContent('No profiling data available');
+    expect(finalResults).toHaveTextContent('Most impactful');
+    expect(finalResults).not.toHaveTextContent('95%');
   });
 
   it('honours the emphasis and inline code the agent wrote, without showing the markers', () => {
@@ -182,6 +198,9 @@ describe('InvestigationOutput', () => {
     expect(finalResults).toHaveTextContent('Block the attacker IPs at the firewall via hosts.deny');
     expect(finalResults).not.toHaveTextContent('**');
     expect(finalResults).toHaveTextContent('No apm-* indices');
+
+    fireEvent.click(screen.getByRole('button', { name: /No apm/ }));
+
     expect(finalResults).toHaveTextContent('Needed for tracing.');
   });
 
@@ -198,21 +217,53 @@ describe('InvestigationOutput', () => {
     expect(blindSpots.textContent?.match(/No GeoIP enrichment/g)).toHaveLength(1);
   });
 
-  it('renders recommendations and blind spots as separate sections, with code as a snippet', () => {
+  it('opens recommendation details with a click and blind-spot details from a collapsed accordion', () => {
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
     const recommendations = screen.getByTestId('investigationOutputRecommendations');
     expect(recommendations).toHaveTextContent(
       'Roll back the deployment that introduced the regression'
     );
-    expect(recommendations).toHaveTextContent('kubectl rollout undo deployment/checkout-service');
+    fireEvent.click(screen.getByText('Roll back the deployment that introduced the regression'));
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'kubectl rollout undo deployment/checkout-service'
+    );
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Restore the last known-good checkout deployment.'
+    );
 
     const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
     expect(blindSpots).toHaveTextContent('No profiling data available');
+    const firstBlindSpot = screen.getByText('No profiling data available').closest('button');
+    expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(firstBlindSpot!);
+
+    expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'true');
     expect(blindSpots).toHaveTextContent(
       'Could not confirm whether a leak compounded the exhaustion.'
     );
     expect(recommendations).not.toContainElement(blindSpots);
+  });
+
+  it('opens recommendation details with the keyboard and returns focus on close', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
+
+    const action = screen
+      .getByText('Roll back the deployment that introduced the regression')
+      .closest('button')!;
+    action.focus();
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Roll back the deployment that introduced the regression'
+    );
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(action).toHaveFocus();
   });
 
   it('renders the conclusion on its own when no recommendations or blind spots were reported', () => {
