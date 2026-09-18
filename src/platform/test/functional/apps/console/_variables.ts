@@ -109,7 +109,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.openConsole();
         await PageObjects.console.clickClearInput();
         await PageObjects.console.enterText('\n GET _search\n');
-        await PageObjects.console.enterText(`{\n\t"query": {"match_\${queryType}": {}}`);
+        await PageObjects.console.enterText(`{\n\t"query": {"match_\${queryType}": {}}\n}`);
         await PageObjects.console.waitForSelectedRequestsCount(1);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
