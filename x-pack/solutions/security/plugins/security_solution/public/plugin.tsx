@@ -37,6 +37,7 @@ import type {
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common/constants';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -85,12 +86,16 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
+  registerAttackDiscoveryAttachment,
+  registerAttackDiscoveryVerdictAttachment,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerInvestigationTimelineAttachment,
+  registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -359,6 +364,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttackDiscoveryAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
+      registerAttackDiscoveryVerdictAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -417,11 +428,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           spaces: plugins.spaces,
         });
       }
+      if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+        registerInvestigationTimelineAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+        registerInvestigationIocsAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+      }
     }
 
-    // Enable CPS picker in READ_ONLY mode for all Security Solution pages except for Value Report
+    // Enable CPS picker in READ_ONLY mode for all Security Solution pages except for the AI Value
+    // Report and Cloud Security Posture pages (whose data is origin-only).
     plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      location.includes(AI_VALUE_PATH)
+      location.includes(AI_VALUE_PATH) || location.includes(CLOUD_SECURITY_POSTURE_BASE_PATH)
         ? ProjectRoutingAccess.DISABLED
         : ProjectRoutingAccess.READONLY
     );
@@ -1008,6 +1028,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'cribl',
       view: 'package-policy-replace-define-step',
       Component: LazyCustomCriblExtension,
+      useWidePageLayout: true,
     });
   }
 

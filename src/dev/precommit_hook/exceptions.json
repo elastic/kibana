@@ -1,6 +1,7 @@
 {
   "_no_owner": {
-    "oas_docs/package-lock.json": "'package-lock.json' should be snake_case",
+    "oas_docs/pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
+    "oas_docs/pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
     "packages/kbn-tsconfig": "'kbn-tsconfig' should be snake_case",
     "pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
     "pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
@@ -451,9 +452,6 @@
   "@elastic/workflows-eng": {
     "src/platform/plugins/shared/workflows_execution_engine/server/step/on_failure/fallback-step": "'fallback-step' should be snake_case",
     "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/step-level": "'step-level' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level": "'workflow-level' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration": "'parse-duration' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration/parse-duration.test.ts": "'parse-duration.test.ts' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration/parse-duration.ts": "'parse-duration.ts' should be snake_case"
+    "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level": "'workflow-level' should be snake_case"
   }
 }
