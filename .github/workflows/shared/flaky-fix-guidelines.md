@@ -14,7 +14,7 @@ Read these even when the surrounding test file predates them. They won't cover e
 
 #### What a good fix looks like
 
-- **Fix the cause, where it lives.** A product bug or a wrong assertion is the preferred fix over any test-side workaround. For UI tests, addressing the root cause often means surfacing state in the DOM so the test can wait on a real readiness signal instead of guessing.
+- **Fix the cause, where it lives.** A product bug or a wrong assertion is the preferred fix over any test-side workaround. For UI tests, addressing the root cause often means surfacing state in the DOM so the test can wait on a real readiness signal instead of guessing. This is the most important item in this entire section. DO take every effort to expose state in the DOM itself so tests have reliable readiness signals.
 - **A test-side wait can't fix a production-side race.** If the evidence points to a race in product code, adding `await` / `waitFor` in the test only makes the test wait longer — the race is still there for users. This is the most common pattern that looks like a fix but isn't. Fix the race.
 - **Be skeptical of nearby code** The codebase is old and some anti-patterns have accumulated; don't copy a retry or a wait from a neighboring test just because it is there. At the same time, an existing block retrying interactions in a long-lived test may be there for a reason — check the file history before removing it.
 - **Shared code has a wide blast radius.** A change to a shared page object, fixture, service, or framework package (`kbn-test*`, `kbn-ftr-*`, `@kbn/scout*`) affects every suite that uses it, so verify it more broadly than the one failing spec.
