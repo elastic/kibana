@@ -150,38 +150,70 @@ export class ObservabilityNavigation {
    *
    * Do not `or()` the primary item with the More trigger and `waitFor` — both can
    * be visible at once, which Playwright treats as a strict-mode violation.
+   *
+   * Wait for a placement signal before choosing a branch: chrome can paint the
+   * More trigger (for other overflow items) before this item lands in primary,
+   * or paint primary late after `waitForLoad()` only saw the nav container.
    */
   async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
-    const primaryItem = this.navItemInPrimaryByDeepLinkId(deepLinkId);
-    if (await primaryItem.isVisible()) {
-      return primaryItem;
-    }
-    if (await this.moreMenuTrigger.isVisible()) {
-      await this.openMoreMenu();
-      return this.navItemInMoreByDeepLinkId(deepLinkId);
-    }
-    await primaryItem.waitFor({
-      state: 'visible',
-      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
-    });
-    return primaryItem;
+    return this.revealBodyNavItem(
+      this.navItemInPrimaryByDeepLinkId(deepLinkId),
+      this.navItemInMoreByDeepLinkId(deepLinkId)
+    );
   }
 
   /** Same overflow handling as `revealBodyNavItemByDeepLinkId`, keyed by node `id`. */
   async revealBodyNavItemById(id: string): Promise<Locator> {
-    const primaryItem = this.navItemInPrimaryById(id);
+    return this.revealBodyNavItem(this.navItemInPrimaryById(id), this.navItemInMoreById(id));
+  }
+
+  private async revealBodyNavItem(primaryItem: Locator, moreItem: Locator): Promise<Locator> {
+    await this.waitForLoad();
+    await this.waitForFirstVisible([primaryItem, this.moreMenuTrigger]);
+
     if (await primaryItem.isVisible()) {
       return primaryItem;
     }
-    if (await this.moreMenuTrigger.isVisible()) {
-      await this.openMoreMenu();
-      return this.navItemInMoreById(id);
+
+    await this.openMoreMenu();
+    await this.waitForFirstVisible([primaryItem, moreItem]);
+
+    if (await primaryItem.isVisible()) {
+      return primaryItem;
     }
-    await primaryItem.waitFor({
-      state: 'visible',
-      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+
+    return moreItem;
+  }
+
+  /** First of `locators` to become visible; prefers no one-shot `isVisible()` race. */
+  private async waitForFirstVisible(locators: Locator[]): Promise<Locator> {
+    if (locators.length === 0) {
+      throw new Error('waitForFirstVisible requires at least one locator');
+    }
+
+    const timeout = OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS;
+
+    return new Promise<Locator>((resolve, reject) => {
+      let pending = locators.length;
+      let settled = false;
+
+      for (const locator of locators) {
+        locator.waitFor({ state: 'visible', timeout }).then(
+          () => {
+            if (!settled) {
+              settled = true;
+              resolve(locator);
+            }
+          },
+          (error) => {
+            pending -= 1;
+            if (!settled && pending === 0) {
+              reject(error);
+            }
+          }
+        );
+      }
     });
-    return primaryItem;
   }
 
   /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */

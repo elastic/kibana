@@ -74,49 +74,6 @@ const ALL_PANEL_LINKS = [
   PANEL_LINKS.executionHistory,
 ] as const;
 
-const PRIVILEGE_CASES = [
-  {
-    name: 'no alerting privileges',
-    role: observabilityAlertingNavRole(),
-    visible: [],
-  },
-  {
-    name: 'v2 alerts read',
-    role: observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
-    visible: [PANEL_LINKS.alerts],
-  },
-  {
-    name: 'v2 rules read',
-    role: observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
-    visible: [PANEL_LINKS.rulesV2],
-  },
-  {
-    name: 'v2 rules write',
-    role: observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
-    visible: [PANEL_LINKS.rulesV2],
-  },
-  {
-    name: 'v2 action policies read',
-    role: observabilityAlertingNavRole({ alerting_v2_action_policies: ['read'] }),
-    visible: [PANEL_LINKS.actionPolicies],
-  },
-  {
-    name: 'v2 execution history read',
-    role: observabilityAlertingNavRole({ alerting_v2_execution_history: ['read'] }),
-    visible: [PANEL_LINKS.executionHistory],
-  },
-  {
-    name: 'v1 observability alerts read',
-    role: observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
-    visible: [PANEL_LINKS.alerts],
-  },
-  {
-    name: 'v1 logs alerts and rules read',
-    role: observabilityAlertingNavRole({ logs: ['read'] }),
-    visible: [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1],
-  },
-] as const;
-
 const loadNavAsRole = async (
   browserAuth: { loginWithCustomRole: (role: KibanaRole) => Promise<void> },
   nav: ObservabilityNavigation,
@@ -177,6 +134,31 @@ const expectPanelLinks = async (nav: ObservabilityNavigation, visible: readonly 
       await expect(item).not.toBeVisible();
     }
   }
+};
+
+const expectPanelForRole = async (
+  {
+    browserAuth,
+    pageObjects,
+    kbnClient,
+    scoutSpace,
+  }: {
+    browserAuth: { loginWithCustomRole: (role: KibanaRole) => Promise<void> };
+    pageObjects: { observabilityNavigation: ObservabilityNavigation };
+    kbnClient: Parameters<typeof setAlertingV2NavSettings>[0];
+    scoutSpace: Parameters<typeof setAlertingV2NavSettings>[1];
+  },
+  role: KibanaRole,
+  visible: readonly string[],
+  { showClassicAlertsPage = false }: { showClassicAlertsPage?: boolean } = {}
+) => {
+  await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+    v2Enabled: true,
+    showClassicAlertsPage,
+  });
+  const nav = pageObjects.observabilityNavigation;
+  await loadNavAsRole(browserAuth, nav, role);
+  await expectPanelLinks(nav, visible);
 };
 
 test.describe(
@@ -423,48 +405,127 @@ test.describe(
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
     });
 
-    test('filters Alerting panel links by the signed-in user privileges', async ({
+    test('hides the Alerting panel when the user has no alerting privileges', async ({
       browserAuth,
       pageObjects,
       kbnClient,
       scoutSpace,
     }) => {
-      // Eight custom-role logins plus three uiSettings cache waits exceed Playwright's 60s default.
-      test.setTimeout(240_000);
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole(),
+        []
+      );
+    });
 
-      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-        v2Enabled: true,
-        showClassicAlertsPage: false,
-      });
+    test('shows Alerts in the panel when the user has v2 alerts read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
+        [PANEL_LINKS.alerts]
+      );
+    });
 
-      const nav = pageObjects.observabilityNavigation;
+    test('shows Rules in the panel when the user has v2 rules read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
+        [PANEL_LINKS.rulesV2]
+      );
+    });
 
-      for (const privilegeCase of PRIVILEGE_CASES) {
-        await test.step(privilegeCase.name, async () => {
-          await loadNavAsRole(browserAuth, nav, privilegeCase.role);
-          await expectPanelLinks(nav, privilegeCase.visible);
-        });
-      }
+    test('shows Rules in the panel when the user has v2 rules write', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
+        [PANEL_LINKS.rulesV2]
+      );
+    });
 
-      await test.step('v1 observability alerts read and classic table on', async () => {
-        await scoutSpace.uiSettings.set({
-          [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: true,
-        });
+    test('shows Action Policies in the panel when the user has v2 action policies read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_action_policies: ['read'] }),
+        [PANEL_LINKS.actionPolicies]
+      );
+    });
+
+    test('shows Execution history in the panel when the user has v2 execution history read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_execution_history: ['read'] }),
+        [PANEL_LINKS.executionHistory]
+      );
+    });
+
+    test('shows Alerts in the panel when the user has v1 observability alerts read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
+        [PANEL_LINKS.alerts]
+      );
+    });
+
+    test('shows Alerts and classic Rules in the panel when the user has v1 logs read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ logs: ['read'] }),
+        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+      );
+    });
+
+    test('shows Alerts and Alerts V1 when the user has v1 observability alerts read and the classic table is on', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      try {
+        await expectPanelForRole(
+          { browserAuth, pageObjects, kbnClient, scoutSpace },
+          observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
+          [PANEL_LINKS.alerts, ALERTS_DEEP_LINK],
+          { showClassicAlertsPage: true }
+        );
+      } finally {
+        await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID);
         await kbnClient.uiSettings.waitForEventualCacheRefresh();
-        try {
-          await loadNavAsRole(
-            browserAuth,
-            nav,
-            observabilityAlertingNavRole({ observabilityAlerts: ['read'] })
-          );
-          await expectPanelLinks(nav, [PANEL_LINKS.alerts, ALERTS_DEEP_LINK]);
-        } finally {
-          await scoutSpace.uiSettings.set({
-            [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
-          });
-          await kbnClient.uiSettings.waitForEventualCacheRefresh();
-        }
-      });
+      }
     });
   }
 );
