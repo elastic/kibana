@@ -45,6 +45,12 @@ interface ResolveEsqlForAuthoringParams {
  */
 const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
+/** Same request shape as generateEsql `execute: 'schema'`. */
+const executeSchemaParams = {
+  dropNullColumns: false,
+  limit: 1,
+} as const;
+
 /**
  * Resolve an ES|QL query and its result columns for visualization authoring.
  *
@@ -78,9 +84,7 @@ export const resolveEsqlForAuthoring = async ({
       ({ columns } = await executeEsql({
         query,
         params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
-        // Same request shape as generateEsql execute: 'schema' for an already-provided query.
-        dropNullColumns: false,
-        limit: 1,
+        ...executeSchemaParams,
         esClient: esClient.asCurrentUser,
       }));
     } catch (error) {
@@ -116,9 +120,7 @@ export const resolveEsqlForAuthoring = async ({
       ({ columns } = await executeEsql({
         query,
         params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
-        // Same request shape as generateEsql execute: 'schema' for an already-provided query.
-        dropNullColumns: false,
-        limit: 1,
+        ...executeSchemaParams,
         esClient: esClient.asCurrentUser,
       }));
     }

@@ -15,7 +15,7 @@ import { resolveEsqlForAuthoring } from '../shared/resolve_esql_for_authoring';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
-  GENERATE_ESQL_NODE,
+  RESOLVE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
   MAX_RETRY_ATTEMPTS,
@@ -134,7 +134,7 @@ export const createVisualizationGraph = async (
   // Resolve the ES|QL query and its result columns. A query may reference
   // time-picker params (?_tstart/?_tend); bind a default range so it runs
   // server-side. Kibana binds the live range at render time.
-  const generateESQLNode = async (state: VisualizationState) => {
+  const resolveEsqlNode = async (state: VisualizationState) => {
     let action: GenerateEsqlAction;
     try {
       const resolved = await resolveEsqlForAuthoring({
@@ -381,13 +381,13 @@ export const createVisualizationGraph = async (
   };
 
   // Router: A config authored without a query can never validate (data_source
-  // is pinned from the generated query), so when ES|QL generation failed route
+  // is pinned from the resolved query), so when ES|QL resolution failed route
   // straight to finalize with the ES|QL error instead of burning config
   // generation retries.
-  const afterGenerateEsqlRouter = (state: VisualizationState): string => {
+  const afterResolveEsqlRouter = (state: VisualizationState): string => {
     const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
     if (!lastGenerateEsqlAction?.success) {
-      logger.warn('ES|QL generation failed; finalizing without generating a config');
+      logger.warn('ES|QL resolution failed; finalizing without generating a config');
       return 'finalize';
     }
     return GENERATE_CONFIG_NODE;
@@ -396,12 +396,12 @@ export const createVisualizationGraph = async (
   // Build and compile the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
-    .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(RESOLVE_ESQL_NODE, resolveEsqlNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
     .addNode('finalize', finalizeNode)
-    .addEdge('__start__', GENERATE_ESQL_NODE)
-    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+    .addEdge('__start__', RESOLVE_ESQL_NODE)
+    .addConditionalEdges(RESOLVE_ESQL_NODE, afterResolveEsqlRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       finalize: 'finalize',
     })

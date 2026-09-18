@@ -49,7 +49,7 @@ export function isValidateConfigAction(action: Action): action is ValidateConfig
 }
 
 // Node name constants
-export const GENERATE_ESQL_NODE = 'generate_esql_query';
+export const RESOLVE_ESQL_NODE = 'resolve_esql';
 export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';
 
