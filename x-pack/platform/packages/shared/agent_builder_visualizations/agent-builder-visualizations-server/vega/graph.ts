@@ -17,7 +17,7 @@ import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
 import {
-  GENERATE_ESQL_NODE,
+  RESOLVE_ESQL_NODE,
   SELECT_EXAMPLES_NODE,
   AUTHOR_SPEC_NODE,
   VALIDATE_SPEC_NODE,
@@ -132,7 +132,7 @@ export const createVegaGraph = async (
   // Resolve the ES|QL query and its result columns. A query may reference
   // time-picker params (?_tstart/?_tend); bind a default range so it runs
   // server-side. Kibana binds the live range at render time.
-  const generateESQLNode = async (state: VegaState) => {
+  const resolveEsqlNode = async (state: VegaState) => {
     let action: GenerateEsqlAction;
 
     try {
@@ -332,7 +332,7 @@ export const createVegaGraph = async (
 
   // A query that could not be resolved/executed must not be authored into a
   // spec (the spec would only fail at render), so route straight to finalize.
-  const afterGenerateEsqlRouter = (state: VegaState): string => {
+  const afterResolveEsqlRouter = (state: VegaState): string => {
     const lastGenerate = [...state.actions].reverse().find(isGenerateEsqlAction);
     if (!lastGenerate?.success) {
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
@@ -358,14 +358,14 @@ export const createVegaGraph = async (
   };
 
   return new StateGraph(VegaStateAnnotation)
-    .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(RESOLVE_ESQL_NODE, resolveEsqlNode)
     .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
     .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
     .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
     .addNode(FINALIZE_NODE, finalizeNode)
-    .addEdge('__start__', GENERATE_ESQL_NODE)
+    .addEdge('__start__', RESOLVE_ESQL_NODE)
     .addEdge('__start__', SELECT_EXAMPLES_NODE)
-    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+    .addConditionalEdges(RESOLVE_ESQL_NODE, afterResolveEsqlRouter, {
       [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
       [FINALIZE_NODE]: FINALIZE_NODE,
     })
