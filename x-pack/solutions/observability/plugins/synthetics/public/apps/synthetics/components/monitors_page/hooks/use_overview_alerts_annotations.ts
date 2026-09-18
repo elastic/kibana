@@ -20,6 +20,7 @@ import {
 } from '../../../../../../common/constants/synthetics_alerts';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useGetUrlParams } from '../../../hooks';
+import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { useMonitorFilters } from './use_monitor_filters';
 
 // A single value's KQL clause, e.g. `field: ("a" or "b")`.
@@ -51,6 +52,11 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
   const { euiTheme } = useEuiTheme();
   const { locations, query } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
+  // Spaces are a security boundary for alert data — `alertsFilters` omits the
+  // `kibana.space_ids` clause until the active space resolves (see
+  // `useKibanaSpace`), which would otherwise let this layer transiently
+  // surface monitor/reason/duration tooltip data from every space.
+  const { loading: spaceLoading } = useKibanaSpace();
 
   const { data: alertsDataView } = useFetcher(async () => {
     return new ObservabilityDataViews(dataViews, true).getDataView('alerts');
@@ -71,7 +77,7 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
   }, [alertsFilters, locations, query]);
 
   return useMemo(() => {
-    if (!alertsDataView) {
+    if (!alertsDataView || spaceLoading) {
       return undefined;
     }
 
@@ -108,7 +114,7 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
     };
 
     return [{ dataView: alertsDataView, annotations: [annotation] }];
-  }, [alertsDataView, kqlClauses, euiTheme.colors.accent]);
+  }, [alertsDataView, kqlClauses, euiTheme.colors.accent, spaceLoading]);
 }
 
 const alertsAnnotationLabel = i18n.translate(

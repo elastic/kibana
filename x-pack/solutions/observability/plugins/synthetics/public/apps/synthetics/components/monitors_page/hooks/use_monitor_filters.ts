@@ -7,10 +7,18 @@
 
 import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux-v7';
-import { isEmpty, uniqueId } from 'lodash';
+import { isEmpty } from 'lodash';
 import { useGetUrlParams } from '../../../hooks/use_url_params';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { selectOverviewStatus } from '../../../state/overview_status';
+
+// A stable stand-in for "no monitor should match" (e.g. a status filter with
+// no current monitors). Module-level and fixed rather than a fresh
+// `uniqueId()` per render — a new value every render changes this hook's
+// output identity every render too, and consumers like `useOverviewAlertsCount`
+// key an async-fetch dependency array off that output (via `JSON.stringify`),
+// so a fresh id here caused a continuous refetch/re-render loop.
+const NO_MATCHING_MONITOR_ID = '__no_matching_monitor__';
 
 const createFiltersForField = ({
   field,
@@ -49,6 +57,8 @@ const idsForStatusFilter = (
       return overviewStatus?.pendingIds ?? [];
     case 'stale':
       return overviewStatus?.staleIds ?? [];
+    case 'disabled':
+      return overviewStatus?.disabledMonitorQueryIds ?? [];
     default:
       return undefined;
   }
@@ -69,13 +79,13 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
     // otherwise selecting e.g. "Down" would stop narrowing anything once a
     // schedule or (AND-ed) location filter is also active.
     const ids = statusIds ? allIds.filter((id) => statusIds.includes(id)) : allIds;
-    // If ids is empty we return an array with a random id just to not get any result, there's probably a better solution
-    return [{ field: 'monitor.id', values: ids.length ? ids : [uniqueId()] }];
+    // If ids is empty we return a fixed non-matching id just to not get any result.
+    return [{ field: 'monitor.id', values: ids.length ? ids : [NO_MATCHING_MONITOR_ID] }];
   }
 
   return [
     ...(statusIds
-      ? [{ field: 'monitor.id', values: statusIds.length ? statusIds : [uniqueId()] }]
+      ? [{ field: 'monitor.id', values: statusIds.length ? statusIds : [NO_MATCHING_MONITOR_ID] }]
       : []),
     ...(projects?.length ? [{ field: 'monitor.project.id', values: getValues(projects) }] : []),
     ...(monitorTypes?.length ? [{ field: 'monitor.type', values: getValues(monitorTypes) }] : []),

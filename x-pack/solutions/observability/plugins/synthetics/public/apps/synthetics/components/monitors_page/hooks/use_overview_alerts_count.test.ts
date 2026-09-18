@@ -9,6 +9,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useOverviewAlertsCount } from './use_overview_alerts_count';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as filtersHook from './use_monitor_filters';
+import * as spaceHook from '../../../../../hooks/use_kibana_space';
 
 const mockHttpPost = jest.fn();
 // Stable across renders — a fresh object per call would change `http`'s
@@ -27,11 +28,13 @@ const bucketsResponse = (buckets: Array<{ key: string; doc_count: number }>) => 
 describe('useOverviewAlertsCount', () => {
   const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
   const filtersSpy = jest.spyOn(filtersHook, 'useMonitorFilters');
+  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
 
   beforeEach(() => {
     jest.clearAllMocks();
     filtersSpy.mockReturnValue([]);
     paramSpy.mockReturnValue({} as any);
+    spaceSpy.mockReturnValue({ loading: false } as any);
     mockHttpPost.mockResolvedValue(bucketsResponse([]));
   });
 
@@ -92,6 +95,18 @@ describe('useOverviewAlertsCount', () => {
         { terms: { 'observer.geo.name': ['us-east'] } },
       ])
     );
+  });
+
+  it('does not query until the active space resolves, so it never runs unscoped by space', async () => {
+    // Spaces are a security boundary for alert data — `alertsFilters` omits
+    // `kibana.space_ids` until the space resolves, so firing before that
+    // would transiently expose alert counts from every space.
+    spaceSpy.mockReturnValue({ loading: true } as any);
+
+    const { result } = renderHook(() => useOverviewAlertsCount(props));
+
+    expect(result.current.loading).toBe(true);
+    expect(mockHttpPost).not.toHaveBeenCalled();
   });
 
   it('quotes and escapes the free-text search query rather than passing it through as raw Lucene syntax', async () => {
