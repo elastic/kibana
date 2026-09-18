@@ -42,7 +42,6 @@ import type { FiltersNotificationActionApi } from './filters_notification_action
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [disableEditbutton, setDisableEditButton] = useState(false);
 
   const filters = useMemo(() => api.filters$?.value, [api]);
   const esqlStatements = useMemo(
@@ -50,7 +49,6 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     [api]
   );
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
-  const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
 
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -83,21 +81,23 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         return { queryString: JSON.stringify(query.query, null, 2) };
       }
     } else {
-      setDisableEditButton(true);
       const language: 'esql' | undefined = getAggregateQueryMode(query);
       return {
         queryString: query[language as keyof AggregateQuery],
         queryLanguage: language,
       };
     }
-  }, [api, setDisableEditButton]);
+  }, [api]);
 
   const [dataViews, parentViewMode] = useBatchedPublishingSubjects(
     api.parentApi?.dataViews$ ?? new BehaviorSubject(undefined),
     getViewModeSubject(api) ?? new BehaviorSubject(undefined)
   );
 
-  const showEditButton = !disableEditbutton && parentViewMode === 'edit' && canEditUnifiedSearch;
+  const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
+  const hasUnifiedSearch = Boolean(queryString) || Boolean(filters?.length);
+  const showEditButton =
+    hasUnifiedSearch && parentViewMode === 'edit' && canEditUnifiedSearch;
 
   return (
     <EuiPopover
