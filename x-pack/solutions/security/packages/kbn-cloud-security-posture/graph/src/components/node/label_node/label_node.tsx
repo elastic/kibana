@@ -201,8 +201,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_LABEL_WIDTH - 3}px`}
               y={`${
-                -ACTUAL_LABEL_HEIGHT +
-                (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+                -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
               }px`}
               style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
             />
