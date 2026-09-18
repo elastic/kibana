@@ -65,7 +65,6 @@ jest.mock('@kbn/core-di-browser', () => {
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
   useParams: jest.fn(),
 }));
 
@@ -500,6 +499,11 @@ describe('EpisodeDetailsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
+    expect(mockLocators.episodesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(screen.getByTestId('episodeDetailsErrorBackButton')).toHaveAttribute(
+      'href',
+      '/mock-locator-url'
+    );
   });
 
   it('renders the error prompt when the episode query errors', () => {
