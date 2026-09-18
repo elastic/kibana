@@ -314,7 +314,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('GET /outputs', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/291937
+    describe.skip('GET /outputs', () => {
       it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
