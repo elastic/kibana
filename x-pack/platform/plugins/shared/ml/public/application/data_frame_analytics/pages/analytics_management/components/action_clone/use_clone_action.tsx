@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+
+import { i18n } from '@kbn/i18n';
 
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 
-import {
-  cloneActionNameText,
-  useNavigateToWizardWithClonedJob,
-  CloneActionName,
-} from './clone_action_name';
+import { cloneActionNameText, useNavigateToWizardWithClonedJob } from './clone_action_name';
+
+const cloneActionPermissionText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.cloneActionPermissionTooltip',
+  {
+    defaultMessage: 'You do not have permission to clone analytics jobs.',
+  }
+);
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
@@ -29,14 +34,10 @@ export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () =>
-        !canCreateDataFrameAnalytics ? (
-          <CloneActionName isDisabled={!canCreateDataFrameAnalytics} />
-        ) : (
-          cloneActionNameText
-        ),
+      name: cloneActionNameText,
       enabled: () => canCreateDataFrameAnalytics,
-      description: cloneActionNameText,
+      description: () =>
+        canCreateDataFrameAnalytics ? cloneActionNameText : cloneActionPermissionText,
       icon: 'copy',
       type: 'icon',
       onClick: clickHandler,

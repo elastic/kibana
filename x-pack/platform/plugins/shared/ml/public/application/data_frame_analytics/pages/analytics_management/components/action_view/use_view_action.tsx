@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
@@ -21,7 +22,13 @@ import type {
 } from '../analytics_list/common';
 
 import { getViewLinkStatus } from './get_view_link_status';
-import { viewActionButtonText, ViewButton } from './view_button';
+
+export const viewActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.viewActionName',
+  {
+    defaultMessage: 'View',
+  }
+);
 
 export type ViewAction = ReturnType<typeof useViewAction>;
 export const useViewAction = () => {
@@ -46,10 +53,10 @@ export const useViewAction = () => {
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       isPrimary: true,
-      name: (item: DataFrameAnalyticsListRow) =>
-        getViewLinkStatus(item).disabled ? <ViewButton item={item} /> : viewActionButtonText,
+      name: viewActionButtonText,
       enabled: (item: DataFrameAnalyticsListRow) => !getViewLinkStatus(item).disabled,
-      description: viewActionButtonText,
+      description: (item: DataFrameAnalyticsListRow) =>
+        getViewLinkStatus(item).tooltipContent ?? viewActionButtonText,
       icon: 'table',
       type: 'icon',
       onClick: clickHandler,

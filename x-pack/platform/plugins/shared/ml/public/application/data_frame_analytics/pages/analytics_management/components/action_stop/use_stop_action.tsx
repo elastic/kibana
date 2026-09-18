@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
@@ -14,7 +17,12 @@ import type {
 import { isDataFrameAnalyticsFailed, isDataFrameAnalyticsRunning } from '../analytics_list/common';
 import { useStopAnalytics } from '../../services/analytics_service';
 
-import { stopActionNameText, StopActionName } from './stop_action_name';
+export const stopActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.stopActionNameText',
+  {
+    defaultMessage: 'Stop',
+  }
+);
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
@@ -52,16 +60,14 @@ export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () =>
-        !canStartStopDataFrameAnalytics ? (
-          <StopActionName isDisabled={!canStartStopDataFrameAnalytics} />
-        ) : (
-          stopActionNameText
-        ),
+      name: stopActionNameText,
       available: (i: DataFrameAnalyticsListRow) =>
         isDataFrameAnalyticsRunning(i.stats.state) || isDataFrameAnalyticsFailed(i.stats.state),
       enabled: () => canStartStopDataFrameAnalytics,
-      description: stopActionNameText,
+      description: () =>
+        canStartStopDataFrameAnalytics
+          ? stopActionNameText
+          : createPermissionFailureMessage('canStartStopDataFrameAnalytics'),
       icon: 'stop',
       type: 'icon',
       onClick: clickHandler,
