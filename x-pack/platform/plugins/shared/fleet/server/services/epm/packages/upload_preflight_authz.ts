@@ -9,12 +9,12 @@ import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import { KibanaAssetType } from '../../../common/types/models/epm';
-import { FleetUnauthorizedError } from '../../errors';
-import { appContextService } from '../../services';
-import { getPathParts } from '../../services/epm/archive';
-import { createArchiveIterator } from '../../services/epm/archive/archive_iterator';
-import { getInstallationObject } from '../../services/epm/packages/get';
+import { KibanaAssetType } from '../../../types';
+import { FleetUnauthorizedError } from '../../../errors';
+import { appContextService } from '../../app_context';
+import { getPathParts } from '../archive';
+import { createArchiveIterator } from '../archive/archive_iterator';
+import { getInstallationObject } from './get';
 
 const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.securityRule,

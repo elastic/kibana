@@ -7,11 +7,11 @@
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { KibanaAssetType } from '../../../common/types/models/epm';
-import { FleetUnauthorizedError } from '../../errors';
-import { appContextService } from '../../services';
-import { createArchiveIterator } from '../../services/epm/archive/archive_iterator';
-import { getInstallationObject } from '../../services/epm/packages/get';
+import { KibanaAssetType } from '../../../types';
+import { FleetUnauthorizedError } from '../../../errors';
+import { appContextService } from '../../app_context';
+import { createArchiveIterator } from '../archive/archive_iterator';
+import { getInstallationObject } from './get';
 
 import {
   checkUploadPackageAssetPrivileges,
@@ -19,18 +19,18 @@ import {
   buildRequiredActions,
 } from './upload_preflight_authz';
 
-jest.mock('../../services', () => ({
+jest.mock('../../app_context', () => ({
   appContextService: {
     getSecurity: jest.fn(),
     getConfig: jest.fn(),
   },
 }));
 
-jest.mock('../../services/epm/archive/archive_iterator', () => ({
+jest.mock('../archive/archive_iterator', () => ({
   createArchiveIterator: jest.fn(),
 }));
 
-jest.mock('../../services/epm/packages/get', () => ({
+jest.mock('./get', () => ({
   getInstallationObject: jest.fn(),
 }));
 
@@ -288,7 +288,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockRequest,
       mockArchiveBuffer,
       mockContentType,
-      mockSpaceId
+      mockSpaceId,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -320,7 +321,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockRequest,
       mockArchiveBuffer,
       mockContentType,
-      mockSpaceId
+      mockSpaceId,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -385,7 +387,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockRequest,
       mockArchiveBuffer,
       mockContentType,
-      mockSpaceId
+      mockSpaceId,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -412,7 +415,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
       mockRequest,
       mockArchiveBuffer,
       mockContentType,
-      mockSpaceId
+      mockSpaceId,
+      mockSavedObjectsClient
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;

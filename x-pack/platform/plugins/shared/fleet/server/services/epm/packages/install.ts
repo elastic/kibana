@@ -107,6 +107,7 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { checkUploadPackageAssetPrivileges } from './upload_preflight_authz';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
 
@@ -933,6 +934,21 @@ async function installPackageByUpload({
         );
       }
     }
+
+    if (
+      !isBundledPackage &&
+      request &&
+      !appContextService.getConfig()?.internal?.skipUploadPackageValidation
+    ) {
+      await checkUploadPackageAssetPrivileges(
+        request,
+        archiveBuffer,
+        contentType,
+        spaceId,
+        savedObjectsClient
+      );
+    }
+
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
