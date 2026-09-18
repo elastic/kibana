@@ -46,7 +46,8 @@ interface CanvasFlyoutProps {
  * Full-screen Agent Builder still uses a 50vw push flyout (overlay on narrow viewports).
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
@@ -183,7 +184,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       container={isAgentWorkspaceMount ? `#${AGENT_MAIN_CONTAINER_ID}` : undefined}
       hideCloseButton
       paddingSize="none"
-      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles : undefined}
+      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles(euiThemeContext) : undefined}
     >
       <AttachmentHeader
         icon={header?.icon}

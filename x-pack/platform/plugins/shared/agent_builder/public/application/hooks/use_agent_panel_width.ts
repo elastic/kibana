@@ -6,18 +6,23 @@
  */
 
 import { useLayoutEffect, useState } from 'react';
+import { euiShadow, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { SerializedStyles } from '@emotion/react';
-import { AGENT_MAIN_CONTAINER_ID, layoutVar } from '@kbn/ui-chrome-layout';
+import { AGENT_FIRST_GAP, AGENT_MAIN_CONTAINER_ID, layoutVar } from '@kbn/ui-chrome-layout';
 import { useIsAgentWorkspaceMount } from './use_navigation';
 
 /** Pin flyouts to the agent column so they do not cover the application workspace. */
-export const agentPanelFlyoutStyles = css`
-  top: ${layoutVar('application.top', '0px')} !important;
-  bottom: ${layoutVar('application.bottom', '0px')} !important;
-  right: ${layoutVar('agent.right', '0px')} !important;
+export const agentPanelFlyoutStyles = (euiThemeContext: UseEuiTheme) => css`
+  top: calc(${layoutVar('application.top', '0px')} + ${AGENT_FIRST_GAP}px) !important;
+  bottom: calc(${layoutVar('application.bottom', '0px')} + ${AGENT_FIRST_GAP}px) !important;
+  right: calc(${layoutVar('agent.right', '0px')} + ${AGENT_FIRST_GAP}px) !important;
   height: auto !important;
   max-height: none !important;
+  max-width: calc(${layoutVar('agent.width', '100%')} - ${AGENT_FIRST_GAP * 2}px) !important;
+  clip-path: none !important;
+  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+  ${euiShadow(euiThemeContext, 'm', { border: 'none' })};
 `;
 
 const PUSH_OFFSET_PROPS = ['padding-inline-start', 'padding-inline-end'] as const;
@@ -107,6 +112,7 @@ export interface AgentColumnFlyoutProps {
  * Canvas uses 1400px because it needs room for an editor; inspection flyouts share Chat info's threshold.
  */
 export const useAgentColumnFlyoutProps = (enabled = true): AgentColumnFlyoutProps => {
+  const euiThemeContext = useEuiTheme();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const inAgentColumn = enabled && isAgentWorkspaceMount;
   const agentPanelWidth = useAgentPanelWidth(inAgentColumn);
@@ -126,6 +132,6 @@ export const useAgentColumnFlyoutProps = (enabled = true): AgentColumnFlyoutProp
     hasAnimation: false,
     type: isPush ? 'push' : 'overlay',
     resizable: isPush,
-    css: agentPanelFlyoutStyles,
+    css: agentPanelFlyoutStyles(euiThemeContext),
   };
 };

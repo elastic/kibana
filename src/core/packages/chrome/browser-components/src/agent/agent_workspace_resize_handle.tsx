@@ -8,14 +8,23 @@
  */
 
 import type { FC, KeyboardEvent, MouseEvent, TouchEvent } from 'react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { EuiResizableButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { clampAgentWorkspaceWidth } from '@kbn/ui-chrome-layout';
+import {
+  AGENT_MAIN_CONTAINER_ID,
+  clampAgentWorkspaceWidth,
+  layoutLevels,
+} from '@kbn/ui-chrome-layout';
 
 const resizeButtonStyles = css`
-  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  z-index: ${layoutLevels.sidebar};
 `;
 
 const KEYBOARD_RESIZE_STEP = 10;
@@ -31,6 +40,7 @@ export interface AgentWorkspaceResizeHandleProps {
 
 /**
  * Resize handle on the right edge of the agent workspace.
+ * Portaled onto the agent column so push flyouts cannot cover it.
  * Drag right to widen the agent column; the application workspace fills remaining space.
  */
 export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = ({
@@ -43,6 +53,11 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
 }) => {
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
+  const [host, setHost] = useState<HTMLElement | null>(null);
+
+  useLayoutEffect(() => {
+    setHost(document.getElementById(AGENT_MAIN_CONTAINER_ID));
+  }, []);
 
   const setWidth = useCallback(
     (nextWidth: number) => {
@@ -120,7 +135,7 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
     [setWidth, width]
   );
 
-  return (
+  const button = (
     <EuiResizableButton
       css={resizeButtonStyles}
       indicator="border"
@@ -134,4 +149,6 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
       })}
     />
   );
+
+  return host ? createPortal(button, host) : button;
 };

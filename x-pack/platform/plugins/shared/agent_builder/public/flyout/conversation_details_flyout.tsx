@@ -265,6 +265,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
+  const euiThemeContext = useEuiTheme();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const agentPanelWidth = useAgentPanelWidth(isAgentWorkspaceMount);
   const isPushFlyout =
@@ -288,7 +289,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
-      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles : undefined}
+      css={isAgentWorkspaceMount ? agentPanelFlyoutStyles(euiThemeContext) : undefined}
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent
