@@ -40,6 +40,7 @@ export async function optimize({
       repoRoot: REPO_ROOT,
       examples: false,
       testPlugins: false,
+      devOnly: false,
       includeCoreBundle: true,
       dist: !!dist,
       watch: !!watch,
