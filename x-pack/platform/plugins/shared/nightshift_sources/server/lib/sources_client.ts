@@ -118,7 +118,8 @@ export class SourcesClient {
       await this.compensate(`restore source ${id} after its view could not be updated`, () =>
         soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, previous, {
           ...FULL_UPDATE,
-          version: updated.version,
+          // Update's version is typed optional; passing undefined would drop OCC on the restore.
+          ...(typeof updated.version === 'string' ? { version: updated.version } : {}),
         })
       );
       throw error;

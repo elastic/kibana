@@ -37,8 +37,9 @@ const createSourcesClient = (
   logger: Logger
 ): SourcesClient => {
   // The hidden type is not on the Nightshift feature's savedObject lists, so the saved objects
-  // security extension would reject everyone but superusers. Route authz is the access check;
-  // the spaces extension stays on so every call is scoped to the request's space.
+  // security extension would reject everyone but superusers. Route authz (or the engine's own
+  // equivalent) is the access check; `getSourcesClient` does not re-check Nightshift privileges.
+  // The spaces extension stays on so every call is scoped to the request's space.
   const soClient = core.savedObjects.getScopedClient(request, {
     includedHiddenTypes: [NIGHTSHIFT_SOURCE_SO_TYPE],
     excludedExtensions: [SECURITY_EXTENSION_ID],

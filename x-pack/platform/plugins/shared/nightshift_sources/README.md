@@ -32,6 +32,14 @@ Wire schemas and types (`NightshiftSource`, `SourceHealth`, request/response sha
 `@kbn/nightshift-shared` so browser code can import them. A typed repository client is exposed
 on the public start contract through `getClient()`.
 
+## Engine access
+
+`start.getSourcesClient({ request })` is how other Nightshift plugins talk to the catalog
+without going through HTTP. It returns the same client the routes use and does not re-check
+`read_nightshift` / `manage_nightshift`. The hidden saved-object type already excludes the
+security extension, so a check here would not restore SO authorization (that path rejects
+everyone but superusers). Call it from a route that already requires those privileges.
+
 ## Query validation
 
 A source is rows only. On create and update the ES|QL must:
@@ -120,6 +128,7 @@ project type in `config/serverless.yml` and back on for Observability Complete i
 
 ```bash
 node scripts/jest x-pack/platform/plugins/shared/nightshift_sources
+node scripts/jest x-pack/platform/packages/shared/kbn-nightshift-shared
 node scripts/type_check --project x-pack/platform/plugins/shared/nightshift_sources/tsconfig.json
 node scripts/scout run-tests --arch stateful --domain classic \
   --config x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/playwright.config.ts

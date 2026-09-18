@@ -12,6 +12,9 @@ import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_e
 // ES|QL answers a wildcard that matches nothing with a single placeholder column of this name.
 const ESQL_EMPTY_RELATION_COLUMN = '<no-fields>';
 
+// Trailing `--` / `//` on the stored query would swallow `| LIMIT 0` if it sat on the same line.
+const appendLimitZero = (query: string): string => `${query}\n| LIMIT 0`;
+
 /**
  * True when nothing exists yet behind the query's source command. A concrete name that does not
  * exist fails with "Unknown index"; a wildcard that matches nothing succeeds with an empty
@@ -28,7 +31,7 @@ export const hasNoIndicesBehind = async ({
 }): Promise<boolean> => {
   try {
     const { columns = [] } = await esClient.esql.query({
-      query: `${getSourceCommandQuery(esql)}\n| LIMIT 0`,
+      query: appendLimitZero(getSourceCommandQuery(esql)),
       format: 'json',
     });
     return columns.every((column) => column.name === ESQL_EMPTY_RELATION_COLUMN);
@@ -53,7 +56,7 @@ export const assertSourceQueryExecutes = async ({
   esql: string;
 }): Promise<void> => {
   try {
-    await esClient.esql.query({ query: `${esql}\n| LIMIT 0`, format: 'json' });
+    await esClient.esql.query({ query: appendLimitZero(esql), format: 'json' });
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
       if (hasMultipleSourceIndices(esql)) {

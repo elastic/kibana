@@ -13,5 +13,10 @@ export type GetSourcesClient = (params: { request: KibanaRequest }) => Promise<S
 export type NightshiftSourcesServerSetup = void;
 
 export interface NightshiftSourcesServerStart {
+  /**
+   * Same client the HTTP routes use. Does not re-check `read_nightshift` / `manage_nightshift`;
+   * the hidden type excludes the saved-objects security extension, so the caller must already
+   * be authorized (a Nightshift-privileged route, not a weaker handler).
+   */
   getSourcesClient: GetSourcesClient;
 }

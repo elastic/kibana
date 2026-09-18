@@ -419,6 +419,25 @@ describe('SourcesClient', () => {
       );
     });
 
+    it('restores without a version when the update response does not stamp one', async () => {
+      const { client, soClient, viewsClient } = setup();
+      const previous = makeAttributes();
+      soClient.get.mockResolvedValue(makeSavedObject(previous));
+      soClient.update.mockResolvedValueOnce(makeSavedObject(previous));
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+
+      await expect(
+        client.update('source-1', { title: 'new', tags: [], esql: 'FROM logs-other-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(soClient.update).toHaveBeenLastCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        previous,
+        FULL_UPDATE
+      );
+    });
+
     it('maps a missing saved object to a 404 that does not leak the type name', async () => {
       const { client, soClient } = setup();
       soClient.get.mockRejectedValue(
