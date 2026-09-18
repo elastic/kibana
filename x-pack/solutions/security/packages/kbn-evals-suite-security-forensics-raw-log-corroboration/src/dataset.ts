@@ -7,6 +7,14 @@
 
 import type { CorroborationScenario } from './types';
 
+/**
+ * Scenarios for the raw-log corroboration suite.
+ *
+ * `stages` is the ground truth the fixture is seeded from and `expected` is what
+ * the report is checked against. `dataset_invariants.test.ts` asserts the two
+ * agree, so a stage edit that is not reflected in the bounds fails locally
+ * instead of silently changing what the eval measures.
+ */
 export const SCENARIOS: CorroborationScenario[] = [
   {
     id: 'full-corroboration',
@@ -19,9 +27,28 @@ export const SCENARIOS: CorroborationScenario[] = [
       hosts: ['WKSTN-EVAL01'],
       timeRange: { from: '2026-08-18T10:00:00Z', to: '2026-08-18T12:00:00Z' },
     },
+    stages: [
+      {
+        id: 'initial-access',
+        evidence: 'outlook.exe spawned powershell.exe on WKSTN-EVAL01',
+        corroborated: true,
+      },
+      {
+        id: 'execution',
+        evidence: 'powershell -enc download cradle on WKSTN-EVAL01',
+        corroborated: true,
+      },
+      {
+        id: 'command-and-control',
+        evidence: 'tcp connection to 192.168.1.50:443 from WKSTN-EVAL01',
+        corroborated: true,
+      },
+    ],
     expected: {
-      corroboratedCount: 3,
-      gapCount: 0,
+      minCorroboratedCount: 3,
+      maxCorroboratedCount: 3,
+      minGapCount: 0,
+      maxGapCount: 0,
     },
   },
   {
@@ -35,9 +62,33 @@ export const SCENARIOS: CorroborationScenario[] = [
       hosts: ['WKSTN-EVAL01', 'SRV-DC01'],
       timeRange: { from: '2026-08-18T10:00:00Z', to: '2026-08-18T14:00:00Z' },
     },
+    stages: [
+      {
+        id: 'initial-access',
+        evidence: 'outlook.exe spawned powershell.exe on WKSTN-EVAL01',
+        corroborated: true,
+      },
+      {
+        id: 'execution',
+        evidence: 'powershell -enc download cradle on WKSTN-EVAL01',
+        corroborated: true,
+      },
+      {
+        id: 'lateral-movement',
+        evidence: 'WMI connection from WKSTN-EVAL01 to SRV-DC01',
+        corroborated: false,
+      },
+      {
+        id: 'command-and-control',
+        evidence: 'tcp connection to 192.168.1.50:443 from SRV-DC01',
+        corroborated: true,
+      },
+    ],
     expected: {
-      corroboratedCount: 3,
-      gapCount: 1,
+      minCorroboratedCount: 3,
+      maxCorroboratedCount: 3,
+      minGapCount: 1,
+      maxGapCount: 1,
     },
   },
   {
@@ -50,9 +101,56 @@ export const SCENARIOS: CorroborationScenario[] = [
       hosts: ['WKSTN-EVAL01'],
       timeRange: { from: '2026-08-18T10:00:00Z', to: '2026-08-18T12:00:00Z' },
     },
+    stages: [
+      {
+        id: 'exfiltration',
+        evidence: 'DNS tunneling telemetry for WKSTN-EVAL01',
+        corroborated: false,
+      },
+    ],
     expected: {
-      corroboratedCount: 0,
-      gapCount: 1,
+      minCorroboratedCount: 0,
+      maxCorroboratedCount: 0,
+      minGapCount: 1,
+      maxGapCount: 1,
+    },
+  },
+  {
+    id: 'decoy-out-of-scope',
+    name: 'Decoy telemetry outside scope',
+    description:
+      'Matching telemetry exists but belongs to another host and sits outside the scenario time range, so nothing in scope corroborates the narrative',
+    narrative:
+      'PowerShell download cradle executed on WKSTN-EVAL01, C2 beacon established to 192.168.1.50:443',
+    alertIds: ['alert-006'],
+    scope: {
+      hosts: ['WKSTN-EVAL01'],
+      timeRange: { from: '2026-08-18T10:00:00Z', to: '2026-08-18T12:00:00Z' },
+    },
+    // Both stages have matching telemetry in the index, but on DECOY-HOST-01 and
+    // timestamped a day earlier. A report that counts these as corroboration is
+    // wrong on both scope dimensions; a report that flags them as gaps is right.
+    // This is the case that separates a model reading the scope from one
+    // matching keywords.
+    stages: [
+      {
+        id: 'execution',
+        evidence: 'powershell download cradle (recorded on DECOY-HOST-01)',
+        corroborated: false,
+        decoy: { host: 'DECOY-HOST-01', outsideTime: true },
+      },
+      {
+        id: 'command-and-control',
+        evidence: 'C2 beacon to 192.168.1.50:443 (recorded on DECOY-HOST-01)',
+        corroborated: false,
+        decoy: { host: 'DECOY-HOST-01', outsideTime: true },
+      },
+    ],
+    expected: {
+      minCorroboratedCount: 0,
+      maxCorroboratedCount: 0,
+      minGapCount: 1,
+      maxGapCount: 2,
     },
   },
 ];

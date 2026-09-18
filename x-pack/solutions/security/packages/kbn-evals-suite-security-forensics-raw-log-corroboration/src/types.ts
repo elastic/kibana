@@ -18,11 +18,43 @@ export interface GapEvent {
   possibleCauses?: string;
 }
 
+/**
+ * The report shape the worker is asked to produce. Not consumed by the gates
+ * yet — the worker emits prose, so the spec measures that prose. Kept as the
+ * target shape for when the worker returns structured output.
+ */
 export interface CorroborationReport {
   corroboratedEvents: CorroboratedEvent[];
   gapEvents: GapEvent[];
   confidence: number;
   unresolvedQuestions: string[];
+}
+
+/**
+ * A single stage of a narrative, and whether raw telemetry exists for it.
+ *
+ * `stages` is the ground truth the fixture is built from: the seeder writes an
+ * event for each `corroborated` stage and none for the rest. Before this
+ * existed, the seeder wrote the same two events regardless of scenario, so a
+ * scenario named "no raw telemetry" was still run against seeded telemetry and
+ * its premise was untested.
+ */
+export interface NarrativeStage {
+  id: string;
+  /** Human-readable description of the telemetry that corroborates the stage. */
+  evidence: string;
+  /** True when in-scope telemetry exists. Drives seeding and the lower bound. */
+  corroborated: boolean;
+  /**
+   * Seeds matching telemetry that does NOT corroborate the stage: it belongs to
+   * another host, sits outside `scope.timeRange`, or both. Real log data a
+   * careless read would count as confirmation — the point of a decoy scenario.
+   * Never counted as corroborated.
+   */
+  decoy?: {
+    host: string;
+    outsideTime?: boolean;
+  };
 }
 
 export interface CorroborationScenario {
@@ -35,12 +67,17 @@ export interface CorroborationScenario {
     hosts: string[];
     timeRange: { from: string; to: string };
   };
-  // Only these two are gated. Confidence is part of the report shape above but
-  // is deliberately NOT an expectation: the worker emits no structured
-  // confidence field yet, and prose-parsing a self-reported number would be a
-  // gameable metric. Model it here only once the structured report exists.
+  stages: NarrativeStage[];
+  /**
+   * Bounds the report is checked against. Deliberately two-sided: the earlier
+   * shape had only `corroboratedCount` as a *minimum* and `gapCount` as a loose
+   * *maximum*, so claiming corroboration the data cannot support was never
+   * penalised and every scenario passed on vocabulary alone.
+   */
   expected: {
-    corroboratedCount: number;
-    gapCount: number;
+    minCorroboratedCount: number;
+    maxCorroboratedCount: number;
+    minGapCount: number;
+    maxGapCount: number;
   };
 }

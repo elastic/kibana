@@ -27,13 +27,9 @@ evaluate.describe(
   { tag: tags.stateful.classic },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      const scenario = SCENARIOS[0];
-      await seedForensicTimeline({
-        esClient,
-        scenarioId: scenario.id,
-        hosts: scenario.scope.hosts,
-        timeRange: scenario.scope.timeRange,
-      });
+      for (const scenario of SCENARIOS) {
+        await seedForensicTimeline({ esClient, scenario });
+      }
     });
 
     evaluate.afterAll(async ({ esClient }) => {

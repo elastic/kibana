@@ -29,6 +29,8 @@ interface RawLogEvalExample extends Example {
   };
   output: {
     minCorroboratedCount: number;
+    maxCorroboratedCount: number;
+    minGapCount: number;
     maxGapCount: number;
   };
   metadata?: {
@@ -51,8 +53,10 @@ const buildExamples = (): RawLogEvalExample[] =>
       question: toPrompt(scenario.narrative, scenario.scope.hosts),
     },
     output: {
-      minCorroboratedCount: scenario.expected.corroboratedCount,
-      maxGapCount: scenario.expected.gapCount,
+      minCorroboratedCount: scenario.expected.minCorroboratedCount,
+      maxCorroboratedCount: scenario.expected.maxCorroboratedCount,
+      minGapCount: scenario.expected.minGapCount,
+      maxGapCount: scenario.expected.maxGapCount,
     },
     metadata: {
       case_id: scenario.id,
@@ -65,13 +69,17 @@ const examples = selectShard(buildExamples(), process.env.EVAL_SHARD);
 
 base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.classic }, () => {
   base.beforeAll(async ({ esClient, log }) => {
-    const scenario = SCENARIOS[0];
-    await seedForensicTimeline({
-      esClient,
-      scenarioId: scenario.id,
-      hosts: scenario.scope.hosts,
-      timeRange: scenario.scope.timeRange,
-    });
+    // Seed every scenario from its own `stages`. Only SCENARIOS[0] used to be
+    // seeded, so the remaining scenarios ran against telemetry that contradicted
+    // their premise — the "no raw telemetry" scenario's host had seeded events.
+    for (const scenario of SCENARIOS) {
+      await seedForensicTimeline({ esClient, scenario });
+      const inScope = scenario.stages.filter((s) => s.corroborated).length;
+      const decoys = scenario.stages.filter((s) => s.decoy !== undefined).length;
+      log.info(
+        `[L2] Seeded ${scenario.id}: ${inScope} in-scope stage(s), ${decoys} decoy stage(s)`
+      );
+    }
   });
 
   base.afterAll(async ({ esClient }) => {
@@ -124,25 +132,35 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
               (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
           );
 
+        // Two-sided bounds from the dataset. The previous shape bounded
+        // corroboration only from below and gaps only loosely from above
+        // (`maxGapCount + 1`), so claiming corroboration the telemetry cannot
+        // support was never penalised and every scenario passed on vocabulary
+        // alone. Bounds are exact now: the dataset states what the seeded
+        // telemetry can and cannot support.
         const corroborationDepth = corroboratedCount >= example.output.minCorroboratedCount;
-        const gapIdentification = gapCount <= example.output.maxGapCount + 1;
+        const corroborationPrecision = corroboratedCount <= example.output.maxCorroboratedCount;
+        const gapDetection = gapCount >= example.output.minGapCount;
+        const gapRestraint = gapCount <= example.output.maxGapCount;
 
-        // `success` is the AND of every dimension the scorecard reports. It previously
-        // omitted corroborationDepth/gapIdentification, so a run could report
-        // `corroborationDepth: 0` and still be green — the dataset's own
-        // minCorroboratedCount/maxGapCount expectations gated nothing.
+        // `success` is the AND of every dimension the scorecard reports, so a
+        // reported 0 can never coexist with a green result.
         const success =
           skillInvoked &&
           searchToolCalled &&
           corroborationDepth &&
-          gapIdentification &&
+          corroborationPrecision &&
+          gapDetection &&
+          gapRestraint &&
           hasQueryReferences;
 
         const scorecard = {
           skillInvoked: skillInvoked ? 1 : 0,
           correctToolCalled: searchToolCalled ? 1 : 0,
           corroborationDepth: corroborationDepth ? 1 : 0,
-          gapIdentification: gapIdentification ? 1 : 0,
+          corroborationPrecision: corroborationPrecision ? 1 : 0,
+          gapDetection: gapDetection ? 1 : 0,
+          gapRestraint: gapRestraint ? 1 : 0,
           groundedness: hasQueryReferences ? 1 : 0,
         };
 
@@ -157,7 +175,8 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
           explanation:
             `Skill invoked: ${skillInvoked}. ` +
             `Search tool called: ${searchToolCalled}. ` +
-            `Corroborated: ${corroboratedCount}, Gaps: ${gapCount}. ` +
+            `Corroborated: ${corroboratedCount} (expected ${example.output.minCorroboratedCount}-${example.output.maxCorroboratedCount}). ` +
+            `Gaps: ${gapCount} (expected ${example.output.minGapCount}-${example.output.maxGapCount}). ` +
             `Grounded: ${hasQueryReferences}.`,
           scorecard,
         };

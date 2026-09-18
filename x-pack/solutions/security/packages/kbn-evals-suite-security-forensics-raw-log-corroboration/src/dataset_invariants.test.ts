@@ -13,7 +13,7 @@ import { SCENARIOS } from './dataset';
  * These assert properties of the *dataset*, not of the agent under test — the
  * agent's behaviour is measured by evals/leaf_quality.spec.ts against a live
  * stack. The value of this file is that it fails when someone edits SCENARIOS
- * into a shape the gates cannot interpret.
+ * into a shape the fixture and the gates disagree about.
  *
  * This file previously contained assertions that could not fail: it built a
  * `CorroborationReport` object literal and asserted that literal's own fields
@@ -34,6 +34,7 @@ describe('raw_log_corroboration dataset invariants', () => {
       expect(scenario.scope.hosts.length).toBeGreaterThan(0);
       expect(scenario.alertIds.length).toBeGreaterThan(0);
       expect(scenario.narrative.length).toBeGreaterThan(0);
+      expect(scenario.stages.length).toBeGreaterThan(0);
 
       const from = Date.parse(scenario.scope.timeRange.from);
       const to = Date.parse(scenario.scope.timeRange.to);
@@ -43,34 +44,79 @@ describe('raw_log_corroboration dataset invariants', () => {
     }
   });
 
-  it('expects non-negative integer counts', () => {
+  // The invariant that keeps fixture and expectation honest. The seeder writes
+  // telemetry for exactly the corroborated stages, so the bounds must describe
+  // that same set. Without this, editing `stages` silently changes what the eval
+  // measures while `expected` keeps asserting the old numbers.
+  it('corroboration bounds match the stages the seeder will seed', () => {
     for (const scenario of SCENARIOS) {
-      for (const value of [scenario.expected.corroboratedCount, scenario.expected.gapCount]) {
+      const corroborated = scenario.stages.filter((s) => s.corroborated).length;
+      expect(scenario.expected.minCorroboratedCount).toBe(corroborated);
+      expect(scenario.expected.maxCorroboratedCount).toBe(corroborated);
+    }
+  });
+
+  it('gap bounds match the stages with no in-scope telemetry', () => {
+    for (const scenario of SCENARIOS) {
+      const gaps = scenario.stages.filter((s) => !s.corroborated).length;
+      expect(scenario.expected.maxGapCount).toBe(gaps);
+      expect(scenario.expected.minGapCount).toBeLessThanOrEqual(gaps);
+    }
+  });
+
+  it('bounds are ordered, non-negative integers', () => {
+    for (const scenario of SCENARIOS) {
+      const { minCorroboratedCount, maxCorroboratedCount, minGapCount, maxGapCount } =
+        scenario.expected;
+      for (const value of [minCorroboratedCount, maxCorroboratedCount, minGapCount, maxGapCount]) {
         expect(Number.isInteger(value)).toBe(true);
         expect(value).toBeGreaterThanOrEqual(0);
       }
+      expect(minCorroboratedCount).toBeLessThanOrEqual(maxCorroboratedCount);
+      expect(minGapCount).toBeLessThanOrEqual(maxGapCount);
     }
   });
 
   it('encodes the intended semantics of each named scenario', () => {
-    // The three scenarios are deliberately ordered by corroboration strength.
-    // If an expectation drifts, the suite silently stops testing what its name
-    // claims — which is exactly the kind of edit this file should catch.
     const byId = new Map(SCENARIOS.map((s) => [s.id, s]));
 
     const full = byId.get('full-corroboration');
     expect(full).toBeDefined();
-    expect(full?.expected.gapCount).toBe(0);
-    expect(full?.expected.corroboratedCount).toBeGreaterThan(0);
+    expect(full?.expected.minGapCount).toBe(0);
+    expect(full?.expected.minCorroboratedCount).toBeGreaterThan(0);
 
     const partial = byId.get('partial-gap');
     expect(partial).toBeDefined();
-    expect(partial?.expected.gapCount).toBe(1);
+    expect(partial?.expected.minGapCount).toBe(1);
 
     const none = byId.get('no-raw-telemetry');
     expect(none).toBeDefined();
-    expect(none?.expected.corroboratedCount).toBe(0);
-    expect(none?.expected.gapCount).toBeGreaterThanOrEqual(1);
+    expect(none?.expected.maxCorroboratedCount).toBe(0);
+    expect(none?.expected.minGapCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('a decoy stage is never corroborated and never in scope', () => {
+    for (const scenario of SCENARIOS) {
+      const decoyStages = scenario.stages.flatMap((stage) =>
+        stage.decoy === undefined ? [] : [{ stage, decoy: stage.decoy }]
+      );
+      for (const { stage, decoy } of decoyStages) {
+        expect(stage.corroborated).toBe(false);
+        // A decoy must be out of scope on at least one axis, otherwise it is
+        // just normal corroborating telemetry wearing the wrong name.
+        expect(scenario.scope.hosts.includes(decoy.host)).toBe(false);
+      }
+    }
+  });
+
+  it('keeps at least one scenario with a decoy, so over-claiming stays detectable', () => {
+    const withDecoy = SCENARIOS.filter((s) => s.stages.some((stage) => stage.decoy !== undefined));
+    expect(withDecoy.length).toBeGreaterThan(0);
+    // And such a scenario must permit no corroboration, or the decoy proves
+    // nothing: over-claiming has to be able to fail.
+    for (const scenario of withDecoy) {
+      expect(scenario.expected.maxCorroboratedCount).toBe(0);
+    }
   });
 
   it('uses comparison-safe scenario ids', () => {
