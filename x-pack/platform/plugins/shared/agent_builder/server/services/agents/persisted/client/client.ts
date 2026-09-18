@@ -731,12 +731,9 @@ export const validateAccessControlEntries = ({
     );
   }
 
-  const addedAtByKey = new Map(
-    currentEntries.flatMap((entry) =>
-      entry.added_at !== undefined ? [[getAccessControlEntryKey(entry), entry.added_at]] : []
-    )
+  const currentByKey = new Map(
+    currentEntries.map((entry) => [getAccessControlEntryKey(entry), entry])
   );
-  const currentKeys = new Set(currentEntries.map(getAccessControlEntryKey));
 
   const now = new Date().toISOString();
   const seen = new Set<string>();
@@ -762,10 +759,19 @@ export const validateAccessControlEntries = ({
 
     const key = getAccessControlEntryKey(entry);
 
-    if (entry.id === undefined && !currentKeys.has(key)) {
-      throw createBadRequestError(
-        `ACL entry for "${entry.name}" requires an id. A name identifies a principal only for grants that already exist, because it cannot distinguish same-named users across realms.`
-      );
+    const current = currentByKey.get(key);
+
+    if (entry.id === undefined) {
+      if (current === undefined) {
+        throw createBadRequestError(
+          `ACL entry for "${entry.name}" requires an id. A name identifies a principal only for grants that already exist, because it cannot distinguish same-named users across realms.`
+        );
+      }
+      if (current.role !== entry.role) {
+        throw createBadRequestError(
+          `ACL entry for "${entry.name}" requires an id to change its role. A name matches every same-named user across realms, so an existing grant can only be sent back unchanged.`
+        );
+      }
     }
     if (seen.has(key)) {
       throw createBadRequestError(
@@ -776,7 +782,7 @@ export const validateAccessControlEntries = ({
 
     normalizedEntries.push({
       ...entry,
-      added_at: addedAtByKey.get(key) ?? now,
+      added_at: current?.added_at ?? now,
     });
   }
 

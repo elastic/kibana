@@ -664,15 +664,26 @@ describe('validateAccessControlEntries', () => {
     ).toThrow(/requires an id/);
   });
 
-  test('rejects a name-only entry whose role changed but keeps the grant when unchanged', () => {
+  test('keeps a name-only entry sent back with its persisted role', () => {
     const current = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.User }];
 
     expect(
       validate({
+        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
+        currentEntries: current,
+      })
+    ).toEqual([expect.objectContaining({ name: 'alice', role: AgentAccessControlRole.User })]);
+  });
+
+  test('rejects a role change on a name-only entry', () => {
+    const current = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.User }];
+
+    expect(() =>
+      validate({
         entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Manager }],
         currentEntries: current,
       })
-    ).toEqual([expect.objectContaining({ name: 'alice', role: AgentAccessControlRole.Manager })]);
+    ).toThrow(/requires an id to change its role/);
   });
 
   test('rejects entries with neither id nor name', () => {
@@ -737,7 +748,7 @@ describe('validateAccessControlEntries', () => {
       validate({
         entries: [
           { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
-          { type: 'user', name: 'alice', role: AgentAccessControlRole.Manager },
+          { type: 'user', name: 'alice', role: AgentAccessControlRole.User },
         ],
         currentEntries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.User }],
       })

@@ -858,7 +858,7 @@ apiTest.describe(
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-roundtrip-${randomUUID()}`;
         await seedIdLessAccessControlEntry({
           agentId,
-          entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.User }],
+          entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.Editor }],
         });
 
         const res = await apiClient.put(
