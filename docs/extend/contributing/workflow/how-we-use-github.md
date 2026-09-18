@@ -165,7 +165,7 @@ These labels affect whether your PR appears in the release notes (that is to say
 it's notable and affects our users) and which section it appears in. For example:
 
 - `release_note:breaking`: Specifies a breaking change and adds the PR to the Breaking changes section in the release notes. Elasticians must follow the internal Breaking Change procedures. Breaking changes within a major should be very rare and limited to experimental or preview features or unused features.
-- `release_note:deprecation`: Specifies a deprecated feature and adds the PR to the Deprecations section in the release notes. This section warns users about features that will be removed at a later date, usually the next major version.
+- `release_note:deprecation`: Specifies a deprecated feature and adds the PR to the Deprecations section in the release notes. This section warns users about features that will be removed later, usually the next major version.
 - `release_note:feature`: Specifies a new feature and adds the PR to the  Features section in the release notes. Use the feature label for a brand new capability or major functionality that did not exist before.
 - `release_note:enhancement`: Specifies a feature enhancement and adds the PR to the Enhancements section in the release notes. Use the enhancement label for improvements, optimizations, or extensions to an existing feature.
 - `release_note:fix`: Specifies a bug fix and adds the PR to the Bug fixes section in the release notes.
@@ -198,11 +198,11 @@ PRs that are included in release notes must have clear and concise titles and de
 
 Features, enhancements and fixes are sourced from your PR title and will include a link back to the PR. Deprecations, breaking changes and known issues require additional context. Include the impact, action and workarounds needed within the PR description and this will be included in the release notes when published.
 
-You may optionally provide a custom paragraph within the PR description. Use a `Release note:` or `## Release note` header, followed by the text. This is the place to give a clear, user-focussed summary, rather than technical implementation detail.
+You can optionally provide a custom paragraph within the PR description. Use a `Release note:` or `## Release note` header, followed by the text. This is the place to give a clear, user-focussed summary, rather than technical implementation detail.
 
 When creating a PR title:
 - Use sentence case.
 - Start PR titles with action words such as `Add`, `Fix`, `Improve`, `Show`, `Deprecate`, `Prevent`
 - Keep it short. Be clear. Be concise. Aim to keep the title less than 80 characters.
-- Describe what was fixed. (e.g. `Fix timeout` is not informative; this is better described as `Fix duplicate API call to prevent initialization timeout`)
+- Describe what was fixed. (for example `Fix timeout` is not informative; this is better described as `Fix duplicate API call to prevent initialization timeout`)
 
