@@ -264,9 +264,11 @@ spaceTest.describe(
 
     spaceTest(
       'never shows the configuration and insights flyouts at the same time',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { metricsExperience } = pageObjects;
         const { gridSettings, flyout } = metricsExperience;
+
+        await page.setViewportSize(testData.PUSH_FLYOUT_VIEWPORT);
 
         await spaceTest.step('open the configuration', async () => {
           await metricsExperience.openInsightsFlyout(0);
