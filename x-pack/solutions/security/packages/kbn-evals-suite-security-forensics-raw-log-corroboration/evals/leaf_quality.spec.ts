@@ -30,7 +30,6 @@ interface RawLogEvalExample extends Example {
   output: {
     minCorroboratedCount: number;
     maxGapCount: number;
-    minConfidence: number;
   };
   metadata?: {
     case_id: string;
@@ -54,7 +53,6 @@ const buildExamples = (): RawLogEvalExample[] =>
     output: {
       minCorroboratedCount: scenario.expected.corroboratedCount,
       maxGapCount: scenario.expected.gapCount,
-      minConfidence: scenario.expected.minConfidence,
     },
     metadata: {
       case_id: scenario.id,

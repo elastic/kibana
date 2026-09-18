@@ -22,7 +22,6 @@ export const SCENARIOS: CorroborationScenario[] = [
     expected: {
       corroboratedCount: 3,
       gapCount: 0,
-      minConfidence: 0.7,
     },
   },
   {
@@ -39,7 +38,6 @@ export const SCENARIOS: CorroborationScenario[] = [
     expected: {
       corroboratedCount: 3,
       gapCount: 1,
-      minConfidence: 0.4,
     },
   },
   {
@@ -55,7 +53,6 @@ export const SCENARIOS: CorroborationScenario[] = [
     expected: {
       corroboratedCount: 0,
       gapCount: 1,
-      minConfidence: 0.0,
     },
   },
 ];

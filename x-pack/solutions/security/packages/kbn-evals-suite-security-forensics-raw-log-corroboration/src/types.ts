@@ -35,9 +35,12 @@ export interface CorroborationScenario {
     hosts: string[];
     timeRange: { from: string; to: string };
   };
+  // Only these two are gated. Confidence is part of the report shape above but
+  // is deliberately NOT an expectation: the worker emits no structured
+  // confidence field yet, and prose-parsing a self-reported number would be a
+  // gameable metric. Model it here only once the structured report exists.
   expected: {
     corroboratedCount: number;
     gapCount: number;
-    minConfidence: number;
   };
 }
