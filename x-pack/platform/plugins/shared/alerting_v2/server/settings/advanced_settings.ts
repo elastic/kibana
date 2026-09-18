@@ -42,7 +42,7 @@ export const alertingGlobalAdvancedSettings = {
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<typeof ALERTING_V2_ENABLED_SETTING_ID>;
 
-// Kibana space-scoped — gates alerting v2 features not yet generally available, per space.
+// Gates experimental Alerting V2 features independently for each Kibana space.
 export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_V2_CATEGORY],
@@ -52,7 +52,7 @@ export const alertingSpaceAdvancedSettings = {
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingDescription', {
-      defaultMessage: 'Enables Alerting v2 features that are not yet generally available.',
+      defaultMessage: 'Enables experimental features for Alerting V2.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
