@@ -14,7 +14,12 @@ import { MatchActionPoliciesForRuleRoute } from './match_action_policies_for_rul
 const createMocks = () => {
   const deps = createRouteDependencies();
   const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPoliciesForRule'>> = {
-    matchActionPoliciesForRule: jest.fn().mockResolvedValue({ items: [] }),
+    matchActionPoliciesForRule: jest.fn().mockResolvedValue({
+      items: [],
+      total: 0,
+      evaluated_count: 0,
+      is_truncated: false,
+    }),
   };
   return { deps, actionPolicyClient };
 };
@@ -57,6 +62,9 @@ describe('MatchActionPoliciesForRuleRoute', () => {
     const mocks = createMocks();
     const clientResult = {
       items: [{ action_policy: { id: 'ap-1', name: 'AP 1' }, category: 'catch-all' }],
+      total: 250,
+      evaluated_count: 100,
+      is_truncated: true,
     };
     mocks.actionPolicyClient.matchActionPoliciesForRule.mockResolvedValue(clientResult as any);
 

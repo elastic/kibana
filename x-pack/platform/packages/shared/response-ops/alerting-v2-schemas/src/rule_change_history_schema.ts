@@ -30,6 +30,7 @@ export const listRuleChangeHistoryRequestSchema = z
       .default(RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE)
       .describe('Number of results per page.'),
   })
+  .strict()
   .refine(({ page, per_page }) => page * per_page <= RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW, {
     message: `page * per_page cannot exceed ${RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
@@ -37,14 +38,16 @@ export const listRuleChangeHistoryRequestSchema = z
 export type ListRuleChangeHistoryRequest = z.infer<typeof listRuleChangeHistoryRequestSchema>;
 
 /** Path params for `GET …/rules/{id}/history/{event_id}`. */
-export const getRuleChangeHistoryEventParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule.'),
-  event_id: z
-    .string()
-    .min(1)
-    .max(ID_MAX_LENGTH)
-    .describe('The change-history event identifier (`event.id`).'),
-});
+export const getRuleChangeHistoryEventParamsSchema = z
+  .object({
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule.'),
+    event_id: z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .describe('The change-history event identifier (`event.id`).'),
+  })
+  .strict();
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
 /**

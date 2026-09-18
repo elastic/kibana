@@ -49,6 +49,8 @@ describe('LinkedActionPoliciesStep', () => {
         },
       ],
       total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -67,6 +69,8 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -80,6 +84,8 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -99,6 +105,8 @@ describe('LinkedActionPoliciesStep', () => {
         },
       ],
       total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -125,6 +133,8 @@ describe('LinkedActionPoliciesStep', () => {
         },
       ],
       total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -150,6 +160,8 @@ describe('LinkedActionPoliciesStep', () => {
         },
       ],
       total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -172,6 +184,8 @@ describe('LinkedActionPoliciesStep', () => {
         },
       ],
       total: 1,
+      evaluatedCount: 1,
+      isTruncated: false,
     });
 
     render(
@@ -192,6 +206,8 @@ describe('LinkedActionPoliciesStep', () => {
       error: new Error('Network error'),
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();
@@ -206,6 +222,8 @@ describe('LinkedActionPoliciesStep', () => {
       error: null,
       items: [],
       total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
     });
 
     renderComponent();

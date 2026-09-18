@@ -2991,6 +2991,41 @@ describe('ActionPolicyClient', () => {
       expect(result.items[0].category).toBe('catch-all');
       expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
+      expect(result.evaluated_count).toBe(1);
+      expect(result.is_truncated).toBe(true);
+    });
+
+    it('returns metadata for evaluated policies', async () => {
+      const { total, evaluatedCount, isTruncated } = {
+        total: 250,
+        evaluatedCount: 100,
+        isTruncated: true,
+      };
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse(
+          Array.from({ length: evaluatedCount }, (_, index) => ({
+            id: `ap-${index}`,
+            attributes: {
+              ...baseAttributes,
+              matcher: { tags: ['prod'] },
+            },
+          })),
+          total
+        )
+      );
+
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+
+      expect(result.items).toHaveLength(evaluatedCount);
+      expect(result).toMatchObject({
+        total,
+        evaluated_count: evaluatedCount,
+        is_truncated: isTruncated,
+      });
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 100 })
+      );
     });
 
     it('returns catch-all APs for policies whose matcher has neither tags nor an expression', async () => {
