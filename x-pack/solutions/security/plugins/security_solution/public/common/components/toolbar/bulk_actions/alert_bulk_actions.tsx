@@ -27,6 +27,7 @@ import type {
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { BulkActions } from '.';
 import { useBulkActionItems } from './use_bulk_action_items';
+import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import type { inputsModel } from '../../../store';
@@ -45,6 +46,11 @@ interface OwnProps {
   customBulkActions?: CustomBulkActionProp[];
   customRefetch?: Refetch;
   data: TimelineItem[];
+  /**
+   * Query context used to resolve a "select all" beyond the loaded rows for the run-workflow
+   * action. Omit it and a run stays scoped to the loaded rows.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
 }
 
 export type StatefulAlertBulkActionsProps = OwnProps & PropsFromRedux;
@@ -67,6 +73,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     customBulkActions,
     customRefetch,
     data,
+    selectionScope,
   }) => {
     const dispatch = useDispatch();
 
@@ -195,6 +202,10 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       customBulkActions,
       data,
       closePopover,
+      // `showClearSelection` is this table's select-all indicator: the store only holds the
+      // loaded rows, so the run-workflow action has to resolve the rest from the query.
+      isAllSelected: showClearSelection,
+      selectionScope,
     });
 
     return (
