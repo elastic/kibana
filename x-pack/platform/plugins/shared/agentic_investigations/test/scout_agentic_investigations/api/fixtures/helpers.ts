@@ -198,5 +198,3 @@ export const dismissProposal = (
     body,
     responseType: 'json',
   });
-
-

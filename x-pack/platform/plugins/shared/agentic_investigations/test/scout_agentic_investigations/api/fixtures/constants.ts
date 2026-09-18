@@ -22,4 +22,3 @@ export const PROPOSALS_READ_ONLY_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { agenticInvestigations: ['read'] }, spaces: ['*'] }],
 };
-
