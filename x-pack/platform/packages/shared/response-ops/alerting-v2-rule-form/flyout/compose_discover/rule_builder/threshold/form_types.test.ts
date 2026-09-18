@@ -412,7 +412,10 @@ describe('severity helpers', () => {
   describe('hasReservedSeverityLabel', () => {
     it('is true when a stat is named severity', () => {
       expect(
-        hasReservedSeverityLabel([{ id: 's1', label: 'severity', aggregation: Aggregation.COUNT }], [])
+        hasReservedSeverityLabel(
+          [{ id: 's1', label: 'severity', aggregation: Aggregation.COUNT }],
+          []
+        )
       ).toBe(true);
     });
 
