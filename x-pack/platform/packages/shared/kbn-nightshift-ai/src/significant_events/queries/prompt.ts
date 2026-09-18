@@ -25,7 +25,6 @@ import { getComputedFeatureInstructions } from '../features/computed';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
-/** System prompt with `{{{available_feature_types}}}` and `{{{computed_feature_instructions}}}` rendered. */
 export const significantEventsAgentPrompt = significantEventsSystemPrompt
   .replaceAll('{{{available_feature_types}}}', SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '))
   .replaceAll(

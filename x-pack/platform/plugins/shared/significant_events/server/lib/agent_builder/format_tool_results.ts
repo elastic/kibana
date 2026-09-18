@@ -7,7 +7,6 @@
 
 import { ToolResultType, type ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 
-/** Flat, LLM-friendly payload built from Agent Builder tool results. */
 export interface BridgedToolResponse {
   results: Array<{ type: string; data: unknown }>;
   count: number;

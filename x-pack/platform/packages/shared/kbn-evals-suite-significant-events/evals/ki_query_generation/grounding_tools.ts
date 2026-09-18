@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Semantic Code Search (SCS) grounding configuration for the KI query
- * generation eval; the SCS tools themselves are exposed by the deployed agent.
- */
-
 export type GroundingMode = 'baseline' | 'grounded';
 
 /** Resolves the grounding modes to run from `KI_QUERY_GENERATION_GROUNDING` (off|on|both). */
@@ -25,13 +20,12 @@ export const resolveGroundingModes = (): GroundingMode[] => {
   }
 };
 
-/**
- * Resolves the SCS code index for a dataset. Reads a per-dataset JSON map from
- * `KI_QUERY_GENERATION_CODE_INDICES` (e.g. {"otel-demo":"code-open-telemetry_opentelemetry-demo"})
- * and falls back to a single `KI_QUERY_GENERATION_CODE_INDEX` for all datasets.
- */
-export const resolveCodeIndexForDataset = (datasetId: string): string | undefined => {
-  const mapRaw = process.env.KI_QUERY_GENERATION_CODE_INDICES;
+const readDatasetValue = (
+  datasetId: string,
+  mapEnvVar: string,
+  singleEnvVar: string
+): string | undefined => {
+  const mapRaw = process.env[mapEnvVar];
   if (mapRaw) {
     try {
       const map = JSON.parse(mapRaw) as Record<string, string>;
@@ -39,9 +33,21 @@ export const resolveCodeIndexForDataset = (datasetId: string): string | undefine
         return map[datasetId];
       }
     } catch {
-      // ignore malformed map and fall through to single-index fallback
+      // ignore malformed map and fall through to the single-value fallback
     }
   }
-  const single = process.env.KI_QUERY_GENERATION_CODE_INDEX;
+  const single = process.env[singleEnvVar];
   return single && single.length > 0 ? single : undefined;
 };
+
+/**
+ * Resolves the SCS `repository` label (e.g. "open-telemetry/opentelemetry-demo") for a dataset.
+ * The legacy `*_CODE_INDEX*` variables hold index names, which SCS no longer accepts as `repository`.
+ */
+export const resolveRepositoryForDataset = (datasetId: string): string | undefined =>
+  readDatasetValue(
+    datasetId,
+    'KI_QUERY_GENERATION_REPOSITORIES',
+    'KI_QUERY_GENERATION_REPOSITORY'
+  ) ??
+  readDatasetValue(datasetId, 'KI_QUERY_GENERATION_CODE_INDICES', 'KI_QUERY_GENERATION_CODE_INDEX');

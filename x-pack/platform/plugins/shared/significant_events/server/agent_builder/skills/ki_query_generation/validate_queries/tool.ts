@@ -24,7 +24,7 @@ import { streamToAnalysisTarget } from '../../../../lib/significant_events/strea
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
   'platform.sig_events.ki_queries_validate';
 
-export type AcceptedQuery = Omit<ValidatedKIQuery, 'esql' | 'expects_matches'> & {
+export type AcceptedQuery = Omit<ValidatedKIQuery, 'esql'> & {
   esql: { query: string };
 };
 
@@ -70,6 +70,12 @@ const candidateQuerySchema = z.object({
     .optional()
     .describe(
       'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query it supersedes.'
+    ),
+  expects_matches: z
+    .boolean()
+    .optional()
+    .describe(
+      'Required intent declaration. true: the query is grounded in evidence currently present and should match rows in the evaluation window. false: the query deliberately watches for a plausible future condition not present in the current evidence. Queries without it are rejected for repair.'
     ),
   feature_ids: z
     .array(z.string().max(MAX_ID_LENGTH))
@@ -158,14 +164,14 @@ export const createValidateQueriesTool = ({
           signal,
           logger,
           queryValidationTimeoutMs: scopedClients.tuningConfig.query_validation_timeout_ms,
+          requireQueryIntent: true,
+          collectQueryAttempts: true,
         });
 
-        const validatedQueries: AcceptedQuery[] = acceptedQueries.map(
-          ({ expects_matches: _expectsMatches, esql, ...query }) => ({
-            ...query,
-            esql: { query: esql },
-          })
-        );
+        const validatedQueries: AcceptedQuery[] = acceptedQueries.map(({ esql, ...query }) => ({
+          ...query,
+          esql: { query: esql },
+        }));
         const finalized = results.every(({ valid }) => valid === true);
 
         return {

@@ -61,6 +61,7 @@ describe('ki_queries_validate tool', () => {
     description: 'Detects failures',
     category: 'error' as const,
     severity_score: 60,
+    expects_matches: true,
     feature_ids: ['feature-1'],
   };
 
@@ -71,6 +72,7 @@ describe('ki_queries_validate tool', () => {
     description: 'Detects failures',
     category: 'error',
     severity_score: 60,
+    expects_matches: true,
     features: [{ id: 'feature-1', run_id: 'run-1' }],
   };
 
@@ -113,15 +115,19 @@ describe('ki_queries_validate tool', () => {
       logger,
     });
 
-  it('bounds its input', () => {
+  it('bounds its input and leaves expects_matches enforcement to the handler', () => {
     const tool = createTool();
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
     }
 
+    const { expects_matches: _expectsMatches, ...withoutIntent } = candidate;
     expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [candidate] }).success).toBe(
       true
     );
+    expect(
+      tool.schema.safeParse({ target_id: 'logs.test', queries: [withoutIntent] }).success
+    ).toBe(true);
     expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(true);
     expect(
       tool.schema.safeParse({ target_id: 'logs.test', queries: Array(101).fill(candidate) }).success
@@ -161,6 +167,8 @@ describe('ki_queries_validate tool', () => {
         features: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
         esClient: streamDataEsClient,
         queryValidationTimeoutMs: 12_000,
+        requireQueryIntent: true,
+        collectQueryAttempts: true,
       })
     );
     expect(result.results).toEqual([
@@ -177,6 +185,7 @@ describe('ki_queries_validate tool', () => {
               description: 'Detects failures',
               category: 'error',
               severity_score: 60,
+              expects_matches: true,
               features: [{ id: 'feature-1', run_id: 'run-1' }],
             },
           ],

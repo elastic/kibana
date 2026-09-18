@@ -67,7 +67,7 @@ import { collectSampleDocuments } from './collect_sample_documents';
 import { runKIQueryGenerationAgent } from '../../src/run_ki_query_generation_agent';
 import { seedExistingQueries } from './seed_existing_queries';
 import {
-  resolveCodeIndexForDataset,
+  resolveRepositoryForDataset,
   resolveGroundingModes,
   type GroundingMode,
 } from './grounding_tools';
@@ -254,7 +254,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             let lastReplayedSnapshot: string | undefined;
             let lastSeededScenarioId: string | undefined;
             const groundingModes = resolveGroundingModes();
-            const codeIndex = resolveCodeIndexForDataset(dataset.id);
+            const repository = resolveRepositoryForDataset(dataset.id);
 
             const setSemanticCodeSearchGrounding = async (enabled: boolean) => {
               await kbnClient.request({
@@ -396,8 +396,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   target,
                   connectorId: connector.id,
                   groundingContext:
-                    groundingMode === 'grounded' && codeIndex
-                      ? `\`preferred_code_index\`: ${codeIndex}`
+                    groundingMode === 'grounded' && repository
+                      ? `\`preferred_repository\`: ${repository}`
                       : undefined,
                 });
 
@@ -407,6 +407,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   category: q.category as SignificantEventType,
                   severity_score: q.severity_score,
                   evidence: q.evidence,
+                  expects_matches: q.expects_matches,
                 }));
 
                 logger.info(`[DEBUG] generated_queries=${queries.length}`);
@@ -427,10 +428,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               };
 
             for (const groundingMode of groundingModes) {
-              if (groundingMode === 'grounded' && !codeIndex) {
+              if (groundingMode === 'grounded' && !repository) {
                 log.info(
-                  `[${dataset.id}] grounded variant skipped — set KI_QUERY_GENERATION_CODE_INDEX ` +
-                    `(or KI_QUERY_GENERATION_CODE_INDICES) to an installed SCS code index.`
+                  `[${dataset.id}] grounded variant skipped — set KI_QUERY_GENERATION_REPOSITORY ` +
+                    `(or KI_QUERY_GENERATION_REPOSITORIES) to a repository label from scs.list_repos.`
                 );
                 continue;
               }
@@ -574,6 +575,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 category: q.category as SignificantEventType,
                 severity_score: q.severity_score,
                 evidence: q.evidence,
+                expects_matches: q.expects_matches,
               }));
 
               return {
