@@ -22,7 +22,6 @@ import {
   TimelineEventType,
   TimelineTriggerType,
   executionStartedEventId,
-  executionStepEventId,
   executionTerminatedEventId,
   parseExecutionId,
   promptResponseEventId,
@@ -298,7 +297,7 @@ export const resumeExecutionToEvents = ({
     conversation,
   });
   const stepEvents: TimelineEvent[] = (followUpRound.steps ?? []).map((step, index) => ({
-    id: executionStepEventId(roundId, executionIndex, index),
+    id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${index}`,
     type: TimelineEventType.executionStep,
     created_at: followUpRound.started_at,
     actor: agentActor(conversation),
