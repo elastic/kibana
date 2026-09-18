@@ -32,7 +32,11 @@ import {
   ROLE_LABEL,
   selectableRolesForAccessControlMode,
 } from './role_to_capabilities';
-import { accessFlyoutRemoveAriaLabel, accessFlyoutRoleAriaLabel } from './access_i18n';
+import {
+  accessFlyoutLegacyRoleLocked,
+  accessFlyoutRemoveAriaLabel,
+  accessFlyoutRoleAriaLabel,
+} from './access_i18n';
 
 interface PrincipalRowProps {
   entry: AgentAccessControlEntry;
@@ -59,6 +63,8 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
   onRemove,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const isRoleLocked = entry.id === undefined;
 
   const roleOptions = useMemo(() => {
     const allowed = selectableRolesForAccessControlMode(accessControlMode);
@@ -146,19 +152,22 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                 min-width: 180px;
               `}
             >
-              <EuiSuperSelect<AgentAccessControlRole>
-                compressed
-                aria-label={accessFlyoutRoleAriaLabel}
-                valueOfSelected={entry.role}
-                options={roleOptions}
-                disabled={isDisabled}
-                onChange={(next) => onChangeRole(next)}
-                popoverProps={{
-                  panelPaddingSize: 's',
-                  panelStyle: { minWidth: 280 },
-                  anchorPosition: 'downRight',
-                }}
-              />
+              <EuiToolTip content={isRoleLocked ? accessFlyoutLegacyRoleLocked : undefined}>
+                <EuiSuperSelect<AgentAccessControlRole>
+                  compressed
+                  fullWidth
+                  aria-label={accessFlyoutRoleAriaLabel}
+                  valueOfSelected={entry.role}
+                  options={roleOptions}
+                  disabled={isDisabled || isRoleLocked}
+                  onChange={(next) => onChangeRole(next)}
+                  popoverProps={{
+                    panelPaddingSize: 's',
+                    panelStyle: { minWidth: 280 },
+                    anchorPosition: 'downRight',
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
