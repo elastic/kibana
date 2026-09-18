@@ -1395,6 +1395,7 @@ packages:
   - 'x-pack/platform/plugins/private/monitoring_collection'
   - 'x-pack/platform/plugins/private/observability_ai_assistant_management'
   - 'x-pack/platform/plugins/private/otel_telemetry_collection'
+  - 'x-pack/platform/plugins/private/page_render_screenshotting'
   - 'x-pack/platform/plugins/private/painless_lab'
   - 'x-pack/platform/plugins/private/product_intercept'
   - 'x-pack/platform/plugins/private/reindex_service'

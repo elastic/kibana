@@ -997,6 +997,9 @@ export default function ({ getService }: FtrProviderContext) {
             `Verifying that ${privilege.id} sub-feature privilege of dashboard_v2 feature is disabled.`
           );
           if (privilege.id === 'store_search_session') continue;
+          // POC (response-ops-team#682): explicit decision to enable dashboard PDF/PNG export
+          // in serverless via page-render-service. See config/serverless.yml.
+          if (privilege.id === 'generate_report') continue;
           expect(privilege.disabled).toBe(true);
         }
       });

@@ -999,6 +999,7 @@
     "@kbn/otel-semantic-conventions": "workspace:*",
     "@kbn/otel-telemetry-collection-plugin": "workspace:*",
     "@kbn/paertial-results-example-plugin": "workspace:*",
+    "@kbn/page-render-screenshotting-plugin": "workspace:*",
     "@kbn/painless-lab-plugin": "workspace:*",
     "@kbn/palettes": "workspace:*",
     "@kbn/panel-loader": "workspace:*",
