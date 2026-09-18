@@ -117,6 +117,16 @@ describe('useBulkActionsByTableType', () => {
       scopeId: PageScope.alerts,
       tableId: mockTableId,
     });
+
+    // The run-workflow panel needs the table query and time range to resolve a "select all"
+    // selection beyond the loaded page.
+    expect(useBulkRunAlertWorkflowPanelModule.useBulkRunAlertWorkflowPanel).toHaveBeenCalledWith({
+      localFilters: [],
+      from: '2020-07-07T08:20:18.966Z',
+      to: '2020-07-08T08:20:18.966Z',
+      scopeId: PageScope.alerts,
+      tableId: mockTableId,
+    });
   });
 
   it('forwards runtimeMappings to useBulkAlertActionItems', () => {
