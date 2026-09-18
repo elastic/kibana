@@ -675,8 +675,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     const result = await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, 'request-space',
-      'security_detection_engine', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      'request-space',
+      'security_detection_engine',
+      installation
     );
 
     // Must detect the security-rule in installed_kibana and require rules-all.
@@ -794,7 +798,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     await checkUploadPackageAssetPrivileges(
-      mockRequest, mockArchiveBuffer, mockContentType, mockSpaceId, 'mypackage', installation
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      'mypackage',
+      installation
     );
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;

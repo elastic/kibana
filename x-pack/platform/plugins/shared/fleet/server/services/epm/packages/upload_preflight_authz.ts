@@ -133,7 +133,8 @@ export async function checkUploadPackageAssetPrivileges(
   // Mirror that here so the preflight sees the same ref set as cleanup — otherwise a benign
   // upload in an additional Space would find additional_spaces_installed_kibana[spaceId] empty,
   // skip the privilege check, and let cleanup delete gated assets via the internal client.
-  const isStreamingPackage = pkgName != null && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
+  const isStreamingPackage =
+    pkgName != null && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
   // Build per-Space gated type sets: archive types (written to every destination Space) union
   // each Space's own existing gated types (which cleanUpUnusedKibanaAssetsStep would remove).
