@@ -116,11 +116,17 @@ async function setup(
   });
 
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+  const tabId = toolkit.getCurrentTab().id;
+
+  // Skip the initial fetch so tests fully own data$.main$ and no async emission races their explicit `.next()`.
+  toolkit.internalState.dispatch(
+    internalStateActions.setSkipInitialFetch({ tabId, skipInitialFetch: true })
+  );
+  await toolkit.initializeSingleTab({ tabId, skipWaitForDataFetching: true });
 
   toolkit.internalState.dispatch(
     internalStateActions.setDataView({
-      tabId: toolkit.getCurrentTab().id,
+      tabId,
       dataView: dataViewMock,
     })
   );
