@@ -90138,6 +90138,7 @@ components:
           type: string
         download_source_ids:
           items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
@@ -107101,6 +107102,7 @@ components:
           type: string
         download_source_ids:
           items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
@@ -115159,6 +115161,7 @@ components:
           type: string
         download_source_ids:
           items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
