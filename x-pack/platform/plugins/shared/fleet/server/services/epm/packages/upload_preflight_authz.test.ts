@@ -34,6 +34,10 @@ jest.mock('./get', () => ({
   getInstallationObject: jest.fn(),
 }));
 
+jest.mock('./install', () => ({
+  PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
+}));
+
 const mockRequest = {} as KibanaRequest;
 const mockSpaceId = 'default';
 const mockArchiveBuffer = Buffer.from('fake-archive');
@@ -621,5 +625,45 @@ describe('checkUploadPackageAssetPrivileges', () => {
     );
 
     expect(result).toEqual(['space-x']);
+  });
+
+  it('checks only the request space for a streaming package even when installed in additional spaces', async () => {
+    // security_detection_engine uses streaming install (installKibanaAssetsWithStreaming),
+    // which writes only to the request Space regardless of primary/additional.
+    // Preflight must mirror that — do not require privileges in the other Spaces.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([
+        { path: 'security_detection_engine-1.0.0/kibana/security_rule/my-rule.json' },
+      ])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        additional_spaces_installed_kibana: {
+          'space-a': [],
+          'space-b': [],
+        },
+      },
+    });
+
+    const result = await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      mockSavedObjectsClient
+    );
+
+    expect(result).toEqual([mockSpaceId]);
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith([mockSpaceId], expect.anything());
+    expect(atSpaces).not.toHaveBeenCalledWith(
+      expect.arrayContaining(['space-a']),
+      expect.anything()
+    );
   });
 });

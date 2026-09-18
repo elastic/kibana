@@ -243,7 +243,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg,
   spaceId,
   assetTags,
-  authorizedSpaces,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -253,9 +252,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
-  // When provided (upload path), caps propagation to the snapshot of Spaces that were
-  // authorized during preflight, preventing TOCTOU bypass via concurrent add-to-Space.
-  authorizedSpaces?: string[];
 }) {
   // Derive whether this is an additional-space install from the package's sticky primary space.
   // Any request from a space other than installed_kibana_space_id is an additional-space install.
@@ -278,15 +274,9 @@ export async function installKibanaAssetsAndReferencesMultispace({
     });
 
     const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
-    const allAdditionalSpaces = Object.keys(
+    for (const additionnalSpaceId of Object.keys(
       installedPkg.attributes.additional_spaces_installed_kibana ?? {}
-    ).filter((s) => s !== primarySpaceId);
-    // When authorizedSpaces is set (upload path), restrict propagation to the snapshot
-    // that preflight authorized — preventing assets reaching Spaces added after preflight.
-    const propagationSpaces = authorizedSpaces
-      ? allAdditionalSpaces.filter((s) => authorizedSpaces.includes(s))
-      : allAdditionalSpaces;
-    for (const additionnalSpaceId of propagationSpaces) {
+    ).filter((s) => s !== primarySpaceId)) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
         logger,

@@ -16,6 +16,7 @@ import { appContextService } from '../../app_context';
 import { getPathParts } from '../archive';
 import { createArchiveIterator } from '../archive/archive_iterator';
 import { getInstallationObject } from './get';
+import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './install';
 
 const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.securityRule,
@@ -155,14 +156,21 @@ export async function checkUploadPackageAssetPrivileges(
     installation?.attributes?.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
   const isAdditionalSpaceInstall = !!installation && effectivePrimarySpace !== spaceId;
 
-  const destinationSpaces = isAdditionalSpaceInstall
-    ? [spaceId]
-    : [
-        ...new Set([
-          spaceId,
-          ...Object.keys(installation?.attributes?.additional_spaces_installed_kibana ?? {}),
-        ]),
-      ];
+  // Streaming packages write only to the request Space regardless of primary/additional logic.
+  // Mirror that here so we only check privileges for the Spaces that will actually be written.
+  let destinationSpaces: string[];
+  if (signals.pkgName && PACKAGES_TO_INSTALL_WITH_STREAMING.includes(signals.pkgName)) {
+    destinationSpaces = [spaceId];
+  } else if (isAdditionalSpaceInstall) {
+    destinationSpaces = [spaceId];
+  } else {
+    destinationSpaces = [
+      ...new Set([
+        spaceId,
+        ...Object.keys(installation?.attributes?.additional_spaces_installed_kibana ?? {}),
+      ]),
+    ];
+  }
 
   const checkResult = await security.authz
     .checkPrivilegesWithRequest(request)

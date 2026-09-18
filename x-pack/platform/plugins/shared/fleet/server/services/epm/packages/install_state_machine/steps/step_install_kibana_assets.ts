@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import { installKibanaAssetsAndReferencesMultispace } from '../../../kibana/assets/install';
 
 import { withPackageSpan } from '../../utils';
@@ -15,6 +17,7 @@ import type { KibanaAssetReference } from '../../../../../../common/types';
 import { INSTALL_STATES, KibanaSavedObjectType } from '../../../../../../common/types';
 import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install_with_streaming';
 import { indexPatternTypes } from '../../../kibana/index_pattern/install';
+import { FleetUnauthorizedError } from '../../../../../errors';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
   const {
@@ -28,6 +31,27 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
+  // If preflight ran (authorizedSpaces is set), abort if the install-time snapshot
+  // contains Spaces that were not in the preflight snapshot. Silently skipping those
+  // Spaces would leave them at the old version while the package record advances,
+  // breaking upgrade consistency. The caller should retry the upload.
+  if (authorizedSpaces && installedPkg) {
+    const primarySpaceId =
+      installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+    const isAdditionalSpaceInstall = primarySpaceId !== spaceId;
+    if (!isAdditionalSpaceInstall) {
+      const newSpaces = Object.keys(
+        installedPkg.attributes.additional_spaces_installed_kibana ?? {}
+      ).filter((s) => s !== primarySpaceId && !authorizedSpaces.includes(s));
+      if (newSpaces.length > 0) {
+        throw new FleetUnauthorizedError(
+          `Upload aborted: the package was added to new Spaces (${newSpaces.join(', ')}) after ` +
+            `authorization was checked. Please retry the upload to include all destination Spaces.`
+        );
+      }
+    }
+  }
+
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
     installKibanaAssetsAndReferencesMultispace({
       savedObjectsClient,
@@ -38,7 +62,6 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       logger,
       spaceId,
       assetTags: packageInfo?.asset_tags,
-      authorizedSpaces,
     })
   );
   // Necessary to avoid async promise rejection warning
