@@ -218,7 +218,9 @@ export default function (providerContext: FtrProviderContext) {
           .catch(() => null);
         expect(doc).not.to.be(null);
         expect((doc?._source as any)?.managed).to.be(false);
-        expect((doc?._source as any)?.tag?.name).to.equal('fleet-test-orphan-fleet-orphan-user-copy-1');
+        expect((doc?._source as any)?.tag?.name).to.equal(
+          'fleet-test-orphan-fleet-orphan-user-copy-1'
+        );
 
         await deleteOrphanedTag('fleet-orphan-user-copy-1');
       });
