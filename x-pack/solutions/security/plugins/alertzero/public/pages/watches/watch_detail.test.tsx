@@ -295,10 +295,16 @@ describe('WatchDetailPage', () => {
       expect(getComputedStyle(header).padding).toBe('16px');
       expect(getComputedStyle(body).padding).toBe('16px');
 
-      // The switch is interactive content; EUI renders it beside the toggle, never inside it.
-      expect(
-        screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`).closest('button')
-      ).toBeNull();
+      // The switch is itself a <button> (EuiSwitch's own DOM node), so it can't be asserted
+      // to sit outside "a button" — it has to sit outside the accordion's own toggle button
+      // (EUI's `.euiAccordion__button`), the one that expands/collapses the section, or a
+      // click on the switch would also toggle the accordion.
+      const accordionToggle = header.closest(
+        '.euiAccordion__triggerWrapper, .euiAccordion__button'
+      );
+      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
+      expect(accordionToggle).not.toBeNull();
+      expect(accordionToggle?.contains(enabledSwitch)).toBe(false);
     }
   });
 

@@ -280,9 +280,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               {headerBandContent(`${worker.id}-heading`, 'span')}
             </div>
           }
-          // Layout rides on EuiAccordion's own props and on nodes we render: EUI's internal
-          // `.euiAccordion__*` classes are not part of its public contract, so an EUI update may
-          // reshape them without notice.
+          // Layout rides on EuiAccordion's own props and on nodes we render, not on EUI's
+          // internal accordion class names, which are not part of its public contract and
+          // may be reshaped by an EUI update without notice.
           buttonProps={{ css: accordionButtonStyles }}
           arrowProps={{ css: accordionArrowStyles }}
           extraAction={
