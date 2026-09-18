@@ -76,12 +76,20 @@ const contentText = (content: unknown): string => {
 };
 
 /**
- * The user-role message contents of the final-answer request whose last user message contains
- * `input`. Consecutive human messages are merged into one multi-part user message by the LLM
- * adapter, so each returned entry may hold several original messages.
+ * The user-role message contents of the final-answer request made after `since` whose last user
+ * message contains `input`. The proxy's history is cumulative for the whole file, so callers
+ * capture `llmProxy.interceptedRequests.length` right before the converse call under test.
+ * Consecutive human messages are merged into one multi-part user message by the LLM adapter, so
+ * each returned entry may hold several original messages.
  */
-const userMessagesOfFinalAnswerFor = (llmProxy: LlmProxy, input: string): string[] => {
+const userMessagesOfFinalAnswerFor = (
+  llmProxy: LlmProxy,
+  input: string,
+  /** Index into the proxy's cumulative request history to search from (captured before the call). */
+  since: number
+): string[] => {
   const requests = llmProxy.interceptedRequests
+    .slice(since)
     .filter((request) => request.matchingInterceptorName === 'final-assistant-response')
     .map((request) => request.requestBody as { messages: LlmMessage[] });
   const request = requests.find((body) => {
@@ -113,6 +121,8 @@ apiTest.describe(
     let callbackServerUrl: string;
     let sysEsClient: Client;
     const conversationIds = new Set<string>();
+    /** Executions created by this suite are those indexed after it started (API suites run sequentially). */
+    const suiteStartedAt = new Date().toISOString();
 
     apiTest.beforeAll(async ({ requestAuth, samlAuth, log, kbnClient, esClient, config }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
@@ -134,6 +144,14 @@ apiTest.describe(
           `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
         );
       }
+      // Conversation deletion does not cascade to execution documents; remove the ones this
+      // suite created so repeated runs do not accumulate them on a shared server.
+      await sysEsClient.deleteByQuery({
+        index: AGENT_EXECUTIONS_INDEX,
+        query: { range: { '@timestamp': { gte: suiteStartedAt } } },
+        refresh: true,
+        conflicts: 'proceed',
+      });
       await callbackServer.stop();
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
@@ -196,7 +214,7 @@ apiTest.describe(
           const first = await postConverse(
             apiClient,
             adminCredentials.apiKeyHeader,
-            { input: 'first', connector_id: connectorId },
+            { input: `first ${mode}`, connector_id: connectorId },
             mode
           );
           expect(first).toHaveStatusCode(200);
@@ -213,10 +231,15 @@ apiTest.describe(
           const second = await postConverse(
             apiClient,
             adminCredentials.apiKeyHeader,
-            { input: 'second', conversation_id: conversationId, connector_id: connectorId },
+            { input: `second ${mode}`, conversation_id: conversationId, connector_id: connectorId },
             mode
           );
-          expect(second.statusCode).toBeGreaterThanOrEqual(400);
+          // the failure is surfaced as the agent's error: a 500 whose message is the connector
+          // failure, and that same message is what gets persisted (checked below)
+          expect(second).toHaveStatusCode(500);
+          const failureBody = second.body as { message: string };
+          expect(typeof failureBody.message).toBe('string');
+          expect(failureBody.message.length).toBeGreaterThan(0);
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
           // 3. the failed execution is on the conversation as a full projection, not as a round
@@ -242,13 +265,15 @@ apiTest.describe(
             (event) => event.id === failed[0].trigger_event_id
           );
           expect(trigger?.type).toBe(TimelineEventType.userMessage);
-          expect((trigger?.data as { message: string }).message).toBe('second');
+          expect((trigger?.data as { message: string }).message).toBe(`second ${mode}`);
           const failedData = failed[0].data as {
             error: { code: string; message: string };
             time_to_last_token: number;
           };
           expect(typeof failedData.error.code).toBe('string');
           expect(typeof failedData.time_to_last_token).toBe('number');
+          // parity: the persisted error is the one the API returned
+          expect(failedData.error.message).toBe(failureBody.message);
 
           // 4. a third, successful round sees the failed message followed by the failure notice
           await setupAgentDirectAnswer({
@@ -256,23 +281,28 @@ apiTest.describe(
             continueConversation: true,
             response: 'third ok',
           });
+          const requestsBeforeThird = llmProxy.interceptedRequests.length;
           const third = await postConverse(
             apiClient,
             adminCredentials.apiKeyHeader,
-            { input: 'third', conversation_id: conversationId, connector_id: connectorId },
+            { input: `third ${mode}`, conversation_id: conversationId, connector_id: connectorId },
             mode
           );
           expect(third).toHaveStatusCode(200);
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          const userMessages = userMessagesOfFinalAnswerFor(llmProxy, 'third');
+          const userMessages = userMessagesOfFinalAnswerFor(
+            llmProxy,
+            `third ${mode}`,
+            requestsBeforeThird
+          );
           const history = userMessages.join('\n');
-          const failedAt = history.indexOf('second');
+          const failedAt = history.indexOf(`second ${mode}`);
           const noticeAt = history.indexOf('<system_notice>');
           expect(failedAt).toBeGreaterThanOrEqual(0);
           // the failure notice follows the failed message and precedes the next input
           expect(noticeAt).toBeGreaterThan(failedAt);
-          expect(noticeAt).toBeLessThan(history.lastIndexOf('third'));
+          expect(noticeAt).toBeLessThan(history.lastIndexOf(`third ${mode}`));
           expect(history).toContain('attempt to answer the previous message failed');
 
           const after = await getConversation(
@@ -282,8 +312,8 @@ apiTest.describe(
           );
           expect(after.rounds).toHaveLength(2);
           expect(after.rounds.map((round) => round.input.message)).toStrictEqual([
-            'first',
-            'third',
+            `first ${mode}`,
+            `third ${mode}`,
           ]);
         }
       );
@@ -407,8 +437,9 @@ apiTest.describe(
           continueConversation: true,
           response: 'third ok',
         });
+        const requestsBeforeThird = llmProxy.interceptedRequests.length;
         const third = await converseViaCallback(
-          'third',
+          'third after abort',
           `Ev-interrupted-abort-3-${RUN_ID}`,
           'abort-3'
         );
@@ -416,7 +447,11 @@ apiTest.describe(
         await collectCompletedRoundRequests();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const userMessages = userMessagesOfFinalAnswerFor(llmProxy, 'third');
+        const userMessages = userMessagesOfFinalAnswerFor(
+          llmProxy,
+          'third after abort',
+          requestsBeforeThird
+        );
         expect(userMessages.some((content) => content.includes('second aborted'))).toBe(false);
       }
     );
