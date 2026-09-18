@@ -254,6 +254,10 @@ export const seedProposal = async (
     refresh: 'wait_for',
   });
   const id = response._id;
+  // Tracked before the follow-up update, not after: the document exists from the
+  // index call onwards, so an update that throws must not leave it untracked —
+  // cleanup would then never remove it from a shared server.
+  trackProposal(id);
   // `rootProposalId` defaults to the document's own id on the root, exactly
   // like `ProposalsService.create()` stamps it — done as a follow-up update
   // since the id is not known until after the first index call.
@@ -263,7 +267,6 @@ export const seedProposal = async (
     doc: { rootProposalId: id },
     refresh: 'wait_for',
   });
-  trackProposal(id);
   return { id };
 };
 
