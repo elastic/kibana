@@ -90,7 +90,8 @@ export const authenticationStrings = {
       i18n.translate(
         'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeysDescription.gcs',
         {
-          defaultMessage: 'Elastic stores a service account key that can read your bucket. Rotating it breaks the connection until you update it.',
+          defaultMessage:
+            'Elastic stores a service account key that can read your bucket. Rotating it breaks the connection until you update it.',
         }
       ),
     azure: () =>
