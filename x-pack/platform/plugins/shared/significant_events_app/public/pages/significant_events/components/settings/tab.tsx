@@ -51,6 +51,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
@@ -91,6 +92,7 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canConfigureEngines = canManage && canConfigure;
   const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
+  const { isDeveloperMode, setDeveloperMode, canEditDeveloperMode } = useDeveloperMode();
   // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
 
@@ -793,6 +795,56 @@ export function SettingsTab() {
                     </EuiFormRow>
                   </>
                 )}
+              </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      <EuiSpacer />
+
+      <EuiPanel
+        hasBorder={true}
+        hasShadow={false}
+        paddingSize="none"
+        grow={false}
+        data-test-subj="nightshiftDeveloperModeSection"
+      >
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
+                defaultMessage: 'Developer mode',
+              })}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
+                  defaultMessage:
+                    'Unlocks extra Nightshift Management surfaces in this Kibana space. Changes take effect immediately.',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="nightshiftDeveloperModeSwitch"
+                    label={i18n.translate(
+                      'xpack.significantEventsApp.settings.developerModeToggleSwitch',
+                      { defaultMessage: 'Enable developer mode' }
+                    )}
+                    checked={isDeveloperMode}
+                    onChange={(e) => {
+                      void setDeveloperMode(e.target.checked);
+                    }}
+                    disabled={!canEditDeveloperMode}
+                  />
+                </EuiFormRow>
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
