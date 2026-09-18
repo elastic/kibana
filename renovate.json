@@ -40,7 +40,6 @@
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
-        "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
         "val-loader",

@@ -77,7 +77,12 @@
     // mongodb and mongodb-connection-string-url are loaded via dynamic import() in
     // @kbn/connector-specs (the MongoDB connector); knip can't trace dynamic imports.
     "mongodb",
-    "mongodb-connection-string-url"
+    "mongodb-connection-string-url",
+    // Rspack resolves these string entries from create_shared_npm_config.ts;
+    // knip does not recognize dependencies referenced this way.
+    "@babel/runtime",
+    "immer",
+    "qs"
   ],
   "workspaces": {
     ".": {
