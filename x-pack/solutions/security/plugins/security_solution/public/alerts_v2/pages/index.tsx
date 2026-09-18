@@ -22,7 +22,7 @@ import { AlertsV2KpisSection } from './alerts_v2_kpis_section';
 import { EpisodesTableSection } from './table/episodes_table_section';
 import { useEsqlRowCount } from './use_esql_row_count';
 
-const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM $.alert-episodes' };
+const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM $.security-alerts' };
 const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 
 /**

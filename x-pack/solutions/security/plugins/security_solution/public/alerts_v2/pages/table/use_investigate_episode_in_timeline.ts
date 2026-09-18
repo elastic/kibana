@@ -14,7 +14,7 @@ import { useDiscoverState } from '../../../timelines/components/timeline/tabs/es
 import { useKibana } from '../../../common/lib/kibana';
 
 /** The RnA episodes view — the ES|QL source Timeline is pointed at. */
-const EPISODES_VIEW = '$.alert-episodes';
+const EPISODES_VIEW = '$.security-alerts';
 
 /** Half-width of the time window centered on the episode's `@timestamp` (1 hour on each side). */
 const TIME_BUFFER_MS = 60 * 60 * 1000;
@@ -101,9 +101,11 @@ export const useInvestigateEpisodeInTimeline = (): ((params: InvestigateEpisodeP
           })
         );
         liveContainer.internalState.dispatch(
-          liveContainer.injectCurrentTab(liveContainer.internalActions.updateAppStateAndReplaceUrl)({
-            appState: { query: { esql } },
-          })
+          liveContainer.injectCurrentTab(liveContainer.internalActions.updateAppStateAndReplaceUrl)(
+            {
+              appState: { query: { esql } },
+            }
+          )
         );
       }
 
