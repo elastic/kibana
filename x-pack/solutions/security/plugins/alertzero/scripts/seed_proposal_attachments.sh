@@ -121,6 +121,7 @@ index_proposal "$P1_ID" "$(jq -n \
   --arg id "$P1_ID" \
   --arg space "$KIBANA_SPACE" \
   '{
+    id: $id,
     spaceId: $space,
     conversationId: $cid,
     comment: "Block outbound traffic from the compromised host to prevent data exfiltration. This change applies only to the host running qualys-scan on the DMZ scan pool.",
@@ -177,8 +178,10 @@ index_proposal "$P2_ID" "$(jq -n \
   --arg cid "$CONV2" \
   --arg now "$NOW" \
   --arg expiry "$FUTURE_EXPIRY" \
+  --arg id "$P2_ID" \
   --arg space "$KIBANA_SPACE" \
   '{
+    id: $id,
     spaceId: $space,
     conversationId: $cid,
     comment: "Create a detection rule for repeated SSH login failures from external IP ranges. The pattern observed correlates with credential-stuffing campaigns in our threat intel feed.",
@@ -237,8 +240,10 @@ P3_ID=$(gen_uuid)
 index_proposal "$P3_ID" "$(jq -n \
   --arg cid "$CONV3" \
   --arg now "$NOW" \
+  --arg id "$P3_ID" \
   --arg space "$KIBANA_SPACE" \
   '{
+    id: $id,
     spaceId: $space,
     conversationId: $cid,
     comment: "Create a detection rule for repeated failed logins from this IP range.",
