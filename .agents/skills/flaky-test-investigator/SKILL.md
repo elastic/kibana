@@ -108,7 +108,7 @@ Scout and FTR tests should also follow the general best practices in `docs/exten
 
 ### Fix guidelines
 
-Any fix you recommend should follow the shared fix guidelines at `.github/workflows/shared/flaky-test-fix-guidelines.md` — the single source of truth for how to think about a durable fix, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
+Any fix you recommend should follow the shared fix guidelines at `.github/workflows/shared/flaky-fix-guidelines.md` — the single source of truth for how to think about a durable fix, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
 
 ### Investigation pitfalls
 

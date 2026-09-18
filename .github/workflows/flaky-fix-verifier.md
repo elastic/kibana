@@ -645,4 +645,4 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 
 ## Fix guidelines
 
-{{#import .github/workflows/shared/flaky-test-fix-guidelines.md}}
+{{#import .github/workflows/shared/flaky-fix-guidelines.md}}

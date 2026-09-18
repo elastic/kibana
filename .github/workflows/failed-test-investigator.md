@@ -253,7 +253,7 @@ For Security Cypress, skip this section's wait/`file:line` rules and use [Securi
 
 Every fix you propose is held to the same guidelines as the fixer and verifier workflows that act on it:
 
-{{#import .github/workflows/shared/flaky-test-fix-guidelines.md}}
+{{#import .github/workflows/shared/flaky-fix-guidelines.md}}
 
 ## Labels
 

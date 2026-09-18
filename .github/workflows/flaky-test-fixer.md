@@ -280,7 +280,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 ## Fix guidelines
 
-{{#import .github/workflows/shared/flaky-test-fix-guidelines.md}}
+{{#import .github/workflows/shared/flaky-fix-guidelines.md}}
 
 ## Validate the investigation is current
 
