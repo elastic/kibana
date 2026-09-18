@@ -104,6 +104,20 @@ export {
   WorkerSettingsExtras,
   WorkerSettingsWrite,
   WorkflowTriggerType,
+  AffectedAsset,
+  HuntForThreatHit,
+  HuntForThreatRequestBody,
+  HuntForThreatResponse,
+  HuntForThreatResult,
+  HuntForThreatStatus,
+  HuntIoc,
+  HuntIocType,
+  HuntReadinessRequestQuery,
+  HuntReadinessResponse,
+  HuntTechnology,
+  IndexScopeStatus,
+  IndexScopeWindow,
+  ResolvedIndexScope,
 } from './impl/schemas';
 
 export {

@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import { API_VERSIONS, HuntForThreatRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import type { HuntTechnology } from '../../services/watches/hunt/common/types';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
-import { IOC_TYPES } from '../../services/watches/hunt/tier1/types';
 import type { RouteDependencies } from '../register_routes';
 
 /** `POST /internal/alertzero/threat_intel/hunt_for_threat` path (plan.md Phase 3). */
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
-
-const HuntForThreatRequestBody = z.object({
-  technology: z.enum(['aws_iam', 'fortigate']),
-  iocs: z.array(z.object({ type: z.enum(IOC_TYPES), value: z.string() })).optional(),
-  techniques: z.array(z.string()).optional(),
-  timeRange: z.object({ from: z.string(), to: z.string() }).optional(),
-  size: z.number().int().positive().optional(),
-});
 
 /**
  * Runs Tier 1's deterministic search against a technology's A2-resolved
