@@ -307,13 +307,19 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('forwards arbitrary EuiButton and DOM props to the trigger', () => {
-    renderMenu({ id: 'takeActionButton', className: 'customClass', 'data-ebt-target': 'footer' });
+    renderMenu({
+      id: 'takeActionButton',
+      className: 'customClass',
+      'data-ebt-target': 'footer',
+      title: 'Open action menu',
+    });
 
     const trigger = screen.getByRole('button', { name: /take action/i });
     expect(trigger).toHaveAttribute('id', 'takeActionButton');
     expect(trigger).toHaveClass('customClass');
     expect(trigger).toHaveAttribute('data-ebt-target', 'footer');
     expect(trigger).toHaveAttribute('data-test-subj', 'takeAction');
+    expect(trigger).toHaveAttribute('title', 'Open action menu');
   });
 
   it('a consumer cannot override the trigger props the template owns', () => {
