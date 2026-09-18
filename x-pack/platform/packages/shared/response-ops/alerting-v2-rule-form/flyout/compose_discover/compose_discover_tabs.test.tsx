@@ -19,6 +19,11 @@ jest.mock('@kbn/code-editor', () => {
 
   return {
     ESQL_LANG_ID: 'esql',
+    monaco: {
+      KeyMod: { CtrlCmd: 2048 },
+      KeyCode: { KeyI: 39 },
+      editor: { EditorOption: { fontInfo: 0 } },
+    },
     CodeEditor: ({
       value,
       languageId,
@@ -35,6 +40,7 @@ jest.mock('@kbn/code-editor', () => {
           getModel: () => ({ id: value }),
           getContentHeight: () => 40,
           onDidContentSizeChange: () => ({ dispose: () => {} }),
+          addAction: () => ({ dispose: () => {} }),
         });
       }, [editorDidMount, value]);
 

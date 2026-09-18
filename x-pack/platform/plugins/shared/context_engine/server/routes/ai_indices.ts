@@ -6,6 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -16,6 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { DeleteWorkflowsApi } from '../types';
@@ -32,6 +34,9 @@ import {
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_TRACES,
+  MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_AI_INDEX_TRACE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
@@ -73,7 +78,9 @@ import {
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
+  AiIndexIdConflictError,
   InvalidConnectorSourceError,
+  InvalidAiIndexTraceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
@@ -87,6 +94,9 @@ import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import { validateTraces } from '../ai_indices/validate_traces';
+import { formatErrorMessage } from '../utils/format_es_error';
+import { resolveSpaceId } from '../utils/resolve_space_id';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
@@ -216,6 +226,38 @@ const kiIdParamsSchema = schema.object({
   }),
 });
 
+const aiIndexTraceSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('elastic_agent'),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      meta: { description: 'The Agent Builder agent id.' },
+    }),
+  }),
+  schema.object({
+    type: schema.literal('index'),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      validate: (value) => {
+        if (value.split(',').length > MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS) {
+          return `value must contain at most ${MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS} comma-separated expressions`;
+        }
+      },
+      meta: { description: 'An index or data stream name or pattern to read traces from.' },
+    }),
+  }),
+  schema.object({
+    type: schema.literal('esql'),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+      meta: { description: 'An ES|QL query to select traces.' },
+    }),
+  }),
+]);
+
 const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
@@ -247,7 +289,11 @@ const aiIndexPropertiesSchema = {
     }),
     {
       maxSize: MAX_AI_INDEX_AUTOMATIONS,
-      meta: { description: 'Automations associated with the AI index.' },
+      defaultValue: [],
+      meta: {
+        description:
+          'Automations associated with the AI index. Defaults to an empty array when omitted.',
+      },
     }
   ),
   sources: schema.arrayOf(
@@ -271,13 +317,30 @@ const aiIndexPropertiesSchema = {
     ]),
     {
       maxSize: MAX_AI_INDEX_SOURCES,
-      meta: { description: 'Additional sources that provide context for the AI index.' },
+      defaultValue: [],
+      meta: {
+        description:
+          'Additional sources that provide context for the AI index. Defaults to an empty array when omitted.',
+      },
     }
   ),
+  traces: schema.arrayOf(aiIndexTraceSchema, {
+    maxSize: MAX_AI_INDEX_TRACES,
+    defaultValue: [],
+    meta: {
+      description:
+        'Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.',
+    },
+  }),
 };
 
-const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
-const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
+const createAiIndexBodySchema = schema.object({
+  id: aiIndexIdSchema,
+  ...aiIndexPropertiesSchema,
+});
+const putAiIndexBodySchema = schema.object({
+  ...aiIndexPropertiesSchema,
+});
 
 const listKisQuerySchema = schema.object({
   size: schema.number({
@@ -302,8 +365,12 @@ const getKiQuerySchema = schema.object({
   }),
 });
 
-const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
-  if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
+const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
+  if (
+    error instanceof InvalidAiIndexDestError ||
+    error instanceof InvalidConnectorSourceError ||
+    error instanceof InvalidAiIndexTraceError
+  ) {
     return response.badRequest({ body: { message: error.message } });
   }
   if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
@@ -312,15 +379,18 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (
     error instanceof AiIndexManagedError ||
     error instanceof AiIndexConflictError ||
-    error instanceof AiIndexAlreadyExistsError
+    error instanceof AiIndexAlreadyExistsError ||
+    error instanceof AiIndexIdConflictError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
-  throw error;
+  logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
+  const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
+  return response.customError({
+    statusCode,
+    body: { message: formatErrorMessage(error) },
+  });
 };
-
-const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRequest): string =>
-  spaces?.spacesService.getSpaceId(request) ?? 'default';
 
 const deleteAiIndexQuerySchema = schema.object({
   delete_knowledge_indicators: schema.boolean({
@@ -345,23 +415,29 @@ export const registerAiIndexRoutes = ({
   getImprovementsService,
   getScheduleService,
   getActions,
+  getAgentBuilder,
   getWorkflowsManagementApi,
   getSpaces,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
+  getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+  const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     try {
-      const aiIndex = await getAiIndexService().get(aiIndexId);
+      const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       await getScheduleService().reconcile({
         aiIndexId,
+        spaceId,
         ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
         request,
       });
@@ -397,7 +473,8 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, elasticsearch } = await ctx.core;
+        const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
           await validateConnectorSources({
@@ -405,14 +482,21 @@ export const registerAiIndexRoutes = ({
             actions: await getActions(),
             request,
           });
-          await getAiIndexService().create(id, properties);
+          await validateTraces({
+            traces: properties.traces,
+            esClient: elasticsearch.client.asCurrentUser,
+            agents: (await getAgentBuilder())?.agents,
+            request,
+          });
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id, request);
+          await reconcileSchedule(id, spaceId, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -442,7 +526,8 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, elasticsearch } = await ctx.core;
+        const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
           await validateConnectorSources({
@@ -450,18 +535,25 @@ export const registerAiIndexRoutes = ({
             actions: await getActions(),
             request,
           });
-          const status = await getAiIndexService().put(aiIndexId, request.body);
+          await validateTraces({
+            traces: request.body.traces,
+            esClient: elasticsearch.client.asCurrentUser,
+            agents: (await getAgentBuilder())?.agents,
+            request,
+          });
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const status = await getAiIndexService().put(aiIndexId, spaceId, request.body);
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -491,15 +583,16 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId);
+          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId, spaceId);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -522,17 +615,18 @@ export const registerAiIndexRoutes = ({
         version: AI_INDEX_API_VERSION,
         validate: false,
       },
-      withContextEngineFeatureFlag(async (ctx, _request, response) => {
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         try {
+          const spaceId = resolveSpaceId(await getSpaces(), request);
           const body: ListAiIndexResponse = {
-            ai_indices: await getAiIndexService().list(),
+            ai_indices: await getAiIndexService().list(spaceId),
           };
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -561,11 +655,12 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
         const { size, type } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: ListKisResponse = await getKis(esClient, {
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
           });
@@ -575,7 +670,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -603,12 +698,13 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             index,
             kiId,
           });
@@ -618,7 +714,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -646,20 +742,22 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const feedbackAnalysis = await getAiIndexService().setFeedbackAnalysis(
             aiIndexId,
+            spaceId,
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
@@ -695,22 +793,23 @@ export const registerAiIndexRoutes = ({
         const core = await ctx.core;
         const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         const {
           delete_knowledge_indicators: deleteKnowledgeIndicators,
           delete_automations: deleteAutomations,
         } = request.query;
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           if (aiIndex.managed) {
             throw new AiIndexManagedError(aiIndexId);
           }
-          await getAiIndexService().delete(aiIndexId);
+          await getAiIndexService().delete(aiIndexId, spaceId);
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
           await getScheduleService()
-            .remove({ aiIndexId })
+            .remove({ aiIndexId, spaceId })
             .catch((error) => {
               logger.warn(
                 `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
@@ -729,6 +828,7 @@ export const registerAiIndexRoutes = ({
               dest: aiIndex.dest,
               logger,
               aiIndexId,
+              spaceId,
             });
             if (err) errors.push(err);
           }
@@ -747,7 +847,7 @@ export const registerAiIndexRoutes = ({
               const automationErrors = await deleteAutomationResources({
                 automations: aiIndex.automations,
                 workflowsManagementApi: await getWorkflowsManagementApi(),
-                spaceId: resolveSpaceId(await getSpaces(), request),
+                spaceId,
                 request,
                 logger,
                 aiIndexId,
@@ -772,7 +872,7 @@ export const registerAiIndexRoutes = ({
           // is a user-owned index and the caller may well have no privileges on it, and reporting a
           // failure for an index that is already gone would only send them to retry a delete that
           // now 404s. What is left behind is inert until an id is reused.
-          await getImprovementsService(core.elasticsearch.client.asCurrentUser)
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser, spaceId)
             .deleteByAiIndex(aiIndexId)
             .catch((error) => {
               logger.warn(
@@ -788,7 +888,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
