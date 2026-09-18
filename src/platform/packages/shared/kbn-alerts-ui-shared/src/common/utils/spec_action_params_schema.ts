@@ -11,7 +11,7 @@ import { startCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import { getMeta, setMeta } from '@kbn/connector-specs';
+import { getMeta, setMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import type { GenericValidationResult } from '../types';
 import type { SpecActionParams } from '../types/spec_action_params';
@@ -66,6 +66,10 @@ export async function validateSpecActionParams(
   actionParams: SpecActionParams
 ): Promise<GenericValidationResult<Record<string, string[]>>> {
   const { subAction, subActionParams } = actionParams;
+
+  if (subAction === TEST_CONNECTOR_SUB_ACTION) {
+    return { errors: {} };
+  }
 
   if (!subAction || spec.actions[subAction] === undefined) {
     return {

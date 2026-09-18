@@ -125,6 +125,14 @@ describe('spec_action_params_schema', () => {
       expect(unknown.errors.subAction).toEqual(expect.arrayContaining([expect.any(String)]));
     });
 
+    it('returns empty errors for the reserved test sub-action', async () => {
+      const result = await validateSpecActionParams(slackLikeSpec(), {
+        subAction: '_test',
+        subActionParams: {},
+      });
+      expect(result.errors).toEqual({});
+    });
+
     it('returns empty errors when params are valid', async () => {
       const result = await validateSpecActionParams(slackLikeSpec(), {
         subAction: 'sendMessage',
