@@ -10,6 +10,7 @@ import {
   ChatEventType,
   EventActorType,
   TimelineEventType,
+  ToolResultType,
   executionStepEventId,
   executionTerminatedEventId,
   isToolCallStep,
@@ -108,7 +109,11 @@ describe('sseToEvents', () => {
       } as ChatEvent,
       {
         type: ChatEventType.toolResult,
-        data: { tool_call_id: 't1', results: [{ type: 'other', data: { ok: true } }] },
+        data: {
+          tool_call_id: 't1',
+          tool_id: 'my_tool',
+          results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
+        },
       } as ChatEvent
     );
 
@@ -116,7 +121,7 @@ describe('sseToEvents', () => {
     expect(stepAt(state, stepId)).toMatchObject({
       tool_call_id: 't1',
       progression: [{ message: 'halfway', metadata: {} }],
-      results: [{ type: 'other', data: { ok: true } }],
+      results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
     });
   });
 
