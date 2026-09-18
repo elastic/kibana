@@ -40,6 +40,11 @@ export const getPlaywrightProject = (
   }
 };
 
+export const getUiModeLaunchMessage = (pwProject: ScoutPlaywrightProjects): string =>
+  pwProject === 'local'
+    ? 'scout: Launching Playwright UI mode. Test servers will be started first and kept running until the UI is closed.'
+    : `scout: Launching Playwright UI mode against the pre-provisioned '${pwProject}' servers.`;
+
 const getScoutRunCommandForReporting = (argv: string[]): string => {
   const [nodeBin, scriptPath, ...rest] = argv;
   const nodeDisplay =
@@ -197,9 +202,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   }
 
   if (options.ui) {
-    log.info(
-      `scout: Launching Playwright UI mode. Test servers will be started first and kept running until the UI is closed.`
-    );
+    log.info(getUiModeLaunchMessage(pwProject));
   }
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');

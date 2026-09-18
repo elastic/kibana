@@ -47,7 +47,7 @@ export const TEST_FLAG_OPTIONS: FlagOptions = {
     --config            Playwright config file path (required if --testFiles not provided)
     --testFiles         Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed            Run Playwright with browser head
-    --ui                Run Playwright in interactive UI mode. Servers are started first and kept running until the UI is closed
+    --ui                Run Playwright in interactive UI mode. For local test targets, Scout starts the servers first and keeps them running until the UI is closed
     --uiHost            Host to serve the Playwright UI on (requires --ui, e.g. --uiHost 0.0.0.0 for remote access)
     --uiPort            Port to serve the Playwright UI on (requires --ui)
     --repeatEach        Run each test N times for local flakiness validation (e.g. --repeatEach 5)
