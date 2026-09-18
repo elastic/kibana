@@ -135,6 +135,25 @@ describe('useBulkActionItems', () => {
       );
     });
 
+    // Without the scope a "select all" would silently run on the loaded rows only.
+    it('forwards the select-all flag and selection scope so a run is not capped to the page', () => {
+      const selectionScope = {
+        dataViewId: 'security-solution-default',
+        indexNames: ['logs-*'],
+        filterQuery: '{"bool":{}}',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        runtimeMappings: {},
+        queryId: 'test-table-run-workflow-selection',
+      };
+
+      renderUseBulkActionItems({ isAllSelected: true, selectionScope });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({ isAllSelected: true, selectionScope })
+      );
+    });
+
     it('should include workflow menu items when useRunDocumentWorkflowPanel returns items', () => {
       const mockMenuItem = {
         key: 'run-document-workflow-action',

@@ -18,6 +18,18 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
+// Spied rather than stubbed so the menu-item assertions keep exercising the real hook.
+jest.mock('./use_bulk_action_items', () => {
+  const actual = jest.requireActual('./use_bulk_action_items');
+  return {
+    ...actual,
+    useBulkActionItems: jest.fn((args) => actual.useBulkActionItems(args)),
+  };
+});
+
+const useBulkActionItemsMock = jest.requireMock('./use_bulk_action_items')
+  .useBulkActionItems as jest.Mock;
+
 const mockSelectedEventIds: Record<string, TimelineNonEcsData[]> = {
   nvowrrn: [{ field: 'nvowrrn' }],
 };
@@ -67,5 +79,38 @@ describe('AlertBulkActionsComponent', () => {
     it('"Mark as closed" should be visible', () => {
       expect(screen.getByTestId('alert-close-context-menu-item')).toBeInTheDocument();
     });
+  });
+
+  // The store only ever holds the loaded rows, so bulk actions that act on the whole selection
+  // need to know when the user asked for all of them.
+  it('reports a "select all" to the bulk actions so they are not capped to the loaded rows', async () => {
+    renderAlertBulkActions();
+    expect(useBulkActionItemsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isAllSelected: false })
+    );
+
+    await userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+
+    expect(useBulkActionItemsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isAllSelected: true })
+    );
+  });
+
+  it('passes the caller selection scope through to the bulk actions', () => {
+    const selectionScope = {
+      dataViewId: 'security-solution-default',
+      indexNames: ['logs-*'],
+      filterQuery: '{"bool":{}}',
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      runtimeMappings: {},
+      queryId: 'test-table-run-workflow-selection',
+    };
+
+    renderAlertBulkActions({ selectionScope });
+
+    expect(useBulkActionItemsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ selectionScope })
+    );
   });
 });
