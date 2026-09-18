@@ -3903,8 +3903,8 @@ importers:
         specifier: 9.13.1
         version: 9.13.1(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 1.4.0
-        version: 1.4.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.0
+        version: 2.0.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -12178,13 +12178,13 @@ packages:
   '@launchdarkly/node-server-sdk@9.13.1':
     resolution: {integrity: sha512-ZVp0PVxns8K8bH9Wd7vtp3GrvSgZK/F88wixB3yl92/4ytYCjyFIQWh3rtbSByNIXC1Ct92JMvDzyTcZdzUnOQ==}
 
-  '@launchdarkly/openfeature-js-server-common@1.1.0':
-    resolution: {integrity: sha512-y9g1ik03wMOimJ3hKJ/YR+omsxb5XP7iqgMDwTgoNiF/i3lzJKPsISBxVKyNSh2ZmHGstDaFroDisYWDjD4w1A==}
+  '@launchdarkly/openfeature-js-server-common@2.0.0':
+    resolution: {integrity: sha512-WfNXSeMcPrsW1IY5lqRLfYvuVls2+qPTfjijsjLLzBEJ2gF0ts4QmecSlzublR3q4hKXSyzVZ57NrN1Jc+KQXg==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@1.4.0':
-    resolution: {integrity: sha512-eMNLpHIqO85H02ZQZC6XP4zjcxRDWEO49x22RgmQsmb/QesCg3/ZB+18mA1f1q+N5Y0uL1fEe30NINo4Mi1PTw==}
+  '@launchdarkly/openfeature-node-server@2.0.0':
+    resolution: {integrity: sha512-RpIC/3PAv8i6ey6O7Jv+JIpbm+zE6HcYmMeFcDkUaDh1QT1eHfcaYG2Ff1f9xcr7CijDM1naca+bepazsgQ2pw==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -29473,15 +29473,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@1.1.0(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.0.0(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.25.2
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@1.4.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.0(@launchdarkly/node-server-sdk@9.13.1(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
       '@launchdarkly/node-server-sdk': 9.13.1(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 1.1.0(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/openfeature-js-server-common': 2.0.0(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@leichtgewicht/ip-codec@2.0.5': {}
