@@ -83,35 +83,32 @@ export function ESQLMenu({
       })}
       buttonSize="s"
     >
-      {
-        !hideVisor && (
-          <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+      {!hideVisor && (
+        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
+            aria-label={searchPlaceholder}
+            onClick={onToggleVisor}
+            isDisabled={!onToggleVisor}
+            data-test-subj="esql-menu-button"
+          />
+        </EuiToolTip>
+      )}
+      {!hideHistory && (
+        <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
+          {/* eslint-disable-next-line @elastic/eui/button-group-no-invalid-children -- StarDustWrapper only adds a non-disruptive animation wrapper */}
+          <StardustWrapper active={showStardust}>
             <EuiButtonIcon
-              iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
-              aria-label={searchPlaceholder}
-              onClick={onToggleVisor}
-              isDisabled={!onToggleVisor}
-              data-test-subj="esql-menu-button"
+              iconType={isStarred ? 'starFill' : 'star'}
+              aria-label={starredQueryLabel}
+              className={!isStarred ? 'cm-favorite-button--empty' : ''}
+              onClick={onToggleStarredQuery}
+              isDisabled={!editorActions?.canToggleStarredQuery}
+              data-test-subj="ESQLEditor-toggle-starred-query-icon"
             />
-          </EuiToolTip>
-        )
-      }
-      {
-        !hideHistory && (
-          <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
-            {/* eslint-disable-next-line @elastic/eui/button-group-no-invalid-children -- StarDustWrapper only adds a non-disruptive animation wrapper */}
-            <StardustWrapper active={showStardust}>
-              <EuiButtonIcon
-                iconType={isStarred ? 'starFill' : 'star'}
-                aria-label={starredQueryLabel}
-                className={!isStarred ? 'cm-favorite-button--empty' : ''}
-                onClick={onToggleStarredQuery}
-                isDisabled={!editorActions?.canToggleStarredQuery}
-                data-test-subj="ESQLEditor-toggle-starred-query-icon"
-              />
-            </StardustWrapper>
-          </EuiToolTip>
-        )}
+          </StardustWrapper>
+        </EuiToolTip>
+      )}
       {!hideHistory && (
         <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -147,6 +144,5 @@ export function ESQLMenu({
         />
       </Suspense>
     </EuiButtonGroup>
-
   );
 }
