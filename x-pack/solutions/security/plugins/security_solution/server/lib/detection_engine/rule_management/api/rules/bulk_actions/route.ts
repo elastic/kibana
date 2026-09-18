@@ -336,6 +336,14 @@ export const performBulkActionRoute = (
               errors.push(...bulkDeleteResult.errors);
               deleted = bulkDeleteResult.rules;
               skipped = [...skipped, ...bulkDeleteResult.skipped];
+
+              if (skipped.length > 0) {
+                logger.debug(
+                  `Bulk delete: ${skipped.length} rules skipped (RULE_NOT_FOUND): ${skipped
+                    .map((s) => s.id)
+                    .join(', ')}`
+                );
+              }
               break;
             }
             case BulkActionTypeEnum.duplicate: {

@@ -22,7 +22,7 @@ interface HandleScheduleBackfillResultsOutcome {
   errors: Array<PromisePoolError<RuleAlertType, Error> | BulkOperationError>;
 }
 
-const RULE_NOT_FOUND_MESSAGE = 'Rule not found';
+export const RULE_NOT_FOUND_MESSAGE = 'Rule not found';
 
 /**
  * Mutates the errors array in place: removes fetch-time "Rule not found" errors

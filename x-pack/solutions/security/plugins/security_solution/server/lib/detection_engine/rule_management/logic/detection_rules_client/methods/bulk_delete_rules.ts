@@ -51,7 +51,11 @@ export const bulkDeleteRules = async ({
       // When every rule in the chunk is already gone, alerting throws
       // Boom.badRequest('No rules found for bulk delete'). Treat the
       // entire chunk as skipped.
-      if (error.isBoom && error.output?.statusCode === 400) {
+      if (
+        error.isBoom &&
+        error.output?.statusCode === 400 &&
+        error.message?.includes('No rules found')
+      ) {
         for (const id of idsChunk) {
           allSkipped.push({
             id,

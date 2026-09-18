@@ -289,6 +289,38 @@ describe('Perform bulk action route', () => {
       });
     });
 
+    it('returns 500 with mixed success, skipped, and error in one request', async () => {
+      const failedRuleId = 'failed-rule-id';
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [mockRule],
+        errors: [
+          {
+            message: 'Internal error',
+            status: 500,
+            rule: { id: failedRuleId, name: 'Failed Rule' },
+          },
+        ],
+        skipped: [{ id: 'skipped-rule-id', name: 'Skipped Rule', skip_reason: 'RULE_NOT_FOUND' }],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 1,
+        succeeded: 1,
+        total: 3,
+      });
+      expect(response.body.attributes.results.deleted).toHaveLength(1);
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: 'skipped-rule-id', name: 'Skipped Rule', skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
     it('returns 500 when deletion fails with a non-404 error', async () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
         rules: [],

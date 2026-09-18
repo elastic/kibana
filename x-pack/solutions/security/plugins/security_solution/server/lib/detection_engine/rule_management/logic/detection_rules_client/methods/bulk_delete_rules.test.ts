@@ -128,6 +128,45 @@ describe('bulkDeleteRules', () => {
     ]);
   });
 
+  it('accumulates results across multiple chunks', async () => {
+    const chunkSize = 1000;
+    const totalRules = chunkSize + 1;
+    const allRules = Array.from({ length: totalRules }, (_, i) =>
+      getRuleMock(getQueryRuleParams(), { id: `rule-${i}`, name: `Rule ${i}` })
+    );
+
+    // Chunk 1: all succeed
+    rulesClient.bulkDeleteRules.mockResolvedValueOnce({
+      rules: allRules.slice(0, chunkSize),
+      errors: [],
+      total: chunkSize,
+      taskIdsFailedToBeDeleted: [],
+    });
+
+    // Chunk 2: the single rule is a 404
+    rulesClient.bulkDeleteRules.mockResolvedValueOnce({
+      rules: [],
+      errors: [
+        {
+          message: 'Rule not found',
+          status: 404,
+          rule: { id: `rule-${chunkSize}`, name: `Rule ${chunkSize}` },
+        },
+      ],
+      total: 1,
+      taskIdsFailedToBeDeleted: [],
+    });
+
+    const result = await bulkDeleteRules({ rulesClient, rules: allRules });
+
+    expect(result.rules).toHaveLength(chunkSize);
+    expect(result.errors).toEqual([]);
+    expect(result.skipped).toEqual([
+      { id: `rule-${chunkSize}`, name: `Rule ${chunkSize}`, skip_reason: 'RULE_NOT_FOUND' },
+    ]);
+    expect(rulesClient.bulkDeleteRules).toHaveBeenCalledTimes(2);
+  });
+
   it('rethrows non-Boom errors from rulesClient.bulkDeleteRules', async () => {
     rulesClient.bulkDeleteRules.mockRejectedValue(new Error('unexpected failure'));
 
