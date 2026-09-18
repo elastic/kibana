@@ -555,7 +555,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'alerting:v2:experimentalFeatures': {
     type: 'boolean',
-    _meta: { description: 'Whether experimental Alerting v2 features are enabled.' },
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
   },
   'observability:logSources': {
     type: 'array',
