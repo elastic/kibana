@@ -20,6 +20,7 @@ import { SyntheticsRefreshContext } from '../../../contexts';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { SearchField } from '../common/search_field';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
+import { SelectedFilterPills } from '../common/monitor_filters/selected_filter_pills';
 import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import { useAllMonitorErrors } from '../hooks/use_all_errors';
 import { useErrorGroups } from '../hooks/use_error_groups';
@@ -103,6 +104,10 @@ export const ErrorsTab = () => {
             <FilterGroup handleFilterChange={handleFilterChange} excludeFields={['schedules']} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <SelectedFilterPills
+          handleFilterChange={handleFilterChange}
+          excludeFields={['schedules']}
+        />
         <EuiSpacer size="m" />
         {apiError && (
           <>
