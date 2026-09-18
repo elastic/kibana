@@ -188,11 +188,14 @@ function makeService(params?: {
       : undefined
   );
 
+  const savedObjects = {
+    createInternalRepository: jest.fn(() => soClient),
+    getScopedClient: jest.fn(),
+  };
+
   const server = {
     core: {
-      savedObjects: {
-        getScopedClient: jest.fn(() => soClient),
-      },
+      savedObjects,
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
       },
@@ -228,6 +231,7 @@ function makeService(params?: {
   return {
     service,
     soClient,
+    savedObjects,
     v2RulesClient,
     getRuleBackedQueryLinks,
     globalUiSettingsClient,
@@ -264,6 +268,15 @@ describe('SignificantEventsMaintenanceService', () => {
           scheduledDiscoveryEnabled: false,
         },
       });
+    });
+
+    it('reads state through the internal repository, not a scoped client', async () => {
+      const { service, savedObjects } = makeService();
+      await service.getStatus({ request: REQUEST });
+      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+      ]);
+      expect(savedObjects.getScopedClient).not.toHaveBeenCalled();
     });
   });
 
