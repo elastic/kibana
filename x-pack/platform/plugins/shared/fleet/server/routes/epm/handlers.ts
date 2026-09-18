@@ -709,7 +709,13 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     !wouldBeRateLimited &&
     !appContextService.getConfig()?.internal?.skipUploadPackageValidation
   ) {
-    await checkUploadPackageAssetPrivileges(request, archiveBuffer, contentType, spaceId);
+    await checkUploadPackageAssetPrivileges(
+      request,
+      archiveBuffer,
+      contentType,
+      spaceId,
+      savedObjectsClient
+    );
   }
 
   const res = await installPackage({

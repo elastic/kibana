@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { KibanaAssetType } from '../../../common/types/models/epm';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../../services';
 import { createArchiveIterator } from '../../services/epm/archive/archive_iterator';
+import { getInstallationObject } from '../../services/epm/packages/get';
 
 import {
   checkUploadPackageAssetPrivileges,
@@ -29,10 +30,15 @@ jest.mock('../../services/epm/archive/archive_iterator', () => ({
   createArchiveIterator: jest.fn(),
 }));
 
+jest.mock('../../services/epm/packages/get', () => ({
+  getInstallationObject: jest.fn(),
+}));
+
 const mockRequest = {} as KibanaRequest;
 const mockSpaceId = 'default';
 const mockArchiveBuffer = Buffer.from('fake-archive');
 const mockContentType = 'application/zip';
+const mockSavedObjectsClient = {} as SavedObjectsClientContract;
 
 function makeAssetBuffer(attributes: Record<string, unknown>): Buffer {
   return Buffer.from(JSON.stringify({ type: 'security-rule', attributes }));
@@ -176,6 +182,7 @@ describe('buildRequiredActions', () => {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
       blockedTypes: [],
       hasMlSecurityRules: false,
+      pkgName: undefined,
     };
 
     expect(buildRequiredActions(signals, security as any)).toContain('api:rules-all');
@@ -186,6 +193,7 @@ describe('buildRequiredActions', () => {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
       blockedTypes: [],
       hasMlSecurityRules: true,
+      pkgName: undefined,
     };
 
     const actions = buildRequiredActions(signals, security as any);
@@ -198,6 +206,7 @@ describe('buildRequiredActions', () => {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityRule]),
       blockedTypes: [],
       hasMlSecurityRules: false,
+      pkgName: undefined,
     };
 
     const actions = buildRequiredActions(signals, security as any);
@@ -210,6 +219,7 @@ describe('buildRequiredActions', () => {
       gatedTypesFound: new Set<KibanaAssetType>([KibanaAssetType.securityAIPrompt]),
       blockedTypes: [],
       hasMlSecurityRules: false,
+      pkgName: undefined,
     };
 
     expect(buildRequiredActions(signals, security as any)).toContain('api:elasticAssistant');
@@ -223,6 +233,7 @@ describe('buildRequiredActions', () => {
       ]),
       blockedTypes: [],
       hasMlSecurityRules: true,
+      pkgName: undefined,
     };
 
     const actions = buildRequiredActions(signals, security as any);
@@ -235,6 +246,7 @@ describe('buildRequiredActions', () => {
 describe('checkUploadPackageAssetPrivileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getInstallationObject as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('allows upload when archive contains no gated asset types', async () => {
@@ -253,7 +265,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockRequest,
         mockArchiveBuffer,
         mockContentType,
-        mockSpaceId
+        mockSpaceId,
+        mockSavedObjectsClient
       )
     ).resolves.toBeUndefined();
 
@@ -335,7 +348,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockRequest,
         mockArchiveBuffer,
         mockContentType,
-        mockSpaceId
+        mockSpaceId,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -353,7 +367,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockRequest,
         mockArchiveBuffer,
         mockContentType,
-        mockSpaceId
+        mockSpaceId,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -424,8 +439,40 @@ describe('checkUploadPackageAssetPrivileges', () => {
         mockRequest,
         mockArchiveBuffer,
         mockContentType,
-        mockSpaceId
+        mockSpaceId,
+        mockSavedObjectsClient
       )
     ).rejects.toThrow(FleetUnauthorizedError);
+  });
+
+  it('checks privileges across all additional installed spaces when package is already installed multi-space', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (getInstallationObject as jest.Mock).mockResolvedValue({
+      attributes: {
+        additional_spaces_installed_kibana: {
+          'space-a': [],
+          'space-b': [],
+        },
+      },
+    });
+
+    await checkUploadPackageAssetPrivileges(
+      mockRequest,
+      mockArchiveBuffer,
+      mockContentType,
+      mockSpaceId,
+      mockSavedObjectsClient
+    );
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']),
+      expect.objectContaining({ kibana: expect.arrayContaining(['api:rules-all']) })
+    );
   });
 });

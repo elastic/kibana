@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
@@ -14,6 +14,7 @@ import { FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../../services';
 import { getPathParts } from '../../services/epm/archive';
 import { createArchiveIterator } from '../../services/epm/archive/archive_iterator';
+import { getInstallationObject } from '../../services/epm/packages/get';
 
 const GATED_ASSET_TYPES = new Set<KibanaAssetType>([
   KibanaAssetType.securityRule,
@@ -29,6 +30,7 @@ export interface ArchiveSignals {
   gatedTypesFound: Set<KibanaAssetType>;
   blockedTypes: KibanaAssetType[];
   hasMlSecurityRules: boolean;
+  pkgName: string | undefined;
 }
 
 export async function collectArchiveSignals(
@@ -39,10 +41,17 @@ export async function collectArchiveSignals(
   const gatedTypesFound = new Set<KibanaAssetType>();
   const blockedTypes: KibanaAssetType[] = [];
   let hasMlSecurityRules = false;
+  let pkgName: string | undefined;
 
   await iterator.traverseEntries(
     async (entry) => {
       const parts = getPathParts(entry.path);
+
+      if (!pkgName && parts.pkgkey) {
+        const match = parts.pkgkey.match(/^(.+)-(\d+\.\d+\.\d+.*)$/);
+        if (match) pkgName = match[1];
+      }
+
       if (parts.service !== 'kibana') return;
       const assetType = parts.type as KibanaAssetType;
       if (!GATED_ASSET_TYPES.has(assetType)) return;
@@ -71,7 +80,7 @@ export async function collectArchiveSignals(
     }
   );
 
-  return { gatedTypesFound, blockedTypes, hasMlSecurityRules };
+  return { gatedTypesFound, blockedTypes, hasMlSecurityRules, pkgName };
 }
 
 export function buildRequiredActions(
@@ -98,7 +107,8 @@ export async function checkUploadPackageAssetPrivileges(
   request: KibanaRequest,
   archiveBuffer: Buffer,
   contentType: string,
-  spaceId: string
+  spaceId: string,
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> {
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
@@ -126,9 +136,21 @@ export async function checkUploadPackageAssetPrivileges(
 
   const actions = buildRequiredActions(signals, security);
 
+  // Upgrades propagate Kibana assets into every Space the package is already installed in.
+  // Check the caller has the required privileges in all destination Spaces, not just the
+  // current one, to prevent privilege escalation into Spaces the caller cannot access.
+  const additionalSpaces = signals.pkgName
+    ? Object.keys(
+        (await getInstallationObject({ savedObjectsClient, pkgName: signals.pkgName }))?.attributes
+          ?.additional_spaces_installed_kibana ?? {}
+      )
+    : [];
+
+  const destinationSpaces = [...new Set([spaceId, ...additionalSpaces])];
+
   const checkResult = await security.authz
     .checkPrivilegesWithRequest(request)
-    .atSpaces([spaceId], { kibana: actions });
+    .atSpaces(destinationSpaces, { kibana: actions });
 
   if (!checkResult.hasAllRequested) {
     const missingActions = checkResult.privileges.kibana
