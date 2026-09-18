@@ -115,6 +115,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
+  /**
+   * Retired no-op. The Entity Analytics homepage is always on. Kept so existing
+   * `xpack.securitySolution.enableExperimental` entries, including
+   * `disable:entityAnalyticsNewHomePageEnabled`, remain valid during upgrade.
+   */
+  entityAnalyticsNewHomePageEnabled: true,
+
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
