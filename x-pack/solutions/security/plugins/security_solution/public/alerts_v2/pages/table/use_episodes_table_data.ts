@@ -68,8 +68,15 @@ const buildSortClause = (sort: SortOrder[]): string[] => {
 // plus the ECS columns pulled out of `data`. The whole row is handed to the document
 // flyout as-is, so we don't need the rule-event doc id/index.
 const buildEpisodesTableQuery = (baseEsql: string, sort: SortOrder[]): string => {
+  // v2 episodes keep source ECS inside the `data` flattened blob; v1 detection alerts have no
+  // `data` and store ECS as real top-level fields. COALESCE reads the top-level value first (v1),
+  // falling back to extracting it from `data` (v2). The uniform `::keyword` cast keeps the two
+  // COALESCE arms type-compatible (e.g. `source.ip` is `ip`-typed on the v1 index, but
+  // JSON_EXTRACT returns a keyword). Assumes the queried source exposes these columns, which the
+  // unified `$.security-alerts` view does (via its `.alerts-security.alerts-*` arm).
   const evalExpr = ECS_DATA_COLUMNS.map(
-    (field) => `\`${field}\` = JSON_EXTRACT(data::keyword, "$['${field}']")`
+    (field) =>
+      `\`${field}\` = COALESCE(\`${field}\`::keyword, JSON_EXTRACT(data::keyword, "$['${field}']"))`
   ).join(', ');
   return composeEsqlQuery(
     baseEsql,
