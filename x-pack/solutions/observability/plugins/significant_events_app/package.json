@@ -1,0 +1,10 @@
+{
+  "name": "@kbn/significant-events-app-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "devDependencies": {
+    "@kbn/scout-oblt": "workspace:*"
+  },
+  "kbnGenerated": true
+}

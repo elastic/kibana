@@ -2599,7 +2599,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/nightshift_investigations
+        version: link:x-pack/solutions/observability/plugins/nightshift_investigations
       '@kbn/nightshift-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift
@@ -3436,10 +3436,10 @@ importers:
         version: link:x-pack/solutions/security/packages/siem-readiness
       '@kbn/significant-events-app-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/significant_events_app
+        version: link:x-pack/solutions/observability/plugins/significant_events_app
       '@kbn/significant-events-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/significant_events
+        version: link:x-pack/solutions/observability/plugins/significant_events
       '@kbn/significant-events-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-significant-events-schema
@@ -5294,7 +5294,7 @@ importers:
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness
       '@kbn/evals-suite-significant-events':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events
+        version: link:x-pack/solutions/observability/packages/kbn-evals-suite-significant-events
       '@kbn/evals-suite-smoke-tests':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests
@@ -8792,7 +8792,7 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations: {}
 
-  x-pack/platform/packages/shared/kbn-evals-suite-significant-events: {}
+  x-pack/solutions/observability/packages/kbn-evals-suite-significant-events: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 
@@ -9156,7 +9156,7 @@ importers:
 
   x-pack/platform/plugins/shared/ml/evals: {}
 
-  x-pack/platform/plugins/shared/nightshift_investigations: {}
+  x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 
@@ -9186,9 +9186,9 @@ importers:
 
   x-pack/platform/plugins/shared/serverless: {}
 
-  x-pack/platform/plugins/shared/significant_events: {}
+  x-pack/solutions/observability/plugins/significant_events: {}
 
-  x-pack/platform/plugins/shared/significant_events_app: {}
+  x-pack/solutions/observability/plugins/significant_events_app: {}
 
   x-pack/platform/plugins/shared/slo_shared: {}
 
