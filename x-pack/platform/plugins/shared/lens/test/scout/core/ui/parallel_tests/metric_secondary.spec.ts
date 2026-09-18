@@ -159,6 +159,10 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
       await lens.waitForVisualization('mtrVis');
       await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toContain('Average of bytes');
 
+      await page.testSubj.click('lnsMetric_secondaryNameVisibility_tooltip');
+      await lens.waitForVisualization('mtrVis');
+      await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toBeUndefined();
+
       await page.testSubj.click('lnsMetric_secondaryNameVisibility_hidden');
       await lens.waitForVisualization('mtrVis');
       await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toBeUndefined();
