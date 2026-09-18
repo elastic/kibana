@@ -56,6 +56,10 @@ module.exports = {
           path: 'src/core/packages/chrome/',
           reason: 'Core chrome mounts layout and owns the public chrome facades.',
         },
+        {
+          path: 'x-pack/platform/plugins/shared/agent_builder/',
+          reason: 'Agent-first chrome flyouts pin to the agent workspace column.',
+        },
       ],
     },
 

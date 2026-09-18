@@ -7,7 +7,9 @@
 
 import { useLayoutEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
 import { AGENT_MAIN_CONTAINER_ID, layoutVar } from '@kbn/ui-chrome-layout';
+import { useIsAgentWorkspaceMount } from './use_navigation';
 
 /** Pin flyouts to the agent column so they do not cover the application workspace. */
 export const agentPanelFlyoutStyles = css`
@@ -84,4 +86,46 @@ export const useAgentPanelWidth = (enabled: boolean): number => {
   }, [enabled]);
 
   return width;
+};
+
+/** Push agent-column flyouts when the column is at least this wide. Matches Chat info. */
+export const AGENT_COLUMN_PUSH_MIN_WIDTH = 1000;
+
+export interface AgentColumnFlyoutProps {
+  isAgentWorkspaceMount: boolean;
+  isOverlay: boolean;
+  container?: string;
+  session?: 'never';
+  hasAnimation: boolean;
+  type?: 'push' | 'overlay';
+  resizable: boolean;
+  css?: SerializedStyles;
+}
+
+/**
+ * Agent-column flyout props. Overlay below 1000px (same as Chat info), push when wider.
+ * Canvas uses 1400px because it needs room for an editor; inspection flyouts share Chat info's threshold.
+ */
+export const useAgentColumnFlyoutProps = (enabled = true): AgentColumnFlyoutProps => {
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const inAgentColumn = enabled && isAgentWorkspaceMount;
+  const agentPanelWidth = useAgentPanelWidth(inAgentColumn);
+  const isPush = inAgentColumn && agentPanelWidth >= AGENT_COLUMN_PUSH_MIN_WIDTH;
+  const isOverlay = inAgentColumn && !isPush;
+  useClearAgentPanelPushOffsetOnUnmount(inAgentColumn);
+
+  if (!inAgentColumn) {
+    return { isAgentWorkspaceMount, isOverlay: false, hasAnimation: true, resizable: false };
+  }
+
+  return {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container: `#${AGENT_MAIN_CONTAINER_ID}`,
+    session: 'never',
+    hasAnimation: false,
+    type: isPush ? 'push' : 'overlay',
+    resizable: isPush,
+    css: agentPanelFlyoutStyles,
+  };
 };

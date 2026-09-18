@@ -30,6 +30,7 @@ import { ToolResult } from '../results/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
 import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
 import { useSteppedFlyoutStyles } from './use_stepped_flyout_styles';
+import { useAgentColumnFlyoutProps } from '../../../../../hooks/use_agent_panel_width';
 
 const backLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.back', {
   defaultMessage: 'Back',
@@ -59,6 +60,16 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const titleId = useGeneratedHtmlId({ prefix: 'toolResponseFlyout' });
   const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
+  const {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container,
+    session,
+    hasAnimation,
+    type,
+    resizable,
+    css: agentColumnCss,
+  } = useAgentColumnFlyoutProps();
 
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
@@ -130,8 +141,14 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       onClose={onClose}
       aria-labelledby={titleId}
       size="m"
-      ownFocus={!onBack}
-      outsideClickCloses={onBack ? true : undefined}
+      ownFocus={!isAgentWorkspaceMount && !onBack}
+      outsideClickCloses={isAgentWorkspaceMount ? isOverlay : Boolean(onBack)}
+      container={container}
+      session={session}
+      hasAnimation={hasAnimation}
+      type={type}
+      resizable={resizable}
+      css={agentColumnCss}
     >
       {onBack && (
         <EuiFlyoutHeader hasBorder css={backHeaderCss}>

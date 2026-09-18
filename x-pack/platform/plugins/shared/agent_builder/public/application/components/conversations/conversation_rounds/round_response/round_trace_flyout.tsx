@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiFlyoutResizable, EuiTitle } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useAgentColumnFlyoutProps } from '../../../../hooks/use_agent_panel_width';
 
 const title = i18n.translate('xpack.agentBuilder.round.traceFlyout.title', {
   defaultMessage: 'Trace',
@@ -27,25 +28,44 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onC
   const { data } = services.plugins;
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
   const traceSpansResult = useTraceSpans(traceId, { fetchTrace });
+  const {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container,
+    session,
+    hasAnimation,
+    type,
+    resizable,
+    css: agentColumnCss,
+  } = useAgentColumnFlyoutProps();
 
   return (
-    <EuiFlyoutResizable
+    <EuiFlyout
       onClose={onClose}
       aria-labelledby="agentBuilderRoundTraceFlyoutTitle"
       size={620}
       minWidth={400}
       maxWidth={1200}
-      ownFocus={false}
-      css={css`
-        z-index: ${euiThemeVars.euiZFlyout + 4};
-        .euiFlyoutBody__overflowContent {
-          height: 100%;
-          padding: 0;
-        }
-        .euiFlyoutBody__overflow {
-          overflow: hidden;
-        }
-      `}
+      ownFocus={!isAgentWorkspaceMount}
+      outsideClickCloses={isAgentWorkspaceMount ? isOverlay : undefined}
+      container={container}
+      session={session}
+      hasAnimation={hasAnimation}
+      type={type}
+      resizable={!isAgentWorkspaceMount || resizable}
+      css={[
+        css`
+          z-index: ${euiThemeVars.euiZFlyout + 4};
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+            padding: 0;
+          }
+          .euiFlyoutBody__overflow {
+            overflow: hidden;
+          }
+        `,
+        agentColumnCss,
+      ]}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -65,6 +85,6 @@ export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onC
           />
         </div>
       </EuiFlyoutBody>
-    </EuiFlyoutResizable>
+    </EuiFlyout>
   );
 };

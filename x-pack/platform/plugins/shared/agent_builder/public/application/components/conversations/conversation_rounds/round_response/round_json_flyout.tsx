@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import { useAgentColumnFlyoutProps } from '../../../../hooks/use_agent_panel_width';
 
 const title = i18n.translate('xpack.agentBuilder.round.jsonFlyout.title', {
   defaultMessage: 'Raw response',
@@ -23,16 +24,35 @@ interface RoundJsonFlyoutProps {
 
 export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => {
   const formattedJson = useMemo(() => JSON.stringify(rawRound, null, 2), [rawRound]);
+  const {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container,
+    session,
+    hasAnimation,
+    type,
+    resizable,
+    css: agentColumnCss,
+  } = useAgentColumnFlyoutProps();
 
   return (
     <EuiFlyout
       onClose={onClose}
       aria-labelledby="agentBuilderRoundJsonFlyoutTitle"
       size="m"
-      ownFocus={false}
-      css={css`
-        z-index: ${euiThemeVars.euiZFlyout + 4};
-      `}
+      ownFocus={!isAgentWorkspaceMount}
+      outsideClickCloses={isAgentWorkspaceMount ? isOverlay : undefined}
+      container={container}
+      session={session}
+      hasAnimation={hasAnimation}
+      type={type}
+      resizable={resizable}
+      css={[
+        css`
+          z-index: ${euiThemeVars.euiZFlyout + 4};
+        `,
+        agentColumnCss,
+      ]}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

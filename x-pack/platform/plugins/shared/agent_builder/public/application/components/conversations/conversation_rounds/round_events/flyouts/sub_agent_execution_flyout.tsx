@@ -30,6 +30,7 @@ import { FlyoutStackContext } from './flyout_stack_context';
 import { ToolResponseFlyout } from './tool_response_flyout';
 import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
 import { useSteppedFlyoutStyles } from './use_stepped_flyout_styles';
+import { useAgentColumnFlyoutProps } from '../../../../../hooks/use_agent_panel_width';
 
 const backLabel = i18n.translate('xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.back', {
   defaultMessage: 'Back',
@@ -70,6 +71,16 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   const { euiTheme } = useEuiTheme();
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const titleId = useGeneratedHtmlId({ prefix: 'subAgentExecutionFlyout' });
+  const {
+    isAgentWorkspaceMount,
+    isOverlay,
+    container,
+    session,
+    hasAnimation,
+    type,
+    resizable,
+    css: agentColumnCss,
+  } = useAgentColumnFlyoutProps();
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
   const hasError = Boolean(error);
@@ -134,8 +145,14 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         onClose={onClose}
         aria-labelledby={titleId}
         size="m"
-        ownFocus={!onBack}
-        outsideClickCloses={onBack ? true : undefined}
+        ownFocus={!isAgentWorkspaceMount && !onBack}
+        outsideClickCloses={isAgentWorkspaceMount ? isOverlay : Boolean(onBack)}
+        container={container}
+        session={session}
+        hasAnimation={hasAnimation}
+        type={type}
+        resizable={resizable}
+        css={agentColumnCss}
       >
         {onBack && (
           <EuiFlyoutHeader hasBorder css={backHeaderCss}>
