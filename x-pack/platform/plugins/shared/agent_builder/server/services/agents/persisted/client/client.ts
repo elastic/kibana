@@ -696,11 +696,6 @@ class AgentClientImpl implements AgentClient {
   }
 }
 
-const isRedundantOwnerEntry = (entry: AgentAccessControlEntry, owner: UserIdAndName): boolean =>
-  entry.id !== undefined
-    ? owner.id !== undefined && entry.id === owner.id
-    : owner.id === undefined && entry.name !== undefined && entry.name === owner.username;
-
 const validatePrincipal = (entry: AgentAccessControlEntry): string | undefined => {
   const hasId = entry.id !== undefined;
   const hasName = entry.name !== undefined;
@@ -760,7 +755,13 @@ export const validateAccessControlEntries = ({
       throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
     }
 
-    if (owner !== undefined && isRedundantOwnerEntry(entry, owner)) {
+    // Mirrors `isAgentOwner`: a name-only entry is covered only when the owner has no id either.
+    if (
+      owner !== undefined &&
+      (entry.id !== undefined
+        ? owner.id !== undefined && entry.id === owner.id
+        : owner.id === undefined && entry.name !== undefined && entry.name === owner.username)
+    ) {
       continue;
     }
 
