@@ -73,6 +73,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '4h',
   },
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -163,7 +164,7 @@ it.each([
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-    '1:83a50923',
+    '1:75ff22c7',
   ],
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '6:01d470b4'],
   [

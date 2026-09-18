@@ -9,7 +9,10 @@
 
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
-import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
+import {
+  renderScheduledWorkerYaml,
+  type ScheduledWorkerTemplateValues,
+} from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
@@ -21,6 +24,6 @@ export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
+  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+    renderScheduledWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;

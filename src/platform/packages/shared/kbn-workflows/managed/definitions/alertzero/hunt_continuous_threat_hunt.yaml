@@ -1,18 +1,187 @@
 version: "1"
 name: Continuous Threat Hunt
-description: Hunt Watch continuous threat hunt worker stub.
+description: >
+  Hunt Watch's only tagged Worker. Continuous, technology-aware hunting on a
+  recurring UTC sweep with reviewable findings. Owns schedule, settings, and
+  report fan-out; composes untagged children (hunt, correlation,
+  package_report). The five Hunt-only dials below are fixed YAML consts, not
+  settings-API fields, until WorkerSettings grows room for them.
 enabled: false
 tags:
   - watch
   - watch-hunt
 triggers:
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
   - type: manual
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+  # Hunt-only dials. Not settings-API fields (WorkerSettings has no room for
+  # them yet) — edit this file directly to change defaults.
+  inference_endpoint_id: ""
+  tier2_when: on_hits
+  candidate_limit: 10
+  fan_out_max: 10
+  hunt_cooldown_minutes: 240
 steps:
-  - name: stub
-    type: console
+  # --- Stage 0: readiness gate + candidate selection ------------------
+  - name: check_ti_readiness
+    type: kibana.request
     with:
-      message: "Continuous Threat Hunt worker stub"
+      request:
+        method: GET
+        # TI supply readiness under security_solution's THREAT_INTEL_API_BASE.
+        # Response: { status: 'ready'|'degraded'|'blocked', reasonCodes, ... }.
+        path: /internal/threat_intel/readiness
+
+  - name: select_candidate_reports
+    type: elasticsearch.search
+    if: "${{ steps.check_ti_readiness.output.status == 'ready' }}"
+    with:
+      index: ".kibana-threat-reports"
+      size: 10
+      query:
+        bool:
+          filter:
+            # Per-space Worker copy (workflowIdSuffix: spaceId); include global
+            # catalog rows (`space_id: "*"`) the same way Attribute Alerts does.
+            - terms:
+                space_id: ["{{ workflow.spaceId }}", "*"]
+            # Usable-report bar (mvp-slice.md): has content, has IOCs or
+            # techniques, has severity. Replaces the removed `reportable`
+            # field, which does not exist on the shipped mapping.
+            - bool:
+                should:
+                  - exists:
+                      field: extracted.iocs
+                  - exists:
+                      field: extracted.ttps.techniques
+                minimum_should_match: 1
+            - exists:
+                field: severity.level
+            # Cooldown / revision bypass against nested per-space `evidence`.
+            # Flat range/exists on a nested subfield matches nothing. A report
+            # is eligible when any of: never hunted in this space, cooldown
+            # elapsed in this space, or top-level revision advanced past this
+            # space's last_hunted_revision (re-enrich bypasses the time gate).
+            - bool:
+                should:
+                  - bool:
+                      must_not:
+                        - nested:
+                            path: evidence
+                            query:
+                              bool:
+                                filter:
+                                  - term:
+                                      evidence.space_id: "{{ workflow.spaceId }}"
+                                  - exists:
+                                      field: evidence.last_hunted_at
+                  - nested:
+                      path: evidence
+                      query:
+                        bool:
+                          filter:
+                            - term:
+                                evidence.space_id: "{{ workflow.spaceId }}"
+                            - range:
+                                evidence.last_hunted_at:
+                                  lte: "now-240m"
+                  - script:
+                      script:
+                        lang: painless
+                        params:
+                          space_id: "{{ workflow.spaceId }}"
+                        source: >
+                          def rev = params._source.revision;
+                          if (rev == null) { return false; }
+                          if (!(params._source.evidence instanceof List)) { return false; }
+                          for (def el : params._source.evidence) {
+                            if (el != null && el.space_id == params.space_id) {
+                              def last = el.last_hunted_revision;
+                              if (last == null) { return ((Number)rev).intValue() > 0; }
+                              return ((Number)rev).intValue() > ((Number)last).intValue();
+                            }
+                          }
+                          return false;
+                minimum_should_match: 1
+      sort:
+        # corroborated_rank_score lives only under nested evidence; sort must
+        # use nested path + space filter or ES ignores / rejects the field.
+        - evidence.corroborated_rank_score:
+            order: desc
+            missing: _last
+            nested:
+              path: evidence
+              filter:
+                term:
+                  evidence.space_id: "{{ workflow.spaceId }}"
+        - rank_score:
+            order: desc
+            missing: 0
+
+  # --- Stage 1-4: one straight-line branch per selected report --------
+  # Branch body must be straight-line, atomic steps only (no nested
+  # if/foreach/parallel), so hunt and correlation run serially below
+  # instead of concurrently.
+  - name: report_fan_out
+    type: parallel
+    foreach: "{{ steps.select_candidate_reports.output.hits.hits | json }}"
+    concurrency:
+      max: 10
+    steps:
+      - name: find_or_create_investigation
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            # TODO(follow-up): route does not exist yet. AlertZero's
+            # investigations routes today are GET-only (get_investigation,
+            # list_investigations, list_proposals); there is no POST
+            # find-or-create handler.
+            path: /internal/alertzero/investigations
+            body:
+              # The report's own id is the document _id, not a report_id field.
+              report_id: "{{ foreach.item._id }}"
+
+      - name: hunt
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-execute
+          inputs:
+            report_id: "{{ foreach.item._id }}"
+            revision: "{{ foreach.item._source.revision }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+            inference_endpoint_id: "{{ consts.inference_endpoint_id }}"
+            tier2_when: "{{ consts.tier2_when }}"
+
+      - name: correlation
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-correlation
+          inputs:
+            report_id: "{{ foreach.item._id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: package_report
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-package-report
+          inputs:
+            report_id: "{{ foreach.item._id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: start_proposal_gates
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            # TODO(follow-up): route does not exist yet, see the
+            # find_or_create_investigation note above.
+            path: /internal/alertzero/investigations/{{ steps.find_or_create_investigation.output.investigation_id }}/start_gates
+            body:
+              proposals: "{{ steps.package_report.output.proposals_to_gate | json }}"

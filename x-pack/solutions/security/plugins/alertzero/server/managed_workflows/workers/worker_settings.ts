@@ -39,6 +39,14 @@ const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
  * Template values mirror the settings API: shared fields flat (with the legacy `autonomyLevel`
  * key the YAML templates read), Worker-specific fields nested under `extras`.
  */
+const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
+  // Matches the Attack Discovery schedule form default.
+  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: '24h',
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: '2h',
+  // Hunt's sweep cadence; the cooldown that keeps a subject from being re-swept is a YAML const.
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: '4h',
+};
+
 const toTemplateValues = (
   workerId: RegisteredWorkerId,
   settings: WorkerSettings
