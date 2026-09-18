@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
-import { queryBoolean, routeId } from '../zod_query';
+import { queryBoolean, routeId, monitorRequestBody } from '../zod_query';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
 import {
@@ -60,7 +59,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       query: z.strictObject({
         internal: queryBoolean.optional().default(false),
       }),
-      body: schema.any(),
+      body: monitorRequestBody,
     },
   },
   handler: async (routeContext): Promise<any> => {

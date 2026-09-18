@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { routeId } from '../zod_query';
+import { routeId, monitorRequestBody } from '../zod_query';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -20,7 +19,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   method: 'POST',
   path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
-    body: schema.any(),
+    body: monitorRequestBody,
     params: z.strictObject({
       monitorId: routeId,
     }),

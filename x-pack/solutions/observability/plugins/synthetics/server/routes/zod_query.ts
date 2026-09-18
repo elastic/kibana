@@ -23,7 +23,27 @@ export const MAX_PARAM_BULK_SIZE = 10_000;
 // Params hold PEM chains / keys; 10KB 400s those. 1MB is a DoS cap, not a product limit.
 export const MAX_PARAM_VALUE_LENGTH = 1_000_000;
 
-export const queryNumber = z.coerce.number();
+const blankQueryNumberToNaN = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? Number.NaN : value;
+
+/**
+ * config-schema `schema.number()` 400s blank query values (`?interval=`) and
+ * integers outside `Number.MAX_SAFE_INTEGER`. `z.coerce.number()` alone turns
+ * blanks into `0` and rounds unsafe ints.
+ */
+export const queryNumberFrom = (min?: number, max?: number) =>
+  z.preprocess(
+    blankQueryNumberToNaN,
+    z.coerce
+      .number()
+      .min(min ?? Number.MIN_SAFE_INTEGER)
+      .max(max ?? Number.MAX_SAFE_INTEGER)
+  );
+
+export const queryNumber = queryNumberFrom();
+
+/** `schema.any()` equivalent. Field codecs run in-handler after name/url aliases. */
+export const monitorRequestBody = z.any();
 export const queryBoolean = z.preprocess(
   (value) => (typeof value === 'string' ? value.toLowerCase() : value),
   BooleanFromString
