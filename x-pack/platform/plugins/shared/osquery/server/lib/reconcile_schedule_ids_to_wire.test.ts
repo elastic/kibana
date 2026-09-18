@@ -572,7 +572,12 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packagePolicyUpdate).not.toHaveBeenCalled();
   });
 
-  test('skips a pack whose queries are all disabled instead of writing queries: {}', async () => {
+  test('clears a policy still carrying queries when the SO says every query is disabled', async () => {
+    // The divergence reconciliation exists to repair: the user disabled the
+    // last enabled query, the SO was written, and the route's Fleet update
+    // failed — so the policy still schedules the queries the user switched
+    // off. Skipping the write here would leave them collecting on every agent
+    // indefinitely, so the empty map must be treated as a desired state.
     const scopedClient = createMockScopedClient({
       'reconcile-pack': {
         id: 'pack-1',
@@ -606,6 +611,7 @@ describe('reconcileScheduleIdsToWire', () => {
     const result = await reconcileScheduleIdsToWire({
       coreStart: createMockCoreStart(scopedClient),
       osqueryContext: createMockOsqueryContext({
+        // Policy still carries the pre-disable scheduled queries.
         fetchAllItems: mockFetchAllItems([buildPackagePolicy()]),
         update: packagePolicyUpdate,
       }),
@@ -615,7 +621,16 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     expect(result.hadFailures).toBe(false);
-    expect(packagePolicyUpdate).not.toHaveBeenCalled();
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+
+    const packBlock =
+      packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+        'default--reconcile-pack'
+      ];
+    // An empty block is harmless on the wire — osquerybeat's `forOsqueryd`
+    // skips packs with no queries — and it is what stops the disabled queries.
+    expect(packBlock.queries).toEqual({});
+    expect(packBlock.pack_id).toBe('pack-1');
   });
 
   test('still repairs a DISABLED but still-wired pack in place (never detaches)', async () => {

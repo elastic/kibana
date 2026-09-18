@@ -31,11 +31,13 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { Shard } from '../../../common/utils/converters';
-import { isAllPlatforms, isEmptyOrAllPlatforms } from '../../../common/platform';
+import { isAllPlatforms } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import type { ResultType } from '../../../common/result_type';
 import { mapResultTypeToWire, mapWireToExplicitResultType } from '../../../common/result_type';
+import type { PackExecutionDefaults } from '../../../common/pack_execution';
+import { isPackQueryEnabled, resolveEffectiveQueryExecution } from '../../../common/pack_execution';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import { parseRRule } from '../../../common/utils/rrule_parser';
@@ -402,62 +404,12 @@ export const convergePerQueryIntervals = (
   );
 };
 
-export interface PackExecutionDefaults {
-  /** Pack-level minimum osquery version default. Fans out to inheriting queries. */
-  min_osquery_version?: string | null;
-  /** Pack-level result type default. Fans out to inheriting queries. */
-  result_type?: ResultType | null;
-  /**
-   * Pack-level platform default (comma-separated osquery platform tokens).
-   * Fans out to inheriting queries exactly like the two fields above.
-   *
-   * This is deliberately NOT osquery's native `Pack.Platform`, which is an
-   * init-time gate that skips the *whole pack* when it fails. Kibana never
-   * emits that field; this value is expanded onto each inheriting query as a
-   * per-query `platform`, so a query's own value always wins and a mismatch
-   * only ever skips that one query.
-   */
-  platform?: string | null;
-}
-
-/**
- * Whether a pack query should run. `enabled` defaults to true when absent
- * (legacy queries never stored the field). Shared by the scheduled Fleet
- * emit and the live-query action path.
- */
-export const isPackQueryEnabled = (query: { enabled?: boolean }): boolean =>
-  query.enabled !== false;
-
-/**
- * Resolve a query's effective version and platform against pack-level
- * defaults. Per-query wins; an empty-token or all-OS platform is treated as
- * unset so the pack default can apply. The result omits an all-OS platform
- * (emitting it is a no-op on the wire).
- *
- * Shared by the scheduled Fleet emit and the live-query action path so the
- * two cannot drift. `result_type` is intentionally not resolved here — live
- * queries do not send it.
- */
-export const resolveEffectiveQueryExecution = (
-  query: { version?: string | null; platform?: string | null },
-  packExecutionDefaults?: PackExecutionDefaults
-): { version?: string; platform?: string } => {
-  // Normalize blank/empty version strings — an empty string is not a meaningful
-  // override; treat it as absent so the pack default can apply.
-  const perQueryVersion = query.version || undefined;
-  const effectiveVersion =
-    perQueryVersion ?? packExecutionDefaults?.min_osquery_version ?? undefined;
-
-  const perQueryPlatform = isEmptyOrAllPlatforms(query.platform)
-    ? undefined
-    : query.platform ?? undefined;
-  const effectivePlatform = perQueryPlatform ?? packExecutionDefaults?.platform ?? undefined;
-
-  return {
-    ...(effectiveVersion ? { version: effectiveVersion } : {}),
-    ...(isEmptyOrAllPlatforms(effectivePlatform) ? {} : { platform: effectivePlatform }),
-  };
-};
+// Pack-level execution defaults and the per-query precedence rule live in
+// `common/` because the browser response-action form shares them with the
+// scheduled Fleet emit and the live-query path. Re-exported here so existing
+// server importers keep their import site.
+export type { PackExecutionDefaults };
+export { isPackQueryEnabled, resolveEffectiveQueryExecution };
 
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;

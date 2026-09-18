@@ -386,8 +386,10 @@ export const reconcileScheduleIdsToWire = async ({
 
         const { id: packId, attributes: packAttrs } = packEntry;
 
-        // Cheap skip when the SO itself has no queries. All-disabled packs
-        // still pass this (they have rows) and are caught after the build.
+        // Cheap skip when the SO itself has no queries — there is nothing to
+        // reconcile for a pack that never had rows. All-disabled packs still
+        // pass this (they have rows) and are reconciled to an empty block
+        // below, rather than skipped.
         // Pack-level `enabled` is deliberately NOT gated on — a
         // disabled-but-wired pack is the drift we repair in place (detaching
         // is the routes' job).
@@ -425,16 +427,18 @@ export const reconcileScheduleIdsToWire = async ({
             }
           );
 
-          // Test the *built* map: `enabled === false` is filtered inside
-          // convert, so an all-disabled pack would otherwise write
-          // `queries: {}` — the empty block this guard exists to prevent.
-          if (!hasQueries(builtQueries)) {
-            logger.debug(
-              `reconcileScheduleIdsToWire: pack "${packKey}" has no queries, skipping write`
-            );
-            continue;
-          }
-
+          // An all-disabled pack builds an empty map (`enabled === false` is
+          // filtered inside convert) and that is a legitimate desired state,
+          // not a reason to skip. Writing `queries: {}` is harmless —
+          // osquerybeat's `forOsqueryd` skips packs with no queries, and
+          // create/update/update_global_packs already write it consistently.
+          //
+          // Skipping here would instead *preserve* divergence: if a user
+          // disables the last enabled query and the route's Fleet update fails
+          // after the SO is written, the policy still carries the previous
+          // scheduled queries. Declining to write would leave those disabled
+          // queries collecting on every agent indefinitely — exactly the drift
+          // reconciliation exists to repair.
           const intendedPackBlock = {
             ...(existingShard !== undefined ? { shard: existingShard } : {}),
             pack_id: packId,
