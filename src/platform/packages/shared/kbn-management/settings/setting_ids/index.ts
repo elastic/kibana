@@ -54,6 +54,9 @@ export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 // Accessibility settings
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
+// Alerting v2 settings
+export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experimentalFeatures';
+
 // Agent builder settings
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';

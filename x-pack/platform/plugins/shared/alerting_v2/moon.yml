@@ -152,6 +152,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/content-list-common'
+  - '@kbn/core-ui-settings-server'
 tags:
   - plugin
   - prod
