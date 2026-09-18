@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-jest.mock('./send_email', () => ({
-  sendEmail: jest.fn(),
-}));
+jest.mock('./send_email', () => {
+  const actual = jest.requireActual('./send_email');
+  return {
+    ...actual,
+    sendEmail: jest.fn(),
+  };
+});
 
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -25,7 +29,10 @@ import {
   WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from '@kbn/actions-plugin/server/lib';
 
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import {
+  type ActionTypeExecutorOptions,
+  ConnectorUsageCollector,
+} from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import type { EmailConnectorType, EmailConnectorTypeExecutorOptions } from '.';
 import type {
@@ -1199,6 +1206,101 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure subject and message pass through using HTTP_REQUEST and __json service', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('the subject');
+    expect(emailSent.content.message).toBe(
+      'a message to you\n\n---\n\nThis message was sent by Elastic.'
+    );
+    expect(emailSent.content.messageHTML).toBe(null);
+  });
+
+  test('ensure fixed subject and message and no footer using HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        kibanaFooterLink: {
+          path: '/some-url',
+          text: 'Click this link',
+        },
+      },
+      config: { ...executorOptions.config, service: 'gmail' },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('This is a test email from Kibana');
+    expect(emailSent.content.message).toBe('This is a test email from Kibana');
+    expect(emailSent.content.messageHTML).toBe(null);
+  });
+
+  test('ensure fixed messageHTML using HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP: ActionTypeExecutorOptions<
+      ConnectorTypeConfigType,
+      ConnectorTypeSecretsType,
+      ActionParamsType
+    > = {
+      ...executorOptions,
+      params: { ...executorOptions.params, messageHTML: 'this html should be replaced' },
+      config: { ...executorOptions.config, service: 'gmail', allowHtml: true },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTTP);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "attachments": undefined,
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "This is a test email from Kibana",
+          "messageHTML": "This is a test email from Kibana",
+          "subject": "This is a test email from Kibana",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "gmail",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
   test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
     sendEmailMock.mockReset();
 
@@ -1291,7 +1393,7 @@ describe('execute()', () => {
         ...executorOptions.config,
         allowHtml: true,
       },
-      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      source: { type: ActionExecutionSourceType.BACKGROUND_TASK, source: null },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',

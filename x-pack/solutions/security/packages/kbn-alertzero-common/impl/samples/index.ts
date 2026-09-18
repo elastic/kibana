@@ -19,9 +19,4 @@ export {
   getMockInvestigationsByWatchId,
 } from './investigations';
 
-export {
-  MOCK_PROPOSALS,
-  createMockProposal,
-  getMockProposalById,
-  getMockProposalsByInvestigationId,
-} from './proposals';
+export { MOCK_PROPOSALS, getMockProposalsByConversationId } from './proposals';

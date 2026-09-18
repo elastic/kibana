@@ -1,5 +1,5 @@
 {
-  "sha1": "95efe502d9f7098aced596b0ce283cb3073595c3",
+  "sha1": "b2cbdd19db40612b3a687e601b6f9ca9486a9fd6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,168 +7,182 @@
     {
       "id": "ec1ea961b0a61a1-feefadb7ab1bd3b",
       "title": "context engine AI indices API manages an AI index through its full lifecycle",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 89,
-        "column": 18
+        "line": 99,
+        "column": 23
       }
     },
     {
       "id": "ec1ea961b0a61a1-f62c2ffc71eb674",
       "title": "context engine AI indices API creates an AI index whose dest does not exist yet (lazy creation)",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 180,
-        "column": 73
+        "line": 191,
+        "column": 29
       }
     },
     {
       "id": "ec1ea961b0a61a1-8e3d5cca11c592a",
       "title": "context engine AI indices API creates and reads an index AI index",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 194,
-        "column": 55
+        "line": 204,
+        "column": 60
       }
     },
     {
       "id": "ec1ea961b0a61a1-c4dd85537aaad56",
       "title": "context engine AI indices API rejects a system index as an index dest",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 214,
-        "column": 22
+        "line": 225,
+        "column": 16
       }
     },
     {
       "id": "ec1ea961b0a61a1-f73c44e9fe62fc2",
       "title": "context engine AI indices API rejects a request without the required dest field",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 223,
-        "column": 73
+        "line": 233,
+        "column": 89
       }
     },
     {
       "id": "ec1ea961b0a61a1-fbb4103d779912d",
       "title": "context engine AI indices API rejects an id with disallowed characters",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 229,
-        "column": 13
+        "line": 240,
+        "column": 7
       }
     },
     {
       "id": "ec1ea961b0a61a1-f5eec36ee9b274d",
       "title": "context engine AI indices API forbids writes for a read-only user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 237,
-        "column": 71
+        "line": 248,
+        "column": 27
       }
     },
     {
       "id": "ec1ea961b0a61a1-a0c542673ba31af",
       "title": "context engine AI indices API allows reads for a read-only user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 247,
-        "column": 21
+        "line": 257,
+        "column": 59
       }
     },
     {
       "id": "ec1ea961b0a61a1-22ca8b4e20bdf13",
       "title": "context engine AI indices API rejects delete of a managed AI index with 409",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 255,
-        "column": 73
+        "line": 266,
+        "column": 22
       }
     },
     {
       "id": "ec1ea961b0a61a1-7de293b8246ac86",
       "title": "context engine AI indices API deletes the dest when it is the last AI index using it",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 281,
+        "line": 292,
         "column": 12
       }
     },
     {
       "id": "ec1ea961b0a61a1-e42452f80aacc10",
       "title": "context engine AI indices API skips dest delete while another AI index still uses it",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 307,
-        "column": 62
+        "line": 317,
+        "column": 75
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-f97ae7e1eb228af",
+      "title": "context engine AI indices API skips dest delete while the same AI index id in another space still uses it",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 368,
+        "column": 65
       }
     },
     {
       "id": "ec1ea961b0a61a1-5728a6f6f346108",
       "title": "context engine AI indices API does not delete an index-pattern dest when deleting knowledge indicators",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 358,
+        "line": 413,
         "column": 16
       }
     }
