@@ -415,11 +415,7 @@ steps:
             # Autonomy → autoApprove mapping. One site: update here if semantics change.
             autoApprove: "${{ consts.worker_settings.autonomy == 'supervised' }}"
 
-      # Fetch proposal details for the outcome comment attribution.
-      # TODO: once proposals.getProposal exposes decidedBy, add
-      #   "by @{{ steps.get_proposal.output.decidedBy.username }}" to both outcome
-      #   comments below (guard with {% if steps.get_proposal.output.decidedBy %}
-      #   for the Supervised/auto-approve case where no human decided).
+      # Fetch proposal details for outcome comment attribution (decision, decidedBy).
       - name: get_proposal
         type: proposals.getProposal
         on-failure:
@@ -439,17 +435,6 @@ steps:
           # Everything the analyst approved has already happened by this point: the alerts are
           # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
           # would report a successful triage as a failure, so the patch is allowed to fail.
-          #
-          # It does fail, intermittently, and only on this path. `patchMetadata` demands
-          # `owner` access, ownership is decided by `isConversationOwner`, and that returns
-          # false whenever the stored owner and the current user share no identity field —
-          # the conversation is persisted with a username and no user id, while the context
-          # rebuilt to resume after a human decision does not reliably carry that username.
-          # The denial then surfaces as "Conversation <id> not found", which is why this
-          # looks like a missing conversation rather than an authorization failure.
-          # Assisted never hits it because nothing parks, so the context is never rebuilt.
-          # Tracked in FOLLOW_UPS.md for @elastic/workchat-eng; D44's reconciliation sweep
-          # closes an Investigation left open this way.
           - name: close_investigation_after_approval
             type: ai.conversation.metadata.patch
             on-failure:
@@ -469,8 +454,6 @@ steps:
                 close_reason: false_positive
 
           # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-          # TODO: add "by @{{ steps.get_proposal.output.decidedBy.username }}" once
-          #   proposals.getProposal exposes decidedBy (see get_proposal step above).
           - name: post_comment_outcome_approved
             type: kibana.request
             on-failure:
@@ -486,12 +469,10 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
         else:
           # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-          # TODO: add "by @{{ steps.get_proposal.output.decidedBy.username }}" once
-          #   proposals.getProposal exposes decidedBy (see get_proposal step above).
           - name: post_comment_outcome_dismissed
             type: kibana.request
             on-failure:
@@ -507,7 +488,7 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
 
   # ---------------------------------------------------------------------------
   # 9. No-FP branch: close the Investigation immediately (D31, D41).
