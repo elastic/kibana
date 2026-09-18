@@ -200,4 +200,45 @@ describe('Rule Actions', () => {
 
     expect(await screen.findByText('On check intervals')).toBeInTheDocument();
   });
+
+  it('renders an action whose type is absent from the registry without throwing', async () => {
+    const ruleActions = [
+      {
+        id: 'slack2-connector',
+        group: 'default',
+        actionTypeId: '.slack2',
+        params: {},
+        frequency: {
+          notifyWhen: 'onActionGroupChange' as const,
+          throttle: null,
+          summary: false,
+        },
+      },
+    ];
+
+    actionTypeRegistry.has.mockReturnValue(false);
+    actionTypeRegistry.get.mockImplementation((id: string) => {
+      throw new Error(`Action type "${id}" is not registered`);
+    });
+    actionTypeRegistry.list.mockReturnValue([] as ActionTypeModel[]);
+
+    mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
+      isLoadingActionConnectors: false,
+      actionConnectors: [
+        {
+          id: 'slack2-connector',
+          name: 'Slack v2',
+          actionTypeId: '.slack2',
+        },
+      ] as Array<ActionConnector<Record<string, unknown>>>,
+      errorActionConnectors: undefined,
+      reloadRuleActionConnectors: jest.fn(),
+    });
+
+    render(<RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />);
+
+    expect(screen.getByTestId('actionConnectorName-0-Slack v2')).toBeInTheDocument();
+    expect(await screen.findByText('On status changes')).toBeInTheDocument();
+    expect(actionTypeRegistry.get).not.toHaveBeenCalled();
+  });
 });
