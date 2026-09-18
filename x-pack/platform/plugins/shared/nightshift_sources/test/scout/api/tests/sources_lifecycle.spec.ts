@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RoleSessionCredentials } from '@kbn/scout';
-import { getNightshiftSourceViewName, type SourceWithHealth } from '@kbn/nightshift-shared';
+import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_MANAGER_ROLE,
   apiTest,
@@ -84,7 +84,7 @@ apiTest.describe(
           `search=${encodeURIComponent(body.title)}`
         );
         expect(listed).toHaveStatusCode(200);
-        expect(findListed(listed.body, source.id)).toStrictEqual({ source, health: 'ok' });
+        expect(findListed(listed.body, source.id)).toStrictEqual(source);
 
         const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
         expect(fetched).toHaveStatusCode(200);
@@ -233,15 +233,16 @@ apiTest.describe(
       const firstPage = await listPage(1);
       expect(firstPage).toHaveStatusCode(200);
       expect(firstPage.body).toMatchObject({ page: 1, per_page: 2, total: 3 });
-      expect(
-        firstPage.body.sources.map((entry: SourceWithHealth) => entry.source.title)
-      ).toStrictEqual([titles[0], titles[1]]);
+      expect(firstPage.body.sources.map((source: NightshiftSource) => source.title)).toStrictEqual([
+        titles[0],
+        titles[1],
+      ]);
 
       const secondPage = await listPage(2);
       expect(secondPage.body).toMatchObject({ page: 2, per_page: 2, total: 3 });
-      expect(
-        secondPage.body.sources.map((entry: SourceWithHealth) => entry.source.title)
-      ).toStrictEqual([titles[2]]);
+      expect(secondPage.body.sources.map((source: NightshiftSource) => source.title)).toStrictEqual(
+        [titles[2]]
+      );
 
       const tooMany = await listSources(apiClient, manager.cookieHeader, 'per_page=101');
       expect(tooMany).toHaveStatusCode(400);

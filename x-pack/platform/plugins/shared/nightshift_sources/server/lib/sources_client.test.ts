@@ -103,18 +103,14 @@ describe('SourcesClient', () => {
       const { client, viewsClient } = setup();
       viewsClient.getView.mockRejectedValue(forbidden('no read_view_metadata'));
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
-        'unknown'
-      );
+      await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
     });
 
     it('is view_missing when the view does not exist', async () => {
       const { client, viewsClient } = setup();
       viewsClient.getView.mockResolvedValue(undefined);
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
-        'view_missing'
-      );
+      await expect(client.getHealth(makeSource())).resolves.toBe('view_missing');
     });
 
     it('is view_drift when the view query differs beyond formatting', async () => {
@@ -124,9 +120,7 @@ describe('SourcesClient', () => {
         query: 'FROM logs-nginx-* | WHERE status >= 400',
       });
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
-        'view_drift'
-      );
+      await expect(client.getHealth(makeSource())).resolves.toBe('view_drift');
     });
 
     it('treats formatting-only differences as matching', async () => {
@@ -136,22 +130,11 @@ describe('SourcesClient', () => {
         query: 'from   logs-nginx-*\n| where status>=500',
       });
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe('ok');
+      await expect(client.getHealth(makeSource())).resolves.toBe('ok');
       expect(dataEsClient.esql.query).toHaveBeenCalledWith({
         query: 'FROM $.nightshift.sources.source-1 | LIMIT 0',
         format: 'json',
       });
-    });
-
-    it('skips the probe for list health', async () => {
-      const { client, viewsClient, dataEsClient } = setup();
-      viewsClient.getView.mockResolvedValue({
-        name: '$.nightshift.sources.source-1',
-        query: makeAttributes().esql,
-      });
-
-      await expect(client.getHealth(makeSource(), { checkResolvable: false })).resolves.toBe('ok');
-      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
     });
 
     it('is ok when the probe hits a pattern with no indices yet', async () => {
@@ -162,7 +145,7 @@ describe('SourcesClient', () => {
       });
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe('ok');
+      await expect(client.getHealth(makeSource())).resolves.toBe('ok');
     });
 
     it('is unresolvable when Unknown index comes from a multi-source query', async () => {
@@ -176,9 +159,7 @@ describe('SourcesClient', () => {
       });
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
 
-      await expect(client.getHealth(source, { checkResolvable: true })).resolves.toBe(
-        'unresolvable'
-      );
+      await expect(client.getHealth(source)).resolves.toBe('unresolvable');
     });
 
     it('is unresolvable when the view no longer plans against existing indices', async () => {
@@ -191,9 +172,7 @@ describe('SourcesClient', () => {
         .mockRejectedValueOnce(unknownColumnError())
         .mockResponseOnce(withColumns);
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
-        'unresolvable'
-      );
+      await expect(client.getHealth(makeSource())).resolves.toBe('unresolvable');
       expect(dataEsClient.esql.query).toHaveBeenLastCalledWith({
         query: 'FROM logs-nginx-*\n| LIMIT 0',
         format: 'json',
@@ -210,7 +189,7 @@ describe('SourcesClient', () => {
         .mockRejectedValueOnce(unknownColumnError())
         .mockResponseOnce(withoutColumns);
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe('ok');
+      await expect(client.getHealth(makeSource())).resolves.toBe('ok');
     });
 
     it('is unknown when the probe is forbidden', async () => {
@@ -223,9 +202,7 @@ describe('SourcesClient', () => {
         createEsResponseError(403, 'security_exception', 'unauthorized')
       );
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
-        'unknown'
-      );
+      await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
     });
 
     it('is unknown when the follow-up source probe fails for a non-verification reason', async () => {
@@ -238,9 +215,7 @@ describe('SourcesClient', () => {
         .mockRejectedValueOnce(unknownColumnError())
         .mockRejectedValueOnce(createEsResponseError(503, 'unavailable', 'shards down'));
 
-      await expect(client.getHealth(makeSource(), { checkResolvable: true })).resolves.toBe(
-        'unknown'
-      );
+      await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
     });
   });
 
@@ -468,7 +443,6 @@ describe('SourcesClient', () => {
         page: 2,
         per_page: 5,
       });
-      viewsClient.getView.mockResolvedValue(undefined);
 
       const response = await client.list({ page: 2, perPage: 5, enabled: true });
 
@@ -480,8 +454,9 @@ describe('SourcesClient', () => {
         sortOrder: 'asc',
         filter: 'nightshift-source.attributes.enabled: true',
       });
+      expect(viewsClient.getView).not.toHaveBeenCalled();
       expect(response).toEqual({
-        sources: [{ source: makeSource(), health: 'view_missing' }],
+        sources: [makeSource()],
         total: 7,
         page: 2,
         per_page: 5,

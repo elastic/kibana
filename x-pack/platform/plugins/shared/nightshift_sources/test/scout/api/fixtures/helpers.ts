@@ -8,7 +8,8 @@
 import { randomUUID } from 'crypto';
 import type {
   CreateSourceRequest,
-  SourceWithHealth,
+  ListSourcesResponse,
+  NightshiftSource,
   UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout';
@@ -105,15 +106,11 @@ export const setSourceEnabled = (
     body: {},
   });
 
-interface ListBody {
-  sources: SourceWithHealth[];
-  total: number;
-}
+export const findListed = (body: ListSourcesResponse, id: string): NightshiftSource | undefined =>
+  body.sources.find((source) => source.id === id);
 
-export const findListed = (body: ListBody, id: string): SourceWithHealth | undefined =>
-  body.sources.find((entry) => entry.source.id === id);
-
-export const listedIds = (body: ListBody): string[] => body.sources.map((entry) => entry.source.id);
+export const listedIds = (body: ListSourcesResponse): string[] =>
+  body.sources.map((source) => source.id);
 
 export const createTestIndex = async (esClient: EsClient, index: string): Promise<void> => {
   await esClient.indices.delete({ index }, { ignore: [404] });
@@ -164,8 +161,8 @@ export const cleanupSources = async (
     if (response.statusCode !== 200) {
       throw new Error(`Failed to list sources for cleanup: ${JSON.stringify(response.body)}`);
     }
-    const { sources, total } = response.body as ListBody;
-    ids.push(...sources.map(({ source }) => source.id));
+    const { sources, total } = response.body as ListSourcesResponse;
+    ids.push(...sources.map((source) => source.id));
     if (sources.length === 0 || ids.length >= total) {
       break;
     }

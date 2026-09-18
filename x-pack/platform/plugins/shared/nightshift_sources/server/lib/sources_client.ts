@@ -19,7 +19,6 @@ import {
   type SourceWithHealth,
 } from '@kbn/nightshift-shared';
 import { notFound } from '@hapi/boom';
-import pLimit from 'p-limit';
 import { v4 as uuidv4 } from 'uuid';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -29,8 +28,6 @@ import { assertSourceQueryExecutes, hasNoIndicesBehind } from './assert_source_q
 import { isEsqlUnknownIndexError, isEsqlVerificationError } from './es_errors';
 import type { EsqlViewsClient } from './esql_views_client';
 import { validateSourceQuery } from './validate_source_query';
-
-const HEALTH_CHECK_CONCURRENCY = 10;
 
 // Every write sends the full attribute set, so a field the caller dropped (an optional
 // `description`) must be removed rather than merged over the stored value.
@@ -133,9 +130,10 @@ export class SourcesClient {
   async get(id: string): Promise<SourceWithHealth> {
     const { attributes } = await this.getSavedObject(id);
     const source = toSource(id, attributes);
-    return { source, health: await this.getHealth(source, { checkResolvable: true }) };
+    return { source, health: await this.getHealth(source) };
   }
 
+  /** Saved-object catalog. View health is `get()`; list does not fetch views. */
   async list({
     page,
     perPage,
@@ -164,17 +162,14 @@ export class SourcesClient {
       filter: filters.length > 0 ? filters.join(' AND ') : undefined,
     });
 
-    const limit = pLimit(HEALTH_CHECK_CONCURRENCY);
-    const sources = await Promise.all(
-      response.saved_objects.map((savedObject) =>
-        limit(async (): Promise<SourceWithHealth> => {
-          const source = toSource(savedObject.id, savedObject.attributes);
-          return { source, health: await this.getHealth(source, { checkResolvable: false }) };
-        })
-      )
-    );
-
-    return { sources, total: response.total, page, per_page: perPage };
+    return {
+      sources: response.saved_objects.map((savedObject) =>
+        toSource(savedObject.id, savedObject.attributes)
+      ),
+      total: response.total,
+      page,
+      per_page: perPage,
+    };
   }
 
   async delete(id: string): Promise<void> {
@@ -208,10 +203,7 @@ export class SourcesClient {
    * `unknown` wins over everything because it means we could not look (privileges, ES down), so
    * no other verdict is trustworthy. `unresolvable` is reserved for a query ES refuses to plan.
    */
-  async getHealth(
-    source: NightshiftSource,
-    { checkResolvable }: { checkResolvable: boolean }
-  ): Promise<SourceHealth> {
+  async getHealth(source: NightshiftSource): Promise<SourceHealth> {
     const { viewsClient, dataEsClient, logger } = this.deps;
 
     let view;
@@ -227,12 +219,9 @@ export class SourcesClient {
     if (typeof view.query !== 'string') {
       return 'view_drift';
     }
-    // Byte-equal skips the parse-and-normalize on every list row.
+    // Byte-equal skips the parse-and-normalize.
     if (view.query !== source.esql && !hasSameEsql(view.query, source.esql)) {
       return 'view_drift';
-    }
-    if (!checkResolvable) {
-      return 'ok';
     }
 
     try {

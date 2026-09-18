@@ -81,7 +81,7 @@ export const listSourcesQuerySchema = z.object({
 });
 
 export interface ListSourcesResponse {
-  sources: SourceWithHealth[];
+  sources: NightshiftSource[];
   total: number;
   page: number;
   per_page: number;

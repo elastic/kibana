@@ -27,8 +27,7 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
   options: {
     access: 'internal',
     summary: 'List Nightshift sources',
-    description:
-      'Returns the sources defined in the current space, sorted by title, each with the health of its ES|QL view.',
+    description: 'Returns the sources defined in the current space, sorted by title.',
   },
   security: {
     authz: {

@@ -17,9 +17,9 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated, sorted by title, each source with `health` |
+| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
 | `POST` | `/internal/nightshift/sources` | manage | Validates the query, writes the saved object, creates the view |
-| `GET` | `/internal/nightshift/sources/{sourceId}` | read | Also probes `FROM <view> \| LIMIT 0` for `unresolvable` |
+| `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
@@ -49,12 +49,15 @@ source's health becomes `unresolvable`.
 
 ## Health
 
+Health is computed on `GET /{sourceId}` only. List is the saved-object catalog and does not
+fetch views; engines query `FROM <view>` and will fail at query time if the view is gone.
+
 | Value | Meaning |
 | --- | --- |
 | `ok` | View exists and its query matches the stored ES|QL |
 | `view_missing` | View was deleted out of band; `PUT` the current values to recreate it |
 | `view_drift` | View exists but its query differs from the stored ES|QL; `PUT` fixes it |
-| `unresolvable` | `FROM <view> \| LIMIT 0` fails with a 400 while indices exist behind the source, e.g. a `WHERE` field that no longer resolves (only checked on `GET /{sourceId}`) |
+| `unresolvable` | `FROM <view> \| LIMIT 0` fails with a 400 while indices exist behind the source, e.g. a `WHERE` field that no longer resolves |
 | `unknown` | The view could not be read or probed (403, ES error); the source itself may be fine |
 
 ## Enablement model
@@ -90,8 +93,9 @@ the query reads. ES|QL view operations are index privileges applied to the view 
 
 `manage` covers create, read-definition and delete. Where the cluster supports them,
 `create_view`, `read_view_metadata` and `delete_view` are the least-privilege alternative.
-Readers only need `read` and `read_view_metadata` on the view names plus `read` on the data;
-without them the API still answers, with `health: "unknown"`.
+Readers only need `read` and `read_view_metadata` on the view names plus `read` on the data.
+List still answers without those Elasticsearch privileges; `GET /{sourceId}` reports
+`health: "unknown"`.
 
 ## Configuration
 

@@ -72,7 +72,7 @@ apiTest.describe(
         `search=${encodeURIComponent(body.title)}`
       );
       expect(listed).toHaveStatusCode(200);
-      expect(findListed(listed.body, sourceId)?.health).toBe('ok');
+      expect(findListed(listed.body, sourceId)?.id).toBe(sourceId);
 
       const fetched = await getSource(apiClient, cookieHeader, sourceId);
       expect(fetched).toHaveStatusCode(200);
@@ -100,7 +100,7 @@ apiTest.describe(
           `search=${encodeURIComponent(body.title)}`
         );
         expect(listed).toHaveStatusCode(200);
-        expect(findListed(listed.body, sourceId)?.health).toBe('unknown');
+        expect(findListed(listed.body, sourceId)?.id).toBe(sourceId);
 
         const fetched = await getSource(apiClient, cookieHeader, sourceId);
         expect(fetched).toHaveStatusCode(200);
