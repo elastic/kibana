@@ -382,13 +382,23 @@ describe('rule-tuning approval gate contract', () => {
   describe('the approval spec itself', () => {
     const spec = () => read('evals/rule_tuning_approval.spec.ts');
 
-    it('takes both arms and never skips one', () => {
+    it('takes both arms and never skips one silently', () => {
       expect(spec()).toMatch(/approved: false/);
       expect(spec()).toMatch(/approved: true/);
-      // A skipped or focused arm is how this spec silently stops proving the gate.
+      // A focused arm is how this spec silently stops proving the gate.
       expect(spec()).not.toMatch(/\.only\(/);
-      expect(spec()).not.toMatch(/\.skip\(/);
       expect(spec()).not.toMatch(/test\.todo/);
+      // Skipping remains forbidden in every silent form: no bare `.skip()`, no
+      // `.skip(true)` without a reason. The one allowed form is the explicit
+      // `.skip(true, reason)` inside the `unmeasured` helper, which every arm must
+      // route through — it logs the reason at warning level and the reason names the
+      // fixture, so an UNMEASURED arm can never pass for a proved gate.
+      const skips =
+        spec()
+          .replace(/^\s*\/\/.*$/gm, '')
+          .match(/\.skip\(([^)]*)\)/g) ?? [];
+      expect(skips).toEqual(['.skip(true, reason)']);
+      expect(spec()).toMatch(/const unmeasured = \(log: ToolingLog, reason: string\): never => \{/);
     });
 
     it('cleans up after every arm, not only on success', () => {

@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DIAGNOSE_STEP_ID, RULE_TUNING_INVESTIGATE_TOOL_ID } from '../constants';
 import type { RuleTuningVerdict } from '../workflow_task';
@@ -197,5 +198,87 @@ describe('assertToolSpansReachable', () => {
         log,
       })
     ).rejects.toThrow(/no join keys at all/);
+  });
+});
+
+describe('createToolRoutingEvaluator with a catalog probe', () => {
+  const catalogFetch = (results: Array<{ id: string; tool_ids?: string[] }>) =>
+    jest.fn(async () => ({ results })) as unknown as HttpHandler;
+
+  const failingCatalogFetch = () =>
+    jest.fn(async () => {
+      throw new Error('503 Service Unavailable');
+    }) as unknown as HttpHandler;
+
+  const evaluateWithCatalog = (
+    fetch: HttpHandler,
+    client: EsClient,
+    output: RuleTuningVerdict = result()
+  ) =>
+    createToolRoutingEvaluator({ traceEsClient: client, log, fetch }).evaluate({
+      input: {},
+      output,
+      expected: {},
+      metadata: undefined,
+    } as never);
+
+  it('scores 0 as REAL when the catalog carries the graded tool but the run never called it', async () => {
+    const res = await evaluateWithCatalog(
+      catalogFetch([{ id: 'find-security-rules', tool_ids: [RULE_TUNING_INVESTIGATE_TOOL_ID] }]),
+      esWith(() => counts(41, 0))
+    );
+
+    expect(res.score).toBe(0);
+    expect(res.explanation).toContain('a real 0');
+  });
+
+  it('reports UNMEASURED (not 0) when the stack does not carry the graded tool', async () => {
+    // The AZ-3e defect: the skill is absent from the eval stack's catalog, so every
+    // example scored a 0 that said nothing about the workflow.
+    const res = await evaluateWithCatalog(
+      catalogFetch([{ id: 'find-security-rules' }]),
+      esWith(() => counts(41, 0))
+    );
+
+    expect(res.score).toBeNull();
+    expect(res.label).toBe('unavailable');
+    expect(res.explanation).toContain('absent from this stack');
+    expect(res.explanation).toContain(RULE_TUNING_INVESTIGATE_TOOL_ID);
+  });
+
+  it('flags a 0 as unverified when the catalog cannot be read', async () => {
+    const res = await evaluateWithCatalog(
+      failingCatalogFetch(),
+      esWith(() => counts(41, 0))
+    );
+
+    expect(res.score).toBe(0);
+    expect(res.explanation).toContain('unverified');
+  });
+
+  it('still scores 1 when the graded tool was called, without reading the catalog', async () => {
+    const fetch = catalogFetch([{ id: 'find-security-rules' }]);
+    const res = await evaluateWithCatalog(
+      fetch,
+      esWith(() => counts(41, 3))
+    );
+
+    expect(res.score).toBe(1);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('reads the catalog once per evaluator across examples', async () => {
+    const fetch = catalogFetch([{ id: 'find-security-rules' }]);
+    const evaluator = createToolRoutingEvaluator({
+      traceEsClient: esWith(() => counts(5, 0)),
+      log,
+      fetch,
+    });
+    const args = { input: {}, output: result(), expected: {}, metadata: undefined } as never;
+
+    await evaluator.evaluate(args);
+    await evaluator.evaluate(args);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

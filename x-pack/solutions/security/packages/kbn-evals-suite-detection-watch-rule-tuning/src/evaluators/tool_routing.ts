@@ -6,9 +6,12 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import { DIAGNOSE_STEP_ID, RULE_TUNING_INVESTIGATE_TOOL_ID } from '../constants';
+import type { AgentBuilderCatalog } from '../agent_builder_catalog';
+import { readAgentBuilderCatalog } from '../agent_builder_catalog';
 import type { RuleTuningVerdict } from '../workflow_task';
 
 const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
@@ -43,6 +46,25 @@ interface EsqlResponse {
  * reached the agent's spans, so the run is scored N/A rather than a false 0
  * (STATS COUNT(*) always returns a row — an unmeasured trace otherwise reads
  * as a confident zero).
+ *
+ * Two further ways a 0 would be dishonest, both reported as N/A instead:
+ *  - the stack's Agent Builder catalog does not carry the graded tool (or its
+ *    skill), so the review could not call it at all — an environment defect,
+ *    read from `/api/agent_builder/skills` via `readAgentBuilderCatalog`;
+ *  - the graded tool id is missing from this cluster's spans *and* the catalog
+ *    was unreadable, so the 0 is flagged as unverified in its explanation.
+ *
+ * Span identity for skill tools, measured on the AZ-3e n=3 baseline (105 cells,
+ * 244 `custom` tool spans): every tool call is exported twice — once under
+ * `data_stream.dataset: agent_builder.otel`, where tool ids outside
+ * AGENT_BUILDER_BUILTIN_TOOLS are anonymized to `custom`, and once under
+ * `generic.otel`, where the real id is kept. The 244 `custom` spans are exactly
+ * the six non-allow-listed tools of that run (`security.find_rules`,
+ * `security.discover_rule_tags`, `natural_language_search`, `list_tools`,
+ * `list_skills`, `relevance_search`), each also present raw in `generic.otel`.
+ * So a `FROM traces-*` predicate on `attributes.gen_ai.tool.name` DOES see a
+ * skill tool's real id — do NOT narrow this query to `agent_builder.otel`, and
+ * do not "fix" a 0 by adding tool ids to the platform allow-list.
  */
 /**
  * The diagnose step's Agent Builder conversation id, when the step persisted one
@@ -83,11 +105,33 @@ export const toolSpanJoinClauses = ({
 export function createToolRoutingEvaluator({
   traceEsClient,
   log,
+  fetch,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
+  /**
+   * Kibana HTTP handler, used to read the stack's Agent Builder catalog so a 0
+   * can be told apart from "the graded tool does not exist here" (UNMEASURED).
+   * Omitted in unit tests that only exercise the span counting.
+   */
+  fetch?: HttpHandler;
 }): Evaluator {
-  const countToolSpans = async (where: string): Promise<number | undefined> => {
+  let catalogPromise: Promise<AgentBuilderCatalog> | undefined;
+  /** Memoized: the catalog is a property of the stack, not of the example. */
+  const readCatalog = async (): Promise<AgentBuilderCatalog | undefined> => {
+    if (!fetch) return undefined;
+    catalogPromise = catalogPromise ?? readAgentBuilderCatalog({ fetch, log });
+    try {
+      return await catalogPromise;
+    } catch (error) {
+      log.debug(`catalog probe failed: ${error instanceof Error ? error.message : String(error)}`);
+      return undefined;
+    }
+  };
+
+  const countToolSpans = async (
+    where: string
+  ): Promise<{ total: number; required: number } | undefined> => {
     const response = (await traceEsClient.esql.query({
       query: `FROM traces-*\n| WHERE ${where} AND ${TOOL_KIND}\n| STATS tool_calls = COUNT(*),\n  required_tool_calls = COUNT(CASE(attributes.gen_ai.tool.name == "${RULE_TUNING_INVESTIGATE_TOOL_ID}", 1, NULL))`,
     })) as unknown as EsqlResponse;
@@ -100,7 +144,7 @@ export function createToolRoutingEvaluator({
     const required = row[reqIdx] as number | null | undefined;
     if (total == null) return undefined;
     if (total === 0) return undefined; // not reported on this join key
-    return (required ?? 0) > 0 ? 1 : 0;
+    return { total, required: required ?? 0 };
   };
 
   return {
@@ -123,12 +167,49 @@ export function createToolRoutingEvaluator({
       // Stages, in order, using the shared join clauses.
       for (const clause of toolSpanJoinClauses({ traceId, conversationId })) {
         try {
-          const score = await countToolSpans(clause.where);
-          if (score !== undefined) {
+          const counts = await countToolSpans(clause.where);
+          if (counts && counts.required > 0) {
             return {
-              score,
+              score: 1,
               label: undefined,
               explanation: `joined on ${clause.name}`,
+              metadata: undefined,
+            };
+          }
+
+          if (counts) {
+            // The graded tool was not called. Before reporting 0, ask whether this
+            // stack's catalog even carries it: a stack without the skill scores 0 on
+            // every example for an environment reason, which is UNMEASURED, not a
+            // routing failure (and the suite's own kill rule fires on 0s).
+            const catalog = await readCatalog();
+            if (catalog?.readable && !catalog.investigateRuleReachable) {
+              log.warning(
+                `Tool Routing unmeasured: ${RULE_TUNING_INVESTIGATE_TOOL_ID} is not in this ` +
+                  `stack's Agent Builder catalog (${catalog.evidence})`
+              );
+              return {
+                score: null,
+                label: 'unavailable',
+                explanation:
+                  `The graded tool ${RULE_TUNING_INVESTIGATE_TOOL_ID} is absent from this stack's ` +
+                  `Agent Builder catalog, so the review could not call it: ${catalog.evidence}. ` +
+                  `Reported as UNMEASURED — a 0 here would be an environment defect, not a ` +
+                  `routing failure.`,
+                metadata: undefined,
+              };
+            }
+
+            return {
+              score: 0,
+              label: undefined,
+              explanation:
+                `joined on ${clause.name}; ${RULE_TUNING_INVESTIGATE_TOOL_ID} was not called in ` +
+                `${counts.total} TOOL span(s)${
+                  catalog?.readable
+                    ? `, and the catalog carries it (${catalog.evidence}) — a real 0`
+                    : ` (catalog not checked, so treat this 0 as unverified)`
+                }`,
               metadata: undefined,
             };
           }

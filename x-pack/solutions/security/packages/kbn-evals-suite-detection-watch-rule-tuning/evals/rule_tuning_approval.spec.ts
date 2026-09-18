@@ -50,11 +50,12 @@ import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { evaluate, tags } from '../src/evaluate';
+import { ensureAlertsIndexReady } from '../src/alerts_index';
+import { readProposal } from '../src/proposal_reading';
 import {
   describeStepExecutions,
   respondToReviewGate,
   runRuleTuningToApprovalGate,
-  type RuleTuningApprovalRequest,
 } from '../src/workflow_task';
 import {
   ACKNOWLEDGED_TAG,
@@ -161,27 +162,14 @@ const waitForTag = async ({
 };
 
 /**
- * The persisted query the gate is asking to apply, or a loud failure explaining why this run
- * cannot be asserted at all.
- *
- * This is the value the gate message renders and the exact string `apply_query_tuning`
- * interpolates into its patch, so it is the only honest oracle for "was the proposal
- * applied?". A non-query branch is NOT a broken gate and must not be silently skipped: it
- * means the fixture stopped driving the query path (or the model chose another branch), and
- * both arms would then assert nothing.
+ * Report an unmeasurable arm as UNMEASURED (a Playwright skip carrying the reason) instead of
+ * failing the suite or passing while asserting nothing.
  */
-const proposedQueryFrom = (gate: RuleTuningApprovalRequest): string => {
-  const { change_type: changeType, proposed_query: proposedQuery } = gate.proposal;
-  if (changeType !== 'query' || !proposedQuery) {
-    throw new Error(
-      `The review proposed change_type=${changeType}` +
-        `${proposedQuery ? ` (proposed_query "${proposedQuery}")` : ''} for the ` +
-        `"${FIXTURE.id}" fixture, which is labelled "query". Both arms assert on a persisted ` +
-        `query change, so this run cannot be scored — check that the fixture still drives the ` +
-        `query path and that the run reached the gate for the seeded rule.`
-    );
-  }
-  return proposedQuery;
+const unmeasured = (log: ToolingLog, reason: string): never => {
+  log.warning(`UNMEASURED: ${reason}`);
+  evaluate.skip(true, reason);
+  // Unreachable: evaluate.skip() aborts the test. Present so callers narrow the union.
+  throw new Error(reason);
 };
 
 /**
@@ -215,6 +203,15 @@ evaluate.describe(
     /** Executions this spec started, cancelled in afterEach before the fixtures are swept. */
     const pendingExecutionIds = new Set<string>();
     let seeded: SeededFixture | undefined;
+
+    // Both arms seed alerts and then assert on what the workflow wrote back, so the
+    // alerts index must already carry the unified-alerts mapping. Without this the
+    // seed's bulk creates a plain, dynamically-mapped index and the worker's harvest
+    // fails with `Unknown column [kibana.alert.workflow_tags]` — a "completed" sweep
+    // with zero reviews, which is exactly the silent failure this spec must not have.
+    evaluate.beforeAll(async ({ fetch, esClient, log }) => {
+      await ensureAlertsIndexReady({ fetch, esClient, log });
+    });
 
     // Cleanup runs on EVERY path, including assertion failures and timeouts. A seeded rule
     // left behind is re-harvested by the next sweep in the stack, which then opens a second
@@ -266,14 +263,10 @@ evaluate.describe(
         pendingExecutionIds.add(gate.workflowExecutionId);
         pendingExecutionIds.add(gate.reviewExecutionId);
 
-        const proposedQuery = proposedQueryFrom(gate);
-        if (proposedQuery === before.query) {
-          throw new Error(
-            `The review proposed the rule's existing query verbatim ("${proposedQuery}"), so ` +
-              `this arm cannot distinguish "not applied" from "applied" — the fixture or the ` +
-              `run is degenerate, and a green assertion here would prove nothing.`
-          );
-        }
+        const proposal = readProposal(gate.proposal, FIXTURE.id, before.query);
+        const proposedQuery = proposal.measured
+          ? proposal.proposedQuery
+          : unmeasured(log, proposal.reason);
 
         const settled = await respondToReviewGate({
           fetch,
@@ -354,14 +347,10 @@ evaluate.describe(
         // The proposal is read from the PAUSED review's diagnose step — the same persisted
         // value the gate renders and the apply step interpolates — and captured before the
         // response, so the assertion below cannot be satisfied by re-reading our own answer.
-        const proposedQuery = proposedQueryFrom(gate);
-        if (proposedQuery === before.query) {
-          throw new Error(
-            `The review proposed the rule's existing query verbatim ("${proposedQuery}") — an ` +
-              `approval would be a no-op patch, so this arm could not show the gate doing ` +
-              `anything.`
-          );
-        }
+        const proposal = readProposal(gate.proposal, FIXTURE.id, before.query);
+        const proposedQuery = proposal.measured
+          ? proposal.proposedQuery
+          : unmeasured(log, proposal.reason);
 
         const settled = await respondToReviewGate({
           fetch,

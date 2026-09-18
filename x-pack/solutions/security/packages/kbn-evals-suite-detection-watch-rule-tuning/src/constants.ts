@@ -104,3 +104,66 @@ export const DIAGNOSE_STEP_ID = 'diagnose_rule';
  * counts — that line must not be copied over.
  */
 export const RULE_TUNING_INVESTIGATE_TOOL_ID = 'investigate-rule.get_alerts_by_ids';
+
+/**
+ * Agent Builder skill that owns `RULE_TUNING_INVESTIGATE_TOOL_ID`.
+ *
+ * The tuning eval stack's Scout config set does not enable it, so the review's
+ * `diagnose_rule` step cannot call the tool at all and Tool Routing legitimately
+ * has nothing to measure. The suite reads this from the stack's own
+ * `/api/agent_builder/skills` catalog (src/agent_builder_catalog.ts) so a stack
+ * defect is reported as UNMEASURED instead of a 0.000 routing score.
+ */
+export const RULE_TUNING_INVESTIGATE_SKILL_ID = 'investigate-rule';
+
+/**
+ * Whether the eval stack under test is *supposed* to carry the investigate-rule
+ * skill.
+ *
+ * `false` today: enabling it in the Scout config set is a separate change owned
+ * by the config-set owner (see the follow-up card), and until it lands the
+ * honest answer for Tool Routing is UNMEASURED, not 0. Flip this to `true` in
+ * the same change that enables the skill — the suite then fails loudly when the
+ * catalog does not carry it (src/agent_builder_catalog.ts).
+ */
+export const INVESTIGATE_RULE_SKILL_EXPECTED_IN_EVAL_STACK = false;
+
+/**
+ * Alerts index the suite seeds into and the worker's harvest step reads.
+ *
+ * A single hidden index behind this alias, created by the alerting framework
+ * when the security solution bootstraps its rule-data namespace. Seeding into
+ * the name before that happens makes ES auto-create a plain, dynamically-mapped
+ * index instead — see src/alerts_index.ts.
+ */
+export const ALERTS_INDEX = '.alerts-security.alerts-default';
+
+/**
+ * Field whose presence proves the alerts index carries the unified-alerts
+ * mapping rather than a dynamic one. An ES|QL query naming an unmapped column
+ * fails with `verification_exception: Unknown column [kibana.alert.workflow_tags]`,
+ * which is how the seed/security-solution race surfaces in the harvest step.
+ */
+export const ALERTS_WORKFLOW_TAGS_FIELD = 'kibana.alert.workflow_tags';
+
+/** `POST` this to have the security solution install/refresh the alerts index. */
+export const DETECTION_ENGINE_INDEX_API_PATH = '/api/detection_engine/index';
+
+/**
+ * Step id of the worker's `workflow.output` step
+ * (`kbn-workflows/managed/definitions/alertzero/rule_tuning_worker.yaml`). Its
+ * step execution carries the emitted `harvest_failed` / `reviews_requested`
+ * counters — the only place a *failed* harvest is distinguishable from a sweep
+ * that found nothing to tune.
+ */
+export const WORKER_OUTPUT_STEP_ID = 'emit_result';
+
+/**
+ * The worker's harvest step (`elasticsearch.esql.query`). It runs with
+ * `on-failure: continue`, so a query failure leaves the sweep `completed` with
+ * `reviews_requested: 0` — see `assertHarvestSucceeded` in src/workflow_task.ts.
+ */
+export const WORKER_HARVEST_STEP_ID = 'harvest_fp_alerts_by_rule';
+
+/** Advanced setting that decides which connector the workflows' agents resolve. */
+export const GEN_AI_DEFAULT_CONNECTOR_SETTING = 'genAiSettings:defaultAIConnector';

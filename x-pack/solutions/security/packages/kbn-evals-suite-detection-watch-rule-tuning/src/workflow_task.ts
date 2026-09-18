@@ -17,8 +17,11 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import {
+  ALERTS_INDEX,
   RULE_TUNING_WORKER_WORKFLOW_ID,
   RULE_TUNING_REVIEW_WORKFLOW_ID,
+  WORKER_HARVEST_STEP_ID,
+  WORKER_OUTPUT_STEP_ID,
   WORKFLOWS_API_VERSION,
   type ChangeType,
 } from './constants';
@@ -77,6 +80,58 @@ export interface RuleTuningVerdict extends RuleTuningProposal {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * What the worker's `workflow.output` step emitted (`emit_result` in
+ * rule_tuning_worker.yaml).
+ */
+export interface WorkerOutput {
+  reviews_requested?: number;
+  reviews_approved?: number;
+  reviews_failed?: number;
+  rules_applied?: number;
+  harvest_failed?: boolean;
+}
+
+/** The worker's emitted counters, or `undefined` when it never reached its output step. */
+export const readWorkerOutput = (worker: WorkflowExecutionDto): WorkerOutput | undefined => {
+  const outputStep = worker.stepExecutions?.find((step) => step.stepId === WORKER_OUTPUT_STEP_ID);
+  const output = outputStep?.output;
+  return output != null && typeof output === 'object' ? (output as WorkerOutput) : undefined;
+};
+
+/** The harvest step's failure text, when the worker recorded one. */
+const harvestStepError = (worker: WorkflowExecutionDto): string | undefined => {
+  const harvestStep = worker.stepExecutions?.find((step) => step.stepId === WORKER_HARVEST_STEP_ID);
+  return harvestStep?.error ? String(harvestStep.error) : undefined;
+};
+
+/**
+ * A settled worker that reported `harvest_failed: true` has 0 reviews because
+ * its harvest query failed, not because there was nothing to tune.
+ *
+ * The harvest step is `on-failure: continue`, so the sweep still reaches
+ * `completed` and emits its counters — without this assert the run scores as
+ * "0 reviews requested" and the stack defect (a missing/unmapped alerts index,
+ * an ES|QL query that no longer validates) is invisible downstream.
+ */
+export const assertHarvestSucceeded = (worker: WorkflowExecutionDto): WorkerOutput | undefined => {
+  const output = readWorkerOutput(worker);
+  if (output?.harvest_failed !== true) {
+    return output;
+  }
+
+  const error = harvestStepError(worker);
+  throw new Error(
+    `Worker execution ${worker.id} reported harvest_failed=true ` +
+      `(reviews_requested=${output.reviews_requested ?? 0}) — its harvest step ` +
+      `(${WORKER_HARVEST_STEP_ID}) failed, so this run has nothing to review and the sweep ` +
+      `still completed. A failed harvest is NOT "nothing to tune"${
+        error ? `: ${error}` : '.'
+      } Check that ${ALERTS_INDEX} carries the unified-alerts mapping ` +
+      `(src/alerts_index.ts) and that the harvest query still validates on this stack.`
+  );
+};
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
@@ -329,11 +384,22 @@ const findReviewChildrenSince = async (
 };
 
 /** The failure text for a sweep that settled without opening a review child. */
-const noReviewChildError = (workflowExecutionId: string, workerStatus: ExecutionStatus): Error =>
+const noReviewChildError = (
+  workflowExecutionId: string,
+  workerStatus: ExecutionStatus,
+  workerOutput?: WorkerOutput
+): Error =>
   new Error(
     `Worker execution ${workflowExecutionId} settled (status: ${workerStatus}) but opened no ` +
       `review children — the seeded rule was not harvested. Check seed_fp_cluster tags/index and ` +
-      `that the rule is enabled.`
+      `that the rule is enabled.${
+        workerOutput
+          ? ` Worker emitted: harvest_failed=${String(
+              workerOutput.harvest_failed
+            )}, reviews_requested=${workerOutput.reviews_requested ?? 0}, ` +
+            `reviews_failed=${workerOutput.reviews_failed ?? 0}.`
+          : ' The worker never reached its output step, so it emitted no counters at all.'
+      }`
   );
 
 /**
@@ -354,11 +420,13 @@ const soleReviewChild = async ({
   fetch,
   workflowExecutionId,
   workerStatus,
+  workerOutput,
   startedAt,
 }: {
   fetch: HttpHandler;
   workflowExecutionId: string;
   workerStatus: ExecutionStatus;
+  workerOutput?: WorkerOutput;
   startedAt: number;
 }): Promise<WorkflowExecutionListItemDto | undefined> => {
   const reviewChildren = await findReviewChildrenSince(fetch, startedAt);
@@ -373,7 +441,7 @@ const soleReviewChild = async ({
     if (!isTerminal(workerStatus)) {
       return undefined;
     }
-    throw noReviewChildError(workflowExecutionId, workerStatus);
+    throw noReviewChildError(workflowExecutionId, workerStatus, workerOutput);
   }
   return reviewChildren[0];
 };
@@ -383,16 +451,24 @@ const assertSoleReviewChild = async ({
   fetch,
   workflowExecutionId,
   workerStatus,
+  workerOutput,
   startedAt,
 }: {
   fetch: HttpHandler;
   workflowExecutionId: string;
   workerStatus: ExecutionStatus;
+  workerOutput?: WorkerOutput;
   startedAt: number;
 }): Promise<WorkflowExecutionListItemDto> => {
-  const child = await soleReviewChild({ fetch, workflowExecutionId, workerStatus, startedAt });
+  const child = await soleReviewChild({
+    fetch,
+    workflowExecutionId,
+    workerStatus,
+    workerOutput,
+    startedAt,
+  });
   if (!child) {
-    throw noReviewChildError(workflowExecutionId, workerStatus);
+    throw noReviewChildError(workflowExecutionId, workerStatus, workerOutput);
   }
   return child;
 };
@@ -497,10 +573,16 @@ export const runRuleTuningWorkflow = async ({
 
   // Every branch has settled once the worker is terminal; pick the review child
   // this run created (started at/after our run) — older reviews were cancelled above.
+  // `assertHarvestSucceeded` runs first: a settled sweep that reported
+  // harvest_failed=true has 0 reviews because its harvest query failed, and that
+  // must be reported as a failed harvest rather than as "nothing to tune".
+  const workerOutput = assertHarvestSucceeded(worker);
+
   const reviewChild = await assertSoleReviewChild({
     fetch,
     workflowExecutionId,
     workerStatus: worker.status,
+    workerOutput,
     startedAt,
   });
 
@@ -582,6 +664,13 @@ export const runRuleTuningToApprovalGate = async ({
       );
     }
 
+    // A settled sweep that reported harvest_failed=true has 0 reviews because its
+    // harvest query failed (the step is on-failure: continue), so fail on the cause
+    // rather than on the empty child list below.
+    if (isTerminal(worker.status)) {
+      assertHarvestSucceeded(worker);
+    }
+
     // A freshly scheduled sweep has to be picked up by the runtime (and then run its
     // harvest pass) before it can open its review child, so an empty child list here is
     // only meaningful once the worker has settled — `soleReviewChild` returns undefined
@@ -592,6 +681,7 @@ export const runRuleTuningToApprovalGate = async ({
       fetch,
       workflowExecutionId,
       workerStatus: worker.status,
+      workerOutput: readWorkerOutput(worker),
       startedAt,
     });
 

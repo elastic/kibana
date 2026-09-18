@@ -52,6 +52,9 @@ import {
 } from '../src/evaluators/tool_routing';
 import { logRunSummary, withScoreCollection, type ScoreSink } from '../src/evaluators/run_summary';
 import { type ChangeType } from '../src/constants';
+import { assertInvestigateRuleCatalogState } from '../src/agent_builder_catalog';
+import { ensureAlertsIndexReady } from '../src/alerts_index';
+import { assertWorkflowModelMatches, type ConnectorLike } from '../src/model_attribution';
 import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
 
 /** Experiment/dataset name. Also the label on every per-evaluator summary line. */
@@ -366,13 +369,22 @@ evaluate.describe(
         log,
         esClient,
         traceEsClient,
+        connector,
       }: {
         fetch: HttpHandler;
         log: ToolingLog;
         esClient: EsClient;
         traceEsClient: TraceEsClient;
+        connector: ConnectorLike;
       }) => {
         const probeFixture = TUNING_FIXTURES[0];
+
+        // The alerts index has to carry the unified-alerts mapping before the seed
+        // writes: a bulk into a missing alias makes ES create a plain, dynamically
+        // mapped index, and the worker's harvest then dies with `Unknown column
+        // [kibana.alert.workflow_tags]` while still reporting a completed sweep.
+        await ensureAlertsIndexReady({ fetch, esClient, log });
+
         const { seededUuid, ruleId } = await seedRuleAndFpAlerts(
           { fetch, esClient, log },
           probeFixture,
@@ -395,6 +407,16 @@ evaluate.describe(
         }
         await assertToolSpansReachable({ traceEsClient, probe, log });
         log.info(`trace reachability verified (${probe.traceId}) — trace-based evaluators armed`);
+
+        // The graded skill is a property of the stack, not of the run: read the
+        // catalog once so a Tool Routing N/A is attributable (missing skill vs.
+        // missing call) instead of being re-diagnosed by hand every baseline.
+        await assertInvestigateRuleCatalogState({ fetch, log });
+
+        // The pin in src/evaluate.ts decides which connector the workflow's
+        // ai.agent step resolves; this reads the model back off the probe's own
+        // chat spans, so the score docs' task_model cannot disagree with the trace.
+        await assertWorkflowModelMatches({ traceEsClient, probe, connector, log });
       }
     );
 
@@ -442,7 +464,7 @@ evaluate.describe(
         const selectedEvaluators = selectEvaluators([
           changeTypeAccuracy,
           validProposal,
-          createToolRoutingEvaluator({ traceEsClient, log }),
+          createToolRoutingEvaluator({ traceEsClient, log, fetch }),
           tuningQualityJudge,
         ]);
 
@@ -488,9 +510,12 @@ evaluate.describe(
               );
 
               try {
-                // No connector pinning post-split (see runRuleTuningWorkflow): the
-                // worker schema rejects extra inputs, so the review's ai.agent
-                // resolves the space-default connector like the rule-creation suite.
+                // No per-run connector input: the worker schema rejects extra
+                // inputs, so the review's ai.agent resolves the space-default
+                // connector. src/evaluate.ts pins that setting to this project's
+                // connector once per worker, so the workflow runs the model the
+                // score docs are stamped with (asserted against the probe's chat
+                // spans in beforeAll).
                 return await runRuleTuningWorkflow({ fetch, log });
               } finally {
                 await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);

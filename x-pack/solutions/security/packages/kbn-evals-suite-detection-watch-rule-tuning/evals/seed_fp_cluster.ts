@@ -14,6 +14,14 @@
 import { createHash } from 'crypto';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { ALERTS_INDEX } from '../src/constants';
+
+/**
+ * Re-exported for the specs that clean up seeded alerts. The literal lives in
+ * src/constants.ts so the seeding path and the harness's harvest diagnostics
+ * cannot drift apart.
+ */
+export { ALERTS_INDEX };
 
 /**
  * Seeds one detection rule plus a cluster of closed-false-positive alerts for
@@ -40,9 +48,6 @@ interface SeedContext {
   esClient: EsClient;
   log: ToolingLog;
 }
-
-/** Alerts index the harvest reads and the review's tag steps write into the space's index. */
-export const ALERTS_INDEX = '.alerts-security.alerts-default';
 
 /** Entity matrix per fixture: what the diagnose step should "see". */
 const ENTITY_PROFILES: Record<
