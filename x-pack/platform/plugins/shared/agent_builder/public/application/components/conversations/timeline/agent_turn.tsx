@@ -17,8 +17,8 @@ import { AgentResponse } from './agent_response';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
-import type { AgentTurnItem } from './to_timeline_items';
-import { isCompletedTurn, isFailedTurn, isAbortedTurn } from './to_timeline_items';
+import type { AgentTurnItem } from './types';
+import { isCompletedTurn, isFailedTurn, isAbortedTurn } from './timeline_item_utils';
 
 const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', {
   defaultMessage: 'Agent is generating a response',

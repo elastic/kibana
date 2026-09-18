@@ -7,7 +7,7 @@
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import type { AgentTurnItem, TimelineItem } from '../to_timeline_items';
+import type { AgentTurnItem, TimelineItem } from '../types';
 import { createUserMessageEvent } from './user_message_event.factory';
 import { createPromptResponseEvent } from './prompt_response_event.factory';
 import { createExecutionTerminatedEvent } from './execution_terminated_event.factory';

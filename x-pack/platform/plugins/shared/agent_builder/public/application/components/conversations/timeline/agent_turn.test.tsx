@@ -12,7 +12,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { TimelineItem } from './to_timeline_items';
+import type { TimelineItem } from './types';
 import { Timeline } from './timeline';
 
 jest.mock('../../../context/conversation/use_conversation_id', () => ({

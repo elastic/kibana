@@ -19,7 +19,7 @@ interface ReleaseLocalContentParams {
 /**
  * Fetches saved history after an execution finished and drops the local copies whose saved
  * replacement is present, matched by server ids. A failed fetch is not an execution failure:
- * the pending message is cleared as before this ticket, and the draft is left to its own rules.
+ * the pending message is cleared anyway, and the live events are left to the stream service.
  */
 export const releaseLocalContent = async ({
   refetch,

@@ -409,6 +409,7 @@ export {
   resumeExecutionId,
   parseExecutionId,
   executionTerminatedEventId,
+  executionStepEventId,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,

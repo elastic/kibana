@@ -12,7 +12,7 @@ import { useStreamingContext } from '../context/streaming/streaming_context';
 import { useConversationStatus } from './use_conversation';
 import { useCurrentUser } from './use_current_user';
 import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
-import type { TimelineItem } from '../components/conversations/timeline/to_timeline_items';
+import type { TimelineItem } from '../components/conversations/timeline/types';
 import { createUserMessageEvent } from '../components/conversations/timeline/items/user_message_event.factory';
 import { useOnMessageFromOtherParticipant } from './use_on_message_from_other_participant';
 

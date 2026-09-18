@@ -18,7 +18,7 @@ import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
-import type { TimelineItem } from './to_timeline_items';
+import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
 jest.mock('../../../hooks/use_conversation', () => ({
@@ -118,14 +118,25 @@ describe('TimelineConnector', () => {
     });
   };
 
-  it('keeps the pending message and completed draft visible after the stream ends', () => {
+  it('shows a running turn under the message until the stream reports the run started', () => {
+    setState({ conversation: conversationWith([]), pendingMessage: 'hello' });
+    render(<TimelineConnector />);
+
+    expect(renderedItems()).toEqual([
+      'userMessage:pending::user_message:',
+      'agentTurn:active:running',
+    ]);
+  });
+
+  it('keeps the pending message and the finished turn visible after the stream ends', () => {
     setState({ conversation: conversationWith([]), pendingMessage: 'hello' });
     render(<TimelineConnector />);
 
     streamCompletedExecution();
 
+    // `execution_started` renames the local copy to the id the server gave it.
     expect(renderedItems()).toEqual([
-      'userMessage:pending::user_message:',
+      'userMessage:round-1::user_message:',
       'agentTurn:round-1::execution:completed',
     ]);
   });
@@ -167,7 +178,7 @@ describe('TimelineConnector', () => {
     expect(renderedItems()).toEqual([
       'userMessage:round-0::user_message:',
       'agentTurn:round-0::execution:completed',
-      'userMessage:pending::user_message:',
+      'userMessage:round-1::user_message:',
       'agentTurn:round-1::execution:completed',
     ]);
   });
@@ -219,7 +230,7 @@ describe('TimelineConnector', () => {
     expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:saved-1');
   });
 
-  it('observes the live draft for a conversation that has not been fetched yet', () => {
+  it('observes the live events of a conversation that has not been fetched yet', () => {
     setState({ conversation: undefined, pendingMessage: 'hello' });
     render(<TimelineConnector />);
 
@@ -232,7 +243,7 @@ describe('TimelineConnector', () => {
     });
 
     expect(renderedItems()).toEqual([
-      'userMessage:pending::user_message:',
+      'userMessage:round-1::user_message:',
       'agentTurn:round-1::execution:running',
     ]);
   });

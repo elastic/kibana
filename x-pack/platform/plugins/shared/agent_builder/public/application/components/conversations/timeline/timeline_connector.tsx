@@ -11,7 +11,7 @@ import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id'
 import { RoundsScreenReaderStatus } from '../conversation_rounds/rounds_screen_reader_status';
 import { useTimelineItems } from './use_timeline_items';
 import { Timeline } from './timeline';
-import type { AgentTurnItem } from './to_timeline_items';
+import type { AgentTurnItem } from './types';
 
 /**
  * @todo: errors not handled yet. Probably should read the streaming context error state here

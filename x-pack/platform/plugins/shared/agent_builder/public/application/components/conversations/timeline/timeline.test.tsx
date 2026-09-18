@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { TimelineItem } from './to_timeline_items';
+import type { TimelineItem } from './types';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { Timeline } from './timeline';
 
