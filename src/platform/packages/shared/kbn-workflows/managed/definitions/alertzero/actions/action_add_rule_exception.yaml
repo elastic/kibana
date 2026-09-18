@@ -1,0 +1,133 @@
+version: "1"
+name: Add detection rule exception
+description: >
+  AlertZero action: adds an exception item to an existing detection rule, so the
+  rule stops alerting on events matching every one of the item's conditions.
+  Executed by the investigation proposal gate once an analyst approves, so the
+  exception is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Add detection rule exception
+    description: Adds a scoped exception to a detection rule's own exception list, narrowing what the rule alerts on without changing its logic.
+    category: configure
+    # Narrower than a rule edit: the rule keeps its logic and coverage for
+    # everything outside the exception's conditions.
+    impact: low
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            The exception item to create. Separate from the edit-rule action
+            because this is not a rule patch: it creates an exception object on
+            the rule's own default exception list rather than changing a rule
+            field.
+          properties:
+            rule_id:
+              type: string
+              maxLength: 36
+              description: >-
+                Saved-object id of the rule. The step's own schema caps this at
+                36 characters because it takes the rule UUID, not a signature id.
+            name:
+              type: string
+              maxLength: 256
+              description: Name shown on the exception item in the Detection Rules UI.
+            description:
+              type: string
+              maxLength: 2048
+              description: Why the exception exists, for whoever reads it later.
+            entries:
+              type: array
+              minItems: 1
+              maxItems: 20
+              description: >-
+                Conditions the exception matches on. ALL entries must match for
+                an event to be excluded, so each entry narrows the exception
+                further. Alternative conditions need separate exception items.
+              items:
+                oneOf:
+                  - type: object
+                    properties:
+                      field:
+                        type: string
+                        maxLength: 512
+                      operator:
+                        type: string
+                        enum: [is, is_not, matches, does_not_match]
+                      value:
+                        type: string
+                        minLength: 1
+                        maxLength: 2048
+                    required: [field, operator, value]
+                  - type: object
+                    properties:
+                      field:
+                        type: string
+                        maxLength: 512
+                      operator:
+                        type: string
+                        enum: [is_one_of, is_not_one_of]
+                      values:
+                        type: array
+                        minItems: 1
+                        maxItems: 100
+                        items:
+                          type: string
+                          maxLength: 2048
+                    required: [field, operator, values]
+                  - type: object
+                    properties:
+                      field:
+                        type: string
+                        maxLength: 512
+                      operator:
+                        type: string
+                        enum: [exists, does_not_exist]
+                    required: [field, operator]
+          required:
+            - rule_id
+            - name
+            - description
+            - entries
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: id
+    type: string
+  - name: outcome
+    type: string
+steps:
+  # Entries are passed as a whole array. `${{ }}` keeps them real objects: the
+  # step's input schema would reject the rendered string the plain form produces.
+  - name: create_exception
+    type: security.createRuleException
+    with:
+      rule_id: "{{ inputs.actionInput.rule_id }}"
+      name: "{{ inputs.actionInput.name }}"
+      description: "{{ inputs.actionInput.description }}"
+      entries: "${{ inputs.actionInput.entries }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      id: "{{ steps.create_exception.output.id }}"
+      # `created`, `skipped` or `overwritten`, per the step's own contract.
+      outcome: "{{ steps.create_exception.output.outcome }}"

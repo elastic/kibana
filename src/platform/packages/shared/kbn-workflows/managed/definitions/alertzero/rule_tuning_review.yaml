@@ -533,7 +533,7 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "manual" %}Manual change, no automated action{% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
         {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
@@ -611,45 +611,112 @@ steps:
         {% endif %}
         {% endif %}
 
+  # One fork, four exclusive arms: the change type the agent chose decides which
+  # proposal reaches the gate. Every arm is a single call to the same gate
+  # workflow, differing only in the action it names, the input it hands over and
+  # the impact it declares. Separate arms rather than one templated call because
+  # a YAML object cannot be assembled conditionally. Guarded on the
+  # investigation, since without one there is nowhere to propose. No default arm:
+  # a review with no diagnosis, or an unknown change type, proposes nothing, its
+  # alerts stay untagged, and the next sweep retries it.
+  #
   # The proposal gate records the recommendation on the investigation, parks on
-  # the analyst's decision for up to 72h, and on approval runs the edit-rule action
-  # as the approver. A gate timeout fails the gate, which fails this run before the
-  # tag steps: the alerts stay unreviewed and the next sweep proposes the rule again
-  # with a fresh diagnosis, while the investigation stays open because nobody decided.
-  - name: propose_action
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: "{{ steps.compose_proposal.output.comment }}"
-        actionWorkflowId: system-alertzero-action-edit-rule
-        actionInput:
-          id: "{{ inputs.rule_uuid }}"
-          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-        impact: medium
-        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-        # Query edits always wait for an analyst; matches the action's approvalPolicy.
-        autoApprove: false
+  # the analyst's decision for up to 72h, and on approval runs the named action
+  # as the approver. A gate timeout fails the gate, which fails this run before
+  # the tag steps: the alerts stay unreviewed and the next sweep proposes the rule
+  # again with a fresh diagnosis, while the investigation stays open because
+  # nobody decided.
+  - name: propose_tuning
+    type: switch
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    expression: "{{ steps.diagnose_rule.output.structured_output.change_type }}"
+    cases:
+      - match: query
+        steps:
+          - name: propose_query
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                # Query edits always wait for an analyst; matches the action's approvalPolicy.
+                autoApprove: false
 
-  # Same gate without an action: the analyst carries the change out themselves, so
-  # approval is the whole lifecycle. Needs a diagnosis, since the investigation now
-  # exists before one.
-  - name: propose_manual
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.diagnose_rule.output.structured_output.change_type == 'manual' }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: "{{ steps.compose_proposal.output.comment }}"
-        impact: low
-        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+      # Same edit-rule action as the query arm, carrying a different set of
+      # fields. The action patches only what it is given, so the query, schedule
+      # and exceptions are untouched. The impact differs: re-ranking an alert
+      # cannot lose a detection.
+      - match: risk_score
+        steps:
+          - name: propose_risk_score
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  # `${{ }}` so the risk score reaches the action as a number: the
+                  # gate validates actionInput against the action's schema at
+                  # creation, and a stringified integer is rejected there rather
+                  # than at apply time.
+                  risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
+                  severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+                # Lower than a query edit. The action declares no impact of its
+                # own, so this is what the queue records and shows.
+                impact: low
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                # Settings edits always wait for an analyst; matches the action's approvalPolicy.
+                autoApprove: false
+
+      # Not a rule edit: this creates an exception item on the rule's own list,
+      # so it has its own action rather than a field on the patch. The rule keeps
+      # its logic and its coverage outside the exception's conditions.
+      - match: exception
+        steps:
+          - name: propose_exception
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-add-rule-exception
+                actionInput:
+                  rule_id: "{{ inputs.rule_uuid }}"
+                  name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                  description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
+                  # `${{ }}` so the entries arrive as real objects. The plain
+                  # form renders them as a string, which the action's schema
+                  # rejects at proposal creation.
+                  entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                impact: low
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                # Exceptions always wait for an analyst; matches the action's approvalPolicy.
+                autoApprove: false
+
+      # Same gate without an action: the analyst carries the change out
+      # themselves, so approval is the whole lifecycle.
+      - match: manual
+        steps:
+          - name: propose_manual
+            type: workflow.execute
+            with:
+              workflow-id: system-create-investigation-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                impact: low
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
   # The gate reports its outcome on two independent axes: `decision` is what the
   # analyst concluded (`approved` / `dismissed`, absent until someone decides),
@@ -657,64 +724,37 @@ steps:
   # when there was nothing to run, `expired` when nobody answered). Spelled out
   # per outcome rather than derived from a single flag so a run that never
   # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
+  # Exactly one of the four proposal steps runs per review, so these or-chains
+  # never see two outcomes at once.
   #
-  # NOTE: `approved` still reads `succeeded` for the action path, so a decision
-  # the analyst approved but whose patch failed counts as not approved. The
-  # decision axis can now tell those apart — left as-is here because this change
-  # is only migrating the renamed values.
+  # A dismissal is read off `decision`, because every dismissed proposal reports
+  # `status: no_action` whatever its action was. Applied is read off `status`,
+  # because only `succeeded` means the action actually ran.
+  #
+  # NOTE: `approved` reads `succeeded` for the three action paths, so a change
+  # the analyst approved but whose apply failed counts as not approved here. The
+  # decision axis can now tell those apart; left as-is because this change only
+  # migrates the renamed values.
   - name: record_proposal_action_decision
     type: data.set
     with:
-      applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
+      applied: >-
+        ${{ steps.propose_query.output.status == 'succeeded'
+          or steps.propose_risk_score.output.status == 'succeeded'
+          or steps.propose_exception.output.status == 'succeeded' }}
       approved: >-
-        ${{ steps.propose_action.output.status == 'succeeded'
+        ${{ steps.propose_query.output.status == 'succeeded'
+          or steps.propose_risk_score.output.status == 'succeeded'
+          or steps.propose_exception.output.status == 'succeeded'
           or steps.propose_manual.output.decision == 'approved' }}
       dismissed: >-
-        ${{ steps.propose_action.output.decision == 'dismissed'
+        ${{ steps.propose_query.output.decision == 'dismissed'
+          or steps.propose_risk_score.output.decision == 'dismissed'
+          or steps.propose_exception.output.decision == 'dismissed'
           or steps.propose_manual.output.decision == 'dismissed' }}
 
-  ### this is temporray, unitl excepion/rule score proposals is implemented
-  - name: review_tuning
-    type: waitForApproval
-    if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' or steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
-    timeout: "72h"
-    with:
-      approveLabel: Approve change
-      rejectLabel: Dismiss
-      message: |-
-        {{ steps.compose_proposal.output.comment }}
-
-  ### this is temporray, unitl excepion/rule score proposals is implemented
-  - name: apply_exception_tuning
-    type: security.createRuleException
-    if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
-    on-failure:
-      continue: true
-    with:
-      rule_id: "{{ inputs.rule_uuid }}"
-      name: "Tuning: {{ steps.fetch_rule.output.name }}"
-      description: "Added by the rule tuning workflow."
-      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
-
-  ### this is temporray, unitl excepion/rule score proposals is implemented
-  - name: apply_risk_score_tuning
-    type: security.patchRule
-    if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
-    on-failure:
-      continue: true
-    with:
-      patch:
-        id: "{{ inputs.rule_uuid }}"
-        risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
-        severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
-
   # The action ran inside the gate, so its result is not visible here; re-read the
-  # rule to refresh the attachment with the query that actually landed.
+  # rule to refresh the attachment with the change that actually landed.
   - name: refetch_rule
     type: kibana.request
     if: "${{ steps.record_proposal_action_decision.output.applied == true }}"
@@ -747,40 +787,13 @@ steps:
     on-failure:
       continue: true
 
-  # A skipped step leaves no execution record. Query success requires a returned
-  # rule id; the other error checks are paired with their apply gates. Failed
-  # changes stay untagged so a later sweep can retry.
-  - name: record_apply_results
-    type: data.set
-    with:
-      query_applied: >-
-        ${{ steps.record_proposal_action_decision.output.applied == true and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
-      exception_applied: >-
-        ${{ steps.review_tuning.output.response.approved == true
-          and steps.diagnose_rule.output.structured_output.change_type == 'exception'
-          and steps.apply_exception_tuning.error == null }}
-      risk_score_applied: >-
-        ${{ steps.review_tuning.output.response.approved == true
-          and steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
-          and steps.apply_risk_score_tuning.error == null }}
-
-  # Liquid cannot parenthesise conditions, so the OR-of-ANDs for rule_patched is
-  # split into a second step that reads the already-resolved individual flags.
-  - name: record_outcome
-    type: data.set
-    with:
-      rule_patched: >-
-        ${{ steps.record_apply_results.output.query_applied == true
-          or steps.record_apply_results.output.exception_applied == true
-          or steps.record_apply_results.output.risk_score_applied == true }}
-
-  # Dismissals arrive from either gate: the proposal gate for query and manual,
-  # the interim in-run gate for exception and risk score.
+  # No per-change-type apply flags: every change now runs inside the gate's
+  # action, and only the query, risk score and exception paths carry one, so
+  # `applied` already means "a change landed on the rule". The manual path has no
+  # action and can never set it.
   - name: mark_alerts_dismissed
     type: security.setAlertTags
-    if: >-
-      ${{ steps.record_proposal_action_decision.output.dismissed == true
-        or steps.review_tuning.output.response.approved == false }}
+    if: "${{ steps.record_proposal_action_decision.output.dismissed == true }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
@@ -791,7 +804,7 @@ steps:
 
   - name: mark_alerts_applied
     type: security.setAlertTags
-    if: "${{ steps.record_outcome.output.rule_patched == true }}"
+    if: "${{ steps.record_proposal_action_decision.output.applied == true }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
@@ -831,14 +844,11 @@ steps:
     on-failure:
       continue: true
 
-  # Liquid evaluates right-to-left, so the conversation check gates both
-  # dismissal sources without parentheses.
   - name: close_investigation_dismissed
     type: ai.conversation.metadata.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_proposal_action_decision.output.dismissed == true
-        or steps.review_tuning.output.response.approved == false }}
+        and steps.record_proposal_action_decision.output.dismissed == true }}
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
@@ -853,10 +863,7 @@ steps:
     status: completed
     with:
       rule_uuid: "{{ inputs.rule_uuid }}"
-      # Two approval sources: the proposal gate (query, manual) and the interim
-      # in-run gate (exception, risk_score). A plain or-chain, since Liquid has no
-      # parentheses.
-      approved: >-
-        ${{ steps.record_proposal_action_decision.output.approved == true
-          or steps.review_tuning.output.response.approved == true }}
-      applied: "${{ steps.record_outcome.output.rule_patched == true }}"
+      # One approval source now that every change type decides on the
+      # investigation: the proposal gate.
+      approved: "${{ steps.record_proposal_action_decision.output.approved == true }}"
+      applied: "${{ steps.record_proposal_action_decision.output.applied == true }}"
