@@ -11,7 +11,7 @@ xpack.alertzero.enabled: true
 ```
 
 - **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
-- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `true`). It still feeds mock Skills / Investigations. Worker settings and Watch grouping are live either way.
+- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
 
 Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
 
@@ -41,9 +41,9 @@ Definitions still exist in `@kbn/workflows/managed` (code registry only). Worker
 
 The only always-on cost of a soft flag is the tiny public plugin entry bundle (~page-load limit); it registers nothing when disabled.
 
-### Live mode caveats (`useMockData: false`)
+### Live data mode (default)
 
-Before enabling live projection in shared or production environments:
+Real data is served by default. Keep these in mind when running AlertZero in shared or production environments:
 
 - Watch reads require only `alertzero_read`; AlertZero owns the catalog projection and its managed definitions. Recent-run enrichment soft-fails when execution history is unavailable.
 - Settings writes require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary.
@@ -114,7 +114,7 @@ OpenAPI → Zod schemas live in `@kbn/alertzero-common`. Regenerate with:
 
 ```bash
 cd x-pack/solutions/security/packages/kbn-alertzero-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 ## Managed workflows
@@ -225,7 +225,7 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 1. **Schema** — add the field to the Worker's extras object in `@kbn/alertzero-common/impl/schemas/components/<watch>_watch_settings.schema.yaml` (`additionalProperties: false`, required) and run `yarn openapi:generate` in that package.
 2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`.
 3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run.
-4. **Control** — build a real control in the Watch's component under `public/pages/watches/custom_settings/` (registered by Worker id in `registry.ts`). It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
+4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
 

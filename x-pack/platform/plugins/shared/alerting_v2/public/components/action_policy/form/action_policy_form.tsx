@@ -24,7 +24,6 @@ import { NotificationControlsSection } from './components/notification_controls_
 import { NotificationSummary } from './components/notification_summary';
 import { QuickFilters } from './components/quick_filters';
 import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
-import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
 
@@ -115,21 +114,6 @@ export const ActionPolicyForm = () => {
             </EuiFormRow>
           )}
         />
-        <Controller
-          name="tags"
-          control={control}
-          render={({ field }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.actionPolicy.form.tags', {
-                defaultMessage: 'Tags',
-              })}
-              labelAppend={optionalLabel}
-              fullWidth
-            >
-              <TagsInput value={field.value} onChange={field.onChange} />
-            </EuiFormRow>
-          )}
-        />
       </EuiDescribedFormGroup>
 
       <EuiHorizontalRule margin="l" />
@@ -178,7 +162,8 @@ export const ActionPolicyForm = () => {
                   placeholder={i18n.translate(
                     'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
                     {
-                      defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
+                      defaultMessage:
+                        'e.g. data.host.name : "my-host.com" and severity : "critical"',
                     }
                   )}
                 />
