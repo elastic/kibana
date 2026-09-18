@@ -95,10 +95,11 @@ export class UpdateMonitorAPI {
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
     const maintenanceWindows = await this.getMaintenanceWindows(decryptedMonitors, patchById);
+    const editMonitorAPI = new AddEditMonitorAPI(this.routeContext);
 
     for (const decryptedMonitor of decryptedMonitors) {
       const patch = patchById.get(decryptedMonitor.id) ?? {};
-      await this.processMonitor(decryptedMonitor, patch, maintenanceWindows);
+      await this.processMonitor(decryptedMonitor, patch, maintenanceWindows, editMonitorAPI);
     }
 
     await this.rejectNameConflictsWithExistingMonitors(updates);
@@ -158,7 +159,8 @@ export class UpdateMonitorAPI {
   private async processMonitor(
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
     patch: Partial<EncryptedSyntheticsMonitor>,
-    maintenanceWindows?: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[] | undefined,
+    editMonitorAPI: AddEditMonitorAPI
   ) {
     const monitorId = decryptedMonitor.id;
 
@@ -195,7 +197,6 @@ export class UpdateMonitorAPI {
       return;
     }
 
-    const editMonitorAPI = new AddEditMonitorAPI(this.routeContext);
     let normalizedMonitor: MonitorFields;
     try {
       editMonitorAPI.validateMonitorType(merged as MonitorFields, prevAttrs as MonitorFields);
@@ -231,10 +232,9 @@ export class UpdateMonitorAPI {
     }
 
     /*
-     * `normalizeMonitor` already resolved (and cached on `editMonitorAPI`) the
-     * private locations covering this monitor's spaces — same fetch the
-     * single-monitor PUT relies on. A public-only monitor leaves it `[]`, which
-     * `checkPrivateLocationSpaces` short-circuits.
+     * `normalizeMonitor` resolves private locations for this monitor's spaces
+     * (cached on `editMonitorAPI` for the request). Public-only leaves `[]`,
+     * which `checkPrivateLocationSpaces` short-circuits.
      */
     const plSpaceError = this.checkPrivateLocationSpaces(
       decodedMonitor,
