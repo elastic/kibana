@@ -88,11 +88,12 @@ export const getLegendAction = (
     }
 
     const filterableColumns = filterActionData.map((data) => data.table.columns[data.column]);
+    const filterValues = filterActionData.map((data) => data.value);
     // isFilterable gates the action (disabled state + whether it runs); warningMessage is
     // display-only and can be suppressed (e.g. for dates) without affecting isFilterable.
-    const isFilterable = !isEsqlMode || isFilterableColumnSet(filterableColumns);
+    const isFilterable = !isEsqlMode || isFilterableColumnSet(filterableColumns, filterValues);
     const warningMessage = isEsqlMode
-      ? getFilterDrilldownWarningMessage(filterableColumns)
+      ? getFilterDrilldownWarningMessage(filterableColumns, filterValues)
       : undefined;
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {

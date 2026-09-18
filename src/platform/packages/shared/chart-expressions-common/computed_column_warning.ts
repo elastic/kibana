@@ -48,21 +48,45 @@ const isNonFilterableComputedColumn = (column: DatatableColumn): boolean => {
   return column.meta?.sourceParams?.isSourceFieldFilterable !== true;
 };
 
-export const isFilterableColumnSet = (columns: Array<DatatableColumn | undefined>): boolean => {
-  const defined = columns.filter((c): c is DatatableColumn => c != null);
-  return !defined.some((col) => isNonFilterableComputedColumn(col));
+// match_phrase query cannot find an empty string because of how text fields are tokenized and analyzed
+const isBlankEsqlTextField = (column: DatatableColumn, value: unknown): boolean =>
+  column.meta?.esType === 'text' && (value == null || value === '');
+
+export const isFilterableColumnSet = (
+  columns: Array<DatatableColumn | undefined>,
+  values?: unknown[]
+): boolean => {
+  return !columns.some((col, i) => {
+    if (col == null) return false;
+    if (isNonFilterableComputedColumn(col)) return true;
+    return values !== undefined && isBlankEsqlTextField(col, values[i]);
+  });
 };
 
 /**
  * Returns the warning message to show when filterable chart columns are computed ES|QL fields
- * that cannot be used for filtering.
+ * that cannot be used for filtering, or when a blank text field value is present.
  */
 export const getFilterDrilldownWarningMessage = (
-  columns: Array<DatatableColumn | undefined>
+  columns: Array<DatatableColumn | undefined>,
+  values?: unknown[]
 ): string | undefined => {
   const defined = columns.filter((c): c is DatatableColumn => c != null);
   if (defined.length === 0) {
     return undefined;
+  }
+
+  if (
+    values !== undefined &&
+    columns.some((col, i) => col != null && isBlankEsqlTextField(col, values[i]))
+  ) {
+    return i18n.translate(
+      'chartExpressionsCommon.computedColumn.blankTextFieldFilterDisabledDescription',
+      {
+        defaultMessage:
+          "You can't apply a filter or drill down from a blank text field value. To filter by blank values, use a keyword field instead.",
+      }
+    );
   }
 
   // Suppress the message for date columns (product decision).
