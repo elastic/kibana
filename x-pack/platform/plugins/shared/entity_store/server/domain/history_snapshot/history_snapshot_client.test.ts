@@ -10,13 +10,19 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { HistorySnapshotClient } from './history_snapshot_client';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
+import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
+import { DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS } from '../saved_objects';
 
 jest.mock('../../infra/elasticsearch');
+jest.mock('./expire_history_snapshots');
 
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
 const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
 const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
   typeof updateByQueryWithScript
+>;
+const mockDeleteExpiredHistorySnapshots = deleteExpiredHistorySnapshots as jest.MockedFunction<
+  typeof deleteExpiredHistorySnapshots
 >;
 
 const mockGlobalStateStarted = {
@@ -40,16 +46,19 @@ function createMockGlobalStateClient(overrides?: { status?: 'started' | 'stopped
 
 describe('HistorySnapshotClient', () => {
   const namespace = 'default';
+  let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let client: HistorySnapshotClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeleteExpiredHistorySnapshots.mockResolvedValue({ deleted: [] });
+    mockLogger = loggerMock.create();
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockGlobalStateClient = createMockGlobalStateClient();
     client = new HistorySnapshotClient({
-      logger: loggerMock.create(),
+      logger: mockLogger,
       esClient: mockEsClient,
       namespace,
       globalStateClient:
@@ -114,6 +123,13 @@ describe('HistorySnapshotClient', () => {
           lastError: undefined,
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          namespace,
+          retentionDays: 30,
+        })
+      );
     });
 
     it('uses nested entity field access in the reset script (no flat dotted keys)', () => {
@@ -146,6 +162,7 @@ describe('HistorySnapshotClient', () => {
           lastError: undefined,
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
     it('returns skipped when history snapshot status is not started', async () => {
@@ -168,6 +185,7 @@ describe('HistorySnapshotClient', () => {
       expect(mockCreateIndex).not.toHaveBeenCalled();
       expect(mockReindex).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(0);
     });
 
     it('returns error when createIndex throws', async () => {
@@ -186,6 +204,7 @@ describe('HistorySnapshotClient', () => {
           lastError: { message: 'index creation failed', timestamp: expect.any(String) },
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
     it('returns error when reindex throws', async () => {
@@ -204,6 +223,29 @@ describe('HistorySnapshotClient', () => {
           lastError: { message: 'reindex failed', timestamp: expect.any(String) },
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('still succeeds when retention cleanup throws', async () => {
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
+      mockDeleteExpiredHistorySnapshots.mockRejectedValue(new Error('cleanup failed'));
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(true);
+      if (result.ok && !('skipped' in result)) {
+        expect(result.docCount).toBe(0);
+      }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'history snapshot: retention cleanup failed: cleanup failed'
+      );
     });
 
     it('returns error when updateByQueryWithScript throws', async () => {
@@ -231,6 +273,49 @@ describe('HistorySnapshotClient', () => {
           },
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls deleteExpiredHistorySnapshots with configured retentionDays when set in global state', async () => {
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
+        ...mockGlobalStateStarted,
+        historySnapshot: { ...mockGlobalStateStarted.historySnapshot, retentionDays: 7 },
+      });
+
+      await client.runHistorySnapshot();
+
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          retentionDays: 7,
+        })
+      );
+    });
+
+    it('calls deleteExpiredHistorySnapshots with default retention when retentionDays is not configured', async () => {
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
+
+      await client.runHistorySnapshot();
+
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+        })
+      );
     });
   });
 });

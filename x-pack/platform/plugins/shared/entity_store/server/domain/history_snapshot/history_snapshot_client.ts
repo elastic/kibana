@@ -13,12 +13,14 @@ import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
+import { DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS } from '../saved_objects';
 import {
   getHistorySnapshotIndexName,
   getLegacySecurityHistorySnapshotIndexName,
 } from '../asset_manager/history_snapshot_index';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
+import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
 
 export type RunHistorySnapshotResult =
   | { ok: true; historySnapshotIndex: string; docCount: number; resetCount: number }
@@ -79,6 +81,7 @@ export class HistorySnapshotClient {
         ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
         : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
 
+    let result: RunHistorySnapshotResult;
     try {
       await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
 
@@ -127,7 +130,7 @@ export class HistorySnapshotClient {
       await this.updateGlobalStateOnSuccess(globalState);
       entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
       entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
-      return {
+      result = {
         ok: true,
         historySnapshotIndex,
         docCount,
@@ -135,10 +138,29 @@ export class HistorySnapshotClient {
       };
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
+      this.logger.error(`history snapshot failed: ${caughtError.message}`, {
+        error: caughtError,
+      });
       await this.updateGlobalStateOnError(globalState, caughtError);
-      return { ok: false, error: new Error('History snapshot failed') };
+      result = { ok: false, error: new Error('History snapshot failed') };
+    } finally {
+      try {
+        await deleteExpiredHistorySnapshots({
+          esClient: this.esClient,
+          namespace: this.namespace,
+          retentionDays:
+            globalState.historySnapshot?.retentionDays ?? DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+          logger: this.logger,
+          abortSignal,
+        });
+      } catch (cleanupErr) {
+        this.logger.error(
+          `history snapshot: retention cleanup failed: ${getErrorMessage(cleanupErr)}`
+        );
+      }
     }
+
+    return result;
   }
 
   private async updateGlobalStateOnSuccess(globalState: EntityStoreGlobalState): Promise<void> {
