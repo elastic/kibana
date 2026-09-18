@@ -141,7 +141,10 @@ export class EscalationsService {
       const union = [...prev, ...toAdd.filter((id) => !prev.includes(id))];
 
       if (union.length > MAX_ESCALATION_LINKED_INVESTIGATIONS) {
-        throw new TooManyLinkedInvestigationsError(union.length, MAX_ESCALATION_LINKED_INVESTIGATIONS);
+        throw new TooManyLinkedInvestigationsError(
+          union.length,
+          MAX_ESCALATION_LINKED_INVESTIGATIONS
+        );
       }
 
       const { conversation } = await client.patchMetadata(escalationId, {

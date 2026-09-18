@@ -73,7 +73,9 @@ apiTest.describe(
       });
       if (createResponse.status !== 200 || !createResponse.body.id) {
         throw new Error(
-          `Setup: failed to create escalation (status ${createResponse.status}): ${JSON.stringify(createResponse.body)}`
+          `Setup: failed to create escalation (status ${createResponse.status}): ${JSON.stringify(
+            createResponse.body
+          )}`
         );
       }
       escalationId = createResponse.body.id;
