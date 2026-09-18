@@ -355,7 +355,7 @@ export function UnifiedHistogramChart({
             prependRight: (
               <span style={{ marginRight: 4 }}>
                 <ApproximationBadge
-                  isApproximationApplied={isApproximationApplied}
+                  isApproximationApplied={chartVisible && isApproximationApplied}
                   data-test-subj="unifiedHistogramApproximationApplied"
                 />
               </span>
