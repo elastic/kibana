@@ -330,6 +330,10 @@ describe('EpisodeDetailsPage', () => {
 
     await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata'));
 
+    const metadataSection = screen.getByTestId('stubMetadataSection');
+    expect(metadataSection.parentElement).toHaveStyleRule('block-size', '100%');
+    expect(metadataSection.parentElement).toHaveStyleRule('min-block-size', '0');
+    expect(metadataSection.parentElement?.parentElement).toHaveStyleRule('min-block-size', '0');
     expect(mockMetadataSection).toHaveBeenCalledWith(
       expect.objectContaining({ decreaseAvailableHeightBy: Number.MAX_SAFE_INTEGER }),
       expect.anything()

@@ -24,6 +24,7 @@ export interface AlertEpisodeMetadataTableProps {
   dataTimestamp?: string;
   dateFormat?: string;
   calloutMarginSize?: Exclude<EuiPaddingSize, 'none'>;
+  controlsPaddingSize?: Exclude<EuiPaddingSize, 'none'>;
 }
 
 export const AlertEpisodeMetadataTable = ({
@@ -34,6 +35,7 @@ export const AlertEpisodeMetadataTable = ({
   dataTimestamp,
   dateFormat,
   calloutMarginSize,
+  controlsPaddingSize,
 }: AlertEpisodeMetadataTableProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -68,7 +70,23 @@ export const AlertEpisodeMetadataTable = ({
       <EuiFlexItem
         grow
         css={css`
-          min-height: 0;
+          min-block-size: 0;
+
+          > * {
+            block-size: 100%;
+            min-block-size: 0;
+
+            ${controlsPaddingSize
+              ? css`
+                  > :has(input[type='search']),
+                  > :has([role='switch']) {
+                    box-sizing: border-box;
+                    max-inline-size: 100%;
+                    padding-inline: ${euiTheme.size[controlsPaddingSize]};
+                  }
+                `
+              : undefined}
+          }
         `}
       >
         {renderTable({ hit, dataView })}

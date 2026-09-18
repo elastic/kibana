@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiLink,
@@ -102,18 +101,9 @@ const metadataBodyStyles = css`
   }
 `;
 
-/** Fills the body, and pads the doc viewer's controls but not its table. */
-const metadataTabStyles = (euiTheme: EuiThemeComputed) => css`
+/** Fills the flyout body. */
+const metadataTabStyles = css`
   block-size: 100%;
-
-  /* Keep the controls inset while the document table itself remains edge-to-edge. */
-  :has(> input[type='search']) {
-    padding-inline: ${euiTheme.size.m};
-  }
-
-  :has(> button[role='switch']) {
-    padding-inline: ${euiTheme.size.m};
-  }
 `;
 
 const interactiveBadgeLabelCss = css`
@@ -516,7 +506,7 @@ export const AlertEpisodeDetailsFlyout = ({
               <Global styles={metadataBodyStyles} />
               <div
                 className={METADATA_SCOPE_CLASS}
-                css={metadataTabStyles(euiTheme)}
+                css={metadataTabStyles}
                 data-test-subj="alertingV2EpisodeFlyoutMetadataScope"
               >
                 <AlertEpisodeMetadataSection
@@ -524,6 +514,7 @@ export const AlertEpisodeDetailsFlyout = ({
                   services={services}
                   decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
                   calloutMarginSize="m"
+                  controlsPaddingSize="m"
                 />
               </div>
             </FlyoutTemplate.Body.TabPanel>

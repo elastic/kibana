@@ -455,6 +455,7 @@ export function EpisodeDetailsPage() {
               paddingSize="none"
               css={css`
                 min-width: 0;
+                min-block-size: 0;
               `}
             >
               {actualMainPanel === 'timeline' ? (
@@ -471,7 +472,15 @@ export function EpisodeDetailsPage() {
                   episodeStart={episode?.first_timestamp}
                 />
               ) : actualMainPanel === 'metadata' ? (
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+                <EuiPanel
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="l"
+                  css={css`
+                    block-size: 100%;
+                    min-block-size: 0;
+                  `}
+                >
                   <AlertEpisodeMetadataSection
                     episodeId={episodeId}
                     services={metadataServices}

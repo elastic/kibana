@@ -68,7 +68,7 @@ jest.mock('./metadata_section', () => ({
         <input type="search" />
       </div>
       <div>
-        <button type="button" role="switch" aria-checked={false} />
+        <input type="checkbox" role="switch" aria-checked={false} />
       </div>
     </div>
   )),
@@ -174,19 +174,15 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 
-  it('activates the document viewer flex layout and pads its semantic controls', () => {
+  it('activates the document viewer flex layout and requests padded controls', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
 
-    const metadataScope = screen.getByTestId('alertingV2EpisodeFlyoutMetadataScope');
-    expect(metadataScope).toHaveStyleRule('padding-inline', '12px', {
-      target: ":has(> input[type='search'])",
-    });
-    expect(metadataScope).toHaveStyleRule('padding-inline', '12px', {
-      target: ":has(> button[role='switch'])",
-    });
     expect(mockMetadataSection).toHaveBeenCalledWith(
-      expect.objectContaining({ decreaseAvailableHeightBy: Number.MAX_SAFE_INTEGER }),
+      expect.objectContaining({
+        decreaseAvailableHeightBy: Number.MAX_SAFE_INTEGER,
+        controlsPaddingSize: 'm',
+      }),
       expect.anything()
     );
   });
