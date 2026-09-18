@@ -10714,9 +10714,6 @@ packages:
   '@elastic/esql-ast@4.26.0':
     resolution: {integrity: sha512-YxyYqe3i7Oyan0cdaEs0wIt0BdXjiq+RLCbwayfyVAJcmLTvdQ1wjYfWGa7CflUJbX3Cwr8YyHoBxeIm1uO9Ww==}
 
-  '@elastic/esql-definitions@4.25.0':
-    resolution: {integrity: sha512-4/rn0qt1y5O/pLVLwGlGYOKUiG68uF2kOWNwphot8CLbQP7umgpr9E1kwFHM1eVRn2lc4/HFqS5Gng+XcrUBPQ==}
-
   '@elastic/esql-definitions@4.26.0':
     resolution: {integrity: sha512-cZaR1OqVvtHF+MOgxP8/djPa81OnhkbGRNWTCdGVIWo7ZYwlUXruC45k5Lg5Cy3CWKz10bC3nEh7xRpe0osKwA==}
 
@@ -27579,8 +27576,6 @@ snapshots:
       '@elastic/esql-types': 4.22.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.25.0': {}
-
   '@elastic/esql-definitions@4.26.0': {}
 
   '@elastic/esql-grammar@4.22.0':
@@ -27805,7 +27800,7 @@ snapshots:
 
   '@elastic/prismjs-esql@4.25.0':
     dependencies:
-      '@elastic/esql-definitions': 4.25.0
+      '@elastic/esql-definitions': 4.26.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
