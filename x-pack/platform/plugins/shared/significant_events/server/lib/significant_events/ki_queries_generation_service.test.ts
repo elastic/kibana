@@ -156,5 +156,4 @@ describe('generateKIQueries', () => {
 
     expect(identifyKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('systemPrompt');
   });
-
 });

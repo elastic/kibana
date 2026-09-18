@@ -64,11 +64,7 @@ describe('SignificantEventsPlugin setup', () => {
 
     expect(
       core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
-    ).toEqual([
-      detectionsDataStream,
-      eventsDataStream,
-      knowledgeIndicatorsDataStream,
-    ]);
+    ).toEqual([detectionsDataStream, eventsDataStream, knowledgeIndicatorsDataStream]);
   });
 
   it('registers a callback without accessing start services', () => {
