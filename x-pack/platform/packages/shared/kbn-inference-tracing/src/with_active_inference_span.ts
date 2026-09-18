@@ -14,8 +14,8 @@ import {
   EXECUTION_ID_BAGGAGE_KEY,
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
   CONVERSATION_ID_BAGGAGE_KEY,
-  WORKFLOW_RUN_ID_BAGGAGE_KEY,
 } from './baggage';
+import { getWorkflowRunIdFromContext, WORKFLOW_RUN_ID_ATTRIBUTE_NAME } from './workflow_run_id';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 import { GenAISemanticConventions } from './types';
 
@@ -35,7 +35,8 @@ export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx
   const executionId = baggage?.getEntry(EXECUTION_ID_BAGGAGE_KEY)?.value;
   const experimentId = baggage?.getEntry(EVAL_EXPERIMENT_ID_BAGGAGE_KEY)?.value;
   const conversationId = baggage?.getEntry(CONVERSATION_ID_BAGGAGE_KEY)?.value;
-  const workflowRunId = baggage?.getEntry(WORKFLOW_RUN_ID_BAGGAGE_KEY)?.value;
+  // Carried in a non-propagating context value, not baggage: see `withWorkflowRunIdContext`.
+  const workflowRunId = getWorkflowRunIdFromContext(parentContext);
 
   return withActiveSpan(
     name,
@@ -49,7 +50,7 @@ export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx
         ...(conversationId
           ? { [GenAISemanticConventions.GenAIConversationId]: conversationId }
           : {}),
-        ...(workflowRunId ? { [WORKFLOW_RUN_ID_BAGGAGE_KEY]: workflowRunId } : {}),
+        ...(workflowRunId ? { [WORKFLOW_RUN_ID_ATTRIBUTE_NAME]: workflowRunId } : {}),
         ...opts.attributes,
       },
     },

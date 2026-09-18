@@ -11,7 +11,7 @@ import {
   ElasticGenAIAttributes,
   GenAISemanticConventions,
   UserAttributes,
-  WORKFLOW_RUN_ID_BAGGAGE_KEY,
+  WORKFLOW_RUN_ID_ATTRIBUTE_NAME,
   parseJsonAttr,
   type GenAIInputMessage,
   type GenAIOutputMessage,
@@ -77,9 +77,9 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
   // (the run that owns the `ai.agent` step, rather than a workflow the agent invoked), so it
   // falls under the same `agentBuilder:tracing:includeRealIds` policy — a second attribute
   // name must not re-expose what the setting anonymizes.
-  const workflowRunId = result[WORKFLOW_RUN_ID_BAGGAGE_KEY];
+  const workflowRunId = result[WORKFLOW_RUN_ID_ATTRIBUTE_NAME];
   if (workflowRunId != null) {
-    result[WORKFLOW_RUN_ID_BAGGAGE_KEY] = toHashedId(String(workflowRunId));
+    result[WORKFLOW_RUN_ID_ATTRIBUTE_NAME] = toHashedId(String(workflowRunId));
   }
 
   return result;

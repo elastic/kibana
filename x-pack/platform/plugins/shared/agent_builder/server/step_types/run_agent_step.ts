@@ -17,8 +17,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { context as otelContext, propagation } from '@opentelemetry/api';
-import { WORKFLOW_RUN_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import { withWorkflowRunIdContext } from '@kbn/inference-tracing';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import {
@@ -47,29 +46,6 @@ export const parseMaxStepSize = (value: string): number | undefined => {
     return undefined;
   }
 };
-
-/**
- * Wraps `cb` in an OTel context carrying the workflow execution's run id
- * (`.workflows-executions` document id) as W3C baggage. Every inference span
- * emitted inside `cb` — including the descendant `ai.agent` spans created by
- * `executionService.executeAgent` — is tagged with this id as a plain span
- * attribute (`kibana.workflows.run_id`), giving evals/observability a stable
- * join key between a workflow execution and its agent spans even though the
- * workflow engine's own trace id (an `elastic-apm-node` transaction id) lives
- * in a disconnected id space from the OTel trace the agent spans are recorded
- * under (see https://github.com/elastic/kibana/issues/291310).
- */
-function withWorkflowRunIdBaggage<T>(workflowRunId: string | undefined, cb: () => T): T {
-  if (!workflowRunId) {
-    return cb();
-  }
-  const ctx = otelContext.active();
-  const baggage = (propagation.getBaggage(ctx) ?? propagation.createBaggage()).setEntry(
-    WORKFLOW_RUN_ID_BAGGAGE_KEY,
-    { value: workflowRunId }
-  );
-  return otelContext.with(propagation.setBaggage(ctx, baggage), cb);
-}
 
 /**
  * Server step definition for the "ai.agent" step.
@@ -166,7 +142,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         // engine's APM trace id and the OTel trace id these spans are
         // recorded under live in disconnected id spaces).
         const workflowRunId = context.contextManager.getContext()?.execution?.id;
-        const { events$ } = await withWorkflowRunIdBaggage(workflowRunId, () =>
+        const { events$ } = await withWorkflowRunIdContext(workflowRunId, () =>
           executionService.executeAgent({
             mode: AgentExecutionMode.conversation,
             request,
@@ -198,7 +174,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           })
         );
 
-        const events = await withWorkflowRunIdBaggage(workflowRunId, () =>
+        const events = await withWorkflowRunIdContext(workflowRunId, () =>
           firstValueFrom(
             events$.pipe(
               tap((event) => {

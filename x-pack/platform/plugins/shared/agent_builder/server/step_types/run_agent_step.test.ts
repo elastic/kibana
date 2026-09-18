@@ -27,7 +27,8 @@ import { context as otelContext, propagation } from '@opentelemetry/api';
 import { resources } from '@elastic/opentelemetry-node/sdk';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import {
-  WORKFLOW_RUN_ID_BAGGAGE_KEY,
+  WORKFLOW_RUN_ID_ATTRIBUTE_NAME,
+  getWorkflowRunIdFromContext,
   initInferenceTracerProvider,
   shutdownInferenceTracerProvider,
   withActiveInferenceSpan,
@@ -954,16 +955,19 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       otelContextManager.disable();
     });
 
-    it('sets WORKFLOW_RUN_ID_BAGGAGE_KEY baggage around executeAgent when the workflow run id is known', async () => {
-      let seenBaggageValue: string | undefined;
+    it('carries the workflow run id in context around executeAgent, without baggage', async () => {
+      let seenRunId: string | undefined;
+      let baggageHadRunId: boolean | undefined;
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = {
         executeAgent: jest.fn().mockImplementation(async () => {
-          const baggage = propagation.getBaggage(otelContext.active());
-          seenBaggageValue = baggage?.getEntry(WORKFLOW_RUN_ID_BAGGAGE_KEY)?.value;
+          seenRunId = getWorkflowRunIdFromContext(otelContext.active());
+          baggageHadRunId = !!propagation
+            .getBaggage(otelContext.active())
+            ?.getEntry(WORKFLOW_RUN_ID_ATTRIBUTE_NAME);
           return { executionId: 'exec-1', events$ };
         }),
       };
@@ -983,19 +987,21 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         })
       );
 
-      expect(seenBaggageValue).toBe('wf-run-42');
+      expect(seenRunId).toBe('wf-run-42');
+      // Baggage would be injected into every outbound connector/model request made by the
+      // agent, bypassing the `includeRealIds` anonymization.
+      expect(baggageHadRunId).toBe(false);
     });
 
-    it('does not set baggage when the workflow run id is unknown (default context mock)', async () => {
-      let baggageWasPresent = true;
+    it('carries no run id when the workflow run id is unknown (default context mock)', async () => {
+      let seenRunId: string | undefined = 'unset';
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = {
         executeAgent: jest.fn().mockImplementation(async () => {
-          const baggage = propagation.getBaggage(otelContext.active());
-          baggageWasPresent = !!baggage?.getEntry(WORKFLOW_RUN_ID_BAGGAGE_KEY);
+          seenRunId = getWorkflowRunIdFromContext(otelContext.active());
           return { executionId: 'exec-1', events$ };
         }),
       };
@@ -1004,15 +1010,15 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const step = getRunAgentStepDefinition(serviceManager);
       await step.handler(createContext({ input: { message: 'hello' } }));
 
-      expect(baggageWasPresent).toBe(false);
+      expect(seenRunId).toBeUndefined();
     });
 
     it('tags an inference span created while the deferred event stream is consumed', async () => {
       // The agent keeps emitting spans while `events$` is drained, and that drain happens
-      // after `executeAgent()` has already returned — so the baggage has to be
+      // after `executeAgent()` has already returned — so the run id has to be
       // re-established around the subscription too, not only around the call that produces
-      // the stream. This drives a real inference tracer, so it fails if the baggage wrapper
-      // around `events$`, the baggage read, or the attribute mapping is dropped.
+      // the stream. This drives a real inference tracer, so it fails if the context wrapper
+      // around `events$`, the context read, or the attribute mapping is dropped.
       const captured: tracing.ReadableSpan[] = [];
       const captureProcessor: tracing.SpanProcessor = {
         onStart: jest.fn(),
@@ -1057,7 +1063,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         );
 
         expect(captured).toHaveLength(1);
-        expect(captured[0].attributes[WORKFLOW_RUN_ID_BAGGAGE_KEY]).toBe('wf-run-42');
+        expect(captured[0].attributes[WORKFLOW_RUN_ID_ATTRIBUTE_NAME]).toBe('wf-run-42');
       } finally {
         await shutdownInferenceTracerProvider();
       }
