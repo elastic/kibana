@@ -143,8 +143,8 @@ export class SavedObjectsPageObject extends FtrService {
 
   async waitTableIsLoaded() {
     return await this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '*[data-test-subj="savedObjectsTable"] :not(.euiBasicTable-loading)'
+      const isLoaded = await this.find.existsByCssSelector(
+        '[data-test-subj="savedObjectsTable"] .euiBasicTable:not(.euiBasicTable-loading)'
       );
       if (isLoaded) {
         return true;
