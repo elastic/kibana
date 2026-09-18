@@ -308,9 +308,6 @@ export interface ProposalChartsSummaryResponse {
   buckets: ProposalChartsSummaryBucket[];
 }
 
-/** Proposal is no longer pending — the analyst cannot approve or dismiss it. */
-export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
-
 /**
  * Whether a human can still act on this proposal.
  *
