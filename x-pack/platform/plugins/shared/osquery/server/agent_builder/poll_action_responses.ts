@@ -58,12 +58,57 @@ export interface PollActionResponsesResult {
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
+
+const asNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
+/**
+ * Host/agent identity of a result document.
+ *
+ * Query columns live under `osquery` while the host identity stays at the
+ * document root (`agent.id` / `agent.name` from the ECS fields the results
+ * search strategy selects, with `elastic_agent.id` and `agent_id` as
+ * fallbacks). A live query can be dispatched to many agents at once, so rows
+ * without this metadata are indistinguishable from each other and forensic
+ * output from one host can be attributed to another.
+ */
+const extractRowProvenance = (source: Record<string, unknown>): Record<string, unknown> => {
+  const agent = asRecord(source.agent);
+  const elasticAgent = asRecord(source.elastic_agent);
+  const host = asRecord(source.host);
+
+  const agentId =
+    asNonEmptyString(agent?.id) ??
+    asNonEmptyString(elasticAgent?.id) ??
+    asNonEmptyString(source.agent_id);
+  const agentName =
+    asNonEmptyString(agent?.name) ??
+    asNonEmptyString(host?.hostname) ??
+    asNonEmptyString(host?.name);
+
+  return {
+    ...(agentId !== undefined && { agent_id: agentId }),
+    ...(agentName !== undefined && { agent_name: agentName }),
+  };
+};
+
 const extractRowFromHit = (source: Record<string, unknown>): Record<string, unknown> => {
   const nested =
     (source.osquery as Record<string, unknown> | undefined) ??
     (source['osquery.result'] as Record<string, unknown> | undefined);
 
-  return nested ?? source;
+  const row = nested ?? source;
+  const provenance = extractRowProvenance(source);
+
+  // Only fill keys the SQL row does not already define: provenance must never
+  // overwrite a column the query itself selected.
+  const missingProvenance = Object.fromEntries(
+    Object.entries(provenance).filter(([key]) => !(key in row))
+  );
+
+  return Object.keys(missingProvenance).length > 0 ? { ...row, ...missingProvenance } : row;
 };
 
 /**

@@ -204,4 +204,151 @@ describe('pollActionResponses', () => {
     expect(result.status).toBe('partial');
     expect(result.errorAgents).toBe(1);
   });
+
+  // github-actions review #4975398844: result documents keep the query columns
+  // under `osquery` and the host identity at the document root, so a query
+  // dispatched to several agents used to emit rows with nothing to tell them
+  // apart — forensic output from one host could be attributed to another.
+  describe('row provenance', () => {
+    const twoAgentResults = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              agent: { id: 'agent-a', name: 'host-a' },
+              osquery: { pid: 1, name: 'launchd' },
+            },
+          },
+          {
+            _source: {
+              agent: { id: 'agent-b', name: 'host-b' },
+              osquery: { pid: 2, name: 'svchost' },
+            },
+          },
+        ],
+      },
+    };
+
+    it('keeps per-row agent identity for a multi-agent dispatch', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(2))
+        .mockResolvedValueOnce(twoAgentResults);
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 2,
+      });
+
+      expect(result.rows).toEqual([
+        { pid: 1, name: 'launchd', agent_id: 'agent-a', agent_name: 'host-a' },
+        { pid: 2, name: 'svchost', agent_id: 'agent-b', agent_name: 'host-b' },
+      ]);
+    });
+
+    it('reads provenance from the document root when the ECS agent object is absent', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              { _source: { agent_id: 'a1', host: { hostname: 'host-a' }, osquery: { pid: 1 } } },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([{ pid: 1, agent_id: 'a1', agent_name: 'host-a' }]);
+    });
+
+    it('falls back to elastic_agent.id and never overwrites a selected column', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  elastic_agent: { id: 'agent-from-elastic-agent' },
+                  // The query selected its own `agent_id` column: provenance
+                  // must not clobber query output.
+                  osquery: { pid: 1, agent_id: 'value-selected-by-the-query' },
+                },
+              },
+              {
+                _source: {
+                  elastic_agent: { id: 'agent-from-elastic-agent' },
+                  osquery: { pid: 2 },
+                },
+              },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([
+        { pid: 1, agent_id: 'value-selected-by-the-query' },
+        { pid: 2, agent_id: 'agent-from-elastic-agent' },
+      ]);
+    });
+
+    it('adds provenance for rows nested under `osquery.result`', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  agent: { id: 'agent-a', name: 'host-a' },
+                  'osquery.result': { pid: 1 },
+                },
+              },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([{ pid: 1, agent_id: 'agent-a', agent_name: 'host-a' }]);
+    });
+
+    it('leaves rows untouched when the document carries no identity at all', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({ hits: { hits: [{ _source: { osquery: { pid: 1 } } }] } });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([{ pid: 1 }]);
+    });
+  });
 });
