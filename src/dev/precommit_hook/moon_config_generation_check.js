@@ -43,7 +43,7 @@ export class MoonConfigGenerationCheck extends PrecommitCheck {
     const affectedProjects = files
       .map((f) => f.getRelativePath())
       .filter((f) => f.endsWith('moon.yml') || f.endsWith('moon.extend.yml'))
-      .map((file) => path.dirname(file))
+      .map((file) => path.dirname(file).replace(/\\/g, '/'))
       .filter((v, i, a) => a.indexOf(v) === i) // unique
       .flatMap((dir) => {
         const projectName = dependencyLookup[dir];
