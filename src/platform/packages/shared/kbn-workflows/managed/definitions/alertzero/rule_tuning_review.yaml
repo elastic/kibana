@@ -250,6 +250,11 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
+    # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_agentic
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_rule_tuning_review
+    aggregate-by: alertzero_parent
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
