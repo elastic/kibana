@@ -52,6 +52,9 @@ groups:
           eck: ga
           self: ga
           serverless: preview
+        note: |
+          :applies_to: serverless: ga
+          This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.
 
   - group: Custom branding
     id: kibana-custom-branding-settings
