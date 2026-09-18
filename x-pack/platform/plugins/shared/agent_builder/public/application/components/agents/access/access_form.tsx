@@ -88,9 +88,6 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
   );
 };
 
-const sameEntry = (a: AgentAccessControlEntry, b: AgentAccessControlEntry): boolean =>
-  getAccessControlEntryKey(a) === getAccessControlEntryKey(b);
-
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
@@ -123,11 +120,15 @@ export const AccessForm: React.FC<AccessFormProps> = ({
   };
 
   const handleChangeRole = (target: AgentAccessControlEntry, role: AgentAccessControlRole) => {
-    onChange(entries.map((e) => (sameEntry(e, target) ? { ...e, role } : e)));
+    const targetKey = getAccessControlEntryKey(target);
+
+    onChange(entries.map((e) => (getAccessControlEntryKey(e) === targetKey ? { ...e, role } : e)));
   };
 
   const handleRemove = (target: AgentAccessControlEntry) => {
-    onChange(entries.filter((e) => !sameEntry(e, target)));
+    const targetKey = getAccessControlEntryKey(target);
+
+    onChange(entries.filter((e) => getAccessControlEntryKey(e) !== targetKey));
   };
 
   return (
