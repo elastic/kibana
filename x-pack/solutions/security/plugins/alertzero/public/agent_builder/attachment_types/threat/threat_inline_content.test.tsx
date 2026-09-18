@@ -19,9 +19,12 @@ import type { ThreatAttachment } from './types';
 const buildAttachment = (data: ThreatAttachment['data']): ThreatAttachment =>
   ({ id: 'att-1', type: 'security.threat', data } as ThreatAttachment);
 
+const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+
 const renderProps = (attachment: ThreatAttachment, http: HttpStart) => ({
   attachment,
   http,
+  navigation,
   isSidebar: false,
 });
 

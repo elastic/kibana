@@ -17,6 +17,14 @@ import type { HuntCorrelationAttachment } from './types';
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
   ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
 
+const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+
+const renderProps = (attachment: HuntCorrelationAttachment) => ({
+  attachment,
+  navigation,
+  isSidebar: false,
+});
+
 const baseData: HuntCorrelationAttachment['data'] = {
   anchors: [
     { kind: 'hash', value: 'abc123' },
@@ -31,17 +39,16 @@ describe('HuntCorrelationInlineContent', () => {
   it('renders the empty state for malformed data', () => {
     render(
       <HuntCorrelationInlineContent
-        attachment={buildAttachment(undefined as unknown as HuntCorrelationAttachment['data'])}
-        isSidebar={false}
+        {...renderProps(
+          buildAttachment(undefined as unknown as HuntCorrelationAttachment['data'])
+        )}
       />
     );
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders anchors, diamond scores, and thresholds from a valid payload', () => {
-    render(
-      <HuntCorrelationInlineContent attachment={buildAttachment(baseData)} isSidebar={false} />
-    );
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(baseData))} />);
     expect(screen.getByTestId(HUNT_CORRELATION_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('abc123')).toBeInTheDocument();
     expect(screen.getByText('APT-99')).toBeInTheDocument();
@@ -62,7 +69,7 @@ describe('HuntCorrelationInlineContent', () => {
         { value: 'missing-kind' },
       ] as unknown as HuntCorrelationAttachment['data']['anchors'],
     };
-    render(<HuntCorrelationInlineContent attachment={buildAttachment(data)} isSidebar={false} />);
+    render(<HuntCorrelationInlineContent {...renderProps(buildAttachment(data))} />);
     expect(screen.getByText('valid-anchor')).toBeInTheDocument();
     expect(screen.queryByText('missing-kind')).not.toBeInTheDocument();
   });
@@ -70,8 +77,7 @@ describe('HuntCorrelationInlineContent', () => {
   it('shows the empty-anchors sentinel when anchors is empty', () => {
     render(
       <HuntCorrelationInlineContent
-        attachment={buildAttachment({ ...baseData, anchors: [] })}
-        isSidebar={false}
+        {...renderProps(buildAttachment({ ...baseData, anchors: [] }))}
       />
     );
     expect(screen.getByText('No anchors recorded')).toBeInTheDocument();
@@ -80,8 +86,7 @@ describe('HuntCorrelationInlineContent', () => {
   it('shows the empty-diamond-scores sentinel when diamond_scores is empty', () => {
     render(
       <HuntCorrelationInlineContent
-        attachment={buildAttachment({ ...baseData, diamond_scores: [] })}
-        isSidebar={false}
+        {...renderProps(buildAttachment({ ...baseData, diamond_scores: [] }))}
       />
     );
     expect(screen.getByText('No diamond scores recorded')).toBeInTheDocument();

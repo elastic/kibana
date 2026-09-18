@@ -23,6 +23,14 @@ const buildAttachment = (
     data,
   } as SignificantSecurityEventAttachment);
 
+const navigation = { spaceId: 'default', prependPath: (path: string) => path };
+
+const renderProps = (attachment: SignificantSecurityEventAttachment) => ({
+  attachment,
+  navigation,
+  isSidebar: false,
+});
+
 const baseData = {
   title: 'Suspicious lateral movement',
   severity: 'high' as const,
@@ -44,20 +52,14 @@ describe('SignificantSecurityEventInlineContent', () => {
   it('renders the empty state for malformed data', () => {
     render(
       <SignificantSecurityEventInlineContent
-        attachment={buildAttachment({} as SignificantSecurityEventAttachment['data'])}
-        isSidebar={false}
+        {...renderProps(buildAttachment({} as SignificantSecurityEventAttachment['data']))}
       />
     );
     expect(screen.getByTestId(SSE_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders every field from a valid payload', () => {
-    render(
-      <SignificantSecurityEventInlineContent
-        attachment={buildAttachment(baseData)}
-        isSidebar={false}
-      />
-    );
+    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />);
     expect(screen.getByTestId(SSE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('Suspicious lateral movement')).toBeInTheDocument();
     expect(screen.getByText('high (0.8)')).toBeInTheDocument();
@@ -82,9 +84,7 @@ describe('SignificantSecurityEventInlineContent', () => {
         { what: 'missing at' },
       ] as unknown as SignificantSecurityEventAttachment['data']['timeline'],
     };
-    render(
-      <SignificantSecurityEventInlineContent attachment={buildAttachment(data)} isSidebar={false} />
-    );
+    render(<SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />);
     expect(screen.getByText('valid entry')).toBeInTheDocument();
     expect(screen.queryByText('bad at type')).not.toBeInTheDocument();
     expect(screen.queryByText('missing at')).not.toBeInTheDocument();
@@ -93,8 +93,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   it('shows the empty-timeline sentinel when there are no entries', () => {
     render(
       <SignificantSecurityEventInlineContent
-        attachment={buildAttachment({ ...baseData, timeline: [] })}
-        isSidebar={false}
+        {...renderProps(buildAttachment({ ...baseData, timeline: [] }))}
       />
     );
     expect(screen.getByText('No timeline entries recorded')).toBeInTheDocument();
@@ -103,8 +102,7 @@ describe('SignificantSecurityEventInlineContent', () => {
   it('shows the no-entities sentinel when entities is empty', () => {
     render(
       <SignificantSecurityEventInlineContent
-        attachment={buildAttachment({ ...baseData, entities: [] })}
-        isSidebar={false}
+        {...renderProps(buildAttachment({ ...baseData, entities: [] }))}
       />
     );
     expect(screen.getByText('No entities recorded')).toBeInTheDocument();
