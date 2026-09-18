@@ -4398,6 +4398,8 @@ components:
     payload_workflow:
       type: object
       description: The payload for a workflow user action, recorded when a user runs a workflow from a case.
+      required:
+        - workflow
       properties:
         workflow:
           type: object
