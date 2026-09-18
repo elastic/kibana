@@ -39,8 +39,12 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
     children,
     primaryAction,
     secondaryActions,
+    tone,
+    blastRadius,
   }: {
     children?: React.ReactNode;
+    tone?: string;
+    blastRadius?: { variant: string; items: Array<{ id: string; text?: string }> };
     primaryAction?: {
       label: string;
       onClick: () => void;
@@ -54,7 +58,7 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
       'data-test-subj'?: string;
     }>;
   }) => (
-    <div data-test-subj="approval-content">
+    <div data-test-subj="approval-content" data-tone={tone}>
       {primaryAction && (
         <button
           onClick={primaryAction.onClick}
@@ -73,6 +77,13 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
         >
           {a.label}
         </button>
+      ))}
+      {/* Surfaced so the tone and the blast-radius rows are observable: the real
+          component renders them as props rather than as children. */}
+      {blastRadius?.items?.map((item) => (
+        <div key={item.id} data-test-subj={`blast-radius-${item.id}`}>
+          {item.text}
+        </div>
       ))}
       {children}
     </div>
@@ -181,6 +192,42 @@ describe('ProposalApprovalCard', () => {
       setupMocks(null);
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('danger-callout')).toBeInTheDocument();
+    });
+  });
+
+  describe('displayed impact', () => {
+    it('shows a revised impact rather than the action metadata it replaced', () => {
+      // An action-backed proposal whose impact a revision raised. The queue
+      // sorts by the row's impact, so a card that preferred the action's
+      // declared impact would display the value the revision replaced and
+      // contradict the order the analyst is looking at.
+      setupMocks(
+        baseProposal({
+          impact: 'high',
+          action: { name: 'Isolate host', impact: 'low' },
+        })
+      );
+
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
+      expect(getByTestId('blast-radius-impact')).toHaveTextContent('high impact');
+    });
+
+    it("falls back to the action's impact when the proposal sets none", () => {
+      // The action's value is the default for a proposal that never overrode
+      // it, which is the case the old precedence was written for.
+      setupMocks(
+        baseProposal({
+          impact: undefined,
+          action: { name: 'Isolate host', impact: 'critical' },
+        })
+      );
+
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByTestId('approval-content')).toHaveAttribute('data-tone', 'danger');
+      expect(getByTestId('blast-radius-impact')).toHaveTextContent('critical impact');
     });
   });
 

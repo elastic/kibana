@@ -120,12 +120,24 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
           .then(() => {
             indexCreatedBySuite = true;
           })
-          .catch((error: { statusCode?: number }) => {
-            if (error?.statusCode === 400) {
-              return; // resource_already_exists_exception — another worker won the race.
+          .catch(
+            (error: {
+              statusCode?: number;
+              body?: { error?: { type?: string } };
+              meta?: { body?: { error?: { type?: string } } };
+            }) => {
+              // Only the concurrent-create race is benign. Every other 400 here
+              // means the write target is not what this seed assumes —
+              // `invalid_alias_name_exception` above all, which is the exact
+              // failure this helper exists to prevent — and carrying on would
+              // run the suite against a stale plain index instead of the alias.
+              const type = error?.body?.error?.type ?? error?.meta?.body?.error?.type;
+              if (error?.statusCode === 400 && type === 'resource_already_exists_exception') {
+                return;
+              }
+              throw error;
             }
-            throw error;
-          })
+          )
       )
       .then(() => undefined);
   }

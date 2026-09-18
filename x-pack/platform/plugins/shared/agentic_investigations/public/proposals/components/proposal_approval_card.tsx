@@ -202,7 +202,12 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     // is settled without anyone having decided anything.
     const decision = liveProposal.decision;
 
-    const impact = liveProposal.action?.impact ?? liveProposal.impact;
+    // The row's own impact first: a revision can override it, and it is the
+    // value the queue sorts by, so preferring the action's declared impact
+    // would let an approved revision display the impact it replaced. The
+    // action's value is only the default for a proposal that never set one.
+    // (`category` keeps the opposite precedence — a revision cannot change it.)
+    const impact = liveProposal.impact ?? liveProposal.action?.impact;
     const tone =
       impact === 'high' || impact === 'critical' ? ('danger' as const) : ('primary' as const);
 
