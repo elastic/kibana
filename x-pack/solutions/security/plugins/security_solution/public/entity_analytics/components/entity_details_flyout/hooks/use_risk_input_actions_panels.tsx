@@ -120,7 +120,6 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         ),
         id: 0,
         items: withGroupSeparators([
-          timelineActions,
           hasCasesPermissions
             ? [
                 {
@@ -132,6 +131,7 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
                 },
               ]
             : [],
+          timelineActions,
         ]),
       },
     ];

@@ -116,8 +116,8 @@ describe('useRiskInputActionsPanels', () => {
     const { getAllByRole, getByTestId } = customRender();
 
     expect(getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
-      'Add to new timeline',
       'Add to case',
+      'Add to new timeline',
     ]);
     expect(getByTestId('securityActionMenuGroupSeparator')).toBeInTheDocument();
     expect(
