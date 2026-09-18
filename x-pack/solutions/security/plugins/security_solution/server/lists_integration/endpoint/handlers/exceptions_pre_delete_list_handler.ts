@@ -13,7 +13,7 @@ import type {
   ExceptionsListPreDeleteListServerExtension,
 } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { EndpointError } from '../../../../common/endpoint/errors';
+import { EndpointHttpError } from '../../../endpoint/errors';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
 const MAX_REFERENCING_RULES = 10000;
@@ -30,8 +30,9 @@ export const getExceptionsPreDeleteListHandler = (
     // reference this list, and treating "cannot verify" as "not referenced" would allow
     // deleting a list that rules still depend on.
     if (!request) {
-      throw new EndpointError(
-        `Unable to verify detection rule references for exception list [${data.list.list_id}]: no request in context`
+      throw new EndpointHttpError(
+        `Unable to verify detection rule references for exception list [${data.list.list_id}]: no request in context`,
+        403
       );
     }
 
@@ -46,8 +47,9 @@ export const getExceptionsPreDeleteListHandler = (
     });
 
     if (authorizedRuleTypes.size === 0) {
-      throw new EndpointError(
-        `Unable to verify detection rule references for exception list [${data.list.list_id}]: not authorized to read detection rules`
+      throw new EndpointHttpError(
+        `Unable to verify detection rule references for exception list [${data.list.list_id}]: not authorized to read detection rules`,
+        403
       );
     }
 

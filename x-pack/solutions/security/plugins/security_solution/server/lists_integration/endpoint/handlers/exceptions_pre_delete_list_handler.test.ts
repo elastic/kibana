@@ -103,6 +103,9 @@ describe('Exceptions pre delete list handler', () => {
     await expect(
       handler({ context: { ...context, request: undefined }, data })
     ).rejects.toThrowError(/Unable to verify detection rule references/);
+    await expect(
+      handler({ context: { ...context, request: undefined }, data })
+    ).rejects.toMatchObject({ statusCode: 403 });
     expect(endpointAppContextService.getRulesClient).not.toHaveBeenCalled();
   });
 
@@ -115,6 +118,7 @@ describe('Exceptions pre delete list handler', () => {
     await expect(handler({ context, data })).rejects.toThrowError(
       /not authorized to read detection rules/
     );
+    await expect(handler({ context, data })).rejects.toMatchObject({ statusCode: 403 });
     expect(rulesClient.find).not.toHaveBeenCalled();
   });
 

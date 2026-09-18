@@ -474,9 +474,11 @@ describe('bulkDeleteExceptionList', () => {
         saved_objects: [savedObjectFor(failingList), savedObjectFor(okList)],
       });
       (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
+      // Simulates EndpointHttpError from the security_solution plugin without
+      // importing it — the lists plugin only reads err.statusCode via transformError.
       const preDeleteListHook: PreDeleteListHook = async (list) => {
         if (list.id === 'so-fail') {
-          throw new Error('cannot verify rule references');
+          throw Object.assign(new Error('cannot verify rule references'), { statusCode: 403 });
         }
         return [];
       };
@@ -494,7 +496,7 @@ describe('bulkDeleteExceptionList', () => {
         {
           lists: [{ id: 'so-fail', list_id: 'fail-list' }],
           message: 'cannot verify rule references',
-          status_code: 500,
+          status_code: 403,
         },
       ]);
       expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 1, total: 2 });
