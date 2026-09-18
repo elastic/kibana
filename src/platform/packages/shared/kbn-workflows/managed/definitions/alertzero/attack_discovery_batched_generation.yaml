@@ -16,7 +16,8 @@ description: |
 
   Emits to the caller: attack_discoveries (the persisted alert documents),
   batch_errors,
-  batches_total, batches_succeeded, batches_failed. A declared outputs block is
+  batches_total, batches_succeeded, batches_failed, discoveries_generated (what
+  the model produced, before de-duplication). A declared outputs block is
   deliberately omitted: a legacy array-typed output is validated as an array of
   scalars (items anyOf string/number/boolean), which would reject arrays of
   discovery objects at runtime, and workflow.execute types a child's output as
@@ -196,6 +197,24 @@ steps:
         {%- assign analyzed = analyzed | plus: batch_count -%}
         {%- endfor -%}
         {{ analyzed }}
+      # What the model produced, before persistence deduplicated it. The run step
+      # reports `discovery_count` even though `include_attack_discoveries` is
+      # false, so this survives while the discoveries themselves are read back
+      # from the index. It is the only count that can disagree with
+      # `attack_discoveries`: a re-discovered attack is generated here and then
+      # dropped by the bulk create's version conflict, so it never comes back out
+      # of `fetch_discoveries`. Same local-accumulator shape as `alerts_analyzed`,
+      # for the same reason.
+      #
+      # The TS definition's version is bumped alongside this output, or an existing
+      # install keeps a definition that emits nothing here.
+      discoveries_generated: |-
+        {%- assign generated = 0 -%}
+        {%- for result in steps.generate_batches.output.results -%}
+        {%- assign batch_count = result.output.discovery_count | default: 0 -%}
+        {%- assign generated = generated | plus: batch_count -%}
+        {%- endfor -%}
+        {{ generated }}
 
   # `| plus: 0` coerces the counted strings above back to numbers.
   - name: emit_result
@@ -207,6 +226,7 @@ steps:
       batches_failed: "${{ steps.generate_batches.output.total | minus: steps.aggregate.output.delivered }}"
       batches_succeeded: "${{ steps.aggregate.output.delivered | plus: 0 }}"
       batches_total: "${{ steps.generate_batches.output.total }}"
+      discoveries_generated: "${{ steps.aggregate.output.discoveries_generated | plus: 0 }}"
       # One generation id per delivered batch, not one per run: batching turns the
       # run step's single `execution_uuid` into 1:N. Each is a
       # `kibana.alert.rule.execution.uuid` on that batch's persisted discoveries,

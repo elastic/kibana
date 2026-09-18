@@ -86,6 +86,8 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
+  registerAttackDiscoveryAttachment,
+  registerAttackDiscoveryVerdictAttachment,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
@@ -360,6 +362,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttackDiscoveryAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
+      registerAttackDiscoveryVerdictAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,

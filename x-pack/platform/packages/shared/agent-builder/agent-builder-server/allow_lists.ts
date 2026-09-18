@@ -361,6 +361,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
   'diagnostic_report',
+  'security.attack_discovery',
+  'security.attack_discovery.verdict',
 
   // Observability
   'observability.ai_insight',
