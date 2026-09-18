@@ -49,8 +49,11 @@ const reviseProposalSchema = z.object({
  * `clone()` (an action-failure retry triggered by the workflow itself, not an
  * analyst). The two coexist deliberately — see the PR description.
  *
- * Never resumes the original's `waitForApproval` gate: that execution stays
- * parked forever once its proposal is superseded. The privilege check is done
+ * Never resumes the original's `waitForApproval` gate — that execution is
+ * left waiting on its own step-level `timeout`, not on this proposal's
+ * `expiresAt` (see `hasHitlWaitExpired` in the workflows execution engine).
+ * It will time out and fail on the engine's own clock regardless of whether
+ * this proposal is ever revised. The privilege check is done
  * here, not inside `ProposalsService.revise()`, because this tool bypasses
  * both the HTTP route (which declares it via `security.authz`) and the
  * workflow step wrapper (which calls `privileges.assertCanManage` itself) —
