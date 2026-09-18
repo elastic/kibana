@@ -95,13 +95,7 @@ const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKib
 
 const defaultProps: UseRunDocumentWorkflowPanelProps = {
   closePopover: jest.fn(),
-  documents: [
-    {
-      _id: 'doc-123',
-      _index: 'documents-index',
-      'host.name': 'test-host',
-    },
-  ],
+  documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
 };
 
 const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): WorkflowListItemDto => ({
@@ -203,7 +197,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         () =>
           useRunDocumentWorkflowPanel({
             ...defaultProps,
-            documents: [
+            documentIds: [
               { _id: 'doc-1', _index: 'documents-index' },
               { _id: 'doc-2', _index: 'documents-index' },
             ],
@@ -292,14 +286,14 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
           origin: 'document',
-          itemCount: defaultProps.documents.length,
+          itemCount: defaultProps.documentIds.length,
           owner: 'securitySolution',
         })
       );
     });
 
     it('reports a bulk action as a bulk document run over the selected documents', async () => {
-      renderPanel({ documents: twoDocuments, isBulk: true });
+      renderPanel({ documentIds: twoDocuments, isBulk: true });
 
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
@@ -323,7 +317,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         telemetry: caseTelemetry,
       });
 
-      renderPanel({ documents: twoDocuments, isBulk: true });
+      renderPanel({ documentIds: twoDocuments, isBulk: true });
 
       await waitFor(() => expect(lastPanelProps()?.telemetry).toEqual(caseTelemetry));
     });
@@ -422,7 +416,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(
-        () => useRunDocumentWorkflowPanel({ ...defaultProps, documents: [] }),
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documentIds: [] }),
         { wrapper: TestProviders }
       );
 
@@ -464,7 +458,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(panelProps.inputs).toEqual({
         event: {
           triggerType: 'document',
-          documents: defaultProps.documents,
+          documentIds: defaultProps.documentIds,
         },
       });
       expect(panelProps.visibility).toBeUndefined();
@@ -482,6 +476,40 @@ describe('useRunDocumentWorkflowPanel', () => {
         manualWorkflow,
         alertWorkflow,
       ]);
+    });
+
+    // Every caller sends id pairs and lets the server resolve the fields: it keeps a large
+    // selection inside the payload limit and gives every caller the same document shape.
+    it('sends only id pairs, never an embedded source', async () => {
+      const documentIds = [
+        { _id: 'doc-1', _index: 'documents-index' },
+        { _id: 'doc-2', _index: 'documents-index' },
+      ];
+      const closePopover = jest.fn();
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ closePopover, documentIds }),
+        { wrapper: TestProviders }
+      );
+      const { getByTestId } = renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      });
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'document',
+          documentIds,
+        },
+      });
+      expect(panelProps.inputs).not.toHaveProperty('event.documents');
     });
   });
 });
