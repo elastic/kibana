@@ -39,6 +39,10 @@ const getOrCreateGlobalStateManager = (): ToolbarStateManager => {
   return (registry.developerToolbarStateManager ??= new ToolbarStateManager());
 };
 
+export const registerToolbarItem = (item: DeveloperToolbarItem): (() => void) => {
+  return getOrCreateGlobalStateManager().registerItem(item);
+};
+
 export interface DeveloperToolbarState {
   items: DeveloperToolbarItem[];
   enabledItems: DeveloperToolbarItem[];

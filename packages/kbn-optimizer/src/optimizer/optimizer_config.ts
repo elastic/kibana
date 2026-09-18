@@ -110,6 +110,8 @@ interface Options {
   examples?: boolean;
   /** discover and build test plugins along with the standard plugins */
   testPlugins?: boolean;
+  /** include `devOnly` plugins */
+  devOnly?: boolean;
   /** absolute paths to specific plugins which should be built */
   pluginPaths?: string[];
   /** absolute paths to directories, any plugins in these directories will be built */
@@ -179,6 +181,7 @@ export class OptimizerConfig {
     const profileWebpack = !!options.profileWebpack;
     const inspectWorkers = !!options.inspectWorkers;
     const testPlugins = !!options.testPlugins;
+    const devOnly = !!options.devOnly;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
@@ -236,6 +239,7 @@ export class OptimizerConfig {
       pluginSelector: {
         examples,
         testPlugins,
+        devOnly,
         paths: pluginPaths,
         parentDirs: pluginScanDirs,
         allowlistPluginGroups: options.allowlistPluginGroups,

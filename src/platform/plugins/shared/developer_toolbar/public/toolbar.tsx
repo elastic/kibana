@@ -9,20 +9,11 @@
 
 import { useLayoutUpdate } from '@kbn/core-chrome-layout';
 import React, { useCallback } from 'react';
-import type { Observable } from 'rxjs';
-import type { DeveloperToolbarItemProps, DeveloperToolbarProps } from '@kbn/developer-toolbar';
-import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/developer-toolbar';
-import useObservable from 'react-use/lib/useObservable';
+import type { DeveloperToolbarProps } from '@kbn/developer-toolbar';
+import { DeveloperToolbar } from '@kbn/developer-toolbar';
 
-export const Toolbar = ({
-  items$,
-  envInfo,
-}: {
-  items$: Observable<DeveloperToolbarItemProps[]>;
-  envInfo: DeveloperToolbarProps['envInfo'];
-}) => {
+export const Toolbar = ({ envInfo }: { envInfo: DeveloperToolbarProps['envInfo'] }) => {
   const updateLayout = useLayoutUpdate();
-  const registeredItems = useObservable(items$) || [];
 
   const onHeightChange = useCallback(
     (height: number) => {
@@ -33,16 +24,7 @@ export const Toolbar = ({
     [updateLayout]
   );
 
-  return (
-    <>
-      <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />
-      {registeredItems.map((item: DeveloperToolbarItemProps) => (
-        <DeveloperToolbarItem key={item.id} id={item.id} priority={item.priority}>
-          {item.children}
-        </DeveloperToolbarItem>
-      ))}
-    </>
-  );
+  return <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />;
 };
 
 // eslint-disable-next-line import/no-default-export

@@ -13,8 +13,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
-import { BehaviorSubject } from 'rxjs';
-import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { registerToolbarItem, type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -45,8 +44,6 @@ const LazyDesignToolsButton = lazy(() =>
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
 {
-  private items$ = new BehaviorSubject<DeveloperToolbarItemProps[]>([]);
-
   constructor(private readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
@@ -59,7 +56,7 @@ export class DeveloperToolbarPlugin
     const LazyToolbar = React.lazy(() => import('./toolbar'));
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
-        <LazyToolbar items$={this.items$} envInfo={this.context.env} />
+        <LazyToolbar envInfo={this.context.env} />
       </Suspense>
     );
 
@@ -97,21 +94,5 @@ export class DeveloperToolbarPlugin
 
   public stop() {}
 
-  private registerItem = (item: DeveloperToolbarItemProps) => {
-    const currentItems = this.items$.value;
-    const existingIndex = currentItems.findIndex((a) => a.id === item.id);
-
-    if (existingIndex >= 0) {
-      const updatedItems = [...currentItems];
-      updatedItems[existingIndex] = item;
-      this.items$.next(updatedItems);
-    } else {
-      this.items$.next([...currentItems, item]);
-    }
-
-    return () => {
-      const filteredItems = this.items$.value.filter((a) => item.id !== a.id);
-      this.items$.next(filteredItems);
-    };
-  };
+  private registerItem = (item: DeveloperToolbarItemProps) => registerToolbarItem(item);
 }

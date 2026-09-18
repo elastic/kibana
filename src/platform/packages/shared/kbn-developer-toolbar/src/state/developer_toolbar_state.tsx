@@ -60,12 +60,14 @@ export class ToolbarStateManager {
   }
 
   registerItem(item: DeveloperToolbarItem): () => void {
-    const exists = this.items.some((i) => i.id === item.id);
-    if (exists) {
-      return () => {}; // Return no-op if already exists
+    const existingIndex = this.items.findIndex((i) => i.id === item.id);
+    if (existingIndex >= 0) {
+      const updated = [...this.items];
+      updated[existingIndex] = item;
+      this.items = updated.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+    } else {
+      this.items = [...this.items, item].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
     }
-
-    this.items = [...this.items, item].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
     this.notifySubscribers();
 
     return () => {

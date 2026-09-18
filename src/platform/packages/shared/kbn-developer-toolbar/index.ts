@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DeveloperToolbarItem,
-  type DeveloperToolbarItemProps,
-} from './src/components/developer_toolbar_item';
+export { type DeveloperToolbarItemProps } from './src/components/developer_toolbar_item';
 export { DeveloperToolbar, type DeveloperToolbarProps } from './src/components/developer_toolbar';
 export { LiveColorThemeToggle } from './src/toolbar_items/color_theme/color_theme_toggle';
+export { registerToolbarItem } from './src/hooks/use_toolbar_state';
