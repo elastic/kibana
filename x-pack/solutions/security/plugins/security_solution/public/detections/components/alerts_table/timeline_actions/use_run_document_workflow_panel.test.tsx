@@ -254,6 +254,125 @@ describe('useRunDocumentWorkflowPanel', () => {
         alertWorkflow,
       ]);
     });
+
+    it('builds compact documentIds inputs (no embedded source) when documentIds are provided', async () => {
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            closePopover: jest.fn(),
+            documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
+          }),
+        { wrapper: TestProviders }
+      );
+
+      const { getByTestId } = renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      });
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'document',
+          documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
+        },
+      });
+    });
+
+    it('builds a query selection inputs payload when querySelection is provided', async () => {
+      const querySelection = {
+        query: { bool: { must: [{ match_all: {} }] } },
+        index: 'documents-index',
+      };
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            closePopover: jest.fn(),
+            querySelection,
+          }),
+        { wrapper: TestProviders }
+      );
+
+      const { getByTestId } = renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      });
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'document',
+          querySelection,
+        },
+      });
+    });
+
+    it('passes a select-all cap notice and keeps the default menu label when querySelection is provided', () => {
+      const querySelection = {
+        query: { bool: { must: [{ match_all: {} }] } },
+        index: 'documents-index',
+      };
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            closePopover: jest.fn(),
+            querySelection,
+          }),
+        { wrapper: TestProviders }
+      );
+
+      // Menu label stays "Run workflow"; the cap is surfaced via the in-panel notice.
+      expect(result.current.runWorkflowMenuItem[0].name).toBe(i18n.CONTEXT_MENU_RUN_WORKFLOW);
+
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.notice).toBeDefined();
+    });
+
+    it('does not pass a notice for an explicit (non-select-all) selection', () => {
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            closePopover: jest.fn(),
+            documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
+          }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem[0].name).toBe(i18n.CONTEXT_MENU_RUN_WORKFLOW);
+
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.notice).toBeUndefined();
+    });
   });
 });
 // Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:
