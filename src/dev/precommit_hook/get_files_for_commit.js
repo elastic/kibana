@@ -32,7 +32,7 @@ export async function getFilesForCommit(gitRef, options = {}) {
     // Ignore blank lines
     .filter((line) => line.trim().length > 0)
     .map((line) => line.trim().split('\t'))
-    .map(([statusSymbol, ...paths]) => {
+    .flatMap(([statusSymbol, ...paths]) => {
       const status = {
         A: 'added',
         M: 'modified',
@@ -42,7 +42,11 @@ export async function getFilesForCommit(gitRef, options = {}) {
         '?': 'untracked',
       }[statusSymbol[0]];
 
-      return new File(paths[paths.length - 1], status);
+      const dest = new File(paths[paths.length - 1], status);
+      if (status === 'renamed' && paths.length > 1) {
+        return [new File(paths[0], 'deleted'), dest];
+      }
+      return [dest];
     });
 
   if (!includeUntracked) {

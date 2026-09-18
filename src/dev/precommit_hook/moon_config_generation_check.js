@@ -13,6 +13,7 @@ import fs from 'fs/promises';
 import { REPO_ROOT } from '../kbn_pm/src/lib/paths.mjs';
 
 import { PrecommitCheck } from './precommit_check';
+import { getMoonAffectedProjectNames, isMoonGeneratorInput } from './moon_generator_inputs';
 
 export class MoonConfigGenerationCheck extends PrecommitCheck {
   constructor() {
@@ -20,10 +21,7 @@ export class MoonConfigGenerationCheck extends PrecommitCheck {
   }
 
   shouldExecute({ files, deletedFiles }) {
-    return files.concat(deletedFiles).some((f) => {
-      const p = f.getRelativePath();
-      return p.endsWith('moon.yml') || p.endsWith('moon.extend.yml');
-    });
+    return files.concat(deletedFiles).some((f) => isMoonGeneratorInput(f.getRelativePath()));
   }
 
   async execute(log, files, options) {
@@ -40,19 +38,10 @@ export class MoonConfigGenerationCheck extends PrecommitCheck {
     /**
      * This can't be done with @kbn/moon because we want to see locally changed files/projects only
      */
-    const affectedProjects = files
-      .map((f) => f.getRelativePath())
-      .filter((f) => f.endsWith('moon.yml') || f.endsWith('moon.extend.yml'))
-      .map((file) => path.dirname(file).replace(/\\/g, '/'))
-      .filter((v, i, a) => a.indexOf(v) === i) // unique
-      .flatMap((dir) => {
-        const projectName = dependencyLookup[dir];
-        if (!projectName) {
-          console.warn(`Could not find project name for path: ${dir}`);
-          return [];
-        }
-        return [projectName];
-      });
+    const affectedProjects = getMoonAffectedProjectNames(
+      files.map((f) => f.getRelativePath()),
+      dependencyLookup
+    );
 
     if (affectedProjects.length === 0) {
       return;
