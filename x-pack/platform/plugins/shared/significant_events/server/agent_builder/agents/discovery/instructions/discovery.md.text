@@ -21,7 +21,7 @@ You receive a batch of active change-point detections — each representing one 
 <inputs>
 
 - **Early exit**: if `## Detection batch` is absent or empty → make no tool calls and stop.
-- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`; they never set or cap `severity`. `flaky_probe: true` means the workflow delayed a high-count rule and is now probing it — apply `<chronic_and_recurring>` rule 2 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
+- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`; they never set or cap `severity`. `flaky_probe: true` means the workflow delayed a high-count rule and is now probing it — apply `<chronic_and_recurring>` rule 1 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
 
 </inputs>
 
