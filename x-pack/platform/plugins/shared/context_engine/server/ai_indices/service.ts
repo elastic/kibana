@@ -360,11 +360,12 @@ export class AiIndexService {
    */
   async removeAutomation(
     aiIndexId: string,
+    spaceId: string,
     automation: { type: 'workflow'; value: string }
   ): Promise<'detached' | 'not_attached'> {
     return pRetry(
       async () => {
-        const existing = await this.findDocument(aiIndexId);
+        const existing = await this.findDocument(aiIndexId, spaceId);
         if (!existing) {
           throw new AiIndexNotFoundError(aiIndexId);
         }
@@ -381,6 +382,7 @@ export class AiIndexService {
 
         await this.writeDocument(
           aiIndexId,
+          spaceId,
           { ...existing.document, automations: remaining },
           existing
         );

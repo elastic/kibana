@@ -51,6 +51,7 @@ const improvement = (overrides: Partial<Improvement> = {}): Improvement => ({
   revision_id: 'rev-1',
   latest: true,
   ai_index_id: AI_INDEX_ID,
+  space: 'default',
   '@timestamp': '2026-08-20T09:00:00.000Z',
   status: 'suggested',
   suggested_at: '2026-08-20T09:00:00.000Z',
