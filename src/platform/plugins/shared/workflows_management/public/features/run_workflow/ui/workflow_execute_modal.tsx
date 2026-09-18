@@ -63,10 +63,7 @@ export interface WorkflowExecuteModalProps {
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (
-    data: Record<string, unknown>,
-    triggerTab: WorkflowTriggerTab
-  ) => void | Promise<void>;
+  onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void | Promise<void>;
   yamlString?: string;
   /** When set, open with Historical tab and this execution pre-selected */
   initialExecutionId?: string;
