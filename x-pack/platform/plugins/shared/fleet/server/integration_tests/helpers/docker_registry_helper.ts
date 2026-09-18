@@ -23,7 +23,7 @@ const DOCKER_START_TIMEOUT = 6 * 60 * 1000; // 6 minutes
 // which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
 const DOCKER_IMAGE =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
-  'docker.elastic.co/observability-ci/distribution:lite-pr-3161';
+  'docker.elastic.co/observability-ci/distribution:lite-pr-3166';
 
 function firstWithTimeout(source$: Rx.Observable<any>, errorMsg: string, ms = 30 * 1000) {
   return Rx.race(
