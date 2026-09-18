@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const config = getService('config');
+  const retry = getService('retry');
 
   // Flaky on MKI (#kibana-serverless-test-alerts); keep local serverless coverage.
   // Tracking: https://github.com/elastic/kibana/issues/282284
@@ -207,6 +208,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await PageObjects.lens.editDimensionLabel(longLabel);
       await PageObjects.lens.waitForVisualization('xyVisChart');
+      await retry.waitFor(
+        'the long label to commit to the dimension trigger before closing the editor',
+        async () =>
+          (await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')) === longLabel
+      );
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
