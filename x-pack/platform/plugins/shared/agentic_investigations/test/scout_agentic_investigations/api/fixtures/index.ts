@@ -8,7 +8,10 @@
 export { apiTest } from '@kbn/scout';
 export {
   INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
   LIST_ESCALATIONS_PATH,
   CREATE_ESCALATION_PATH,
   ESCALATION_BY_ID_PATH,
+  AB_CONVERSATIONS_PATH,
+  AB_CONVERSATION_BY_ID_PATH,
 } from './constants';

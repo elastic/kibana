@@ -7,11 +7,17 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, INTERNAL_HEADERS, LIST_ESCALATIONS_PATH } from '../../fixtures';
+import {
+  apiTest,
+  INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
+  LIST_ESCALATIONS_PATH,
+  CREATE_ESCALATION_PATH,
+  AB_CONVERSATIONS_PATH,
+  AB_CONVERSATION_BY_ID_PATH,
+} from '../../fixtures';
 
 const ESCALATION_TEMPLATE_ID = 'escalation';
-const INVESTIGATION_TEMPLATE_ID = 'investigation';
-const INVESTIGATION_INDEX = '.chat-conversations';
 
 apiTest.describe(
   'GET /internal/investigations/escalations — list escalations',
@@ -25,88 +31,108 @@ apiTest.describe(
     let closedEscalationId: string;
     let investigationId: string;
     let privateEscalationId: string;
+    // The investigation backing the open escalation.
+    let openInvestigationId: string;
+    // The investigation backing the private escalation.
+    let privateInvestigationId: string;
 
-    apiTest.beforeAll(async ({ samlAuth, esClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
-      // Open escalation — must appear in the list.
-      const openResult = await esClient.index({
-        index: INVESTIGATION_INDEX,
-        refresh: true,
-        document: {
-          template_id: ESCALATION_TEMPLATE_ID,
-          title: 'Scout open escalation',
-          agent_id: 'elastic-ai-agent',
-          space_id: 'default',
-          '@timestamp': new Date().toISOString(),
-          rounds: [],
+      // Investigation backing the open escalation.
+      const invResult = await apiClient.post(AB_CONVERSATIONS_PATH, {
+        headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+        body: {
+          title: 'Scout open escalation investigation',
+          template_id: 'investigation',
+          access_control: { access_mode: 'public' },
           metadata: { status: 'open', severity: 'high' },
-          access_control: { access_mode: 'public' },
         },
+        responseType: 'json',
       });
-      openEscalationId = openResult._id;
+      openInvestigationId = invResult.body.id;
 
-      // Closed escalation — must NOT appear in the list.
-      const closedResult = await esClient.index({
-        index: INVESTIGATION_INDEX,
-        refresh: true,
-        document: {
-          template_id: ESCALATION_TEMPLATE_ID,
+      // Open escalation — must appear in the list.
+      const openResult = await apiClient.post(CREATE_ESCALATION_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        body: { linked_investigation_id: openInvestigationId, visibility: 'public' },
+        responseType: 'json',
+      });
+      openEscalationId = openResult.body.id;
+
+      // Closed escalation — created directly via the Agent Builder API so we can set
+      // status: "closed" at creation time. Must NOT appear in the list.
+      const closedResult = await apiClient.post(AB_CONVERSATIONS_PATH, {
+        headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+        body: {
           title: 'Scout closed escalation',
-          agent_id: 'elastic-ai-agent',
-          space_id: 'default',
-          '@timestamp': new Date().toISOString(),
-          rounds: [],
+          template_id: 'escalation',
+          access_control: { access_mode: 'public' },
           metadata: { status: 'closed' },
-          access_control: { access_mode: 'public' },
         },
+        responseType: 'json',
       });
-      closedEscalationId = closedResult._id;
+      closedEscalationId = closedResult.body.id;
 
-      // Investigation (wrong template) — must NOT appear in the list.
-      const invResult = await esClient.index({
-        index: INVESTIGATION_INDEX,
-        refresh: true,
-        document: {
-          template_id: INVESTIGATION_TEMPLATE_ID,
-          title: 'Scout investigation — should not appear',
-          agent_id: 'elastic-ai-agent',
-          space_id: 'default',
-          '@timestamp': new Date().toISOString(),
-          rounds: [],
-          metadata: { status: 'open' },
+      // Investigation (wrong template) — must NOT appear in the escalations list.
+      const wrongTemplateResult = await apiClient.post(AB_CONVERSATIONS_PATH, {
+        headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+        body: {
+          title: 'Scout investigation — should not appear in escalations list',
+          template_id: 'investigation',
           access_control: { access_mode: 'public' },
-        },
-      });
-      investigationId = invResult._id;
-
-      // Private escalation with no access_control entries for the test users — must
-      // NOT appear in the list for admin (who is not the owner or a listed member).
-      // Seeded as owned by a fictional user id so neither admin nor viewer match.
-      const privateResult = await esClient.index({
-        index: INVESTIGATION_INDEX,
-        refresh: true,
-        document: {
-          template_id: ESCALATION_TEMPLATE_ID,
-          title: 'Scout private escalation — no access',
-          agent_id: 'elastic-ai-agent',
-          space_id: 'default',
-          user_id: 'u_some_other_user_that_is_not_admin',
-          '@timestamp': new Date().toISOString(),
-          rounds: [],
           metadata: { status: 'open' },
-          access_control: { access_mode: 'private', entries: [] },
         },
+        responseType: 'json',
       });
-      privateEscalationId = privateResult._id;
+      investigationId = wrongTemplateResult.body.id;
+
+      // Investigation backing the private escalation.
+      const privateInvResult = await apiClient.post(AB_CONVERSATIONS_PATH, {
+        headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+        body: {
+          title: 'Scout private escalation investigation',
+          template_id: 'investigation',
+          access_control: { access_mode: 'public' },
+          metadata: { status: 'open' },
+        },
+        responseType: 'json',
+      });
+      privateInvestigationId = privateInvResult.body.id;
+
+      // Private escalation owned by admin with a collaborator that is neither admin nor
+      // viewer. Viewer (not owner, not a listed collaborator) must NOT see it in the list.
+      const privateResult = await apiClient.post(CREATE_ESCALATION_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        body: {
+          linked_investigation_id: privateInvestigationId,
+          visibility: 'private',
+          collaborators: ['u_scout_fake_collaborator_not_viewer'],
+        },
+        responseType: 'json',
+      });
+      privateEscalationId = privateResult.body.id;
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await Promise.all(
-        [openEscalationId, closedEscalationId, investigationId, privateEscalationId]
+    apiTest.afterAll(async ({ apiClient }) => {
+      await Promise.allSettled(
+        [
+          openEscalationId,
+          closedEscalationId,
+          investigationId,
+          privateEscalationId,
+          openInvestigationId,
+          privateInvestigationId,
+        ]
           .filter(Boolean)
-          .map((id) => esClient.delete({ index: INVESTIGATION_INDEX, id }).catch(() => {}))
+          .map((id) =>
+            apiClient
+              .delete(AB_CONVERSATION_BY_ID_PATH(id), {
+                headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+              })
+              .catch(() => {})
+          )
       );
     });
 
@@ -156,16 +182,20 @@ apiTest.describe(
       expect(ids).not.toContain(investigationId);
     });
 
-    apiTest('excludes private escalations the caller has no access to', async ({ apiClient }) => {
-      const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
+    apiTest(
+      'excludes private escalations the caller is not a collaborator of',
+      async ({ apiClient }) => {
+        // Viewer is not the owner and not listed as a collaborator of the private escalation.
+        const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+          responseType: 'json',
+        });
 
-      expect(response).toHaveStatusCode(200);
-      const ids = response.body.results.map((r: { id: string }) => r.id);
-      expect(ids).not.toContain(privateEscalationId);
-    });
+        expect(response).toHaveStatusCode(200);
+        const ids = response.body.results.map((r: { id: string }) => r.id);
+        expect(ids).not.toContain(privateEscalationId);
+      }
+    );
 
     apiTest(
       'results carry template_id: "escalation" (never "investigation")',

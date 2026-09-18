@@ -7,13 +7,16 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, INTERNAL_HEADERS, CREATE_ESCALATION_PATH } from '../../fixtures';
+import {
+  apiTest,
+  INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
+  CREATE_ESCALATION_PATH,
+  AB_CONVERSATIONS_PATH,
+  AB_CONVERSATION_BY_ID_PATH,
+} from '../../fixtures';
 
-// Seed an investigation conversation directly in ES so we have a real id to escalate.
-// We write it through the Agent Builder conversation index that the plugin itself uses.
-const INVESTIGATION_TEMPLATE_ID = 'investigation';
 const ESCALATION_TEMPLATE_ID = 'escalation';
-const INVESTIGATION_INDEX = '.chat-conversations';
 
 apiTest.describe(
   'POST /internal/investigations/escalations — create escalation',
@@ -24,38 +27,47 @@ apiTest.describe(
     let investigationId: string;
     const createdEscalationIds: string[] = [];
 
-    apiTest.beforeAll(async ({ samlAuth, esClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
-      // Seed a minimal investigation conversation so we have a valid linked_investigation_id.
-      const result = await esClient.index({
-        index: INVESTIGATION_INDEX,
-        refresh: true,
-        document: {
-          template_id: INVESTIGATION_TEMPLATE_ID,
+      // Create a real investigation conversation through the Agent Builder API so the
+      // .chat-conversations index is managed by Kibana (direct esClient writes are
+      // rejected on restricted indices).
+      const result = await apiClient.post(AB_CONVERSATIONS_PATH, {
+        headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+        body: {
           title: 'Scout test investigation',
-          agent_id: 'elastic-ai-agent',
-          space_id: 'default',
-          '@timestamp': new Date().toISOString(),
-          rounds: [],
+          template_id: 'investigation',
+          access_control: { access_mode: 'public' },
           metadata: {
             status: 'open',
             severity: 'high',
             summary: 'Suspicious PowerShell',
             workflow_execution_id: 'wf-scout-test',
           },
-          access_control: { access_mode: 'public' },
         },
+        responseType: 'json',
       });
-      investigationId = result._id;
+      if (result.statusCode !== 200 || !result.body.id) {
+        throw new Error(
+          `Setup: failed to create investigation (status ${result.statusCode}): ${JSON.stringify(result.body)}`
+        );
+      }
+      investigationId = result.body.id;
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
+    apiTest.afterAll(async ({ apiClient }) => {
       await Promise.allSettled(
         [investigationId, ...createdEscalationIds]
           .filter(Boolean)
-          .map((id) => esClient.delete({ index: INVESTIGATION_INDEX, id }).catch(() => {}))
+          .map((id) =>
+            apiClient
+              .delete(AB_CONVERSATION_BY_ID_PATH(id), {
+                headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+              })
+              .catch(() => {})
+          )
       );
     });
 
@@ -176,27 +188,24 @@ apiTest.describe(
 
     apiTest(
       'returns 400 when linked_investigation_id points at a non-investigation',
-      async ({ apiClient, esClient }) => {
-        // Seed a second conversation that is an escalation (wrong template)
-        const { _id: escalationId } = await esClient.index({
-          index: INVESTIGATION_INDEX,
-          refresh: true,
-          document: {
-            template_id: ESCALATION_TEMPLATE_ID,
+      async ({ apiClient }) => {
+        // Create a conversation with the escalation template (wrong template for this check).
+        const seedResponse = await apiClient.post(AB_CONVERSATIONS_PATH, {
+          headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+          body: {
             title: 'Wrong template',
-            agent_id: 'elastic-ai-agent',
-            space_id: 'default',
-            '@timestamp': new Date().toISOString(),
-            rounds: [],
-            metadata: { status: 'open' },
+            template_id: 'escalation',
             access_control: { access_mode: 'public' },
+            metadata: { status: 'open' },
           },
+          responseType: 'json',
         });
+        const wrongId = seedResponse.body.id;
 
         const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: {
-            linked_investigation_id: escalationId,
+            linked_investigation_id: wrongId,
             visibility: 'public',
           },
           responseType: 'json',
@@ -204,7 +213,11 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(400);
 
-        await esClient.delete({ index: INVESTIGATION_INDEX, id: escalationId }).catch(() => {});
+        await apiClient
+          .delete(AB_CONVERSATION_BY_ID_PATH(wrongId), {
+            headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+          })
+          .catch(() => {});
       }
     );
 

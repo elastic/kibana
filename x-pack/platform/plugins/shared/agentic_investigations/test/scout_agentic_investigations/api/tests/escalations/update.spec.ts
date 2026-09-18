@@ -10,12 +10,12 @@ import { expect } from '@kbn/scout/api';
 import {
   apiTest,
   INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
   CREATE_ESCALATION_PATH,
   ESCALATION_BY_ID_PATH,
+  AB_CONVERSATIONS_PATH,
+  AB_CONVERSATION_BY_ID_PATH,
 } from '../../fixtures';
-
-const INVESTIGATION_INDEX = '.chat-conversations';
-const INVESTIGATION_TEMPLATE_ID = 'investigation';
 
 apiTest.describe(
   'PATCH /internal/investigations/escalations/{id} — update escalation',
@@ -27,43 +27,36 @@ apiTest.describe(
     let secondInvestigationId: string;
     let escalationId: string;
 
-    apiTest.beforeAll(async ({ samlAuth, esClient, apiClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
-      // Seed two investigations
+      // Create two investigations through the Agent Builder API so the index is
+      // managed by Kibana (direct esClient writes are rejected on restricted indices).
       const [inv1, inv2] = await Promise.all([
-        esClient.index({
-          index: INVESTIGATION_INDEX,
-          refresh: true,
-          document: {
-            template_id: INVESTIGATION_TEMPLATE_ID,
+        apiClient.post(AB_CONVERSATIONS_PATH, {
+          headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+          body: {
             title: 'Scout update test investigation',
-            agent_id: 'elastic-ai-agent',
-            space_id: 'default',
-            '@timestamp': new Date().toISOString(),
-            rounds: [],
+            template_id: 'investigation',
+            access_control: { access_mode: 'public' },
             metadata: { status: 'open', severity: 'high' },
-            access_control: { access_mode: 'public' },
           },
+          responseType: 'json',
         }),
-        esClient.index({
-          index: INVESTIGATION_INDEX,
-          refresh: true,
-          document: {
-            template_id: INVESTIGATION_TEMPLATE_ID,
+        apiClient.post(AB_CONVERSATIONS_PATH, {
+          headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+          body: {
             title: 'Scout second investigation',
-            agent_id: 'elastic-ai-agent',
-            space_id: 'default',
-            '@timestamp': new Date().toISOString(),
-            rounds: [],
-            metadata: { status: 'open' },
+            template_id: 'investigation',
             access_control: { access_mode: 'public' },
+            metadata: { status: 'open' },
           },
+          responseType: 'json',
         }),
       ]);
-      investigationId = inv1._id;
-      secondInvestigationId = inv2._id;
+      investigationId = inv1.body.id;
+      secondInvestigationId = inv2.body.id;
 
       // Create the escalation to update
       const createResponse = await apiClient.post(CREATE_ESCALATION_PATH, {
@@ -71,9 +64,9 @@ apiTest.describe(
         body: { linked_investigation_id: investigationId, visibility: 'public' },
         responseType: 'json',
       });
-      if (createResponse.status !== 200 || !createResponse.body.id) {
+      if (createResponse.statusCode !== 200 || !createResponse.body.id) {
         throw new Error(
-          `Setup: failed to create escalation (status ${createResponse.status}): ${JSON.stringify(
+          `Setup: failed to create escalation (status ${createResponse.statusCode}): ${JSON.stringify(
             createResponse.body
           )}`
         );
@@ -81,12 +74,18 @@ apiTest.describe(
       escalationId = createResponse.body.id;
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await Promise.allSettled([
-        esClient.delete({ index: INVESTIGATION_INDEX, id: investigationId }),
-        esClient.delete({ index: INVESTIGATION_INDEX, id: secondInvestigationId }),
-        esClient.delete({ index: INVESTIGATION_INDEX, id: escalationId }),
-      ]);
+    apiTest.afterAll(async ({ apiClient }) => {
+      await Promise.allSettled(
+        [investigationId, secondInvestigationId, escalationId]
+          .filter(Boolean)
+          .map((id) =>
+            apiClient
+              .delete(AB_CONVERSATION_BY_ID_PATH(id), {
+                headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+              })
+              .catch(() => {})
+          )
+      );
     });
 
     apiTest('renames the escalation and returns 200', async ({ apiClient }) => {
