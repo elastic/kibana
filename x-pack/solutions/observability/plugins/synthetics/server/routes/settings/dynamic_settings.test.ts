@@ -221,14 +221,40 @@ describe('dynamic settings routes', () => {
   describe('DynamicSettingsSchema', () => {
     it('accepts a boolean rebalancePrivateLocationShardsEnabled', () => {
       expect(
-        DynamicSettingsSchema.validate({ rebalancePrivateLocationShardsEnabled: false })
+        DynamicSettingsSchema.parse({ rebalancePrivateLocationShardsEnabled: false })
       ).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
     });
 
     it('rejects a non-boolean rebalancePrivateLocationShardsEnabled', () => {
       expect(() =>
-        DynamicSettingsSchema.validate({ rebalancePrivateLocationShardsEnabled: 'nope' })
+        DynamicSettingsSchema.parse({ rebalancePrivateLocationShardsEnabled: 'nope' })
       ).toThrow();
+    });
+
+    it('rejects unknown top-level keys so a typo cannot no-op via merge', () => {
+      expect(
+        DynamicSettingsSchema.safeParse({
+          certAgeThresholdTypo: 90,
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects unknown defaultEmail keys so a typo cannot drop cc or bcc', () => {
+      expect(
+        DynamicSettingsSchema.safeParse({
+          defaultEmail: { to: ['alerts@example.com'], ccc: ['copy@example.com'] },
+        }).success
+      ).toBe(false);
+    });
+
+    it('accepts a known defaultEmail payload', () => {
+      expect(
+        DynamicSettingsSchema.parse({
+          defaultEmail: { to: ['alerts@example.com'], cc: ['copy@example.com'] },
+        })
+      ).toEqual({
+        defaultEmail: { to: ['alerts@example.com'], cc: ['copy@example.com'] },
+      });
     });
   });
 });

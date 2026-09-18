@@ -6,7 +6,8 @@
  */
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { optionalRouteId } from '../../zod_query';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -25,8 +26,8 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        id: schema.maybe(schema.string()),
+      params: z.strictObject({
+        id: optionalRouteId,
       }),
     },
   },

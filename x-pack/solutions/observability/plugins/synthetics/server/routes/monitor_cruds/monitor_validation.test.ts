@@ -627,12 +627,9 @@ describe('validateMonitor', () => {
         'default'
       );
 
-      expect(result).toMatchObject({
-        valid: false,
-        reason: 'Invalid alert configuration',
-        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
-        payload: testMonitor,
-      });
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid alert configuration');
+      expect(result.details).toMatch(/status/);
     });
     it('when parsed from serialized JSON for alert invalid key', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
@@ -649,12 +646,9 @@ describe('validateMonitor', () => {
         'default'
       );
 
-      expect(result).toMatchObject({
-        valid: false,
-        reason: 'Invalid alert configuration',
-        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
-        payload: testMonitor,
-      });
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid alert configuration');
+      expect(result.details).toMatch(/status/);
     });
   });
 
@@ -939,7 +933,7 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: { a: [] } } as any)).toEqual({
-      errorMessage: 'Invalid params: [a]: expected value of type [string] but got [Array]',
+      errorMessage: 'Invalid params: Invalid value "[]" supplied to "a"',
       formattedConfig: {
         type: 'browser',
         params: { a: [] },

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from '../../tasks/sync_private_locations_monitors_task';
 import { scheduleCleanUpTask } from '../../synthetics_service/private_location/clean_up_task';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -14,11 +14,8 @@ export const getSyntheticsTriggerTaskRun: SyntheticsRestApiRouteFactory = () => 
   method: 'POST',
   path: SYNTHETICS_API_URLS.TRIGGER_TASK_RUN,
   validate: {
-    params: schema.object({
-      taskType: schema.oneOf([
-        schema.literal('syncPrivateLocationMonitors'),
-        schema.literal('cleanUpPackagePolicyTask'),
-      ]),
+    params: z.strictObject({
+      taskType: z.enum(['syncPrivateLocationMonitors', 'cleanUpPackagePolicyTask']),
     }),
   },
   writeAccess: true,

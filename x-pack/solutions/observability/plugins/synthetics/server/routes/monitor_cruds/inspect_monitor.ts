@@ -6,7 +6,9 @@
  */
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { queryBoolean, optionalRouteId } from '../zod_query';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { unzipFile } from '../../common/unzip_project_code';
@@ -24,9 +26,9 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT,
   validate: {
     body: schema.any(),
-    query: schema.object({
-      id: schema.maybe(schema.string()),
-      hideParams: schema.maybe(schema.boolean()),
+    query: z.strictObject({
+      id: optionalRouteId,
+      hideParams: queryBoolean.optional(),
     }),
   },
   handler: async (routeContext): Promise<any> => {
