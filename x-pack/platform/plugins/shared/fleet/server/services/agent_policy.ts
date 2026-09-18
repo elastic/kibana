@@ -2840,11 +2840,14 @@ class AgentPolicyService {
     agentPolicy: T
   ): T {
     if ('download_source_ids' in agentPolicy) {
+      // Deduplicate while preserving order (first occurrence wins).
+      const deduped = [...new Set(agentPolicy.download_source_ids ?? [])];
       // Keep download_source_id in sync with the primary entry so older nodes
       // that only read this field compile the correct sourceURI during rolling upgrades.
       return {
         ...agentPolicy,
-        download_source_id: agentPolicy.download_source_ids?.[0] ?? null,
+        download_source_ids: deduped,
+        download_source_id: deduped[0] ?? null,
       };
     }
     if ('download_source_id' in agentPolicy) {
