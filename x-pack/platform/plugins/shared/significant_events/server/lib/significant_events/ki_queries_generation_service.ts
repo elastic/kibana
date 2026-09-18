@@ -11,6 +11,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
@@ -29,7 +30,7 @@ import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
-import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
+import { createMemoryService } from '../../memory_and_investigation/lib/memory';
 import { createMemoryDiscoveryTools } from './memory_discovery_tools';
 import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
@@ -46,6 +47,7 @@ export interface GenerateKIQueriesDependencies {
   inferenceClient: InferenceClient;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
+  dataStreams: DataStreamsStart;
   /**
    * Client used to validate generated ES|QL against the stream's data, always routed across every
    * CPS-linked project. Separate from `esClient` because the stream can resolve to a remote
@@ -77,6 +79,7 @@ export async function generateKIQueries(
     inferenceClient,
     kiClient,
     esClient,
+    dataStreams,
     streamDataEsClient,
     featureFlags,
     searchInferenceEndpoints,
@@ -105,14 +108,12 @@ export async function generateKIQueries(
       isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
     ]);
 
-  const memoryTools = significantEventsAvailable
-    ? createMemoryDiscoveryTools({
-        memoryService: new MemoryServiceImpl({
-          logger: logger.get('memory'),
-          esClient,
-        }),
-      })
-    : undefined;
+  let memoryTools;
+  if (significantEventsAvailable) {
+    memoryTools = createMemoryDiscoveryTools({
+      memoryService: await createMemoryService(esClient, dataStreams, logger.get('memory')),
+    });
+  }
 
   const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
 
