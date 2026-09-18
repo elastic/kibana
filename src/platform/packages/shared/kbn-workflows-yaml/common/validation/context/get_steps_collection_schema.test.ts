@@ -54,7 +54,7 @@ describe('getStepsCollectionSchema', () => {
     );
     expectZodSchemaEqual(stepsCollectionSchema, z.object({}));
   });
-  it('should return steps collection with all predecessors outputs and foreach states for foreach steps', () => {
+  it('should share predecessor entry schemas across step contexts', () => {
     const definition = {
       version: '1' as const,
       name: 'test-workflow',
@@ -84,6 +84,11 @@ describe('getStepsCollectionSchema', () => {
               with: {
                 message: 'Hello, {{foreach.item}}',
               },
+            },
+            {
+              name: 'step-1-foreach-2',
+              type: 'console',
+              with: { message: 'Goodbye, {{foreach.item}}' },
             },
           ],
         },
@@ -117,6 +122,16 @@ describe('getStepsCollectionSchema', () => {
     expect(step1Schema).toBeDefined();
     expect(step1Schema.shape.output.def.type).toBe('optional');
     expect(step1Schema.shape.error.def.type).toBe('optional');
+
+    const { schema: nextStepCollectionSchema } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-1-foreach-2'
+    );
+
+    expect(nextStepCollectionSchema.shape['step-1']).toBe(stepsCollectionSchema.shape['step-1']);
+    expect(nextStepCollectionSchema.shape.loop).toBeDefined();
   });
 
   it('should deduplicate predecessor nodes sharing the same stepId', () => {
