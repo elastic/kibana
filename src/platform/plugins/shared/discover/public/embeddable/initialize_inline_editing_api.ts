@@ -28,6 +28,17 @@ type InlineEditSnapshot = {
   [K in keyof Required<SearchEmbeddableSerializedAttributes>]: SearchEmbeddableSerializedAttributes[K];
 };
 
+interface InlineEditState {
+  snapshot: InlineEditSnapshot;
+  /**
+   * Whether the applied state has diverged from the snapshot and so must be restored when editing
+   * stops. This is not the same as `inlineEditDirty$`, which only marks a committable change:
+   * `reinitializeState` empties rows before it can reject, so a failed tab switch mutates the
+   * applied state while leaving the edit clean.
+   */
+  diverged: boolean;
+}
+
 interface SearchEmbeddableDeps {
   api: { savedSearch$: PublishingSubject<SavedSearch> };
   reinitializeState: (state: SearchEmbeddableSerializedAttributes) => Promise<void>;
@@ -74,8 +85,7 @@ export const initializeInlineEditingApi = ({
   const inlineEditDirty$ = new BehaviorSubject<boolean>(false);
   const overrideHoverActions$ = isInlineEditing$;
 
-  let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
-  let stateNeedsRestore = false;
+  let inlineEditState: InlineEditState | undefined;
 
   const setFocusedPanelId = (panelId?: string) => {
     if (apiCanFocusPanel(parentApi)) {
@@ -101,14 +111,17 @@ export const initializeInlineEditingApi = ({
   const switchTab = async (tabId: string): Promise<boolean> => {
     const tab = tabs.find((t) => t.id === tabId);
 
-    if (!tab) return false;
+    if (!tab || !inlineEditState) return false;
 
-    // Tracks divergence from the snapshot, which inlineEditDirty$ does not: that only marks a
-    // committable change, while reinitializeState empties rows before it can reject, so a failed
-    // switch mutates applied state and still has to be restored when editing stops
-    stateNeedsRestore = true;
+    inlineEditState.diverged = true;
 
     return applyState(tab);
+  };
+
+  const restoreSnapshot = async () => {
+    if (inlineEditState?.diverged) {
+      await applyState(inlineEditState.snapshot);
+    }
   };
 
   const stopInlineEditing = () => {
@@ -116,21 +129,18 @@ export const initializeInlineEditingApi = ({
     inlineEditDirty$.next(false);
     draftSelectedTabId$.next(selectedTabId$.getValue());
 
-    inlineEditStateSnapshot = undefined;
-    stateNeedsRestore = false;
+    inlineEditState = undefined;
 
     setFocusedPanelId();
   };
 
-  const startInlineEditing = async () => {
-    if (isInlineEditing$.getValue()) return;
-
+  const createSnapshot = (): InlineEditSnapshot => {
     const {
       stateManager,
       api: { savedSearch$ },
     } = searchEmbeddable;
 
-    inlineEditStateSnapshot = {
+    return {
       serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
       sort: stateManager.sort.getValue(),
       columns: stateManager.columns.getValue(),
@@ -144,6 +154,12 @@ export const initializeInlineEditingApi = ({
       documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
       jsonModeSettings: stateManager.jsonModeSettings.getValue(),
     };
+  };
+
+  const startInlineEditing = async () => {
+    if (isInlineEditing$.getValue()) return;
+
+    inlineEditState = { snapshot: createSnapshot(), diverged: false };
 
     draftSelectedTabId$.next(selectedTabId$.getValue());
     isInlineEditing$.next(true);
@@ -175,11 +191,8 @@ export const initializeInlineEditingApi = ({
     const committedTabId = selectedTabId$.getValue();
 
     if (!draftTabId || draftTabId === committedTabId) {
-      // Nothing to commit, so this is a discard: restore for the same reason cancel does
-      if (stateNeedsRestore && inlineEditStateSnapshot) {
-        await applyState(inlineEditStateSnapshot);
-      }
-
+      // Nothing to commit, so this is a discard
+      await restoreSnapshot();
       stopInlineEditing();
       return;
     }
@@ -202,12 +215,9 @@ export const initializeInlineEditingApi = ({
   };
 
   const cancelInlineTabSelection = async () => {
-    if (!isInlineEditing$.getValue() || !inlineEditStateSnapshot) return;
+    if (!isInlineEditing$.getValue() || !inlineEditState) return;
 
-    if (stateNeedsRestore) {
-      await applyState(inlineEditStateSnapshot);
-    }
-
+    await restoreSnapshot();
     stopInlineEditing();
   };
 
