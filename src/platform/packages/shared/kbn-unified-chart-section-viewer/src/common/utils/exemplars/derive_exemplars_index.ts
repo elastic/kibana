@@ -53,7 +53,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
   }
 
   const dataset = suffix.slice(0, namespaceSeparatorIndex);
-  if (!dataset.includes(EXEMPLARS_OTEL_DATASET_MARKER)) {
+  if (!dataset.endsWith(EXEMPLARS_OTEL_DATASET_MARKER)) {
     return undefined;
   }
 

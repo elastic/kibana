@@ -28,6 +28,11 @@ describe('deriveExemplarsIndex', () => {
     expect(deriveExemplarsIndex('metrics-system.cpu-default')).toBeUndefined();
   });
 
+  it('returns undefined when the dataset contains but does not end with the .otel marker', () => {
+    // `.includes` would accept `generic.otelfoo`; `.endsWith` correctly rejects it.
+    expect(deriveExemplarsIndex('metrics-generic.otelfoo-default')).toBeUndefined();
+  });
+
   it('returns undefined when the .otel marker is in the namespace rather than the dataset', () => {
     expect(deriveExemplarsIndex('metrics-generic-default.otel')).toBeUndefined();
   });
