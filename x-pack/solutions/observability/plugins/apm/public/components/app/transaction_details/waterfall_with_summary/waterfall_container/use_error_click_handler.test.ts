@@ -115,6 +115,9 @@ describe('useErrorClickHandler', () => {
         ...defaultQuery,
         serviceGroup: '',
         kuery: 'trace.id : "trace-123" and (span.id : "span-1" or transaction.id : "span-1")',
+        // traceId/spanId are appended so the OTel panel can self-suppress when absent.
+        traceId: 'trace-123',
+        spanId: 'span-1',
       },
     });
     expect(mockNavigateToUrl).toHaveBeenCalled();
@@ -158,6 +161,8 @@ describe('useErrorClickHandler', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           kuery: 'trace.id : "my-trace-id" and (span.id : "span-1" or transaction.id : "span-1")',
+          traceId: 'my-trace-id',
+          spanId: 'span-1',
         }),
       })
     );
@@ -186,7 +191,7 @@ describe('useErrorClickHandler', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('opens span flyout with errors-table for multiple errors when any is unprocessed OTel', () => {
+  it('opens span flyout with errors-table for pure-OTel multi-error rows (unprocessedOtel source)', () => {
     const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
 
     result.current({
@@ -205,12 +210,68 @@ describe('useErrorClickHandler', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('constructs correct kuery with traceId and both id fields for transactions (multiple APM errors)', () => {
+  it('navigates to errors page with traceId/spanId for mixed spans (APM + OTel errors)', () => {
     const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
 
     result.current({
+      traceId: 'trace-mixed',
+      docId: 'span-1',
+      errorCount: 3,
+      errorSource: 'mixed',
+    });
+
+    expect(mockLink).toHaveBeenCalledWith(
+      '/services/{serviceName}/errors',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          traceId: 'trace-mixed',
+          spanId: 'span-1',
+        }),
+      })
+    );
+    expect(mockNavigateToUrl).toHaveBeenCalled();
+    expect(mockOnOpenDocFlyout).not.toHaveBeenCalled();
+  });
+
+  it('explicit traceId overrides any stale traceId inherited from the transactions/view route query', () => {
+    // transactions/view declares traceId in its own schema; use_error_click_handler spreads
+    // the whole query object, which may carry a stale traceId from the sampled transaction.
+    // The row's own errorTraceId must win.
+    mockUseAnyOfApmParams.mockReturnValue({
+      query: { ...defaultQuery, traceId: 'stale-trace-from-transactions-view' },
+    } as any);
+
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+
+    result.current({
+      traceId: 'actual-error-trace',
+      docId: 'span-1',
+      errorCount: 1,
+      errorSource: 'apm',
+    });
+
+    expect(mockLink).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.objectContaining({
+          // The row's traceId overrides the stale one from the spread.
+          traceId: 'actual-error-trace',
+          spanId: 'span-1',
+        }),
+      })
+    );
+    // Stale traceId must NOT appear in the link when it differs.
+    const callArgs = mockLink.mock.calls[0][1] as { query: Record<string, unknown> };
+    expect(callArgs.query.traceId).toBe('actual-error-trace');
+  });
+
+  it('constructs correct kuery with traceId and both id fields for spans (multiple APM errors)', () => {
+    const { result } = renderHook(() => useErrorClickHandler(mockTraceItems, mockOnOpenDocFlyout));
+
+    // Use span-1 (non-mobile service) so the result is the standard /errors route with all params.
+    result.current({
       traceId: 'my-trace-id',
-      docId: 'tx-1',
+      docId: 'span-1',
       errorCount: 2,
       errorSource: 'apm',
     });
@@ -219,7 +280,9 @@ describe('useErrorClickHandler', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.objectContaining({
-          kuery: 'trace.id : "my-trace-id" and (span.id : "tx-1" or transaction.id : "tx-1")',
+          kuery: 'trace.id : "my-trace-id" and (span.id : "span-1" or transaction.id : "span-1")',
+          traceId: 'my-trace-id',
+          spanId: 'span-1',
         }),
       })
     );
@@ -261,6 +324,8 @@ describe('useErrorClickHandler', () => {
         serviceGroup: '',
         kuery:
           'trace.id : "trace-123" and (span.id : "otel-span-id" or transaction.id : "otel-span-id")',
+        traceId: 'trace-123',
+        spanId: 'otel-span-id',
       },
     });
   });

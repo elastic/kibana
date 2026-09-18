@@ -28,7 +28,8 @@ export interface OpenDocFlyoutParams {
  *
  * Routing:
  *  - single unprocessed OTel error → log flyout for the individual error doc
- *  - multiple errors where any is unprocessed OTel → span flyout scrolled to the Errors table
+ *  - multiple errors where all are unprocessed OTel → span flyout scrolled to the Errors table
+ *  - mixed span (APM errors + unprocessed OTel exceptions) → APM Errors page with OTel panel
  *  - classic APM errors (single or multiple) → navigate to the APM Errors page
  */
 export function useErrorClickHandler(
@@ -55,14 +56,15 @@ export function useErrorClickHandler(
         return;
       }
 
-      // Multiple errors that include at least one unprocessed OTel error → span flyout with errors
-      // table. Classic APM multi-error rows fall through to the Errors page below.
+      // Multiple errors where ALL are unprocessed OTel (pure-OTel span) → span flyout with errors
+      // table. Mixed rows (errorSource === 'mixed') fall through to the Errors page below.
       if (errorCount > 1 && errorSource === 'unprocessedOtel') {
         onOpenDocFlyout({ type: 'span', docId, docIndex: undefined, activeSection: 'errors-table' });
         return;
       }
 
-      // Classic APM errors (single or multiple) → navigate to the Errors page.
+      // Classic APM errors (single or multiple) or mixed spans → navigate to the Errors page.
+      // Mixed spans additionally receive traceId/spanId so the OTel panel renders on arrival.
       const item = traceItems?.find((i) => i.id === docId);
       if (!item) return;
 
@@ -82,7 +84,11 @@ export function useErrorClickHandler(
           })
         : apmRouter.link('/services/{serviceName}/errors', {
             path: { serviceName: item.serviceName },
-            query: { ...query, serviceGroup: '', kuery },
+            // traceId/spanId go AFTER the spread: `query` inherits a stale `traceId` from the
+            // sampled transaction (transactions/view declares it). The explicit values override it
+            // so the OTel panel fetches from the correct trace. Appended unconditionally so
+            // the panel can self-suppress when there are no OTel rows.
+            query: { ...query, serviceGroup: '', kuery, traceId: errorTraceId, spanId: docId },
           });
 
       navigateToUrl(href);
