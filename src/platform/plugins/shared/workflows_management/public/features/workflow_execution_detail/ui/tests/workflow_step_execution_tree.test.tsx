@@ -1921,6 +1921,87 @@ describe('WorkflowStepExecutionTree', () => {
       expect(reopenedRow).toHaveAttribute('data-is-expanded', 'true');
     });
 
+    it('force-expands an iteration again after collapsing it, leaving, and re-selecting it', async () => {
+      const user = userEvent.setup();
+      isTerminalStatus.mockReturnValue(true);
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: 'foreach-exec',
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          children: [
+            makeIteration(0, 'step-0'),
+            makeIteration(1, 'step-1'),
+            makeIteration(2, 'step-2'),
+          ],
+        },
+      ]);
+
+      const execution = createMockExecution({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [
+          createMockStepExecution({
+            id: 'foreach-exec',
+            stepId: 'loop',
+            stepType: 'foreach',
+          }),
+          createMockStepExecution({ id: 'step-0', stepId: 'log', stepType: 'console' }),
+          createMockStepExecution({ id: 'step-1', stepId: 'log', stepType: 'console' }),
+          createMockStepExecution({ id: 'step-2', stepId: 'log', stepType: 'console' }),
+        ],
+      });
+
+      const treeProps = {
+        execution,
+        definition: createMockDefinition(),
+        error: null as Error | null,
+        onStepExecutionClick: mockOnStepExecutionClick,
+      };
+
+      const { rerender } = render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree {...treeProps} selectedId="foreach-iteration:loop:1" />
+        </TestWrapper>
+      );
+
+      const selectedNode = screen
+        .getByText('Iteration #1')
+        .closest('[data-test-subj="workflowStepTreeNode"]');
+      const chevron = selectedNode?.querySelector(
+        '[data-test-subj="workflowStepTreeChevron"]'
+      ) as HTMLElement;
+      await user.click(chevron);
+      expect(
+        screen
+          .getByText('Iteration #1')
+          .closest('[data-test-subj="step-execution-tree-item-label"]')
+      ).toHaveAttribute('data-is-expanded', 'false');
+
+      rerender(
+        <TestWrapper>
+          <WorkflowStepExecutionTree {...treeProps} selectedId="foreach-iteration:loop:0" />
+        </TestWrapper>
+      );
+      rerender(
+        <TestWrapper>
+          <WorkflowStepExecutionTree {...treeProps} selectedId="foreach-iteration:loop:1" />
+        </TestWrapper>
+      );
+
+      expect(
+        screen
+          .getByText('Iteration #1')
+          .closest('[data-test-subj="step-execution-tree-item-label"]')
+      ).toHaveAttribute('data-is-expanded', 'true');
+      expect(
+        screen
+          .getByText('Iteration #1')
+          .closest('[data-test-subj="workflowStepTreeNode"]')
+          ?.querySelector('[data-step-id="log"]')
+      ).not.toBeNull();
+    });
+
     it('opens a collapsed gap when the selected iteration index is inside it', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation(

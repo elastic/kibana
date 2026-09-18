@@ -1016,6 +1016,10 @@ const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null
     ids: Set<string>;
   } | null>(null);
 
+  if (collapseOverride && collapseOverride.selectedId !== selectedId) {
+    setCollapseOverride(null);
+  }
+
   const defaultExpandedIds = useMemo(() => {
     const ids = new Set<string>();
     collectDefaultExpandedIds(openNodes, ids);
