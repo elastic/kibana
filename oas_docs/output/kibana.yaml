@@ -77177,6 +77177,7 @@ paths:
               type: object
               properties:
                 clearHistorySnapshots:
+                  default: false
                   description: |
                     When set to `true`, all existing history snapshot indices for this namespace are deleted in the background after the task is disabled. The response returns immediately without waiting for deletion to complete.
                   type: boolean
