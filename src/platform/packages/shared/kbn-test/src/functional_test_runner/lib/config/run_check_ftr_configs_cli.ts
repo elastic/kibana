@@ -27,6 +27,7 @@ const IGNORED_PATHS = [
   'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts',
   'x-pack/solutions/security/test/cloud_security_posture_functional/config.base.ts',
   'x-pack/solutions/observability/plugins/apm/test/scenarios/agent_config.ts',
+  'x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/benchmarks/saved_object_diff.benchmark.config.ts',
 ];
 
 export async function runCheckFtrConfigsCli() {
