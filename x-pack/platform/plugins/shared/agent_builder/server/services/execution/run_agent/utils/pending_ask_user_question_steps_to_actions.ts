@@ -54,6 +54,7 @@ export const pendingAskUserQuestionStepsToActions = ({
     validateResponse({ step, response });
 
     const { toolCallId, toolName, args, content, artifact } = materializeAskUserQuestionToolCall({
+      promptId: step.prompt_id,
       questions: step.questions,
       answers: response.answers,
     });

@@ -233,6 +233,7 @@ export const roundToLangchain = async (
       } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
         // Render answered ask_user_question steps as a tool-call / tool-response pair.
         const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+          promptId: step.prompt_id,
           questions: step.questions,
           answers: step.answers,
         });

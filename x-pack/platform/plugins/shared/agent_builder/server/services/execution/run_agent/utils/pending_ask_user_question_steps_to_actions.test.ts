@@ -64,6 +64,7 @@ describe('pendingAskUserQuestionStepsToActions', () => {
     expect(toolCallAction.tool_calls[0].args).toEqual({ questions: [sampleQuestion] });
     expect(executeToolAction.type).toBe(AgentActionType.ExecuteTool);
     const expected = materializeAskUserQuestionToolCall({
+      promptId: 's1',
       questions: [sampleQuestion],
       answers: [{ choice: [0] }],
     });

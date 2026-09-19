@@ -46,6 +46,7 @@ export const roundToActions = ({
     }
 
     const { toolCallId, toolName, args, content, artifact } = materializeAskUserQuestionToolCall({
+      promptId: step.prompt_id,
       questions: step.questions,
       answers: step.answers,
     });

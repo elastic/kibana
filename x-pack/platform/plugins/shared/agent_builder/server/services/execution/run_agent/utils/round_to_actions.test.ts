@@ -213,6 +213,7 @@ describe('roundToActions', () => {
     expect(actions[1].type).toBe(AgentActionType.ExecuteTool);
 
     const expected = materializeAskUserQuestionToolCall({
+      promptId: answered.prompt_id,
       questions: answered.questions,
       answers: answered.answers!,
     });
