@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { AIMessage } from '@langchain/core/messages';
+import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { ConversationRoundStepType, type ConversationRoundStep } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
-import { AgentActionType } from './actions';
 import { createAgentGraph } from './graph';
 import type { PromptFactory } from './prompts';
 import type { ProcessedConversation } from './utils/prepare_conversation';
@@ -23,12 +24,23 @@ jest.mock('@langchain/langgraph/prebuilt', () => ({
   })),
 }));
 
+const askName = internalTools.askUserQuestion.replace(/\./g, '_');
+
+const mockToolNodeOnce = (messages: ToolMessage[]) => {
+  const { ToolNode } = jest.requireMock('@langchain/langgraph/prebuilt');
+  ToolNode.mockImplementationOnce(() => ({
+    invoke: jest.fn().mockResolvedValue(messages),
+  }));
+};
+
 const createTestGraph = ({
   structuredOutput = false,
+  outputSchema,
   sessionId,
   cacheControl,
 }: {
   structuredOutput?: boolean;
+  outputSchema?: Record<string, unknown>;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
 } = {}) => {
@@ -48,6 +60,15 @@ const createTestGraph = ({
   const toolManager = {
     list: jest.fn(() => []),
     recordToolUse: jest.fn(),
+    getToolIdMapping: jest.fn(
+      () =>
+        new Map([
+          ['my_tool', 'my_tool'],
+          ['test-tool', 'test-tool'],
+          [askName, internalTools.askUserQuestion],
+        ])
+    ),
+    getToolMeta: jest.fn(() => ({ origin: undefined, type: undefined })),
   } as unknown as ToolManager;
   const promptFactory = {
     getMainPrompt: jest.fn().mockResolvedValue([]),
@@ -61,6 +82,7 @@ const createTestGraph = ({
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
+    outputSchema,
     processedConversation: {} as ProcessedConversation,
     promptFactory,
     roundId: 'test-round',
@@ -68,7 +90,15 @@ const createTestGraph = ({
     cacheControl,
   });
 
-  return { graph, researchInvoke, structuredInvoke, toolManager, researchWithConfig };
+  return {
+    graph,
+    researchInvoke,
+    structuredInvoke,
+    toolManager,
+    researchWithConfig,
+    promptFactory,
+    chatModel,
+  };
 };
 
 describe('createAgentGraph', () => {
@@ -82,20 +112,30 @@ describe('createAgentGraph', () => {
     expect(researchInvoke).toHaveBeenCalledTimes(3);
   });
 
-  it('resets the consecutive error counter after a valid research response', async () => {
-    const { graph, researchInvoke } = createTestGraph();
+  it('resets the consecutive error counter after a valid research response and keeps the retry notice', async () => {
+    const { graph, researchInvoke, promptFactory } = createTestGraph();
     researchInvoke
       .mockResolvedValueOnce(new AIMessage({ content: '' }))
-      .mockResolvedValueOnce(new AIMessage({ content: 'final answer' }));
+      .mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
 
     const result = await graph.invoke({ cycleLimit: 10 });
 
     expect(result.errorCount).toBe(0);
-    expect(result.finalAnswer).toBe('final answer');
-    expect(result.mainActions.map(({ type }) => type)).toEqual([
-      AgentActionType.Error,
-      AgentActionType.HandOver,
+    expect(result.finalAnswer).toBe('the answer');
+    expect(result.steps).toEqual([]);
+    expect(result.retryNotices).toEqual([
+      {
+        phase: 'research',
+        afterNonTodosStepCount: 0,
+        error: expect.objectContaining({
+          meta: expect.objectContaining({ errCode: AgentExecutionErrorCode.emptyResponse }),
+        }),
+      },
     ]);
+    // the retry turn sees the notice
+    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith(
+      expect.objectContaining({ retryNotices: result.retryNotices })
+    );
   });
 
   it('preserves valid tool-call and handover behavior', async () => {
@@ -114,6 +154,142 @@ describe('createAgentGraph', () => {
     expect(toolManager.recordToolUse).toHaveBeenCalledWith('test-tool');
     expect(result.finalAnswer).toBe('answer after tool call');
     expect(result.errorCount).toBe(0);
+  });
+
+  it('records tool calls as pending steps, resolves them after execution and clears pending ids', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({
+          content: 'looking',
+          tool_calls: [{ id: 'c1', name: 'my_tool', args: { q: 1 } }],
+        })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({
+        tool_call_id: 'c1',
+        content: JSON.stringify({ results: [{ type: 'other', data: { ok: true } }] }),
+        artifact: { results: [{ type: 'other', data: { ok: true } }] },
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.steps.map((s: ConversationRoundStep) => s.type)).toEqual([
+      ConversationRoundStepType.reasoning,
+      ConversationRoundStepType.toolCall,
+    ]);
+    expect(result.steps[1]).toMatchObject({
+      tool_call_id: 'c1',
+      results: [{ type: 'other', data: { ok: true } }],
+    });
+    expect(result.pendingToolCallIds).toEqual([]);
+    expect(result.toolRenderState.c1).toMatchObject({
+      toolName: 'my_tool',
+      kind: 'server',
+      cycle: 1,
+    });
+    expect(result.toolRenderState.c1.content).toContain('"ok":true');
+    expect(result.toolOutcome).toEqual({ type: 'completed' });
+    expect(result.finalAnswer).toBe('done');
+  });
+
+  it('lets the model repair an ask_user_question call whose arguments failed validation', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'a1', name: askName, args: { questions: 'not-an-array' } }],
+        })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      // what ToolNode returns on a schema-validation failure: no artifact, no interrupt
+      new ToolMessage({
+        tool_call_id: 'a1',
+        content: 'Error: Received tool input did not match expected schema',
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.steps).toEqual([
+      expect.objectContaining({
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'a1',
+        results: [expect.objectContaining({ type: 'error' })],
+      }),
+    ]);
+    expect(result.toolRenderState.a1).toMatchObject({
+      kind: 'dedicated',
+      content: expect.stringContaining('Error:'),
+    });
+    expect(result.pendingToolCallIds).toEqual([]);
+    expect(result.toolOutcome).toEqual({ type: 'completed' });
+    expect(result.finalAnswer).toBe('done');
+    expect(researchInvoke).toHaveBeenCalledTimes(2);
+  });
+
+  it('interrupts the run when a tool returns a prompt', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke.mockResolvedValueOnce(
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }],
+      })
+    );
+    const prompt = { id: 'p1', type: 'confirmation', title: 't', message: 'm' };
+    mockToolNodeOnce([new ToolMessage({ tool_call_id: 'c1', content: '', artifact: { prompt } })]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.interrupted).toBe(true);
+    expect(result.prompts).toEqual([prompt]);
+    expect(result.pendingToolCallIds).toEqual(['c1']);
+    expect(result.steps[0]).toMatchObject({ tool_call_id: 'c1', results: [] });
+    expect(result.finalAnswer).toBeUndefined();
+    expect(researchInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws cycleLimitExceeded when the research agent keeps calling tools past its budget', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    let call = 0;
+    researchInvoke.mockImplementation(async () => {
+      call += 1;
+      return new AIMessage({
+        content: '',
+        tool_calls: [{ id: `c${call}`, name: 'my_tool', args: {} }],
+      });
+    });
+
+    await expect(graph.invoke({ cycleLimit: 2 }, { recursionLimit: 50 })).rejects.toMatchObject({
+      meta: { errCode: AgentExecutionErrorCode.cycleLimitExceeded },
+    });
+  });
+
+  it('forcefully hands over to the answer agent past the budget in structured mode', async () => {
+    const { graph, researchInvoke, structuredInvoke, promptFactory } = createTestGraph({
+      structuredOutput: true,
+    });
+    let call = 0;
+    researchInvoke.mockImplementation(async () => {
+      call += 1;
+      return new AIMessage({
+        content: '',
+        tool_calls: [{ id: `c${call}`, name: 'my_tool', args: {} }],
+      });
+    });
+    structuredInvoke.mockResolvedValue({ response: 'forced' });
+
+    const result = await graph.invoke({ cycleLimit: 2 }, { recursionLimit: 50 });
+
+    expect(result.finalAnswer).toEqual({ response: 'forced' });
+    expect(result.researchOutcome).toEqual({ type: 'handover', message: '', forceful: true });
+    expect(promptFactory.getStructuredAnswerPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ handover: { message: '', forceful: true } })
+    );
   });
 
   it('stops after two retries and surfaces emptyResponse for empty structured answers', async () => {
@@ -143,10 +319,26 @@ describe('createAgentGraph', () => {
 
     expect(result.errorCount).toBe(0);
     expect(result.finalAnswer).toEqual({ response: 'structured answer' });
-    expect(result.answerActions.map(({ type }) => type)).toEqual([
-      AgentActionType.Error,
-      AgentActionType.StructuredAnswer,
+    expect(result.answerOutcome).toEqual({
+      type: 'structured_answer',
+      data: { response: 'structured answer' },
+    });
+    expect(result.retryNotices).toEqual([
+      expect.objectContaining({ phase: 'answer', afterNonTodosStepCount: 0 }),
     ]);
+  });
+
+  it('unwraps the structured answer when a non-object output schema was wrapped', async () => {
+    const { graph, researchInvoke, structuredInvoke } = createTestGraph({
+      structuredOutput: true,
+      outputSchema: { type: 'array', items: { type: 'string' } },
+    });
+    researchInvoke.mockResolvedValue(new AIMessage({ content: 'research complete' }));
+    structuredInvoke.mockResolvedValue({ response: ['a', 'b'] });
+
+    const result = await graph.invoke({ cycleLimit: 10 });
+
+    expect(result.finalAnswer).toEqual(['a', 'b']);
   });
 
   it('passes sessionId and cacheControl to the research model when sessionId is provided', async () => {

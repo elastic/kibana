@@ -10,8 +10,12 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-common/chat';
-import { isToolCallStep } from '@kbn/agent-builder-common/chat';
+import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
+import {
+  isBackgroundAgentCompleteStep,
+  isReasoningStep,
+  isSubagentRosterUpdatedStep,
+} from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
@@ -28,62 +32,93 @@ import {
   matchEvent,
   matchGraphName,
   matchName,
-  toolIdentifierFromToolCall,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
-import { internalTools } from '@kbn/agent-builder-common';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
-import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
-import { extractToolReturn } from './utils/extract_tool_return';
-import {
-  isBackgroundExecutionCompleteAction,
-  isExecuteToolAction,
-  isHandoverAction,
-  isSubagentRosterUpdatedAction,
-  isToolCallAction,
-  isToolPromptAction,
-} from './actions';
+import { steps, tags } from './constants';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
+import { isRootGraphNodeEnd } from './run_step_tracker';
+import type { RunStepUpdate } from './step_state';
+import type { ResearchOutcome, ToolOutcome, ToolRenderStateUpdate } from './transient_state';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
+/** What a `researchAgent` node returns, as seen on its `on_chain_end` event. */
+interface ResearchNodeOutput {
+  steps?: RunStepUpdate[];
+  toolRenderState?: ToolRenderStateUpdate;
+  researchOutcome?: ResearchOutcome;
+}
+
+/** What an `executeTool` node returns, as seen on its `on_chain_end` event. */
+interface ExecuteToolNodeOutput {
+  steps?: RunStepUpdate[];
+  toolOutcome?: ToolOutcome;
+}
+
 /**
- * Tools that have their own dedicated step lifecycle event and therefore should NOT produce a default `toolCallEvent`.
+ * Reasoning and tool call events for the step updates emitted by a research turn. Dedicated-lifecycle
+ * calls (e.g. ask_user_question) have no `tool_call` event: their lifecycle is the prompt request.
  */
-const TOOLS_WITH_DEDICATED_STEP_LIFECYCLE: ReadonlySet<string> = new Set([
-  internalTools.askUserQuestion,
-]);
+const stepUpdatesToEvents = (
+  updates: RunStepUpdate[],
+  renderState: ToolRenderStateUpdate
+): ChatAgentEvent[] => {
+  const events: ChatAgentEvent[] = [];
+  for (const update of updates) {
+    if (update.type === 'append' && isReasoningStep(update.step)) {
+      events.push(
+        createReasoningEvent(update.step.reasoning, {
+          toolCallId: update.step.tool_call_id,
+          toolCallGroupId: update.step.tool_call_group_id,
+        })
+      );
+    } else if (update.type === 'append_tool_call') {
+      const { step } = update;
+      const kind = renderState[step.tool_call_id]?.kind ?? 'server';
+      if (kind === 'browser') {
+        events.push(
+          createBrowserToolCallEvent({
+            toolId: step.tool_id,
+            toolCallId: step.tool_call_id,
+            params: step.params,
+          })
+        );
+      } else if (kind === 'server') {
+        events.push(
+          createToolCallEvent({
+            toolId: step.tool_id,
+            toolCallId: step.tool_call_id,
+            params: step.params,
+            toolCallGroupId: step.tool_call_group_id,
+            toolOrigin: step.tool_origin,
+            toolType: step.tool_type,
+          })
+        );
+      }
+    }
+  }
+  return events;
+};
+
+const stripStepType = ({ type, ...execution }: BackgroundAgentCompleteStep) => execution;
 
 export const convertGraphEvents = ({
   graphName,
-  toolManager,
-  pendingRound,
   logger,
   startTime,
   structuredOutput,
 }: {
   graphName: string;
-  toolManager: ToolManager;
-  pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
   structuredOutput: boolean;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
-    const toolCallIdToIdMap = new Map<string, string>();
-
-    if (pendingRound) {
-      const toolCalls = pendingRound.steps.filter(isToolCallStep);
-      toolCalls.forEach((toolCall) => {
-        toolCallIdToIdMap.set(toolCall.tool_call_id, toolCall.tool_id);
-      });
-    }
-
     // message identifier for emitted chunks
     let messageId = uuidv4();
 
@@ -125,64 +160,19 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit tool calls for research agent steps
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
-          const events: ConvertedEvents[] = [];
-          const addedActions = (event.data.output as StateType).mainActions;
-          const nextAction = addedActions[addedActions.length - 1];
-
-          if (isToolCallAction(nextAction)) {
-            const {
-              tool_calls: toolCalls,
-              tool_call_group_id: toolCallGroupId,
-              message: messageText = '',
-            } = nextAction;
-            if (toolCalls.length > 0) {
-              if (messageText.trim().length > 0) {
-                events.push(createReasoningEvent(messageText, { toolCallGroupId }));
-              }
-
-              for (const toolCall of toolCalls) {
-                const toolId = toolIdentifierFromToolCall(toolCall, toolManager.getToolIdMapping());
-                const { toolCallId, args: toolCallArgs, reasoning } = toolCall;
-
-                if (reasoning && reasoning.trim().length > 0) {
-                  events.push(createReasoningEvent(reasoning, { toolCallId, toolCallGroupId }));
-                }
-
-                toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-
-                const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
-                if (isBrowserTool) {
-                  events.push(
-                    createBrowserToolCallEvent({
-                      toolId: toolId.replace(BROWSER_TOOL_PREFIX, ''),
-                      toolCallId,
-                      params: toolCallArgs,
-                    })
-                  );
-                } else if (!TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId)) {
-                  const { origin: toolOrigin, type: toolType } = toolManager.getToolMeta(toolId);
-                  events.push(
-                    createToolCallEvent({
-                      toolId,
-                      toolCallId,
-                      params: toolCallArgs,
-                      toolCallGroupId,
-                      toolOrigin,
-                      toolType,
-                    })
-                  );
-                }
-              }
-            }
-          }
+        // emit reasoning and tool call events for research agent turns
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.researchAgent)) {
+          const output = event.data.output as ResearchNodeOutput;
+          const events: ConvertedEvents[] = stepUpdatesToEvents(
+            output.steps ?? [],
+            output.toolRenderState ?? {}
+          );
 
           // Backdated thinking-complete: when the research agent's terminal turn
-          // produces a HandoverAction in non-structured mode, emit
-          // thinkingCompleteEvent with the timestamp of the first chunk of that
-          // turn. Falls back to "now" if no chunk timestamp was captured.
-          if (!structuredOutput && isHandoverAction(nextAction)) {
+          // is a handover in non-structured mode, emit thinkingCompleteEvent with
+          // the timestamp of the first chunk of that turn. Falls back to "now" if
+          // no chunk timestamp was captured.
+          if (!structuredOutput && output.researchOutcome?.type === 'handover') {
             const firstChunkOffset =
               currentTurnFirstChunkAt !== undefined
                 ? currentTurnFirstChunkAt - startTime.getTime()
@@ -195,7 +185,7 @@ export const convertGraphEvents = ({
 
         // emit messageEvent at finalize: state.finalAnswer is the canonical answer
         // (string for non-structured, object for structured)
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.finalize)) {
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.finalize)) {
           const finalState = event.data.output as StateType;
           const finalAnswer = finalState.finalAnswer;
           if (finalAnswer !== undefined && finalAnswer !== null && finalAnswer !== '') {
@@ -205,50 +195,49 @@ export const convertGraphEvents = ({
         }
 
         // emit tool result events and/or prompt request events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
-          const addedActions = (event.data.output as StateType).mainActions;
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.executeTool)) {
+          const output = event.data.output as ExecuteToolNodeOutput;
+          const updates = output.steps ?? [];
           const resultEvents: ConvertedEvents[] = [];
 
-          for (const action of addedActions) {
-            if (isExecuteToolAction(action)) {
-              for (const toolResult of action.tool_results) {
-                const toolId = toolCallIdToIdMap.get(toolResult.toolCallId);
-                const toolReturn = extractToolReturn(toolResult);
+          for (const update of updates) {
+            if (update.type === 'resolve_tool_call') {
+              resultEvents.push(
+                createToolResultEvent({
+                  toolCallId: update.toolCallId,
+                  toolId: update.toolId,
+                  results: update.results,
+                })
+              );
+            }
+          }
+
+          if (output.toolOutcome?.type === 'interrupted') {
+            for (const { prompt, toolCallId } of output.toolOutcome.prompts) {
+              resultEvents.push(
+                createPromptRequestEvent({
+                  prompt,
+                  source: {
+                    type: AgentPromptRequestSourceType.toolCall,
+                    tool_call_id: toolCallId,
+                  },
+                })
+              );
+
+              if (isAskUserQuestionPrompt(prompt)) {
                 resultEvents.push(
-                  createToolResultEvent({
-                    toolCallId: toolResult.toolCallId,
-                    toolId: toolId ?? 'unknown',
-                    results: toolReturn.results ?? [],
+                  createUserQuestionAskedEvent({
+                    prompt_id: prompt.id,
+                    questions: prompt.questions,
                   })
                 );
               }
             }
+          }
 
-            if (isToolPromptAction(action)) {
-              for (const { prompt, tool_call_id } of action.prompts) {
-                resultEvents.push(
-                  createPromptRequestEvent({
-                    prompt,
-                    source: {
-                      type: AgentPromptRequestSourceType.toolCall,
-                      tool_call_id,
-                    },
-                  })
-                );
-
-                if (isAskUserQuestionPrompt(prompt)) {
-                  resultEvents.push(
-                    createUserQuestionAskedEvent({
-                      prompt_id: prompt.id,
-                      questions: prompt.questions,
-                    })
-                  );
-                }
-              }
-            }
-
-            if (isSubagentRosterUpdatedAction(action)) {
-              resultEvents.push(createSubagentRosterUpdatedEvent(action.roster));
+          for (const update of updates) {
+            if (update.type === 'append' && isSubagentRosterUpdatedStep(update.step)) {
+              resultEvents.push(createSubagentRosterUpdatedEvent(update.step.roster));
             }
           }
 
@@ -258,13 +247,13 @@ export const convertGraphEvents = ({
         }
 
         // emit background execution complete events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.checkBackgroundWork)) {
-          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.checkBackgroundWork)) {
+          const output = event.data.output as { steps?: RunStepUpdate[] };
           const bgEvents: ConvertedEvents[] = [];
 
-          for (const action of addedActions) {
-            if (isBackgroundExecutionCompleteAction(action)) {
-              bgEvents.push(createBackgroundAgentCompleteEvent(action.execution));
+          for (const update of output.steps ?? []) {
+            if (update.type === 'append' && isBackgroundAgentCompleteStep(update.step)) {
+              bgEvents.push(createBackgroundAgentCompleteEvent(stripStepType(update.step)));
             }
           }
 

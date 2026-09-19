@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { ChatEventType, ToolOrigin } from '@kbn/agent-builder-common';
+import { Overwrite, type Command } from '@langchain/langgraph';
+import type { BrowserApiToolMetadata, ToolCallStep } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolOrigin,
+  createAskUserQuestionStep,
+} from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
 import { createAgentHandlerContextMock } from '../../../test_utils/runner';
-import { createRound } from '../../../test_utils/conversations';
+import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
 import { runDefaultAgentMode } from './run_chat_agent';
@@ -21,18 +29,26 @@ import {
   selectTools,
   selectSkills,
   extractRound,
-  getPendingRound,
+  getPendingTurn,
 } from './utils';
 import { createAgentGraph } from './graph';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
+import { RunStepTracker } from './run_step_tracker';
+import { steps as nodeNames } from './constants';
+import { stepUpdates } from './step_state';
+import type { StateType } from './state';
+
+// the real fold, so resume tests exercise the actual pending-turn detection
+const { getPendingTurn: realGetPendingTurn } = jest.requireActual('./utils/conversation_turn');
 
 jest.mock('./utils', () => ({
   prepareConversation: jest.fn(),
   selectSkills: jest.fn().mockResolvedValue([]),
   selectTools: jest.fn(),
   extractRound: jest.fn(),
-  getPendingRound: jest.fn(),
+  getPendingTurn: jest.fn(() => undefined),
+  createPreExecutionSteps: jest.fn(() => []),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
   estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
@@ -68,7 +84,7 @@ const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prep
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const selectSkillsMock = selectSkills as jest.MockedFn<typeof selectSkills>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
+const getPendingTurnMock = getPendingTurn as jest.MockedFn<typeof getPendingTurn>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
 const addRoundCompleteEventMock = addRoundCompleteEvent as jest.MockedFn<
   typeof addRoundCompleteEvent
@@ -92,7 +108,7 @@ describe('runDefaultAgentMode', () => {
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
 
-    getPendingRoundMock.mockReturnValue(undefined);
+    getPendingTurnMock.mockReturnValue(undefined);
 
     const staticTools: ExecutableToolWithOrigin[] = [
       { ...createMockedExecutableTool({ id: 'static-tool-1' }), origin: ToolOrigin.registry },
@@ -177,7 +193,7 @@ describe('runDefaultAgentMode', () => {
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
 
-    getPendingRoundMock.mockReturnValue(undefined);
+    getPendingTurnMock.mockReturnValue(undefined);
 
     selectToolsMock.mockResolvedValue({
       staticTools: [],
@@ -221,7 +237,7 @@ describe('runDefaultAgentMode', () => {
       } as any);
       context.toolManager.getToolIdMapping.mockReturnValue(new Map());
       context.toolManager.getDynamicToolIds.mockReturnValue([]);
-      getPendingRoundMock.mockReturnValue(undefined);
+      getPendingTurnMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
         timeline: [],
@@ -302,7 +318,7 @@ describe('runDefaultAgentMode', () => {
       } as any);
       context.toolManager.getToolIdMapping.mockReturnValue(new Map());
       context.toolManager.getDynamicToolIds.mockReturnValue([]);
-      getPendingRoundMock.mockReturnValue(undefined);
+      getPendingTurnMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
         timeline: [],
@@ -361,7 +377,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
-    getPendingRoundMock.mockReturnValue(undefined);
+    getPendingTurnMock.mockReturnValue(undefined);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
     prepareConversationMock.mockResolvedValue({
       timeline: [],
@@ -400,7 +416,7 @@ describe('runDefaultAgentMode', () => {
       context.toolManager.getDynamicToolIds.mockReturnValue([]);
       (context.attachmentStateManager.getAccessedRefs as jest.Mock).mockReturnValue([]);
       (context.attachmentStateManager.getAll as jest.Mock).mockReturnValue([]);
-      getPendingRoundMock.mockReturnValue(undefined);
+      getPendingTurnMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
         timeline: [],
@@ -416,14 +432,35 @@ describe('runDefaultAgentMode', () => {
     it('emits round_interrupted with the steps so far when the graph stream errors', async () => {
       const context = setup();
       const failure = new Error('llm exploded');
+      const toolCallStep: ToolCallStep = {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'call-1',
+        tool_id: 'my_tool',
+        params: {},
+        results: [],
+        progression: [],
+      };
       createAgentGraphMock.mockReturnValue({
         streamEvents: jest.fn(() => ({
           async *[Symbol.asyncIterator]() {
-            // A tool call emitted by the run before it blows up (via the tool manager's emitter).
+            // The research node records a tool call before the run blows up.
+            yield {
+              event: 'on_chain_end',
+              name: nodeNames.researchAgent,
+              run_id: 'run-1',
+              tags: [],
+              metadata: {
+                graphName: 'default-agent-builder-agent',
+                langgraph_node: nodeNames.researchAgent,
+                langgraph_checkpoint_ns: `${nodeNames.researchAgent}:1`,
+              },
+              data: { output: { steps: [stepUpdates.appendToolCall(toolCallStep)] } },
+            };
+            // progress observed by the tool manager's emitter, never drained by the graph
             const emit = context.toolManager.setEventEmitter.mock.calls[0][0];
             emit({
-              type: ChatEventType.toolCall,
-              data: { tool_call_id: 'call-1', tool_id: 'my_tool', params: {} },
+              type: ChatEventType.toolProgress,
+              data: { tool_call_id: 'call-1', tool_id: 'my_tool', message: 'halfway' },
             } as any);
             throw failure;
           },
@@ -438,6 +475,8 @@ describe('runDefaultAgentMode', () => {
         },
         context
       );
+      // `extractRound` is mocked, so the handler returns before the (async) stream fails.
+      await new Promise((resolve) => setImmediate(resolve));
 
       const emitted = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event);
       const interrupted = emitted.find((event) => event.type === ChatEventType.roundInterrupted);
@@ -446,7 +485,13 @@ describe('runDefaultAgentMode', () => {
         round_id: 'round-1',
         input: { message: 'hello' },
         attachments: [],
-        steps: [expect.objectContaining({ tool_call_id: 'call-1', results: [] })],
+        steps: [
+          expect.objectContaining({
+            tool_call_id: 'call-1',
+            results: [],
+            progression: [{ message: 'halfway' }],
+          }),
+        ],
       });
       expect(interrupted.data.summary.time_to_last_token).toBeGreaterThanOrEqual(0);
       expect(interrupted.data.summary.model_usage).toMatchObject({ connector_id: 'connector-1' });
@@ -490,6 +535,163 @@ describe('runDefaultAgentMode', () => {
       expect(types).not.toContain(ChatEventType.roundInterrupted);
       expect(context.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to build round_interrupted summary')
+      );
+    });
+  });
+
+  describe('graph wiring', () => {
+    const setup = () => {
+      const context = createAgentHandlerContextMock();
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector', connectorId: 'connector-1' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map([['my_tool', 'my.tool']]));
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      const streamEvents = jest.fn(() => []);
+      createAgentGraphMock.mockReturnValue({ streamEvents } as any);
+      return { context, streamEvents };
+    };
+
+    const initialCommand = (streamEvents: jest.Mock): Command<unknown, Partial<StateType>> =>
+      streamEvents.mock.calls[0][0];
+
+    it('hands the tracker and the todo state manager to the graph', async () => {
+      const { context, streamEvents } = setup();
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      const graphParams = createAgentGraphMock.mock.calls[0][0];
+      expect(graphParams.toolExecutionBuffer).toBeInstanceOf(RunStepTracker);
+      expect(graphParams.todoStateManager).toBe(context.todoStateManager);
+      // fresh run: starts at init with no pending calls
+      const command = initialCommand(streamEvents);
+      expect(command.goto).toEqual([nodeNames.init]);
+      expect(command.update).not.toHaveProperty('pendingToolCallIds');
+      expect(command.update).toMatchObject({ cycleLimit: 30, steps: new Overwrite([]) });
+    });
+
+    const pausedCall: ToolCallStep = {
+      type: ConversationRoundStepType.toolCall,
+      tool_call_id: 'call-1',
+      tool_id: 'my.tool',
+      params: { q: 1 },
+      results: [],
+      progression: [],
+    };
+
+    it('resumes at executeTool when the pending turn has a paused tool call', async () => {
+      const { context, streamEvents } = setup();
+      const conversation = createEmptyConversation({
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+            state: {
+              version: 2,
+              agent: {
+                current_cycle: 3,
+                error_count: 0,
+                nodes: [
+                  {
+                    step: 'execute_tool',
+                    tool_call_id: 'call-1',
+                    tool_id: 'my.tool',
+                    tool_params: { q: 1 },
+                    tool_state: undefined,
+                  },
+                ],
+              },
+            },
+          }),
+        ],
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { prompts: { p1: { allow: true } } },
+          agentConfiguration: { tools: [] } as any,
+          conversation,
+        },
+        context
+      );
+
+      const command = initialCommand(streamEvents);
+      expect(command.goto).toEqual([nodeNames.executeTool]);
+      expect(command.update).toMatchObject({
+        pendingToolCallIds: ['call-1'],
+        currentCycle: 3,
+        researchOutcome: {
+          type: 'tool_calls',
+          toolCalls: [{ toolCallId: 'call-1', toolName: 'my_tool', args: { q: 1 } }],
+        },
+        toolRenderState: { 'call-1': { toolName: 'my_tool', kind: 'server' } },
+      });
+      expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
+    });
+
+    it('resumes at researchAgent when the turn only paused on an ask_user_question', async () => {
+      const { context, streamEvents } = setup();
+      const question = { question: 'Pick', options: [{ label: 'a' }], multi_select: false };
+      const conversation = createEmptyConversation({
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [createAskUserQuestionStep({ prompt_id: 'q1', questions: [question] })],
+            pending_prompts: [
+              { id: 'q1', type: AgentPromptType.ask_user_question, questions: [question] },
+            ],
+          }),
+        ],
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.promptManager.dump as jest.Mock).mockReturnValue({
+        responses: {
+          q1: { type: AgentPromptType.ask_user_question, response: { answers: [{ choice: [0] }] } },
+        },
+      });
+
+      await runDefaultAgentMode(
+        {
+          nextInput: {
+            prompts: { q1: { answers: [{ choice: [0] }] } },
+          },
+          agentConfiguration: { tools: [] } as any,
+          conversation,
+        },
+        context
+      );
+
+      const command = initialCommand(streamEvents);
+      expect(command.goto).toEqual([nodeNames.researchAgent]);
+      expect(command.update).toMatchObject({ pendingToolCallIds: [], researchOutcome: undefined });
+      // the consumed answer is removed from the prompt manager and replayed as an event
+      expect(context.promptManager.delete).toHaveBeenCalledWith('q1');
+      const emitted = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event);
+      expect(emitted).toContainEqual(
+        expect.objectContaining({
+          type: ChatEventType.userQuestionAnswered,
+          data: { prompt_id: 'q1', answers: [{ choice: [0] }] },
+        })
       );
     });
   });

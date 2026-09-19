@@ -14,7 +14,6 @@ import type {
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
-import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type {
@@ -22,19 +21,19 @@ import type {
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
-import type { ConvertedEvents } from '../convert_graph_events';
+import type { RunStepTracker } from '../run_step_tracker';
 import { buildAttachmentEvents } from './add_round_complete_event';
 import { formatAttachmentsMetadata } from './attachment_presentation';
-import type { CompactedConversation } from './conversation_compactor';
-import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
+import type { PendingTurn } from './conversation_turn';
 import { buildInterruptedRound } from './round_summary';
 
 export interface BuildRoundInterruptedEventParams {
-  /** Every event of the run so far. */
-  events: ConvertedEvents[];
+  /** Mirror of the run's steps so far (see `RunStepTracker`). */
+  tracker: RunStepTracker;
   /** The runner's round id (a resume keeps the pending round's id for persistence). */
   roundId: string;
-  pendingRound: ConversationRound | undefined;
+  /** The turn being resumed, when this execution is a HITL resume. */
+  pendingTurn: PendingTurn | undefined;
   startTime: Date;
   /** The processed round input, as `round_started` announced it. */
   processedInput: RoundInput;
@@ -45,9 +44,6 @@ export interface BuildRoundInterruptedEventParams {
   modelProvider: ModelProvider;
   mainConnectorId: string;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  compactionResult?: CompactedConversation;
-  relevantSkillsSelection?: RelevantSkillSelection;
-  initialTodos?: TodoItem[];
   attachmentStateManager: AttachmentStateManager;
   /** Attachment changes caused by the incoming message (drained after `prepareConversation`). */
   chatInputChanges: AttachmentChange[];
@@ -63,9 +59,9 @@ export interface BuildRoundInterruptedEventParams {
  * persisted projection of an interrupted execution matches that of a completed one.
  */
 export const buildRoundInterruptedEvent = ({
-  events,
+  tracker,
   roundId,
-  pendingRound,
+  pendingTurn,
   startTime,
   processedInput,
   author,
@@ -75,25 +71,18 @@ export const buildRoundInterruptedEvent = ({
   modelProvider,
   mainConnectorId,
   configurationOverrides,
-  compactionResult,
-  relevantSkillsSelection,
-  initialTodos,
   attachmentStateManager,
   chatInputChanges,
   getWorkspaceId,
   endTime = new Date(),
 }: BuildRoundInterruptedEventParams): RoundInterruptedEvent => {
   const { steps, summary } = buildInterruptedRound({
-    events,
-    pendingRound,
+    tracker,
     startTime,
     endTime,
     modelProvider,
     mainConnectorId,
     configurationOverrides,
-    compactionResult,
-    relevantSkillsSelection,
-    initialTodos,
   });
 
   // Same input processing as `createRound`: refs accessed during the run merged in, then the
@@ -118,6 +107,7 @@ export const buildRoundInterruptedEvent = ({
 
   // Identity of the round the success path would have produced: a resume keeps the pending
   // round's id / author / origin, a fresh round gets the handler's.
+  const pendingRound = pendingTurn?.compatRound;
   const identity: Pick<ConversationRound, 'id' | 'author' | 'origin'> = pendingRound
     ? { id: pendingRound.id, author: pendingRound.author, origin: pendingRound.origin }
     : {

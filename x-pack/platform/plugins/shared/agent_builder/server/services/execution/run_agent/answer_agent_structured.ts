@@ -11,13 +11,14 @@ import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
+import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { convertError, isRecoverableError } from './utils/errors';
-import { errorAction, isAgentErrorAction } from './actions';
 import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
-import type { StateType } from './state';
-import { processStructuredAnswerResponse } from './action_utils';
+import type { StateType, StateUpdate } from './state';
+import { processStructuredAnswerResponse } from './response_processing';
+import { countNonTodosSteps } from './step_state';
 
 const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),
@@ -52,10 +53,19 @@ export const createAnswerAgentStructured = ({
   outputSchema?: Record<string, unknown>;
   logger: Logger;
 }) => {
-  return async (state: StateType) => {
-    if (state.answerActions.length === 0 && state.errorCount === 0) {
+  return async (state: StateType): Promise<StateUpdate> => {
+    if (state.answerOutcome === undefined && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
+
+    const retryUpdate = (error: AgentBuilderAgentExecutionError): StateUpdate => ({
+      answerOutcome: { type: 'retry_error', error },
+      errorCount: state.errorCount + 1,
+      retryNotices: [
+        { phase: 'answer', afterNonTodosStepCount: countNonTodosSteps(state.steps), error },
+      ],
+    });
+
     try {
       const { schema: schemaToUse, wrapped } = wrapJsonSchema({
         schema: outputSchema ?? structuredOutputSchema,
@@ -72,10 +82,15 @@ export const createAnswerAgentStructured = ({
           tags: [tags.agent, tags.answerAgent],
         });
 
+      const handover =
+        state.researchOutcome?.type === 'handover' ? state.researchOutcome : undefined;
       const prompt = await promptFactory.getStructuredAnswerPrompt({
-        actions: state.mainActions,
-        answerActions: state.answerActions,
         cycleLimit: state.cycleLimit,
+        steps: state.steps,
+        renderState: state.toolRenderState,
+        pendingToolCallIds: state.pendingToolCallIds,
+        retryNotices: state.retryNotices,
+        handover: handover ? { message: handover.message, forceful: handover.forceful } : undefined,
       });
 
       let response = await structuredModel.invoke(prompt);
@@ -84,21 +99,18 @@ export const createAnswerAgentStructured = ({
         response = response[wrappedSchemaProp];
       }
 
-      const action = processStructuredAnswerResponse(response);
-
-      return {
-        answerActions: [action],
-        // Successful inference calls can still produce recoverable error actions,
+      const outcome = processStructuredAnswerResponse(response);
+      if (outcome.type === 'retry_error') {
+        // Successful inference calls can still produce recoverable errors,
         // which must count toward the retry limit.
-        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
-      };
+        return retryUpdate(outcome.error);
+      }
+
+      return { answerOutcome: outcome, errorCount: 0 };
     } catch (error) {
       const executionError = convertError(error);
       if (isRecoverableError(executionError)) {
-        return {
-          answerActions: [errorAction(executionError)],
-          errorCount: state.errorCount + 1,
-        };
+        return retryUpdate(executionError);
       } else {
         throw executionError;
       }
