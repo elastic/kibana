@@ -16,6 +16,7 @@ import {
   noCreateCasesPermissions,
   noDeleteCasesPermissions,
   readCasesPermissions,
+  buildCasesPermissions,
   renderWithTestingProviders,
 } from '../../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../../containers/mock';
@@ -862,6 +863,30 @@ describe('AllCasesListGeneric', () => {
           expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
         }
       });
+
+      it('should disable the checkboxes when the user has read + manageTemplates but no bulk-action permissions', async () => {
+        renderWithTestingProviders(<AllCasesList />, {
+          wrapperProps: {
+            permissions: buildCasesPermissions({
+              read: true,
+              manageTemplates: true,
+              create: false,
+              update: false,
+              delete: false,
+              push: false,
+              assign: false,
+              createComment: false,
+              reopenCase: false,
+            }),
+          },
+        });
+
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
+
+        for (const theCase of defaultGetCases.data.cases) {
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+        }
+      });
     });
 
     describe('Row actions', () => {
@@ -1187,6 +1212,34 @@ describe('AllCasesListGeneric', () => {
     it('should not render list checkboxes or bulk actions for read-only users', async () => {
       renderWithTestingProviders(<AllCasesList />, {
         wrapperProps: { permissions: readCasesPermissions() },
+      });
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+
+      for (const theCase of useGetCasesMockState.data.cases) {
+        expect(
+          screen.queryByTestId(`cases-list-item-checkbox-${theCase.id}`)
+        ).not.toBeInTheDocument();
+      }
+
+      expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
+    });
+
+    it('should not render list checkboxes or bulk actions for read + manageTemplates users without bulk-action permissions', async () => {
+      renderWithTestingProviders(<AllCasesList />, {
+        wrapperProps: {
+          permissions: buildCasesPermissions({
+            read: true,
+            manageTemplates: true,
+            create: false,
+            update: false,
+            delete: false,
+            push: false,
+            assign: false,
+            createComment: false,
+            reopenCase: false,
+          }),
+        },
       });
 
       expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
