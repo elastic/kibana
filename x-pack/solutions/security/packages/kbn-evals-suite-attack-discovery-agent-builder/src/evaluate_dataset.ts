@@ -230,20 +230,38 @@ const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
  */
 const TAUTOLOGY_DISJUNCT = /^\s*(true|1\s*==?\s*1)\s*$/i;
 
-/** Whether the disjunct's marker literal sits behind a negation operator. */
+/**
+ * Whether the disjunct's marker literal sits behind a negation operator.
+ *
+ * The negation has to be attached to the MARKER's own predicate, not to the
+ * disjunct. Generated ES|QL legitimately leads with an unrelated negated filter
+ * and then positively filters the marker in a later `AND` branch:
+ *
+ *   WHERE NOT kibana.alert.workflow_status == "closed" AND tags == "<marker>"
+ *
+ * That query retrieves only this fixture, so treating it as negated scores a
+ * correct run as a zero/unscoped retrieval. Earlier revisions keyed the check
+ * off the disjunct's opening token (`/^\s*NOT\b/`), which is exactly this false
+ * negative; the negation is now resolved per `AND` branch instead.
+ */
 const isNegatedMarkerPredicate = (disjunct: string, marker: string): boolean => {
   const markerIndex = disjunct.indexOf(marker);
   if (markerIndex < 0) return false;
 
-  // `NOT tags == "<marker>"` — the negation leads the predicate, so it is not
-  // adjacent to the literal. Deliberately conservative: a disjunct that opens
-  // with NOT is treated as negated even if a later AND-branch is positive, and
-  // none of the recorded scoped shapes opens that way.
-  if (/^\s*NOT\b/i.test(disjunct)) return true;
+  // The branch the marker literal lives in: the text since the last `AND`.
+  const branchStart = Math.max(
+    disjunct.toLowerCase().lastIndexOf(' and ', markerIndex),
+    disjunct.toLowerCase().lastIndexOf(' not ', markerIndex)
+  );
+  const branch = disjunct.slice(branchStart + 1, markerIndex);
+
+  // `NOT tags == "<marker>"` / `NOT QSTR("<marker>")` — the negation leads this
+  // branch, so it is not adjacent to the literal.
+  if (/^\s*NOT\b/i.test(branch)) return true;
 
   // `tags != "<marker>"` / `tags <> "<marker>"` — the negation IS the operator
   // immediately before the literal, modulo the opening quote and whitespace.
-  return /(!=|<>)\s*"?\s*$/.test(disjunct.slice(0, markerIndex));
+  return /(!=|<>)\s*"?\s*$/.test(branch);
 };
 
 const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean => {

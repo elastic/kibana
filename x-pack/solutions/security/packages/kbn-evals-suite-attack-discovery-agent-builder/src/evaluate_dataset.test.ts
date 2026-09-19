@@ -468,6 +468,39 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     ).toEqual([95, 95, 95]);
   });
 
+  // A disjunct that OPENS with NOT is not the same as a marker predicate that is
+  // negated. Generated ES|QL legitimately leads with an unrelated negated filter
+  // and positively filters the marker in a later `AND` branch; treating the
+  // whole disjunct as negated scores a correct run as zero/unscoped.
+  it('accepts a positive marker branch that follows an unrelated negation', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const positive = [
+      `FROM .alerts-security.alerts-default | WHERE NOT kibana.alert.workflow_status == "closed" AND tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE NOT kibana.alert.workflow_status == "closed" AND tags LIKE "*${scope}*"`,
+      `FROM .alerts-security.alerts-default | WHERE NOT host.name == "nope" AND QSTR("${scope}")`,
+    ];
+
+    expect(
+      positive.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([95, 95, 95]);
+
+    // And the negated-marker shapes are still rejected, including when they
+    // themselves follow an unrelated positive branch.
+    const stillNegated = [
+      `FROM .alerts-security.alerts-default | WHERE NOT tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE NOT host.name == "nope" AND NOT tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE tags != "${scope}"`,
+    ];
+
+    expect(
+      stillNegated.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null, null]);
+  });
+
   it('still accepts the marker when a WHERE clause restricts on it', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const filtering = [
