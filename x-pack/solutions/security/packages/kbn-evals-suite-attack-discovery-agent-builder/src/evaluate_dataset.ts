@@ -565,13 +565,54 @@ const parseBooleanExpression = (expression: string): BooleanNode => {
 type LeafRole = 'positive' | 'negated' | 'unrelated';
 
 /**
+ * Whether a leaf that names the marker as a value actually RESTRICTS to it.
+ *
+ * Naming the marker as a delimited literal is not enough:
+ *
+ *   "<marker>" == "<marker>"          constant true — admits every row
+ *   tags IN ("<marker>", "<other>")   admits another run's rows
+ *
+ * Both spell the marker as a value, so a bare "does the marker appear as a
+ * value" test calls them positively scoped and forces every non-marker row to
+ * fail them — which is what let an arbitrary 95-id retrieval score as the dense
+ * population. A leaf that does not restrict is not a marker predicate at all,
+ * so it is reported as unrelated and left to the assignment search, which then
+ * finds the row that satisfies the clause without the marker.
+ */
+const markerValueRestrictsToMarker = (text: string, marker: string): boolean => {
+  // Strip the literals: a comparison with no identifier left on either side is
+  // a constant (`"<marker>" == "<marker>"`), not a field restriction. `QSTR` is
+  // a function over the marker and counts as an identifier; only the boolean
+  // and comparison operators are ignored.
+  const withoutLiterals = text.replace(/"[^"]*"/g, '""').replace(/'[^']*'/g, "''");
+  const withoutOperators = withoutLiterals.replace(/\b(?:LIKE|IN|NOT|AND|OR)\b/gi, '');
+  if (!/[A-Za-z_]/.test(withoutOperators)) return false;
+
+  // `IN` accepts a LIST: `tags IN ("<marker>")` restricts to the marker, but
+  // `tags IN ("<marker>", "<other-run>")` admits rows the fixture does not own.
+  const inList = /\bIN\s*\(([^)]*)\)/i.exec(text);
+  if (inList !== null) {
+    const values = inList[1]
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+
+    return values.length === 1 && values[0].includes(marker);
+  }
+
+  return true;
+};
+
+/**
  * How the marker figures in a leaf: positively filtered (`tags == "<marker>"`),
  * negatively filtered (`tags != "<marker>"`), or not a filter value at all —
- * which includes a leaf that merely mentions the marker as data.
+ * which includes a leaf that merely mentions the marker as data, and one that
+ * names it as a value without restricting to it.
  */
 const leafRole = (text: string, marker: string): LeafRole => {
   const positions = markerValuePositions(text, marker);
   if (positions.length === 0) return 'unrelated';
+  if (!markerValueRestrictsToMarker(text, marker)) return 'unrelated';
 
   return positions.some((position) => !isNegatedMarkerPredicate(text, position, marker))
     ? 'positive'

@@ -88,18 +88,18 @@ export const buildDenseProfileLiveRetrievalExample = (
       'The response identifies attack chains rather than restating individual alerts.',
       'Discoveries are grounded in alerts that exist in the retrieved set.',
       'Background noise (logon failure bursts contained by the lockout policy, share enumeration, cron edits) is not promoted into a discovery on its own.',
-      // The ground-truth half of the fixture's escalated noise: one background
-      // chain carries the severities the four reference chains use (see
-      // `bg-vendor-update`), so severity alone no longer separates target from
-      // noise. A high/critical background step that the reference does not
-      // contain would score a model that surfaces it as a false positive, so the
-      // benign reading has to be checkable HERE, in the annotation the judge
-      // reads: this names the class and says the severity does not make it an
-      // attack. A model that reads the vendor-signed update as benign is
-      // therefore not penalised for leaving it out, and one that promotes it on
-      // severity loses exactly this criterion — which is the precision the
-      // profile exists to measure.
-      'A vendor-signed agent or driver update installed by the management agent is background activity rather than an attack chain, even where the detecting rule reports high or critical severity.',
+      // The ground-truth half of the fixture's escalated noise: TWO background
+      // chains carry the severities the four reference chains use (see
+      // `bg-vendor-update` and `bg-endpoint-inventory`), so severity alone no
+      // longer separates target from noise. A high/critical background step that
+      // the reference does not contain would score a model that surfaces it as a
+      // false positive, so the benign reading has to be checkable HERE, in the
+      // annotation the judge reads: this names both classes and says the
+      // severity does not make them attacks. A model that reads either as benign
+      // is therefore not penalised for leaving it out, and one that promotes
+      // either on severity loses exactly this criterion — which is the precision
+      // the profile exists to measure.
+      'A vendor-signed agent or driver update installed by the management agent, and the signed inventory agent reading its catalog and uploading a report under its granted service account, are background activity rather than attack chains, even where the detecting rule reports high or critical severity.',
     ],
   },
   metadata: {

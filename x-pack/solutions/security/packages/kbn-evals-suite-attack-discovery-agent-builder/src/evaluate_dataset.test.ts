@@ -737,6 +737,44 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     ).toBe(95);
   });
 
+  it('does not let a tautological or widened marker literal prove scope', () => {
+    // The reported defect: `leafRole` returned `positive` whenever the marker
+    // appeared as a delimited literal, without checking the predicate RESTRICTS
+    // to it. Both shapes below name the marker as a value yet admit rows the
+    // fixture does not own, so 95 arbitrary ids scored as the dense population.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const widening = [
+      // Constant true: compares the marker to itself, so it admits every row.
+      `FROM ${ALERT_INDEX_FAMILY} | WHERE "${scope}" == "${scope}"`,
+      // The marker is one accepted value among others, so rows without it pass.
+      `FROM ${ALERT_INDEX_FAMILY} | WHERE tags IN ("${scope}", "other-run-marker")`,
+    ];
+
+    expect(
+      widening.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null]);
+  });
+
+  it('still accepts the marker as the sole accepted value of a field', () => {
+    // The other direction: the stricter role check must not reject the
+    // restricting spellings the recorded scoped queries use.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const restricting = [
+      `FROM ${ALERT_INDEX_FAMILY} | WHERE tags == "${scope}"`,
+      `FROM ${ALERT_INDEX_FAMILY} | WHERE tags IN ("${scope}")`,
+      `FROM ${ALERT_INDEX_FAMILY} | WHERE tags LIKE "*${scope}*"`,
+      `FROM ${ALERT_INDEX_FAMILY} | WHERE QSTR("${scope}")`,
+    ];
+
+    expect(
+      restricting.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([95, 95, 95, 95]);
+  });
+
   it('still accepts the marker when a WHERE clause restricts on it', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const filtering = [
