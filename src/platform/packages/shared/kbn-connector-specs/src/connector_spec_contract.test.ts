@@ -110,6 +110,21 @@ describe('connector spec contracts', () => {
     }
   });
 
+  it.each(allSpecs)(
+    '%s explicitly classifies every action as an agent tool or ingest-only (`isTool`)',
+    (_exportName, spec) => {
+      // CONN-005: every action must declare `isTool` explicitly so heavy ingest actions
+      // (`isTool: false`, workflow-only) can never leak into Agent Builder / MCP by
+      // accident. Omitting the flag defaults to `false` (see `isToolAction`), which is the
+      // safe side, but an explicit declaration is required so the classification is a
+      // deliberate, reviewable decision by the connector author.
+      const unclassified = Object.entries(spec.actions)
+        .filter(([, action]) => typeof action.isTool !== 'boolean')
+        .map(([actionName]) => actionName);
+      expect(unclassified).toEqual([]);
+    }
+  );
+
   it('uses unique eventIds across connector specs', () => {
     const eventIdOwners = new Map<string, string>();
     const duplicates: string[] = [];
