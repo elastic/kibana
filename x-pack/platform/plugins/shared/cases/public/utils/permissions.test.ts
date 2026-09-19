@@ -27,7 +27,21 @@ describe('permissions', () => {
 
     it('returns false if the user has read and manageTemplates permissions', async () => {
       expect(
-        isReadOnlyPermissions(buildCasesPermissions({ read: true, manageTemplates: true, create: false, update: false, delete: false, push: false, assign: false, createComment: false, reopenCase: false, settings: false, connectors: false }))
+        isReadOnlyPermissions(
+          buildCasesPermissions({
+            read: true,
+            manageTemplates: true,
+            create: false,
+            update: false,
+            delete: false,
+            push: false,
+            assign: false,
+            createComment: false,
+            reopenCase: false,
+            settings: false,
+            connectors: false,
+          })
+        )
       ).toBe(false);
     });
 
