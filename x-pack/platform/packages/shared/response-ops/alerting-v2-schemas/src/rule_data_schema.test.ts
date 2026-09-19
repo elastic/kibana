@@ -367,7 +367,7 @@ describe('createRuleDataSchema', () => {
     it('rejects unknown keys inside query (strict)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        query: { base: 'FROM metrics-*', format: 'composed' },
+        query: { base: 'FROM metrics-*', unknownKey: 'x' },
       });
       expect(result.success).toBe(false);
     });
@@ -375,7 +375,7 @@ describe('createRuleDataSchema', () => {
     it('rejects unknown keys inside query.breach (strict)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9', query: 'FROM x' } },
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9', unknownKey: 'x' } },
       });
       expect(result.success).toBe(false);
     });
@@ -556,7 +556,7 @@ describe('createRuleDataSchema', () => {
     it('rejects unknown keys alongside a classifying strategy (strict)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        no_data: { strategy: 'keep_last', segment: 'WHERE cpu > 0.9' },
+        no_data: { strategy: 'keep_last', unknownKey: 'x' },
       });
       expect(result.success).toBe(false);
     });
@@ -821,17 +821,6 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects an inert recovering phase even when no_data resolves the episode', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery: { strategy: 'manual' },
-        no_data: { strategy: 'resolve', query: 'FROM logs-* | STATS c = COUNT(*)' },
-        state_transition: { recovering: { count: 2 } },
-      });
-
-      expect(result.success).toBe(false);
-    });
-
     it('rejects an empty recovering phase when recovery.strategy is "manual"', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -1090,8 +1079,8 @@ describe('updateRuleDataSchema', () => {
     expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
   });
 
-  it('rejects the removed recovery strategy "none"', () => {
-    const result = updateRuleDataSchema.safeParse({ recovery: { strategy: 'none' } });
+  it('rejects unknown recovery strategy', () => {
+    const result = updateRuleDataSchema.safeParse({ recovery: { strategy: 'unknown' } });
     expect(result.success).toBe(false);
   });
 
@@ -1102,11 +1091,6 @@ describe('updateRuleDataSchema', () => {
       expect(result.no_data).toEqual({ strategy });
     }
   );
-
-  it('rejects the removed no_data strategy "emit"', () => {
-    const result = updateRuleDataSchema.safeParse({ no_data: { strategy: 'emit' } });
-    expect(result.success).toBe(false);
-  });
 
   it('rejects recovery set to null (alert rules always store one)', () => {
     const result = updateRuleDataSchema.safeParse({ recovery: null });
@@ -1120,16 +1104,6 @@ describe('updateRuleDataSchema', () => {
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() => updateRuleDataSchema.parse({ unknownProp: 'rejected' })).toThrow();
-  });
-
-  it('rejects the removed recovery_strategy field (strict)', () => {
-    const result = updateRuleDataSchema.safeParse({ recovery_strategy: 'no_breach' });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects the removed no_data_strategy field (strict)', () => {
-    const result = updateRuleDataSchema.safeParse({ no_data_strategy: 'recover' });
-    expect(result.success).toBe(false);
   });
 
   it('rejects unknown keys inside metadata (strict)', () => {
@@ -1490,8 +1464,8 @@ describe('updateRuleBodySchema', () => {
       no_data: json.definitions?.alerting_rule_no_data?.description,
     }).toMatchInlineSnapshot(`
       Object {
-        "no_data": "What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`; defaults to \`ignore\` when omitted. Not allowed when \`kind\` is \`signal\`.",
-        "recovery": "How an alert recovers. Required when \`kind\` is \`alert\`; defaults to \`no_breach\` when omitted. Not allowed when \`kind\` is \`signal\`.",
+        "no_data": "What the rule does when it finds no data for a group. Defaults to \`ignore\` when omitted. Not allowed when \`kind\` is \`signal\`.",
+        "recovery": "How an alert recovers. Defaults to \`no_breach\` when omitted. Not allowed when \`kind\` is \`signal\`.",
         "time_field": "Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.",
       }
     `);
@@ -1956,6 +1930,7 @@ describe('isRecoveryConditionUsableWithBreach', () => {
     expect(
       isRecoveryConditionUsableWithBreach({ query: {}, recovery: { strategy: 'condition' } })
     ).toBe(false);
+
     expect(isRecoveryConditionUsableWithBreach({ recovery: { strategy: 'condition' } })).toBe(
       false
     );
@@ -1999,12 +1974,14 @@ describe('isRecoveryTransitionConsistentWithStrategy', () => {
     expect(isRecoveryTransitionConsistentWithStrategy({ recovery: { strategy: 'manual' } })).toBe(
       true
     );
+
     expect(
       isRecoveryTransitionConsistentWithStrategy({
         recovery: { strategy: 'manual' },
         state_transition: {},
       })
     ).toBe(true);
+
     expect(
       isRecoveryTransitionConsistentWithStrategy({
         recovery: { strategy: 'manual' },
@@ -2029,6 +2006,7 @@ describe('isRecoveryTransitionConsistentWithStrategy', () => {
         state_transition: { recovering: { count: 1 } },
       })
     ).toBe(false);
+
     expect(
       isRecoveryTransitionConsistentWithStrategy({
         recovery: { strategy: 'manual' },

@@ -46,7 +46,6 @@ export const migrateRuleQueryShape: SavedObjectModelUnsafeTransformFn<
         ...attributes,
         ...collapsed,
         query: { ...query, ...collapsed.query },
-        // A `null` gate normalises to absent; the flat scalars stay for rollback.
         ...(stateTransition
           ? { state_transition: { ...stateTransition, ...collapsed.state_transition } }
           : {}),

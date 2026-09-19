@@ -174,8 +174,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     ]);
     expect(state.count_with_grouping).toBe(1);
     expect(state.avg_grouping_fields_count).toBe(2);
-    // Every alert rule stores both lifecycle blocks, so the two buckets cover
-    // all six of them; signal rules store neither and are absent from both.
     expect(state.count_by_recovery_strategy).toStrictEqual({
       no_breach: 3,
       query: 1,

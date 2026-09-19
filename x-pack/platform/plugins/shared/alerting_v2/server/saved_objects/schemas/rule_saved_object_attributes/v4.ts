@@ -109,9 +109,6 @@ export const ruleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV3
   recovery_strategy: legacyRecoveryStrategy,
   no_data_strategy: legacyNoDataStrategy,
   query: querySchema,
-  // Present for alert rules and absent for signal rules. The registry deep-freezes
-  // every type, and `schema.conditional` mutates its branches on first validate, so
-  // the alert/signal requirement is enforced by the request schemas instead.
   recovery: schema.maybe(recoverySchema),
   no_data: schema.maybe(noDataSchema),
   state_transition: schema.maybe(stateTransitionSchema),

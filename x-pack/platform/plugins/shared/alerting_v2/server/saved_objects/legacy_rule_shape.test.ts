@@ -6,6 +6,9 @@
  */
 
 import { collapseLegacyRuleShape, toApiQuery, toApiStateTransition } from './legacy_rule_shape';
+import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+
+type StoredQuery = RuleSavedObjectAttributes['query'];
 
 const COMPOSED_BASE = 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name';
 const STANDALONE_QUERY = 'FROM logs-* | STATS errors = COUNT(*) BY host.name';
@@ -193,24 +196,27 @@ describe('collapseLegacyRuleShape', () => {
 
 describe('toApiQuery', () => {
   it('drops the pre-collapse keys a migrated rule still carries', () => {
-    expect(
-      toApiQuery({
-        base: COMPOSED_BASE,
-        breach: { segment: 'WHERE avg_cpu > 0.9' },
-        format: 'composed',
-        recovery: { segment: 'WHERE avg_cpu < 0.6' },
-      } as Parameters<typeof toApiQuery>[0])
-    ).toEqual({ base: COMPOSED_BASE, breach: { segment: 'WHERE avg_cpu > 0.9' } });
+    const stored: StoredQuery = {
+      base: COMPOSED_BASE,
+      breach: { segment: 'WHERE avg_cpu > 0.9' },
+      format: 'composed',
+      recovery: { segment: 'WHERE avg_cpu < 0.6' },
+    };
+
+    expect(toApiQuery(stored)).toEqual({
+      base: COMPOSED_BASE,
+      breach: { segment: 'WHERE avg_cpu > 0.9' },
+    });
   });
 
-  it.each([
+  const breachCases: Array<[string, StoredQuery['breach']]> = [
     ['a blank segment', { segment: '   ' }],
     ['a standalone breach query', { query: STANDALONE_QUERY }],
     ['no breach', undefined],
-  ])('omits breach for %s', (_label, breach) => {
-    expect(toApiQuery({ base: COMPOSED_BASE, breach } as Parameters<typeof toApiQuery>[0])).toEqual(
-      { base: COMPOSED_BASE }
-    );
+  ];
+
+  it.each(breachCases)('omits breach for %s', (_label, breach) => {
+    expect(toApiQuery({ base: COMPOSED_BASE, breach })).toEqual({ base: COMPOSED_BASE });
   });
 });
 

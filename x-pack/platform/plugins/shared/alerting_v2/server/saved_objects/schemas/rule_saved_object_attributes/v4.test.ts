@@ -24,9 +24,6 @@ const alertAttributes = {
 };
 
 describe('rule saved object attributes v4', () => {
-  // The saved object type registry deep-freezes every registered type, so a schema
-  // that mutates itself on first validate throws at write time rather than at
-  // registration. Freeze here to catch that before it reaches a running Kibana.
   it('validates an alert rule after the registry has frozen the schema', () => {
     deepFreeze({ schemas: { create: ruleSavedObjectAttributesSchema } });
 

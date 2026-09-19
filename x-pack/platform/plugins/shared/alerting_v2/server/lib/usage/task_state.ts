@@ -203,9 +203,6 @@ export const stateSchemaByVersion = {
     schema: stateSchemaV3,
   },
   4: {
-    // The old counters cannot be translated — `standalone`/`composed` have no
-    // successor, and a v3 `recovery_strategy: query` could mean either
-    // `condition` or `query` now. Dropped; the next run repopulates them.
     up: (state: Record<string, unknown>) => ({
       ...omit(state, 'count_by_query_format'),
       count_by_recovery_strategy: undefined,

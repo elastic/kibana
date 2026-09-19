@@ -62,6 +62,7 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
 
   const recoveryEnabled =
     merged.recovery != null && merged.recovery.strategy !== recoveryStrategy.manual;
+
   if (!recoveryEnabled && input.state_transition === undefined && merged.state_transition != null) {
     const { recovering, ...rest } = merged.state_transition;
     merged.state_transition = rest;

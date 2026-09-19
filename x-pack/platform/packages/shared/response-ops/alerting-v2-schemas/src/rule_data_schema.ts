@@ -44,7 +44,7 @@ export const esqlQuerySchema = z
   .superRefine((value, ctx) => {
     const error = validateEsqlQuery(value);
     if (error) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+      ctx.addIssue({ code: 'custom', message: error });
     }
   });
 
@@ -104,7 +104,7 @@ export const metadataSchema = z
 export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
   if (error) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+    ctx.addIssue({ code: 'custom', message: error });
   }
 });
 
@@ -212,7 +212,7 @@ export const recoverySchema = z
       .meta({ id: 'alerting_rule_recovery_manual' }),
   ])
   .describe(
-    'How an alert recovers. Required when `kind` is `alert`; defaults to `no_breach` when omitted. Not allowed when `kind` is `signal`.'
+    'How an alert recovers. Defaults to `no_breach` when omitted. Not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_recovery' });
 
@@ -265,7 +265,7 @@ export const noDataSchema = z
     ),
   ])
   .describe(
-    'What the rule does when it finds no data for a group. Required when `kind` is `alert`; defaults to `ignore` when omitted. Not allowed when `kind` is `signal`.'
+    'What the rule does when it finds no data for a group. Defaults to `ignore` when omitted. Not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_no_data' });
 
@@ -314,9 +314,11 @@ export const getRecoverEsqlQuery = (
   if (recovery?.strategy === recoveryStrategy.condition) {
     return composeEsqlQuery(query.base, recovery.segment);
   }
+
   if (recovery?.strategy === recoveryStrategy.query) {
     return recovery.query;
   }
+
   return undefined;
 };
 
@@ -555,6 +557,12 @@ export const isRecoveryConditionUsableWithBreach = (data: RuleLifecycleShape): b
 export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleShape): boolean =>
   data.recovery?.strategy !== recoveryStrategy.manual || data.state_transition?.recovering == null;
 
+/** The create-rule fields the refinements below read. */
+type CreateRuleRefinementFields = Pick<
+  z.infer<typeof createRuleDataBaseSchema>,
+  'kind' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+>;
+
 /**
  * Shared create-rule cross-field refinements. Applied to both the single-create
  * body and each bulk-create item so the two write paths cannot drift.
@@ -562,7 +570,9 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
  * The remaining invariants are object-local and enforced by the discriminated
  * unions themselves; only the ones that read two different objects live here.
  */
-const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema: T) =>
+const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFields>>(
+  schema: T
+): T =>
   schema
     .refine(isStateTransitionAllowed, {
       message: 'state_transition is only allowed when kind is "alert".',
@@ -581,10 +591,7 @@ const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema
       path: ['state_transition', 'recovering'],
     })
     .check((ctx) => {
-      const { query, recovery } = ctx.value as {
-        query?: z.infer<typeof querySchema>;
-        recovery?: Recovery;
-      };
+      const { query, recovery } = ctx.value;
       if (query == null || recovery?.strategy !== recoveryStrategy.condition) return;
 
       const error = validateComposedEsqlQuery(query.base, recovery.segment);
@@ -641,9 +648,6 @@ export const updateRuleDataSchema = z
     time_field: z.string().min(1).max(128).optional().describe(TIME_FIELD_UPDATE_DESCRIPTION),
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
-    // `recovery` and `no_data` are discriminated unions, so a partial update of
-    // one member is not expressible: send the whole object or omit it. They are
-    // required on disk for alert rules, so there is nothing to clear with `null`.
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
     state_transition: stateTransitionSchema.optional().nullable(),

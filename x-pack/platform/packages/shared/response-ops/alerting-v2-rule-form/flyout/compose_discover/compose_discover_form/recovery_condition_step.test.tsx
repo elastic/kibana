@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
@@ -189,9 +189,7 @@ describe('RecoveryConditionStep', () => {
       await formMethodsRef?.trigger('recovery');
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(RECOVERY_CONDITION_REQUIRES_BREACH_ERROR)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(RECOVERY_CONDITION_REQUIRES_BREACH_ERROR)).toBeInTheDocument();
   });
 
   it('accepts a custom recovery condition when the query has a breach segment', async () => {
