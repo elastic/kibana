@@ -56,7 +56,7 @@ export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflow
 // Per-alert verdict emitted in the workflow.output block; matches the all_verdicts accumulator
 // shape built by the classify_alert_batches loop (and the ai.agent structured output schema).
 export const AlertAnalysisVerdict = z.object({
-  id: z.string(),
+  alert_id: z.string(),
   classification: z.enum(['true_positive', 'false_positive', 'inconclusive']),
   confidence_score: z.number().min(0).max(1),
   rationale: z.string(),
