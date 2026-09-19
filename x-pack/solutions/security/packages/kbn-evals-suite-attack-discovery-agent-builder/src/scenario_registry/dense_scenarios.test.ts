@@ -409,7 +409,7 @@ describe('AD2 scenario registry (dense profile)', () => {
       nullCommandLineCount: (rows) =>
         rows.filter((row) => row.process?.command_line == null).length,
       filePathCount: (rows) => rows.filter((row) => row.file?.path != null).length,
-      rawDocumentCount: (rows) => rawDocumentsByHost.get(rows[0].host?.name) ?? 0,
+      rawDocumentCount: (rows) => rawDocumentsByHost.get(String(rows[0].host?.name ?? '')) ?? 0,
       distinctProcessNames: (rows) => new Set(rows.map((row) => row.process?.name)).size,
       distinctRuleNames: (rows) => new Set(rows.map((row) => row['kibana.alert.rule.name'])).size,
       riskScoreSpread: (rows) =>
