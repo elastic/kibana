@@ -94,13 +94,22 @@ export class LookupIndexEditor {
     const searchField = comboBox.getByTestId('comboBoxSearchInput');
     await searchField.fill(type);
 
-    const option = this.page
-      .locator('[data-test-subj~="indexEditorColumnTypeSelect-optionsList"]')
-      .locator('.euiComboBoxOption__renderOption', {
-        hasText: new RegExp(`^${escapeRegExp(type)}$`, 'i'),
-      });
-    await expect(option).toHaveCount(1);
-    await option.click();
+    const optionsList = this.page.locator(
+      '[data-test-subj~="indexEditorColumnTypeSelect-optionsList"]'
+    );
+    const option = optionsList.locator('.euiComboBoxOption__renderOption', {
+      hasText: new RegExp(`^${escapeRegExp(type)}$`, 'i'),
+    });
+
+    // The options list remounts on a tight interval while open (an existing render-loop
+    // bug in this combobox instance, unrelated to `type` or search text — the rendered
+    // content is always correct and stable). `.click()`'s actionability checks target a
+    // specific node and get "element was detached from the DOM" on every retry, since a
+    // new node has replaced it by the time the click fires. `dispatchEvent` sidesteps that
+    // by resolving the locator and firing the event in one step, same as the identical
+    // workaround in `lens_app.ts`'s `selectChartSwitchOption`.
+    await option.dispatchEvent('click');
+
     await searchField.blur();
   }
 

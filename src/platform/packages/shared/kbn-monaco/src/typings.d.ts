@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+// Monaco languages support declarations
+declare module 'monaco-editor/languages/definitions/markdown/markdown.js';
+declare module 'monaco-editor/languages/definitions/css/css.js';
+declare module 'monaco-editor/languages/definitions/yaml/yaml.js';
+declare module 'monaco-editor/editor/editor.worker.start.js';
+declare module 'monaco-editor/internal/common/workers.js';
 
 // Monaco internal services
-declare module 'monaco-editor/esm/vs/editor/standalone/browser/standaloneServices' {
+declare module 'monaco-editor/editor/standalone/browser/standaloneServices.js' {
   interface StandaloneServicesType {
     get<T>(serviceId: unknown): T;
   }
   export const StandaloneServices: StandaloneServicesType;
 }
 
-declare module 'monaco-editor/esm/vs/platform/undoRedo/common/undoRedo' {
+declare module 'monaco-editor/platform/undoRedo/common/undoRedo.js' {
   export const IUndoRedoService: symbol;
 }
 
-declare module 'monaco-editor/esm/vs/platform/actions/common/actions.js' {
+declare module 'monaco-editor/platform/actions/common/actions.js' {
   export interface MenuItem {
     command?: {
       id: string;

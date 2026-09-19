@@ -14,7 +14,7 @@ import {
   findRequestLineNumber,
   getFallbackRequestStartPosition,
   isInsideConsoleString,
-} from '@kbn/monaco/src/languages/console/utils';
+} from '@kbn/monaco/src/languages/definitions/console/utils';
 import type { AdjustedParsedRequest } from '../types';
 
 export interface TripleQuoteContext {

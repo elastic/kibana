@@ -9,6 +9,7 @@ import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, act } from '@testing-library/react';
 import 'jest-canvas-mock';
+import '@kbn/code-editor-mock/jest_helper';
 import { ImportCompleteView } from './import_complete_view';
 
 jest.mock('../kibana_services', () => ({

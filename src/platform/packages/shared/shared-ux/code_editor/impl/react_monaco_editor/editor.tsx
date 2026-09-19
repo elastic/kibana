@@ -34,9 +34,8 @@ import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 if (process.env.NODE_ENV !== 'production') {
-  import(
-    'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
-  );
+  // @ts-expect-error — internal Monaco module without type declarations
+  import('monaco-editor/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess.js');
 }
 
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;

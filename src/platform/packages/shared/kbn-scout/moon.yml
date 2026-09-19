@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/utils'
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/as-code-discover-schema'
+  - '@kbn/monaco'
 tags:
   - test-helper
   - package

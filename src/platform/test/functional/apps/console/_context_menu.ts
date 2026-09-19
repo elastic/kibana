@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should have options to copy to language, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
+      expect(PageObjects.console.isCopyAsButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
     });
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('by default it should copy as curl and show toast when copy to language button is clicked', async () => {
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyToLanguageButton();
+        await PageObjects.console.clickCopyAsButton();
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.selectAllRequests();
 
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyToLanguageButton();
+        await PageObjects.console.clickCopyAsButton();
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);

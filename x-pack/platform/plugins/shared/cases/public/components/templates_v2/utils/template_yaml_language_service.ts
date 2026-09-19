@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { type MonacoYaml, type MonacoYamlOptions } from 'monaco-yaml';
-import { configureMonacoYamlSchema } from '@kbn/monaco';
+import { configureMonacoYamlSchema, type MonacoYaml, type MonacoYamlOptions } from '@kbn/monaco';
 
 // Default options for Monaco YAML
 const defaultMonacoYamlOptions: MonacoYamlOptions = {

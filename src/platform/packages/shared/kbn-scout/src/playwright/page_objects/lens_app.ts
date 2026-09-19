@@ -22,6 +22,8 @@ interface ChartSwitchPopoverOptions {
 }
 
 export class LensApp {
+  protected static readonly FORMULA_EDITOR_TEST_SUBJ = 'lnsFormulaEditor';
+
   readonly lensApp;
   readonly saveAndReturnButton;
   readonly saveButton;
@@ -46,7 +48,6 @@ export class LensApp {
   private readonly chartSwitchPopover;
   private readonly chartSwitchList;
   /**
-   * Formula Monaco textarea — Lens has no data-test-subj on the editor input.
    * Note: `lnsFormulaWidget` is the overflow/suggest portal on `document.body`, not the editor.
    */
   private readonly formulaEditorTextarea;
@@ -64,15 +65,15 @@ export class LensApp {
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
-    this.formulaEditorTextarea = this.page.locator(
-      '.lnsFormula__editorContent .monaco-editor textarea'
-    );
     this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
     this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
     this.dimensionColorPicker = this.page.locator(
       '[data-test-subj~="indexPattern-dimension-colorPicker"]'
     );
     this.codeEditor = new KibanaCodeEditorWrapper(this.page);
+    this.formulaEditorTextarea = this.page
+      .locator('.lnsFormula__editorContent')
+      .locator(this.codeEditor.editorInputLocator);
   }
 
   async waitForLensApp() {
@@ -329,6 +330,13 @@ export class LensApp {
 
   async switchToFormula() {
     await this.page.testSubj.click('lens-dimensionTabs-formula');
+    // Switching from "quick function" tears down that input and mounts a fresh formula
+    // Monaco editor instance; it isn't necessarily attached the instant the tab click
+    // resolves. Callers (both `configureDimension`'s own follow-up `typeInFormula` and tests
+    // that call this directly then immediately read `getFormulaText()`) can otherwise race an
+    // editor that isn't mounted yet — observed as the formula editor staying on its
+    // empty-state placeholder regardless of what's typed or already configured.
+    await this.codeEditor.waitCodeEditorReady(LensApp.FORMULA_EDITOR_TEST_SUBJ);
   }
 
   async selectOperation(operation: string, isPreviousIncompatible = false) {
@@ -372,22 +380,26 @@ export class LensApp {
    * Types into the formula Monaco editor.
    * Use `replace: true` to clear first (dimension configure). Omit replace to append
    * (autocomplete paths). Lens auto-inserts quotes/parens after some tokens (e.g. `kql=`),
-   * so callers should `expect.poll(() => lens.getFormulaText())` for the final value.
+   * so callers should `expect.poll(() => lens.workspace.getFormulaText())` for the final value.
    */
   async typeInFormula(text: string, options?: { replace?: boolean; focus?: boolean }) {
+    await this.codeEditor.waitCodeEditorReady(LensApp.FORMULA_EDITOR_TEST_SUBJ);
+
     if (options?.focus !== false) {
       await this.focusFormulaEditor();
     }
     if (options?.replace) {
-      const modelIndex = await this.getFormulaModelIndex();
-      await this.codeEditor.setCodeEditorValue('', modelIndex);
+      await this.codeEditor.setCodeEditorValueByTestSubj(LensApp.FORMULA_EDITOR_TEST_SUBJ, '');
       await this.focusFormulaEditor();
     }
-    await this.page.keyboard.type(text, { delay: 25 });
+
+    await this.codeEditor.simulateTyping(LensApp.FORMULA_EDITOR_TEST_SUBJ, text, { delay: 25 });
   }
 
   /**
-   * Focuses the formula Monaco textarea (avoid `{ force: true }` — suggest portals intercept clicks).
+   * Focuses the formula Monaco editor's real input surface (avoid `{ force: true }` — suggest
+   * portals intercept clicks). The resolved node is a `div` under Chrome's native EditContext
+   * mode, or a `textarea` otherwise — see `formulaEditorTextarea`.
    */
   private async focusFormulaEditor() {
     await this.formulaEditorTextarea.waitFor({ state: 'attached' });
@@ -396,22 +408,10 @@ export class LensApp {
     });
   }
 
-  /**
-   * Lens formula uses the last registered Monaco model (not always index 0).
-   * Needed by the Lens plugin's `getFormulaText` as well as `typeInFormula` here.
-   */
-  protected async getFormulaModelIndex(): Promise<number> {
-    return this.page.evaluate(() => {
-      const monacoEnv = (
-        window as unknown as {
-          MonacoEnvironment?: {
-            monaco?: { editor?: { getModels: () => unknown[] } };
-          };
-        }
-      ).MonacoEnvironment;
-      const models = monacoEnv?.monaco?.editor?.getModels() ?? [];
-      return Math.max(0, models.length - 1);
-    });
+  /** Reads the formula Monaco editor's current value, resolved by its own container rather
+   * than a global model index (see `FORMULA_EDITOR_TEST_SUBJ`). */
+  async getFormulaText(): Promise<string> {
+    return this.codeEditor.getCodeEditorValueByTestSubj(LensApp.FORMULA_EDITOR_TEST_SUBJ);
   }
 
   async setEuiSwitch(testSubj: string, checked: boolean) {
