@@ -175,7 +175,6 @@ pageLoadAssetSize:
   searchInferenceEndpoints: 9765
   searchNavigation: 8900
   searchNotebooks: 18826
-  searchPlayground: 12122
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371

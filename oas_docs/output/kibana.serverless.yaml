@@ -86218,7 +86218,6 @@ components:
           supported_feature_ids:
             - generativeAIForSecurity
             - generativeAIForObservability
-            - generativeAIForSearchPlayground
           is_system_action_type: false
         - id: .bedrock
           name: AWS Bedrock
@@ -86229,7 +86228,6 @@ components:
           supported_feature_ids:
             - generativeAIForSecurity
             - generativeAIForObservability
-            - generativeAIForSearchPlayground
           is_system_action_type: false
         - id: .gemini
           name: Google Gemini

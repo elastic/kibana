@@ -50,30 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Playground', () => {
-      before(async () => {
-        await common.navigateToApp('search_playground');
-      });
-
-      it('loads playground list page', async function () {
-        await retry.waitFor(
-          'new playground button',
-          async () => await testSubjects.exists('newPlaygroundButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-
-      it('loads playground', async function () {
-        await testSubjects.click('newPlaygroundButton');
-
-        await retry.waitFor(
-          'playground header menu',
-          async () => await testSubjects.exists('app-menu')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
     describe('Search applications', () => {
       before(async () => {
         await common.navigateToApp('elasticsearch/applications/search_applications');
