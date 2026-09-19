@@ -3,26 +3,16 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/disk_usage.sh
 
 # Dual-cache agent images (elastic/ci-agent-images) bake one tree per package manager:
 #   pnpm -> ~/.cache/kibana/pnpm/{.pnpm-store,node_modules}
-#   yarn -> ~/.kibana/{node_modules,.yarn-local-mirror}   (legacy layout, unchanged)
 # Detect the checkout's package manager so the same bootstrap (and VM image) works on
 # main (pnpm) and legacy release branches (yarn).
 CACHES_ROOT="${HOME}/.cache/kibana"
 mkdir -p "${CACHES_ROOT}"
 
 PNPM_IMAGE_CACHE="${CACHES_ROOT}/pnpm"
-YARN_IMAGE_CACHE="${HOME}/.kibana"
-
-USE_PNPM=false
-if [[ -f pnpm-lock.yaml ]]; then
-  USE_PNPM=true
-fi
-
-# Let's remove the irrelevant cache for the variant:
-echo "--- Removing irrelevant yarn cache"
-rm -rf "${HOME}/.cache/yarn"
 
 echo "--- pnpm install and bootstrap"
 BOOTSTRAP_CMD=(pnpm kbn bootstrap)
@@ -65,32 +55,19 @@ elif [[ "$(pwd)" == "/dev/shm"* ]]; then
     echo "Extracting ~/.kibana/node_modules.tar.zst"
     tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
   fi
-  if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
-    ln -s ~/.kibana/.yarn-local-mirror ./.yarn-local-mirror
-  fi
 fi
 
 if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
-  # Delete node_modules in between attempts to prompt a clean install
-  rm -rf node_modules
-
   echo "--- pnpm install and bootstrap, attempt 2"
   BOOTSTRAP_PARAMS+=(--force-install)
   pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
 
+print_disk_usage "post-bootstrap"
+
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'pnpm kbn bootstrap'
-fi
-
-# Drop caches after install to reclaim disk.
-if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
-  echo "--- Clearing cache leftovers"
-  # We no longer use this cache
-  (echo 'Removing ~/.kibana and ./.yarn-local-mirror' "${HOME}/.cache/yarn" && \
-    rm -rf ~/.kibana ./.yarn-local-mirror "${HOME}/.cache/yarn" && \
-    df -h .) &
 fi
