@@ -44,8 +44,10 @@ describe('formRecoveryToApiRecovery', () => {
     ).toBeUndefined();
   });
 
-  it('returns undefined when the form holds no recovery', () => {
-    expect(formRecoveryToApiRecovery({ kind: 'alert', recovery: undefined })).toBeUndefined();
+  it('falls back to no_breach when the form holds no recovery', () => {
+    expect(formRecoveryToApiRecovery({ kind: 'alert', recovery: undefined })).toEqual({
+      strategy: 'no_breach',
+    });
   });
 });
 
@@ -96,6 +98,12 @@ describe('formNoDataToApiNoData', () => {
     expect(
       formNoDataToApiNoData({ kind: 'signal', noData: { strategy: 'ignore' } })
     ).toBeUndefined();
+  });
+
+  it('falls back to ignore when the form holds no no-data strategy', () => {
+    expect(formNoDataToApiNoData({ kind: 'alert', noData: undefined })).toEqual({
+      strategy: 'ignore',
+    });
   });
 });
 

@@ -62,6 +62,9 @@ describe('yaml_form_utils', () => {
         query: {
           base: 'FROM logs-* | LIMIT 10',
         },
+        // An alert rule always serializes a lifecycle, even when the form holds none.
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
         grouping: {
           fields: ['host.name', 'service.name'],
         },
@@ -195,10 +198,10 @@ describe('yaml_form_utils', () => {
       expect(result.no_data).toEqual({ strategy: 'resolve' });
     });
 
-    it('excludes no_data when undefined', () => {
+    it('falls back to the ignore strategy when no_data is undefined', () => {
       const result = formValuesToYamlObject(defaultTestFormValues);
 
-      expect(result).not.toHaveProperty('no_data');
+      expect(result.no_data).toEqual({ strategy: 'ignore' });
     });
 
     it('excludes recovery and no_data for signal rules', () => {

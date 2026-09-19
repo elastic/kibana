@@ -17,6 +17,8 @@ describe('buildRulePayload', () => {
     query: { base: 'FROM logs-*' },
   };
 
+  const minimalAlertData: Partial<RuleAttachmentData> = { ...minimalData, kind: 'alert' };
+
   it('fills required defaults for minimal data', () => {
     const result = buildRulePayload(minimalData);
 
@@ -47,20 +49,19 @@ describe('buildRulePayload', () => {
 
   it('includes optional fields only when present in data', () => {
     const result = buildRulePayload({
-      ...minimalData,
-      recovery: { strategy: 'no_breach' },
+      ...minimalAlertData,
+      recovery: { strategy: 'manual' },
       grouping: { fields: ['host.name'] },
     });
 
-    expect(result).toHaveProperty('recovery', { strategy: 'no_breach' });
+    expect(result).toHaveProperty('recovery', { strategy: 'manual' });
     expect(result).toHaveProperty('grouping', { fields: ['host.name'] });
-    expect(result).not.toHaveProperty('no_data');
     expect(result).not.toHaveProperty('artifacts');
   });
 
   it('passes through no_data when provided', () => {
     const result = buildRulePayload({
-      ...minimalData,
+      ...minimalAlertData,
       no_data: { strategy: 'keep_last', query: 'FROM heartbeat-*' },
     });
 
@@ -70,6 +71,13 @@ describe('buildRulePayload', () => {
     });
   });
 
+  it('picks a lifecycle for an alert rule that has none', () => {
+    const result = buildRulePayload(minimalAlertData);
+
+    expect(result).toHaveProperty('recovery', { strategy: 'no_breach' });
+    expect(result).toHaveProperty('no_data', { strategy: 'ignore' });
+  });
+
   it('omits optional fields when they are undefined in data', () => {
     const result = buildRulePayload(minimalData);
 
@@ -77,5 +85,16 @@ describe('buildRulePayload', () => {
     expect(result).not.toHaveProperty('no_data');
     expect(result).not.toHaveProperty('grouping');
     expect(result).not.toHaveProperty('artifacts');
+  });
+
+  it('drops the lifecycle from a signal rule that carries one', () => {
+    const result = buildRulePayload({
+      ...minimalData,
+      recovery: { strategy: 'no_breach' },
+      no_data: { strategy: 'ignore' },
+    });
+
+    expect(result).not.toHaveProperty('recovery');
+    expect(result).not.toHaveProperty('no_data');
   });
 });

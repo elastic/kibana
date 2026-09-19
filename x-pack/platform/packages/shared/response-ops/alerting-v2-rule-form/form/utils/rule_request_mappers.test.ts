@@ -103,6 +103,7 @@ describe('rule_request_mappers', () => {
 
       expect(result.state_transition).toEqual({
         pending: { count: 3, timeframe: '10m' },
+        recovering: { count: 0 },
       });
     });
 
@@ -117,7 +118,10 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending: { count: 5 } });
+      expect(result.state_transition).toEqual({
+        pending: { count: 5 },
+        recovering: { count: 0 },
+      });
       expect(result.state_transition?.pending).not.toHaveProperty('timeframe');
     });
 
@@ -153,6 +157,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
         stateTransition: {},
       };
 
@@ -165,6 +170,7 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
@@ -732,7 +738,7 @@ describe('rule_request_mappers', () => {
       expect(result.recovery).toEqual({ strategy: 'manual' });
     });
 
-    it('omits recovery when the form recovery is unset', () => {
+    it('sends no_breach when the form recovery is unset', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
@@ -741,7 +747,7 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      expect(result.recovery).toBeUndefined();
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
     });
 
     it('nullifies empty grouping fields instead of leaving as undefined', () => {

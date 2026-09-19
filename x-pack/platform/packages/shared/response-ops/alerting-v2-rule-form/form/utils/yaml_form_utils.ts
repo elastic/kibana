@@ -229,8 +229,8 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
   const isAlert = resolvedKind === 'alert';
 
-  // Alert rules always carry both blocks; fall back to the API's own defaults
-  // so an omitted block round-trips as what the server would store.
+  // Alert rules always carry both blocks and the write API defaults neither,
+  // so an omitted block is filled in here before the form can submit it.
   const recovery =
     parseRecovery(obj.recovery) ?? (isAlert ? { strategy: recoveryStrategy.no_breach } : undefined);
   const noData =

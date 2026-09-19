@@ -11,14 +11,17 @@ import type { FormValues, RuleNoData, RuleRecovery } from '../types';
 
 type LifecycleFormValues = Pick<FormValues, 'kind' | 'recovery' | 'noData'>;
 
-/** Projects the widened form `recovery` onto the API union. Signal rules carry none. */
+/**
+ * Projects the widened form `recovery` onto the API union. Signal rules carry
+ * none; alert rules always send one, since the API has no default.
+ */
 export const formRecoveryToApiRecovery = (
   values: Pick<LifecycleFormValues, 'kind' | 'recovery'>
 ): Recovery | undefined => {
   const { kind, recovery } = values;
-  if (kind !== 'alert' || !recovery) return undefined;
+  if (kind !== 'alert') return undefined;
 
-  switch (recovery.strategy) {
+  switch (recovery?.strategy) {
     case recoveryStrategy.condition:
       return { strategy: recoveryStrategy.condition, segment: recovery.segment ?? '' };
     case recoveryStrategy.query:
@@ -44,14 +47,17 @@ export const apiRecoveryToFormRecovery = (
   return { strategy: recovery.strategy };
 };
 
-/** Projects the widened form `noData` onto the API union. Signal rules carry none. */
+/**
+ * Projects the widened form `noData` onto the API union. Signal rules carry
+ * none; alert rules always send one, since the API has no default.
+ */
 export const formNoDataToApiNoData = (
   values: Pick<LifecycleFormValues, 'kind' | 'noData'>
 ): NoData | undefined => {
   const { kind, noData } = values;
-  if (kind !== 'alert' || !noData) return undefined;
+  if (kind !== 'alert') return undefined;
 
-  switch (noData.strategy) {
+  switch (noData?.strategy) {
     case noDataStrategy.keep_last:
     case noDataStrategy.resolve:
     case noDataStrategy.alert:

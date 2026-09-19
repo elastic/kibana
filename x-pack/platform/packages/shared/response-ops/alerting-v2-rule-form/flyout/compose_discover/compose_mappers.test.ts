@@ -83,10 +83,10 @@ describe('composeFormToCreateRequest', () => {
     });
   });
 
-  it('omits recovery when the form has none', () => {
+  it('falls back to no_breach when the form has no recovery', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.query).not.toHaveProperty('recovery');
-    expect(result.recovery).toBeUndefined();
+    expect(result.recovery).toEqual({ strategy: 'no_breach' });
   });
 
   it('drops the breach block when the segment is blank', () => {
@@ -134,9 +134,9 @@ describe('composeFormToCreateRequest', () => {
     expect(result.no_data).toEqual({ strategy: 'resolve' });
   });
 
-  it('omits no_data when undefined', () => {
+  it('falls back to the ignore strategy when no_data is undefined', () => {
     const result = composeFormToCreateRequest(baseFormValues);
-    expect(result.no_data).toBeUndefined();
+    expect(result.no_data).toEqual({ strategy: 'ignore' });
   });
 
   it('omits recovery and no_data for signal rules even when set', () => {
@@ -158,7 +158,11 @@ describe('composeFormToCreateRequest', () => {
   });
 
   it('maps state_transition for immediate delay mode (recovery disabled omits recovering)', () => {
-    const result = composeFormToCreateRequest(baseFormValues);
+    const values: FormValues = {
+      ...baseFormValues,
+      recovery: { strategy: recoveryStrategy.manual },
+    };
+    const result = composeFormToCreateRequest(values);
     expect(result.state_transition).toEqual({ pending: { count: 0 } });
   });
 
@@ -297,10 +301,10 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.artifacts).toBeNull();
   });
 
-  it('omits recovery and no_data rather than nulling them', () => {
+  it('sends the lifecycle rather than nulling it', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
-    expect(result.recovery).toBeUndefined();
-    expect(result.no_data).toBeUndefined();
+    expect(result.recovery).toEqual({ strategy: 'no_breach' });
+    expect(result.no_data).toEqual({ strategy: 'ignore' });
   });
 
   it('nullifies tags when empty (clear all tags on a partial update)', () => {
@@ -591,10 +595,10 @@ describe('round-trip: lifecycle fields survive load → save', () => {
     });
   });
 
-  it('does not emit recovery when the response carries none', () => {
+  it('emits no_breach when the response carries no recovery', () => {
     const formValues = mapRuleToComposeFormValues(baseRuleResponse);
     const request = composeFormToCreateRequest(formValues);
-    expect(request.recovery).toBeUndefined();
+    expect(request.recovery).toEqual({ strategy: 'no_breach' });
   });
 
   it('preserves recovery.strategy: condition through load → save cycle', () => {

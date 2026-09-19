@@ -821,7 +821,7 @@ export const generateNoDataStrategyDoc = (): string => {
   return [
     '# No-Data Strategy',
     '',
-    `\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Omitting it on an alert rule stores \`{ strategy: '${noDataStrategy.ignore}' }\`.`,
+    `\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${noDataStrategy.ignore}' }\`.`,
     '',
     table,
     '',
@@ -840,7 +840,7 @@ export const generateRecoveryStrategyDoc = (): string => {
   return [
     '# Recovery Strategy',
     '',
-    `\`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Omitting it on an alert rule stores \`{ strategy: '${recoveryStrategy.no_breach}' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).`,
+    `\`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${recoveryStrategy.no_breach}' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).`,
     '',
     list,
     '',
