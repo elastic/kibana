@@ -160,4 +160,81 @@ describe('createAgentBuilderClient', () => {
     });
     expect(result).toEqual(conversation);
   });
+  it('forwards configurationOverrides as snake_case configuration_overrides', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      configurationOverrides: {
+        instructions: 'Be terse.',
+        tools: [{ toolIds: ['platform.core.search'] }],
+        skillIds: ['forensics-watch'],
+        enableElasticCapabilities: false,
+      },
+    });
+    expect(lastRequestBody()).toEqual({
+      agent_id: 'my-agent',
+      connector_id: 'my-connector',
+      input: 'question',
+      _execution_mode: 'local',
+      configuration_overrides: {
+        instructions: 'Be terse.',
+        tools: [{ tool_ids: ['platform.core.search'] }],
+        skill_ids: ['forensics-watch'],
+        enable_elastic_capabilities: false,
+      },
+    });
+  });
+
+  it('omits configuration_overrides entirely when not provided', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({ agentId: 'my-agent', input: 'question' });
+    expect(lastRequestBody()).not.toHaveProperty('configuration_overrides');
+  });
+
+  it('sends partial configurationOverrides without inventing missing keys', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      configurationOverrides: { skillIds: ['escalation-chain'] },
+    });
+    expect(lastRequestBody().configuration_overrides).toEqual({
+      skill_ids: ['escalation-chain'],
+    });
+  });
+
+  // `enableElasticCapabilities: false` is the restrictive case (skill_ids only fully
+  // restricts routing when elastic capabilities are off), so it must survive the
+  // truthiness-style guards rather than being dropped as falsy.
+  it('preserves an explicit enableElasticCapabilities: false', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      configurationOverrides: { enableElasticCapabilities: false },
+    });
+    expect(lastRequestBody().configuration_overrides).toEqual({
+      enable_elastic_capabilities: false,
+    });
+  });
+
+  it('forwards an empty tools array as an explicit override', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      configurationOverrides: { tools: [] },
+    });
+    expect(lastRequestBody().configuration_overrides).toEqual({ tools: [] });
+  });
+  it('preserves an explicitly empty instructions override', async () => {
+    http.fetch.mockResolvedValue({});
+    await client.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      configurationOverrides: { instructions: '' },
+    });
+    expect(lastRequestBody().configuration_overrides).toEqual({ instructions: '' });
+  });
 });
