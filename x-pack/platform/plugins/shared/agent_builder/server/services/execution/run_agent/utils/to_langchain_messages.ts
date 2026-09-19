@@ -6,30 +6,10 @@
  */
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
-import type {
-  AssistantResponse,
-  ConversationRoundAuthor,
-  ConversationRoundStep,
-  ReasoningStep,
-  ToolCallStep,
-  ToolCallWithResult,
-} from '@kbn/agent-builder-common';
-import {
-  getConversationRoundAuthorDisplayName,
-  isReasoningStep,
-  isToolCallStep,
-  isBackgroundAgentCompleteStep,
-  isSubagentRosterUpdatedStep,
-  isAskUserQuestionStep,
-  isRelevantSkillsStep,
-} from '@kbn/agent-builder-common';
-import {
-  createAIMessage,
-  createUserMessage,
-  sanitizeToolId,
-  wrapToolResultContent,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import type { AIMessage } from '@langchain/core/messages';
+import type { AssistantResponse, ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import { getConversationRoundAuthorDisplayName } from '@kbn/agent-builder-common';
+import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type {
   ProcessedAttachment,
@@ -37,12 +17,7 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import {
-  formatExecutionFailedNotice,
-  formatSystemNotice,
-  formatSubagentRosterNotice,
-} from '../prompts/utils/notices';
-import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
+import { formatExecutionFailedNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
@@ -58,7 +33,7 @@ import {
 } from './context_timeline';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
-import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
+import { renderStepsToMessages } from './render_steps_to_messages';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 
 export interface ConversationToLangchainOptions {
@@ -207,46 +182,12 @@ export const roundToLangchain = async (
 
   // steps
   if (!ignoreSteps) {
-    const groups = groupToolCallSteps(round.steps);
-    const reasoningSteps = round.steps.filter(isReasoningStep);
-
-    let groupIndex = 0;
-    for (const step of round.steps) {
-      if (isBackgroundAgentCompleteStep(step)) {
-        messages.push(createUserMessage(formatSystemNotice(step)));
-      } else if (isSubagentRosterUpdatedStep(step)) {
-        messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
-      } else if (isRelevantSkillsStep(step)) {
-        if (step.skills.length > 0) {
-          messages.push(createRelevantSkillsNoticeMessage(step.skills));
-        }
-      } else if (isToolCallStep(step)) {
-        // Only process when we hit the first tool call of a group
-        // Other tool calls in the same group are handled by createGroupedToolCallMessages
-        const group = groups[groupIndex];
-        if (group && group[0] === step) {
-          messages.push(
-            ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
-          );
-          groupIndex++;
-        }
-      } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
-        // Render answered ask_user_question steps as a tool-call / tool-response pair.
-        const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
-          promptId: step.prompt_id,
-          questions: step.questions,
-          answers: step.answers,
-        });
-        messages.push(
-          new AIMessage({
-            content: '',
-            tool_calls: [{ id: toolCallId, name: toolName, args }],
-          })
-        );
-        messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
-      }
-      // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
-    }
+    messages.push(
+      ...(await renderStepsToMessages({
+        steps: round.steps,
+        mode: { type: 'history', resultTransformer },
+      }))
+    );
   }
 
   // assistant response
@@ -384,129 +325,4 @@ const formatAssistantResponse = ({ response }: { response: AssistantResponse }):
   return createAIMessage(response.message);
 };
 
-/**
- * Groups consecutive tool call steps by `tool_call_group_id`.
- * Steps sharing the same group ID are grouped together (parallel calls).
- * Steps without a group ID are each in their own group (backward compat).
- */
-export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep[][] => {
-  const groups: ToolCallStep[][] = [];
-  let currentGroup: ToolCallStep[] = [];
-  let currentGroupId: string | undefined;
-
-  for (const step of steps) {
-    if (!isToolCallStep(step)) {
-      // Only break the group if there's no active group_id.
-      // Non-tool-call steps (e.g. reasoning) can appear between parallel
-      // tool calls that share the same group_id and must not split them.
-      if (currentGroup.length > 0 && !currentGroupId) {
-        groups.push(currentGroup);
-        currentGroup = [];
-      }
-      continue;
-    }
-
-    const { tool_call_group_id: groupId } = step;
-
-    if (groupId && groupId === currentGroupId) {
-      currentGroup.push(step);
-    } else {
-      if (currentGroup.length > 0) {
-        groups.push(currentGroup);
-      }
-      currentGroup = [step];
-      currentGroupId = groupId;
-    }
-  }
-
-  if (currentGroup.length > 0) {
-    groups.push(currentGroup);
-  }
-
-  return groups;
-};
-
-/**
- * Creates langchain messages for a group of tool call steps.
- * For parallel groups (multiple steps), produces one AIMessage with all tool_calls
- * followed by one ToolMessage per tool call.
- */
-const createGroupedToolCallMessages = async (
-  toolCalls: ToolCallWithResult[],
-  {
-    resultTransformer,
-    reasoningSteps = [],
-  }: { resultTransformer?: ToolCallResultTransformer; reasoningSteps?: ReasoningStep[] } = {}
-): Promise<BaseMessage[]> => {
-  const groupId = toolCalls[0]?.tool_call_group_id;
-  const groupReasoning = groupId
-    ? reasoningSteps
-        .filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
-        .map((s) => s.reasoning)
-        .join('\n')
-    : '';
-
-  const aiMessage = new AIMessage({
-    content: groupReasoning,
-    tool_calls: toolCalls.map((toolCall) => {
-      const stepReasoning = reasoningSteps
-        .filter((s) => s.tool_call_id === toolCall.tool_call_id)
-        .map((s) => s.reasoning)
-        .join('\n');
-      return {
-        id: toolCall.tool_call_id,
-        name: sanitizeToolId(toolCall.tool_id),
-        args: stepReasoning ? { _reasoning: stepReasoning, ...toolCall.params } : toolCall.params,
-        type: 'tool_call' as const,
-      };
-    }),
-  });
-
-  const toolMessages: ToolMessage[] = [];
-  for (const toolCall of toolCalls) {
-    const processedResults = resultTransformer
-      ? await resultTransformer(toolCall)
-      : toolCall.results;
-    toolMessages.push(
-      new ToolMessage({
-        tool_call_id: toolCall.tool_call_id,
-        content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
-      })
-    );
-  }
-
-  return [aiMessage, ...toolMessages];
-};
-
-/**
- * Creates tool call messages for a single tool call.
- * When `resultTransformer` is provided, results will be passed through it.
- */
-export const createToolCallMessages = async (
-  toolCall: ToolCallWithResult,
-  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
-): Promise<[AIMessage, ToolMessage]> => {
-  const toolName = sanitizeToolId(toolCall.tool_id);
-
-  const toolCallMessage = new AIMessage({
-    content: '',
-    tool_calls: [
-      {
-        id: toolCall.tool_call_id,
-        name: toolName,
-        args: toolCall.params,
-        type: 'tool_call',
-      },
-    ],
-  });
-
-  // Process results - apply transformer if provided
-  const processedResults = resultTransformer ? await resultTransformer(toolCall) : toolCall.results;
-
-  const toolResultMessage = new ToolMessage({
-    tool_call_id: toolCall.tool_call_id,
-    content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
-  });
-
-  return [toolCallMessage, toolResultMessage];
-};
+export { groupToolCallSteps } from './render_steps_to_messages';

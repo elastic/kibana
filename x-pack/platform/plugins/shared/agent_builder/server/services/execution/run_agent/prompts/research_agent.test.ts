@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getResearchAgentPrompt } from './research_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
@@ -39,7 +40,10 @@ describe('getResearchAgentPrompt', () => {
       configuration: { instructions: '', aiIndices: [] },
       spaceId: 'default',
       skills: [],
-      actions: [],
+      steps: [],
+      renderState: {},
+      pendingToolCallIds: [],
+      retryNotices: [],
       cycleLimit: 1,
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
@@ -99,22 +103,26 @@ describe('getResearchAgentPrompt', () => {
     expect(system).not.toMatch(/- alpha \(.+SKILL\.md\)/);
   });
 
-  it('injects the <relevant_skills> notice after previous rounds when a selection is provided', async () => {
+  it('injects the <relevant_skills> notice after previous rounds when the run has a relevant_skills step', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { bash: false, skills: true },
         relevantSkillsEnabled: true,
-        relevantSkills: {
-          skills: [
-            {
-              id: 'a.alpha',
-              name: 'alpha',
-              path: '/p/SKILL.md',
-              description: 'Alpha skill',
-              relevance_note: 'fits the request',
-            },
-          ],
-        },
+        steps: [
+          {
+            type: ConversationRoundStepType.relevantSkills,
+            source: 'implicit',
+            skills: [
+              {
+                id: 'a.alpha',
+                name: 'alpha',
+                path: '/p/SKILL.md',
+                description: 'Alpha skill',
+                relevance_note: 'fits the request',
+              },
+            ],
+          },
+        ],
       })
     );
     const texts = messages.map(asText);
@@ -126,23 +134,12 @@ describe('getResearchAgentPrompt', () => {
     expect(texts[noticeIdx]).toContain('fits the request');
   });
 
-  it('injects no notice when relevant-skills is disabled even if a selection is present', async () => {
-    const messages = await getResearchAgentPrompt(
-      makeParams({
-        experimentalFeatures: { bash: false, skills: true },
-        relevantSkillsEnabled: false,
-        relevantSkills: { skills: [{ id: 'a', name: 'a', path: '/p', description: 'd' }] },
-      })
-    );
-    expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
-  });
-
-  it('injects no notice when the selection is empty', async () => {
+  it('injects no notice when the relevant_skills step has no skills', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { bash: false, skills: true },
         relevantSkillsEnabled: true,
-        relevantSkills: { skills: [] },
+        steps: [{ type: ConversationRoundStepType.relevantSkills, source: 'implicit', skills: [] }],
       })
     );
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
@@ -240,7 +237,10 @@ describe('getResearchAgentPrompt', () => {
       },
       spaceId: 'default',
       skills: [],
-      actions: [],
+      steps: [],
+      renderState: {},
+      pendingToolCallIds: [],
+      retryNotices: [],
       cycleLimit: 1,
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       toolManager: {} as any,

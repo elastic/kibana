@@ -16,7 +16,6 @@ import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { RetryNotice, ToolRenderStateMap } from '../transient_state';
-import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
 /** Never call from the tool-result path — image bytes must not enter tool results. */
 export type PromptImageResolver = (ref: {
@@ -53,7 +52,6 @@ export interface PromptFactoryParams {
    * is only the flag.
    */
   relevantSkillsEnabled: boolean;
-  relevantSkills?: RelevantSkillSelection;
   imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
 }
