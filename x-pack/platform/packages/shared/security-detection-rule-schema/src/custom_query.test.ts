@@ -57,7 +57,7 @@ const makeInput = (fields: CustomQueryBuilderFields) => ({
   fields,
   rule: {
     id: 'test-rule-id',
-    kind: 'signal' as const,
+    kind: 'alert' as const,
     schedule: { every: '5m' },
     time_field: '@timestamp',
   },
@@ -388,8 +388,8 @@ describe('securityDetectionQuery definition', () => {
     expect(securityDetectionQuery.type).toBe('security.detection.query');
   });
 
-  it('pins kind to signal', () => {
-    expect(securityDetectionQuery.kind).toBe('signal');
+  it('pins kind to alert', () => {
+    expect(securityDetectionQuery.kind).toBe('alert');
   });
 
   it('declares execution_time compilation', () => {

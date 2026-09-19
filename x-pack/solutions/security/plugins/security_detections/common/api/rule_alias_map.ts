@@ -41,8 +41,8 @@ export interface AliasMapEntry {
   alias: 'query' | 'threshold';
   /** Namespaced builder type id registered with the framework. */
   builderTypeId: string;
-  /** Every detection rule pins `kind: 'signal'`. */
-  kind: 'signal';
+  /** Every detection rule pins `kind: 'alert'`. */
+  kind: 'alert';
   /**
    * Zod schema for creating a rule of this type.
    * Routes use it for request validation; the converter uses it to determine
@@ -63,13 +63,13 @@ const ALIAS_MAP_ENTRIES: AliasMapEntry[] = [
   {
     alias: 'query',
     builderTypeId: 'security.detection.query',
-    kind: 'signal',
+    kind: 'alert',
     createSchema: customQueryCreateSchema,
   },
   {
     alias: 'threshold',
     builderTypeId: 'security.detection.threshold',
-    kind: 'signal',
+    kind: 'alert',
     createSchema: thresholdCreateSchema,
   },
 ];
@@ -104,11 +104,9 @@ export const BUILDER_TYPE_ID_TO_ALIAS: Readonly<Record<string, 'query' | 'thresh
  * Converters should read kind from here rather than hardcoding it, so that
  * adding a future alias with a different pin requires no change to the converter.
  */
-export const ALIAS_TO_KIND: Readonly<Record<'query' | 'threshold', 'alert' | 'signal'>> =
-  Object.fromEntries(ALIAS_MAP_ENTRIES.map((e) => [e.alias, e.kind])) as Record<
-    'query' | 'threshold',
-    'alert' | 'signal'
-  >;
+export const ALIAS_TO_KIND: Readonly<Record<'query' | 'threshold', 'alert'>> = Object.fromEntries(
+  ALIAS_MAP_ENTRIES.map((e) => [e.alias, e.kind])
+) as Record<'query' | 'threshold', 'alert'>;
 
 /**
  * All alias map entries as an array.
