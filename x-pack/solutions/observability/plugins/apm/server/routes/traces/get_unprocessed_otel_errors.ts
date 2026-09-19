@@ -85,6 +85,7 @@ export async function getUnprocessedOtelErrors({
 
     const error: Error = {
       id: event[ID],
+      source: 'unprocessedOtel',
       span: { id: event[SPAN_ID] },
       trace: { id: traceId },
       timestamp: { us: timestamp },

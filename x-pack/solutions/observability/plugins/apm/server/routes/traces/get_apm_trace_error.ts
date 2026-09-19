@@ -56,6 +56,7 @@ export async function getApmTraceError(params: {
 
     return {
       id,
+      source: 'apm' as const,
       parent: {
         id: parent?.id ?? unflattened.span?.id,
       },

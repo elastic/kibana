@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { TraceItem } from '@kbn/apm-types';
 import type { OnErrorClick } from '@kbn/apm-ui-shared';
+import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { toAnyOfKuery } from '../../../../../../common/utils/kuery_utils';
@@ -15,11 +16,26 @@ import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_p
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 
+export interface OpenDocFlyoutParams {
+  type: UnifiedDocViewerObservabilityTracesDocumentType;
+  docId: string;
+  docIndex: string | undefined;
+  activeSection: 'errors-table' | undefined;
+}
+
 /**
  * Hook that provides a callback for handling error clicks in the trace waterfall.
- * Navigates to the appropriate error page based on the agent type (mobile vs standard).
+ *
+ * Routing:
+ *  - single unprocessed OTel error → log flyout for the individual error doc
+ *  - multiple errors where all are unprocessed OTel → span flyout scrolled to the Errors table
+ *  - mixed span (APM errors + unprocessed OTel exceptions) → APM Errors page with OTel panel
+ *  - classic APM errors (single or multiple) → navigate to the APM Errors page
  */
-export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
+export function useErrorClickHandler(
+  traceItems: TraceItem[],
+  onOpenDocFlyout: (params: OpenDocFlyoutParams) => void
+): OnErrorClick {
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
@@ -33,7 +49,27 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
   } = useApmPluginContext();
 
   return useCallback(
-    ({ traceId: errorTraceId, docId }) => {
+    ({ traceId: errorTraceId, docId, errorCount, errorDocId, docIndex, errorSource }) => {
+      // Single unprocessed OTel error → open the log doc flyout.
+      if (errorCount === 1 && errorSource === 'unprocessedOtel' && errorDocId) {
+        onOpenDocFlyout({ type: 'log', docId: errorDocId, docIndex, activeSection: undefined });
+        return;
+      }
+
+      // Multiple errors where ALL are unprocessed OTel (pure-OTel span) → span flyout with errors
+      // table. Mixed rows (errorSource === 'mixed') fall through to the Errors page below.
+      if (errorCount > 1 && errorSource === 'unprocessedOtel') {
+        onOpenDocFlyout({
+          type: 'span',
+          docId,
+          docIndex: undefined,
+          activeSection: 'errors-table',
+        });
+        return;
+      }
+
+      // Classic APM errors (single or multiple) or mixed spans → navigate to the Errors page.
+      // Mixed spans additionally receive traceId/spanId so the OTel panel renders on arrival.
       const item = traceItems?.find((i) => i.id === docId);
       if (!item) return;
 
@@ -53,11 +89,15 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
           })
         : apmRouter.link('/services/{serviceName}/errors', {
             path: { serviceName: item.serviceName },
-            query: { ...query, serviceGroup: '', kuery },
+            // traceId/spanId go AFTER the spread: `query` inherits a stale `traceId` from the
+            // sampled transaction (transactions/view declares it). The explicit values override it
+            // so the OTel panel fetches from the correct trace. Appended unconditionally so
+            // the panel can self-suppress when there are no OTel rows.
+            query: { ...query, serviceGroup: '', kuery, traceId: errorTraceId, spanId: docId },
           });
 
       navigateToUrl(href);
     },
-    [traceItems, apmRouter, query, navigateToUrl]
+    [traceItems, apmRouter, query, navigateToUrl, onOpenDocFlyout]
   );
 }

@@ -289,6 +289,11 @@ export const serviceDetailRoute = {
               pageSize: z.coerce.number().optional(),
               sortField: z.string().optional(),
               sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+              // Trace context for the unprocessed-OTel-exceptions panel, set by the waterfall
+              // error badge when the clicked span has both APM errors and OTel exception logs.
+              // Both are required for the panel to render; absent on the normal entry path.
+              traceId: z.string().optional(),
+              spanId: z.string().optional(),
             })
             .optional(),
         }),

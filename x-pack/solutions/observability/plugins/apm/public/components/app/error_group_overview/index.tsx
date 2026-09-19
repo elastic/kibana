@@ -15,12 +15,13 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
+import { UnprocessedOtelErrors } from './unprocessed_otel_errors';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo },
+    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo, traceId, spanId },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
@@ -87,6 +88,16 @@ export function ErrorGroupOverview() {
           />
         </EuiPanel>
       </EuiFlexItem>
+
+      {/* Unprocessed OTel exceptions panel: only renders when the user arrived via the
+          waterfall error badge on a mixed span (both APM errors and OTel exception logs).
+          Both params must be present; the component self-suppresses when the response
+          contains no OTel rows (e.g. pure-APM spans where the panel is not needed). */}
+      {traceId && spanId ? (
+        <EuiFlexItem>
+          <UnprocessedOtelErrors traceId={traceId} spanId={spanId} />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }

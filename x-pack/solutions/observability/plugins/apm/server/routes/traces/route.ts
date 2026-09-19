@@ -191,11 +191,10 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
       end,
     });
 
-    if (apmErrors.length > 0) {
-      return { traceErrors: apmErrors, source: 'apm' };
-    }
-
-    return { traceErrors: unprocessedOtelErrors, source: 'unprocessedOtel' };
+    const traceErrors = [...apmErrors, ...unprocessedOtelErrors].sort(
+      (a, b) => a.timestamp.us - b.timestamp.us
+    );
+    return { traceErrors };
   },
 });
 
