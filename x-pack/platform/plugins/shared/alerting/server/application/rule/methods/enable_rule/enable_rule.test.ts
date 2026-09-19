@@ -218,6 +218,7 @@ describe('enable()', () => {
         },
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         scheduledTaskId: 'task-123',
@@ -279,8 +280,10 @@ describe('enable()', () => {
         },
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
         scheduledTaskId: 'task-123',
         actions: [
@@ -340,6 +343,7 @@ describe('enable()', () => {
 
     await rulesClient.enableRule({ id: '1' });
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
+    expect(rulesClientParams.getProfileUid).not.toHaveBeenCalled();
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
@@ -367,6 +371,7 @@ describe('enable()', () => {
         apiKeyOwner: 'elastic',
         scheduledTaskId: 'task-123',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -435,6 +440,7 @@ describe('enable()', () => {
       `"Fail to get"`
     );
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
+    expect(rulesClientParams.getProfileUid).not.toHaveBeenCalled();
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
@@ -452,6 +458,7 @@ describe('enable()', () => {
       `"Fail to update"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     // The rule already had a key, so enable reused it and minted nothing. The stored key is still
@@ -711,6 +718,7 @@ describe('enable()', () => {
       `"Fail to schedule"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     expect(taskManager.schedule).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -773,6 +781,7 @@ describe('enable()', () => {
       `"Fail to update after scheduling task"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).toHaveBeenCalled();

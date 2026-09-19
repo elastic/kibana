@@ -18,7 +18,17 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 jest.mock('../../../../common/lib/kibana');
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
   fetchUiConfig: jest
@@ -48,15 +58,18 @@ const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAcces
 
 function renderWithIntl(ui: React.ReactElement) {
   return render(
-    <IntlProvider locale="en" messages={{}}>
-      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
-    </IntlProvider>
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en" messages={{}}>
+        <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+      </IntlProvider>
+    </QueryClientProvider>
   );
 }
 
 describe('rule_details_route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
   });
 
   const spacesMock = spacesPluginMock.createStartContract();

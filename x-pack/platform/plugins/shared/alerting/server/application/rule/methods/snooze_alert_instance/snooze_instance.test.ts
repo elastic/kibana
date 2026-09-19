@@ -47,6 +47,7 @@ describe('snooze alert instance', () => {
     ruleTypeRegistry: ruleTypeRegistryMock,
     getAlertIndicesAlias: getAlertIndicesAliasMock,
     getUserName: async () => {},
+    getProfileUid: async () => null,
     alertsService: alertsServiceMock,
   } as unknown as RulesClientContext;
 
@@ -135,6 +136,8 @@ describe('snooze alert instance', () => {
           },
         ],
         updatedAt: expect.any(String),
+        updatedBy: undefined,
+        updatedByProfileUid: null,
       },
       { version: 'v1' }
     );

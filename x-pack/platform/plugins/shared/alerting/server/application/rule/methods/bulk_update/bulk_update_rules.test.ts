@@ -98,8 +98,10 @@ const so = (
     revision: 0,
     running: false,
     createdBy: 'elastic',
+    createdByProfileUid: null,
     createdAt: '2019-02-12T21:01:22.479Z',
     updatedBy: 'elastic',
+    updatedByProfileUid: null,
     updatedAt: '2019-02-12T21:01:22.479Z',
     apiKey: null,
     apiKeyOwner: null,
@@ -139,7 +141,9 @@ const buildBulkResponse = (
             params: { foo: true },
             actions: [],
             createdBy: 'elastic',
+            createdByProfileUid: null,
             updatedBy: 'elastic',
+            updatedByProfileUid: null,
             createdAt: '2019-02-12T21:01:22.479Z',
             updatedAt: '2019-02-12T21:01:22.479Z',
             snoozeSchedule: [],
@@ -245,7 +249,11 @@ describe('bulkUpdateRules', () => {
         expect.arrayContaining([
           expect.objectContaining({
             id: 'id-1',
-            attributes: expect.objectContaining({ enabled: false, name: 'a' }),
+            attributes: expect.objectContaining({
+              enabled: false,
+              name: 'a',
+              updatedByProfileUid: null,
+            }),
           }),
         ]),
         { overwrite: true }
@@ -253,6 +261,29 @@ describe('bulkUpdateRules', () => {
       expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
       expect(result).toEqual({ successfulIds: ['id-1', 'id-2'], errors: [], total: 2 });
+    });
+
+    test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+      rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+      mockPit([so('id-1')]);
+
+      await rulesClient.bulkUpdateRules({
+        rules: [item('id-1', { name: 'a' })],
+      });
+
+      expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'id-1',
+            attributes: expect.objectContaining({
+              updatedBy: 'elastic',
+              updatedByProfileUid: 'u_profile_1',
+            }),
+          }),
+        ]),
+        { overwrite: true }
+      );
     });
 
     test('enabled: mints a key and invalidates the old one on success', async () => {

@@ -33,6 +33,7 @@ export interface PrepareRuleArgs<Params extends RuleParams> {
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
+  profileUid: string | null;
   id: string;
   rule: BulkCreateRulesItem<Params>;
   apiKeys: Map<string, ApiKeyEntry>;

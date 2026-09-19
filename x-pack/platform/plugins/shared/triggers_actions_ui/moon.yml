@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

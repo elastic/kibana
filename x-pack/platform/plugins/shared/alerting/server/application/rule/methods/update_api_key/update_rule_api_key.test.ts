@@ -107,9 +107,11 @@ describe('updateRuleApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -165,9 +167,11 @@ describe('updateRuleApiKey()', () => {
         uiamApiKey: 'dWlhbS0yMzQ6ZXNzdV9hYmM=',
         uiamApiKeyExternal: false,
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -256,9 +260,11 @@ describe('updateRuleApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -312,9 +318,11 @@ describe('updateRuleApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: true,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -383,9 +391,11 @@ describe('updateRuleApiKey()', () => {
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         revision: 0,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -539,6 +549,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [],

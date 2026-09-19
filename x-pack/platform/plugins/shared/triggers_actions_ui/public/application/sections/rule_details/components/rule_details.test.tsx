@@ -324,12 +324,106 @@ describe('rule_details', () => {
       expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
+    it('renders the API key owner metadata using the resolved user profile when apiKeyOwnerProfileUid is set', async () => {
+      useKibanaMock().services.userProfile.bulkGet = jest.fn().mockResolvedValue([
+        {
+          uid: 'api-key-owner-uid',
+          user: { username: '2889684073', email: 'jdoe@elastic.co' },
+          data: {},
+        },
+      ]);
+      const rule = mockRule({
+        apiKeyOwner: '2889684073',
+        apiKeyOwnerProfileUid: 'api-key-owner-uid',
+      });
+      renderPage(rule);
+
+      expect(await screen.findByTestId('apiKeyOwnerLabel')).toHaveTextContent('jdoe@elastic.co');
+    });
+
+    it('falls back to apiKeyOwner when its profile uid cannot be resolved', async () => {
+      const bulkGet = jest.fn().mockResolvedValue([]);
+      useKibanaMock().services.userProfile.bulkGet = bulkGet;
+      const rule = mockRule({
+        apiKeyOwner: '2889684073',
+        apiKeyOwnerProfileUid: 'unresolvable-api-key-owner-uid',
+      });
+      renderPage(rule);
+
+      await waitFor(() => {
+        expect(bulkGet).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('2889684073');
+    });
+
     it(`doesn't render the API key owner metadata when user can't manage API keys`, () => {
       const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
       hasManageApiKeysCapability.mockReturnValueOnce(false);
       const rule = mockRule();
       renderPage(rule);
       expect(screen.queryByTestId('apiKeyOwnerLabel')).not.toBeInTheDocument();
+    });
+
+    it('renders the created/updated metadata using createdBy/updatedBy when no profile uid is set', () => {
+      const rule = mockRule({ createdBy: 'jdoe', updatedBy: 'asmith' });
+      renderPage(rule);
+      expect(screen.getByTestId('ruleCreatedMetadata')).toHaveTextContent('Created by jdoe on');
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent(
+        'Last updated by asmith on'
+      );
+    });
+
+    it('renders the created/updated metadata using the resolved user profile when createdByProfileUid/updatedByProfileUid are set', async () => {
+      useKibanaMock().services.userProfile.bulkGet = jest.fn().mockResolvedValue([
+        {
+          uid: 'created-uid',
+          user: { username: 'jdoe', full_name: 'Jane Doe' },
+          data: {},
+        },
+        {
+          uid: 'updated-uid',
+          user: { username: 'asmith', full_name: 'Alex Smith' },
+          data: {},
+        },
+      ]);
+      const rule = mockRule({
+        createdBy: 'jdoe',
+        updatedBy: 'asmith',
+        createdByProfileUid: 'created-uid',
+        updatedByProfileUid: 'updated-uid',
+      });
+      renderPage(rule);
+
+      expect(await screen.findByTestId('ruleCreatedMetadata')).toHaveTextContent(
+        'Created by Jane Doe on'
+      );
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent(
+        'Last updated by Alex Smith on'
+      );
+    });
+
+    it('falls back to createdBy/updatedBy when a profile uid is set but cannot be resolved', async () => {
+      const bulkGet = jest.fn().mockResolvedValue([]);
+      useKibanaMock().services.userProfile.bulkGet = bulkGet;
+      // Use uids distinct from other tests in this suite so this test's query isn't served from
+      // a cached result of a previous test sharing the same module-level `queryClient`.
+      const rule = mockRule({
+        createdBy: 'jdoe',
+        updatedBy: 'asmith',
+        createdByProfileUid: 'unresolvable-created-uid',
+        updatedByProfileUid: 'unresolvable-updated-uid',
+      });
+      renderPage(rule);
+
+      await waitFor(() => {
+        expect(bulkGet).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('ruleCreatedMetadata')).toHaveTextContent('Created by jdoe on');
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent(
+        'Last updated by asmith on'
+      );
     });
 
     it('does not render the actions menu if the user has only read permissions', async () => {

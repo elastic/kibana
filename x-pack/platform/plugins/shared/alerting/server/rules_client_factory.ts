@@ -444,6 +444,10 @@ export class RulesClientFactory {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
       },
+      async getProfileUid() {
+        const user = securityService.authc.getCurrentUser(request);
+        return user?.profile_uid ?? null;
+      },
       async createAPIKey(name: string, refresh?: boolean | 'wait_for') {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
