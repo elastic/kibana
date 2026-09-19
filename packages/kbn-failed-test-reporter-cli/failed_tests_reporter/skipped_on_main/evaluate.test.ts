@@ -1,0 +1,318 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
+
+import type { EvaluableFailure, RefFileReader } from './evaluate';
+import {
+  collectJUnitFailures,
+  collectScoutFailures,
+  evaluateFailures,
+  mergeFileContents,
+} from './evaluate';
+
+const fixture = (name: string) =>
+  Fs.readFileSync(Path.resolve(__dirname, '__fixtures__', `${name}.ts.txt`), 'utf8');
+
+const CASES_FILE =
+  'x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/configure_legacy.ts';
+const SCOUT_FILE =
+  'x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts';
+
+const casesFailure: EvaluableFailure = {
+  kind: 'ftr',
+  file: CASES_FILE,
+  fullTitle:
+    'Cases Configure - legacy custom fields and templates Custom fields adds a custom field',
+};
+const scoutFailure: EvaluableFailure = {
+  kind: 'scout',
+  file: SCOUT_FILE,
+  suite: 'context engine AI indices API',
+  title: 'manages an AI index through its full lifecycle',
+};
+
+const readerFor = (files: Record<string, string | undefined>): RefFileReader => {
+  return (ref, file) => files[`${ref}:${file}`];
+};
+
+const evaluate = (failures: EvaluableFailure[], readFile: RefFileReader) =>
+  evaluateFailures(failures, { mainRef: 'main', baseRef: 'base', headRef: 'head', readFile });
+
+/** A mocha file with one runnable `s c` test, padded so edits far apart merge cleanly. */
+const PADDING = Array.from({ length: 8 }, (_, i) => `// line ${i}`).join('\n');
+const SUITE_BEFORE = `describe('s', () => {\n  it('c', () => {});\n});\n${PADDING}\n`;
+const SUITE_SKIPPED = SUITE_BEFORE.replace("it('c'", "it.skip('c'");
+
+describe('evaluateFailures', () => {
+  it('marks failures as known skipped when the skip exists on main but not at the merge base', () => {
+    const readFile = readerFor({
+      [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+      [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
+      [`base:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+    });
+
+    const result = evaluate([casesFailure, scoutFailure], readFile);
+
+    expect(result.real).toEqual([]);
+    expect(result.knownSkipped).toEqual([
+      { failure: casesFailure, issue: 'https://github.com/elastic/kibana/issues/280016' },
+      { failure: scoutFailure, issue: 'https://github.com/elastic/kibana/issues/280639' },
+    ]);
+  });
+
+  it('still forgives when the PR changed the failing file elsewhere and the merge is clean', () => {
+    const readFile = readerFor({
+      [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+      [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`head:${CASES_FILE}`]: `${fixture(
+        'ftr_cases_configure_legacy.before'
+      )}\n// touched by the PR\n`,
+    });
+
+    const result = evaluate([casesFailure], readFile);
+
+    expect(result.real).toEqual([]);
+    expect(result.knownSkipped).toHaveLength(1);
+  });
+
+  it('keeps the failure when the skip is already present at the merge base (PR un-skips it)', () => {
+    const readFile = readerFor({
+      [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+      [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+      [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+    });
+
+    const result = evaluate([casesFailure], readFile);
+
+    expect(result.knownSkipped).toEqual([]);
+    expect(result.real).toEqual([casesFailure]);
+  });
+
+  it('keeps the failure when the file is gone on main or the test is not skipped there', () => {
+    const readFile = readerFor({
+      [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      [`base:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+    });
+
+    expect(evaluate([casesFailure], readFile).real).toEqual([casesFailure]);
+    expect(evaluate([scoutFailure], readFile).real).toEqual([scoutFailure]);
+  });
+
+  it('keeps the failure when the file is absent at the merge base (PR and main both added it)', () => {
+    const readFile = readerFor({
+      [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+    });
+
+    const result = evaluate([scoutFailure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([scoutFailure]);
+  });
+
+  it('keeps the failure when the PR and main changed the same lines (merge conflict)', () => {
+    const readFile = readerFor({
+      [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
+      [`base:${SCOUT_FILE}`]: 'apiTest.describe("context engine AI indices API", () => {});',
+      [`head:${SCOUT_FILE}`]: fixture('scout_ai_indices.before'),
+    });
+
+    const result = evaluate([scoutFailure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([scoutFailure]);
+  });
+
+  it('keeps the failure when the PR added a same-titled test next to the one main skipped', () => {
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 's c' };
+    const readFile = readerFor({
+      [`base:${CASES_FILE}`]: SUITE_BEFORE,
+      [`main:${CASES_FILE}`]: SUITE_SKIPPED,
+      // Merges cleanly: the merged file has the skipped original plus the PR's runnable copy.
+      [`head:${CASES_FILE}`]: `${SUITE_BEFORE}describe('s', () => {\n  it('c', () => {});\n});\n`,
+    });
+
+    const result = evaluate([failure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([failure]);
+  });
+
+  it('keeps the failure when the PR un-skipped one of several same-titled occurrences', () => {
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 's c' };
+    const readFile = readerFor({
+      [`base:${CASES_FILE}`]: `${SUITE_SKIPPED}${SUITE_BEFORE}`,
+      [`main:${CASES_FILE}`]: `${SUITE_SKIPPED}${SUITE_SKIPPED}`,
+      // The PR un-skipped the first occurrence; the merge keeps it runnable.
+      [`head:${CASES_FILE}`]: `${SUITE_BEFORE}${SUITE_BEFORE}`,
+    });
+
+    const result = evaluate([failure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([failure]);
+  });
+
+  it('keeps the failure when the test does not resolve as runnable at the PR head', () => {
+    // The test ran and failed, so a head lookup that finds it skipped means the file was misread.
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 's c' };
+    const readFile = readerFor({
+      [`base:${CASES_FILE}`]: SUITE_SKIPPED,
+      [`main:${CASES_FILE}`]: SUITE_SKIPPED,
+      [`head:${CASES_FILE}`]: SUITE_SKIPPED,
+    });
+
+    const result = evaluate([failure], readFile);
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([failure]);
+  });
+
+  it('keeps failures without a file location', () => {
+    const failure: EvaluableFailure = { kind: 'ftr', file: '', fullTitle: 'something' };
+    const result = evaluate([failure], () => {
+      throw new Error('should not be called');
+    });
+    expect(result.real).toEqual([failure]);
+  });
+
+  it('reads and merges each file only once', () => {
+    const readFile = jest.fn(
+      readerFor({
+        [`main:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.after'),
+        [`base:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+        [`head:${CASES_FILE}`]: fixture('ftr_cases_configure_legacy.before'),
+      })
+    );
+    evaluate([casesFailure, { ...casesFailure, fullTitle: 'Cases other test' }], readFile);
+    expect(readFile).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('mergeFileContents', () => {
+  it('applies non-overlapping edits from both sides', () => {
+    expect(mergeFileContents('a\nb\nc\n', 'A\nb\nc\n', 'a\nb\nC\n')).toBe('A\nb\nC\n');
+  });
+
+  it('returns undefined on conflict', () => {
+    expect(mergeFileContents('a\n', 'b\n', 'c\n')).toBeUndefined();
+  });
+});
+
+describe('failure adapters', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'skipped-on-main-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('collects FTR failures from JUnit with the decoded file path', async () => {
+    const xmlPath = Path.join(tmpDir, 'report.xml');
+    Fs.writeFileSync(
+      xmlPath,
+      `<?xml version="1.0" encoding="utf-8"?>
+<testsuites name="ftr">
+  <testsuite>
+    <testcase name="Cases suite passes" classname="Chrome X-Pack UI Functional Tests.${CASES_FILE.replace(
+      /\./g,
+      '·'
+    )}" time="1"></testcase>
+    <testcase name="Cases suite fails" classname="Chrome X-Pack UI Functional Tests.${CASES_FILE.replace(
+      /\./g,
+      '·'
+    )}" time="1"><failure>boom</failure></testcase>
+    <testcase name="Cases suite skipped" classname="x.y" time="1"><skipped/></testcase>
+  </testsuite>
+</testsuites>`
+    );
+
+    expect(await collectJUnitFailures([xmlPath])).toEqual([
+      { kind: 'ftr', file: CASES_FILE, fullTitle: 'Cases suite fails' },
+    ]);
+  });
+
+  it('collects Scout failures from ndjson', () => {
+    const ndjsonPath = Path.join(tmpDir, 'scout-failures-1.ndjson');
+    Fs.writeFileSync(
+      ndjsonPath,
+      [
+        JSON.stringify({ suite: 'suite a', title: 'test a', location: SCOUT_FILE, target: 'x' }),
+        '',
+        JSON.stringify({ suite: 'suite b', title: 'test b', location: 'other.spec.ts' }),
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'scout-runner-errors-1.json'),
+      JSON.stringify({ status: 'failed', errors: [] })
+    );
+
+    expect(collectScoutFailures([ndjsonPath])).toEqual([
+      { kind: 'scout', file: SCOUT_FILE, suite: 'suite a', title: 'test a' },
+      { kind: 'scout', file: 'other.spec.ts', suite: 'suite b', title: 'test b' },
+    ]);
+  });
+
+  it('treats a missing runner errors sidecar as a real failure, since the reporter did not complete', () => {
+    const ndjsonPath = Path.join(tmpDir, 'scout-failures-partial.ndjson');
+    Fs.writeFileSync(
+      ndjsonPath,
+      JSON.stringify({ suite: 'suite a', title: 'test a', location: SCOUT_FILE }) + '\n'
+    );
+
+    const failures = collectScoutFailures([ndjsonPath]);
+    const evaluation = evaluate(failures, (ref) =>
+      ref === 'main'
+        ? 'test.describe.skip("suite a", () => { test("test a", () => {}) })'
+        : 'test.describe("suite a", () => { test("test a", () => {}) })'
+    );
+
+    expect(evaluation.real).toEqual([
+      expect.objectContaining({
+        suite: 'Scout runner',
+        title: expect.stringContaining('sidecar missing'),
+      }),
+    ]);
+  });
+
+  it('turns Scout runner errors into failures that are never forgiven', () => {
+    const ndjsonPath = Path.join(tmpDir, 'scout-failures-run1.ndjson');
+    Fs.writeFileSync(
+      ndjsonPath,
+      JSON.stringify({ suite: 'suite a', title: 'test a', location: SCOUT_FILE }) + '\n'
+    );
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'scout-runner-errors-run1.json'),
+      JSON.stringify({ status: 'failed', errors: ['global teardown threw'] })
+    );
+
+    const failures = collectScoutFailures([ndjsonPath]);
+    const evaluation = evaluate(failures, (ref) =>
+      ref === 'main'
+        ? 'test.describe.skip("suite a", () => { test("test a", () => {}) })'
+        : 'test.describe("suite a", () => { test("test a", () => {}) })'
+    );
+
+    expect(evaluation.real).toEqual([
+      { kind: 'scout', file: '', suite: 'Scout runner', title: 'global teardown threw' },
+    ]);
+  });
+});

@@ -108,4 +108,28 @@ describe('ScoutFailureTracker', () => {
 
     expect(fs.existsSync(tracker.getTrackingFilePath())).toBe(false);
   });
+
+  it('writes runner errors to a sidecar named after the tracking file run id', () => {
+    const tracker = new ScoutFailureTracker(createMockLog(), tempDir, 'run-5');
+
+    tracker.saveRunnerErrors({ status: 'failed', errors: ['global teardown threw'] });
+
+    const sidecar = path.join(tempDir, 'scout-runner-errors-run-5.json');
+    expect(JSON.parse(fs.readFileSync(sidecar, 'utf-8'))).toEqual({
+      status: 'failed',
+      errors: ['global teardown threw'],
+    });
+    // The NDJSON consumed by the GitHub issue reporter must not pick them up.
+    expect(fs.existsSync(tracker.getTrackingFilePath())).toBe(false);
+  });
+
+  it('writes an empty sidecar when there are no runner errors, marking the report complete', () => {
+    const tracker = new ScoutFailureTracker(createMockLog(), tempDir, 'run-6');
+
+    tracker.saveRunnerErrors({ status: 'passed', errors: [] });
+
+    expect(
+      JSON.parse(fs.readFileSync(path.join(tempDir, 'scout-runner-errors-run-6.json'), 'utf-8'))
+    ).toEqual({ status: 'passed', errors: [] });
+  });
 });
