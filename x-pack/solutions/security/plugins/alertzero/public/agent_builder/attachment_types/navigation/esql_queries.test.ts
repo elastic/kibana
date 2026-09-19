@@ -81,7 +81,7 @@ describe('esql_queries', () => {
       'FROM "logs-*" | WHERE user.name == "escalated-role" OR user.target.name == "escalated-role"'
     );
     expect(buildEntityLookupEsql({ kind: 'actor', value: 'APT-99' })).toBe(
-      'FROM "logs-*" | WHERE threat.group.name == "APT-99"'
+      'FROM ".kibana-threat-reports*" | WHERE extracted.threat_actors == "APT-99"'
     );
   });
 

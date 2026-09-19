@@ -95,19 +95,21 @@ export const buildIocLookupEsql = ({
   )}`;
 };
 
-/** ECS fields used for Discover lookups from attachment entity chips. */
+/** ECS / document fields used for Discover lookups from attachment entity chips. */
 const ENTITY_KIND_TO_ESQL_FIELDS: Readonly<Record<string, readonly string[]>> = {
   user: ['user.name', 'user.target.name'],
   host: ['host.name', 'host.hostname'],
   service: ['service.name'],
   // IAM roles commonly surface on user.name in CloudTrail-normalized logs.
   role: ['user.name', 'user.target.name'],
-  actor: ['threat.group.name'],
 };
 
 /**
  * Build an ES|QL lookup for an attachment entity short name by kind.
  * Returns undefined for unknown/generic kinds (prefer skip over guessing).
+ *
+ * Actors are stored on threat reports (`extracted.threat_actors`), not ECS
+ * `threat.group.name` in logs, so they query the threat-reports index.
  */
 export const buildEntityLookupEsql = ({
   kind,
@@ -118,8 +120,18 @@ export const buildEntityLookupEsql = ({
   value: string;
   indexPattern?: string;
 }): string | undefined => {
+  if (!value.trim()) {
+    return undefined;
+  }
+
+  if (kind === 'actor') {
+    return `FROM ${quoteEsqlIdentifier(
+      THREAT_REPORTS_INDEX_PATTERN
+    )} | WHERE ${buildFieldEqualityWhere(['extracted.threat_actors'], value)}`;
+  }
+
   const fields = ENTITY_KIND_TO_ESQL_FIELDS[kind];
-  if (!fields || fields.length === 0 || !value.trim()) {
+  if (!fields || fields.length === 0) {
     return undefined;
   }
 
