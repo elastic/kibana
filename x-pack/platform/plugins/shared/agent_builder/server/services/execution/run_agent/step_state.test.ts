@@ -7,7 +7,9 @@
 
 import {
   ConversationRoundStepType,
+  ToolResultType,
   type ConversationRoundStep,
+  type ReasoningStep,
   type TodosStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -24,14 +26,14 @@ const toolCall = (id: string, groupId = 'g1'): ToolCallStep => ({
   tool_call_group_id: groupId,
 });
 
-const reasoning = (text: string): ConversationRoundStep => ({
+const reasoning = (text: string): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
   reasoning: text,
 });
 
 const todos = (n: number): TodosStep => ({
   type: ConversationRoundStepType.updateTodos,
-  todos: [{ id: `t${n}`, content: `todo ${n}`, status: 'pending' }],
+  todos: [{ content: `todo ${n}`, status: 'pending' }],
 });
 
 const invalidStateError = expect.objectContaining({
@@ -70,14 +72,16 @@ describe('applyStepUpdates', () => {
         stepUpdates.resolveToolCall({
           toolCallId: 'c1',
           toolId: 'my_tool',
-          results: [{ type: 'other', data: { ok: true } }],
+          results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
           progression: [{ message: 'after' }],
         }),
       ]
     );
     expect(result).toHaveLength(3);
     const resolved = result[1] as ToolCallStep;
-    expect(resolved.results).toEqual([{ type: 'other', data: { ok: true } }]);
+    expect(resolved.results).toEqual([
+      { tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } },
+    ]);
     expect(resolved.progression).toEqual([{ message: 'before' }, { message: 'after' }]);
     // the seeded step object is not mutated
     expect(seeded.results).toEqual([]);
@@ -143,7 +147,7 @@ describe('applyStepUpdates', () => {
       ConversationRoundStepType.toolCall,
       ConversationRoundStepType.updateTodos,
     ]);
-    expect(result.at(-1)).toMatchObject({ todos: [{ id: 't2' }] });
+    expect(result.at(-1)).toMatchObject({ todos: [{ content: 'todo 2' }] });
   });
 
   it('keeps the last todos step when the input carries several (legacy merged rounds)', () => {

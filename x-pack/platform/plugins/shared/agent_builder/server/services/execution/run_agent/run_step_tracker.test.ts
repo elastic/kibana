@@ -9,8 +9,9 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   TODOS_UPDATED_UI_EVENT,
+  ToolResultType,
   type ChatAgentEvent,
-  type ConversationRoundStep,
+  type ReasoningStep,
   type TodosStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -25,13 +26,13 @@ const toolCall = (id: string, results: ToolCallStep['results'] = []): ToolCallSt
   results,
   progression: [],
 });
-const reasoning = (text: string): ConversationRoundStep => ({
+const reasoning = (text: string): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
   reasoning: text,
 });
 const todos = (id: string): TodosStep => ({
   type: ConversationRoundStepType.updateTodos,
-  todos: [{ id, content: id, status: 'pending' }],
+  todos: [{ content: id, status: 'pending' }],
 });
 const progressEvent = (toolCallId: string, message: string): ChatAgentEvent => ({
   type: ChatEventType.toolProgress,
@@ -44,7 +45,7 @@ const todosUiEvent = (ids: string[]): ChatAgentEvent =>
       tool_id: 'todo_write',
       tool_call_id: 'c1',
       custom_event: TODOS_UPDATED_UI_EVENT,
-      data: { todos: ids.map((id) => ({ id, content: id, status: 'pending' })) },
+      data: { todos: ids.map((id) => ({ content: id, status: 'pending' })) },
     },
   } as ChatAgentEvent);
 
@@ -96,7 +97,7 @@ describe('RunStepTracker', () => {
 
   it('excludes inherited steps on resume and projects resolved pending calls with delta progression only', () => {
     const tracker = new RunStepTracker({ graphName: 'my-graph' });
-    const done = toolCall('done', [{ type: 'other', data: {} }]);
+    const done = toolCall('done', [{ tool_result_id: 'r0', type: ToolResultType.other, data: {} }]);
     const pending = { ...toolCall('pending'), progression: [{ message: 'before pause' }] };
     tracker.seed([reasoning('old'), done, pending], {
       execution: 'resume',
@@ -106,7 +107,7 @@ describe('RunStepTracker', () => {
       stepUpdates.resolveToolCall({
         toolCallId: 'pending',
         toolId: 'my_tool',
-        results: [{ type: 'other', data: { ok: true } }],
+        results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
         progression: [{ message: 'after resume' }],
       }),
       stepUpdates.append(reasoning('new')),
@@ -119,7 +120,7 @@ describe('RunStepTracker', () => {
     expect(projection).toHaveLength(2);
     expect(projection[0]).toMatchObject({
       tool_call_id: 'pending',
-      results: [{ type: 'other', data: { ok: true } }],
+      results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
       progression: [{ message: 'after resume' }],
     });
     expect(projection[1]).toMatchObject({ reasoning: 'new' });
@@ -181,9 +182,9 @@ describe('RunStepTracker', () => {
     // unconsumed (e.g. the tool node failed right after todo_write): snapshot carries the todos step
     expect(tracker.snapshotSteps().at(-1)).toMatchObject({
       type: ConversationRoundStepType.updateTodos,
-      todos: [{ id: 'b' }],
+      todos: [{ content: 'b' }],
     });
-    expect(tracker.consumeTodosWrite()).toEqual([{ id: 'b', content: 'b', status: 'pending' }]);
+    expect(tracker.consumeTodosWrite()).toEqual([{ content: 'b', status: 'pending' }]);
     expect(tracker.consumeTodosWrite()).toBeUndefined();
     expect(tracker.snapshotSteps()).toEqual([]);
   });
