@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// Disable viewport-based culling so all nodes render in JSDOM (which has no real viewport)
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
+
 import React from 'react';
 import { ReactFlow } from '@xyflow/react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';

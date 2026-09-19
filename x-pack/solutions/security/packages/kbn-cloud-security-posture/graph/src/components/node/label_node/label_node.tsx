@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { Handle, Position } from '@xyflow/react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { Handle, NodeToolbar, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiText,
+  EuiTextTruncate,
+  EuiToolTip,
+  transparentize,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -20,7 +28,7 @@ import {
   NODE_LABEL_WIDTH,
   getLabelColors,
 } from '../styles';
-import type { LabelNodeViewModel, NodeProps } from '../../types';
+import type { LabelNodeViewModel, NodeProps, NodeToolbarItem } from '../../types';
 import { NodeExpandButton } from '../node_expand_button';
 import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
 import { analyzeDocuments } from './analyze_documents';
@@ -47,6 +55,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     countryCodes,
     nodeClick,
     expandButtonClick,
+    toolbarItemsFn,
     ipClickHandler,
     countryClickHandler,
     eventClickHandler,
@@ -67,9 +76,67 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const analysis = analyzeDocuments({ uniqueEventsCount: numEvents, uniqueAlertsCount: numAlerts });
 
+  // Hover state for the floating NodeToolbar — generous delay so the mouse
+  // can travel from the label card into the toolbar without it dismissing.
+  const [isHovered, setIsHovered] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToolbar = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    setIsHovered(true);
+  }, []);
+  const hideToolbar = useCallback(() => {
+    hideTimerRef.current = setTimeout(() => setIsHovered(false), 300);
+  }, []);
+
+  const toolbarItems: NodeToolbarItem[] = useMemo(
+    () => (toolbarItemsFn ? toolbarItemsFn(props) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [toolbarItemsFn, props.id]
+  );
+
   return (
     <>
-      <LabelNodeContainer data-test-subj={GRAPH_LABEL_NODE_ID}>
+      <LabelNodeContainer
+        data-test-subj={GRAPH_LABEL_NODE_ID}
+        onMouseEnter={showToolbar}
+        onMouseLeave={hideToolbar}
+      >
+        {/* Floating action toolbar — shown on hover when toolbar items are available */}
+        {interactive && toolbarItems.length > 0 && (
+          <NodeToolbar isVisible={isHovered} position={Position.Top} align="center" offset={4}>
+            <div
+              onMouseEnter={showToolbar}
+              onMouseLeave={hideToolbar}
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                background: ${euiTheme.colors.backgroundBasePlain};
+                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
+                border-radius: ${euiTheme.border.radius.medium};
+                padding: 2px;
+                box-shadow: ${shadow};
+              `}
+            >
+              {toolbarItems.map((item, idx) => (
+                <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType={item.iconType}
+                    iconSize="s"
+                    color="text"
+                    size="xs"
+                    aria-label={item.label}
+                    disabled={item.disabled}
+                    onClick={item.onClick}
+                  />
+                </EuiToolTip>
+              ))}
+            </div>
+          </NodeToolbar>
+        )}
         {interactive && (
           <LabelShapeOnHover data-test-subj={TEST_SUBJ_HOVER_OUTLINE} color={color} />
         )}
@@ -84,7 +151,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             css={css`
               display: flex;
               align-items: center;
-              justify-content: space-between;
+              justify-content: center;
               width: 100%;
               gap: ${euiTheme.size.xs};
             `}
@@ -97,6 +164,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                 text-overflow: ellipsis;
                 font-weight: ${euiTheme.font.weight.semiBold};
                 font-size: ${euiTheme.font.scale.xs * 10.5}px;
+                text-align: center;
               `}
             >
               <EuiTextTruncate
@@ -125,6 +193,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               width={NODE_LABEL_WIDTH}
               onClick={(e) => nodeClick?.(e, props)}
             />
+            {/* Expand button — hidden visually when the NodeToolbar is wired, but always
+                 present in the DOM so that tests can click it to open the popover. */}
             <NodeExpandButton
               data-test-subj={TEST_SUBJ_EXPAND_BTN}
               color={'primary'}
@@ -133,6 +203,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               y={`${
                 -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
               }px`}
+              style={toolbarItems.length > 0 ? { display: 'none' } : undefined}
             />
           </>
         )}
