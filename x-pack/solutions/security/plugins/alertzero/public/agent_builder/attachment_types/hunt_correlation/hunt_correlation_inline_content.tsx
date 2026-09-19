@@ -23,6 +23,7 @@ import {
   buildDiscoverThreatReportNestedIocUrl,
   buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
+  buildThreatReportsInEsql,
   DiscoverLink,
 } from '../navigation';
 import { EntityChip } from '../entity_chip';
@@ -52,11 +53,13 @@ const renderAnchorValue = ({
   value,
   index,
   navigation,
+  relatedReportIds,
 }: {
   kind: Anchor['kind'];
   value: string;
   index: number;
   navigation: AttachmentNavigationDeps;
+  relatedReportIds: string[];
 }): React.ReactNode => {
   const badge = (
     <EuiBadge color="hollow" css={{ marginRight: 4 }}>
@@ -78,15 +81,20 @@ const renderAnchorValue = ({
     return badge;
   }
 
-  // Hash anchors are report-only nested IOCs; ES|QL cannot filter nested fields.
-  // ioc_set_hash is a top-level keyword on threat reports.
+  // Hash correlation anchors are report-only. Enrichment often replaces seeded
+  // extracted.iocs, so the hash value may not exist on any report document.
+  // Prefer opening the related reports from this correlation (same exit as the
+  // action button). Fall back to a nested IOC filter when no related ids exist.
   let href: string | undefined;
   if (kind === 'hash') {
-    href = buildDiscoverThreatReportNestedIocUrl({
-      share: navigation.share,
-      iocType: 'hash',
-      value,
-    });
+    const relatedEsql = buildThreatReportsInEsql({ reportIds: relatedReportIds });
+    href = relatedEsql
+      ? buildDiscoverEsqlUrl({ share: navigation.share, esql: relatedEsql })
+      : buildDiscoverThreatReportNestedIocUrl({
+          share: navigation.share,
+          iocType: 'hash',
+          value,
+        });
   } else {
     const esql = buildThreatReportIocSetHashLookupEsql({ value });
     href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
@@ -177,6 +185,7 @@ export const HuntCorrelationInlineContent: React.FC<HuntCorrelationInlineContent
                   value,
                   index,
                   navigation,
+                  relatedReportIds: uniqueRelatedReportIds,
                 })}
               </React.Fragment>
             ))}
