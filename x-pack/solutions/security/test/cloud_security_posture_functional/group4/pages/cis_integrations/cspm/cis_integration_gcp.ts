@@ -235,7 +235,6 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -372,7 +371,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await pageObjects.header.waitUntilLoadingHasFinished();
