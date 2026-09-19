@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { AlertEpisodeOverviewList } from './overview_list';
 
@@ -16,6 +16,15 @@ jest.mock('../assignee_cell', () => ({
   AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
     <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
   ),
+}));
+jest.mock('../user_profile_display', () => ({
+  UserProfileDisplay: ({
+    userProfileUid,
+    emptyState = '—',
+  }: {
+    userProfileUid: string | null | undefined;
+    emptyState?: React.ReactNode;
+  }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
 }));
 
 jest.mock('../grouping/alerting_episode_grouping_tags', () => ({
@@ -40,6 +49,7 @@ const baseProps = {
   triggeredAt: '2024-01-01T00:00:00.000Z',
   durationMs: 5000,
   assigneeUid: 'user-1',
+  status: ALERT_EPISODE_STATUS.ACTIVE,
   episodeAction: undefined,
   groupAction: undefined,
   userProfile: mockUserProfile,
@@ -150,6 +160,7 @@ describe('AlertEpisodeOverviewList', () => {
             lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
             lastAssigneeUid: null,
             lastAckActor: 'user-acker',
+            lastDeactivateActor: null,
           }}
         />
       </I18nProvider>
@@ -157,7 +168,7 @@ describe('AlertEpisodeOverviewList', () => {
 
     expect(screen.getByText('Acknowledged by')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-acker')
+      screen.getAllByTestId('mockUserProfileDisplay').find((el) => el.textContent === 'user-acker')
     ).toBeInTheDocument();
   });
 
@@ -166,11 +177,21 @@ describe('AlertEpisodeOverviewList', () => {
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
+          status={ALERT_EPISODE_STATUS.INACTIVE}
+          episodeAction={{
+            episodeId: 'ep-1',
+            ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
+            lastDeactivateActor: 'user-resolver',
+          }}
           groupAction={{
             groupHash: 'gh-1',
             ruleId: 'rule-1',
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-            lastDeactivateActor: 'user-resolver',
+            lastDeactivateActor: null,
             lastSnoozeAction: null,
             snoozeExpiry: null,
             tags: [],
@@ -182,8 +203,24 @@ describe('AlertEpisodeOverviewList', () => {
 
     expect(screen.getByText('Resolved by')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-resolver')
+      screen
+        .getAllByTestId('mockUserProfileDisplay')
+        .find((el) => el.textContent === 'user-resolver')
     ).toBeInTheDocument();
+  });
+
+  it('renders the resolved-by row when the episode is resolved before group actions load', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          status={ALERT_EPISODE_STATUS.INACTIVE}
+          groupAction={undefined}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Resolved by')).toBeInTheDocument();
   });
 
   it('renders the snoozed-by and snoozed-until rows when the group is snoozed', () => {
@@ -208,7 +245,9 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByText('Snoozed by')).toBeInTheDocument();
     expect(screen.getByText('Snoozed until')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-snoozer')
+      screen
+        .getAllByTestId('mockUserProfileDisplay')
+        .find((el) => el.textContent === 'user-snoozer')
     ).toBeInTheDocument();
   });
 

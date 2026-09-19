@@ -13,7 +13,7 @@ import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleError, isRuleForbidden, isRuleLoaded, isRuleNotFound } from '../../types/rule_state';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
+import { getGroupActionKey, useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { AlertEpisodeOverviewList, type GroupingRowStatus } from './overview_list';
 import { AlertEpisodeDescriptionListSkeleton } from './section_skeletons';
@@ -94,7 +94,9 @@ export const AlertEpisodeOverviewListSection = ({
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
-  const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
+  const groupAction = groupHash
+    ? groupActionsMap?.get(getGroupActionKey(ruleId, groupHash))
+    : undefined;
 
   return (
     <AlertEpisodeOverviewList
@@ -105,6 +107,7 @@ export const AlertEpisodeOverviewListSection = ({
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}
+      status={episode?.['episode.status']}
       episodeAction={episodeAction}
       groupAction={groupAction}
       userProfile={services.userProfile}

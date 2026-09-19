@@ -39,6 +39,7 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
           lastAckAction: row.last_ack_action ?? null,
           lastAssigneeUid: row.last_assignee_uid ?? null,
           lastAckActor: row.last_ack_actor ?? null,
+          lastDeactivateActor: row.last_deactivate_actor ?? null,
         });
       }
       return map;

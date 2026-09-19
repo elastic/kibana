@@ -7,15 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiCode,
-  EuiCopy,
-  EuiIcon,
-  EuiLink,
-  EuiSkeletonText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCode, EuiIcon, EuiLink, EuiSkeletonText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
@@ -27,6 +19,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
+import { CopyableShortId } from './copyable_short_id';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
@@ -38,9 +31,6 @@ import * as i18n from './translations';
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
 
-/** Characters of the rule id shown when a rule has no name to display. */
-const SHORT_RULE_ID_LENGTH = 7;
-
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
 
@@ -51,6 +41,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastAckAction: (row.flattened.last_ack_action as string | undefined) ?? null,
     lastAssigneeUid: (row.flattened.last_assignee_uid as string | undefined) ?? null,
     lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
+    lastDeactivateActor: null,
   };
 
   const groupAction: EpisodeStatusGroupAction = {
@@ -222,30 +213,12 @@ export const EpisodeRuleCell = ({
             </span>
           </span>
         </EuiToolTip>
-        <EuiCopy
-          textToCopy={ruleId}
-          beforeMessage={i18n.getRuleCellCopyRuleIdTooltip(ruleId)}
-          afterMessage={i18n.RULE_CELL_RULE_ID_COPIED}
-        >
-          {(copy) => (
-            // eslint-disable-next-line @elastic/eui/require-href-for-link
-            <EuiLink color="subdued" onClick={copy} data-test-subj="episodeRuleCellCopyRuleId">
-              <EuiCode
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  padding-block: 0;
-                  padding-inline: ${euiTheme.size.xs};
-                  line-height: ${euiTheme.size.base};
-                  font-weight: ${euiTheme.font.weight.regular};
-                  color: ${euiTheme.colors.textSubdued};
-                `}
-              >
-                {ruleId.slice(0, SHORT_RULE_ID_LENGTH)}
-              </EuiCode>
-            </EuiLink>
-          )}
-        </EuiCopy>
+        <CopyableShortId
+          id={ruleId}
+          copyTooltip={i18n.getRuleCellCopyRuleIdTooltip(ruleId)}
+          copiedTooltip={i18n.RULE_CELL_RULE_ID_COPIED}
+          data-test-subj="episodeRuleCellCopyRuleId"
+        />
       </span>
     );
   }

@@ -70,6 +70,8 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/ui-callout'
+  - '@kbn/flyout-template'
+  - '@kbn/flyout-sections'
   - '@kbn/response-ops-alerts-apis'
 tags:
   - shared-browser

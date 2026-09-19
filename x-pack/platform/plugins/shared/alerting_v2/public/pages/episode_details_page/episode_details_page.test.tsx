@@ -21,6 +21,7 @@ import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule'
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
+import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { createMockLocators, TestProviders } from '../../test_utils/test_providers';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
@@ -121,7 +122,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_sec
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
-  AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
+  AlertEpisodeMetadataSection: jest.fn(() => <div data-test-subj="stubMetadataSection" />),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_section', () => ({
@@ -142,6 +143,7 @@ const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
 const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
+const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
 const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
 const mockRuleOverviewPanelSection = jest.mocked(AlertEpisodeRuleOverviewPanelSection);
 
@@ -321,6 +323,21 @@ describe('EpisodeDetailsPage', () => {
     expect(
       screen.getByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory')
     ).toBeInTheDocument();
+  });
+
+  it('activates the document viewer flex layout on the metadata tab', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata'));
+
+    const metadataSection = screen.getByTestId('stubMetadataSection');
+    expect(metadataSection.parentElement).toHaveStyleRule('block-size', '100%');
+    expect(metadataSection.parentElement).toHaveStyleRule('min-block-size', '0');
+    expect(metadataSection.parentElement?.parentElement).toHaveStyleRule('min-block-size', '0');
+    expect(mockMetadataSection).toHaveBeenCalledWith(
+      expect.objectContaining({ decreaseAvailableHeightBy: Number.MAX_SAFE_INTEGER }),
+      expect.anything()
+    );
   });
 
   it('shows the action policy history content when its tab is selected', async () => {
