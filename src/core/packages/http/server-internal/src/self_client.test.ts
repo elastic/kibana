@@ -431,7 +431,7 @@ describe('InternalHttpSelfScopedClient', () => {
   });
 
   describe('auth header augmenter', () => {
-    it('merges augmenter output into outbound headers authoritatively', async () => {
+    it('adds headers returned by the augmenter to the outbound request', async () => {
       const augmenter = jest
         .fn()
         .mockReturnValue({ 'x-kbn-uiam-internal-caller-attestation': 'sig-123' });
@@ -458,32 +458,31 @@ describe('InternalHttpSelfScopedClient', () => {
       expect(capturedHeaders!.get('authorization')).toBe('test-auth-token');
     });
 
-    it('does not alter headers when augmenter returns undefined', async () => {
+    it('consults the augmenter but leaves headers unchanged when it returns undefined', async () => {
       const augmenter = jest.fn().mockReturnValue(undefined);
       const { self } = createClient({ getAuthHeaderAugmenter: () => augmenter });
 
       await self.asScoped(createRequest()).fetch('/api/status');
 
+      expect(augmenter).toHaveBeenCalledTimes(1);
       const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
+      expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
+      expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
     });
 
-    it('does not call augmenter when getAuthHeaderAugmenter is not provided', async () => {
-      const { self } = createClient();
+    it('does not augment when no augmenter is available (getter absent or returns undefined)', async () => {
+      const getAuthHeaderAugmenter = jest.fn().mockReturnValue(undefined);
+      const withGetter = createClient({ getAuthHeaderAugmenter });
+      await withGetter.self.asScoped(createRequest()).fetch('/api/status');
+      expect(getAuthHeaderAugmenter).toHaveBeenCalledTimes(1);
+      const requestWithGetter = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      expect(requestWithGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
 
-      await self.asScoped(createRequest()).fetch('/api/status');
-
-      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
-      expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
-    });
-
-    it('does not call augmenter when getter returns undefined', async () => {
-      const { self } = createClient({ getAuthHeaderAugmenter: () => undefined });
-
-      await self.asScoped(createRequest()).fetch('/api/status');
-
-      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
-      expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
+      const withoutGetter = createClient();
+      await withoutGetter.self.asScoped(createRequest()).fetch('/api/status');
+      const requestWithoutGetter = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+      expect(requestWithoutGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
     });
   });
 });

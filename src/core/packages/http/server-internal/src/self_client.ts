@@ -44,6 +44,7 @@ export type SelfClientAuthHeaderAugmenter = (
   request: KibanaRequest,
   outboundHeaders: Headers
 ) => Record<string, string> | undefined;
+
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
