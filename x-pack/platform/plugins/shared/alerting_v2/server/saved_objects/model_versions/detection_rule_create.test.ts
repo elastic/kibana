@@ -159,7 +159,7 @@ describe('security.detection.query — create via RulesClient', () => {
 
     const res = await client.createRule({
       data: {
-        kind: 'signal',
+        kind: 'alert',
         metadata: {
           name: 'test-query-rule',
           builder_type: 'security.detection.query',
@@ -175,6 +175,7 @@ describe('security.detection.query — create via RulesClient', () => {
         schedule: { every: '5m' },
         recovery_strategy: 'none',
         no_data_strategy: 'none',
+        state_transition: { pending_count: 0 },
         // No query: execution-time types compile at run time, not write time.
       },
       options: { id: 'query-rule-id' },
@@ -201,10 +202,13 @@ describe('security.detection.query — create via RulesClient', () => {
   it('rejects a whitespace-only query (validateFields hook)', async () => {
     const { client } = createDetectionClient(registry);
 
+    // The kind pin now throws RULE_KIND_MISMATCH before validateFields runs when
+    // kind does not match the pin. Using kind: 'alert' here so the pin passes and
+    // the test confirms the validateFields hook is still the rejection reason.
     await expect(
       client.createRule({
         data: {
-          kind: 'signal',
+          kind: 'alert',
           metadata: {
             name: 'bad-query',
             builder_type: 'security.detection.query',
@@ -220,9 +224,10 @@ describe('security.detection.query — create via RulesClient', () => {
           schedule: { every: '5m' },
           recovery_strategy: 'none',
           no_data_strategy: 'none',
+          state_transition: { pending_count: 0 },
         },
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow('query must not be blank (only whitespace)');
   });
 });
 
@@ -244,7 +249,7 @@ describe('security.detection.threshold — create via RulesClient', () => {
 
     const res = await client.createRule({
       data: {
-        kind: 'signal',
+        kind: 'alert',
         metadata: {
           name: 'test-threshold-rule',
           builder_type: 'security.detection.threshold',
@@ -264,6 +269,7 @@ describe('security.detection.threshold — create via RulesClient', () => {
         schedule: { every: '5m' },
         recovery_strategy: 'none',
         no_data_strategy: 'none',
+        state_transition: { pending_count: 0 },
       },
       options: { id: 'threshold-rule-id' },
     });
@@ -275,19 +281,23 @@ describe('security.detection.threshold — create via RulesClient', () => {
     });
     expect(res.metadata.builder_type).toBe('security.detection.threshold');
 
-    // Threshold derives grouping.fields from threshold.field at write time.
+    // Execution-time types persist no query on the stored attributes. The
+    // threshold type no longer derives grouping.fields (dropped in phase A.1).
     const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
     expect(attrs.query).toBeUndefined();
-    expect(attrs.grouping?.fields).toEqual(['source.ip']);
+    expect(attrs.grouping).toBeUndefined();
   });
 
   it('rejects overlapping cardinality and threshold fields (validateFields hook)', async () => {
     const { client } = createDetectionClient(registry);
 
+    // The kind pin now throws RULE_KIND_MISMATCH before validateFields runs when
+    // kind does not match the pin. Using kind: 'alert' here so the pin passes and
+    // the test confirms the validateFields hook is still the rejection reason.
     await expect(
       client.createRule({
         data: {
-          kind: 'signal',
+          kind: 'alert',
           metadata: {
             name: 'bad-threshold',
             builder_type: 'security.detection.threshold',
@@ -308,8 +318,9 @@ describe('security.detection.threshold — create via RulesClient', () => {
           schedule: { every: '5m' },
           recovery_strategy: 'none',
           no_data_strategy: 'none',
+          state_transition: { pending_count: 0 },
         },
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow('cardinality.field "source.ip" is already listed in threshold.field');
   });
 });
