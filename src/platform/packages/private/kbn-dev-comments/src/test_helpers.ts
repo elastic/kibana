@@ -13,7 +13,6 @@ import type {
   CommentsHostServices,
   CommentsLocationService,
   ElementAnchor,
-  NewComment,
 } from './types';
 
 const DEFAULT_RECT = '10,10,100,20';
@@ -47,13 +46,11 @@ export const mockLayout = () => {
   });
 };
 
-/** Replaces the page's content with `html`. */
 export const renderPage = (html: string) => {
   const parsed = new DOMParser().parseFromString(html, 'text/html');
   document.body.replaceChildren(...Array.from(parsed.body.childNodes));
 };
 
-/** The element matching `selector`, which must exist. */
 export const query = <E extends Element = HTMLElement>(selector: string): E => {
   const element = document.querySelector<E>(selector);
   if (!element) {
@@ -65,7 +62,6 @@ export const query = <E extends Element = HTMLElement>(selector: string): E => {
 /** Lets settled promises and zero-delay timers run; wrap in `act` where React renders. */
 export const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-/** A promise settled by the test, to interleave requests. */
 export const deferred = <T>() => {
   let resolve!: (value: T) => void;
   let reject!: (error: unknown) => void;
@@ -97,12 +93,6 @@ export const createComment = (id: string, overrides: Partial<Comment> = {}): Com
   trail: [],
   ...overrides,
 });
-
-/** What the layer asks a host to store for a new comment; see `createComment` for the defaults. */
-export const createNewComment = (overrides: Partial<NewComment> = {}): NewComment => {
-  const { id, createdAt, updatedAt, ...input } = createComment('new', overrides);
-  return input;
-};
 
 /** A location the test navigates; the page key is the path without query and hash. */
 export const createLocation = (initialPath = '/page') => {

@@ -39,8 +39,6 @@ describe('CommentsButton', () => {
     );
     await act(flush);
 
-    // The author opens the details, switches comment mode on only then, and
-    // comments on an element that the click revealed.
     fireEvent.click(query('#open'));
     fireEvent.click(screen.getByTestId('devCommentsButton'));
     fireEvent.keyDown(query('#target'), { key: 'Enter' });

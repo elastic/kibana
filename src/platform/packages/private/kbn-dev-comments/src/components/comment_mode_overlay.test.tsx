@@ -42,18 +42,25 @@ describe('CommentModeOverlay', () => {
     return controller;
   };
 
-  it('starts a comment on the element under a click, but not on clicks the page synthesizes', () => {
+  it('starts a comment where the pointer is released, on disabled controls too, but not on clicks the page synthesizes', () => {
     const controller = renderOverlay();
-    const target = query('#target');
+    const target = query<HTMLButtonElement>('#target');
     const pageHandler = jest.fn();
     target.addEventListener('click', pageHandler);
+    // Browsers dispatch the pointer's release on a disabled control, but never a click.
+    target.disabled = true;
 
-    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
-    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }));
+    const mouse = (type: string, init: MouseEventInit = {}) =>
+      target.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, ...init }));
+    mouse('pointerdown');
+    mouse('pointerup', { clientX: 5, clientY: 6 });
+    mouse('pointerup', { button: 2 });
+    mouse('click', { detail: 1 });
+    mouse('click', { detail: 0 });
 
     expect(pageHandler).not.toHaveBeenCalled();
     expect(controller.pick).toHaveBeenCalledTimes(1);
-    expect(controller.pick).toHaveBeenCalledWith(target, expect.anything(), target);
+    expect(controller.pick).toHaveBeenCalledWith(target, { x: 5, y: 6 }, target);
   });
 
   it('selects the focused element with Enter or Space, swallowing both key phases', () => {

@@ -11,7 +11,6 @@ import type { HttpSetup } from '@kbn/core/public';
 import { buildPath, type IHttpFetchError, type ResponseErrorBody } from '@kbn/core-http-browser';
 import { COMMENTS_API_PATH, type Comment, type CommentSnapshot, type CommentsApi } from '../common';
 
-/** Fetch errors carry the server's explanation (limits) in their body; the layer shows it to the user. */
 const explained = async <T>(request: Promise<T>): Promise<T> => {
   try {
     return await request;

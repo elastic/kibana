@@ -54,9 +54,9 @@ const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
 
 /**
  * Comment mode: pointer and keyboard input to the page is swallowed in the
- * capture phase, so the UI state being commented on does not change. A click
- * starts a comment (or moves the one being written); so do Enter and Space on
- * the focused element, which Tab still moves between.
+ * capture phase, so the UI state being commented on does not change. Releasing
+ * the pointer on an element starts a comment (or moves the one being written);
+ * so do Enter and Space on the focused element, which Tab still moves between.
  */
 export const CommentModeOverlay = () => {
   const controller = useComments();
@@ -91,7 +91,9 @@ export const CommentModeOverlay = () => {
       event.preventDefault();
       event.stopPropagation();
 
-      if (event.type === 'click' && event instanceof MouseEvent && event.detail > 0) {
+      // On the pointer's release rather than the click: a disabled control gets
+      // no click, and clicks the page synthesizes come without a pointer.
+      if (event.type === 'pointerup' && event instanceof MouseEvent && event.button === 0) {
         controller.pick(
           promoteToCommentable(target),
           { x: event.clientX, y: event.clientY },

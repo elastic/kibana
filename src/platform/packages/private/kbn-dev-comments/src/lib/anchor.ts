@@ -260,9 +260,6 @@ const queryLocator = (locator: AnchorLocator): Element[] => {
       );
     case 'cssPath':
       return queryAll(document, locator.selector);
-    default:
-      // locator kinds stored by earlier versions of the layer
-      return [];
   }
 };
 

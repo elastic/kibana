@@ -12,7 +12,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { CommentsButton } from '@kbn/dev-comments';
 import { createCommentsHostServices } from './host_services';
 
-/** The comments layer with Kibana as its host. */
 export const CommentsItem = ({ core }: { core: CoreStart }) => {
   const services = useMemo(() => createCommentsHostServices(core), [core]);
   return <CommentsButton services={services} />;

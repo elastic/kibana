@@ -16,9 +16,6 @@ interface PluginStartDeps {
   developerToolbar?: DeveloperToolbarStart;
 }
 
-// The layer mounts with the toolbar item rather than on first use: it records the
-// clicks that reveal UI from the start, so that a comment made inside a flyout
-// opened before comment mode was ever switched on can still lead readers there.
 const LazyCommentsItem = lazy(() =>
   import('./comments_item').then(({ CommentsItem }) => ({ default: CommentsItem }))
 );

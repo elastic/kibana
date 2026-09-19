@@ -8,6 +8,7 @@
  */
 
 import type { CommentRoute } from '@kbn/dev-comments';
+import { isInternalURL } from '@kbn/std';
 
 export const COMMENTS_API_PATH = '/internal/dev_comments';
 
@@ -21,25 +22,14 @@ export type {
   TrailStep,
 } from '@kbn/dev-comments';
 
-/** Any origin does: what matters is whether resolving the path leaves it. */
-const ORIGIN = 'https://relative.invalid';
-
 /**
- * Whether a path stays within this deployment once resolved: a leading `/` and
- * nothing that a URL parser turns into another origin or a scheme (`//host`,
- * `/\host`, tabs and newlines it strips before looking again). Same check as
- * `isSafeRelativePath` in `@kbn/dev-comments`, which the server cannot import.
+ * Whether a path stays within this deployment: absolute, and not something a
+ * URL parser turns into another origin or a scheme (`//host`, `/\host`, tabs
+ * and newlines it strips before looking again), which is `isInternalURL`'s
+ * check for redirect targets.
  */
-export const isSafeRelativePath = (path: string): boolean => {
-  if (!path.startsWith('/')) {
-    return false;
-  }
-  try {
-    return new URL(path, ORIGIN).origin === ORIGIN;
-  } catch {
-    return false;
-  }
-};
+export const isSafeRelativePath = (path: string): boolean =>
+  path.startsWith('/') && isInternalURL(path);
 
 /**
  * A comment's route from a location whose pathname has had the base path (and

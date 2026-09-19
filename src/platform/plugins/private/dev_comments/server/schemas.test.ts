@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QUOTA_ID, newCommentSchema, normalizeRoute, routeFromLegacy } from './schemas';
-
-const timestamp = '2026-01-01T00:00:00.000Z';
+import { newCommentSchema } from './schemas';
 
 const valid = {
   author: { username: 'capybara', displayName: 'Capybara' },
@@ -20,7 +18,7 @@ const valid = {
       id: 'r1',
       author: { username: 'penguin', displayName: 'Penguin' },
       text: 'Hi',
-      createdAt: timestamp,
+      createdAt: '2026-01-01T00:00:00.000Z',
     },
   ],
   route: { pageKey: '/app/one', path: '/app/one?x=1#/y' },
@@ -47,32 +45,10 @@ describe('newCommentSchema', () => {
     expect(() => newCommentSchema.validate(withRoute(path))).toThrow();
   });
 
-  it('rejects timestamps Elasticsearch would not store and the reserved id', () => {
+  it('rejects timestamps Elasticsearch would not store', () => {
     const reply = valid.replies[0];
     expect(() =>
       newCommentSchema.validate({ ...valid, replies: [{ ...reply, createdAt: 'yesterday' }] })
     ).toThrow(/ISO 8601/);
-    expect(() =>
-      newCommentSchema.validate({ ...valid, replies: [{ ...reply, id: QUOTA_ID }] })
-    ).toThrow(/reserved/);
-  });
-});
-
-describe('first-version routes', () => {
-  it('rewrites them from the URL, without the state that follows the hash route', () => {
-    expect(
-      routeFromLegacy({ pathname: '/app/one', url: 'http://host/kbn/app/one?x=1#/y?_g=(a:b)' })
-    ).toEqual({ pageKey: '/app/one#/y', path: '/app/one?x=1#/y?_g=(a:b)' });
-  });
-
-  it('falls back to the pathname when the URL cannot be parsed', () => {
-    expect(routeFromLegacy({ pathname: '/app/one', url: 'not a url' })).toEqual({
-      pageKey: '/app/one',
-      path: '/app/one',
-    });
-  });
-
-  it('leaves current routes as they are', () => {
-    expect(normalizeRoute(valid.route)).toBe(valid.route);
   });
 });

@@ -60,16 +60,12 @@ const preserveScroll = (original: Node, clone: Node, after: boolean) => {
 
 /**
  * What is on screen right now, at the viewport's size in CSS pixels, without
- * the layer's own UI (marked with `IGNORE_ATTR`) or the host UI matching
- * `ignoreSelectors`: the same UI that cannot be commented on.
+ * the layer's own UI (marked with `IGNORE_ATTR`). The rest, developer toolbar
+ * included, is kept: the screenshot shows the page as the author saw it.
  */
-export const captureViewport = async (
-  ignoreSelectors: readonly string[] = []
-): Promise<HTMLCanvasElement> => {
+export const captureViewport = async (): Promise<HTMLCanvasElement> => {
   const { default: domtoimage } = await import('dom-to-image-more');
   const { innerWidth: width, innerHeight: height, scrollX, scrollY } = window;
-  // A filtered node is left out with its whole subtree, so matching the roots is enough.
-  const ignored = [IGNORE_SELECTOR, ...ignoreSelectors].join(',');
   return domtoimage.toCanvas(document.body, {
     width,
     height,
@@ -79,8 +75,10 @@ export const captureViewport = async (
     style: { marginTop: `${-scrollY}px`, marginLeft: `${-scrollX}px` },
     // `body` is transparent in Kibana (the color is on `html`), so captures keep the app's color mode.
     bgcolor: getEffectiveBackgroundColor(document.body),
+    // A filtered node is left out with its whole subtree, so matching the roots is enough.
     filter: (node) =>
-      !(node instanceof Element && node.matches(ignored)) && !isOffScreen(node, width, height),
+      !(node instanceof Element && node.matches(IGNORE_SELECTOR)) &&
+      !isOffScreen(node, width, height),
     adjustClonedNode: preserveScroll,
   });
 };

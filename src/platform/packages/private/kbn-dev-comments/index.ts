@@ -9,7 +9,6 @@
 
 export { CommentsButton, type CommentsButtonProps } from './src/components/comments_button';
 export { getEffectiveBackgroundColor } from './src/lib/snapshot';
-export { isSafeRelativePath } from './src/lib/route';
 export { IGNORE_ATTR, IGNORE_SELECTOR } from './src/constants';
 export type {
   AnchorLocator,

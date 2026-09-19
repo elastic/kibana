@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
 import { buildAnchor } from '../lib/anchor';
-import { isSafeRelativePath } from '../lib/route';
 import { createSnapshot } from '../lib/snapshot';
 import { createTrailRecorder } from '../lib/trail';
 import type {
@@ -49,6 +48,10 @@ export interface CommentsState {
   pageKey: string;
   /** Every comment, on every page; only the current page's get pins. */
   comments: Comment[];
+  /** The list has been fetched at least once; before that, `comments` is not known to be empty. */
+  loaded: boolean;
+  /** Why the list could not be fetched the last time, until it is fetched again. */
+  loadError: string | null;
   /** Comment mode: the page is not interactable and a click on it starts a comment. */
   active: boolean;
   panelMinimized: boolean;
@@ -56,7 +59,6 @@ export interface CommentsState {
   /** Pin that should take focus once it is rendered: its thread was opened without a pointer. */
   focusPinId: string | null;
   pending: PendingComment | null;
-  /** Comment the reader is being guided to. */
   guideId: string | null;
   /** An overlay opened from the layer (full-screen screenshot) is showing; the layer sits below its mask meanwhile. */
   overlayOpen: boolean;
@@ -74,6 +76,7 @@ export interface CommentsController {
   ignoreSelectors: readonly string[];
   start(): void;
   dispose(): void;
+  reload(): Promise<void>;
   /** Leaving comment mode drops any comment being written; while one is being saved, the mode cannot be changed. */
   setActive(active: boolean): void;
   toggleActive(): void;
@@ -131,6 +134,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
   const store = createStore<CommentsState>({
     pageKey: location.getPageKey(),
     comments: [],
+    loaded: false,
+    loadError: null,
     active: false,
     panelMinimized: false,
     activeThreadId: null,
@@ -187,6 +192,9 @@ export const createCommentsController = (services: CommentsHostServices): Commen
   const load = async (): Promise<void> => {
     const sequence = ++loadSequence;
     const writesBefore = writes;
+    if (store.getState().loadError) {
+      store.setState({ loadError: null });
+    }
     try {
       const comments = await api.list();
       if (!started || sequence !== loadSequence) {
@@ -195,14 +203,16 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       if (writes !== writesBefore) {
         return load();
       }
-      store.setState({ comments });
+      store.setState({ comments, loaded: true });
     } catch (error) {
       if (started && sequence === loadSequence) {
+        const message = errorMessage(error);
+        store.setState({ loadError: message });
         notify(
           'error',
           i18n.translate('devComments.notice.loadFailed', {
             defaultMessage: 'Could not load comments: {message}',
-            values: { message: errorMessage(error) },
+            values: { message },
           })
         );
       }
@@ -321,6 +331,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       trail.stop();
       clearTimeout(noticeTimer);
     },
+
+    reload: load,
 
     setActive,
 
@@ -461,16 +473,6 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         ...droppingDraft(state),
       }));
       if (route.path === location.getPath()) {
-        return;
-      }
-      if (!isSafeRelativePath(route.path)) {
-        endGuide(id);
-        notify(
-          'error',
-          i18n.translate('devComments.notice.unsafePath', {
-            defaultMessage: 'The comment points at a page outside of this deployment.',
-          })
-        );
         return;
       }
       try {

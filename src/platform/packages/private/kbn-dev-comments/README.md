@@ -14,6 +14,7 @@ const services: CommentsHostServices = {
   getCurrentUser, // who is commenting
   captureViewport,// optional: screenshots
   ignoreSelectors,// optional: host UI to leave alone
+  RelativeTime,   // optional: how timestamps are shown, e.g. FormattedRelative
 };
 
 <CommentsButton services={services} />;
@@ -24,7 +25,7 @@ const services: CommentsHostServices = {
 ## Comment mode
 
 - Click an element to comment on it. Pins mark the page's comments; the panel lists all of them, grouped by page.
-- Comments can be replied to and resolved, never deleted.
+- Comments are Markdown. They can be replied to and resolved, never deleted.
 - A comment whose element is not on screen has a "Take me there" button: it opens the comment's page and highlights the author's clicks one at a time until the element appears.
 
 ## Keyboard

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore, type SyntheticEvent } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { IGNORE_ATTR } from '../constants';
 import { createLayoutTracker } from '../lib/layout_tracker';
@@ -17,7 +17,11 @@ export interface LayerZIndex {
   pins: number;
   /** Floating panels and notices. */
   panel: number;
-  /** Popovers opened from pins; EUI derives popover z-indexes from the anchor's offset parents, which our fixed layers do not have. */
+  /**
+   * Thread and composer popovers, portalled to `body` so that they can stack
+   * above the panel; EUI derives popover z-indexes from the anchor's offset
+   * parents, which our fixed layers do not have.
+   */
   popover: number;
 }
 
@@ -36,10 +40,64 @@ export const useLayerZIndex = (): LayerZIndex => {
 };
 
 /**
+ * Pointer input to the layer stays within it. Popovers and flyouts on the page
+ * close when a click outside of them reaches `document`; that would take a
+ * commented element away as its pin or thread is clicked.
+ */
+const CONTAINED_EVENTS = [
+  'pointerdown',
+  'pointerup',
+  'mousedown',
+  'mouseup',
+  'click',
+  'touchstart',
+  'touchend',
+] as const;
+
+const contain = (event: Event | SyntheticEvent) => event.stopPropagation();
+
+/** The same, for what EUI renders outside of the layer's containers: the popovers' content. */
+export const containProps = {
+  onPointerDown: contain,
+  onPointerUp: contain,
+  onMouseDown: contain,
+  onMouseUp: contain,
+  onClick: contain,
+  onTouchStart: contain,
+  onTouchEnd: contain,
+};
+
+/**
+ * Keeps `react-focus-lock`, which holds focus within the page's open modals,
+ * flyouts and popovers, from taking it back out of the layer's UI.
+ */
+const FOCUS_ALLOW_ATTR = 'data-no-focus-lock';
+
+/** For the layer's EUI popover panels, which EUI renders outside of the layer's containers. */
+export const popoverPanelProps = { [IGNORE_ATTR]: true, [FOCUS_ALLOW_ATTR]: true } as Record<
+  string,
+  unknown
+>;
+
+/**
+ * Ref for an `EuiPopover` panel whose z-index is to follow the layer's: EUI
+ * applies its `zIndex` prop only when it positions the panel, and the layer's
+ * changes while a screenshot is shown full screen.
+ */
+export const usePanelZIndex = (zIndex: number): ((panel: HTMLElement | null) => void) => {
+  const [panel, setPanel] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (panel) {
+      panel.style.zIndex = String(zIndex);
+    }
+  }, [panel, zIndex]);
+  return setPanel;
+};
+
+/**
  * `body`-level container marked as developer tool UI, so nothing rendered into
- * it can be commented on. It has no size: the layer's elements are fixed, and EUI
- * popovers inserted into it keep their document coordinates while stacking
- * with the layer. Null before mount.
+ * it can be commented on. It has no size: the layer's elements are fixed. Null
+ * before mount.
  */
 export const useLayerPortal = (id: string, zIndex: number): HTMLElement | null => {
   const [container, setContainer] = useState<HTMLElement | null>(null);
@@ -63,9 +121,11 @@ export const useLayerPortal = (id: string, zIndex: number): HTMLElement | null =
     const element = document.createElement('div');
     element.id = id;
     element.setAttribute(IGNORE_ATTR, 'true');
+    element.setAttribute(FOCUS_ALLOW_ATTR, 'true');
     element.style.position = 'absolute';
     element.style.top = '0';
     element.style.left = '0';
+    CONTAINED_EVENTS.forEach((type) => element.addEventListener(type, contain));
     document.body.appendChild(element);
     setContainer(element);
     return () => {

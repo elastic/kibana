@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentType } from 'react';
+
 /** One way of locating an element; locators are tried in order until one matches exactly one visible element. */
 export type AnchorLocator =
   /** Chain of `data-test-subj` values from an ancestor down to the element, e.g. `"ruleFlyout > saveButton"`. */
@@ -132,16 +134,27 @@ export interface CommentsUser {
 export interface CommentsHostServices {
   api: CommentsApi;
   location: CommentsLocationService;
-  /** Navigates to a path as returned by `location.getPath()`, in-app when possible. */
+  /**
+   * Navigates to a path as returned by `location.getPath()`, in-app when
+   * possible. The path comes from a stored comment, which anyone with access to
+   * the store can have written: the host must refuse one that leaves its
+   * deployment (`//host/...`, a scheme) rather than open it.
+   */
   navigateToPath(path: string): Promise<void>;
   getCurrentUser(): Promise<CommentsUser>;
   /**
+   * Shows when a comment or reply was written, from its ISO 8601 timestamp,
+   * typically as a relative time ("5 minutes ago"); rendered again every half
+   * minute so that such a label keeps up. Without it, the local date and time
+   * are shown.
+   */
+  RelativeTime?: ComponentType<{ value: string }>;
+  /**
    * Renders what is on screen, the viewport at its size in CSS pixels, to a
    * canvas (e.g. with dom-to-image), leaving out elements marked with
-   * `IGNORE_ATTR` and the host's own `ignoreSelectors`; without it, comments
-   * have no screenshots.
+   * `IGNORE_ATTR`; without it, comments have no screenshots.
    */
   captureViewport?(): Promise<HTMLCanvasElement>;
-  /** Host UI that must never be commented on, nor appear in screenshots. */
+  /** Host UI that must never be commented on. */
   ignoreSelectors?: string[];
 }

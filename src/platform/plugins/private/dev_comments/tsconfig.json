@@ -11,6 +11,8 @@
     "@kbn/core-http-browser",
     "@kbn/config-schema",
     "@kbn/dev-comments",
-    "@kbn/developer-toolbar-plugin"
+    "@kbn/developer-toolbar-plugin",
+    "@kbn/i18n-react",
+    "@kbn/std"
   ]
 }

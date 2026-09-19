@@ -97,6 +97,41 @@ describe('createCommentsController', () => {
       expect(controller.store.getState().comments).toEqual([]);
     });
 
+    it('keeps a failed load on record until a reload succeeds, and the list when a later one fails', async () => {
+      const { api, services } = createHost();
+      const controller = createCommentsController(services);
+      api.list.mockRejectedValueOnce(new Error('boom'));
+
+      controller.start();
+      await flush();
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ loaded: false, loadError: 'boom', comments: [] })
+      );
+
+      const retry = deferred<Comment[]>();
+      api.list.mockReturnValueOnce(retry.promise);
+      const reloading = controller.reload();
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ loaded: false, loadError: null })
+      );
+      retry.resolve([createComment('a')]);
+      await reloading;
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ loaded: true, loadError: null, comments: [createComment('a')] })
+      );
+
+      api.list.mockRejectedValueOnce(new Error('offline'));
+      await services.navigateToPath('/app/two');
+      await flush();
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({
+          loaded: true,
+          loadError: 'offline',
+          comments: [createComment('a')],
+        })
+      );
+    });
+
     it('signs with the stored display name, falling back to the user, and survives storage failures', async () => {
       const { services } = createHost();
       localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, 'D.');
@@ -195,7 +230,6 @@ describe('createCommentsController', () => {
       create.reject(new Error('offline'));
       await saving;
 
-      // The composer is back with the draft, on the new page.
       expect(controller.store.getState()).toEqual(
         expect.objectContaining({
           pageKey: '/app/two',
@@ -214,32 +248,6 @@ describe('createCommentsController', () => {
         expect.objectContaining({ pending: null, activeThreadId: null })
       );
       expect(controller.store.getState().comments).toHaveLength(1);
-    });
-
-    it('lets comment mode be left once the save has settled, and reports failures while keeping the draft', async () => {
-      const { api, services } = createHost();
-      const controller = createCommentsController(services);
-      const create = deferred<Comment>();
-      api.create.mockReturnValueOnce(create.promise);
-      controller.start();
-
-      controller.setActive(true);
-      controller.pick(target(), { x: 5, y: 5 });
-      const saving = controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
-      await flush();
-      controller.setActive(false);
-      expect(controller.store.getState().active).toBe(true);
-
-      create.reject(new Error('offline'));
-      await saving;
-      // The failed draft is back in the composer, and can now be given up with the mode.
-      expect(controller.store.getState().pending).toEqual(
-        expect.objectContaining({ element: target(), saving: false })
-      );
-      controller.setActive(false);
-      expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ active: false, pending: null })
-      );
     });
 
     it('opens the new comment with its pin focused, and reports failures while keeping the draft', async () => {
@@ -320,36 +328,19 @@ describe('createCommentsController', () => {
       expect(controller.store.getState().guideId).toBeNull();
     });
 
-    it('refuses paths outside of the deployment and rolls back when navigation fails', async () => {
+    it('rolls back and reports when the host will not or cannot open the page', async () => {
       const { services } = createHost();
       const controller = createCommentsController(services);
       controller.start();
 
-      // The URL parser strips the tab and reads `//evil.example/app`.
-      await controller.guideTo(
-        createComment('evil', { route: { pageKey: '/app/two', path: '/\t/evil.example/app' } })
-      );
-      expect(services.navigateToPath).not.toHaveBeenCalled();
-      expect(controller.store.getState().guideId).toBeNull();
-      expect(controller.store.getState().notice?.type).toBe('error');
-
       (services.navigateToPath as jest.Mock).mockRejectedValueOnce(new Error('no such app'));
       await controller.guideTo(createComment('gone', { route: { pageKey: '/x', path: '/x' } }));
       expect(controller.store.getState().guideId).toBeNull();
-      expect(controller.store.getState().notice?.message).toBe(
-        'Could not open the page of the comment: no such app'
-      );
-    });
-
-    it('opens the comment with its pin focused when found', () => {
-      const { services } = createHost();
-      const controller = createCommentsController(services);
-      controller.store.setState({ guideId: 'a' });
-
-      controller.stopGuide(true);
-
-      expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ guideId: null, activeThreadId: 'a', focusPinId: 'a' })
+      expect(controller.store.getState().notice).toEqual(
+        expect.objectContaining({
+          type: 'error',
+          message: 'Could not open the page of the comment: no such app',
+        })
       );
     });
   });

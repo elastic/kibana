@@ -18,11 +18,11 @@ import {
   type EuiPopoverProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IGNORE_ATTR, PIN_SIZE } from '../constants';
+import { PIN_SIZE } from '../constants';
 import { getAnchorPoint } from '../lib/anchor';
 import type { Comment } from '../types';
 import { useComments, useCommentsState, usePageComments } from './comments_context';
-import { useLayerPortal, useLayerZIndex } from './hooks';
+import { popoverPanelProps, useLayerPortal, useLayerZIndex, usePanelZIndex } from './hooks';
 import { pinShapeStyles } from './pin_marker';
 import { PopoverBody } from './popover_body';
 import { useResolvedAnchors } from './resolved_anchors';
@@ -34,12 +34,11 @@ interface PositionedPin {
   y: number;
 }
 
-const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
-
 type PopoverSide = Parameters<NonNullable<EuiPopoverProps['onPositionChange']>>[0];
 
 const POPOVER_CHROME = 72;
-const MIN_BODY_HEIGHT = 120;
+/** Enough for the thread's actions, reply form and a few lines of comment; EUI moves the popover to the other side of the pin when this does not fit. */
+const MIN_BODY_HEIGHT = 300;
 
 const isOnScreen = (x: number, y: number): boolean =>
   x >= 0 && y >= 0 && x <= window.innerWidth && y <= window.innerHeight;
@@ -75,9 +74,8 @@ const Pin = ({
   const { comment, x, y } = pin;
   const { author, resolved } = comment;
   const count = threadSize(comment);
-  // The popover panel is inserted next to the pin, inside the layer's container, so it stacks with the layer.
-  const [wrapper, setWrapper] = useState<HTMLDivElement | null>(null);
   const [side, setSide] = useState<PopoverSide>('bottom');
+  const panelRef = usePanelZIndex(zIndex);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -124,7 +122,6 @@ const Pin = ({
       `}
       data-test-subj={`devCommentsPin-${comment.id}`}
     >
-      {/* The author's avatar, as in the thread, so the pin tells who commented. */}
       <EuiAvatar
         name={author.displayName}
         size="s"
@@ -137,7 +134,6 @@ const Pin = ({
 
   return (
     <div
-      ref={setWrapper}
       css={css`
         position: fixed;
         left: ${x}px;
@@ -145,21 +141,22 @@ const Pin = ({
         transform: translate(-50%, -100%);
       `}
     >
+      {/* The panel is portalled to `body`, not next to the pin: inside the pins' container it could not stack above the comments panel, whatever its z-index. */}
       <EuiPopover
         button={button}
         aria-label={i18n.translate('devComments.pin.threadLabel', {
           defaultMessage: 'Comment thread',
         })}
-        isOpen={isActive && wrapper !== null}
+        isOpen={isActive}
         // Outside clicks reaching EUI are on developer tool UI (the comments panel) and must not close the thread; Close, Esc and page clicks do.
         closePopover={() => {}}
         anchorPosition="downCenter"
-        panelPaddingSize="m"
+        panelPaddingSize="none"
         repositionOnScroll
-        panelProps={ignoreProps}
+        panelProps={popoverPanelProps}
+        panelRef={panelRef}
         ownFocus={false}
         zIndex={zIndex}
-        insert={wrapper ? { sibling: wrapper, position: 'after' } : undefined}
         onPositionChange={setSide}
       >
         <PopoverBody maxHeight={bodyMaxHeight(side, y)}>

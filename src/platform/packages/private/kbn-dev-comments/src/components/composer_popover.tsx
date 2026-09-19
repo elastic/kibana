@@ -21,21 +21,26 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { COMMENT_MAX_LENGTH, IGNORE_ATTR } from '../constants';
+import { COMMENT_MAX_LENGTH } from '../constants';
 import { getAnchorPoint } from '../lib/anchor';
 import type { PendingComment } from '../state/comments_controller';
 import { useComments } from './comments_context';
 import { DisplayNameField, useDisplayName } from './display_name_field';
 import { PinMarker } from './pin_marker';
 import { PopoverBody } from './popover_body';
-import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
-
-const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
+import {
+  popoverPanelProps,
+  useLayerPortal,
+  useLayerZIndex,
+  useLayoutTick,
+  usePanelZIndex,
+} from './hooks';
 
 export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
   const controller = useComments();
   const zIndex = useLayerZIndex();
   const container = useLayerPortal('devCommentsComposer', zIndex.pins);
+  const panelRef = usePanelZIndex(zIndex.popover);
   const [text, setText] = useState('');
   const [displayName, setDisplayName] = useDisplayName();
   const canCapture = controller.services.captureViewport !== undefined;
@@ -102,8 +107,9 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
           // A page click moves the comment instead; Cancel and Esc discard it.
           closePopover={() => {}}
           anchorPosition="downCenter"
-          panelPaddingSize="m"
-          panelProps={ignoreProps}
+          panelPaddingSize="none"
+          panelProps={popoverPanelProps}
+          panelRef={panelRef}
           repositionOnScroll
           zIndex={zIndex.popover}
           initialFocus="[data-test-subj='devCommentsComposerInput']"

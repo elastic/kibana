@@ -11,15 +11,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  /** Controls whether the dev comments plugin is enabled. */
+  // On by default in dev mode; cannot be switched on outside of it.
   enabled: schema.conditional(
     schema.contextRef('dev'),
     true,
-    /** Allowed to be configured when in dev. */
     schema.boolean(),
-    /** When not in dev, only false is allowed. */
     schema.literal(false),
-    /** Default to true in dev, false otherwise. */
     { defaultValue: schema.contextRef('dev') }
   ),
 });

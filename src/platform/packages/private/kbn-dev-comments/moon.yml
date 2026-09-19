@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/storybook'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

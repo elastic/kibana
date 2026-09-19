@@ -11,11 +11,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -23,17 +25,20 @@ import {
   EuiTitle,
   EuiToolTip,
   euiScrollBarStyles,
+  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Comment } from '../types';
 import { useComments, useCommentsState } from './comments_context';
 import { useLayerPortal, useLayerZIndex } from './hooks';
 import { threadSize } from './pins_layer';
 import { useResolvedAnchors } from './resolved_anchors';
-import { AuthorMeta, ResolveButton, ThreadContent, commentTextStyles } from './thread_content';
+import { AuthorMeta, CommentBody, ResolveButton, ThreadContent } from './thread_content';
 
-const clampedTextStyles = css`
+/** The first lines of a comment as written; its Markdown is rendered once the row is expanded. */
+const previewStyles = css`
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -108,7 +113,7 @@ const PanelRow = ({
   }, [expanded, active]);
 
   const guideLabel = i18n.translate('devComments.panel.notVisible', {
-    defaultMessage: 'Not visible on this page. Click to navigate.',
+    defaultMessage: 'Not visible. Click to navigate.',
   });
 
   return (
@@ -117,6 +122,8 @@ const PanelRow = ({
       css={css`
         border-bottom: ${euiTheme.border.thin};
         padding: ${euiTheme.size.xs} 0;
+        /* Scrolled to, the row lands below the page's sticky header. */
+        scroll-margin-top: ${euiTheme.size.xl};
       `}
       data-test-subj={`devCommentsPanelItem-${comment.id}`}
     >
@@ -132,11 +139,24 @@ const PanelRow = ({
             aria-expanded={expanded}
           >
             <AuthorMeta author={comment.author} at={comment.createdAt} />
-            <EuiSpacer size="xs" />
-            <EuiText size="s" css={expanded ? commentTextStyles : clampedTextStyles}>
-              {comment.text}
-            </EuiText>
+            {!expanded && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiText size="s" css={previewStyles}>
+                  {comment.text}
+                </EuiText>
+              </>
+            )}
           </EuiPanel>
+          {expanded && (
+            <div
+              css={css`
+                padding: 0 ${euiTheme.size.s};
+              `}
+            >
+              <CommentBody text={comment.text} />
+            </div>
+          )}
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
@@ -172,13 +192,10 @@ const PanelRow = ({
       {expanded && (
         <div
           css={css`
-            margin-top: ${euiTheme.size.xs};
-            margin-left: ${euiTheme.size.s};
-            padding-left: ${euiTheme.size.base};
-            border-left: ${euiTheme.border.thin};
+            padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.s};
           `}
         >
-          <ThreadContent comment={comment} showComment={false} onGuide={onGuide} />
+          <ThreadContent comment={comment} inline onGuide={onGuide} />
         </div>
       )}
     </div>
@@ -219,12 +236,15 @@ export const CommentsPanel = () => {
   const zIndex = useLayerZIndex();
   const container = useLayerPortal('devCommentsPanel', zIndex.panel);
   const comments = useCommentsState((state) => state.comments);
+  const loaded = useCommentsState((state) => state.loaded);
+  const loadError = useCommentsState((state) => state.loadError);
   const pageKey = useCommentsState((state) => state.pageKey);
   const activeThreadId = useCommentsState((state) => state.activeThreadId);
   const minimized = useCommentsState((state) => state.panelMinimized);
   // Threads shown inline are those whose element is not on screen; a thread open from a pin never is.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const groups = useMemo(() => groupByPage(comments, pageKey), [comments, pageKey]);
+  const [pageAccordionId] = useState(() => htmlIdGenerator('devCommentsPanelPage'));
   // Anchors are only looked up on their own page: another page's DOM could match them by accident.
   const resolvedAnchors = useResolvedAnchors();
 
@@ -272,19 +292,21 @@ export const CommentsPanel = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiNotificationBadge
-            color="subdued"
-            aria-label={i18n.translate('devComments.panel.count', {
-              defaultMessage: '{count, plural, one {# comment} other {# comments}}',
-              values: { count: comments.length },
-            })}
-            css={css`
-              align-self: flex-start;
-            `}
-            data-test-subj="devCommentsPanelCount"
-          >
-            {comments.length}
-          </EuiNotificationBadge>
+          {loaded && (
+            <EuiNotificationBadge
+              color="subdued"
+              aria-label={i18n.translate('devComments.panel.count', {
+                defaultMessage: '{count, plural, one {# comment} other {# comments}}',
+                values: { count: comments.length },
+              })}
+              css={css`
+                align-self: flex-start;
+              `}
+              data-test-subj="devCommentsPanelCount"
+            >
+              {comments.length}
+            </EuiNotificationBadge>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <HeaderButton
@@ -320,7 +342,47 @@ export const CommentsPanel = () => {
               padding-right: ${euiTheme.size.xs};
             `}
           >
-            {comments.length === 0 && (
+            {loadError !== null && (
+              <KbnDangerCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('devComments.panel.loadFailed', {
+                  defaultMessage: 'Could not load comments',
+                })}
+                text={loadError}
+                actionProps={{
+                  primary: {
+                    children: i18n.translate('devComments.panel.retry', {
+                      defaultMessage: 'Retry',
+                    }),
+                    onClick: () => void controller.reload(),
+                    'data-test-subj': 'devCommentsPanelRetry',
+                  },
+                }}
+                data-test-subj="devCommentsPanelLoadError"
+              />
+            )}
+            {!loaded && loadError === null && (
+              <EuiFlexGroup
+                gutterSize="s"
+                alignItems="center"
+                justifyContent="center"
+                responsive={false}
+                data-test-subj="devCommentsPanelLoading"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate('devComments.panel.loading', {
+                      defaultMessage: 'Loading comments…',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            {loaded && loadError === null && comments.length === 0 && (
               <EuiText size="s" color="subdued">
                 {i18n.translate('devComments.panel.empty', {
                   defaultMessage: 'No comments yet. Click anywhere on the page to leave one.',
@@ -328,21 +390,59 @@ export const CommentsPanel = () => {
               </EuiText>
             )}
             {groups.map((group) => (
-              <div key={group.pageKey} data-test-subj="devCommentsPanelPage">
-                <EuiTitle size="xxs">
-                  <h4
-                    title={group.pageKey}
-                    css={css`
-                      font-family: ${euiTheme.font.familyCode};
-                      white-space: nowrap;
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                      padding: ${euiTheme.size.m} 0 ${euiTheme.size.xs};
-                    `}
+              <EuiAccordion
+                key={group.pageKey}
+                id={pageAccordionId(group.pageKey)}
+                initialIsOpen
+                paddingSize="none"
+                // The page's path is truncated in the header; flex items would otherwise refuse to shrink below it.
+                buttonProps={{
+                  css: css`
+                    min-width: 0;
+                    .euiAccordion__buttonContent {
+                      min-width: 0;
+                    }
+                  `,
+                }}
+                buttonContent={
+                  <EuiTitle size="xxs">
+                    <span
+                      title={group.pageKey}
+                      css={css`
+                        display: block;
+                        font-family: ${euiTheme.font.familyCode};
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                      `}
+                    >
+                      {group.pageKey}
+                    </span>
+                  </EuiTitle>
+                }
+                extraAction={
+                  <EuiNotificationBadge
+                    color="subdued"
+                    aria-label={i18n.translate('devComments.panel.pageCount', {
+                      defaultMessage:
+                        '{count, plural, one {# comment} other {# comments}} on this page',
+                      values: { count: group.comments.length },
+                    })}
                   >
-                    {group.pageKey}
-                  </h4>
-                </EuiTitle>
+                    {group.comments.length}
+                  </EuiNotificationBadge>
+                }
+                css={css`
+                  padding-top: ${euiTheme.size.s};
+                  .euiAccordion__triggerWrapper {
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                    background: ${euiTheme.colors.backgroundBasePlain};
+                  }
+                `}
+                data-test-subj="devCommentsPanelPage"
+              >
                 {group.comments.map((comment) => {
                   const element = resolvedAnchors.get(comment.id)?.element ?? null;
                   return (
@@ -357,7 +457,7 @@ export const CommentsPanel = () => {
                     />
                   );
                 })}
-              </div>
+              </EuiAccordion>
             ))}
           </div>
         </>

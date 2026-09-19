@@ -9,15 +9,12 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IBasePath } from '@kbn/core-http-browser';
-import { isSafeRelativePath, type CommentsHostServices } from '@kbn/dev-comments';
-import { routeFromLocation, type CommentRoute } from '../common';
+import type { CommentsHostServices } from '@kbn/dev-comments';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { isSafeRelativePath, routeFromLocation, type CommentRoute } from '../common';
 import { createCommentsApi } from './comments_api';
 import { captureViewport } from './capture_viewport';
 
-/**
- * Developer toolbar and `@kbn/design-tools` UI that must never be commented on,
- * nor end up in screenshots (mirrors `IGNORED_SELECTOR` in `@kbn/design-tools`).
- */
 const HOST_IGNORE_SELECTORS = [
   '#developerToolbar',
   '#measureOverlay',
@@ -49,8 +46,6 @@ export const createCommentsHostServices = ({
     },
   },
 
-  // Paths come from stored comments, shared by everyone on the deployment: only
-  // paths within it are opened, never another origin (`//host`) or scheme.
   navigateToPath: async (path) => {
     if (!isSafeRelativePath(path)) {
       throw new Error(`Refusing to navigate outside of this deployment: ${path}`);
@@ -63,7 +58,10 @@ export const createCommentsHostServices = ({
     return { username: user.username, fullName: user.full_name ?? undefined };
   },
 
-  captureViewport: () => captureViewport(HOST_IGNORE_SELECTORS),
+  captureViewport,
 
   ignoreSelectors: HOST_IGNORE_SELECTORS,
+
+  // "5 minutes ago" in the UI's locale; the toolbar renders inside core's `I18nProvider`.
+  RelativeTime: FormattedRelative,
 });

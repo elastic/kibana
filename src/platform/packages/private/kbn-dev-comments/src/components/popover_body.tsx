@@ -9,32 +9,38 @@
 
 import React, { type ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { euiScrollBarStyles, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { containProps } from './hooks';
 
 const POPOVER_WIDTH = 400;
 
+/**
+ * The frame of the layer's popovers, filling the panel (which is why the padding
+ * is here): a column of a fixed width that never grows past the room available;
+ * content that has to scroll does so within it.
+ */
 export const PopoverBody = ({
   children,
   maxHeight,
   'data-test-subj': dataTestSubj,
 }: {
   children: ReactNode;
-  /** Room available in the viewport, in px; the body never grows past it. */
+  /** Room available in the viewport, in px. */
   maxHeight?: number;
   'data-test-subj'?: string;
 }) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
   return (
     <div
+      {...containProps}
       css={css`
-        ${euiScrollBarStyles(euiThemeContext)}
+        display: flex;
+        flex-direction: column;
+        box-sizing: content-box;
         width: ${POPOVER_WIDTH}px;
-        max-width: calc(100vw - ${euiTheme.size.xxl});
+        max-width: calc(100vw - ${euiTheme.size.xxl} - 2 * ${euiTheme.size.m});
         max-height: ${maxHeight === undefined ? '60vh' : `min(60vh, ${maxHeight}px)`};
-        overflow-y: auto;
-        // Keeps the scroll box from clipping avatars and focus rings.
-        padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} 0;
+        padding: ${euiTheme.size.m};
       `}
       data-test-subj={dataTestSubj}
     >

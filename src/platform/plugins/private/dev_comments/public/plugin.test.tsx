@@ -13,6 +13,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { COMMENTS_API_PATH, type Comment, type NewComment } from '../common';
 import { DevCommentsPlugin } from './plugin';
 
@@ -26,10 +27,11 @@ const query = (selector: string): HTMLElement => {
   return element;
 };
 
+const fiveMinutesAgo = new Date(Date.now() - 5 * 60_000).toISOString();
 const created: Comment = {
   id: 'created',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  createdAt: fiveMinutesAgo,
+  updatedAt: fiveMinutesAgo,
   author: { username: 'anonymous', displayName: 'anonymous' },
   text: 'Needs a label',
   resolved: false,
@@ -61,15 +63,8 @@ describe('DevCommentsPlugin', () => {
   afterAll(() => jest.restoreAllMocks());
 
   beforeEach(() => {
-    page.innerHTML = `
-      <button type="button" id="open" aria-expanded="false">Open details</button>
-      <div id="details" hidden><button type="button" id="target">Target</button></div>
-    `;
+    page.innerHTML = `<button type="button" id="target">Target</button>`;
     document.body.appendChild(page);
-    query('#open').addEventListener('click', () => {
-      query('#open').setAttribute('aria-expanded', 'true');
-      query('#details').hidden = false;
-    });
   });
 
   afterEach(() => page.remove());
@@ -89,22 +84,22 @@ describe('DevCommentsPlugin', () => {
     return { core, developerToolbar };
   };
 
-  it('mounts the layer with the toolbar item, recording clicks before comment mode is first switched on', async () => {
+  it('mounts the layer with the toolbar item and stores comments through the API', async () => {
     const { core, developerToolbar } = startPlugin();
     expect(developerToolbar.registerItem).toHaveBeenCalledTimes(1);
     const [item] = developerToolbar.registerItem.mock.calls[0];
 
+    // The toolbar renders inside core's chrome, which provides the intl context.
     render(
-      <EuiThemeProvider>
-        <div id="developerToolbar">{item.children}</div>
-      </EuiThemeProvider>
+      <I18nProvider>
+        <EuiThemeProvider>
+          <div id="developerToolbar">{item.children}</div>
+        </EuiThemeProvider>
+      </I18nProvider>
     );
     await screen.findByTestId('devCommentsButton');
     await flush();
 
-    // The author opens the details, switches comment mode on only then, and
-    // comments on an element that the click revealed.
-    fireEvent.click(query('#open'));
     fireEvent.click(screen.getByTestId('devCommentsButton'));
     fireEvent.keyDown(query('#target'), { key: 'Enter' });
     fireEvent.change(await screen.findByTestId('devCommentsComposerInput'), {
@@ -120,15 +115,10 @@ describe('DevCommentsPlugin', () => {
     // The overloads of `http.post` type its recorded calls after the last one; the request is the first.
     const [, options] = core.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions];
     const sent: NewComment = JSON.parse(String(options.body));
-    expect(sent.text).toBe('Needs a label');
-    expect(sent.trail).toEqual([
-      expect.objectContaining({
-        label: 'Open details',
-        anchor: expect.objectContaining({
-          locators: expect.arrayContaining([{ type: 'id', value: 'open' }]),
-        }),
-      }),
-    ]);
+    expect(sent).toEqual(
+      expect.objectContaining({ text: 'Needs a label', route: { pageKey: '/', path: '/' } })
+    );
+    expect(await screen.findAllByText('5 minutes ago')).not.toHaveLength(0);
   });
 
   it('registers nothing outside dev mode, when disabled, or without the toolbar', () => {

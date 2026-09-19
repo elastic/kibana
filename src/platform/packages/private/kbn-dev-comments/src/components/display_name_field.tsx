@@ -29,7 +29,6 @@ export const DisplayNameField = ({
   value: string;
   onChange: (value: string) => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
-  /** While the text is being submitted. */
   readOnly?: boolean;
 }) => (
   <EuiFieldText

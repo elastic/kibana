@@ -8,8 +8,17 @@
  */
 
 import React from 'react';
-import { EuiThemeProvider } from '@elastic/eui';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
 import { createCommentsController } from '../state/comments_controller';
@@ -69,19 +78,41 @@ describe('CommentsLayer', () => {
     expect(document.activeElement).toBe(target());
   });
 
-  it('gives the pin focus when its thread is opened from the panel', async () => {
-    const controller = await renderLayer();
+  it('lists comments by page, the current page first, in accordions that are open but can be closed', async () => {
+    const elsewhere = createComment('far', {
+      route: { pageKey: '/app/two', path: '/app/two' },
+      anchor: anchorById('missing'),
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere, seeded]) });
     act(() => controller.setActive(true));
+
+    const [current, other] = await screen.findAllByTestId('devCommentsPanelPage');
+    expect(current).toHaveTextContent('/page');
+    expect(other).toHaveTextContent('/app/two');
+    expect(within(current).getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
+    expect(within(other).getByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
+
+    const trigger = within(current).getByText('/page').closest('button') as HTMLButtonElement;
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(within(current).getByTestId('devCommentsPanelItem-a').closest('[inert]')).not.toBeNull();
+    expect(within(other).getByTestId('devCommentsPanelItem-far').closest('[inert]')).toBeNull();
+  });
+
+  it('shows when a comment was written the way the host does, or as the local time without it', async () => {
+    const fallback = await renderLayer();
+    act(() => fallback.setActive(true));
     const row = await screen.findByTestId('devCommentsPanelItem-a');
+    expect(within(row).getByText(new Date(seeded.createdAt).toLocaleString())).toBeInTheDocument();
+    cleanup();
 
-    fireEvent.click(row.querySelector('.euiPanel') ?? row);
-
-    await waitFor(() =>
-      expect(document.activeElement).toBe(screen.getByTestId('devCommentsPin-a'))
-    );
-    expect(controller.store.getState()).toEqual(
-      expect.objectContaining({ activeThreadId: 'a', focusPinId: null })
-    );
+    const controller = await renderLayer({
+      RelativeTime: ({ value }) => <>{`written ${value}`}</>,
+    });
+    act(() => controller.setActive(true));
+    const hosted = await screen.findByTestId('devCommentsPanelItem-a');
+    expect(within(hosted).getByText(`written ${seeded.createdAt}`)).toBeInTheDocument();
   });
 
   it('opens threads from the panel with the keyboard, inline when the element is not on screen', async () => {
@@ -110,6 +141,55 @@ describe('CommentsLayer', () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByTestId('devCommentsPin-a'))
     );
+  });
+
+  it('renders comments as Markdown, leaving out the HTML and unsafe links anyone could have stored', async () => {
+    const text = [
+      'Use `EuiButtonEmpty` here, see [the issue](https://github.com/elastic/kibana/issues/1).',
+      '<img src=x onerror="alert(1)"> [run](javascript:alert(1))',
+    ].join('\n');
+    const gone = createComment('gone', { anchor: anchorById('missing'), text });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([gone]) });
+    act(() => controller.setActive(true));
+    const row = await screen.findByTestId('devCommentsPanelItem-gone');
+
+    // Collapsed, the row previews the text as written; expanded, the rendered body follows the header.
+    const toggle = within(row).getByRole('button', { name: /Use `EuiButtonEmpty` here/ });
+    fireEvent.click(toggle);
+    expect(toggle).not.toHaveTextContent('EuiButtonEmpty');
+
+    expect(within(row).getByText('EuiButtonEmpty').tagName).toBe('CODE');
+    expect(within(row).getByRole('link', { name: 'the issue' })).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/kibana/issues/1'
+    );
+    expect(row.querySelector('img')).toBeNull();
+    expect(within(row).queryByRole('link', { name: 'run' })).toBeNull();
+    expect(row).toHaveTextContent('[run](javascript:alert(1))');
+  });
+
+  it('shows that comments are loading, then a failed load with a retry, and the empty state only once loaded', async () => {
+    const first = deferred<Comment[]>();
+    const list = jest.fn().mockReturnValueOnce(first.promise).mockResolvedValueOnce([]);
+    const controller = await renderLayer({ api: { ...createInMemoryCommentsApi(), list } });
+    act(() => controller.setActive(true));
+
+    await screen.findByTestId('devCommentsPanelLoading');
+    expect(screen.queryByText(/No comments yet/)).toBeNull();
+    expect(screen.queryByTestId('devCommentsPanelCount')).toBeNull();
+
+    act(() => first.reject(new Error('offline')));
+    await act(flush);
+    expect(screen.getByTestId('devCommentsPanelLoadError')).toHaveTextContent('offline');
+    expect(screen.queryByTestId('devCommentsPanelLoading')).toBeNull();
+    expect(screen.queryByText(/No comments yet/)).toBeNull();
+
+    fireEvent.click(screen.getByTestId('devCommentsPanelRetry'));
+    await act(flush);
+    expect(screen.queryByTestId('devCommentsPanelLoadError')).toBeNull();
+    expect(screen.getByText(/No comments yet/)).toBeInTheDocument();
+    expect(screen.getByTestId('devCommentsPanelCount')).toHaveTextContent('0');
+    expect(list).toHaveBeenCalledTimes(2);
   });
 
   it('keeps a draft that is being saved when Escape is pressed, and discards one that is not', async () => {
@@ -160,6 +240,44 @@ describe('CommentsLayer', () => {
 
     expect(controller.store.getState().pending?.saving).toBe(false);
     expect(screen.getByTestId('devCommentsComposerInput')).toHaveValue('Kept');
+  });
+
+  it('keeps clicks on pins and threads from the page, which closes popovers on clicks outside of them', async () => {
+    renderPage(
+      `<button id="target">Target</button><div id="host"><button id="hostButton">Host</button></div>`
+    );
+    // How EUI's popovers and flyouts notice a click outside of them.
+    const outsideClick = jest.fn();
+    document.addEventListener('mouseup', outsideClick);
+    const controller = await renderLayer({ ignoreSelectors: ['#host'] });
+    act(() => controller.setActive(true));
+    const pin = await screen.findByTestId('devCommentsPin-a');
+
+    fireEvent.mouseUp(pin);
+    fireEvent.click(pin);
+    fireEvent.mouseUp(await screen.findByTestId('devCommentsReplyInput'));
+    expect(outsideClick).not.toHaveBeenCalled();
+
+    fireEvent.mouseUp(query('#hostButton'));
+    expect(outsideClick).toHaveBeenCalledTimes(1);
+    document.removeEventListener('mouseup', outsideClick);
+  });
+
+  it('puts its popovers under a screenshot shown full screen, and back above the page after', async () => {
+    const { levels } = renderHook(() => useEuiTheme(), { wrapper: EuiThemeProvider }).result.current
+      .euiTheme;
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    act(() => controller.openThread('a'));
+    const panel = await screen.findByRole('dialog', { name: 'Comment thread' });
+    const above = Number(panel.style.zIndex);
+    expect(above).toBeGreaterThan(Number(levels.modal));
+
+    act(() => controller.setOverlayOpen(true));
+    expect(Number(panel.style.zIndex)).toBeLessThan(Number(levels.mask));
+
+    act(() => controller.setOverlayOpen(false));
+    expect(Number(panel.style.zIndex)).toBe(above);
   });
 
   it('guides to the recorded control only, not to another one that took its place', async () => {

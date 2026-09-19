@@ -20,7 +20,6 @@ import { createAnchorResolver } from '../lib/anchor_resolver';
 import { usePageComments } from './comments_context';
 import { layoutTracker, useLayoutTick } from './hooks';
 
-/** Where each of the current page's comments is right now, by comment id; null when its element is not in the DOM. */
 export type ResolvedAnchors = ReadonlyMap<string, ResolvedAnchor | null>;
 
 const ResolvedAnchorsContext = createContext<ResolvedAnchors>(new Map());
