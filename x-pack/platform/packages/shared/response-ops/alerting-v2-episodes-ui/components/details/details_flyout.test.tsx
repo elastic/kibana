@@ -82,6 +82,15 @@ jest.mock('../assignee_cell', () => ({
     <div data-test-subj="alertingV2EpisodeAssigneeCell">{assigneeUid ?? 'No assignee'}</div>
   ),
 }));
+jest.mock('../user_profile_display', () => ({
+  UserProfileDisplay: ({
+    userProfileUid,
+    emptyState = '—',
+  }: {
+    userProfileUid: string | null | undefined;
+    emptyState?: React.ReactNode;
+  }) => <div data-test-subj="alertingV2UserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+}));
 
 const mockUseEpisodeDetailsHeaderData = jest.mocked(useEpisodeDetailsHeaderData);
 const mockFlyoutAccordion = jest.mocked(FlyoutAccordion);
@@ -386,6 +395,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
         lastAssigneeUid: null,
         lastAckActor: 'user-acker',
+        lastDeactivateActor: null,
       },
     });
 
@@ -400,11 +410,20 @@ describe('AlertEpisodeDetailsFlyout', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
       status: ALERT_EPISODE_STATUS.INACTIVE,
+      episodeAction: {
+        episodeId: 'ep-1',
+        ruleId: 'rule-1',
+        groupHash: 'gh-1',
+        lastAckAction: null,
+        lastAssigneeUid: null,
+        lastAckActor: null,
+        lastDeactivateActor: 'user-resolver',
+      },
       groupAction: {
         groupHash: 'gh-1',
         ruleId: 'rule-1',
         lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-        lastDeactivateActor: 'user-resolver',
+        lastDeactivateActor: null,
         lastSnoozeAction: null,
         snoozeExpiry: null,
         tags: [],

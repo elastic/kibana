@@ -17,6 +17,15 @@ jest.mock('../assignee_cell', () => ({
     <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
   ),
 }));
+jest.mock('../user_profile_display', () => ({
+  UserProfileDisplay: ({
+    userProfileUid,
+    emptyState = '—',
+  }: {
+    userProfileUid: string | null | undefined;
+    emptyState?: React.ReactNode;
+  }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+}));
 
 jest.mock('../grouping/alerting_episode_grouping_tags', () => ({
   AlertingEpisodeGroupingTags: ({
@@ -151,6 +160,7 @@ describe('AlertEpisodeOverviewList', () => {
             lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
             lastAssigneeUid: null,
             lastAckActor: 'user-acker',
+            lastDeactivateActor: null,
           }}
         />
       </I18nProvider>
@@ -158,7 +168,7 @@ describe('AlertEpisodeOverviewList', () => {
 
     expect(screen.getByText('Acknowledged by')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-acker')
+      screen.getAllByTestId('mockUserProfileDisplay').find((el) => el.textContent === 'user-acker')
     ).toBeInTheDocument();
   });
 
@@ -168,11 +178,20 @@ describe('AlertEpisodeOverviewList', () => {
         <AlertEpisodeOverviewList
           {...baseProps}
           status={ALERT_EPISODE_STATUS.INACTIVE}
+          episodeAction={{
+            episodeId: 'ep-1',
+            ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
+            lastDeactivateActor: 'user-resolver',
+          }}
           groupAction={{
             groupHash: 'gh-1',
             ruleId: 'rule-1',
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-            lastDeactivateActor: 'user-resolver',
+            lastDeactivateActor: null,
             lastSnoozeAction: null,
             snoozeExpiry: null,
             tags: [],
@@ -184,7 +203,9 @@ describe('AlertEpisodeOverviewList', () => {
 
     expect(screen.getByText('Resolved by')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-resolver')
+      screen
+        .getAllByTestId('mockUserProfileDisplay')
+        .find((el) => el.textContent === 'user-resolver')
     ).toBeInTheDocument();
   });
 
@@ -224,7 +245,9 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByText('Snoozed by')).toBeInTheDocument();
     expect(screen.getByText('Snoozed until')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-snoozer')
+      screen
+        .getAllByTestId('mockUserProfileDisplay')
+        .find((el) => el.textContent === 'user-snoozer')
     ).toBeInTheDocument();
   });
 

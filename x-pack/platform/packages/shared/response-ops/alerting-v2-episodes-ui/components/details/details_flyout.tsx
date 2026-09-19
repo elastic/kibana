@@ -30,6 +30,7 @@ import { isSupportedEpisodeSeverity, normalizeEpisodeSeverity } from '../severit
 import { AlertEpisodeSeverityHealth } from '../severity/episode_severity_health';
 import { EPISODE_STATUS_BADGE_COLORS, getEpisodeStatusBadgeLabel } from '../status/status_badge';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
+import { UserProfileDisplay } from '../user_profile_display';
 import { CopyableShortId } from '../copyable_short_id';
 import { AlertEpisodeGroupingSection } from './grouping_section';
 import { AlertEpisodeTrendChartSection } from './trend_chart_section';
@@ -392,8 +393,8 @@ export const AlertEpisodeDetailsFlyout = ({
 
           {isAcked && (
             <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_ACKNOWLEDGED_BY}>
-              <AlertEpisodeAssigneeCell
-                assigneeUid={episodeAction?.lastAckActor}
+              <UserProfileDisplay
+                userProfileUid={episodeAction?.lastAckActor}
                 userProfile={services.userProfile}
               />
             </FlyoutTemplate.Header.InfoBlock>
@@ -401,8 +402,8 @@ export const AlertEpisodeDetailsFlyout = ({
 
           {isResolved && (
             <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_RESOLVED_BY}>
-              <AlertEpisodeAssigneeCell
-                assigneeUid={groupAction?.lastDeactivateActor}
+              <UserProfileDisplay
+                userProfileUid={episodeAction?.lastDeactivateActor}
                 userProfile={services.userProfile}
               />
             </FlyoutTemplate.Header.InfoBlock>
@@ -410,8 +411,8 @@ export const AlertEpisodeDetailsFlyout = ({
 
           {isSnoozed && (
             <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_SNOOZED_BY}>
-              <AlertEpisodeAssigneeCell
-                assigneeUid={groupAction?.lastSnoozeActor}
+              <UserProfileDisplay
+                userProfileUid={groupAction?.lastSnoozeActor}
                 userProfile={services.userProfile}
               />
             </FlyoutTemplate.Header.InfoBlock>
