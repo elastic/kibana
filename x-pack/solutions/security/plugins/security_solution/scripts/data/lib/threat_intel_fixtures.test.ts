@@ -40,8 +40,16 @@ describe('PACK_TI_SCENARIOS', () => {
     ]);
   });
 
+  it('gives aws-iam two scenarios and every other pack exactly one', () => {
+    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(2);
+    expect(PACK_TI_SCENARIOS.okta).toHaveLength(1);
+    expect(PACK_TI_SCENARIOS.kubernetes).toHaveLength(1);
+    expect(PACK_TI_SCENARIOS['github-actions']).toHaveLength(1);
+  });
+
   it('uses stable threat-intel source ids without data-generator branding', () => {
     expect(allThreatIntelSourceIds().sort()).toEqual([
+      'aws-iam-assume-role',
       'ti-rss-aws-iam',
       'ti-rss-github-actions',
       'ti-rss-kubernetes',
@@ -50,7 +58,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('keeps fixture identity free of data-generator strings', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const blob = [
         scenario.sourceId,
         scenario.name,
@@ -66,14 +74,14 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('declares Hub categories and regions for historic report seeding', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       expect(scenario.categories.length).toBeGreaterThan(0);
       expect(scenario.regions.length).toBeGreaterThan(0);
     }
   });
 
   it('declares distinct historic article variants with join and narrative anchors', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       expect(scenario.historicArticles.length).toBeGreaterThanOrEqual(4);
       const titles = scenario.historicArticles.map((article) => article.title);
       expect(new Set(titles).size).toEqual(titles.length);
@@ -87,7 +95,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('builds a data:text/html article URL that embeds the scenario title and body', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const articleUrl = buildPackArticleDataUrl(scenario);
       expect(articleUrl.startsWith('data:text/html;charset=utf-8,')).toBe(true);
       const html = decodeURIComponent(articleUrl.replace(/^data:text\/html;charset=utf-8,/, ''));
@@ -98,7 +106,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('embeds join IOCs in a single-item current RSS feed without dated titles', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const reportItems = buildPackRssCurrentReportItems({
         endMs: Date.parse('2026-07-01T00:00:00.000Z'),
       });
@@ -120,7 +128,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('includes at least one defanged IP per pack body for discriminating extraction', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       expect(scenario.body).toMatch(/\d+\[\.\]\d+\[\.\]\d+\[\.\]\d+/);
       expect(scenario.joinIocs.some((ioc) => ioc.type === 'ip' && Boolean(ioc.defanged))).toBe(
         true
@@ -129,7 +137,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('uses the full kubernetes SA principal as a user join IOC (not the short nickname alone)', () => {
-    const k8s = PACK_TI_SCENARIOS.kubernetes;
+    const k8s = PACK_TI_SCENARIOS.kubernetes[0];
     expect(k8s.joinIocs).toEqual(
       expect.arrayContaining([
         {
@@ -146,16 +154,24 @@ describe('PACK_TI_SCENARIOS', () => {
 
   it('diversifies live RSS body tone so enrich can classify mixed severities', () => {
     const { okta, 'aws-iam': awsIam, kubernetes, 'github-actions': github } = PACK_TI_SCENARIOS;
+    const [primaryOkta] = okta;
+    const [primaryAwsIam] = awsIam;
+    const [primaryKubernetes] = kubernetes;
+    const [primaryGithub] = github;
     // Titles stay natural (no demo prefixes like ACTIVE INCIDENT / Research note).
-    expect(okta.title.toLowerCase()).not.toContain('active incident');
-    expect(awsIam.title.toLowerCase()).not.toContain('investigated campaign');
-    expect(kubernetes.title.toLowerCase()).not.toMatch(/^advisory:/);
-    expect(github.title.toLowerCase()).not.toContain('research note');
+    expect(primaryOkta.title.toLowerCase()).not.toContain('active incident');
+    expect(primaryAwsIam.title.toLowerCase()).not.toContain('investigated campaign');
+    expect(primaryKubernetes.title.toLowerCase()).not.toMatch(/^advisory:/);
+    expect(primaryGithub.title.toLowerCase()).not.toContain('research note');
     // Severity ladder lives in body wording for classify_severity.
-    expect(okta.body.toLowerCase()).toMatch(/ongoing breach|ransomware-adjacent|immediately/);
-    expect(awsIam.body.toLowerCase()).toMatch(/confirmed|prioritize|does not assert/);
-    expect(kubernetes.body.toLowerCase()).toMatch(/advisory|monitoring guidance|does not claim/);
-    expect(github.body.toLowerCase()).toMatch(
+    expect(primaryOkta.body.toLowerCase()).toMatch(
+      /ongoing breach|ransomware-adjacent|immediately/
+    );
+    expect(primaryAwsIam.body.toLowerCase()).toMatch(/confirmed|prioritize|does not assert/);
+    expect(primaryKubernetes.body.toLowerCase()).toMatch(
+      /advisory|monitoring guidance|does not claim/
+    );
+    expect(primaryGithub.body.toLowerCase()).toMatch(
       /background research|no immediate incident response|situational awareness/
     );
   });
@@ -193,6 +209,7 @@ describe('threat intel report timestamps', () => {
     const endMs = Date.parse('2025-07-01T00:00:00.000Z');
     const current = buildPackRssCurrentReportItems({ endMs });
     const historic = buildPackHistoricReportItemsForScenario({
+      scenario: PACK_TI_SCENARIOS.okta[0],
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -208,10 +225,11 @@ describe('threat intel report timestamps', () => {
 
 describe('buildHistoricThreatReportDoc', () => {
   it('assigns critical severity to the newest historic slot per pack', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const endMs = Date.parse('2026-07-21T18:00:00.000Z');
     const startMs = Date.parse('2026-01-01T00:00:00.000Z');
     const items = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -247,10 +265,11 @@ describe('buildHistoricThreatReportDoc', () => {
   });
 
   it('rotates historic article variants without date-suffix titles', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const endMs = Date.parse('2026-07-21T18:00:00.000Z');
     const startMs = Date.parse('2026-01-01T00:00:00.000Z');
     const items = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -285,7 +304,7 @@ describe('buildHistoricThreatReportDoc', () => {
   });
 
   it('keeps live kind on the canonical scenario title and body', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const feedUrl = buildPackRssDataUrl({
       scenario,
       reportItems: buildPackRssCurrentReportItems({
@@ -306,10 +325,11 @@ describe('buildHistoricThreatReportDoc', () => {
   });
 
   it('introduces emerging source names only on the newest historic slots', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const endMs = Date.parse('2026-07-21T18:00:00.000Z');
     const startMs = Date.parse('2026-01-01T00:00:00.000Z');
     const items = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -344,7 +364,7 @@ describe('buildHistoricThreatReportDoc', () => {
 
 describe('resolveHistoricSourceName', () => {
   it('keeps older slots canonical and switches to emerging near the end', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     expect(resolveHistoricSourceName({ scenario, itemIndex: 0, reportsPerPack: 12 })).toEqual(
       scenario.name
     );
@@ -357,7 +377,7 @@ describe('resolveHistoricSourceName', () => {
   });
 
   it('makes older halves of a pack run smaller source sets than newer halves', () => {
-    const scenarios = Object.values(PACK_TI_SCENARIOS);
+    const scenarios = Object.values(PACK_TI_SCENARIOS).flat();
     const reportsPerPack = 12;
     const older = new Set<string>();
     const newer = new Set<string>();
@@ -368,7 +388,7 @@ describe('resolveHistoricSourceName', () => {
         else newer.add(name);
       }
     }
-    expect(older.size).toBe(4);
+    expect(older.size).toBe(5);
     expect(newer.size).toBeGreaterThan(older.size);
   });
 });
@@ -399,7 +419,7 @@ describe('pack TI join contract', () => {
   it('places every join IOC on mustard hunt ECS fields after pack enrich', async () => {
     const missing: string[] = [];
 
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const eventsPath = path.join(scriptsDataDir('packs', scenario.packId), 'events.ndjson');
       const raw = await readNdjson(eventsPath);
       const docs = raw.map((doc) => {
@@ -434,5 +454,198 @@ describe('resolveThreatIntelPackIds', () => {
 
   it('preserves an explicit pack subset', () => {
     expect(resolveThreatIntelPackIds(['okta', 'aws-iam'])).toEqual(['okta', 'aws-iam']);
+  });
+});
+
+describe('deterministic historic report ids', () => {
+  const buildAllHistoricDocs = () => {
+    const spaceId = 'default';
+    const feedUrl = 'data:text/html,stub';
+    const scenarios = Object.values(PACK_TI_SCENARIOS).flat();
+    const docs = scenarios.flatMap((scenario, packIndex) => {
+      const items = buildPackHistoricReportItemsForScenario({
+        scenario,
+        packIndex,
+        packCount: scenarios.length,
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+        reportsPerPack: 12,
+      });
+      return items.map((item, itemIndex) =>
+        buildHistoricThreatReportDoc({
+          scenario,
+          item,
+          itemIndex,
+          packIndex,
+          reportsPerPack: 12,
+          spaceId,
+          feedUrl,
+          kind: 'historic',
+        })
+      );
+    });
+    return docs;
+  };
+
+  it('names guids `ti-report-<reportIdSlug>-historic-NN`, capped at 99 slots by the 2-digit NN', () => {
+    const docs = buildAllHistoricDocs();
+    const ids = docs.map((doc) => doc.lineage.source_doc_ref.id);
+    expect(ids).toContain('ti-report-aws-iam-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-assume-role-historic-01');
+    for (const id of ids) {
+      expect(id).toMatch(/^ti-report-[a-z0-9-]+-historic-\d{2}$/);
+    }
+  });
+
+  it('produces a unique id per report across all five scenarios (guards the packId collision)', () => {
+    const ids = buildAllHistoricDocs().map((doc) => doc.lineage.source_doc_ref.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('builds identical ids and docs from identical inputs (idempotent by construction)', () => {
+    const first = buildAllHistoricDocs();
+    const second = buildAllHistoricDocs();
+    expect(second).toEqual(first);
+  });
+});
+
+describe('per-slot correlation anchors', () => {
+  const buildAllHistoricDocsWithIds = () => {
+    const spaceId = 'default';
+    const feedUrl = 'data:text/html,stub';
+    const scenarios = Object.values(PACK_TI_SCENARIOS).flat();
+    return scenarios.flatMap((scenario, packIndex) => {
+      const items = buildPackHistoricReportItemsForScenario({
+        scenario,
+        packIndex,
+        packCount: scenarios.length,
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+        reportsPerPack: 12,
+      });
+      return items.map((item, itemIndex) =>
+        buildHistoricThreatReportDoc({
+          scenario,
+          item,
+          itemIndex,
+          packIndex,
+          reportsPerPack: 12,
+          spaceId,
+          feedUrl,
+          kind: 'historic',
+        })
+      );
+    });
+  };
+
+  // Mirrors the discriminating-anchor rules in search_by_anchors.ts: a `threat_actors`
+  // entry or a hash-typed IOC value correlates two reports; every doc excludes itself.
+  const discriminatingAnchorsForDoc = (
+    doc: ReturnType<typeof buildAllHistoricDocsWithIds>[number]
+  ) => {
+    const actors = doc.extracted?.threat_actors ?? [];
+    const hashes = (doc.extracted?.iocs ?? [])
+      .filter((ioc) => ioc.type === 'hash')
+      .map((ioc) => ioc.value);
+    return { actors, hashes };
+  };
+
+  it('correlates exactly the anchored A/B pair and nothing else', () => {
+    const docs = buildAllHistoricDocsWithIds();
+    const byId = new Map(docs.map((doc) => [doc.lineage.source_doc_ref.id, doc]));
+
+    const matchesFor = (id: string) => {
+      const anchors = discriminatingAnchorsForDoc(byId.get(id)!);
+      const matches = new Set<string>();
+      for (const other of docs) {
+        const otherId = other.lineage.source_doc_ref.id;
+        if (otherId !== id) {
+          const otherAnchors = discriminatingAnchorsForDoc(other);
+          const sharesActor = anchors.actors.some((a) => otherAnchors.actors.includes(a));
+          const sharesHash = anchors.hashes.some((h) => otherAnchors.hashes.includes(h));
+          if (sharesActor || sharesHash) matches.add(otherId);
+        }
+      }
+      return matches;
+    };
+
+    const reportA = 'ti-report-aws-iam-historic-01';
+    const reportB = 'ti-report-aws-iam-assume-role-historic-01';
+    expect(matchesFor(reportA)).toEqual(new Set([reportB]));
+    expect(matchesFor(reportB)).toEqual(new Set([reportA]));
+
+    const anchoredIds = docs
+      .filter((doc) => discriminatingAnchorsForDoc(doc).actors.length > 0)
+      .map((doc) => doc.lineage.source_doc_ref.id);
+    expect(new Set(anchoredIds)).toEqual(new Set([reportA, reportB]));
+
+    for (const doc of docs) {
+      const id = doc.lineage.source_doc_ref.id;
+      if (id !== reportA && id !== reportB) {
+        expect(matchesFor(id).size).toBe(0);
+      }
+    }
+  });
+
+  it('keeps every actor string and hash IOC value scoped to only the intended pair', () => {
+    // Technique ids may legitimately overlap (okta and aws-iam both carry T1078.004);
+    // that overlap is boost-only in the gate (minimum_should_match on discriminating
+    // clauses only) and is not asserted here.
+    const docs = buildAllHistoricDocsWithIds();
+    const actorOwners = new Map<string, Set<string>>();
+    const hashOwners = new Map<string, Set<string>>();
+    for (const doc of docs) {
+      const { actors, hashes } = discriminatingAnchorsForDoc(doc);
+      for (const actor of actors) {
+        actorOwners.set(actor, (actorOwners.get(actor) ?? new Set()).add(doc.source.adapter_id));
+      }
+      for (const hash of hashes) {
+        hashOwners.set(hash, (hashOwners.get(hash) ?? new Set()).add(doc.source.adapter_id));
+      }
+    }
+    for (const owners of actorOwners.values()) {
+      expect(owners.size).toBeLessThanOrEqual(2);
+    }
+    for (const owners of hashOwners.values()) {
+      expect(owners.size).toBeLessThanOrEqual(2);
+    }
+
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      if (scenario.packId !== 'aws-iam') {
+        expect(scenario.historicAnchors).toBeUndefined();
+      }
+    }
+  });
+
+  it('never puts a hash-typed IOC into joinIocs (report-only, not a join contract)', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      expect(scenario.joinIocs.some((ioc) => (ioc.type as string) === 'hash')).toBe(false);
+    }
+  });
+
+  it('names the attributed intrusion set in aws-iam canonical body text for Diamond suitability', () => {
+    // enrich_taxonomy's diamond_suitable gate requires the report itself to name an
+    // attributed actor/campaign, not just carry a threat_actors field on the extracted
+    // doc. historicAnchors.threatActors never reaches content.body_text, so the actor
+    // name must be woven into the prose directly (mirrors the okta scenario's pattern).
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'];
+    for (const scenario of awsIamScenarios) {
+      expect(scenario.historicAnchors?.threatActors.length).toBeGreaterThan(0);
+      const namedActor = scenario.historicAnchors!.threatActors[0];
+      expect(scenario.body).toContain(namedActor);
+    }
+  });
+
+  it('names the attributed intrusion set in the anchored historic-article body too', () => {
+    // buildHistoricThreatReportDoc renders content.body_text from historicArticles[itemIndex],
+    // not from scenario.body, whenever historicArticles is non-empty. The seeded
+    // ti-report-*-historic-01 docs (the ones the diamond-extraction demo actually reads) use
+    // historicArticles[0], so the actor name must also be woven into that slot's prose, not
+    // just scenario.body's live/RSS twin.
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'];
+    for (const scenario of awsIamScenarios) {
+      const namedActor = scenario.historicAnchors!.threatActors[0];
+      expect(scenario.historicArticles[0]?.body).toContain(namedActor);
+    }
   });
 });
