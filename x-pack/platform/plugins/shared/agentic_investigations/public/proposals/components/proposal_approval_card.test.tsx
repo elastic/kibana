@@ -197,10 +197,7 @@ describe('ProposalApprovalCard', () => {
 
   describe('displayed impact', () => {
     it('shows a revised impact rather than the action metadata it replaced', () => {
-      // An action-backed proposal whose impact a revision raised. The queue
-      // sorts by the row's impact, so a card that preferred the action's
-      // declared impact would display the value the revision replaced and
-      // contradict the order the analyst is looking at.
+      // An action-backed proposal whose impact a revision raised.
       setupMocks(
         baseProposal({
           impact: 'high',
@@ -324,12 +321,6 @@ describe('ProposalApprovalCard', () => {
   });
 
   describe('superseded row', () => {
-    /**
-     * A conversation attachment keeps the id it was created with, and a
-     * revision supersedes that row — so without the redirect the analyst is
-     * left with a card that offers no actions for a proposal that is no longer
-     * the one awaiting their decision.
-     */
     it('renders the revision that replaced it, not the superseded row', () => {
       setupMocks();
       useProposalMock.mockImplementation(

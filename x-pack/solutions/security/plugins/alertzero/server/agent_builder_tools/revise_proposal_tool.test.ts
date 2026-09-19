@@ -77,11 +77,6 @@ describe('reviseProposalTool', () => {
     );
   });
 
-  /**
-   * The regression this guards: `revise()` refuses a superseded predecessor,
-   * so a second revision addressed to the id the model was handed at creation
-   * would fail unless the live head is resolved first.
-   */
   it('revises the live head when the given id is an earlier link in the chain', async () => {
     const getLatestRevision = jest
       .fn()

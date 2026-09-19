@@ -890,9 +890,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      // The undecided status pair admits `superseded`, so without this guard a
-      // direct caller could write a terminal row with no successor — one the
-      // latest-revision query would still count as live.
+      // A terminal row with no successor would still read as live.
       await expect(
         service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID)
       ).rejects.toThrow(ProposalConflictError);

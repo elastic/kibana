@@ -38,9 +38,7 @@ export const toBlastRadiusItems = (proposal: ProposalWithMetadata): BlastRadiusI
     iconType: 'warning',
     text: i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.impactText', {
       defaultMessage: '{impact} impact',
-      // The proposal's own impact first, matching the approval card's tone: a
-      // revision can override it, and the action's declared value is only the
-      // default for a proposal that never set one.
+      // The proposal's own impact first: a revision can override it.
       values: { impact: proposal.impact ?? proposal.action?.impact },
     }),
   });
