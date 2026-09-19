@@ -9,7 +9,6 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   createTrajectoryEvaluator,
-  getToolCallSteps,
   type AgentBuilderClient,
   type DefaultEvaluators,
   type EvaluationDataset,
@@ -22,6 +21,7 @@ import { converseQuestionToTaskOutput } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
 // Security-owned fork: also scores load_skill spans (platform createSkillInvocationEvaluator is filestore.read only).
 import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
+import { extractTrajectoryToolIds } from './trajectory_tool_ids';
 
 /** Must match defineSkillType({ name }) in endpoint_forensic_analysis_skill.ts */
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME = 'endpoint-forensic-analysis';
@@ -45,20 +45,12 @@ export type EvaluateForensicDataset = (options: {
   };
 }) => Promise<void>;
 
-const FILESTORE_READ_TOOL_ID = 'filestore.read';
-const LOAD_SKILL_TOOL_ID = 'load_skill';
-
-const SKILL_ROUTING_TOOL_IDS = new Set([FILESTORE_READ_TOOL_ID, LOAD_SKILL_TOOL_ID]);
-
 export const createForensicTrajectoryEvaluator = (): Evaluator<
   ForensicDatasetExample,
   TaskOutput
 > => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) =>
-      getToolCallSteps(output as TaskOutput)
-        .map((step) => step.tool_id)
-        .filter((id): id is string => typeof id === 'string' && !SKILL_ROUTING_TOOL_IDS.has(id)),
+    extractToolCalls: (output) => extractTrajectoryToolIds(output as TaskOutput),
     goldenPathExtractor: (expected) => {
       const exp = expected as ForensicDatasetExample['output'] | undefined;
       return exp?.tool_sequence ?? [];

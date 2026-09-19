@@ -6,20 +6,27 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { ResponseActionsApiCommandNames } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
+import { EndpointActionGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_action_generator';
+import { FleetActionGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/fleet_action_generator';
+import type { EndpointAction } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 const POLL_INTERVAL_MS = 5_000;
 
 /** Disjoint from the forensic suite's `eval-agent-forensic-` ids (see cleanup.ts). */
 const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
-const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
 
 export async function waitForEndpointPackage(
   kbnClient: KbnClient,
@@ -94,12 +101,14 @@ export async function waitForTransformPropagation(
   esClient: Client,
   log: ToolingLog,
   expectedCounts: { metadataCurrent: number; metadataUnited: number },
-  maxWaitMs = 180_000
+  maxWaitMs = 180_000,
+  agentIdPrefix: string = EVAL_AGENT_ID_PREFIX
 ): Promise<void> {
   const start = Date.now();
+  const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
   log.info(
-    `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
+    `Waiting for transform propagation of '${agentIdPrefix}*': metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
 
   while (Date.now() - start < maxWaitMs) {
@@ -107,12 +116,12 @@ export async function waitForTransformPropagation(
       const [currentCount, unitedCount] = await Promise.all([
         esClient.count({
           index: metadataCurrentIndexPattern,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
       ]);
@@ -149,6 +158,7 @@ export async function waitForTransformPropagation(
 export interface SeedClients {
   esClient: Client;
   internalEsClient: Client;
+  kbnClient?: KbnClient;
 }
 
 interface ExtraDocument {
@@ -289,11 +299,110 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     os,
     policyName,
     policyStatus,
-    policyId,
     endpointStatus = 'enrolled',
     agentVersion = DEFAULT_AGENT_VERSION,
     extraDocuments = [],
   } = scenario;
+
+  let policyId = scenario.policyId;
+
+  // The PACKAGE policy id a seeded response action must name in its
+  // `agent.policy[].integrationPolicyId`. It is not the same thing as the agent
+  // policy id the metadata doc carries: `getActionDetailsById` ->
+  // `fetchActionRequestById` validates the action with
+  // `ensureInCurrentSpace({ integrationPolicyIds, matchAll: false })`, which
+  // resolves those ids through `packagePolicyService.getByIDs` and 404s the
+  // action when none of them exist. A placeholder id therefore makes a seeded
+  // action permanently unreadable (`action_not_found`) even though the document
+  // is in the index.
+  let integrationPolicyId: string | undefined;
+
+  // The endpoint metadata route's `buildBaseEndpointMetadataFilter` requires
+  // `united.agent.policy_id` to match a real package policy. Without one, the
+  // filter yields zero policy IDs and every lookup returns `endpoint_not_found`.
+  // Resolve a real agent policy + endpoint package policy, reusing any policy
+  // a previous run left behind so repeated runs stay idempotent.
+  if (clients.kbnClient) {
+    const agentPolicyName = `eval-agent-policy-${agentId}`;
+
+    const existing = await clients.kbnClient.request<{
+      items: Array<{ id: string; name: string }>;
+    }>({
+      method: 'GET',
+      path: '/api/fleet/agent_policies',
+      query: { perPage: 100 },
+    });
+    const foundPolicyId = existing.data.items.find((p) => p.name === agentPolicyName)?.id;
+
+    const realPolicyId =
+      foundPolicyId ??
+      (
+        await clients.kbnClient.request<{ item: { id: string } }>({
+          method: 'POST',
+          path: '/api/fleet/agent_policies',
+          body: {
+            name: agentPolicyName,
+            description: 'eval',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+          },
+        })
+      ).data.item.id;
+
+    const existingPkg = await clients.kbnClient.request<{
+      items: Array<{ id: string; policy_id: string; package?: { name?: string } }>;
+    }>({
+      method: 'GET',
+      path: '/api/fleet/package_policies',
+      query: { perPage: 100 },
+    });
+    const existingEndpointPkg = existingPkg.data.items.find(
+      (p) => p.policy_id === realPolicyId && p.package?.name === 'endpoint'
+    );
+
+    if (existingEndpointPkg) {
+      integrationPolicyId = existingEndpointPkg.id;
+    } else {
+      // Read the installed version from EPM instead of hard-coding a stack
+      // version. The Scout config installs `endpoint` at `latest`
+      // (`evals_endpoint/stateful/classic.stateful.config.ts`), so the
+      // installed version moves with the stack. A hard-coded version can be
+      // rejected by Fleet when that exact package version is not installed,
+      // which leaves the endpoint package policy missing — and every host
+      // lookup then returns `endpoint_not_found` (see the note above).
+      const endpointPackage = await clients.kbnClient.request<{
+        item: { version?: string };
+      }>({
+        method: 'GET',
+        path: '/api/fleet/epm/packages/endpoint',
+      });
+      const endpointPackageVersion = endpointPackage.data.item?.version;
+
+      if (!endpointPackageVersion) {
+        throw new Error(
+          'Could not determine the installed endpoint package version from /api/fleet/epm/packages/endpoint'
+        );
+      }
+
+      const created = await clients.kbnClient.request<{ item: { id: string } }>({
+        method: 'POST',
+        path: '/api/fleet/package_policies',
+        body: {
+          name: `eval-endpoint-policy-${agentId}`,
+          description: 'eval',
+          namespace: 'default',
+          policy_id: realPolicyId,
+          package: { name: 'endpoint', version: endpointPackageVersion },
+          inputs: [],
+        },
+      });
+
+      integrationPolicyId = created.data.item.id;
+    }
+
+    // Use the real policy ID for the fleet agent + metadata docs.
+    policyId = realPolicyId;
+  }
 
   await clients.esClient.create({
     index: 'metrics-endpoint.metadata-default',
@@ -332,6 +441,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     document: {
       '@timestamp': now,
       agent: { id: agentId, version: agentVersion },
+      type: 'PERMANENT',
       local_metadata: { host: { name: hostName } },
       active: true,
       enrolled_at: now,
@@ -352,6 +462,181 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       refresh: true,
       document: { '@timestamp': now, ...extra.document },
     });
+  }
+
+  return { agentPolicyId: policyId, packagePolicyId: integrationPolicyId };
+}
+
+export interface SeededScenario {
+  /** Agent policy id the seeded metadata doc is attributed to. */
+  agentPolicyId?: string;
+  /** Endpoint package policy id a seeded response action must name. */
+  packagePolicyId?: string;
+}
+
+/**
+ * The package policy id a seeded response action has to carry, as a hard
+ * failure rather than an optional value: an action whose
+ * `agent.policy[].integrationPolicyId` names a policy that does not exist can
+ * only ever answer `action_not_found`, so seeding one would look like coverage
+ * while proving nothing.
+ */
+export const requirePackagePolicyId = ({
+  packagePolicyId,
+  agentPolicyId,
+}: SeededScenario): string => {
+  if (!packagePolicyId) {
+    throw new Error(
+      'seedScenario() did not resolve an endpoint package policy id — a response action seeded without it is unreadable (fetchActionRequestById validates it via ensureInCurrentSpace)'
+    );
+  }
+
+  assertPackagePolicyId({ packagePolicyId, agentPolicyId });
+
+  return packagePolicyId;
+};
+
+export interface SeedResponseActionOptions {
+  actionId: string;
+  agentId: string;
+  command: ResponseActionsApiCommandNames;
+  status: 'pending' | 'successful' | 'failed';
+  /**
+   * PACKAGE (integration) policy id the action is attributed to —
+   * `SeededScenario.packagePolicyId`. NOT the agent policy id: the read
+   * validates this value with
+   * `ensureInCurrentSpace({ integrationPolicyIds, matchAll: false })`, so an
+   * agent policy id here makes the action permanently unreadable
+   * (`action_not_found`) while the document sits in the index.
+   */
+  packagePolicyId: string;
+  /** Agent policy id the action is attributed to — `SeededScenario.agentPolicyId`. */
+  agentPolicyId?: string;
+  comment?: string;
+}
+
+/**
+ * Guards the package-policy-id contract at the point of use: seeding an action
+ * whose `agent.policy[].integrationPolicyId` names the *agent* policy (or any
+ * policy that does not exist) produces a document that can only ever answer
+ * `action_not_found`, which looks like coverage while proving nothing.
+ */
+export const assertPackagePolicyId = ({
+  packagePolicyId,
+  agentPolicyId,
+}: {
+  packagePolicyId: string;
+  agentPolicyId?: string;
+}): void => {
+  if (agentPolicyId && packagePolicyId === agentPolicyId) {
+    throw new Error(
+      'seedResponseAction() was given the agent policy id as the package policy id — the action would be unreadable (fetchActionRequestById validates `integrationPolicyId` via ensureInCurrentSpace). Pass SeededScenario.packagePolicyId.'
+    );
+  }
+};
+
+/**
+ * Seeds one response-action request (+ Fleet + Endpoint ack response when
+ * `status !== 'pending'`) so `get_response_action_status` evals exercise the
+ * real ES read path instead of only the not-found branch.
+ *
+ * Uses the same generators/indices as
+ * `indexEndpointAndFleetActionsForHost` (kept separate because that helper
+ * only supports randomized action ids/commands, not the fixed values a
+ * golden-question eval needs to assert against).
+ */
+export async function seedResponseAction(
+  internalEsClient: Client,
+  {
+    actionId,
+    agentId,
+    command,
+    status,
+    packagePolicyId,
+    agentPolicyId = '',
+    comment,
+  }: SeedResponseActionOptions
+): Promise<void> {
+  assertPackagePolicyId({ packagePolicyId, agentPolicyId });
+  const integrationPolicyId = packagePolicyId;
+  const generator = new EndpointActionGenerator();
+  const startedAt = new Date().toISOString();
+
+  const logsEndpointAction = generator.generate({
+    EndpointActions: {
+      action_id: actionId,
+      data: { command, comment: comment ?? `eval seed: ${command}` },
+    },
+    '@timestamp': startedAt,
+    agent: {
+      id: agentId,
+      policy: [
+        {
+          agentId,
+          elasticAgentId: agentId,
+          integrationPolicyId,
+          agentPolicyId,
+        },
+      ],
+    },
+  });
+
+  const fleetAction: EndpointAction = {
+    ...logsEndpointAction.EndpointActions,
+    '@timestamp': logsEndpointAction['@timestamp'],
+    agents: [agentId],
+    user_id: logsEndpointAction.user.id,
+  };
+
+  const operations: BulkRequest['operations'] = [
+    { create: { _index: AGENT_ACTIONS_INDEX } },
+    fleetAction,
+    { create: { _index: ENDPOINT_ACTIONS_INDEX } },
+    logsEndpointAction,
+  ];
+
+  if (status !== 'pending') {
+    const fleetGenerator = new FleetActionGenerator();
+    const fleetActionResponse = fleetGenerator.generateResponse({
+      action_id: actionId,
+      agent_id: agentId,
+      action_response: { endpoint: { ack: true } },
+      error: status === 'failed' ? 'eval seed: command failed' : undefined,
+    });
+
+    // `EndpointActionGenerator.generateResponse` returns the
+    // `logs-endpoint.action.responses-*` shape directly — no manual
+    // reshaping of the Fleet response needed.
+    const endpointActionResponse = generator.generateResponse({
+      EndpointActions: {
+        action_id: actionId,
+        data: { command, comment: comment ?? `eval seed: ${command}` },
+      },
+      agent: { id: agentId },
+      error: status === 'failed' ? { message: 'eval seed: command failed' } : undefined,
+    });
+
+    operations.push(
+      { create: { _index: AGENT_ACTIONS_RESULTS_INDEX } },
+      fleetActionResponse,
+      { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+      endpointActionResponse
+    );
+  }
+
+  const bulkResponse = await internalEsClient.bulk(
+    { operations, refresh: 'wait_for' },
+    { headers: { 'X-elastic-product-origin': 'fleet' } }
+  );
+
+  if (bulkResponse.errors) {
+    throw new Error(
+      `seedResponseAction(): ES bulk failed for action ${actionId}\n\n${JSON.stringify(
+        bulkResponse,
+        null,
+        2
+      )}`
+    );
   }
 }
 

@@ -21,6 +21,7 @@ export const servers: ScoutServerConfig = {
         'automaticTroubleshootingSkill',
         'endpointForensicAnalysisSkill',
         'elasticDefendPolicyManagementSkill',
+        'endpointResponseActionsSkill',
       ])}`,
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',
