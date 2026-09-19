@@ -9,8 +9,10 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
+import type { ExperimentalDataStreamFeature } from '../../../common/types';
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 import { appContextService } from '../app_context';
+import { prepareDataStreamTemplates } from '../epm/elasticsearch/template/install';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
 
@@ -695,6 +697,200 @@ describe('experimental_datastream_features', () => {
           mockedUpdateCurrentWriteIndices.mock.calls[0][2].map(({ templateName }) => templateName)
         ).toEqual(['metrics-test.test']);
       });
+    });
+  });
+
+  describe('index mode (tsdb / columnar)', () => {
+    type Features = ExperimentalDataStreamFeature['features'];
+
+    const noFeatures: Features = {
+      synthetic_source: false,
+      tsdb: false,
+      doc_value_only_numeric: false,
+      doc_value_only_other: false,
+      columnar: false,
+    };
+
+    function getPolicy(dataStream: string, features: Partial<Features>): NewPackagePolicy {
+      return {
+        name: 'Test policy',
+        policy_id: 'agent-policy',
+        policy_ids: ['agent-policy'],
+        description: 'Test policy description',
+        namespace: 'default',
+        enabled: true,
+        inputs: [],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.0.1',
+          experimental_data_stream_features: [
+            { data_stream: dataStream, features: { ...noFeatures, ...features } },
+          ],
+        },
+      };
+    }
+
+    function mockInstalledFeatures(dataStream: string, features: Partial<Features>) {
+      mockGetInstalledPackageWithAssets({
+        experimental_data_stream_features: [
+          { data_stream: dataStream, features: { ...noFeatures, ...features } },
+        ],
+      });
+    }
+
+    function mockIndexTemplate(dataStream: string, index: Record<string, unknown> = {}) {
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: dataStream,
+            index_template: {
+              template: { settings: { index }, mappings: {} },
+              composed_of: [],
+              index_patterns: '',
+            },
+          },
+        ],
+      });
+    }
+
+    function putIndexSettings() {
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      return (esClient.indices.putIndexTemplate.mock.calls[0][0] as any).template.settings.index;
+    }
+
+    beforeEach(() => {
+      // The outer beforeEach queues an index template for metrics-test.test; each test here
+      // provides its own so the data stream name and existing mode are under control.
+      esClient.indices.getIndexTemplate.mockReset();
+      esClient.indices.putIndexTemplate.mockClear();
+    });
+
+    it('uses logsdb_columnar when enabling columnar on a logs data stream', async () => {
+      mockInstalledFeatures('logs-test.test', {});
+      mockIndexTemplate('logs-test.test');
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('logs-test.test', { columnar: true }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'logsdb_columnar' });
+    });
+
+    it('uses logsdb_columnar when enabling columnar on a hidden logs data stream', async () => {
+      mockInstalledFeatures('.logs-test.test', {});
+      mockIndexTemplate('.logs-test.test');
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('.logs-test.test', { columnar: true }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'logsdb_columnar' });
+    });
+
+    it('uses the base columnar mode when enabling columnar on a non-logs data stream', async () => {
+      mockInstalledFeatures('metrics-test.test', {});
+      mockIndexTemplate('metrics-test.test');
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('metrics-test.test', { columnar: true }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'columnar' });
+    });
+
+    it('writes time_series in a single PUT when switching from columnar to tsdb', async () => {
+      mockInstalledFeatures('metrics-test.test', { columnar: true });
+      mockIndexTemplate('metrics-test.test', { mode: 'columnar', codec: 'best_compression' });
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('metrics-test.test', { tsdb: true, columnar: false }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'time_series', codec: 'best_compression' });
+    });
+
+    it('writes columnar in a single PUT when switching from tsdb to columnar', async () => {
+      mockInstalledFeatures('metrics-test.test', { tsdb: true });
+      mockIndexTemplate('metrics-test.test', { mode: 'time_series' });
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('metrics-test.test', { tsdb: false, columnar: true }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'columnar' });
+    });
+
+    it('throws before writing any template when tsdb and columnar are both enabled', async () => {
+      mockInstalledFeatures('metrics-test.test', {});
+      mockIndexTemplate('metrics-test.test');
+
+      await expect(
+        handleExperimentalDatastreamFeatureOptIn({
+          soClient,
+          esClient,
+          packagePolicy: getPolicy('metrics-test.test', {
+            tsdb: true,
+            columnar: true,
+            synthetic_source: true,
+          }),
+        })
+      ).rejects.toThrow(/cannot have both tsdb and columnar enabled/);
+
+      expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
+    it('removes the index mode when opting out of columnar on a package without a declared mode', async () => {
+      mockInstalledFeatures('metrics-test.test', { columnar: true });
+      mockIndexTemplate('metrics-test.test', { mode: 'columnar', codec: 'best_compression' });
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('metrics-test.test', { columnar: false }),
+      });
+
+      expect(putIndexSettings()).toEqual({ codec: 'best_compression' });
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _meta: { has_experimental_data_stream_indexing_features: false },
+        })
+      );
+    });
+
+    it('preserves the package-declared index mode when opting out of columnar', async () => {
+      jest.mocked(prepareDataStreamTemplates).mockResolvedValueOnce([
+        {
+          componentTemplates: {},
+          indexTemplate: {
+            templateName: 'logs-test.test',
+            indexTemplate: {
+              template: { settings: { index: { mode: 'logsdb_columnar' } } },
+            },
+          },
+        },
+      ] as any);
+      mockInstalledFeatures('logs-test.test', { columnar: true });
+      mockIndexTemplate('logs-test.test', { mode: 'logsdb_columnar' });
+
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: getPolicy('logs-test.test', { columnar: false }),
+      });
+
+      expect(putIndexSettings()).toEqual({ mode: 'logsdb_columnar' });
     });
   });
 });

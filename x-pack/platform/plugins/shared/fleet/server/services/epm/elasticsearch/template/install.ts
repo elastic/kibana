@@ -664,15 +664,19 @@ export function prepareTemplate({
 
   // Columnar index mode family: declared in the manifest or opted in via experimental feature.
   // "columnar" is the base mode; "logsdb_columnar" adds the logs profile on top.
-  // When a user opts in via the experimental feature, we default to logsdb_columnar (logs profile).
+  // When a user opts in via the experimental feature, logs data streams get logsdb_columnar; for
+  // any other type the logs profile defaults (host.name sort, logs pipeline) are inappropriate,
+  // so the base columnar mode is used. This must stay in sync with the toggle handler in
+  // package_policies/experimental_datastream_features.ts.
   const manifestColumnarMode =
     dataStream.elasticsearch?.index_mode === 'logsdb_columnar' ||
     dataStream.elasticsearch?.index_mode === 'columnar'
       ? dataStream.elasticsearch.index_mode
       : undefined;
+  const optInColumnarMode = dataStream.type === 'logs' ? 'logsdb_columnar' : 'columnar';
   const resolvedIndexMode =
     manifestColumnarMode ??
-    (experimentalDataStreamFeature?.features.columnar ? 'logsdb_columnar' : undefined);
+    (experimentalDataStreamFeature?.features.columnar ? optInColumnarMode : undefined);
 
   const validFields = processFields(fields);
 

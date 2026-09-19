@@ -54,6 +54,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   // for the package policy here to compare later.
   let installation;
   const templateMappings: { [key: string]: any } = {};
+  // index.mode of each index template as prepared from the package with the *new* feature set.
+  // With every mode-changing feature turned off this is exactly what the package manifest
+  // declares (or undefined), which is what an opt-out must fall back to.
+  const preparedIndexModes: { [templateName: string]: string | undefined } = {};
 
   if (packagePolicy.package) {
     const installedPackageWithAssets = await getInstalledPackageWithAssets({
@@ -84,12 +88,24 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         templateMappings[templateName] =
           (template.componentTemplates[templateName].template as any).mappings ?? {};
       });
+      if (template.indexTemplate?.templateName) {
+        preparedIndexModes[template.indexTemplate.templateName] =
+          template.indexTemplate.indexTemplate?.template?.settings?.index?.mode;
+      }
     });
   }
 
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
 
   for (const featureMapEntry of packagePolicy.package.experimental_data_stream_features) {
+    // Reject mutually exclusive combination before any ES write: a data stream cannot be both
+    // TSDB and columnar.
+    if (featureMapEntry.features.tsdb && featureMapEntry.features.columnar) {
+      throw new Error(
+        `data stream ${featureMapEntry.data_stream} cannot have both tsdb and columnar enabled simultaneously`
+      );
+    }
+
     const existingOptIn = installation?.experimental_data_stream_features?.find(
       (optIn) => optIn.data_stream === featureMapEntry.data_stream
     );
@@ -208,51 +224,29 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     } = rawIndexTemplate as IndexTemplate;
     let updatedIndexTemplate = indexTemplate;
 
-    // Reject mutually exclusive combination: a data stream cannot be both TSDB and columnar.
-    if (featureMapEntry.features.tsdb && featureMapEntry.features.columnar) {
-      throw new Error(
-        `data stream ${featureMapEntry.data_stream} cannot have both tsdb and columnar enabled simultaneously`
-      );
-    }
-
-    if (isTSDBOptInChanged) {
-      const indexTemplateBody = {
-        ...updatedIndexTemplate,
-        template: {
-          ...(updatedIndexTemplate.template ?? {}),
-          settings: {
-            ...(updatedIndexTemplate.template?.settings ?? {}),
-            index: {
-              // Preserve any existing index settings (sort, codec, etc.) — only set mode.
-              ...(updatedIndexTemplate.template?.settings?.index ?? {}),
-              mode: featureMapEntry.features.tsdb ? 'time_series' : undefined,
-            },
-          },
-        },
-      };
-
-      updatedIndexTemplate = indexTemplateBody as IndexTemplate;
-
-      await esClient.indices.putIndexTemplate({
-        name: featureMapEntry.data_stream,
-        ...indexTemplateBody,
-        _meta: {
-          has_experimental_data_stream_indexing_features:
-            featureMapEntry.features.tsdb || featureMapEntry.features.columnar,
-        },
-        // GET brings string | string[] | undefined but this PUT expects string[]
-        ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
-          ? [indexTemplateBody.ignore_missing_component_templates].flat()
-          : undefined,
-      });
-    }
-
-    if (isColumnarOptInChanged) {
+    // Both tsdb and columnar are expressed through the same `settings.index.mode` key, so when
+    // either (or both) changed we resolve the final mode once and issue a single PUT. Two
+    // independent PUTs would let the second one clobber the mode written by the first.
+    if (isTSDBOptInChanged || isColumnarOptInChanged) {
       // For non-logs data streams the logs profile defaults (host.name sort, logs pipeline) are
-      // inappropriate, so use the base columnar mode instead of logsdb_columnar.
-      const dsType = featureMapEntry.data_stream.split('-')[0];
+      // inappropriate, so use the base columnar mode instead of logsdb_columnar. Hidden data
+      // streams are prefixed with a dot (`.logs-...`), strip it before reading the type.
+      const dsType = featureMapEntry.data_stream.replace(/^\./, '').split('-')[0];
       const columnarMode = dsType === 'logs' ? 'logsdb_columnar' : 'columnar';
 
+      // When opting out of both features, fall back to the mode the package itself declares
+      // (from the template prepared above with the new feature set) rather than dropping the
+      // key, so a manifest-declared index_mode survives the opt-out.
+      const resolvedMode = featureMapEntry.features.tsdb
+        ? 'time_series'
+        : featureMapEntry.features.columnar
+        ? columnarMode
+        : preparedIndexModes[featureMapEntry.data_stream];
+
+      // Preserve any existing index settings (sort, codec, etc.) — only touch mode.
+      const { mode: _previousMode, ...existingIndexSettings } =
+        updatedIndexTemplate.template?.settings?.index ?? {};
+
       const indexTemplateBody = {
         ...updatedIndexTemplate,
         template: {
@@ -260,9 +254,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           settings: {
             ...(updatedIndexTemplate.template?.settings ?? {}),
             index: {
-              // Preserve any existing index settings (sort, codec, etc.) — only set mode.
-              ...(updatedIndexTemplate.template?.settings?.index ?? {}),
-              mode: featureMapEntry.features.columnar ? columnarMode : undefined,
+              ...existingIndexSettings,
+              ...(resolvedMode ? { mode: resolvedMode } : {}),
             },
           },
         },
