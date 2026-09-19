@@ -60,6 +60,7 @@ describe('filters notification popover', () => {
   let api: FiltersNotificationActionApi;
   let updateFilters: (filters: Filter[]) => void;
   let updateQuery: (query: Query | AggregateQuery | undefined) => void;
+  let updateEsql: (queries: AggregateQuery[]) => void;
   let updateViewMode: (viewMode: ViewMode) => void;
 
   beforeEach(async () => {
@@ -67,6 +68,8 @@ describe('filters notification popover', () => {
     updateFilters = (filters) => filtersSubject.next(filters);
     const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     updateQuery = (query) => querySubject.next(query);
+    const esqlSubject = new BehaviorSubject<AggregateQuery[]>([]);
+    updateEsql = (queries) => esqlSubject.next(queries);
     const viewMode$ = new BehaviorSubject<ViewMode>('view');
     updateViewMode = (viewMode) => viewMode$.next(viewMode);
 
@@ -74,6 +77,7 @@ describe('filters notification popover', () => {
       uuid: 'testId',
       filters$: filtersSubject,
       query$: querySubject,
+      esql$: esqlSubject,
       parentApi: {
         viewMode$,
       },
@@ -103,6 +107,21 @@ describe('filters notification popover', () => {
     expect(await screen.findByTestId('filtersNotificationModal__query')).toBeInTheDocument();
   });
 
+  it('renders the esql section when given esql queries from esql$', async () => {
+    updateEsql([{ esql: 'FROM test_dataview' }, { esql: 'FROM other_index' }]);
+    await renderAndOpenPopover();
+    expect(await screen.findByTestId('filtersNotificationModal__esql')).toBeInTheDocument();
+    expect(screen.getByText('FROM test_dataview')).toBeInTheDocument();
+    expect(screen.getByText('FROM other_index')).toBeInTheDocument();
+  });
+
+  it('does not render an edit button when only esql$ statements are present in edit mode', async () => {
+    updateViewMode('edit');
+    updateEsql([{ esql: 'FROM test_dataview' }]);
+    await renderAndOpenPopover();
+    expect(screen.queryByTestId('filtersNotificationModal__editButton')).not.toBeInTheDocument();
+  });
+
   it('does not render an edit button when not in edit mode', async () => {
     await renderAndOpenPopover();
     expect(
@@ -123,16 +142,6 @@ describe('filters notification popover', () => {
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
     await renderAndOpenPopover();
     expect(await screen.findByTestId('filtersNotificationModal__editButton')).toBeInTheDocument();
-  });
-
-  it('does not render an edit button when the query is ESQL', async () => {
-    updateFilters([getMockPhraseFilter('ay', 'oh')]);
-    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
-    updateFilters([getMockPhraseFilter('ay', 'oh')]);
-    await renderAndOpenPopover();
-    expect(
-      await screen.queryByTestId('filtersNotificationModal__editButton')
-    ).not.toBeInTheDocument();
   });
 
   it('calls edit action execute when edit button is clicked', async () => {

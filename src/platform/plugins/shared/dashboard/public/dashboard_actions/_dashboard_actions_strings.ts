@@ -145,4 +145,8 @@ export const dashboardFilterNotificationActionStrings = {
     i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
       defaultMessage: 'Filters',
     }),
+  getEsqlTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.esqlTitle', {
+      defaultMessage: 'ES|QL',
+    }),
 };
