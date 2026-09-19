@@ -25,6 +25,7 @@ import {
   dataTypes,
   FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
+  otlpProtocol,
   outputType,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
@@ -815,6 +816,22 @@ function generateOtelcolExporter(
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),
+          },
+        },
+      };
+    }
+    case outputType.Otlp: {
+      const outputID = getOutputIdForAgentPolicy(dataOutput);
+      const { protocol, ...exporterConfig } = dataOutput.otlp_exporter;
+      const exporterID =
+        protocol === otlpProtocol.Grpc ? `otlp/${outputID}` : `otlphttp/${outputID}`;
+      const tlsSecrets = dataOutput.secrets?.otlp_exporter?.tls;
+      return {
+        extensions: {},
+        exporters: {
+          [exporterID]: {
+            ...exporterConfig,
+            ...(tlsSecrets ? { secrets: { tls: tlsSecrets } } : {}),
           },
         },
       };

@@ -1587,6 +1587,296 @@ describe('Output Service', () => {
           expect.anything()
         );
       });
+
+      describe('managed OTLP endpoint defaults', () => {
+        const MANAGED_HOST = 'managed-otlp.ingest.elastic.cloud';
+
+        beforeEach(() => {
+          mockedAppContextService.getCloud.mockReturnValue({
+            managedOtlp: { url: MANAGED_HOST },
+          } as any);
+          mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
+          mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+        });
+
+        afterEach(() => {
+          mockedAppContextService.getCloud.mockReturnValue({} as any);
+        });
+
+        it('applies recommended sending_queue defaults when none is provided', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP',
+              type: 'otlp',
+              otlp_exporter: { endpoint: MANAGED_HOST, protocol: 'grpc' },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  enabled: true,
+                  sizer: 'bytes',
+                  queue_size: 50_000_000,
+                  block_on_overflow: true,
+                  batch: expect.objectContaining({
+                    flush_timeout: '1s',
+                    min_size: 1_000_000,
+                    max_size: 4_000_000,
+                  }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('merges user-provided sending_queue over defaults', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP custom queue',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: MANAGED_HOST,
+                protocol: 'grpc',
+                sending_queue: { enabled: false, queue_size: 10_000_000 },
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  enabled: false, // user wins
+                  queue_size: 10_000_000, // user wins
+                  sizer: 'bytes', // from defaults
+                  block_on_overflow: true, // from defaults
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('does not apply defaults when sending_queue is explicitly null', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP no queue',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: MANAGED_HOST,
+                protocol: 'grpc',
+                sending_queue: null,
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({ sending_queue: null }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('does not apply defaults for a non-managed OTLP endpoint', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Non-managed OTLP',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: 'my-own-collector.example.com:4317',
+                protocol: 'grpc',
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.not.objectContaining({
+                sending_queue: expect.anything(),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('deep-merges a partial nested batch over defaults, preserving batch.sizer', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP partial batch',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: MANAGED_HOST,
+                protocol: 'grpc',
+                sending_queue: { batch: { max_size: 2_000_000 } },
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  sizer: 'bytes', // top-level default preserved
+                  batch: expect.objectContaining({
+                    max_size: 2_000_000, // user value wins
+                    flush_timeout: '1s', // nested default preserved
+                    min_size: 1_000_000, // nested default preserved
+                    // nested sizer preserved; otelcol own default is 'items' so this matters
+                    sizer: 'bytes',
+                  }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('preserves sending_queue.batch: null to disable batching when explicitly set', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP null batch',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: MANAGED_HOST,
+                protocol: 'grpc',
+                sending_queue: { batch: null },
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({ batch: null }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+      });
+
+      it.each([
+        {
+          flag: 'is_default',
+          input: { is_default: true, is_default_monitoring: false },
+          expectedError: 'An OTLP output cannot be the default data output.',
+        },
+        {
+          flag: 'is_default_monitoring',
+          input: { is_default: false, is_default_monitoring: true },
+          expectedError: 'An OTLP output cannot be the default monitoring output.',
+        },
+      ])(
+        'should throw when creating an OTLP output with $flag: true',
+        async ({ input, expectedError }) => {
+          const soClient = getMockedSoClient();
+          await expect(
+            outputService.create(soClient, esClientMock, {
+              ...input,
+              name: 'Test OTLP',
+              type: 'otlp',
+              otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+            })
+          ).rejects.toThrow(expectedError);
+        }
+      );
+
+      it.each([
+        {
+          flag: 'is_default',
+          input: { is_default: true, is_default_monitoring: false },
+          defaultOutputOption: { defaultOutputId: 'existing-default-output' },
+          expectedWarning: 'An OTLP output cannot be the default data output.',
+          previousDefaultId: 'existing-default-output',
+          unsetKey: 'is_default' as const,
+        },
+        {
+          flag: 'is_default_monitoring',
+          input: { is_default: false, is_default_monitoring: true },
+          defaultOutputOption: { defaultOutputMonitoringId: 'existing-default-monitoring-output' },
+          expectedWarning: 'An OTLP output cannot be the default monitoring output.',
+          previousDefaultId: 'existing-default-monitoring-output',
+          unsetKey: 'is_default_monitoring' as const,
+        },
+      ])(
+        'sanitizes $flag for preconfigured OTLP create and preserves the existing default',
+        async ({ input, defaultOutputOption, expectedWarning, previousDefaultId, unsetKey }) => {
+          const soClient = getMockedSoClient(defaultOutputOption);
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              ...input,
+              name: 'Preconfigured OTLP',
+              type: 'otlp',
+              otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+            },
+            { fromPreconfiguration: true }
+          );
+
+          expect(mockedLogger.warn).toHaveBeenCalledWith(expect.stringContaining(expectedWarning));
+          // The prior default must not have been unset — _updateDefaultOutput fires soClient.update
+          expect(soClient.update).not.toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid(previousDefaultId),
+            expect.objectContaining({ [unsetKey]: false }),
+            expect.anything()
+          );
+        }
+      );
     });
 
     it('should throw FleetError when given an invalid id', async () => {
@@ -2269,6 +2559,7 @@ describe('Output Service', () => {
         defaultOutputId: 'existing-preconfigured-default-output',
       });
       mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await expect(
         outputService.update(soClient, esClientMock, 'output-test', {
@@ -3423,7 +3714,7 @@ describe('Output Service', () => {
         ).rejects.toThrow('9.6.0 or later');
       });
 
-      it('Should throw when updating an OTLP output used by a policy with non-OTel inputs', async () => {
+      it('Should throw when changing an output to OTLP type that is used by a policy with non-OTel inputs', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
           items: [{ id: 'mixed-policy', name: 'Mixed Policy' }],
@@ -3440,10 +3731,10 @@ describe('Output Service', () => {
           })()
         );
 
-        // is_default: true changes is_default, which triggers validateTypeChanges for the OTLP path
         await expect(
-          outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-            is_default: true,
+          outputService.update(soClient, esClientMock, 'existing-es-output', {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
           })
         ).rejects.toThrow(
           'OTLP output cannot be used with agent policy "Mixed Policy" because it contains non-OTel inputs.'
@@ -3654,7 +3945,7 @@ describe('Output Service', () => {
         );
       });
 
-      it('accepts an OTLP update when the using policy has no package policies', async () => {
+      it('accepts changing type to OTLP when the using policy has no package policies', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
           items: [{ id: 'empty-policy', name: 'Empty Policy' }],
@@ -3664,14 +3955,15 @@ describe('Output Service', () => {
           Promise.resolve((async function* () {})())
         );
 
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          is_default: true,
+        await outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'otlp',
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
         expect(soClient.update).toBeCalled();
       });
 
-      it('accepts an OTLP update when all using policies have only OTel inputs', async () => {
+      it('accepts changing type to OTLP when all using policies have only OTel inputs', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
           items: [{ id: 'otel-policy', name: 'OTel Policy' }],
@@ -3690,8 +3982,9 @@ describe('Output Service', () => {
           )
         );
 
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          is_default: true,
+        await outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'otlp',
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
         expect(soClient.update).toBeCalled();
@@ -3756,6 +4049,125 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
         );
+      });
+
+      it.each([
+        {
+          flag: 'is_default',
+          update: { is_default: true },
+          expectedError: 'An OTLP output cannot be the default data output.',
+        },
+        {
+          flag: 'is_default_monitoring',
+          update: { is_default_monitoring: true },
+          expectedError: 'An OTLP output cannot be the default monitoring output.',
+        },
+      ])(
+        'should throw when explicitly setting $flag: true on an existing OTLP output',
+        async ({ update, expectedError }) => {
+          const soClient = getMockedSoClient({});
+          await expect(
+            outputService.update(soClient, esClientMock, 'existing-otlp-output', update)
+          ).rejects.toThrow(expectedError);
+        }
+      );
+
+      it('should throw when changing type to OTLP on an output that is is_default_monitoring: true', async () => {
+        const soClient = getMockedSoClient({});
+        esoClientMock.getDecryptedAsInternalUser.mockImplementationOnce(async () =>
+          mockOutputSO('existing-es-monitoring-output', {
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: true,
+          })
+        );
+        await expect(
+          outputService.update(soClient, esClientMock, 'existing-es-monitoring-output', {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          })
+        ).rejects.toThrow('An OTLP output cannot be the default monitoring output.');
+      });
+
+      it.each([
+        {
+          flag: 'is_default',
+          update: { is_default: true },
+          defaultOutputOption: { defaultOutputId: 'existing-default-output' },
+          expectedWarning: 'An OTLP output cannot be the default data output.',
+          previousDefaultId: 'existing-default-output',
+          unsetKey: 'is_default' as const,
+        },
+        {
+          flag: 'is_default_monitoring',
+          update: { is_default_monitoring: true },
+          defaultOutputOption: {
+            defaultOutputMonitoringId: 'existing-default-monitoring-output',
+          },
+          expectedWarning: 'An OTLP output cannot be the default monitoring output.',
+          previousDefaultId: 'existing-default-monitoring-output',
+          unsetKey: 'is_default_monitoring' as const,
+        },
+      ])(
+        'sanitizes $flag for preconfigured OTLP update and preserves the existing default',
+        async ({ update, defaultOutputOption, expectedWarning, previousDefaultId, unsetKey }) => {
+          const soClient = getMockedSoClient(defaultOutputOption);
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', update, {
+            fromPreconfiguration: true,
+          });
+
+          expect(mockedLogger.warn).toHaveBeenCalledWith(expect.stringContaining(expectedWarning));
+          expect(soClient.update).not.toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid(previousDefaultId),
+            expect.objectContaining({ [unsetKey]: false }),
+            expect.anything()
+          );
+        }
+      );
+
+      describe('managed OTLP endpoint defaults', () => {
+        const MANAGED_HOST = 'managed-otlp.ingest.elastic.cloud';
+
+        beforeEach(() => {
+          mockedAppContextService.getCloud.mockReturnValue({
+            managedOtlp: { url: MANAGED_HOST },
+          } as any);
+        });
+
+        afterEach(() => {
+          mockedAppContextService.getCloud.mockReturnValue({} as any);
+        });
+
+        it('applies managed defaults when updating an OTLP output endpoint to a managed endpoint', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+            otlp_exporter: {
+              endpoint: MANAGED_HOST,
+              protocol: 'grpc',
+            },
+          });
+
+          expect(soClient.update).toBeCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  enabled: true,
+                  sizer: 'bytes',
+                  block_on_overflow: true,
+                  batch: expect.objectContaining({
+                    flush_timeout: '1s',
+                    sizer: 'bytes',
+                  }),
+                }),
+              }),
+            })
+          );
+        });
       });
     });
   });

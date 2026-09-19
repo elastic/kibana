@@ -146,6 +146,13 @@ export function getAllowedOutputTypesForIntegration(packageName?: string): strin
   return Object.values(outputType);
 }
 
+/**
+ * Return allowed output types for the monitoring slot. Fleet only emits the beats-shaped
+ * `agent.monitoring` block and monitoring permissions are ES-only, so `otlp` is never valid.
+ */
+export const getAllowedOutputTypesForMonitoring = (): Array<ValueOf<OutputType>> =>
+  BEATS_OUTPUT_TYPES;
+
 export function outputYmlIncludesReservedPerformanceKey(
   configYml: string,
   // Dependency injection for `safeLoad` prevents bundle size issues 🤷‍♀️
