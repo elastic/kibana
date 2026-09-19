@@ -147,6 +147,7 @@ describe('AgentTurn', () => {
 
     fireEvent.click(screen.getByTestId('agentBuilderExecutionFailedToggle'));
     expect(screen.getByTestId('agentBuilderRoundError')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderRoundErrorRetryButton')).not.toBeInTheDocument();
 
     rerender(
       <I18nProvider>

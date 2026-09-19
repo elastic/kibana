@@ -11930,6 +11930,8 @@
     "xpack.agentBuilder.round.error.hook.title": "Hook-Ausführung fehlgeschlagen",
     "xpack.agentBuilder.round.error.reasoningError": "Argumentationsfehler",
     "xpack.agentBuilder.round.error.requestAborted.description": "Die Anfrage wurde unterbrochen, bevor das Modell seine Antwort beenden konnte. Dies geschieht typischerweise, wenn ein Tool eine sehr große Datenmenge zurückgibt, wie zum Beispiel Index-Mappings mit vielen Feldern. Versuchen Sie, Ihre Frage einzugrenzen oder ein spezifischeres Indexmuster zu verwenden.",
+    "xpack.agentBuilder.round.error.retryLabel": "Erneut versuchen",
+    "xpack.agentBuilder.round.error.tryAgain": "Noch einmal versuchen?",
     "xpack.agentBuilder.round.error.workflowAborted.title": "Konversation abgebrochen",
     "xpack.agentBuilder.round.error.workflowExecution.title": "Workflow fehlgeschlagen",
     "xpack.agentBuilder.round.jsonFlyout.title": "Rohreaktion",

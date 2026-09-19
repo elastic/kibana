@@ -39,6 +39,8 @@ const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
 describe('RoundError', () => {
+  const onRetry = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -51,7 +53,7 @@ describe('RoundError', () => {
       HookExecutionMode.blocking
     );
 
-    renderWithIntl(<RoundError error={error} />);
+    renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
     expect(screen.getByTestId('agentBuilderErrorHookExecution')).toBeInTheDocument();
     expect(screen.queryByTestId('reasoningErrorPanel')).not.toBeInTheDocument();
@@ -60,7 +62,7 @@ describe('RoundError', () => {
   it('shows workflow execution callout and skips the reasoning error panel', () => {
     const error = createWorkflowExecutionError('step failed', { workflow: 'wf-1' });
 
-    renderWithIntl(<RoundError error={error} />);
+    renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
     expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
     expect(screen.queryByTestId('reasoningErrorPanel')).not.toBeInTheDocument();
@@ -69,7 +71,7 @@ describe('RoundError', () => {
   it('shows workflow aborted callout and skips the reasoning error panel', () => {
     const error = createWorkflowAbortedError('aborted by workflow', { workflow: 'wf-2' });
 
-    renderWithIntl(<RoundError error={error} />);
+    renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
     expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
     expect(screen.queryByTestId('reasoningErrorPanel')).not.toBeInTheDocument();
@@ -78,7 +80,7 @@ describe('RoundError', () => {
   it('shows request aborted error inside the reasoning error panel', () => {
     const error = createRequestAbortedError('Converse request was aborted');
 
-    renderWithIntl(<RoundError error={error} />);
+    renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
     expect(screen.getByTestId('agentBuilderRoundErrorRequestAborted')).toBeInTheDocument();
     expect(screen.getByTestId('reasoningErrorPanel')).toBeInTheDocument();
@@ -86,7 +88,7 @@ describe('RoundError', () => {
   });
 
   it('shows generic errors inside the reasoning error panel', () => {
-    renderWithIntl(<RoundError error={new Error('boom')} />);
+    renderWithIntl(<RoundError error={new Error('boom')} onRetry={onRetry} />);
 
     expect(screen.getByTestId('agentBuilderGenericRoundError')).toBeInTheDocument();
     expect(screen.getByTestId('reasoningErrorPanel')).toBeInTheDocument();
@@ -100,7 +102,7 @@ describe('RoundError', () => {
         meta: { errCode: AgentExecutionErrorCode.contextLengthExceeded },
       });
 
-      renderWithIntl(<RoundError error={error} />);
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
       expect(screen.getByTestId('agentBuilderRoundErrorContextExceeded')).toBeInTheDocument();
     });
@@ -116,7 +118,7 @@ describe('RoundError', () => {
         },
       });
 
-      renderWithIntl(<RoundError error={error} />);
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
       expect(screen.getByTestId('agentBuilderErrorHookExecution')).toBeInTheDocument();
     });
@@ -128,7 +130,7 @@ describe('RoundError', () => {
         meta: { workflow: 'wf-1' },
       });
 
-      renderWithIntl(<RoundError error={error} />);
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
       expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
     });
@@ -144,7 +146,7 @@ describe('RoundError', () => {
         ],
       });
 
-      renderWithIntl(<RoundError error={error} />);
+      renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
 
       const details = screen.getByTestId('agentBuilderGenericRoundError').textContent;
       expect(details).toContain('Error executing agent: boom');

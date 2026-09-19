@@ -35,6 +35,7 @@ describe('ResponseMessage', () => {
   it('renders response actions after a completed response', () => {
     render(
       <ResponseMessage
+        hasError={false}
         response={{ message: 'hi' }}
         steps={[]}
         isLoading={false}
@@ -56,6 +57,7 @@ describe('ResponseMessage', () => {
   it('does not render response actions while loading', () => {
     render(
       <ResponseMessage
+        hasError={false}
         response={{ message: 'hi' }}
         steps={[]}
         isLoading={true}
