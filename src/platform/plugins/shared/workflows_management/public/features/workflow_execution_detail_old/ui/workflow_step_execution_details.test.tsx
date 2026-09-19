@@ -18,6 +18,10 @@ jest.mock('./step_execution_data_view', () => ({
   StepExecutionDataView: () => <div data-test-subj="step-execution-data-view" />,
 }));
 
+jest.mock('../../workflow_execution_detail/ui/step_execution_logs', () => ({
+  StepExecutionLogs: () => <div data-test-subj="workflowStepExecutionLogs" />,
+}));
+
 jest.mock('./workflow_execution_overview', () => ({
   WorkflowExecutionOverview: () => <div data-test-subj="workflow-execution-overview" />,
 }));
@@ -160,6 +164,7 @@ describe('WorkflowStepExecutionDetails', () => {
     const tabs = screen.getAllByRole('tab');
     expect(tabs[0]).toHaveTextContent('Output');
     expect(tabs[1]).toHaveTextContent('Input');
+    expect(tabs[2]).toHaveTextContent('Logs');
   });
 
   it('renders with workflowExecutionTrigger data-test-subj for trigger pseudo-step', () => {
@@ -184,5 +189,6 @@ describe('WorkflowStepExecutionDetails', () => {
     expect(
       container.querySelector('[data-test-subj="workflowStepExecutionDetails"]')
     ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Logs' })).toBeInTheDocument();
   });
 });

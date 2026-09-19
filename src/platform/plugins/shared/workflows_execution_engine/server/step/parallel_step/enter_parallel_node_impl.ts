@@ -509,53 +509,60 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     const branchImpl = this.nodesFactory.create(branchRuntime);
 
-    const timedOut = await this.runWithDeadline(
-      async () => {
-        // Pre-warm (rehydrate evicted outputs) — scope-independent, safe to run
-        // concurrently with sibling branches.
-        await branchRuntime.contextManager.ensureContextReady();
-        // Start the node with the branch's scope installed. The step's
-        // synchronous template rendering (getInput) reads the scope before the
-        // first await, so the scope only needs to be correct for this synchronous
-        // prefix; we restore it immediately so concurrent siblings are unaffected.
-        // The returned promise's awaited I/O does not read the global scope.
-        const runPromise = this.withBranchScope(branchStackFrames, () =>
-          Promise.resolve(branchImpl.run())
-        );
-        await runPromise;
-      },
-      deadline,
-      branchRuntime.abortController
-    );
+    try {
+      const timedOut = await this.runWithDeadline(
+        async () => {
+          // Pre-warm (rehydrate evicted outputs) — scope-independent, safe to run
+          // concurrently with sibling branches.
+          await branchRuntime.contextManager.ensureContextReady();
+          // Start the node with the branch's scope installed. The step's
+          // synchronous template rendering (getInput) reads the scope before the
+          // first await, so the scope only needs to be correct for this synchronous
+          // prefix; we restore it immediately so concurrent siblings are unaffected.
+          // The returned promise's awaited I/O does not read the global scope.
+          const runPromise = this.withBranchScope(branchStackFrames, () =>
+            Promise.resolve(branchImpl.run())
+          );
+          await runPromise;
+        },
+        deadline,
+        branchRuntime.abortController
+      );
 
-    // Release the read-pins set by ensureContextReady for this branch so its
-    // pinned outputs become eviction-eligible again. Runs on every exit path
-    // (completed / failed / waiting / timed-out). A still-in-flight 'waiting'
-    // branch re-pins on the next tick's ensureContextReady call. Idempotent.
-    branchRuntime.contextManager.releaseReadPins();
+      // Release the read-pins set by ensureContextReady for this branch so its
+      // pinned outputs become eviction-eligible again. Runs on every exit path
+      // (completed / failed / waiting / timed-out). A still-in-flight 'waiting'
+      // branch re-pins on the next tick's ensureContextReady call. Idempotent.
+      branchRuntime.contextManager.releaseReadPins();
 
-    if (timedOut) {
-      // The deadline aborted the branch's in-flight work mid-run, so the branch
-      // node never wrote its own terminal status — its step execution would leak
-      // in RUNNING forever. Invoke the node's cancellation cleanup (e.g. a
-      // `workflow.execute` cancelling its child workflow so it doesn't keep
-      // running orphaned) then mark it TIMED_OUT so the per-branch step record
-      // matches the aggregate `results[]`. This does not set the workflow error
-      // (the parallel step owns timeout disposition); see `timeoutStep`.
-      await this.runBranchOnCancel(branchImpl);
-      branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
-      return 'timed_out';
-    }
+      if (timedOut) {
+        // The deadline aborted the branch's in-flight work mid-run, so the branch
+        // node never wrote its own terminal status — its step execution would leak
+        // in RUNNING forever. Invoke the node's cancellation cleanup (e.g. a
+        // `workflow.execute` cancelling its child workflow so it doesn't keep
+        // running orphaned) then mark it TIMED_OUT so the per-branch step record
+        // matches the aggregate `results[]`. This does not set the workflow error
+        // (the parallel step owns timeout disposition); see `timeoutStep`.
+        await this.runBranchOnCancel(branchImpl);
+        branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
+        return 'timed_out';
+      }
 
-    const status = branchRuntime.stepExecution?.status;
-    if (status === ExecutionStatus.COMPLETED) {
-      return 'completed';
+      const status = branchRuntime.stepExecution?.status;
+      if (status === ExecutionStatus.COMPLETED) {
+        return 'completed';
+      }
+      if (status === ExecutionStatus.FAILED) {
+        return 'failed';
+      }
+      // WAITING / RUNNING / undefined: still in flight, retry on next tick.
+      return 'waiting';
+    } finally {
+      // Parallel branches run inline and skip `run_node`, which is what flushes
+      // the per-step event logger. Without this, handler logs (and even
+      // started/completed) for custom steps inside `parallel` never reach ES.
+      await branchRuntime.flushEventLogs();
     }
-    if (status === ExecutionStatus.FAILED) {
-      return 'failed';
-    }
-    // WAITING / RUNNING / undefined: still in flight, retry on next tick.
-    return 'waiting';
   }
 
   /**
@@ -700,6 +707,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     });
     await this.cancelBranchNode(branchRuntime);
     branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
+    await branchRuntime.flushEventLogs();
   }
 
   /**

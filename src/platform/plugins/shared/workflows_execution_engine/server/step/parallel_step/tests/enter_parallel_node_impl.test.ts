@@ -117,6 +117,7 @@ describe('EnterParallelNodeImpl', () => {
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
           timeoutStep: jest.fn(),
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
       }),
     } as unknown as jest.Mocked<StepExecutionRuntimeFactory>;
@@ -207,6 +208,16 @@ describe('EnterParallelNodeImpl', () => {
     expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith('exitParallel_fanOut');
   });
 
+  it('flushes each branch step logger after the node runs', async () => {
+    await build().run();
+    const flushed = factory.createStepExecutionRuntime.mock.results.filter(
+      (result) => result.value?.flushEventLogs?.mock?.calls?.length > 0
+    );
+    // One flush per branch body node (3 branches × 1 node). finish() also creates
+    // runtimes for aggregation; those are not flushed.
+    expect(flushed).toHaveLength(3);
+  });
+
   it('emits per-branch index and key correlation in the results', async () => {
     await build().run();
     const output = stepRuntime.finishStep.mock.calls[0][0] as {
@@ -272,6 +283,7 @@ describe('EnterParallelNodeImpl', () => {
         },
         getCurrentStepResult: () => ({ output: { node: nodeId, branch: index }, error: undefined }),
         timeoutStep: jest.fn(),
+        flushEventLogs: jest.fn().mockResolvedValue(undefined),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
     nodesFactory.create = jest.fn(
@@ -353,6 +365,7 @@ describe('EnterParallelNodeImpl', () => {
         },
         getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
         timeoutStep,
+        flushEventLogs: jest.fn().mockResolvedValue(undefined),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
     nodesFactory.create = jest.fn(
@@ -441,6 +454,7 @@ describe('EnterParallelNodeImpl', () => {
           error: undefined,
         }),
         timeoutStep: jest.fn(),
+        flushEventLogs: jest.fn().mockResolvedValue(undefined),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -526,6 +540,7 @@ describe('EnterParallelNodeImpl', () => {
           error: undefined,
         }),
         timeoutStep: jest.fn(),
+        flushEventLogs: jest.fn().mockResolvedValue(undefined),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -603,6 +618,7 @@ describe('EnterParallelNodeImpl', () => {
           error: undefined,
         }),
         timeoutStep: jest.fn(),
+        flushEventLogs: jest.fn().mockResolvedValue(undefined),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -796,6 +812,7 @@ describe('EnterParallelNodeImpl', () => {
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
           timeoutStep,
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -842,6 +859,7 @@ describe('EnterParallelNodeImpl', () => {
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
           timeoutStep,
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -879,6 +897,7 @@ describe('EnterParallelNodeImpl', () => {
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
           timeoutStep: jest.fn(),
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -975,6 +994,7 @@ describe('EnterParallelNodeImpl', () => {
           },
           getCurrentStepResult: () => ({ output: { node: nodeId }, error: undefined }),
           timeoutStep: jest.fn(),
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -1029,6 +1049,7 @@ describe('EnterParallelNodeImpl', () => {
             error: failed ? { message: 'boom' } : undefined,
           }),
           timeoutStep: jest.fn(),
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -1079,6 +1100,7 @@ describe('EnterParallelNodeImpl', () => {
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
           timeoutStep: jest.fn(),
+          flushEventLogs: jest.fn().mockResolvedValue(undefined),
         } as unknown as StepExecutionRuntime;
         createdRuntimes.push(runtime as unknown as CapturedRuntime);
         return runtime;
