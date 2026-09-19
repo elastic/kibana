@@ -9,6 +9,7 @@ import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { DefaultPolicyNotificationMessage, policyFactory } from './policy_config';
 import {
+  clearCustomYaraSignaturesIfEnabled,
   disableProtections,
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
@@ -16,8 +17,10 @@ import {
   getPolicyProtectionsReference,
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
+  removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  setCustomYaraSignatures,
 } from './policy_config_helpers';
 import { get, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -34,6 +37,7 @@ describe('Policy Config helpers', () => {
       const notSupported: PolicyConfig['windows']['memory_protection'] = {
         mode: ProtectionModes.off,
         supported: false,
+        custom_yara_signatures: false,
       };
 
       const notSupportedBehaviorProtection: PolicyConfig['windows']['behavior_protection'] = {
@@ -510,6 +514,107 @@ describe('Policy Config helpers', () => {
       expect(result.linux.events).not.toBe(policy.linux.events);
     });
   });
+
+  describe('custom_yara_signatures', () => {
+    it('writes custom_yara_signatures only for OSes in osList', () => {
+      const policy = policyFactory();
+      setCustomYaraSignatures(policy, false, ['windows']);
+      expect(policy.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(policy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);
+
+      setCustomYaraSignatures(policy, false, ['mac', 'linux']);
+      expect(policy.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(policy.mac.memory_protection.custom_yara_signatures).toBe(false);
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(false);
+    });
+
+    it('returns a copy with custom_yara_signatures removed on all OSes without mutating the input', () => {
+      const policy = policyFactory();
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+      const result = removeCustomYaraSignatures(policy);
+
+      expect(result).not.toBe(policy);
+      expect(result.windows.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.linux.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.windows.memory_protection.custom_yara_signatures).toBe(true);
+      expect(policy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);
+    });
+
+    it('keeps an explicitly disabled custom_yara_signatures while dropping enabled and absent ones', () => {
+      const policy = policyFactory();
+      policy.windows.memory_protection.custom_yara_signatures = false;
+      delete policy.mac.memory_protection.custom_yara_signatures;
+      (policy.linux as { advanced?: unknown }).advanced = {
+        memory_protection: { user_yara_rescan_interval_seconds: 3600 },
+      };
+
+      const result = removeCustomYaraSignatures(policy);
+
+      expect(result.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(result.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.linux.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(result.linux.advanced).not.toHaveProperty('memory_protection');
+    });
+
+    it('also removes the Enterprise-gated advanced rescan interval on all OSes', () => {
+      const policy = policyFactory();
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        (policy[os] as { advanced?: unknown }).advanced = {
+          memory_protection: { user_yara_rescan_interval_seconds: 3600 },
+        };
+      }
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      const result = removeCustomYaraSignatures(policy);
+
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(result[os].advanced).not.toHaveProperty('memory_protection');
+      }
+      expect(policy).toEqual(originalPolicy);
+    });
+
+    it('keeps unrelated advanced settings when removing the rescan interval', () => {
+      const policy = policyFactory();
+      (policy.windows as { advanced?: unknown }).advanced = {
+        memory_protection: { user_yara_rescan_interval_seconds: 3600, shim_cache: true },
+        alerts: { rollback: { self_healing: { enabled: true } } },
+      };
+
+      const result = removeCustomYaraSignatures(policy);
+
+      expect(result.windows.advanced).toEqual({
+        memory_protection: { shim_cache: true },
+        alerts: { rollback: { self_healing: { enabled: true } } },
+      });
+    });
+
+    it('clears an enabled custom_yara_signatures only for OSes in osList', () => {
+      const policy = policyFactory();
+
+      clearCustomYaraSignaturesIfEnabled(policy, ['windows']);
+
+      expect(policy.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(policy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(true);
+    });
+
+    it('leaves an absent custom_yara_signatures absent when clearing', () => {
+      const policy = policyFactory();
+      delete policy.windows.memory_protection.custom_yara_signatures;
+      delete policy.mac.memory_protection.custom_yara_signatures;
+      policy.linux.memory_protection.custom_yara_signatures = true;
+
+      clearCustomYaraSignaturesIfEnabled(policy, ['windows', 'mac', 'linux']);
+
+      expect(policy.windows.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(policy.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      expect(policy.linux.memory_protection.custom_yara_signatures).toBe(false);
+    });
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
@@ -539,7 +644,11 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     ransomware: { mode: ProtectionModes.off, supported: true },
-    memory_protection: { mode: ProtectionModes.off, supported: true },
+    memory_protection: {
+      mode: ProtectionModes.off,
+      supported: true,
+      custom_yara_signatures: false,
+    },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     device_control: { enabled: false, usb_storage: 'audit' },
     popup: {
@@ -557,7 +666,11 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     events: { dns: true, process: true, file: true, network: true, security: true },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
-    memory_protection: { mode: ProtectionModes.off, supported: true },
+    memory_protection: {
+      mode: ProtectionModes.off,
+      supported: true,
+      custom_yara_signatures: false,
+    },
     ransomware: { mode: ProtectionModes.off, supported: true },
     device_control: { enabled: false, usb_storage: 'audit' },
     popup: {
@@ -583,7 +696,11 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
-    memory_protection: { mode: ProtectionModes.off, supported: true },
+    memory_protection: {
+      mode: ProtectionModes.off,
+      supported: true,
+      custom_yara_signatures: false,
+    },
     popup: {
       malware: { message: '', enabled: false },
       behavior_protection: { message: '', enabled: false },

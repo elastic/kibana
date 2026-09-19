@@ -28,6 +28,7 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
 } from '../../../common/endpoint/models/policy_config_helpers';
@@ -77,6 +78,13 @@ export const createDefaultPolicy = (
     !experimentalFeatures.trustedDevices
   ) {
     defaultPolicyPerType = removeDeviceControl(defaultPolicyPerType);
+  }
+
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+    !experimentalFeatures.customYaraSignaturesEnabled
+  ) {
+    defaultPolicyPerType = removeCustomYaraSignatures(defaultPolicyPerType);
   }
 
   if (!experimentalFeatures.linuxDnsEvents) {

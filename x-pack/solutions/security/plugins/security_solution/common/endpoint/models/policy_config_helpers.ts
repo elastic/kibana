@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
 import { DefaultPolicyNotificationMessage } from './policy_config';
 import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
@@ -170,6 +171,7 @@ const getDisabledCommonProtectionsForOS = (
   memory_protection: {
     ...policy[os].memory_protection,
     mode: ProtectionModes.off,
+    custom_yara_signatures: false,
   },
   malware: {
     ...policy[os].malware,
@@ -454,6 +456,125 @@ export const setMalwareBoolean = (
   });
   return policy;
 };
+
+export const setCustomYaraSignatures = (
+  policy: PolicyConfig,
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    policy[os].memory_protection.custom_yara_signatures = value;
+  });
+  return policy;
+};
+
+/**
+ * Turns off custom YARA signatures only where they are currently enabled.
+ *
+ * An absent field is left absent: it means "never configured", and manufacturing an explicit
+ * `false` would opt the policy out of the future backfill for a feature the user never had
+ * access to. An enabled field still has to be cleared, otherwise the save is rejected by
+ * license validation.
+ */
+export const clearCustomYaraSignaturesIfEnabled = (
+  policy: PolicyConfig,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    if (policy[os].memory_protection.custom_yara_signatures) {
+      policy[os].memory_protection.custom_yara_signatures = false;
+    }
+  });
+  return policy;
+};
+
+/** Leaf field of every path in `CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS`. */
+const CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD = 'user_yara_rescan_interval_seconds';
+
+type AdvancedSettings = Record<string, unknown>;
+
+/**
+ * Whether the policy carries any of the Enterprise-gated custom YARA advanced settings.
+ */
+export const hasCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): boolean =>
+  [...CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS].some((key) => get(policy, key) !== undefined);
+
+const removeYaraAdvancedSettingsForOs = <T extends { advanced?: unknown }>(osPolicy: T): T => {
+  const advanced = osPolicy.advanced as AdvancedSettings | undefined;
+  const memoryProtection = advanced?.memory_protection as AdvancedSettings | undefined;
+
+  if (
+    !advanced ||
+    !memoryProtection ||
+    !(CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD in memoryProtection)
+  ) {
+    return osPolicy;
+  }
+
+  const remainingMemoryProtection: AdvancedSettings = { ...memoryProtection };
+  delete remainingMemoryProtection[CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD];
+
+  const nextAdvanced: AdvancedSettings = { ...advanced };
+  if (Object.keys(remainingMemoryProtection).length > 0) {
+    nextAdvanced.memory_protection = remainingMemoryProtection;
+  } else {
+    delete nextAdvanced.memory_protection;
+  }
+
+  return { ...osPolicy, advanced: nextAdvanced } as T;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Enterprise-gated custom YARA advanced
+ * settings removed.
+ *
+ * The license downgrade factories need this as much as the feature-gating path does: while these
+ * settings are inert without `custom_yara_signatures`, leaving them in place would make a
+ * downgraded policy keep failing `isEndpointPolicyValidForLicense`, so `license_watch` could
+ * never bring it into compliance.
+ */
+export const removeCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): PolicyConfig => ({
+  ...policy,
+  windows: removeYaraAdvancedSettingsForOs(policy.windows),
+  mac: removeYaraAdvancedSettingsForOs(policy.mac),
+  linux: removeYaraAdvancedSettingsForOs(policy.linux),
+});
+
+const removeEnabledCustomYaraSignaturesForOs = <
+  T extends { memory_protection: { custom_yara_signatures?: boolean } }
+>(
+  osPolicy: T
+): T => {
+  if (osPolicy.memory_protection.custom_yara_signatures === false) {
+    return osPolicy;
+  }
+
+  const { custom_yara_signatures: customYaraSignatures, ...memoryProtection } =
+    osPolicy.memory_protection;
+
+  return { ...osPolicy, memory_protection: memoryProtection } as T;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with custom YARA signatures sanitized for a
+ * deployment where the feature is gated off, along with the Enterprise-gated custom YARA
+ * advanced settings.
+ *
+ * The field is deleted rather than set to `false`, because an explicit `false` would destroy the
+ * "never set" signal, making the future `??=` backfill a no-op and leaving existing customers
+ * permanently opted out. An existing `false` is kept for the same reason in reverse: it records a
+ * deliberate opt-out, so dropping it would let the backfill turn the feature back on.
+ *
+ * @param policy
+ * @returns PolicyConfig with no enabled custom_yara_signatures
+ */
+export const removeCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig =>
+  removeCustomYaraSignaturesAdvancedSettings({
+    ...policy,
+    windows: removeEnabledCustomYaraSignaturesForOs(policy.windows),
+    mac: removeEnabledCustomYaraSignaturesForOs(policy.mac),
+    linux: removeEnabledCustomYaraSignaturesForOs(policy.linux),
+  });
 
 export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): PolicyConfig => {
   if (value === false) {
