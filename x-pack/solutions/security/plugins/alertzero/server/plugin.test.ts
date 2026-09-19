@@ -42,6 +42,11 @@ jest.mock('./routes/register_routes', () => ({
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,
   ui: { useMockData: true },
+  // Mirrors the config schema's own defaults. `start()` reads
+  // `config.featureFlags.alertTriageWorkerEnabled` unguarded — correct, because the schema
+  // always populates the object — so omitting it here fails with a TypeError rather than
+  // testing the flag-off path.
+  featureFlags: { alertTriageWorkerEnabled: false },
   ...overrides,
 });
 

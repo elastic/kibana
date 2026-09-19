@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
   type Worker,
@@ -26,6 +26,8 @@ interface WorkerSettingsPanelProps {
   enabled: boolean;
   settings: WorkerSettings;
   error?: string;
+  /** URL to link from the error message, e.g. a settings page the user must visit to resolve it. */
+  errorLink?: string;
   /** Settings could not be read for this Worker; controls are locked and the subtitle says why. */
   settingsLocked: boolean;
   /** A Watch save is in flight; controls are locked so edits cannot slip into a draft about to be cleared. */
@@ -44,6 +46,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
   enabled,
   settings,
   error,
+  errorLink,
   settingsLocked,
   isSaving,
   onEnabledChange,
@@ -73,7 +76,17 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiText size="s" color="danger" data-test-subj={`alertZeroWorkerSaveError-${worker.id}`}>
-            <p>{settingsI18n.WORKER_SETTINGS_SAVE_ERROR}</p>
+            <p>
+              {error}
+              {errorLink ? (
+                <>
+                  {' '}
+                  <EuiLink href={errorLink}>
+                    {settingsI18n.WORKER_SETTINGS_ALERT_ANALYSIS_LINK}
+                  </EuiLink>
+                </>
+              ) : null}
+            </p>
           </EuiText>
         </>
       ) : null}

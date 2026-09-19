@@ -53,6 +53,43 @@ export const AlertAnalysisWorkflowSettings = z.object({
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
 
+// Per-alert verdict emitted in the workflow.output block; matches the all_verdicts accumulator
+// shape built by the classify_alert_batches loop (and the ai.agent structured output schema).
+export const AlertAnalysisVerdict = z.object({
+  alert_id: z.string(),
+  classification: z.enum(['true_positive', 'false_positive', 'inconclusive']),
+  confidence_score: z.number().min(0).max(1),
+  rationale: z.string(),
+  // Required by the ai.agent schema; at most 3 short phrases naming the strongest signals.
+  contributing_factors: z.array(z.string()),
+});
+export type AlertAnalysisVerdict = z.infer<typeof AlertAnalysisVerdict>;
+
+// Structured output block emitted by the workflow when invoked by a caller (Worker path).
+// Also available on the standalone path — accumulators are always initialised so the output
+// is well-formed even when the analysis_enabled guard short-circuits.
+export const AlertAnalysisWorkflowOutput = z
+  .object({
+    verdicts: z.array(AlertAnalysisVerdict),
+    false_positive_count: z.number().int().min(0),
+    true_positive_count: z.number().int().min(0),
+    inconclusive_count: z.number().int().min(0),
+    auto_closed_ids: z.array(z.string()),
+  })
+  .superRefine(
+    ({ verdicts, false_positive_count, true_positive_count, inconclusive_count }, ctx) => {
+      const total = false_positive_count + true_positive_count + inconclusive_count;
+      if (total !== verdicts.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Verdict counts (${total}) do not sum to verdicts.length (${verdicts.length})`,
+          path: ['false_positive_count'],
+        });
+      }
+    }
+  );
+export type AlertAnalysisWorkflowOutput = z.infer<typeof AlertAnalysisWorkflowOutput>;
+
 // Shared min<max threshold check, applied via `.refine()` by every settings schema (a refined
 // schema can't be `.extend()`-ed, so the server route reuses this predicate rather than the schema).
 export const isThresholdRangeValid = ({

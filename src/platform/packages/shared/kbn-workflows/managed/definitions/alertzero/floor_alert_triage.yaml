@@ -1,55 +1,529 @@
 version: "1"
 name: Alert Triage
-description: Watch Floor alert triage worker stub.
+description: >
+  AlertZero Worker that triages alert batches produced by detection rule
+  executions. Classifies each alert as true_positive / false_positive /
+  inconclusive using the Security Alert Analysis workflow, records the
+  reasoning in an Investigation conversation, writes each verdict as an
+  alert tag and note, and — gated by the Worker's autonomy level — closes
+  false positives via a HITL proposal.
 enabled: false
 tags:
   - watch
   - watch-floor
+
+settings:
+  # Must exceed the gate workflow's 72 h timeout. `system-create-investigation-proposal`
+  # parks this Worker run on `waitForApproval` for up to 72 h at Manual autonomy.
+  # The 6 h default would kill the run mid-gate.
+  timeout: '80h'
+
 triggers:
+  - type: alert
+  # Keep manual for desk testing without a rule execution.
   - type: manual
+
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
-steps:
-  - name: triage_alerts
-    type: ai.agent
-    agent-id: alertzero-thin-agent
-    # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    connector-id-by-feature: alertzero_fast
-    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
-    plugin-id: alertzero_alert_triage
-    aggregate-by: alertzero_parent
-    timeout: "10m"
-    create-conversation: true
-    with:
-      configuration_overrides:
-        skill_ids:
-          - alert-analysis
-        tools:
-          - tool_ids:
-              - security.alertzero.actions.list
-      message: >
-        Triage the security alert context below. Prefer
-        recall over precision when unsure. Return a structured
-        classification.
+    # Minimum confidence score for a false_positive verdict to qualify for
+    # proposal / auto-close. Alerts below this floor are tagged and noted
+    # but not proposed for closure (R6).
+    autoCloseConfidenceScoreMinThreshold: __WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__
 
-        Alert / event context:
-        {{ event | json }}
-      schema:
-        type: object
-        properties:
-          classification:
-            type: string
-            enum:
-              - true_positive
-              - false_positive
-              - inconclusive
-            description: Classification of the alert based on analysis
-          confidence_score:
-            type: number
-            minimum: 0
-            maximum: 1
-            description: Confidence from 0.0–1.0
-          rationale:
-            type: string
+# =============================================================================
+# Steps
+# =============================================================================
+#
+# ORDERING IS LOAD-BEARING — do not rearrange.
+#
+# The conclusion metadata-patch, tags, and notes MUST be written before the
+# gate (`workflow.execute system-create-investigation-proposal`). The gate
+# parks this Worker for up to 72 h at Manual autonomy; anything sequenced
+# after it is invisible to the analyst until a decision arrives.
+#
+# Pipeline:
+#   1. create_investigation      — open an Investigation conversation
+#   2. attach_alerts             — attach the alert batch by value
+#   3. classify_alerts           — run the classification sub-workflow
+#   4. compute_fp_candidates     — filter verdicts to FP + threshold
+#   5. set_az_tags               — static AZ classification tags (R5, always)
+#   6. add_verdict_notes         — verdict + investigation ref per alert (R4/R13, always)
+#   7. gate_fp_close             — proposal gate (if any FP candidates)
+#   8. close_investigation_no_fp — explicit close when zero FPs (the branch that
+#                                  gets forgotten — must exist, see test)
+#
+# Comments (D41): five kibana.request posts with trigger_mode:'never' serve as the
+# Investigation narrative. No write_conclusion step — the framework generates the summary.
+# TODO: replace kibana.request comment posts with ai.conversation.message.add once kibana#291688 merges.
+
+steps:
+  # ---------------------------------------------------------------------------
+  # 1. Open an Investigation conversation seeded from the `investigation`
+  #    template. Seeds status, severity, and the workflow_execution_id so a
+  #    Worker retry can detect an existing Investigation for this execution.
+  # ---------------------------------------------------------------------------
+  - name: create_investigation
+    type: ai.conversation.create
+    with:
+      template_id: investigation
+      title: "Alert Triage — {{ event.rule.name }}"
+      access_control:
+        access_mode: public
+      metadata:
+        status: open
+        severity: "{{ event.rule.severity | default: 'medium' }}"
+        description: >-
+          Automated triage of {{ event.alerts | size }} alert(s) from rule
+          "{{ event.rule.name }}" ({{ event.rule.id }}).
+        workflow_execution_id: "{{ execution.id }}"
+
+  # ---------------------------------------------------------------------------
+  # 2. Attach the analysed alerts to the Investigation in chunks of 20.
+  #    security.alerts caps at 20 ids per call; foreach+chunk splits larger
+  #    batches into multiple chips. render_inline: true so chips show in the
+  #    Investigation flyout without a separate attachment panel.
+  # ---------------------------------------------------------------------------
+  - name: attach_alerts
+    type: foreach
+    foreach: "${{ event.alerts | map: '_id' | chunk: 20 | json }}"
+    steps:
+      - name: attach_alert_chunk
+        type: ai.attachment.add
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+          type: security.alerts
+          render_inline: true
+          data:
+            alertIds: "${{ foreach.item }}"
+          description: "Alerts analysed in this triage run"
+
+  # ---------------------------------------------------------------------------
+  # 3. Run the Security Alert Analysis sub-workflow.
+  #
+  #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
+  #    every close is a Proposal, so the sub-workflow must not close inline).
+  #
+  #    connectorIdByFeature: alertzero_alert_triage — resolves the model via
+  #    the Model Management feature registry rather than the standalone
+  #    workflow's uiSettings connector, so model choice is an operator-facing
+  #    setting rather than a template value.
+  #
+  #    autoCloseConfidenceScoreMinThreshold is passed through so the
+  #    sub-workflow uses the same floor for tagging/noting (the max threshold
+  #    defaults to 1, collapsing the range to a floor on this path — PR 1).
+  # ---------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
+  # Comment 1 — triage started
+  # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+  # ---------------------------------------------------------------------------
+  - name: post_comment_triage_started
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        Content-Type: application/json
+        elastic-api-version: "2023-10-31"
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        trigger_mode: "never"
+        input: >-
+          🤖 **Alert Triage** — Triage started for rule "{{ event.rule.name }}".
+          Analysing {{ event.alerts | size }} alert(s).
+          Execution: {{ execution.url }}
+
+  # ---------------------------------------------------------------------------
+  # 3. Run the Security Alert Analysis sub-workflow.
+  #
+  #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
+  #    every close is a Proposal, so the sub-workflow must not close inline).
+  #
+  #    connectorIdByFeature: alertzero_alert_triage — resolves the model via
+  #    the Model Management feature registry rather than the standalone
+  #    workflow's uiSettings connector, so model choice is an operator-facing
+  #    setting rather than a template value.
+  #
+  #    autoCloseConfidenceScoreMinThreshold is passed through so the
+  #    sub-workflow uses the same floor for tagging/noting (the max threshold
+  #    defaults to 1, collapsing the range to a floor on this path — PR 1).
+  #
+  #    investigationConversationId is passed so the sub-workflow can post
+  #    per-batch progress comments into the Investigation (guarded by
+  #    calledByWorker inside the sub-workflow).
+  # ---------------------------------------------------------------------------
+  - name: classify_alerts
+    type: workflow.execute
+    with:
+      workflow-id: system-security-alert-analysis
+      inputs:
+        # A child run has no trigger event of its own, so the batch must be passed
+        # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
+        alerts: "${{ event.alerts }}"
+        autoCloseEnabled: false
+        autoCloseConfidenceScoreMinThreshold: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
+        connectorIdByFeature: alertzero_alert_triage
+        calledByWorker: true
+        investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
+
+  # ---------------------------------------------------------------------------
+  # 4. Compute the FP candidate list: verdicts classified as false_positive
+  #    at or above the configured confidence floor.
+  # ---------------------------------------------------------------------------
+  # The confidence floor is applied here rather than in the sub-workflow: this path passes
+  # autoCloseEnabled: false, so the Worker owns the close decision (R11) and therefore owns
+  # R6's threshold too. Built as a string first because the expression filters take a
+  # pre-rendered predicate, matching `reject_exp` usage in alert_analysis_workflow.yaml.
+  - name: build_fp_threshold_expr
+    type: data.set
+    with:
+      fp_threshold_expr: "v.confidence_score >= {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
+
+  - name: compute_fp_candidates
+    type: data.set
+    with:
+      fp_candidate_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
+            | map: 'alert_id' }}
+
+  # Counted in its own step so the filter above stays the single source of truth. Both
+  # autonomy branches gate on this value, so leaving it unset makes every run a silent
+  # no-op: no proposal is created and the Investigation is never closed.
+  - name: count_fp_candidates
+    type: data.set
+    with:
+      fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
+
+  # ---------------------------------------------------------------------------
+  # Comment 2 — classification results
+  # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+  # ---------------------------------------------------------------------------
+  - name: post_comment_classification_results
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        Content-Type: application/json
+        elastic-api-version: "2023-10-31"
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        trigger_mode: "never"
+        input: >-
+          🤖 **Alert Triage** — Classification complete:
+          {{ steps.classify_alerts.output.true_positive_count }} true positive,
+          {{ steps.classify_alerts.output.false_positive_count }} false positive,
+          {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+          {{ steps.classify_alerts.output.grouped_counts_summary }}
+
+  # ---------------------------------------------------------------------------
+  # 5. Apply static AZ classification tags to every analysed alert (R5).
+  #    Tags are always written — never gated on autonomy level or FP count.
+  #    Replaces any stale AZ classification tag before adding the current one.
+  # ---------------------------------------------------------------------------
+  # Removing and adding are two calls, not one: kibana.SetAlertTags rejects a tag present in
+  # both lists ("Duplicate tags ... were found"), and the tag being added is always one of the
+  # three being cleared. Listing abbreviations in tags_to_remove dodges the collision but
+  # matches no real tag, leaving a re-analysed alert carrying both its old verdict and its new.
+  # Same remove-then-add split alert_analysis_workflow.yaml uses for its own tags.
+  - name: set_az_tags
+    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
+    type: foreach
+    steps:
+      - name: remove_stale_az_tags
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids:
+            - "{{ foreach.item.alert_id }}"
+          tags:
+            tags_to_remove:
+              - "az:true_positive"
+              - "az:false_positive"
+              - "az:inconclusive"
+            tags_to_add: []
+
+      - name: add_az_classification_tag
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids:
+            - "{{ foreach.item.alert_id }}"
+          tags:
+            tags_to_remove: []
+            tags_to_add:
+              - "az:{{ foreach.item.classification }}"
+
+  # ---------------------------------------------------------------------------
+  # 6. Write a verdict note to each alert referencing the Investigation (R4, R13).
+  #    Always written — never gated on autonomy level.
+  # ---------------------------------------------------------------------------
+  - name: add_verdict_notes
+    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/api/note"
+      body:
+        note:
+          eventId: "{{ foreach.item.alert_id }}"
+          timelineId: ''
+          note: |
+            🤖 **Alert Triage Worker** — [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
+
+            **Verdict:** {{ foreach.item.classification }}
+            **Confidence:** {{ foreach.item.confidence_score }}
+
+            {{ foreach.item.rationale }}
+      headers:
+        kbn-xsrf: string
+        Content-Type: application/json
+
+  # ---------------------------------------------------------------------------
+  # Comment 3 — what was written back to the alerts
+  # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+  # ---------------------------------------------------------------------------
+  - name: post_comment_alert_updates
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        Content-Type: application/json
+        elastic-api-version: "2023-10-31"
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        trigger_mode: "never"
+        input: >-
+          🤖 **Alert Triage** — Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
+
+  # ---------------------------------------------------------------------------
+  # 7. Autonomy gate — create a proposal to close FP alerts if any qualify.
+  #
+  #    Autonomy mapping:
+  #      manual     → autoApprove: false  (human gate, 72 h queue row)
+  #      supervised → autoApprove: true   (auto-closes; analyst notified and can undo)
+  #
+  #    Both levels go through the proposal gate so the proposal record always
+  #    exists (R11) and there is one mapping site if the semantics ever change.
+  #
+  #    Idempotency: the conversation carries `workflow_execution_id` seeded in
+  #    step 1. A Worker retry re-creates the Investigation (which 409s on a
+  #    duplicate `conversation_id` if one is supplied) rather than re-creating
+  #    a proposal for the same execution. Platform-level idempotency for
+  #    ProposalsService is an open gap (see plan §PR4 non-blocking).
+  # ---------------------------------------------------------------------------
+  - name: gate_fp_close
+    type: if
+    condition: "${{ variables.fp_candidate_count > 0 }}"
+    steps:
+      # -------------------------------------------------------------------------
+      # Comment 4 — what is being proposed and why
+      # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+      # -------------------------------------------------------------------------
+      - name: post_comment_proposal
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            elastic-api-version: "2023-10-31"
+          body:
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            trigger_mode: "never"
+            input: >-
+              🤖 **Alert Triage** — Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
+              Autonomy level: {{ consts.worker_settings.autonomy }}.
+              {% if consts.worker_settings.autonomy == 'supervised' %}This proposal will auto-approve immediately; you will be notified and can undo.{% else %}A human decision is required.{% endif %}
+
+      - name: create_fp_proposal
+        type: workflow.execute
+        # A 72 h gate timeout surfaces as a step failure in the parent
+        # (create_investigation_proposal.yaml: "A gate timeout surfaces as a step
+        # failure rather than a branch"). Patch the Investigation closed so the
+        # analyst sees a legible terminal state rather than a perpetually open one.
+        on-failure:
+          fallback:
+            - name: close_investigation_on_gate_timeout
+              type: ai.conversation.metadata.patch
+              with:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                updates:
+                  status: closed
+                  close_reason: other
+
+            # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+            - name: post_comment_outcome_gate_timeout
+              type: kibana.request
+              on-failure:
+                continue: true
+              with:
+                method: POST
+                path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                headers:
+                  kbn-xsrf: string
+                  Content-Type: application/json
+                  elastic-api-version: "2023-10-31"
+                body:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  trigger_mode: "never"
+                  input: >-
+                    🤖 **Alert Triage** — No decision received within 72 hours. {{ variables.fp_candidate_ids | size }} alert(s) remain open and tagged az:false_positive.
+                    Re-run the Worker to create a new proposal.
+        with:
+          workflow-id: system-create-investigation-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            comment: >-
+              {{ variables.fp_candidate_ids | size }} alert(s) from rule "{{ event.rule.name }}" were classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
+              Approving this proposal will close them with workflow_reason=false_positive.
+              Investigation: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}
+            actionWorkflowId: system-alertzero-action-close-alerts-fp
+            actionInput:
+              alertIds: "${{ variables.fp_candidate_ids }}"
+              reason: "false_positive"
+            impact: high
+            confidence: high
+            # Autonomy → autoApprove mapping. One site: update here if semantics change.
+            autoApprove: "${{ consts.worker_settings.autonomy == 'supervised' }}"
+
+      # Fetch proposal details for outcome comment attribution (decision, decidedBy).
+      - name: get_proposal
+        type: proposals.getProposal
+        on-failure:
+          continue: true
+        with:
+          proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
+
+      # After the gate resolves (human approve or auto-approved), verify the
+      # close landed by comparing the action workflow's output closed_count
+      # against the proposed alert count. A mismatch means alerts stayed open
+      # while nothing notified the analyst — which is the failure D37 says
+      # "logged and shown in the UI" is not good enough for.
+      - name: verify_and_close
+        type: if
+        condition: "${{ steps.create_fp_proposal.output.status == 'succeeded' }}"
+        steps:
+          # Everything the analyst approved has already happened by this point: the alerts are
+          # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
+          # would report a successful triage as a failure, so the patch is allowed to fail.
+          - name: close_investigation_after_approval
+            type: ai.conversation.metadata.patch
+            on-failure:
+              fallback:
+                - name: log_investigation_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      Alerts were closed and the proposal succeeded, but the Investigation
+                      could not be marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open
+                      until the reconciliation sweep resolves it.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: false_positive
+
+          # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+          - name: post_comment_outcome_approved
+            type: kibana.request
+            on-failure:
+              continue: true
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                elastic-api-version: "2023-10-31"
+              body:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                trigger_mode: "never"
+                input: >-
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+
+        else:
+          # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+          - name: post_comment_outcome_dismissed
+            type: kibana.request
+            on-failure:
+              continue: true
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                elastic-api-version: "2023-10-31"
+              body:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                trigger_mode: "never"
+                input: >-
+                  🤖 **Alert Triage** — Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) remain open, tagged az:false_positive.
+
+  # ---------------------------------------------------------------------------
+  # 9. No-FP branch: close the Investigation immediately (D31, D41).
+  #
+  #     This branch MUST be explicit. A batch that classifies nothing as a
+  #     false positive still needs a closed Investigation — it is the branch
+  #     that gets forgotten in tests and in code review.
+  # ---------------------------------------------------------------------------
+  - name: close_investigation_no_fp
+    type: if
+    condition: "${{ variables.fp_candidate_count == 0 }}"
+    steps:
+      - name: close_no_fp
+        type: ai.conversation.metadata.patch
+        with:
+          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+          updates:
+            status: closed
+
+      # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+      - name: post_comment_outcome_no_fp
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            elastic-api-version: "2023-10-31"
+          body:
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            trigger_mode: "never"
+            input: >-
+              🤖 **Alert Triage** — Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
+              {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+

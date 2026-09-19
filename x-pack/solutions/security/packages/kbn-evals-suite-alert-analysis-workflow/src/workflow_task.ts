@@ -40,7 +40,7 @@ const isAgentStep = (step: WorkflowStepExecutionDto): boolean =>
 /** One verdict, as the workflow's `ai.agent` step is schema-constrained to return it. */
 interface Verdict {
   /** The alert id the model echoes back, used to pair a verdict with its alert. */
-  id?: string;
+  alert_id?: string;
   classification?: Classification;
   confidence_score?: number;
   rationale?: string;
@@ -95,7 +95,9 @@ const readAgentVerdict = (
   const agentSteps = stepExecutions.filter(isAgentStep);
   for (const step of agentSteps) {
     const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
-    const verdict = output?.structured_output?.verdicts?.find(({ id }) => id === alertId);
+    const verdict = output?.structured_output?.verdicts?.find(
+      ({ alert_id }) => alert_id === alertId
+    );
     if (verdict?.classification) {
       return verdict;
     }

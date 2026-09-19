@@ -22,6 +22,7 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
+  close: 'respond',
   investigate: 'investigate',
   configure: 'configure',
   tune: 'configure',
@@ -77,6 +78,18 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `confidence`, `origin`, `dismissReason`, `rationale`, `executionError`,
  *   `workflowExecutionId`, `decidedBy`, `expiresAt` — no destination in Investigation.
  */
+/**
+ * Derives a past-tense label for a decided proposal when the action closed a countable
+ * set of alerts (i.e. actionInput.alertIds is present). Falls back to undefined so the
+ * caller can use the action name instead.
+ */
+const closedActionLabel = (proposal: ProposalItem): string | undefined => {
+  const ids = proposal.actionInput?.alertIds;
+  if (!Array.isArray(ids)) return undefined;
+  const n = ids.length;
+  return `${n} ${n === 1 ? 'alert' : 'alerts'} closed as false positive`;
+};
+
 export const proposalToInvestigation = (proposal: ProposalItem): Investigation => {
   // Closed detection mirrors groupProposals() server-side: decidedAt wins over category.
   const isClosed = Boolean(proposal.decidedAt);
@@ -114,7 +127,8 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     summary: proposal.comment,
-    primaryActionLabel: proposal.action?.name,
+    primaryActionLabel:
+      (isClosed ? closedActionLabel(proposal) : undefined) ?? proposal.action?.name,
     assignee: null,
     events: [],
     // affectedSurface left undefined → BlastRadius self-hides (returns null).

@@ -16,6 +16,8 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
@@ -117,6 +119,19 @@ export class AlertZeroPlugin
       },
     });
 
+    if (searchInferenceEndpoints) {
+      searchInferenceEndpoints.features.register({
+        featureId: ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID,
+        parentFeatureId: 'security_search_inference_parent',
+        featureName: 'Alert Triage',
+        featureDescription: 'Model used by the Alert Triage Worker to classify alerts',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        // No ignoreGlobalDefault — falls back to platform default so the Worker works immediately
+        // after onboarding, unlike Hunt Watch's tiered TI features which use ignoreGlobalDefault: true.
+      });
+    }
+
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -133,7 +148,7 @@ export class AlertZeroPlugin
     return {};
   }
 
-  start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
+  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
 
     if (!this.config.enabled) {
@@ -179,14 +194,32 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
-    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
-      ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) =>
-            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
-        : undefined,
-      agentBuilder: plugins.agentBuilder,
-      agentTypes: [agentType],
-    });
+    this.workersService = new WorkersService(
+      management,
+      managedWorkflows,
+      this.logger,
+      {
+        ensureAgentForSpace: plugins.agentBuilder
+          ? (spaceId) =>
+              ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+          : undefined,
+        agentBuilder: plugins.agentBuilder,
+        agentTypes: [agentType],
+      },
+      {
+        getAttachmentService:
+          plugins.securitySolution?.getAlertAnalysisWorkflowRuleAttachmentService.bind(
+            plugins.securitySolution
+          ),
+        // Read per request: the setting is space-scoped, so a Worker enabled in one space
+        // says nothing about another. Resolved here rather than in WorkersService because
+        // the setting belongs to security_solution.
+        isAlertAnalysisRuntimeEnabled: async (request) =>
+          core.uiSettings
+            .asScopedToClient(core.savedObjects.getScopedClient(request))
+            .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
+      }
+    );
 
     return {};
   }

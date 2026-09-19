@@ -178,6 +178,7 @@ const assertPositiveInt = (name: string, value: number) => {
 };
 
 const parseEpisodesFlag = (value: string | undefined): Set<string> => {
+  if (value === 'none') return new Set();
   if (!value)
     return new Set(['ep1', 'ep2', 'ep3', 'ep4', 'ep5', 'ep6', 'ep7', 'ep8', 'noise1', 'noise2']);
   const parts = value
@@ -1094,30 +1095,34 @@ export const cli = () => {
           loaded.push(await loadEpisode(fspec, { validateFixtures }));
         }
 
-        await ensureGeneratorIndices({ esClient, endMs, episodeIds, log, indexPrefix });
+        if (episodeIds.length > 0) {
+          await ensureGeneratorIndices({ esClient, endMs, episodeIds, log, indexPrefix });
 
-        const scaled = scaleEpisodes(loaded, {
-          startMs,
-          endMs,
-          targetEvents: events,
-          hostCount: hosts,
-          userCount: users,
-          seed: getOptionalStringFlag(cliContext.flags, 'seed'),
-          riskyHostCount: Math.min(2, hosts),
-          riskyUserCount: Math.min(2, users),
-          riskyProbability: 0.7,
-        });
+          const scaled = scaleEpisodes(loaded, {
+            startMs,
+            endMs,
+            targetEvents: events,
+            hostCount: hosts,
+            userCount: users,
+            seed: getOptionalStringFlag(cliContext.flags, 'seed'),
+            riskyHostCount: Math.min(2, hosts),
+            riskyUserCount: Math.min(2, users),
+            riskyProbability: 0.7,
+          });
 
-        await bulkIndexStreamed({
-          esClient,
-          endMs,
-          episodeIds,
-          log,
-          docs: scaled,
-          indexPrefix,
-        });
+          await bulkIndexStreamed({
+            esClient,
+            endMs,
+            episodeIds,
+            log,
+            docs: scaled,
+            indexPrefix,
+          });
 
-        log.info(`Done indexing episode events/endpoint alerts.`);
+          log.info(`Done indexing episode events/endpoint alerts.`);
+        } else {
+          log.info('No episodes selected — skipping episode indexing.');
+        }
 
         const packResults = [];
         for (const packId of packIds) {
@@ -1343,7 +1348,7 @@ export const cli = () => {
         -u, --users                      Number of users to spread events across (Default: 5)
         --start-date                     Date math start (e.g. 1d, now-1d) (Default: 1d)
         --end-date                       Date math end (e.g. now) (Default: now)
-        --episodes                       Comma-separated episode IDs or numbers (e.g. ep1,ep2 or 1,2). Default: ep1-ep8,noise1,noise2
+        --episodes                       Comma-separated episode IDs or numbers (e.g. ep1,ep2 or 1,2). Default: ep1-ep8,noise1,noise2. Pass "none" to skip all episodes (pack-only mode).
         --packs                          Comma-separated Technology Watch packs (okta,aws-iam,kubernetes,github-actions)
         --seed                           Optional seed for deterministic scaling
         --clean                          Delete previously generated data for the selected time range before generating new data

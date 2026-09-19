@@ -30,6 +30,7 @@ export {
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_URL,
+  ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_SKILLS_URL,
   ALERTZERO_SKILL_URL_TEMPLATE,
@@ -120,6 +121,8 @@ export {
   WatchWorkerAttachment,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
@@ -155,6 +158,7 @@ export {
   getMockProposalsByConversationId,
 } from './impl/samples';
 export {
+  ALERT_TRIAGE_DEFAULT_EXTRAS,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
