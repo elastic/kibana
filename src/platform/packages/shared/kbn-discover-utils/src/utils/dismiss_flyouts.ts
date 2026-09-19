@@ -12,6 +12,7 @@ export enum DiscoverFlyouts {
   docViewer = 'docViewer',
   esqlDocs = 'esqlDocs',
   metricInsights = 'metricInsights',
+  metricGridSettings = 'metricGridSettings',
   esqlControls = 'esqlControls',
   lensAlertRule = 'lensAlertRule',
   inspectorPanel = 'inspectorPanel',
@@ -48,6 +49,13 @@ const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLE
         () =>
           document.querySelector(
             '[data-test-subj="metricsExperienceFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
+    case DiscoverFlyouts.metricGridSettings:
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="metricsExperienceGridSettingsFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
           ),
       ];
     case DiscoverFlyouts.esqlControls:

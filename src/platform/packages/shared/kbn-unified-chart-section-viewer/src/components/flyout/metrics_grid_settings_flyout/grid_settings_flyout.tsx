@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -26,8 +26,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
+import { usePushFlyoutPaddingCleanup } from '../hooks/use_push_flyout_padding_cleanup';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
@@ -56,6 +61,12 @@ export const GridSettingsFlyout = ({
         'Set how values are aggregated for each metric type. Changes apply to every metric of that type in this Discover tab.',
     }
   );
+
+  useEffect(() => {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricGridSettings);
+  }, []);
+
+  usePushFlyoutPaddingCleanup();
 
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
 

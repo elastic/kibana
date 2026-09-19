@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -58,9 +59,20 @@ export const MetricsExperienceGrid = ({
     profileId,
     gridSettings,
     onGridSettingsChange,
+    onFlyoutStateChange,
     recentlyExploredMetrics,
   } = useMetricsExperienceState();
   const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
+
+  const onOpenGridSettings = useCallback(() => {
+    onFlyoutStateChange(undefined);
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricGridSettings);
+    toggleGridSettingsFlyout(true);
+  }, [onFlyoutStateChange, toggleGridSettingsFlyout]);
+
+  const onCloseGridSettings = useCallback(() => {
+    toggleGridSettingsFlyout(false);
+  }, [toggleGridSettingsFlyout]);
   const {
     metricItems,
     allDimensions,
@@ -141,7 +153,7 @@ export const MetricsExperienceGrid = ({
     renderToggleActions,
     onDimensionsChange,
     isLoading: isDiscoverLoading,
-    onOpenGridSettings: toggleGridSettingsFlyout,
+    onOpenGridSettings,
   });
 
   const onKeyDown = useCallback(
@@ -206,7 +218,7 @@ export const MetricsExperienceGrid = ({
         <GridSettingsFlyout
           gridSettings={gridSettings}
           onGridSettingsChange={onGridSettingsChange}
-          onClose={toggleGridSettingsFlyout}
+          onClose={onCloseGridSettings}
         />
       )}
     </>
