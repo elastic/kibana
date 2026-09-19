@@ -21949,7 +21949,6 @@
     "xpack.fleet.cloudConnector.aws.guide.steps.accept.capabilities": "capacidades",
     "xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials": "Copie {accessKeyId} e {secretAccessKey} depois cole as credenciais abaixo",
     "xpack.fleet.cloudConnector.aws.guide.steps.create": "Clique em {createStack}.",
-    "xpack.fleet.cloudConnector.aws.guide.steps.credentials": "Copie {role} e {external_id} e cole as credenciais da função abaixo",
     "xpack.fleet.cloudConnector.aws.guide.steps.launch": "Clique no botão {launchCloudFormation} abaixo.",
     "xpack.fleet.cloudConnector.aws.guide.steps.organizationLogin": "Faça login como {admin} na conta de gestão da organização AWS que você deseja integrar",
     "xpack.fleet.cloudConnector.aws.guide.steps.region": "(Opcional) Mude a {amazonRegion} no canto superior direito para a região onde você quer implantar sua pilha",

@@ -39,11 +39,10 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
       />
     ) : (
       <FormattedMessage
-        id="xpack.fleet.cloudConnector.aws.guide.steps.credentials"
-        defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
+        id="xpack.fleet.cloudConnector.aws.guide.steps.roleArnCredentials"
+        defaultMessage="Copy {role} then paste it below"
         values={{
           role: <strong>{'Role ARN'}</strong>,
-          external_id: <strong>{'External ID'}</strong>,
         }}
       />
     );

@@ -21853,7 +21853,6 @@
     "xpack.fleet.cloudConnector.aws.guide.steps.accept.capabilities": "fonctionnalités",
     "xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials": "Copiez les {accessKeyId} et les {secretAccessKey}, puis collez les identifiants ci-dessous",
     "xpack.fleet.cloudConnector.aws.guide.steps.create": "Cliquez sur {createStack}.",
-    "xpack.fleet.cloudConnector.aws.guide.steps.credentials": "Copiez les {role} et {external_id}, puis collez les informations d'identification du rôle ci-dessous",
     "xpack.fleet.cloudConnector.aws.guide.steps.launch": "Cliquez sur le bouton {launchCloudFormation} ci-dessous.",
     "xpack.fleet.cloudConnector.aws.guide.steps.region": "(Facultatif) Modifiez la {amazonRegion} dans le coin supérieur droit pour qu'elle corresponde à la région où vous voulez déployer votre suite",
     "xpack.fleet.cloudConnector.aws.guide.steps.stackStatus": "Une fois que l'état de la suite est {createComplete}, cliquez sur l'onglet Sorties",

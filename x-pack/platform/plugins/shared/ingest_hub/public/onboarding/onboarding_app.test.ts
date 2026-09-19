@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shouldClearSession, hydrateOnboardingSession } from './onboarding_app';
+import { getCloudService, shouldClearSession, hydrateOnboardingSession } from './onboarding_app';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendGetCloudOnboardingDeployment: jest.fn(),
@@ -118,5 +118,50 @@ describe('shouldClearSession', () => {
 
   it('returns the integration id when other query params are present but deploymentId is not', () => {
     expect(shouldClearSession(tileEntry({ search: '?foo=bar' }))).toBe('aws');
+  });
+});
+
+describe('getCloudService', () => {
+  const cloudSetup = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    organizationId: '2070044029',
+    csp: 'aws',
+    region: 'eu-west-1',
+    cloudHost: 'eu-west-1.aws.qa.cld.elstc.co',
+    serverless: {},
+  } as any;
+  const cloudStart = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: 'qa:abc',
+    deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c',
+    serverless: {},
+  } as any;
+
+  it('returns undefined when the cloud plugin is not available', () => {
+    expect(getCloudService(undefined, undefined)).toBeUndefined();
+    expect(getCloudService(cloudSetup, undefined)).toBeUndefined();
+  });
+
+  it('exposes the setup-only deployment metadata alongside the start contract', () => {
+    const cloud = getCloudService(cloudSetup, cloudStart);
+    expect(cloud).toMatchObject({
+      organizationId: '2070044029',
+      csp: 'aws',
+      region: 'eu-west-1',
+      cloudHost: 'eu-west-1.aws.qa.cld.elstc.co',
+      cloudId: 'qa:abc',
+      deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c',
+    });
+  });
+
+  it('lets the start contract win on shared keys', () => {
+    const cloud = getCloudService({ ...cloudSetup, cloudId: 'stale' }, cloudStart);
+    expect(cloud?.cloudId).toBe('qa:abc');
+  });
+
+  it('works without a setup contract', () => {
+    expect(getCloudService(undefined, cloudStart)).toEqual(cloudStart);
   });
 });

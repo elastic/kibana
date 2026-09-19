@@ -23,8 +23,14 @@ import {
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
   getAnyCloudConnectorIacTemplateUrl,
+  getTemplateUrlTokens,
+  getElasticCloudTemplateContext,
+  getElasticResource,
+  parseElasticCloudHost,
+  getElasticCloudEnvironmentFromHost,
+  getCloudHostFromCloudId,
 } from './utils';
-import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT, TEMPLATE_URL_TOKENS } from './constants';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -1027,5 +1033,341 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
       ],
     } as any;
     expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
+  });
+});
+
+describe('Workload Identity template URLs', () => {
+  const WII_TEMPLATE_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
+  const LEGACY_TEMPLATE_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.6.0.yml';
+
+  const encodeCloudId = (host: string, kibanaComponentId: string) =>
+    `label:${btoa(`${host}$es-component-id$${kibanaComponentId}`)}`;
+
+  const KIBANA_COMPONENT_ID = '3a127b696031473aba8624d0cb17ec43';
+  const PROJECT_ID = 'fe9c342b06c74eda8afb679e0b3d22d8';
+
+  const echQaCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: encodeCloudId('eu-west-1.aws.qa.cld.elstc.co:9243', KIBANA_COMPONENT_ID),
+    deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c5b6a79808172635445362718',
+    organizationId: '2070044029',
+    serverless: {},
+  } as CloudSetup;
+
+  const serverlessProductionCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: true,
+    cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', 'kibana'),
+    deploymentUrl: `https://cloud.elastic.co/projects/security/${PROJECT_ID}`,
+    organizationId: '10',
+    csp: 'aws',
+    baseUrl: 'https://cloud.elastic.co',
+    serverless: { projectId: PROJECT_ID },
+  } as CloudSetup;
+
+  const getQuickCreateParams = (url: string) => new URLSearchParams(url.split('?')[1]);
+
+  describe('getCloudConnectorRemoteRoleTemplate', () => {
+    it('pre-fills every parameter for an Elastic Cloud Hosted deployment (Kibana component ID as resource)', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: echQaCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeDefined();
+      const params = getQuickCreateParams(result!);
+      expect(params.get('templateURL')).toBe(
+        'https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml'
+      );
+      expect(params.get('param_ElasticOrganizationId')).toBe('2070044029');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eu-west-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('qa');
+      expect(params.get('param_ElasticResourceType')).toBe('deployment');
+      expect(params.get('param_ElasticResourceId')).toBe(KIBANA_COMPONENT_ID);
+      TEMPLATE_URL_TOKENS.forEach((token) => expect(result).not.toContain(token));
+    });
+
+    it('pre-fills every parameter for a Serverless project (project ID as resource)', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: serverlessProductionCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeDefined();
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticOrganizationId')).toBe('10');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('us-east-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('production');
+      expect(params.get('param_ElasticResourceType')).toBe('project');
+      expect(params.get('param_ElasticResourceId')).toBe(PROJECT_ID);
+    });
+
+    it('prefers the explicit cloud plugin CSP and region over the Cloud ID host', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, csp: 'gcp', region: 'us-central1' } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticCloudProvider')).toBe('gcp');
+      expect(params.get('param_ElasticCloudRegion')).toBe('us-central1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('qa');
+    });
+
+    it('prefers the cloudHost exposed by the cloud plugin over decoding the Cloud ID', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, cloudHost: 'eastus2.azure.staging.cld.elstc.co' } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticCloudProvider')).toBe('azure');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eastus2');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('staging');
+    });
+
+    it('falls back to the console base URL for the environment when no Cloud ID host is available', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: {
+          ...serverlessProductionCloud,
+          cloudId: undefined,
+          region: 'us-east-1',
+          baseUrl: 'https://console.staging.foundit.no',
+        } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('staging');
+      expect(params.get('param_ElasticResourceId')).toBe(PROJECT_ID);
+    });
+
+    it('returns undefined when the organization ID is unknown', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, organizationId: undefined } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when the region cannot be derived from config or the Cloud ID host', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...serverlessProductionCloud, cloudId: undefined } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined outside Elastic Cloud', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { isCloudEnabled: false, isServerlessEnabled: false, serverless: {} } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('still returns legacy token-free template URLs untouched', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: echQaCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: LEGACY_TEMPLATE_URL,
+      });
+
+      expect(result).toBe(LEGACY_TEMPLATE_URL);
+    });
+
+    it('URL-encodes substituted values', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, organizationId: 'org id&x' } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toContain('param_ElasticOrganizationId=org%20id%26x');
+    });
+  });
+
+  describe('getTemplateUrlTokens', () => {
+    it('returns the tokens present in declaration order', () => {
+      expect(getTemplateUrlTokens(WII_TEMPLATE_URL)).toEqual([
+        'RESOURCE_ID',
+        'RESOURCE_TYPE',
+        'ORGANIZATION_ID',
+        'CLOUD_PROVIDER',
+        'CLOUD_REGION',
+        'CLOUD_ENVIRONMENT',
+      ]);
+      expect(getTemplateUrlTokens(LEGACY_TEMPLATE_URL)).toEqual([]);
+      expect(getTemplateUrlTokens(undefined)).toEqual([]);
+    });
+  });
+
+  describe('getElasticCloudTemplateContext', () => {
+    it('describes an Elastic Cloud Hosted deployment', () => {
+      expect(getElasticCloudTemplateContext(echQaCloud)).toEqual({
+        resourceType: 'deployment',
+        resourceId: KIBANA_COMPONENT_ID,
+        organizationId: '2070044029',
+        cloudProvider: 'aws',
+        cloudRegion: 'eu-west-1',
+        cloudEnvironment: 'qa',
+      });
+    });
+
+    it('describes a Serverless project', () => {
+      expect(getElasticCloudTemplateContext(serverlessProductionCloud)).toEqual({
+        resourceType: 'project',
+        resourceId: PROJECT_ID,
+        organizationId: '10',
+        cloudProvider: 'aws',
+        cloudRegion: 'us-east-1',
+        cloudEnvironment: 'production',
+      });
+    });
+
+    it('ignores a CSP value that is not a supported provider', () => {
+      expect(
+        getElasticCloudTemplateContext({ ...echQaCloud, csp: 'ibm' } as CloudSetup).cloudProvider
+      ).toBe('aws');
+    });
+
+    it('lower-cases the configured region and falls back to the host for invalid values', () => {
+      expect(
+        getElasticCloudTemplateContext({ ...echQaCloud, region: 'EU-WEST-2' } as CloudSetup)
+          .cloudRegion
+      ).toBe('eu-west-2');
+      expect(
+        getElasticCloudTemplateContext({ ...echQaCloud, region: 'eu west 2' } as CloudSetup)
+          .cloudRegion
+      ).toBe('eu-west-1');
+    });
+
+    it('defaults to production and leaves unknown values undefined without cloud context', () => {
+      expect(getElasticCloudTemplateContext(undefined)).toEqual({
+        resourceType: 'deployment',
+        resourceId: undefined,
+        organizationId: undefined,
+        cloudProvider: undefined,
+        cloudRegion: undefined,
+        cloudEnvironment: 'production',
+      });
+    });
+  });
+
+  describe('getElasticResource', () => {
+    it('uses the Kibana component ID on Elastic Cloud Hosted', () => {
+      expect(getElasticResource(echQaCloud)).toEqual({
+        type: 'deployment',
+        id: KIBANA_COMPONENT_ID,
+      });
+    });
+
+    it('uses the project ID on Serverless', () => {
+      expect(getElasticResource(serverlessProductionCloud)).toEqual({
+        type: 'project',
+        id: PROJECT_ID,
+      });
+    });
+
+    it('keeps Elastic Cloud Hosted precedence when both deployment and project data are present', () => {
+      expect(
+        getElasticResource({
+          ...echQaCloud,
+          isServerlessEnabled: true,
+          serverless: { projectId: 'should-not-be-used' },
+        } as CloudSetup)
+      ).toEqual({ type: 'deployment', id: KIBANA_COMPONENT_ID });
+    });
+
+    it('returns the resource type without an ID when nothing can be derived', () => {
+      expect(
+        getElasticResource({
+          isCloudEnabled: true,
+          isServerlessEnabled: true,
+          serverless: {},
+        } as CloudSetup)
+      ).toEqual({ type: 'project' });
+      expect(getElasticResource(undefined)).toEqual({ type: 'deployment' });
+    });
+  });
+
+  describe('parseElasticCloudHost', () => {
+    it.each([
+      ['us-east-1.aws.found.io', 'us-east-1', 'aws', 'production'],
+      ['us-central1.gcp.cloud.es.io', 'us-central1', 'gcp', 'production'],
+      ['eastus2.azure.elastic-cloud.com', 'eastus2', 'azure', 'production'],
+      ['us-gov-east-1.aws.elastic-cloud.com', 'us-gov-east-1', 'aws', 'production'],
+      ['eu-west-1.aws.elastic.cloud', 'eu-west-1', 'aws', 'production'],
+      ['eu-west-1.aws.qa.cld.elstc.co', 'eu-west-1', 'aws', 'qa'],
+      ['us-central1.gcp.qa.elastic.cloud', 'us-central1', 'gcp', 'qa'],
+      ['us-east-1.aws.staging.foundit.no', 'us-east-1', 'aws', 'staging'],
+      ['us-east-1.aws.staging.elastic.cloud', 'us-east-1', 'aws', 'staging'],
+      ['EU-WEST-1.AWS.QA.CLD.ELSTC.CO:9243', 'eu-west-1', 'aws', 'qa'],
+    ])('parses %s', (host, region, csp, environment) => {
+      expect(parseElasticCloudHost(host)).toEqual({ region, csp, environment });
+    });
+
+    it('leaves the CSP undefined for hosts that do not follow the Elastic Cloud layout', () => {
+      expect(parseElasticCloudHost('my-ece.example.com')).toEqual({
+        region: 'my-ece',
+        csp: undefined,
+        environment: 'production',
+      });
+    });
+
+    it('returns undefined for hosts with fewer than three labels or no host', () => {
+      expect(parseElasticCloudHost('localhost')).toBeUndefined();
+      expect(parseElasticCloudHost('kibana.local')).toBeUndefined();
+      expect(parseElasticCloudHost(undefined)).toBeUndefined();
+      expect(parseElasticCloudHost('')).toBeUndefined();
+    });
+  });
+
+  describe('getElasticCloudEnvironmentFromHost', () => {
+    it('maps QA and staging labels and defaults everything else to production', () => {
+      expect(getElasticCloudEnvironmentFromHost('console.qa.cld.elstc.co')).toBe('qa');
+      expect(getElasticCloudEnvironmentFromHost('staging.found.no')).toBe('staging');
+      expect(getElasticCloudEnvironmentFromHost('console.staging.foundit.no')).toBe('staging');
+      expect(getElasticCloudEnvironmentFromHost('cloud.elastic.co')).toBe('production');
+      expect(getElasticCloudEnvironmentFromHost('ap-southeast-1.aws.found.io')).toBe('production');
+      expect(getElasticCloudEnvironmentFromHost('eu-west-1.aws.dev.elastic.cloud')).toBe(
+        'production'
+      );
+      expect(getElasticCloudEnvironmentFromHost(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('getCloudHostFromCloudId', () => {
+    it('returns the host without the port', () => {
+      expect(
+        getCloudHostFromCloudId(encodeCloudId('eu-west-1.aws.qa.cld.elstc.co:9243', 'kb'))
+      ).toBe('eu-west-1.aws.qa.cld.elstc.co');
+      expect(getCloudHostFromCloudId(encodeCloudId('us-east-1.aws.elastic.cloud', 'kb'))).toBe(
+        'us-east-1.aws.elastic.cloud'
+      );
+    });
+
+    it('returns undefined for missing or malformed Cloud IDs', () => {
+      expect(getCloudHostFromCloudId(undefined)).toBeUndefined();
+      expect(getCloudHostFromCloudId('no-colon')).toBeUndefined();
+      expect(getCloudHostFromCloudId('label:')).toBeUndefined();
+      expect(getCloudHostFromCloudId('label:!!!not-base64!!!')).toBeUndefined();
+    });
   });
 });

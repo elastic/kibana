@@ -21957,7 +21957,6 @@
     "xpack.fleet.cloudConnector.aws.guide.steps.accept.capabilities": "機能",
     "xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials": "{accessKeyId}と{secretAccessKey}をコピーして、以下に認証情報を貼り付けます",
     "xpack.fleet.cloudConnector.aws.guide.steps.create": "{createStack}をクリックします。",
-    "xpack.fleet.cloudConnector.aws.guide.steps.credentials": "{role}と{external_id}をコピーして、以下にロールの資格情報を貼り付けます",
     "xpack.fleet.cloudConnector.aws.guide.steps.launch": "下の［{launchCloudFormation}］ボタンをクリックします。",
     "xpack.fleet.cloudConnector.aws.guide.steps.organizationLogin": "オンボードするAWS組織の管理アカウントで{admin}としてログイン",
     "xpack.fleet.cloudConnector.aws.guide.steps.region": "（任意）右上の{amazonRegion}を、スタックをデプロイしたいリージョンに変更します",

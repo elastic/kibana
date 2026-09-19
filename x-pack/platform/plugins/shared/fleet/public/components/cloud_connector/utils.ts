@@ -14,6 +14,7 @@ import type {
   AzureCloudConnectorVars,
   GcpCloudConnectorVars,
   CloudConnectorVars,
+  CloudProvider,
 } from '../../../common/types';
 import { isCloudProvider } from '../../../common/types';
 import { getIacTemplateUrlFromVarGroupSelection } from '../../../common/services/cloud_connectors';
@@ -23,8 +24,10 @@ import type {
   AzureCloudConnectorCredentials,
   GcpCloudConnectorCredentials,
   CloudConnectorCredentials,
+  CloudSetupForCloudConnector,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
+import type { AccountType } from '../../types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
@@ -38,10 +41,22 @@ import {
   GCP_PROVIDER,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR,
+  TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR,
+  TEMPLATE_URL_CLOUD_REGION_ENV_VAR,
+  TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR,
+  TEMPLATE_URL_TOKENS,
+  ELASTIC_RESOURCE_TYPE_DEPLOYMENT,
+  ELASTIC_RESOURCE_TYPE_PROJECT,
+  ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION,
+  ELASTIC_CLOUD_ENVIRONMENT_STAGING,
+  ELASTIC_CLOUD_ENVIRONMENT_QA,
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
 } from './constants';
+import type { ElasticCloudEnvironment, ElasticResourceType, TemplateUrlToken } from './constants';
 
 export type AzureCloudConnectorFieldNames =
   (typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES];
@@ -163,20 +178,151 @@ export const getDeploymentIdFromUrl = (url: string | undefined): string | undefi
   return match?.[1];
 };
 
-export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+// <host>[:<port>]$<es component id>$<kibana component id>
+const decodeCloudIdParts = (cloudId: string | undefined): string[] | undefined => {
   if (!cloudId) return undefined;
 
   try {
     const base64Part = cloudId.split(':')[1];
     if (!base64Part) return undefined;
 
-    const decoded = atob(base64Part);
-    const [, , kibanaComponentId] = decoded.split('$');
-
-    return kibanaComponentId || undefined;
+    return atob(base64Part).split('$');
   } catch (error) {
     return undefined;
   }
+};
+
+export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+  const [, , kibanaComponentId] = decodeCloudIdParts(cloudId) ?? [];
+  return kibanaComponentId || undefined;
+};
+
+export const getCloudHostFromCloudId = (cloudId: string | undefined): string | undefined => {
+  const [hostWithPort] = decodeCloudIdParts(cloudId) ?? [];
+  const host = hostWithPort?.split(':')[0];
+  return host || undefined;
+};
+
+export interface ElasticCloudHostInfo {
+  region?: string;
+  csp?: CloudProvider;
+  environment: ElasticCloudEnvironment;
+}
+
+const REGION_LABEL_REGEX = /^[a-z0-9-]+$/;
+
+const normalizeRegion = (region: string | undefined): string | undefined => {
+  const value = region?.trim().toLowerCase();
+  return value && REGION_LABEL_REGEX.test(value) ? value : undefined;
+};
+
+const getHostname = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  try {
+    return new URL(url).hostname || undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const getElasticCloudEnvironmentFromHost = (
+  host: string | undefined
+): ElasticCloudEnvironment | undefined => {
+  if (!host) return undefined;
+  const labels = host.toLowerCase().split('.');
+  if (labels.includes(ELASTIC_CLOUD_ENVIRONMENT_QA)) return ELASTIC_CLOUD_ENVIRONMENT_QA;
+  if (labels.includes(ELASTIC_CLOUD_ENVIRONMENT_STAGING)) return ELASTIC_CLOUD_ENVIRONMENT_STAGING;
+  return ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION;
+};
+
+// <region>.<csp>.<domain>
+export const parseElasticCloudHost = (
+  host: string | undefined
+): ElasticCloudHostInfo | undefined => {
+  if (!host) return undefined;
+  const labels = host.toLowerCase().split(':')[0].split('.').filter(Boolean);
+  if (labels.length < 3) return undefined;
+
+  const [region, csp] = labels;
+  return {
+    region: normalizeRegion(region),
+    csp: isCloudProvider(csp) ? csp : undefined,
+    environment: getElasticCloudEnvironmentFromHost(host) ?? ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION,
+  };
+};
+
+export interface ElasticResource {
+  type: ElasticResourceType;
+  /** Kibana component ID on ECH, project ID on serverless. */
+  id?: string;
+}
+
+export const getElasticResource = (
+  cloud: CloudSetupForCloudConnector | undefined
+): ElasticResource => {
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    return { type: ELASTIC_RESOURCE_TYPE_DEPLOYMENT, id: kibanaComponentId };
+  }
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    return { type: ELASTIC_RESOURCE_TYPE_PROJECT, id: cloud.serverless.projectId };
+  }
+  return {
+    type: cloud?.isServerlessEnabled
+      ? ELASTIC_RESOURCE_TYPE_PROJECT
+      : ELASTIC_RESOURCE_TYPE_DEPLOYMENT,
+  };
+};
+
+export interface ElasticCloudTemplateContext {
+  resourceType: ElasticResourceType;
+  resourceId?: string;
+  organizationId?: string;
+  cloudProvider?: CloudProvider;
+  cloudRegion?: string;
+  cloudEnvironment: ElasticCloudEnvironment;
+}
+
+export const getElasticCloudTemplateContext = (
+  cloud: CloudSetupForCloudConnector | undefined
+): ElasticCloudTemplateContext => {
+  const host = cloud?.cloudHost || getCloudHostFromCloudId(cloud?.cloudId);
+  const hostInfo = parseElasticCloudHost(host);
+  const resource = getElasticResource(cloud);
+  const configuredCsp = cloud?.csp;
+
+  return {
+    resourceType: resource.type,
+    resourceId: resource.id,
+    organizationId: cloud?.organizationId || undefined,
+    cloudProvider: isCloudProvider(configuredCsp) ? configuredCsp : hostInfo?.csp,
+    cloudRegion: normalizeRegion(cloud?.region) || hostInfo?.region,
+    cloudEnvironment:
+      getElasticCloudEnvironmentFromHost(host) ??
+      getElasticCloudEnvironmentFromHost(getHostname(cloud?.baseUrl)) ??
+      ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION,
+  };
+};
+
+export const getTemplateUrlTokens = (iacTemplateUrl: string | undefined): TemplateUrlToken[] =>
+  iacTemplateUrl ? TEMPLATE_URL_TOKENS.filter((token) => iacTemplateUrl.includes(token)) : [];
+
+const getTemplateTokenValues = (
+  cloud: CloudSetupForCloudConnector | undefined,
+  accountType: AccountType | undefined
+): Record<TemplateUrlToken, string | undefined> => {
+  const context = getElasticCloudTemplateContext(cloud);
+  return {
+    [TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR]: accountType,
+    [TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR]: context.resourceId,
+    [TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR]: context.resourceType,
+    [TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR]: context.organizationId,
+    [TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR]: context.cloudProvider,
+    [TEMPLATE_URL_CLOUD_REGION_ENV_VAR]: context.cloudRegion,
+    [TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR]: context.cloudEnvironment,
+  };
 };
 
 export const getTemplateUrlFromPackageInfo = (
@@ -228,31 +374,16 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   if (!iacTemplateUrl) return undefined;
 
-  // URLs without substitution tokens need no cloud identifiers — return as-is.
-  if (
-    !iacTemplateUrl.includes(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR) &&
-    !iacTemplateUrl.includes(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR)
-  ) {
-    return iacTemplateUrl;
-  }
+  const tokens = getTemplateUrlTokens(iacTemplateUrl);
+  if (tokens.length === 0) return iacTemplateUrl;
 
-  let elasticResourceId: string | undefined;
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+  const values = getTemplateTokenValues(cloud, accountType);
 
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
-  }
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
-
-  if (!elasticResourceId || !accountType) return undefined;
-
-  return iacTemplateUrl
-    .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    .replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+  return tokens.reduce<string | undefined>((url, token) => {
+    const value = values[token];
+    if (url === undefined || !value) return undefined;
+    return url.split(token).join(encodeURIComponent(value));
+  }, iacTemplateUrl);
 };
 
 /**

@@ -21,6 +21,7 @@ import { catchError, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type {
   IngestHubSetup,
+  IngestHubSetupDependencies,
   IngestHubStart,
   IngestHubStartDependencies,
   IngestFlow,
@@ -61,13 +62,17 @@ const createNavigationAvailable$ = (
 };
 
 export class IngestHubPlugin
-  implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
+  implements
+    Plugin<IngestHubSetup, IngestHubStart, IngestHubSetupDependencies, IngestHubStartDependencies>
 {
   private readonly ingestFlows: IngestFlow[] = [];
 
   constructor(private readonly context: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
+  setup(
+    coreSetup: CoreSetup<IngestHubStartDependencies>,
+    deps: IngestHubSetupDependencies = {}
+  ): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
@@ -109,7 +114,12 @@ export class IngestHubPlugin
       },
     });
 
-    registerOnboardingApp(coreSetup, startServicesPromise, this.context.env.packageInfo.version);
+    registerOnboardingApp(
+      coreSetup,
+      startServicesPromise,
+      this.context.env.packageInfo.version,
+      deps.cloud
+    );
 
     return {};
   }
