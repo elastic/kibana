@@ -8,6 +8,7 @@
 import type {
   ConversationAccessControlInput,
   ConversationEvent,
+  Conversation,
   ConversationListOptions,
   ConversationSearchOptions,
   ConversationWithPermissions,
@@ -87,12 +88,12 @@ export interface ConversationPublicClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, MetadataFieldValue>
-  ): Promise<{ conversation: ConversationWithPermissions; changedFields: string[] }>;
+  ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   /**
    * Update the conversation's title. Requires the caller to be the conversation owner.
    * Metadata writes must go through patchMetadata so they are validated against the template.
    */
-  update(request: ConversationUpdatePublicRequest): Promise<ConversationWithPermissions>;
+  update(request: ConversationUpdatePublicRequest): Promise<Conversation>;
   /**
    * Append custom events to a conversation timeline. Requires converse access.
    * Only custom event types are accepted; built-in timeline event types are rejected.
