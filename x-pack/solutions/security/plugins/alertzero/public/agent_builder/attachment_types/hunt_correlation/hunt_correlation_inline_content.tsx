@@ -69,6 +69,7 @@ const renderAnchorValue = ({
         <EntityChip
           entity={value}
           kindOverride="actor"
+          share={navigation.share}
           testSubj={`alertzeroHuntCorrelationActorChip-${index}`}
         />
       );

@@ -449,6 +449,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
               <EuiFlexItem grow={false} key={`${entity}-${index}`}>
                 <EntityChip
                   entity={entity}
+                  share={navigation.share}
                   testSubj={`alertzeroSignificantSecurityEventEntity-${index}`}
                 />
               </EuiFlexItem>

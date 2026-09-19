@@ -7,6 +7,7 @@
 
 import {
   buildAlertLookupEsql,
+  buildEntityLookupEsql,
   buildEventLookupEsql,
   buildIocLookupEsql,
   buildThreatReportLookupEsql,
@@ -67,5 +68,25 @@ describe('esql_queries', () => {
     expect(buildIocLookupEsql({ type: 'email-addr', value: 'dev-user@corp.example' })).toBe(
       'FROM "logs-*" | WHERE user.email == "dev-user@corp.example" OR user.target.email == "dev-user@corp.example"'
     );
+  });
+
+  it('builds entity lookup ES|QL by kind', () => {
+    expect(buildEntityLookupEsql({ kind: 'user', value: 'dev-user' })).toBe(
+      'FROM "logs-*" | WHERE user.name == "dev-user" OR user.target.name == "dev-user"'
+    );
+    expect(buildEntityLookupEsql({ kind: 'host', value: 'ci-deploy-runner-07' })).toBe(
+      'FROM "logs-*" | WHERE host.name == "ci-deploy-runner-07" OR host.hostname == "ci-deploy-runner-07"'
+    );
+    expect(buildEntityLookupEsql({ kind: 'role', value: 'escalated-role' })).toBe(
+      'FROM "logs-*" | WHERE user.name == "escalated-role" OR user.target.name == "escalated-role"'
+    );
+    expect(buildEntityLookupEsql({ kind: 'actor', value: 'APT-99' })).toBe(
+      'FROM "logs-*" | WHERE threat.group.name == "APT-99"'
+    );
+  });
+
+  it('returns undefined entity lookup for generic/unknown kinds', () => {
+    expect(buildEntityLookupEsql({ kind: 'generic', value: 'x' })).toBeUndefined();
+    expect(buildEntityLookupEsql({ kind: 'user', value: '  ' })).toBeUndefined();
   });
 });

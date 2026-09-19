@@ -14,7 +14,7 @@ import {
   HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID,
 } from './hunt_correlation_inline_content';
 import type { HuntCorrelationAttachment } from './types';
-import { buildIocLookupEsql, buildThreatReportLookupEsql } from '../navigation';
+import { buildEntityLookupEsql, buildIocLookupEsql, buildThreatReportLookupEsql } from '../navigation';
 
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
   ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
@@ -140,6 +140,7 @@ describe('HuntCorrelationInlineContent', () => {
     };
     const hashEsql = buildIocLookupEsql({ type: 'hash', value: hashValue });
     const iocSetEsql = buildIocLookupEsql({ type: 'hash', value: iocSetHashValue });
+    const actorEsql = buildEntityLookupEsql({ kind: 'actor', value: 'APT-99' });
 
     render(
       <HuntCorrelationInlineContent
@@ -164,9 +165,13 @@ describe('HuntCorrelationInlineContent', () => {
     expect(
       screen.queryByTestId('alertzeroHuntCorrelationAnchorLink-actor-0')
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId('alertzeroHuntCorrelationActorChip-0')).toBeInTheDocument();
-    expect(screen.getByText('APT-99')).toBeInTheDocument();
-    expect(screen.getByText('Actor')).toBeInTheDocument();
+    const actorLink = screen.getByTestId('alertzeroHuntCorrelationActorChip-0');
+    expect(actorLink).toHaveAttribute(
+      'href',
+      `https://example.test/discover?esql=${encodeURIComponent(actorEsql as string)}`
+    );
+    expect(actorLink).toHaveTextContent('APT-99');
+    expect(screen.queryByText('Actor')).not.toBeInTheDocument();
   });
 
   it('drops malformed anchor entries but keeps the valid ones', () => {

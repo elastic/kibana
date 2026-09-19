@@ -7,35 +7,15 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { buildDiscoverEsqlUrl, buildEntityLookupEsql, DiscoverLink } from '../navigation';
 import {
   ATTACHMENT_ENTITY_ICON,
   parseAttachmentEntity,
   type AttachmentEntityKind,
   type ParsedAttachmentEntity,
 } from './parse_attachment_entity';
-
-const ENTITY_KIND_LABEL: Record<AttachmentEntityKind, string> = {
-  user: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.user', {
-    defaultMessage: 'User',
-  }),
-  host: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.host', {
-    defaultMessage: 'Host',
-  }),
-  service: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.service', {
-    defaultMessage: 'Service',
-  }),
-  role: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.role', {
-    defaultMessage: 'Role',
-  }),
-  actor: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.actor', {
-    defaultMessage: 'Actor',
-  }),
-  generic: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.generic', {
-    defaultMessage: 'Entity',
-  }),
-};
 
 const chipStyles = css`
   display: inline-flex;
@@ -53,21 +33,29 @@ export interface EntityChipProps {
   entity: string | ParsedAttachmentEntity;
   /** Override kind (e.g. hunt correlation `actor` anchors). */
   kindOverride?: AttachmentEntityKind;
+  /** When present, entity name links to a Discover ES|QL lookup. */
+  share?: SharePluginStart;
   testSubj?: string;
 }
 
 /**
- * Compact entity presentation inspired by Security flyout Insights Entities /
- * Agent Builder entity identity headers: avatar with type icon, name, type badge.
- * Visual-only (no Entity Analytics flyout navigation in this plan).
+ * Compact entity presentation inspired by Security flyout Insights Entities:
+ * type icon + name. Name links to Discover when a lookup query is available.
  */
-export const EntityChip: React.FC<EntityChipProps> = ({ entity, kindOverride, testSubj }) => {
+export const EntityChip: React.FC<EntityChipProps> = ({
+  entity,
+  kindOverride,
+  share,
+  testSubj,
+}) => {
   const parsed = typeof entity === 'string' ? parseAttachmentEntity(entity) : entity;
   const kind = kindOverride ?? parsed.kind;
   const { name } = parsed;
+  const esql = buildEntityLookupEsql({ kind, value: name });
+  const href = esql ? buildDiscoverEsqlUrl({ share, esql }) : undefined;
 
   return (
-    <span css={chipStyles} data-test-subj={testSubj ?? 'alertzeroEntityChip'}>
+    <span css={chipStyles} data-test-subj="alertzeroEntityChip">
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
           <EuiAvatar
@@ -80,15 +68,12 @@ export const EntityChip: React.FC<EntityChipProps> = ({ entity, kindOverride, te
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
           <EuiText size="xs">
-            <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
-              {name}
-            </strong>
+            <DiscoverLink href={href} testSubj={testSubj ?? 'alertzeroEntityChipLink'}>
+              <strong css={nameStyles} data-test-subj="alertzeroEntityChipName">
+                {name}
+              </strong>
+            </DiscoverLink>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="alertzeroEntityChipKind">
-            {ENTITY_KIND_LABEL[kind]}
-          </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     </span>

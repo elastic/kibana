@@ -14,7 +14,7 @@ import {
   SSE_ATTACHMENT_EMPTY_TEST_ID,
 } from './significant_security_event_inline_content';
 import type { SignificantSecurityEventAttachment } from './types';
-import { buildEventLookupEsql, getAlertsIndex } from '../navigation';
+import { buildEntityLookupEsql, buildEventLookupEsql, getAlertsIndex } from '../navigation';
 
 const buildAttachment = (
   data: SignificantSecurityEventAttachment['data']
@@ -126,29 +126,49 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('No entities recorded')).toBeInTheDocument();
   });
 
-  it('renders entities with specialized user/host/role chips', () => {
+  it('renders entity names as Discover links without kind badges', () => {
+    const entities = [
+      'entity:generic:arn:aws:iam::123456789012:user/dev-user',
+      'entity:generic:arn:aws:iam::123456789012:role/escalated-role',
+      'entity:generic:host:ci-deploy-runner-07',
+    ];
+    const userEsql = buildEntityLookupEsql({ kind: 'user', value: 'dev-user' });
+    const roleEsql = buildEntityLookupEsql({ kind: 'role', value: 'escalated-role' });
+    const hostEsql = buildEntityLookupEsql({ kind: 'host', value: 'ci-deploy-runner-07' });
+
     render(
       <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            entities: [
-              'entity:generic:arn:aws:iam::123456789012:user/dev-user',
-              'entity:generic:arn:aws:iam::123456789012:role/escalated-role',
-              'entity:generic:host:ci-deploy-runner-07',
-            ],
-          })
-        )}
+        {...renderProps(buildAttachment({ ...baseData, entities }), {
+          ...defaultNavigation,
+          share: mockShare,
+        })}
       />
     );
 
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-0')).toBeInTheDocument();
-    expect(screen.getByText('dev-user')).toBeInTheDocument();
-    expect(screen.getByText('escalated-role')).toBeInTheDocument();
-    expect(screen.getByText('ci-deploy-runner-07')).toBeInTheDocument();
-    expect(screen.getByText('User')).toBeInTheDocument();
-    expect(screen.getByText('Role')).toBeInTheDocument();
-    expect(screen.getByText('Host')).toBeInTheDocument();
+    const userLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-0');
+    expect(userLink).toHaveAttribute(
+      'href',
+      `https://example.test/discover?esql=${encodeURIComponent(userEsql as string)}`
+    );
+    expect(userLink).toHaveTextContent('dev-user');
+
+    const roleLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-1');
+    expect(roleLink).toHaveAttribute(
+      'href',
+      `https://example.test/discover?esql=${encodeURIComponent(roleEsql as string)}`
+    );
+    expect(roleLink).toHaveTextContent('escalated-role');
+
+    const hostLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-2');
+    expect(hostLink).toHaveAttribute(
+      'href',
+      `https://example.test/discover?esql=${encodeURIComponent(hostEsql as string)}`
+    );
+    expect(hostLink).toHaveTextContent('ci-deploy-runner-07');
+
+    expect(screen.queryByText('User')).not.toBeInTheDocument();
+    expect(screen.queryByText('Role')).not.toBeInTheDocument();
+    expect(screen.queryByText('Host')).not.toBeInTheDocument();
     expect(
       screen.queryByText('entity:generic:arn:aws:iam::123456789012:user/dev-user')
     ).not.toBeInTheDocument();
