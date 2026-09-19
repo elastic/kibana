@@ -12,7 +12,7 @@ import {
   CONVERSATION_TITLE_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
 import type {
-  ConversationWithPermissions,
+  Conversation,
   ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
@@ -26,7 +26,7 @@ import {
 /**
  * An escalation is a templated conversation of the `escalation` type
  */
-export type EscalationConversation = ConversationWithPermissions;
+export type EscalationConversation = Conversation;
 
 /** Conversation ids are UUIDs; the bound matches what the conversation client accepts. */
 const conversationIdSchema = z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH);
