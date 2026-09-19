@@ -82,7 +82,7 @@ const mockRulesWithRoutingTags = [
  */
 const mockManagedRule = {
   id: 'rule-managed',
-  kind: 'signal',
+  kind: 'alert',
   enabled: true,
   metadata: {
     name: 'Detection Rule',
