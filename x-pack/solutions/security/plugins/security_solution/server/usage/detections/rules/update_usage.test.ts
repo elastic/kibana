@@ -55,6 +55,7 @@ const createStubRule = ({
   enabled,
   elastic_rule: elasticRule,
   is_customized: isCustomized,
+  has_base_version: true,
   created_on: '2022-01-06T20:02:45.306Z',
   updated_on: '2022-01-06T20:02:45.306Z',
   alert_count_daily: alertCount,
