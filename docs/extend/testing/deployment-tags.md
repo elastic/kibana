@@ -37,12 +37,12 @@ This is equivalent to assigning all of these tags:
 - `@local-serverless-security_complete` (local serverless)
 - `@cloud-serverless-security_complete` (Elastic Cloud)
 
-To restrict a test to **local environments** only, write the tag strings explicitly:
+To restrict a test to **local environments** only, use the matching [`tags.local.*`](#scout-deployment-tags-local) helper:
 
 ```ts
 test.describe(
   'My suite',
-  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     // ...
   }
@@ -50,6 +50,13 @@ test.describe(
 ```
 
 This test will only run locally (stateful classic and serverless Security complete tier), and will be skipped by Elastic Cloud pipelines.
+
+::::{tip}
+Always tag through the `tags` helper instead of writing the tag strings by hand
+(`{ tag: ['@local-stateful-classic'] }`). The helper is typed, autocompletes, and keeps
+`src/platform/packages/shared/kbn-scout/src/playwright/tags.ts` as the single source of truth, so a
+typo fails type checking instead of silently producing a tag no CI lane greps for.
+::::
 
 ## Pick the right tags [scout-deployment-tags-pick]
 
@@ -81,6 +88,29 @@ Workplace AI is excluded because it has no stateful counterpart.
 
 ::::{warning}
 `tags.deploymentAgnostic` runs your test across all solutions, which is expensive. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
+::::
+
+### Local-only targets [scout-deployment-tags-local]
+
+Use `tags.local.*` for suites that must not run against real Elastic Cloud deployments — for example
+the FTR suite they were migrated from was tagged `skipCloud` / `skipMKI`, or the setup is too slow or
+too privileged for a Cloud/MKI run. These helpers mirror the `stateful` / `serverless` shape but
+expand to the `@local-*` tag only:
+
+| Helper                                                | What it targets                       |
+| ----------------------------------------------------- | ------------------------------------- |
+| `tags.local.stateful.classic`                         | Local stateful classic                |
+| `tags.local.serverless.search`                        | Local serverless Search               |
+| `tags.local.serverless.observability.complete`        | Local Observability (Complete)        |
+| `tags.local.serverless.observability.logs_essentials` | Local Observability (Logs Essentials) |
+| `tags.local.serverless.security.complete`             | Local Security (Complete)             |
+| `tags.local.serverless.security.essentials`           | Local Security (Essentials)           |
+| `tags.local.serverless.security.ease`                 | Local Security (EASE)                 |
+
+::::{note}
+`tags.local` has no `.all` roll-ups and no `deploymentAgnostic` equivalent — compose the targets you
+need explicitly. Add a short comment next to the tag explaining *why* the suite is local-only, so the
+restriction isn't silently dropped the next time the tags change.
 ::::
 
 ### Stateful [scout-deployment-tags-stateful]
