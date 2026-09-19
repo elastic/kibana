@@ -160,6 +160,21 @@ const kibanaPrivilegeSchema = schema.object({
       }),
     ])
   ),
+  privilegeVersions: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        version: schema.string(),
+        extractedInto: schema.arrayOf(
+          schema.object({
+            feature: schema.string(),
+            privileges: schema.arrayOf(schema.string(), { maxSize: 50 }),
+          }),
+          { maxSize: 10 }
+        ),
+      }),
+      { maxSize: 50 }
+    )
+  ),
 });
 
 const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({

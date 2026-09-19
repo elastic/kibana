@@ -10,6 +10,7 @@ import type {
   ElasticsearchFeatureConfig,
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,
+  PrivilegeVersion,
 } from '../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
@@ -3608,6 +3609,327 @@ describe('FeatureRegistry', () => {
             })
           ).validateFeatures()
         ).not.toThrow();
+      });
+
+      describe('privilegeVersions', () => {
+        function createVersionedFeature({
+          allVersions,
+          readVersions,
+          subFeaturePrivileges,
+        }: {
+          allVersions?: PrivilegeVersion[];
+          readVersions?: PrivilegeVersion[];
+          subFeaturePrivileges?: Array<{
+            id: string;
+            includeIn: 'all' | 'read' | 'none';
+          }>;
+        } = {}): KibanaFeatureConfig {
+          const privileges = subFeaturePrivileges ?? [
+            { id: 'so-epsilon-two-all', includeIn: 'all' as const },
+            { id: 'so-epsilon-two-read', includeIn: 'read' as const },
+          ];
+
+          return {
+            id: 'feature-epsilon',
+            name: 'Feature Epsilon',
+            app: [],
+            category: { id: 'epsilon', label: 'epsilon' },
+            privileges: {
+              all: {
+                savedObject: { all: [], read: [] },
+                ui: [],
+                privilegeVersions: allVersions ?? [
+                  {
+                    version: 'v2',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                ],
+              },
+              read: {
+                savedObject: { all: [], read: [] },
+                ui: [],
+                ...(readVersions ? { privilegeVersions: readVersions } : {}),
+              },
+            },
+            subFeatures: [
+              {
+                name: 'sub-epsilon',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: privileges.map(({ id, includeIn }) => ({
+                      id,
+                      name: id,
+                      includeIn,
+                      ui: [],
+                      savedObject: { all: [], read: [] },
+                    })),
+                  },
+                ],
+              },
+            ],
+          };
+        }
+
+        it('does not throw for a valid, single-extraction versioned feature', () => {
+          expect(() => createRegistry(createVersionedFeature()).validateFeatures()).not.toThrow();
+        });
+
+        it('does not throw for a valid, two-extraction versioned feature', () => {
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                  {
+                    version: 'v3',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-three-all'] },
+                    ],
+                  },
+                ],
+                subFeaturePrivileges: [
+                  { id: 'so-epsilon-two-all', includeIn: 'all' },
+                  { id: 'so-epsilon-three-all', includeIn: 'all' },
+                ],
+              })
+            ).validateFeatures()
+          ).not.toThrow();
+        });
+
+        it('rejects privilegeVersions on a deprecated feature', () => {
+          // No sub-features here, deliberately: the point is to isolate the interaction between
+          // `deprecated` and `privilegeVersions` on the SAME privilege, without also having to
+          // satisfy the pre-existing "every sub-feature privilege of a deprecated feature needs
+          // its own replacedBy" rule for an unrelated sub-feature.
+          const registry = createRegistry({
+            deprecated: { notice: 'It was a mistake.' },
+            id: 'feature-epsilon',
+            name: 'Feature Epsilon',
+            app: [],
+            category: { id: 'epsilon', label: 'epsilon' },
+            privileges: {
+              all: {
+                savedObject: { all: [], read: [] },
+                ui: [],
+                // Satisfies the pre-existing "deprecated features must define replacedBy" rule,
+                // so that this test can isolate the "...and must not ALSO define
+                // privilegeVersions" rule instead of tripping the older one first.
+                replacedBy: [{ feature: 'feature-beta', privileges: ['all'] }],
+                privilegeVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [{ feature: 'feature-epsilon', privileges: ['sub-beta-2-1'] }],
+                  },
+                ],
+              },
+              read: {
+                savedObject: { all: [], read: [] },
+                ui: [],
+                replacedBy: [{ feature: 'feature-beta', privileges: ['read'] }],
+              },
+            },
+          });
+
+          expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" is deprecated and must not define a \\"privilegeVersions\\" property for privilege \\"all\\"; use \\"replacedBy\\" instead."`
+          );
+        });
+
+        it('rejects an empty privilegeVersions array', () => {
+          expect(() =>
+            createRegistry(createVersionedFeature({ allVersions: [] })).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" defines an empty \\"privilegeVersions\\"; omit the property entirely if there's nothing to record."`
+          );
+        });
+
+        it('rejects an entry with an empty extractedInto', () => {
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({ allVersions: [{ version: 'v2', extractedInto: [] }] })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" version \\"v2\\" defines an empty \\"extractedInto\\"."`
+          );
+        });
+
+        it('requires versions to be sequential starting at v2', () => {
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v3',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                ],
+              })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" defines \\"privilegeVersions\\" entry #1 with version \\"v3\\", but versions must be sequential starting at \\"v2\\" (expected \\"v2\\")."`
+          );
+
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                  {
+                    version: 'v4',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                ],
+              })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" defines \\"privilegeVersions\\" entry #2 with version \\"v4\\", but versions must be sequential starting at \\"v2\\" (expected \\"v3\\")."`
+          );
+        });
+
+        it('rejects extractedInto referencing another feature', () => {
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [{ feature: 'feature-beta', privileges: ['all'] }],
+                  },
+                ],
+              })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" version \\"v2\\" cannot extract into privileges of feature \\"feature-beta\\"; \\"extractedInto\\" may only reference sub-feature privileges of \\"feature-epsilon\\" itself."`
+          );
+        });
+
+        it('rejects extractedInto referencing an unregistered sub-feature privilege', () => {
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [{ feature: 'feature-epsilon', privileges: ['does-not-exist'] }],
+                  },
+                ],
+              })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" version \\"v2\\" extracts into \\"does-not-exist\\", but that isn't a registered sub-feature privilege of \\"feature-epsilon\\"."`
+          );
+        });
+
+        it('rejects extractedInto referencing a privilege with a mismatched includeIn', () => {
+          // `so-epsilon-two-read` is `includeIn: 'read'`, but it's being referenced from `all`'s
+          // privilegeVersions, which requires `includeIn: 'all'`.
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-read'] },
+                    ],
+                  },
+                ],
+              })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" version \\"v2\\" extracts into \\"so-epsilon-two-read\\", which has \\"includeIn: 'read'\\"; it must be \\"includeIn: 'all'\\" to match the privilege being versioned."`
+          );
+        });
+
+        it('rejects extractedInto referencing a disabled sub-feature privilege', () => {
+          // Sub-feature privileges can't be registered as `disabled` directly (the schema
+          // doesn't allow it) — the only way to get one into that state is a config override,
+          // applied before `validateFeatures()` runs, just like it would be in Serverless.
+          const registry = createRegistry(createVersionedFeature());
+          registry.applyOverrides({
+            'feature-epsilon': {
+              subFeatures: { privileges: { 'so-epsilon-two-all': { disabled: true } } },
+            },
+          });
+
+          expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" version \\"v2\\" extracts into disabled sub-feature privilege \\"so-epsilon-two-all\\"."`
+          );
+        });
+
+        it('rejects the same extraction target appearing more than once', () => {
+          expect(() =>
+            createRegistry(
+              createVersionedFeature({
+                allVersions: [
+                  {
+                    version: 'v2',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                  {
+                    version: 'v3',
+                    extractedInto: [
+                      { feature: 'feature-epsilon', privileges: ['so-epsilon-two-all'] },
+                    ],
+                  },
+                ],
+              })
+            ).validateFeatures()
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-epsilon\\" privilege \\"all\\" extracts into \\"so-epsilon-two-all\\" more than once across its \\"privilegeVersions\\"."`
+          );
+        });
+
+        it('rejects privilegeVersions on a reserved privilege', () => {
+          const registry = createRegistry({
+            id: 'feature-zeta',
+            name: 'Feature Zeta',
+            app: [],
+            category: { id: 'zeta', label: 'zeta' },
+            privileges: null,
+            reserved: {
+              description: 'reserved',
+              privileges: [
+                {
+                  id: 'reserved-zeta',
+                  privilege: {
+                    savedObject: { all: [], read: [] },
+                    ui: [],
+                    privilegeVersions: [
+                      {
+                        version: 'v2',
+                        extractedInto: [{ feature: 'feature-zeta', privileges: ['all'] }],
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          });
+
+          expect(() => registry.validateFeatures()).toThrowErrorMatchingInlineSnapshot(
+            `"Feature \\"feature-zeta\\" reserved privilege \\"reserved-zeta\\" must not define a \\"privilegeVersions\\" property; it's only valid on top-level \\"all\\"/\\"read\\" privileges."`
+          );
+        });
       });
     });
   });

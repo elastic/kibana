@@ -210,6 +210,16 @@ export class FeatureRegistry {
     }
 
     for (const feature of Object.values(this.kibanaFeatures)) {
+      // `privilegeVersions` is only ever valid on the top-level `all`/`read` privileges, never on
+      // reserved privileges — even though they currently share the same underlying schema type.
+      for (const reservedPrivilege of feature.reserved?.privileges ?? []) {
+        if (reservedPrivilege.privilege.privilegeVersions) {
+          throw new Error(
+            `Feature "${feature.id}" reserved privilege "${reservedPrivilege.id}" must not define a "privilegeVersions" property; it's only valid on top-level "all"/"read" privileges.`
+          );
+        }
+      }
+
       if (!feature.privileges) {
         continue;
       }
@@ -277,6 +287,97 @@ export class FeatureRegistry {
 
           replacementFeatureIds.add(featureReference.feature);
         }
+      }
+
+      // Validate `privilegeVersions`, which lets a LIVE feature retire a grant from a top-level
+      // privilege's own "minimal" baseline into a sub-feature without deprecating the feature.
+      const subFeaturePrivileges = new Map(collectSubFeaturesPrivileges(feature));
+      for (const [privilegeId, privilege] of Object.entries(feature.privileges) as Array<
+        ['all' | 'read', FeatureKibanaPrivileges]
+      >) {
+        if (!privilege.privilegeVersions) {
+          continue;
+        }
+
+        if (isFeatureDeprecated) {
+          throw new Error(
+            `Feature "${feature.id}" is deprecated and must not define a "privilegeVersions" property for privilege "${privilegeId}"; use "replacedBy" instead.`
+          );
+        }
+
+        if (privilege.privilegeVersions.length === 0) {
+          throw new Error(
+            `Feature "${feature.id}" privilege "${privilegeId}" defines an empty "privilegeVersions"; omit the property entirely if there's nothing to record.`
+          );
+        }
+
+        const seenExtractedInto = new Set<string>();
+        privilege.privilegeVersions.forEach((privilegeVersion, index) => {
+          const expectedVersion = `v${index + 2}`;
+          if (privilegeVersion.version !== expectedVersion) {
+            throw new Error(
+              `Feature "${
+                feature.id
+              }" privilege "${privilegeId}" defines "privilegeVersions" entry #${
+                index + 1
+              } with version "${
+                privilegeVersion.version
+              }", but versions must be sequential starting at "v2" (expected "${expectedVersion}").`
+            );
+          }
+
+          if (privilegeVersion.extractedInto.length === 0) {
+            throw new Error(
+              `Feature "${feature.id}" privilege "${privilegeId}" version "${privilegeVersion.version}" defines an empty "extractedInto".`
+            );
+          }
+
+          for (const featureReference of privilegeVersion.extractedInto) {
+            if (featureReference.feature !== feature.id) {
+              throw new Error(
+                `Feature "${feature.id}" privilege "${privilegeId}" version "${privilegeVersion.version}" cannot extract into privileges of feature "${featureReference.feature}"; "extractedInto" may only reference sub-feature privileges of "${feature.id}" itself.`
+              );
+            }
+
+            if (featureReference.privileges.length === 0) {
+              throw new Error(
+                `Feature "${feature.id}" privilege "${privilegeId}" version "${privilegeVersion.version}" defines an "extractedInto" reference with no privileges.`
+              );
+            }
+
+            for (const subFeaturePrivilegeId of featureReference.privileges) {
+              const subFeaturePrivilege = subFeaturePrivileges.get(subFeaturePrivilegeId);
+              if (!subFeaturePrivilege) {
+                throw new Error(
+                  `Feature "${feature.id}" privilege "${privilegeId}" version "${privilegeVersion.version}" extracts into "${subFeaturePrivilegeId}", but that isn't a registered sub-feature privilege of "${feature.id}".`
+                );
+              }
+
+              if (subFeaturePrivilege.includeIn !== privilegeId) {
+                throw new Error(
+                  `Feature "${feature.id}" privilege "${privilegeId}" version "${privilegeVersion.version}" extracts into "${subFeaturePrivilegeId}", which has "includeIn: '${subFeaturePrivilege.includeIn}'"; it must be "includeIn: '${privilegeId}'" to match the privilege being versioned.`
+                );
+              }
+
+              // A sub-feature privilege can't be disabled at registration time (the schema
+              // doesn't allow it), but a Serverless config override can disable one after the
+              // fact, before this validation runs — see `applyOverrides`.
+              if (subFeaturePrivilege.disabled) {
+                throw new Error(
+                  `Feature "${feature.id}" privilege "${privilegeId}" version "${privilegeVersion.version}" extracts into disabled sub-feature privilege "${subFeaturePrivilegeId}".`
+                );
+              }
+
+              const referenceKey = `${featureReference.feature}.${subFeaturePrivilegeId}`;
+              if (seenExtractedInto.has(referenceKey)) {
+                throw new Error(
+                  `Feature "${feature.id}" privilege "${privilegeId}" extracts into "${subFeaturePrivilegeId}" more than once across its "privilegeVersions".`
+                );
+              }
+              seenExtractedInto.add(referenceKey);
+            }
+          }
+        });
       }
 
       const featureReplacedBy = feature.deprecated?.replacedBy;

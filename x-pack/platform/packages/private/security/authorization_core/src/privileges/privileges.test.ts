@@ -3958,3 +3958,261 @@ describe('#getReplacedByForPrivilege', () => {
     ]);
   });
 });
+
+describe('privilegeVersions', () => {
+  test(`freezes the original 'minimal_all' with the extracted grant, while the current version excludes it`, () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        id: 'foo',
+        name: 'Foo KibanaFeature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: { all: [], read: [] },
+            ui: ['foo'],
+            privilegeVersions: [
+              {
+                version: 'v2',
+                extractedInto: [{ feature: 'foo', privileges: ['subFeaturePriv1'] }],
+              },
+            ],
+          },
+          read: {
+            savedObject: { all: [], read: [] },
+            ui: ['foo'],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'subFeature1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'subFeaturePriv1',
+                    name: 'sub feature priv 1',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: ['all-sub-feature-type'],
+                      read: ['read-sub-feature-type'],
+                    },
+                    ui: ['sub-feature-ui'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+
+    const actual = privileges.get();
+
+    // `all` stays whole, exactly as it does today without any versioning involved.
+    expect(actual.features).toHaveProperty('foo.all', [
+      actions.login,
+      ...getAllSavedObjectsActions('all-sub-feature-type'),
+      ...getReadSavedObjectsActions('read-sub-feature-type'),
+      actions.ui.get('foo', 'foo'),
+      actions.ui.get('foo', 'sub-feature-ui'),
+    ]);
+
+    // The ORIGINAL, unversioned `minimal_all` predates the extraction, so it's frozen with the
+    // sub-feature's actions still folded in — a role still holding this literal name keeps
+    // exactly the access it always had. Composed (extracted) actions are appended after the
+    // privilege's own baseline actions.
+    expect(actual.features).toHaveProperty('foo.minimal_all', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+      ...getAllSavedObjectsActions('all-sub-feature-type'),
+      ...getReadSavedObjectsActions('read-sub-feature-type'),
+      actions.ui.get('foo', 'sub-feature-ui'),
+    ]);
+
+    // The CURRENT version, `minimal_all_v2`, is what a NEW customization must persist — it does
+    // NOT include the extracted grant, matching what `minimal_all` would grant on a feature that
+    // never had this grant to begin with.
+    expect(actual.features).toHaveProperty('foo.minimal_all_v2', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+    ]);
+
+    expect(actual.features.foo).not.toHaveProperty('minimal_all_v3');
+
+    // `read` never declared `privilegeVersions`, so it's completely unaffected.
+    expect(actual.features).toHaveProperty('foo.read', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+    ]);
+    expect(actual.features).toHaveProperty('foo.minimal_read', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+    ]);
+  });
+
+  test('the frozen legacy minimal privilege keeps the extracted grant even on a license without sub-feature privileges', () => {
+    // On a license where `allowSubFeaturePrivileges` is false, the sub-feature privilege is never
+    // registered as its own standalone, independently-grantable privilege (that's the correct,
+    // intentional license restriction) — but the frozen `minimal_all` must still compose its
+    // actions in, since that grant was unconditional before the extraction ever happened.
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        id: 'foo',
+        name: 'Foo KibanaFeature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: { all: [], read: [] },
+            ui: ['foo'],
+            privilegeVersions: [
+              {
+                version: 'v2',
+                extractedInto: [{ feature: 'foo', privileges: ['subFeaturePriv1'] }],
+              },
+            ],
+          },
+          read: {
+            savedObject: { all: [], read: [] },
+            ui: ['foo'],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'subFeature1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'subFeaturePriv1',
+                    name: 'sub feature priv 1',
+                    includeIn: 'all',
+                    savedObject: { all: ['all-sub-feature-type'], read: [] },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+    const actual = privileges.get();
+
+    // The standalone sub-feature privilege is correctly absent — Basic doesn't allow customizing
+    // sub-feature privileges at all.
+    expect(actual.features.foo).not.toHaveProperty('subFeaturePriv1');
+
+    // But the frozen legacy minimal privilege still grants the extracted saved-object actions.
+    expect(actual.features).toHaveProperty('foo.minimal_all', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+      ...getAllSavedObjectsActions('all-sub-feature-type'),
+    ]);
+
+    // The current version correctly excludes it, exactly as it would on any other license.
+    expect(actual.features).toHaveProperty('foo.minimal_all_v2', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+    ]);
+  });
+
+  test('a second extraction keeps the first extraction intact for the in-between version', () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        id: 'foo',
+        name: 'Foo KibanaFeature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: { all: [], read: [] },
+            ui: ['foo'],
+            privilegeVersions: [
+              {
+                version: 'v2',
+                extractedInto: [{ feature: 'foo', privileges: ['subFeaturePriv1'] }],
+              },
+              {
+                version: 'v3',
+                extractedInto: [{ feature: 'foo', privileges: ['subFeaturePriv2'] }],
+              },
+            ],
+          },
+          read: {
+            savedObject: { all: [], read: [] },
+            ui: ['foo'],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'subFeature1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'subFeaturePriv1',
+                    name: 'sub feature priv 1',
+                    includeIn: 'all',
+                    savedObject: { all: ['one'], read: [] },
+                    ui: [],
+                  },
+                  {
+                    id: 'subFeaturePriv2',
+                    name: 'sub feature priv 2',
+                    includeIn: 'all',
+                    savedObject: { all: ['two'], read: [] },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+
+    const actual = privileges.get();
+
+    // Frozen at "before either extraction": has both.
+    expect(actual.features).toHaveProperty('foo.minimal_all', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+      ...getAllSavedObjectsActions('one'),
+      ...getAllSavedObjectsActions('two'),
+    ]);
+
+    // Frozen at "after the first extraction, before the second": a role saved in this window
+    // (holding `minimal_all_v2`) already lost `one` via its own save, but must keep `two` even
+    // after `two` is later extracted too — that's the second-extraction-doesn't-break-the-first
+    // guarantee.
+    expect(actual.features).toHaveProperty('foo.minimal_all_v2', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+      ...getAllSavedObjectsActions('two'),
+    ]);
+
+    // Current: neither.
+    expect(actual.features).toHaveProperty('foo.minimal_all_v3', [
+      actions.login,
+      actions.ui.get('foo', 'foo'),
+    ]);
+  });
+});

@@ -14,8 +14,10 @@ import type {
 } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
 import {
-  getMinimalPrivilegeId,
+  getAllMinimalPrivilegeIds,
+  getReferencesExtractedAfter,
   isMinimalPrivilegeId,
+  type MinimalPrivilegeBase,
 } from '@kbn/security-authorization-core-common';
 import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
 
@@ -131,17 +133,62 @@ export function privilegesFactory(
           tryStoreComposablePrivilege(feature, fullPrivilegeId, featurePrivilege.privilege);
         }
 
+        // Actions for every sub-feature privilege of this feature, computed regardless of
+        // whether the current license allows sub-feature privilege *customization*
+        // (`allowSubFeaturePrivileges`/`respectLicenseLevel` below). A `privilegeVersions`
+        // extraction target must still be composed into its frozen legacy minimal privilege on
+        // every license, since the grant it represents was previously unconditional, licensed or
+        // not — only the *standalone*, independently-grantable sub-feature privilege (registered
+        // further down) is meant to be license-gated.
+        const subFeaturePrivilegeActionsById = new Map<string, string[]>();
+        if (feature.subFeatures?.length > 0) {
+          for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
+            feature,
+            licenseHasAtLeast
+          )) {
+            subFeaturePrivilegeActionsById.set(
+              subFeaturePrivilege.id,
+              uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature))
+            );
+          }
+        }
+
         for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: false,
           licenseHasAtLeast,
         })) {
-          const minimalPrivilegeId = getMinimalPrivilegeId(featurePrivilege.privilegeId);
-          featurePrivileges[feature.id][minimalPrivilegeId] = [
+          const baseMinimalActions = [
             actions.login,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
 
-          tryStoreComposablePrivilege(feature, minimalPrivilegeId, featurePrivilege.privilege);
+          // A privilege without `privilegeVersions` mints exactly one minimal id, identical to
+          // today's behavior. One with a version history mints one id per historical version
+          // plus the current one, each frozen at the actions it granted when it was current.
+          const basePrivilegeId = featurePrivilege.privilegeId as MinimalPrivilegeBase;
+          const privilegeVersions = featurePrivilege.privilege.privilegeVersions;
+          for (const minimalPrivilegeId of getAllMinimalPrivilegeIds(
+            basePrivilegeId,
+            privilegeVersions
+          )) {
+            const extractedActions = getReferencesExtractedAfter(
+              minimalPrivilegeId,
+              basePrivilegeId,
+              privilegeVersions
+            ).flatMap((reference) =>
+              reference.privileges.flatMap(
+                (subFeaturePrivilegeId) =>
+                  subFeaturePrivilegeActionsById.get(subFeaturePrivilegeId) ?? []
+              )
+            );
+
+            featurePrivileges[feature.id][minimalPrivilegeId] = uniq([
+              ...baseMinimalActions,
+              ...extractedActions,
+            ]);
+
+            tryStoreComposablePrivilege(feature, minimalPrivilegeId, featurePrivilege.privilege);
+          }
         }
 
         if (

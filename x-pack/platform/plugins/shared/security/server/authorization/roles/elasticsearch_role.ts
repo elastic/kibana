@@ -9,7 +9,12 @@ import type { Logger } from '@kbn/core/server';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/common';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server';
 import { getReplacedByForPrivilege } from '@kbn/security-authorization-core';
-import { getMinimalPrivilegeId } from '@kbn/security-authorization-core-common';
+import {
+  getCurrentMinimalPrivilegeId,
+  getMinimalPrivilegeId,
+  getReferencesExtractedAfter,
+  isAnyMinimalPrivilegeId,
+} from '@kbn/security-authorization-core-common';
 import type { RoleKibanaApplication } from '@kbn/security-plugin-types-common';
 import { RoleTransformErrorReason } from '@kbn/security-plugin-types-common';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
@@ -415,6 +420,16 @@ function deserializeKibanaFeaturePrivileges({
   const deprecatedFeatures = replaceDeprecatedKibanaPrivileges
     ? features.filter((feature) => feature.deprecated)
     : undefined;
+  // Same idea, but for LIVE features that have versioned their `all`/`read` minimal privilege
+  // (see `privilegeVersions`) rather than being deprecated outright.
+  const versionedFeatures = replaceDeprecatedKibanaPrivileges
+    ? features.filter(
+        (feature) =>
+          !feature.deprecated &&
+          (feature.privileges?.all?.privilegeVersions?.length ||
+            feature.privileges?.read?.privilegeVersions?.length)
+      )
+    : undefined;
   const result = {} as FeaturesPrivileges;
   for (const serializedPrivilege of serializedPrivileges) {
     if (!PrivilegeSerializer.isSerializedFeaturePrivilege(serializedPrivilege)) {
@@ -427,6 +442,7 @@ function deserializeKibanaFeaturePrivileges({
     // If feature privileges are deprecated, replace them with non-deprecated feature privileges according to the
     // deprecation "mapping".
     const deprecatedFeature = deprecatedFeatures?.find((feature) => feature.id === featureId);
+    const versionedFeature = versionedFeatures?.find((feature) => feature.id === featureId);
     if (deprecatedFeature) {
       const privilege = getPrivilegeById(
         deprecatedFeature,
@@ -447,12 +463,45 @@ function deserializeKibanaFeaturePrivileges({
           ...reference.privileges,
         ]);
       }
+    } else if (versionedFeature) {
+      // A legacy (non-current) minimal privilege id of an otherwise-live feature is normalized to
+      // the current minimal id plus whatever sub-feature privileges were extracted out of it since
+      // it was minted, purely for display/edit purposes — nothing is persisted here.
+      for (const normalizedId of getNormalizedMinimalPrivilegeIds(versionedFeature, privilegeId)) {
+        result[featureId] = getUniqueList([...(result[featureId] || []), normalizedId]);
+      }
     } else {
       result[featureId] = getUniqueList([...(result[featureId] || []), privilegeId]);
     }
   }
 
   return result;
+}
+
+function getNormalizedMinimalPrivilegeIds(feature: KibanaFeature, privilegeId: string): string[] {
+  for (const basePrivilegeId of ['all' as const, 'read' as const]) {
+    const privilegeVersions = feature.privileges?.[basePrivilegeId]?.privilegeVersions;
+    if (
+      !privilegeVersions?.length ||
+      !isAnyMinimalPrivilegeId(privilegeId, basePrivilegeId, privilegeVersions)
+    ) {
+      continue;
+    }
+
+    const currentId = getCurrentMinimalPrivilegeId(basePrivilegeId, privilegeVersions);
+    if (privilegeId === currentId) {
+      return [privilegeId];
+    }
+
+    return [
+      currentId,
+      ...getReferencesExtractedAfter(privilegeId, basePrivilegeId, privilegeVersions).flatMap(
+        (reference) => reference.privileges
+      ),
+    ];
+  }
+
+  return [privilegeId];
 }
 
 function getPrivilegeById(

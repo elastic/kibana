@@ -49,6 +49,15 @@ export const plugin: PluginInitializer<void, void> = async (): Promise<
     // * `case_4_feature_c` (new, only for `ab` SO access)
     case4FeatureExtract(deps);
 
+    // Case #5: feature A grants access to Saved Object types `one`, `two`, and `three` via its
+    // top-level `all`/`read` privileges. Unlike case #3, the feature does NOT need to be
+    // deprecated or bumped to a new id: access to `two` and then `three` is extracted into
+    // independently toggle-able sub-feature privileges one at a time via `privilegeVersions`,
+    // while the feature keeps its original id throughout, and every existing role (whether
+    // stored as `['all']`, `['minimal_all']`, or already customized after the first extraction)
+    // keeps exactly the access it always had, with no role save required.
+    case5FeatureExtractMinimalPrivilegeVersion(deps);
+
     initRoutes(core);
   },
   start: () => {},
@@ -453,5 +462,101 @@ function case4FeatureExtract(deps: PluginSetupDependencies) {
       all: { savedObject: { all: ['ab'], read: [] }, ui: ['ui_all'] },
       read: { savedObject: { all: [], read: ['ab'] }, ui: ['ui_read'] },
     },
+  });
+}
+
+function case5FeatureExtractMinimalPrivilegeVersion(deps: PluginSetupDependencies) {
+  // A single live feature. Its `all`/`read` own fields only grant `one` — access to `two` and
+  // `three` lives entirely in the extraction history below and the sub-feature privileges it
+  // points at, which is what keeps every pre-existing role working unchanged.
+  deps.features.registerKibanaFeature({
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    id: 'case_5_feature',
+    name: 'Case #5 feature',
+    app: [],
+    privileges: {
+      all: {
+        savedObject: { all: ['one'], read: [] },
+        ui: [],
+        // `v2` records that access to `two` was extracted first; `v3` records that access to
+        // `three` was extracted second. `minimal_all` (implicit "v1") is frozen forever with
+        // both; `minimal_all_v2` is frozen with only `three`'s grant; `minimal_all_v3` is the
+        // current, live minimal id, with neither.
+        privilegeVersions: [
+          {
+            version: 'v2',
+            extractedInto: [{ feature: 'case_5_feature', privileges: ['so_two_all'] }],
+          },
+          {
+            version: 'v3',
+            extractedInto: [{ feature: 'case_5_feature', privileges: ['so_three_all'] }],
+          },
+        ],
+      },
+      read: {
+        savedObject: { all: [], read: ['one'] },
+        ui: [],
+        privilegeVersions: [
+          {
+            version: 'v2',
+            extractedInto: [{ feature: 'case_5_feature', privileges: ['so_two_read'] }],
+          },
+          {
+            version: 'v3',
+            extractedInto: [{ feature: 'case_5_feature', privileges: ['so_three_read'] }],
+          },
+        ],
+      },
+    },
+    subFeatures: [
+      {
+        name: 'Access to SO `two`',
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'so_two_all',
+                includeIn: 'all',
+                name: 'Can manage SO `two`',
+                savedObject: { all: ['two'], read: [] },
+                ui: [],
+              },
+              {
+                id: 'so_two_read',
+                includeIn: 'read',
+                name: 'Can read SO `two`',
+                savedObject: { all: [], read: ['two'] },
+                ui: [],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Access to SO `three`',
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'so_three_all',
+                includeIn: 'all',
+                name: 'Can manage SO `three`',
+                savedObject: { all: ['three'], read: [] },
+                ui: [],
+              },
+              {
+                id: 'so_three_read',
+                includeIn: 'read',
+                name: 'Can read SO `three`',
+                savedObject: { all: [], read: ['three'] },
+                ui: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 }
