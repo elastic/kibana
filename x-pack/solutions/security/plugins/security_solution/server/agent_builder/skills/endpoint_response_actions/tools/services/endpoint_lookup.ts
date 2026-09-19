@@ -200,7 +200,7 @@ export function createEndpointLookupService(
   }
 
   const listVisibleFleetCandidates = async (hostName: string): Promise<CandidateCollection> => {
-    const { items, truncated, total } = await collectPages<FleetCandidate>(async (page) => {
+    const { items, truncated } = await collectPages<FleetCandidate>(async (page) => {
       const response = await fleetServices.agent.listAgents({
         showInactive: true,
         kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
@@ -233,7 +233,13 @@ export function createEndpointLookupService(
       }
     }
 
-    return { candidates: visible, truncated, total };
+    // `truncated` is safe to keep: it says only "there were more pages", which
+    // the caller already learns from the space-filtered candidate list being
+    // full. `total` is NOT: `listAgents` counts every matching agent before
+    // `ensureInCurrentSpace` drops the ones this caller cannot see, so returning
+    // it would let a hostname probe learn how many matching agent records exist
+    // in other Spaces. Drop it and let the count be derived from visible data.
+    return { candidates: visible, truncated };
   };
 
   /**

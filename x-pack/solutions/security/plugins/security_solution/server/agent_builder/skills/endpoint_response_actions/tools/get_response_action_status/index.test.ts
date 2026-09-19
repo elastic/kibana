@@ -137,6 +137,42 @@ describe('getResponseActionStatusTool', () => {
     });
   });
 
+  it('distinguishes an expired action from a failed one', async () => {
+    // `getActionStatus` (endpoint/services/actions/utils/utils.ts) reports an
+    // action that never completed and passed its expiration as
+    // `status: 'failed'` — identical to a real command failure. An expired
+    // action usually carries no `errors`, so without `isExpired` the agent
+    // reports a bare "failed" with no reason and the analyst investigates a
+    // failure that never happened instead of re-issuing the action.
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'scan',
+      status: 'failed',
+      wasSuccessful: false,
+      isCompleted: false,
+      wasCanceled: false,
+      isExpired: true,
+      hosts: { 'agent-123': { name: 'pr-272111-defend-demo' } },
+      parameters: {},
+      outputs: {},
+      errors: [],
+      startedAt: '2026-07-13T14:10:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+    expect(data.status).toBe('failed');
+    // The discriminator the model needs to say "it expired, re-run it"
+    // instead of "it failed".
+    expect(data.isExpired).toBe(true);
+    expect(data.isCompleted).toBe(false);
+  });
+
   it('surfaces actionDetails.errors when the action failed', async () => {
     mockGetActionDetailsById.mockResolvedValue({
       id: ACTION_ID,

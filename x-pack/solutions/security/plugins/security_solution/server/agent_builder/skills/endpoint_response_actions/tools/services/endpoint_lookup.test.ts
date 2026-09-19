@@ -288,9 +288,9 @@ describe('createEndpointLookupService', () => {
 
     const result = await lookup.resolveByHostName('hidden-but-plentiful-host');
 
-    expect(result).toEqual(
-      expect.objectContaining({ kind: 'ambiguous', truncated: true, totalCandidates: 500 })
-    );
+    expect(result).toEqual(expect.objectContaining({ kind: 'ambiguous', truncated: true }));
+    // The pre-filter total is not leaked (see listVisibleFleetCandidates).
+    expect((result as { totalCandidates?: number }).totalCandidates).toBeUndefined();
   });
 
   it('does not report ambiguity for agents hidden by space scoping', async () => {
@@ -368,13 +368,11 @@ describe('createEndpointLookupService', () => {
 
       const result = await lookup.resolveByHostName('huge-history-host');
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          kind: 'ambiguous',
-          truncated: true,
-          totalCandidates: 500,
-        })
-      );
+      expect(result).toEqual(expect.objectContaining({ kind: 'ambiguous', truncated: true }));
+      // Fleet's `total: 500` is not propagated — it counts agents before space
+      // filtering, so surfacing it would disclose how many matching records
+      // exist in other Spaces.
+      expect((result as { totalCandidates?: number }).totalCandidates).toBeUndefined();
       expect((result as { candidates: unknown[] }).candidates).toHaveLength(10);
     });
 

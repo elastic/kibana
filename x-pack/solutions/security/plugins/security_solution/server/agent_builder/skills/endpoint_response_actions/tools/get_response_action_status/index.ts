@@ -87,6 +87,15 @@ export const getResponseActionStatusTool = (
                 wasSuccessful: actionDetails.wasSuccessful,
                 isCompleted: actionDetails.isCompleted,
                 wasCanceled: actionDetails.wasCanceled,
+                // `getActionStatus` maps an action that never completed and
+                // passed its expiration to `status: 'failed'` — the same status
+                // as a genuine command failure. `isExpired` is the only field
+                // that tells them apart, and an expired action usually has no
+                // `errors` either, so without it the agent reports "failed" and
+                // then has no reason to give. The analyst's next step differs
+                // completely: a failure is investigated, an expired action is
+                // simply re-issued.
+                isExpired: actionDetails.isExpired,
                 // Bounded: a fan-out action carries one entry per targeted
                 // host, so a batch isolate would otherwise inject thousands of
                 // host records into the model context. The total is reported
