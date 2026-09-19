@@ -330,6 +330,142 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('leaves no host-aggregate threshold that isolates the reference cohort', () => {
+    // The reported defects (round 4): `bg-endpoint-inventory` was the only
+    // 4-step background chain, so it was the only background host with 4
+    // alerts, and its profile was CONSTANT across occurrences. That made
+    // `GROUP BY host | WHERE COUNT(*) = 4` a candidate set of exactly ten hosts,
+    // and then any aggregate threshold on those hosts separated the four
+    // references from the six background ones. Two were reported — `raw document
+    // count = 7` and `MIN(risk_score) >= 72` — but enumerating the space found
+    // five (`MAX(risk_score)`, message length bounds, ...), and an intermediate
+    // revision of the fix merely INVERTED the key (`MIN(risk_score) <= 75`).
+    //
+    // The real invariant is range overlap, not "match the reported fields": a
+    // background profile that is constant across occurrences is a single point,
+    // and a point outside the reference band is separable by a threshold. So no
+    // host-level aggregate may sit entirely to one side of the reference range,
+    // and — because a conjunction of two individually-overlapping aggregates can
+    // still isolate — no PAIR of threshold predicates may select exactly the
+    // reference cohort. That conjunction sweep is what this test encodes; it
+    // catches an inverted key, a newly-constant profile, and a future edit to
+    // any of these numbers.
+    const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const referenceHosts = new Set(
+      listAd2ScenarioKeys('clean').map((key) => getAd2Scenario(key, 'clean')!.host)
+    );
+
+    const rawDocumentsByHost = new Map<string, number>();
+    for (const rawEvent of plan.rawEvents as unknown as Array<{
+      source?: { host?: { name?: string } };
+    }>) {
+      const host = rawEvent.source?.host?.name;
+      if (host) rawDocumentsByHost.set(host, (rawDocumentsByHost.get(host) ?? 0) + 1);
+    }
+
+    // Only the fields this sweep reads are typed; the alert source is a loose
+    // document, so the shape is declared here rather than inferred.
+    interface AlertRow {
+      message?: unknown;
+      host?: { name?: string };
+      file?: { path?: unknown };
+      process?: { name?: unknown; command_line?: unknown };
+      'kibana.alert.risk_score': number;
+      'kibana.alert.severity': string;
+      'kibana.alert.rule.name': string;
+    }
+    const alertsByHost = new Map<string, AlertRow[]>();
+    for (const alert of plan.alerts) {
+      const source = alert.source as unknown as AlertRow;
+      const host = String(source.host?.name ?? '');
+      alertsByHost.set(host, [...(alertsByHost.get(host) ?? []), source]);
+    }
+
+    // Entry point: the hosts a model would reach by cardinality alone.
+    const cohort = [...alertsByHost.entries()].filter(([, rows]) => rows.length === 4);
+    const referenceCohort = cohort.filter(([host]) => referenceHosts.has(host));
+    const backgroundCohort = cohort.filter(([host]) => !referenceHosts.has(host));
+    expect(referenceCohort).toHaveLength(4);
+    // Non-vacuity: with no background host in the cohort the sweep proves
+    // nothing, because every predicate would trivially isolate the references.
+    expect(backgroundCohort.length).toBeGreaterThan(0);
+
+    const aggregates: Record<string, (rows: AlertRow[]) => number> = {
+      minRiskScore: (rows) => Math.min(...rows.map((row) => row['kibana.alert.risk_score'])),
+      maxRiskScore: (rows) => Math.max(...rows.map((row) => row['kibana.alert.risk_score'])),
+      sumRiskScore: (rows) => rows.reduce((sum, row) => sum + row['kibana.alert.risk_score'], 0),
+      minMessageLength: (rows) => Math.min(...rows.map((row) => String(row.message ?? '').length)),
+      maxMessageLength: (rows) => Math.max(...rows.map((row) => String(row.message ?? '').length)),
+      sumMessageLength: (rows) =>
+        rows.reduce((sum, row) => sum + String(row.message ?? '').length, 0),
+      minCommandLineLength: (rows) =>
+        Math.min(...rows.map((row) => String(row.process?.command_line ?? '').length)),
+      maxCommandLineLength: (rows) =>
+        Math.max(...rows.map((row) => String(row.process?.command_line ?? '').length)),
+      filePathCount: (rows) => rows.filter((row) => row.file?.path != null).length,
+      rawDocumentCount: (rows) => rawDocumentsByHost.get(rows[0].host?.name) ?? 0,
+      distinctProcessNames: (rows) => new Set(rows.map((row) => row.process?.name)).size,
+      distinctRuleNames: (rows) => new Set(rows.map((row) => row['kibana.alert.rule.name'])).size,
+      riskScoreSpread: (rows) =>
+        Math.max(...rows.map((row) => row['kibana.alert.risk_score'])) -
+        Math.min(...rows.map((row) => row['kibana.alert.risk_score'])),
+      // Severity composition. A count of steps at or above a level is exactly
+      // the shape `WHERE severity IN ('high','critical')` takes once grouped by
+      // host, so it belongs in the sweep: dropping the background chain's
+      // critical step makes `criticalCount >= 1` select the four references and
+      // nothing else, which is how this aggregate earned its place here.
+      criticalCount: (rows) =>
+        rows.filter((row) => row['kibana.alert.severity'] === 'critical').length,
+      highOrAboveCount: (rows) =>
+        rows.filter((row) => ['high', 'critical'].includes(String(row['kibana.alert.severity'])))
+          .length,
+      distinctSeverities: (rows) => new Set(rows.map((row) => row['kibana.alert.severity'])).size,
+    };
+
+    // Candidate predicates: every >= / <= at every value the cohort actually
+    // takes, which is the full set a model could form from the observed data.
+    const predicates: Array<{ label: string; selects: (rows: AlertRow[]) => boolean }> = [];
+    for (const [name, aggregate] of Object.entries(aggregates)) {
+      for (const value of new Set(cohort.map(([, rows]) => aggregate(rows)))) {
+        predicates.push({
+          label: `${name} >= ${value}`,
+          selects: (rows) => aggregate(rows) >= value,
+        });
+        predicates.push({
+          label: `${name} <= ${value}`,
+          selects: (rows) => aggregate(rows) <= value,
+        });
+      }
+    }
+
+    const isolatesReferences = (selected: Array<[string, AlertRow[]]>): boolean =>
+      selected.length === referenceCohort.length &&
+      selected.every(([host]) => referenceHosts.has(host));
+
+    // Singles first: a single threshold that isolates the cohort is the same
+    // leak one level down, and checking only pairs would let it through.
+    const isolatingSingles = predicates
+      .filter((predicate) =>
+        isolatesReferences(cohort.filter(([, rows]) => predicate.selects(rows)))
+      )
+      .map((predicate) => predicate.label);
+    expect(isolatingSingles).toEqual([]);
+
+    const isolatingPairs: string[] = [];
+    for (let first = 0; first < predicates.length; first++) {
+      for (let second = first + 1; second < predicates.length; second++) {
+        const selected = cohort.filter(
+          ([, rows]) => predicates[first].selects(rows) && predicates[second].selects(rows)
+        );
+        if (isolatesReferences(selected)) {
+          isolatingPairs.push(`${predicates[first].label} AND ${predicates[second].label}`);
+        }
+      }
+    }
+
+    expect(isolatingPairs).toEqual([]);
+  });
+
   it('does not let 4-alert host cardinality plus command-line coverage separate the sides', () => {
     // The reported defect: `bg-endpoint-inventory` was the only 4-step
     // background chain and two of its four steps had a null command line, so
@@ -473,7 +609,7 @@ describe('AD2 scenario registry (dense profile)', () => {
     // this table first.
     const escalatedMarkerByTemplate: Record<string, string> = {
       'bg-vendor-update': 'vendor-signed',
-      'bg-endpoint-inventory': 'elevated service account',
+      'bg-endpoint-inventory': 'signed inventory agent',
     };
 
     const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });

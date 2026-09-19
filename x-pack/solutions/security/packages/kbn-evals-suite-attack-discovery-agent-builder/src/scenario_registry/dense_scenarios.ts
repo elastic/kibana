@@ -325,32 +325,52 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
     // dimension worked alone — this chain removes that gap by being the
     // counterexample to all three predicates at once, the same way
     // `bg-vendor-update` alone is the counterexample to severity alone.
+    //
+    // It is also the only 4-step background chain, which makes it the only
+    // background host with 4 alerts — and that host cardinality is itself an
+    // observable (`GROUP BY host | WHERE COUNT(*) = 4`). Every host-aggregate
+    // predicate the reference cohort satisfies therefore has to be satisfied
+    // here too, or the conjunction isolates the four references without reading
+    // an alert's content.
+    //
+    // The invariant is NOT "match the reference on the reported fields" — it is
+    // that this occurrence's host-level aggregates must not sit entirely to one
+    // side of the reference band, because a background profile that is CONSTANT
+    // across occurrences is a single point, and any point outside the band is
+    // separable by a threshold (`MIN(risk_score) <= T`, `SUM(LENGTH(message)) <= T`,
+    // ...). Measured on the emitted plan, the four references span per host:
+    // min risk 72-75, max risk 91-96, sum risk 324-337, min message length
+    // 39-48, max 60-67, sum 205-222, 7 raw documents, no null command lines,
+    // 1-2 file paths, one critical step. Earlier revisions of this chain had a
+    // background minimum of 76 against a reference maximum of 75, which turned
+    // `MIN(risk_score) <= 75` into a perfect key — the same leak the severity
+    // predicate was, one aggregate up. So every value below is chosen to land
+    // INSIDE those ranges, not merely near them, and `dense_scenarios.test.ts`
+    // pins the no-separating-threshold property over the whole 4-alert cohort
+    // so a future edit to any of these numbers is caught.
+    //
+    // The benign reading stays in every escalated step's own fields (`signed`),
+    // per the rule `bg-vendor-update` documents below.
     raw: true,
     stepsFor: ({ host }) => {
-      const agentPath = `/opt/inventory-agent/bin/scan-${host}.sh`;
       const catalogPath = `/var/lib/inventory-agent/${host}-catalog.json`;
+      const reportPath = `/var/lib/inventory-agent/${host}-report.json`;
       return [
         step(
-          'Scheduled Inventory Agent Started',
-          'low',
-          19,
-          `The signed inventory agent started its scheduled sweep on ${host}`,
+          'Inventory Agent Started With Elevated Privileges',
+          'high',
+          74,
+          `Signed inventory agent swept ${host}`,
           'inventory-agent',
-          agentPath,
+          `inventory-agent --sweep ${host}`,
           'process',
-          agentPath
+          null
         ),
-        // Escalated for the same reason `bg-vendor-update`'s steps are: the
-        // RULE scores privileged enumeration tooling high/critical whether or
-        // not it is the routine signed agent, so the field cannot discriminate
-        // — see that chain's comment. The benign reading is in THIS
-        // occurrence's own fields: a signed, scheduled agent enumerating one
-        // host's own catalog, not an ad hoc privilege-escalation attempt.
         step(
           'Software Catalog Enumerated With Elevated Privileges',
           'high',
-          71,
-          `The signed inventory agent enumerated installed packages on ${host} for the asset catalog using its granted elevated service account`,
+          79,
+          `Signed inventory agent read the catalog on ${host}`,
           'inventory-agent',
           `inventory-agent --catalog ${catalogPath} --elevated`,
           'file',
@@ -358,23 +378,23 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
         ),
         step(
           'Inventory Report Uploaded to Fleet Server',
-          'low',
-          23,
-          `${host} uploaded its scheduled inventory report to the internal fleet server`,
+          'high',
+          84,
+          `Signed inventory agent uploaded its full report for ${host}`,
           'inventory-agent',
           `inventory-agent --upload ${host}-catalog.json`,
           'network',
           `fleet.internal.example.net/report/${host}`
         ),
         step(
-          'Scheduled Inventory Agent Exited Cleanly',
-          'low',
-          17,
-          `The inventory agent completed its scheduled sweep on ${host} and exited with status 0`,
+          'Privileged Inventory Agent Terminated',
+          'critical',
+          92,
+          `Privileged signed inventory agent exited cleanly on ${host}`,
           'inventory-agent',
-          agentPath,
-          'process',
-          agentPath
+          `inventory-agent --report ${reportPath}`,
+          'file',
+          reportPath
         ),
       ];
     },
