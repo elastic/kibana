@@ -57,10 +57,10 @@ export const APPROVE_RUNS_AS_YOU = i18n.translate(
   }
 );
 
-export const DISMISS_MODAL_TITLE = i18n.translate(
+export const CLOSE_INVESTIGATION_MODAL_TITLE = i18n.translate(
   'xpack.alertzero.pendingProposals.dismissModalTitle',
   {
-    defaultMessage: 'Dismiss this proposal?',
+    defaultMessage: 'Close the investigation?',
   }
 );
 
