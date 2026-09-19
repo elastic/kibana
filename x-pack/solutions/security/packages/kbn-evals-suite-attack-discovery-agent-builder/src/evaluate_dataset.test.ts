@@ -350,6 +350,52 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
   });
 
+  // The marker has to be in a RESTRICTIVE clause, not merely somewhere in the
+  // query text. The reported payload: the marker is present but the query
+  // filters on nothing, so its rows are arbitrary shared-index rows.
+  it('does not accept a marker that only appears outside a filtering clause', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const notFiltering = [
+      `FROM .alerts-security.alerts-default | EVAL fixture = "${scope}" | LIMIT 95`,
+      `FROM .alerts-security.alerts-default | KEEP _id, "${scope}" | LIMIT 95`,
+      `FROM .alerts-security.alerts-default | LIMIT 95 // scoped by ${scope}`,
+      `FROM .alerts-security.alerts-default /* ${scope} */ | LIMIT 95`,
+      `FROM .alerts-security.alerts-default | LIMIT 95 | EVAL note = "${scope}"`,
+      // A comment carrying the marker AFTER a WHERE clause: the marker is
+      // inside a restrictive segment textually, so only stripping comments
+      // first keeps this rejected.
+      `FROM .alerts-security.alerts-default | WHERE tags == "unrelated" // ${scope}`,
+      `FROM .alerts-security.alerts-default | WHERE tags == "unrelated" /* ${scope} */`,
+    ];
+
+    expect(
+      notFiltering.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null, null, null, null, null, null]);
+
+    expect(
+      notFiltering.map((query) =>
+        extractUnscopedAlertRetrievalRowCounts([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([[95], [95], [95], [95], [95], [95], [95]]);
+  });
+
+  it('still accepts the marker when a WHERE clause restricts on it', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const filtering = [
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | LIMIT 100 | WHERE message LIKE "*${scope}*"`,
+      `FROM .alerts-security.alerts-default | STATS c = COUNT(*) BY host.name | WHERE c > 0 AND tags == "${scope}"`,
+    ];
+
+    expect(
+      filtering.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([95, 95, 95]);
+  });
+
   it('counts the retrieval when the query carries the scope the example declares', () => {
     const steps = [
       recordedEsqlStep({

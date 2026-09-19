@@ -330,6 +330,52 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('does not let rule-name frequency separate target from noise', () => {
+    // The last field that separated the sides: each clean/reference rule name
+    // appeared exactly once (one chain each) while each background rule name
+    // appeared 6-7 times (one per expanded occurrence). `kibana.alert.rule.name`
+    // could therefore be solved by keeping only the names with a population
+    // count of one, recovering the four references without reading an alert
+    // field. Occurrence-local rule names put every name on one host.
+    const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const scenarios = dense.scenarioKeys
+      .map((key) => ({ key, scenario: getAd2Scenario(key, 'dense') }))
+      .filter((entry): entry is { key: string; scenario: Ad2ScenarioDefinition } =>
+        entry.scenario !== undefined
+      );
+
+    const frequencyByName = new Map<string, number>();
+    for (const { scenario } of scenarios) {
+      for (const scenarioStep of scenario.steps) {
+        frequencyByName.set(
+          scenarioStep.ruleName,
+          (frequencyByName.get(scenarioStep.ruleName) ?? 0) + 1
+        );
+      }
+    }
+
+    const frequencies = (background: boolean): number[] => {
+      const names = new Set(
+        scenarios
+          .filter(({ key }) => isBackgroundScenarioKey(key) === background)
+          .flatMap(({ scenario }) => scenario.steps.map((scenarioStep) => scenarioStep.ruleName))
+      );
+      return [...names].map((name) => frequencyByName.get(name) ?? 0);
+    };
+
+    const targetFrequencies = frequencies(false);
+    const backgroundFrequencies = frequencies(true);
+
+    // Non-vacuity: both sides have to carry rule names, or "no separation"
+    // holds trivially.
+    expect(targetFrequencies.length).toBeGreaterThan(0);
+    expect(backgroundFrequencies.length).toBeGreaterThan(0);
+
+    for (const targetFrequency of new Set(targetFrequencies)) {
+      expect(backgroundFrequencies).toContain(targetFrequency);
+    }
+  });
+
   it('keeps every escalated background step benign on its own fields', () => {
     // A background step is only allowed to be high|critical when its own fields
     // does not contain, and the Criteria evaluator then scores a model that read

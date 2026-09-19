@@ -196,9 +196,34 @@ const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
  * results and the `esql_query` the agent handed
  * `security.attack-discovery.run` — so the agent-side and pipeline-side scope
  * rules cannot drift apart.
+ *
+ * The marker has to participate in a RESTRICTIVE clause, not merely appear in
+ * the query text. A bare substring test accepted `FROM
+ * .alerts-security.alerts-default | EVAL fixture = "<marker>" | LIMIT 95`: the
+ * marker is present, the query filters on nothing, and its 95 arbitrary rows
+ * from the shared index were scored as a complete retrieval of this fixture —
+ * the exact failure the scope gate exists to prevent. Only text inside a
+ * `WHERE` clause counts, and comments are stripped first so a marker mentioned
+ * in a comment cannot pass either.
+ *
+ * This stays a text check rather than a predicate parse because the recorded
+ * scoped queries spell the marker four different ways (`tags == "x"`,
+ * `tags LIKE "*x*"`, `QSTR("x")`, an OR-chain); all four put it inside a
+ * `WHERE`, which is what the check requires. Residual limitation, stated
+ * plainly: a `WHERE` that NEGATES the marker (`message != "<marker>"`) still
+ * contains it in a restrictive clause and is accepted. Closing that needs a
+ * real predicate evaluator, not a stricter regex.
  */
-const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean =>
-  retrievalScope == null || query?.includes(retrievalScope) === true;
+const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean => {
+  if (retrievalScope == null) return true;
+  if (query == null) return false;
+
+  const withoutComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+
+  return withoutComments
+    .split('|')
+    .some((segment) => segment.split(/\bWHERE\b/i).slice(1).join(' WHERE ').includes(retrievalScope));
+};
 
 /**
  * The agent's alerts-index retrievals, split by whether they carry the

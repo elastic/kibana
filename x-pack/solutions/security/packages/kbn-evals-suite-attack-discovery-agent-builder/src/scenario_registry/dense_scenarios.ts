@@ -115,6 +115,24 @@ const occurrenceUser = (base: string, occurrence: number): string =>
   occurrence === 1 ? base : `${base}-${occurrence}`;
 
 /**
+ * `Diagnostic Archive Written to Disk` -> `...-2`, ... — each occurrence's OWN
+ * rule name, the same reason `occurrenceHost` and `occurrenceUser` are
+ * occurrence-local.
+ *
+ * Rule-name FREQUENCY was the last field that separated the sides: every clean
+ * rule name appeared exactly once (one chain each) while every background rule
+ * name appeared 6-7 times (one per expanded occurrence), so `kibana.alert.rule.name`
+ * could be solved by "keep the names with a population count of one" — or,
+ * inverted, "drop every name seen more than once" — recovering the four
+ * references without reading an alert field. Suffixing each occurrence's names
+ * puts every rule name on exactly one host, so no frequency predicate can
+ * separate the sides. Occurrence 1 keeps the template's literal name, so no
+ * existing fixture reference shifts.
+ */
+const occurrenceRuleName = (base: string, occurrence: number): string =>
+  occurrence === 1 ? base : `${base}-${occurrence}`;
+
+/**
  * Background chains: plausible, non-actionable, and NOT part of the four target
  * chains. Severity and risk score do not separate them from those chains either
  * — see `bg-vendor-update` below — so the population cannot be solved by
@@ -434,7 +452,12 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
       const template = AD2_DENSE_BACKGROUND_TEMPLATES[templateIndex];
       const occurrence = round + 1;
       const host = occurrenceHost(template.host, occurrence);
-      const steps = template.stepsFor({ occurrence, host });
+      const steps = template
+        .stepsFor({ occurrence, host })
+        .map((templateStep) => ({
+          ...templateStep,
+          ruleName: occurrenceRuleName(templateStep.ruleName, occurrence),
+        }));
 
       // Truncate at a chain boundary rather than emitting a partial chain.
       if (steps.length <= budget) {
