@@ -562,6 +562,26 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     ).toEqual([null]);
   });
 
+  it('does not treat a marker that is only text inside a longer literal as scope', () => {
+    // `includes(marker)` used to be the whole test, so a query that merely
+    // MENTIONS the marker as data was credited as fixture-scoped and its
+    // whole-index row count was admitted as the fixture's population. The
+    // marker has to be a filter VALUE: a complete literal, or a LIKE fragment
+    // delimited by wildcards.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const mentionsOnly = [
+      `FROM .alerts-security.alerts-default | WHERE message == "the marker is ${scope} here"`,
+      `FROM .alerts-security.alerts-default | WHERE message == "prefix${scope}suffix"`,
+      `FROM .alerts-security.alerts-default | WHERE process.command_line == "echo ${scope}"`,
+    ];
+
+    expect(
+      mentionsOnly.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null, null]);
+  });
+
   it('still accepts the marker when a WHERE clause restricts on it', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const filtering = [

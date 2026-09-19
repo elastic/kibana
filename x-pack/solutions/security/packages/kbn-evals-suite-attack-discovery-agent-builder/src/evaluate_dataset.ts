@@ -355,6 +355,34 @@ const stripComments = (segment: string): string => {
 };
 
 /**
+ * The positions where the marker appears as a filter VALUE rather than as
+ * incidental text inside a larger literal.
+ *
+ * `includes(marker)` alone credits a query that merely mentions the marker as
+ * data — `message == "the marker is <marker> here"` restricts nothing and
+ * retrieves the whole shared index, yet its mention made the retrieval look
+ * fixture-scoped. The marker is a value only when it is a complete literal
+ * (`"<marker>"`, `QSTR("<marker>")`) or a LIKE fragment (`"*<marker>*"`), so it
+ * has to be delimited by a quote or a LIKE wildcard on both sides.
+ */
+const markerValuePositions = (disjunct: string, marker: string): number[] => {
+  const isDelimiter = (character: string | undefined): boolean =>
+    character === '"' || character === "'" || character === '*';
+
+  const positions: number[] = [];
+  let index = disjunct.indexOf(marker);
+
+  while (index >= 0) {
+    if (isDelimiter(disjunct[index - 1]) && isDelimiter(disjunct[index + marker.length])) {
+      positions.push(index);
+    }
+    index = disjunct.indexOf(marker, index + 1);
+  }
+
+  return positions;
+};
+
+/**
  * Whether the disjunct's marker literal sits behind a negation operator.
  *
  * The negation has to be attached to the MARKER's own predicate, not to the
@@ -368,8 +396,11 @@ const stripComments = (segment: string): string => {
  * off the disjunct's opening token (`/^\s*NOT\b/`), which is exactly this false
  * negative; the negation is now resolved per `AND` branch instead.
  */
-const isNegatedMarkerPredicate = (disjunct: string, marker: string): boolean => {
-  const markerIndex = disjunct.indexOf(marker);
+const isNegatedMarkerPredicate = (
+  disjunct: string,
+  markerIndex: number,
+  marker: string
+): boolean => {
   if (markerIndex < 0) return false;
 
   // The branch the marker literal lives in: the text since the last `AND`.
@@ -387,6 +418,18 @@ const isNegatedMarkerPredicate = (disjunct: string, marker: string): boolean => 
   // immediately before the literal, modulo the opening quote and whitespace.
   return /(!=|<>)\s*"?\s*$/.test(branch);
 };
+
+/**
+ * Whether the disjunct positively restricts to the fixture.
+ *
+ * Requires the marker to appear as a filter VALUE (not as text inside a longer
+ * literal) AND to be positively filtered there: `tags == "<marker>"` and
+ * `tags LIKE "*<marker>*"` qualify, `message == "see <marker>"` does not.
+ */
+const isScopedDisjunct = (disjunct: string, retrievalScope: string): boolean =>
+  markerValuePositions(disjunct, retrievalScope).some(
+    (position) => !isNegatedMarkerPredicate(disjunct, position, retrievalScope)
+  );
 
 const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean => {
   if (retrievalScope == null) return true;
@@ -406,10 +449,7 @@ const carriesRetrievalScope = (query: string | null, retrievalScope: string | nu
     // `true` branch names no marker, so it fails here too.
     const disjuncts = splitOutsideQuotes(whereBody, /\s+OR\s+/i);
 
-    return disjuncts.every(
-      (disjunct) =>
-        disjunct.includes(retrievalScope) && !isNegatedMarkerPredicate(disjunct, retrievalScope)
-    );
+    return disjuncts.every((disjunct) => isScopedDisjunct(disjunct, retrievalScope));
   });
 };
 
