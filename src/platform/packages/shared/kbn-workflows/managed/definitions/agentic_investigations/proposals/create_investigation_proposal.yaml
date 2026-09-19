@@ -178,6 +178,10 @@ steps:
       expires_epoch: "${{ steps.create_proposal.output.expiresAt | date: '%s' | plus: 0 }}"
       has_deadline: '${{ steps.create_proposal.output.expiresAt != blank }}'
       action_workflow_id: '{{ inputs.actionWorkflowId }}'
+      # The trigger's input, until the gate answers: a revision appended while
+      # the gate was parked may have corrected it, and `adopt_live_head` below
+      # replaces this with the live revision's own value.
+      action_input: '${{ inputs.actionInput }}'
       decided_by: ''
       # `autoApprove` is only meaningful for an action proposal: autonomy
       # governs whether an action may run without a human, and a non-action
@@ -282,6 +286,28 @@ steps:
               approveLabel: Approve
               rejectLabel: Dismiss
 
+          # Adopted before anything below writes, not after the branch: the
+          # timeout handler writes `expired` on the carried id, and `resolve_gate`
+          # hands it to the release route, which refuses a row that is already
+          # `superseded` — so a gate that answered (or timed out) after a revision
+          # landed would settle the wrong row, or fail outright. The gate belongs
+          # to the chain, so the answer belongs to the chain's live head.
+          - name: adopt_live_head_after_wait_branch
+            type: if
+            condition: '${{ variables.current_proposal_id != blank }}'
+            steps:
+              - name: resolve_live_head_after_wait
+                type: proposals.getLatestRevision
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+              - name: adopt_live_head_after_wait
+                type: data.set
+                with:
+                  current_proposal_id: '{{ steps.resolve_live_head_after_wait.output.proposalId }}'
+                  # The revision's own input, not the trigger's: an analyst who
+                  # approved a corrected revision approved those parameters.
+                  action_input: '${{ steps.resolve_live_head_after_wait.output.actionInput }}'
+
           # Before anything reads the gate's answer, because a timed-out gate
           # has no answer to read: `response.approved` comes back blank, which
           # `resolve_gate` below would record as a dismissal — a decision
@@ -322,6 +348,24 @@ steps:
         type: if
         condition: '${{ variables.needs_gate != true }}'
         steps:
+          # Same adoption, for a loop that reached this branch without parking in
+          # this iteration: an earlier iteration's `park_on_clone` can have been
+          # parked while a revision landed, and every write below targets the
+          # carried id.
+          - name: adopt_live_head_before_auto_branch
+            type: if
+            condition: '${{ variables.current_proposal_id != blank }}'
+            steps:
+              - name: resolve_live_head_before_auto
+                type: proposals.getLatestRevision
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+              - name: adopt_live_head_before_auto
+                type: data.set
+                with:
+                  current_proposal_id: '{{ steps.resolve_live_head_before_auto.output.proposalId }}'
+                  action_input: '${{ steps.resolve_live_head_before_auto.output.actionInput }}'
+
           # No human in this path: the caller's autonomy policy already decided,
           # so the approval is attributed to the execution identity.
           - name: resolve_auto
@@ -402,10 +446,10 @@ steps:
         type: if
         condition: '${{ variables.gate_approved != true }}'
         steps:
-          # Adopting a `supersededBy` successor belongs here and lands with the
-          # tune route, which is the only thing that will write that field onto
-          # a proposal still awaiting a decision. `cloneProposal` writes it onto
-          # one that already failed, so there is nothing to adopt today.
+          # The successor adoption this branch used to defer to the tune route
+          # now happens above, before any write: the revise route is what writes
+          # `supersededBy` onto a proposal still awaiting a decision, so by the
+          # time the gate answers, the carried id may already be terminal.
           - name: record_dismissal
             type: proposals.updateProposal
             with:
@@ -488,7 +532,12 @@ steps:
               inputs:
                 # Every action workflow takes one `actionInput` object, so this
                 # workflow never needs to know an action's parameter names.
-                actionInput: '${{ inputs.actionInput }}'
+                #
+                # Read from variables, not from `inputs`: a revision may have
+                # corrected the input while the gate was parked, and the trigger
+                # value would then execute parameters the analyst never
+                # approved. `adopt_live_head` keeps this in step with the head.
+                actionInput: '${{ variables.action_input }}'
 
           - name: handle_action_success
             type: if

@@ -33,6 +33,14 @@ export const proposalStatusSchema = z.enum([
   'failed',
   'expired',
   'no_action',
+  /**
+   * A revision chain's non-live proposal: replaced by an analyst-requested
+   * revision (`ProposalsService.revise`), never a human rejection. Kept
+   * distinct from `dismissed`/`no_action` for exactly that reason — being
+   * revised says nothing about whether the original was a good proposal.
+   * Terminal: see `isTerminal` in `proposals_service.ts`.
+   */
+  'superseded',
 ]);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
@@ -72,7 +80,7 @@ export type DismissReason = z.infer<typeof dismissReasonSchema>;
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 /** Markdown shown to a human, so it needs room without being unbounded. */
-const MAX_COMMENT_LENGTH = 8192;
+export const MAX_COMMENT_LENGTH = 8192;
 const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
@@ -80,7 +88,7 @@ const MAX_TIMESTAMP_LENGTH = 64;
 /** An action's input is opaque to us, so cap its breadth rather than its shape. */
 const MAX_ACTION_INPUT_KEYS = 100;
 
-const boundedActionInput = z
+export const boundedActionInput = z
   .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
   .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
     message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
@@ -127,10 +135,31 @@ export const proposalSchema = z.object({
   decision: proposalDecisionSchema.optional(),
   /**
    * Set when this proposal was replaced — by a retry after a failed action, or
-   * by a tuned variant. Points at the successor so the queue can show one live
-   * proposal per subject rather than every attempt.
+   * by an analyst-requested revision. Points at the successor so the queue can
+   * show one live proposal per subject rather than every attempt.
    */
   supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The first proposal in this revision chain. Equal to `id` on the root
+   * itself, and unchanged by every revision after it — a revision never starts
+   * a new chain, it only extends the one it was cut from. Present on every
+   * proposal `ProposalsService.create` writes (a fresh proposal is a
+   * single-member chain rooted at itself); a `clone()`-created retry inherits
+   * the original's, same as it inherits `createdAt`.
+   */
+  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The specific proposal this one revises, i.e. the previous link in the
+   * chain. Absent on the root. Distinct from `rootProposalId`: `supersedes`
+   * is always exactly one hop back, `rootProposalId` is always the first hop.
+   */
+  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * 1-based position in the revision chain. The root is `1`; each
+   * `ProposalsService.revise` call increments it by one from whatever it
+   * revised. Not reset by `clone()` — a retry is not a revision.
+   */
+  revision: z.number().int().min(1).optional(),
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,

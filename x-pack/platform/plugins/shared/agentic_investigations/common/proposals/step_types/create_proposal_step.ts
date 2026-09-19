@@ -51,6 +51,13 @@ export const createProposalStepInputSchema = z.object({
 
 export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
+  /**
+   * Equal to `proposalId` on a fresh proposal — every chain starts as a
+   * single member rooted at itself. Captured once by the gate workflow's loop
+   * so a later `proposals.getLatestRevision` call can resolve the chain even
+   * after a revision has replaced this exact id.
+   */
+  rootProposalId: z.string(),
   status: z.string(),
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),

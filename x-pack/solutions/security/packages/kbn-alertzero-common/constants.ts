@@ -49,6 +49,9 @@ export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as cons
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
 
+/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
+export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
+
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
  * Can expand this to multiple scoped thin agents in the future if needed.

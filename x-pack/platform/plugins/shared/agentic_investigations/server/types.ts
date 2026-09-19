@@ -15,6 +15,7 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
+import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
@@ -41,6 +42,14 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
+  /**
+   * Exposed so an in-process caller that never arrives through a route or a
+   * workflow step — an Agent Builder tool handler — can still enforce the
+   * same write/read gate the HTTP API declares. See `proposals.revise`'s tool
+   * (elastic/security-team#19289): it calls `ProposalsService.revise()`
+   * directly, so it must check `assertCanManage` itself first.
+   */
+  getProposalPrivileges: () => ProposalPrivilegesChecker;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

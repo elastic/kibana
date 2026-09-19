@@ -29,6 +29,15 @@ const storageSettings = {
       // Absent while awaiting, which is what `must_not exists` filters on.
       decision: types.keyword({}),
       supersededBy: types.keyword({}),
+      // Revision-chain fields, per elastic/security-team#19289. `rootProposalId`
+      // is set on every revision, including the root (equal to its own id), so
+      // a single term query resolves the whole chain. `supersedes` names the
+      // predecessor a revision replaced; absent on the root. `revision` is
+      // 1-based and orders the chain — `createdAt` cannot, since it is
+      // deliberately inherited unchanged across every revision.
+      rootProposalId: types.keyword({}),
+      supersedes: types.keyword({}),
+      revision: types.long({}),
       impact: types.keyword({}),
       confidence: types.keyword({}),
       category: types.keyword({}),
