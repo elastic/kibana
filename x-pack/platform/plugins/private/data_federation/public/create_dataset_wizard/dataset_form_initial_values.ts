@@ -21,9 +21,9 @@ import {
   type DatasetMultiValueSyntaxFormValue,
   type DatasetPartitionDetectionFormValue,
   type DatasetSchemaResolutionFormValue,
-} from './create_dataset_flyout_form_state';
+} from './create_dataset_form_state';
 
-export const emptyDatasetFlyoutFormValues = (): CreateDatasetFormValues => ({
+export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   name: '',
   description: '',
   data_source: '',
@@ -31,7 +31,7 @@ export const emptyDatasetFlyoutFormValues = (): CreateDatasetFormValues => ({
   settings: emptyCreateDatasetSettingsFormValues(),
 });
 
-/** Maps a list-table row to flyout initial state (no extra GET). */
+/** Maps a list-table row to form initial state (no extra GET). */
 export const dataSetFromListItem = (item: DataSetWithName): DataSetWithName => ({
   ...item,
   description: item.description ?? '',
@@ -43,7 +43,7 @@ const boolToFormValue = (value: boolean | undefined): DatasetBooleanFormValue =>
   return '';
 };
 
-const settingsToFlyoutFormValues = (
+const settingsToFormValues = (
   settings: DatasetSettings | undefined
 ): CreateDatasetSettingsFormValues => {
   const defaults = emptyCreateDatasetSettingsFormValues();
@@ -86,10 +86,10 @@ const settingsToFlyoutFormValues = (
   };
 };
 
-export const dataSetToFlyoutFormValues = (data: DataSetWithName): CreateDatasetFormValues => ({
+export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormValues => ({
   name: data.name,
   description: data.description ?? '',
   data_source: data.data_source,
   resource: data.resource,
-  settings: settingsToFlyoutFormValues(data.settings),
+  settings: settingsToFormValues(data.settings),
 });

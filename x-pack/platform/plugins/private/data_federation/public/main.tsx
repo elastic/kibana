@@ -17,11 +17,17 @@ import type { DataSetWithName, DataSource } from '../common';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import { DatasetsTabContent } from './datasets_tab_content';
+import { CreateDatasetWizardPage } from './create_dataset_wizard';
 import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
-const DATASETS_PATH = '/datasets' as const;
-const DATA_SOURCES_PATH = '/data_sources' as const;
+import {
+  CREATE_DATASET_PATH,
+  DATASETS_PATH,
+  DATA_SOURCES_PATH,
+  EDIT_DATASET_PATH,
+  isDatasetWizardPath,
+} from './app_paths';
 
 export const Main: FunctionComponent = () => {
   const {
@@ -55,7 +61,12 @@ export const Main: FunctionComponent = () => {
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
 
   useEffect(() => {
-    if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
+    if (
+      isDatasetWizardPath(pathname) ||
+      hasUserSelectedTab ||
+      !hasLoadedDataSources ||
+      !hasLoadedDataSets
+    ) {
       return;
     }
 
@@ -69,6 +80,7 @@ export const Main: FunctionComponent = () => {
     hasLoadedDataSources,
     hasUserSelectedTab,
     dataSources.length,
+    pathname,
     selectedTabId,
   ]);
 
@@ -130,6 +142,42 @@ export const Main: FunctionComponent = () => {
       <EuiSpacer size="m" />
 
       <Routes>
+        <Route
+          exact
+          path={CREATE_DATASET_PATH}
+          render={() => (
+            <CreateDatasetWizardPage
+              dataSources={dataSources}
+              existingDataSetNames={dataSets.map((ds) => ds.name)}
+              loadDataSets={reloadDataSets}
+              loadDataSources={reloadDataSources}
+            />
+          )}
+        />
+        <Route
+          exact
+          path={EDIT_DATASET_PATH}
+          render={({ match }) => {
+            const datasetName = decodeURIComponent(match.params.datasetName);
+            const initialDataSet = dataSets.find((dataSet) => dataSet.name === datasetName);
+            if (!hasLoadedDataSets) {
+              return null;
+            }
+            if (!initialDataSet) {
+              return <Redirect to={DATASETS_PATH} />;
+            }
+            return (
+              <CreateDatasetWizardPage
+                key={initialDataSet.name}
+                initialDataSet={initialDataSet}
+                dataSources={dataSources}
+                existingDataSetNames={dataSets.map((ds) => ds.name)}
+                loadDataSets={reloadDataSets}
+                loadDataSources={reloadDataSources}
+              />
+            );
+          }}
+        />
         <Route
           exact
           path={DATASETS_PATH}

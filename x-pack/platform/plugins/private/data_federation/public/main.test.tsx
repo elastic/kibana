@@ -24,6 +24,14 @@ jest.mock('./data_sources_tab_content', () => ({
   DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
 }));
 
+jest.mock('./create_dataset_wizard', () => ({
+  CreateDatasetWizardPage: ({ initialDataSet }: { initialDataSet?: { name: string } }) => (
+    <div data-test-subj="createDatasetWizard">
+      {initialDataSet ? `edit:${initialDataSet.name}` : 'create'}
+    </div>
+  ),
+}));
+
 const createToastsMock = () => ({
   addSuccess: jest.fn(),
   addDanger: jest.fn(),
@@ -122,5 +130,88 @@ describe('Main', () => {
       'aria-selected',
       'true'
     );
+  });
+
+  it('keeps the create wizard visible when both lists are empty', async () => {
+    const services = createServicesMock({ dataSources: [], dataSets: [] });
+
+    const { getByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/create']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(getByTestId('createDatasetWizard')).toHaveTextContent('create');
+
+    await waitFor(() => {
+      expect(services.dataSourcesClient.get).toHaveBeenCalled();
+      expect(services.datasetsClient.get).toHaveBeenCalled();
+    });
+
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(getByTestId('createDatasetWizard')).toHaveTextContent('create');
+  });
+
+  it('opens the wizard with the matching dataset on the edit route', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'source-1', type: 's3', description: '', settings: {} }],
+      dataSets: [
+        {
+          name: 'logs-dataset',
+          data_source: 'source-1',
+          resource: 'bucket/*',
+          description: '',
+        },
+      ],
+    });
+
+    const { findByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/edit/logs-dataset']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(await findByTestId('createDatasetWizard')).toHaveTextContent('edit:logs-dataset');
+  });
+
+  it('redirects to the datasets tab when the edit route dataset is missing', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'source-1', type: 's3', description: '', settings: {} }],
+      dataSets: [
+        {
+          name: 'other-dataset',
+          data_source: 'source-1',
+          resource: 'bucket/*',
+          description: '',
+        },
+      ],
+    });
+
+    const { findByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/edit/logs-dataset']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(await findByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetWizard')).toBeNull();
   });
 });

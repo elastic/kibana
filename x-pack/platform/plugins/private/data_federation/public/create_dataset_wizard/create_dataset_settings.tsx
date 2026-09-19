@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButtonEmpty,
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
@@ -15,14 +14,13 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataFederationKibanaServices } from '../types';
-import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import {
   validateMaxErrorRatio,
   validateMaxErrors,
@@ -32,160 +30,193 @@ import {
   type DatasetBooleanFormValue,
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
-} from './create_dataset_flyout_form_state';
+} from './create_dataset_form_state';
 
 // ---------------------------------------------------------------------------
-// Module-level option factories — shared across components so each select
+// Module-level option arrays — shared across components so each select
 // renders consistently wherever it appears.
 // ---------------------------------------------------------------------------
 
-const FORMAT_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsFormatPlaceholder() },
-  { value: 'csv', text: createDatasetFlyoutStrings.settingsFormatCsv() },
-  { value: 'tsv', text: createDatasetFlyoutStrings.settingsFormatTsv() },
-  { value: 'ndjson', text: createDatasetFlyoutStrings.settingsFormatNdjson() },
-  { value: 'parquet', text: createDatasetFlyoutStrings.settingsFormatParquet() },
-  // { value: 'orc', text: createDatasetFlyoutStrings.settingsFormatOrc() },
+const FORMAT_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsFormatPlaceholder },
+  { value: 'csv', text: createDatasetWizardStrings.settingsFormatCsv },
+  { value: 'tsv', text: createDatasetWizardStrings.settingsFormatTsv },
+  { value: 'ndjson', text: createDatasetWizardStrings.settingsFormatNdjson },
+  { value: 'parquet', text: createDatasetWizardStrings.settingsFormatParquet },
+  // { value: 'orc', text: createDatasetWizardStrings.settingsFormatOrc },
 ];
 
-const SCHEMA_RESOLUTION_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsSchemaResolutionPlaceholder() },
+const SCHEMA_RESOLUTION_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsSchemaResolutionPlaceholder },
   {
     value: 'first_file_wins',
-    text: createDatasetFlyoutStrings.settingsSchemaResolutionFirstFileWins(),
+    text: createDatasetWizardStrings.settingsSchemaResolutionFirstFileWins,
   },
-  { value: 'strict', text: createDatasetFlyoutStrings.settingsSchemaResolutionStrict() },
+  { value: 'strict', text: createDatasetWizardStrings.settingsSchemaResolutionStrict },
   {
     value: 'union_by_name',
-    text: createDatasetFlyoutStrings.settingsSchemaResolutionUnionByName(),
+    text: createDatasetWizardStrings.settingsSchemaResolutionUnionByName,
   },
 ];
 
-const PARTITION_DETECTION_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder() },
-  { value: 'auto', text: createDatasetFlyoutStrings.settingsPartitionDetectionAuto() },
-  { value: 'hive', text: createDatasetFlyoutStrings.settingsPartitionDetectionHive() },
-  { value: 'none', text: createDatasetFlyoutStrings.settingsPartitionDetectionNone() },
+const PARTITION_DETECTION_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsPartitionDetectionPlaceholder },
+  { value: 'auto', text: createDatasetWizardStrings.settingsPartitionDetectionAuto },
+  { value: 'hive', text: createDatasetWizardStrings.settingsPartitionDetectionHive },
+  { value: 'none', text: createDatasetWizardStrings.settingsPartitionDetectionNone },
 ];
 
-const ERROR_MODE_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsErrorModePlaceholder() },
-  { value: 'fail_fast', text: createDatasetFlyoutStrings.settingsErrorModeFailFast() },
-  { value: 'skip_row', text: createDatasetFlyoutStrings.settingsErrorModeSkipRow() },
-  { value: 'null_field', text: createDatasetFlyoutStrings.settingsErrorModeNullField() },
+const ERROR_MODE_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsErrorModePlaceholder },
+  { value: 'fail_fast', text: createDatasetWizardStrings.settingsErrorModeFailFast },
+  { value: 'skip_row', text: createDatasetWizardStrings.settingsErrorModeSkipRow },
+  { value: 'null_field', text: createDatasetWizardStrings.settingsErrorModeNullField },
 ];
 
-const MODE_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsModePlaceholder() },
-  { value: 'quoted', text: createDatasetFlyoutStrings.settingsModeQuoted() },
-  { value: 'escaped', text: createDatasetFlyoutStrings.settingsModeEscaped() },
-  { value: 'plain', text: createDatasetFlyoutStrings.settingsModePlain() },
+const MODE_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
+  { value: 'quoted', text: createDatasetWizardStrings.settingsModeQuoted },
+  { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
+  { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
 ];
 
-const HEADER_ROW_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsHeaderRowPlaceholder() },
-  { value: 'true', text: createDatasetFlyoutStrings.settingsHeaderRowTrue() },
-  { value: 'false', text: createDatasetFlyoutStrings.settingsHeaderRowFalse() },
+const HEADER_ROW_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
+  { value: 'true', text: createDatasetWizardStrings.settingsHeaderRowTrue },
+  { value: 'false', text: createDatasetWizardStrings.settingsHeaderRowFalse },
 ];
 
-const MULTI_VALUE_SYNTAX_OPTIONS = () => [
-  { value: '', text: createDatasetFlyoutStrings.settingsMultiValueSyntaxPlaceholder() },
-  { value: 'none', text: createDatasetFlyoutStrings.settingsMultiValueSyntaxNone() },
-  { value: 'brackets', text: createDatasetFlyoutStrings.settingsMultiValueSyntaxBrackets() },
+const MULTI_VALUE_SYNTAX_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsMultiValueSyntaxPlaceholder },
+  { value: 'none', text: createDatasetWizardStrings.settingsMultiValueSyntaxNone },
+  { value: 'brackets', text: createDatasetWizardStrings.settingsMultiValueSyntaxBrackets },
 ];
 
-const BOOLEAN_OPTIONS = (placeholder: string, enabled: string, disabled: string) => [
-  { value: '', text: placeholder },
-  { value: 'true', text: enabled },
-  { value: 'false', text: disabled },
+const HIVE_PARTITIONING_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsHivePartitioningPlaceholder },
+  { value: 'true', text: createDatasetWizardStrings.settingsHivePartitioningEnabled },
+  { value: 'false', text: createDatasetWizardStrings.settingsHivePartitioningDisabled },
 ];
 
 // ---------------------------------------------------------------------------
 // Top-level export
 // ---------------------------------------------------------------------------
 
-export function CreateDatasetFlyoutSettings({
+export function CreateDatasetFormatField({
   control,
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
-  const {
-    services: { docLinks },
-  } = useKibana<DataFederationKibanaServices>();
-  const dataFederationLinks = docLinks.links.dataFederation;
-
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutAdvancedSettings' });
-
   const { field: formatField, fieldState: formatFieldState } = useController({
     name: 'settings.format',
     control,
     rules: {
       validate: (value) =>
-        value?.trim() ? true : createDatasetFlyoutStrings.settingsFormatRequired(),
+        value?.trim() ? true : createDatasetWizardStrings.settingsFormatRequired,
     },
   });
 
-  const format = formatField.value as DatasetFormatFormValue;
+  return (
+    <EuiFormRow
+      label={createDatasetWizardStrings.settingsFormatLabel}
+      fullWidth
+      isInvalid={Boolean(formatFieldState.error)}
+      error={formatFieldState.error?.message}
+    >
+      <EuiSelect
+        options={FORMAT_OPTIONS}
+        data-test-subj="createDatasetSettingsFormat"
+        fullWidth
+        aria-label={createDatasetWizardStrings.settingsFormatLabel}
+        value={formatField.value}
+        onChange={(e) => formatField.onChange(e.target.value)}
+        name={formatField.name}
+        inputRef={formatField.ref}
+        isInvalid={Boolean(formatFieldState.error)}
+      />
+    </EuiFormRow>
+  );
+}
+
+export function CreateDatasetPartitionDetectionField({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
+  const { field: partitionDetectionField } = useController({
+    name: 'settings.partition_detection',
+    control,
+  });
+
+  return (
+    <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
+      <EuiSelect
+        options={PARTITION_DETECTION_OPTIONS}
+        data-test-subj="createDatasetSettingsPartitionDetection"
+        fullWidth
+        aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
+        value={partitionDetectionField.value}
+        onChange={(e) => partitionDetectionField.onChange(e.target.value)}
+        name={partitionDetectionField.name}
+        inputRef={partitionDetectionField.ref}
+      />
+    </EuiFormRow>
+  );
+}
+
+function DatasetSettingsHelpLink() {
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
 
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsFormatLabel()}
-        fullWidth
-        isInvalid={Boolean(formatFieldState.error)}
-        error={formatFieldState.error?.message}
-      >
-        <EuiSelect
-          options={FORMAT_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsFormat"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
-          value={formatField.value}
-          onChange={(e) => formatField.onChange(e.target.value)}
-          name={formatField.name}
-          inputRef={formatField.ref}
-          isInvalid={Boolean(formatFieldState.error)}
-        />
-      </EuiFormRow>
+      <EuiText size="xs" color="subdued">
+        <EuiLink href={docLinks.links.dataFederation.datasetSettings} target="_blank">
+          {createDatasetWizardStrings.settingsLearnMore}
+        </EuiLink>
+      </EuiText>
+      <EuiSpacer size="s" />
+    </>
+  );
+}
 
-      {/* Core format settings — shown by default without the expander */}
-      <CoreFormatSettings control={control} format={format} />
+export function CreateDatasetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
 
+  return (
+    <>
       <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
-        aria-expanded={isAdvancedOpen}
-        aria-controls={advancedId}
-        onClick={() => setIsAdvancedOpen((v) => !v)}
-        data-test-subj="createDatasetFlyoutAdvancedSettingsToggle"
-      >
-        {isAdvancedOpen
-          ? createDatasetFlyoutStrings.advancedSettingsHide()
-          : createDatasetFlyoutStrings.advancedSettingsShow()}
-      </EuiButtonEmpty>
-      <div id={advancedId} hidden={!isAdvancedOpen}>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          <EuiLink href={dataFederationLinks.datasetSettings} target="_blank">
-            {createDatasetFlyoutStrings.settingsLearnMore()}
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer size="s" />
-        {/* Format-independent advanced settings */}
-        <UniversalAdvancedSettings control={control} />
-        {/* Per-format advanced settings */}
-        <FormatAdvancedSettings control={control} format={format} />
-      </div>
+      <CreateDatasetFormatField control={control} />
+      <CoreFormatSettings control={control} format={format} />
+      <DatasetSettingsHelpLink />
+      <UniversalAdvancedSettings control={control} />
+      <FormatAdvancedSettings control={control} format={format} />
+    </>
+  );
+}
+
+/** Advanced settings without format or partition detection — used by the create-dataset wizard. */
+export function CreateDatasetAdvancedSettings({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
+  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+
+  return (
+    <>
+      <CoreFormatSettings control={control} format={format} />
+      <DatasetSettingsHelpLink />
+      <RemainingUniversalSettings control={control} />
+      <FormatAdvancedSettings control={control} format={format} />
     </>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Core format settings — shown by default (outside the advanced expander)
+// Core format settings — shown when CSV/TSV is selected
 // ---------------------------------------------------------------------------
 
 function CoreFormatSettings({
@@ -205,13 +236,15 @@ function CoreFormatSettings({
 // Universal advanced settings — shown under every format
 // ---------------------------------------------------------------------------
 
-function UniversalAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+function RemainingUniversalSettings({
+  control,
+  partitionDetection,
+}: {
+  control: Control<CreateDatasetFormValues>;
+  partitionDetection?: React.ReactNode;
+}) {
   const { field: schemaResolutionField } = useController({
     name: 'settings.schema_resolution',
-    control,
-  });
-  const { field: partitionDetectionField } = useController({
-    name: 'settings.partition_detection',
     control,
   });
   const { field: partitionPathField } = useController({
@@ -226,15 +259,15 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
   return (
     <>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsSchemaResolutionLabel()}
-        helpText={createDatasetFlyoutStrings.settingsSchemaResolutionHelp()}
+        label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
+        helpText={createDatasetWizardStrings.settingsSchemaResolutionHelp}
         fullWidth
       >
         <EuiSelect
-          options={SCHEMA_RESOLUTION_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsSchemaResolution"
+          options={SCHEMA_RESOLUTION_OPTIONS}
+          data-test-subj="createDatasetSettingsSchemaResolution"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsSchemaResolutionLabel()}
+          aria-label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
           value={schemaResolutionField.value}
           onChange={(e) =>
             schemaResolutionField.onChange(e.target.value as DatasetSchemaResolutionFormValue)
@@ -243,25 +276,14 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
           inputRef={schemaResolutionField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
-        <EuiSelect
-          options={PARTITION_DETECTION_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsPartitionDetection"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
-          value={partitionDetectionField.value}
-          onChange={(e) => partitionDetectionField.onChange(e.target.value)}
-          name={partitionDetectionField.name}
-          inputRef={partitionDetectionField.ref}
-        />
-      </EuiFormRow>
+      {partitionDetection}
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
-        helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
+        label={createDatasetWizardStrings.settingsPartitionPathLabel}
+        helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsPartitionPath"
+          data-test-subj="createDatasetSettingsPartitionPath"
           fullWidth
           value={partitionPathField.value}
           onChange={(e) => partitionPathField.onChange(e.target.value)}
@@ -269,16 +291,12 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
           inputRef={partitionPathField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()} fullWidth>
+      <EuiFormRow label={createDatasetWizardStrings.settingsHivePartitioningLabel} fullWidth>
         <EuiSelect
-          options={BOOLEAN_OPTIONS(
-            createDatasetFlyoutStrings.settingsHivePartitioningPlaceholder(),
-            createDatasetFlyoutStrings.settingsHivePartitioningEnabled(),
-            createDatasetFlyoutStrings.settingsHivePartitioningDisabled()
-          )}
-          data-test-subj="createDatasetFlyoutSettingsHivePartitioning"
+          options={HIVE_PARTITIONING_OPTIONS}
+          data-test-subj="createDatasetSettingsHivePartitioning"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
+          aria-label={createDatasetWizardStrings.settingsHivePartitioningLabel}
           value={hivePartitioningField.value}
           onChange={(e) =>
             hivePartitioningField.onChange(e.target.value as DatasetBooleanFormValue)
@@ -288,6 +306,15 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
         />
       </EuiFormRow>
     </>
+  );
+}
+
+function UniversalAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  return (
+    <RemainingUniversalSettings
+      control={control}
+      partitionDetection={<CreateDatasetPartitionDetectionField control={control} />}
+    />
   );
 }
 
@@ -325,12 +352,12 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
     <>
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsDelimiterLabel()}
-        helpText={createDatasetFlyoutStrings.settingsDelimiterHelp()}
+        label={createDatasetWizardStrings.settingsDelimiterLabel}
+        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsDelimiter"
+          data-test-subj="createDatasetSettingsDelimiter"
           fullWidth
           value={delimiterField.value}
           onChange={(e) => delimiterField.onChange(e.target.value)}
@@ -338,24 +365,24 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
           inputRef={delimiterField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsModeLabel()} fullWidth>
+      <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
         <EuiSelect
-          options={MODE_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsMode"
+          options={MODE_OPTIONS}
+          data-test-subj="createDatasetSettingsMode"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsModeLabel()}
+          aria-label={createDatasetWizardStrings.settingsModeLabel}
           value={modeField.value}
           onChange={(e) => modeField.onChange(e.target.value)}
           name={modeField.name}
           inputRef={modeField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsHeaderRowLabel()} fullWidth>
+      <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>
         <EuiSelect
-          options={HEADER_ROW_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsHeaderRow"
+          options={HEADER_ROW_OPTIONS}
+          data-test-subj="createDatasetSettingsHeaderRow"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsHeaderRowLabel()}
+          aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
           value={headerRowField.value}
           onChange={(e) => headerRowField.onChange(e.target.value as DatasetBooleanFormValue)}
           name={headerRowField.name}
@@ -367,7 +394,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
 }
 
 // ---------------------------------------------------------------------------
-// CSV / TSV — advanced fields (inside the expander)
+// CSV / TSV — remaining format fields
 // ---------------------------------------------------------------------------
 
 function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -410,12 +437,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
   return (
     <>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsNullValueLabel()}
-        helpText={createDatasetFlyoutStrings.settingsNullValueHelp()}
+        label={createDatasetWizardStrings.settingsNullValueLabel}
+        helpText={createDatasetWizardStrings.settingsNullValueHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsNullValue"
+          data-test-subj="createDatasetSettingsNullValue"
           fullWidth
           value={nullValueField.value}
           onChange={(e) => nullValueField.onChange(e.target.value)}
@@ -424,12 +451,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsEncodingLabel()}
-        helpText={createDatasetFlyoutStrings.settingsEncodingHelp()}
+        label={createDatasetWizardStrings.settingsEncodingLabel}
+        helpText={createDatasetWizardStrings.settingsEncodingHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsEncoding"
+          data-test-subj="createDatasetSettingsEncoding"
           fullWidth
           value={encodingField.value}
           onChange={(e) => encodingField.onChange(e.target.value)}
@@ -438,14 +465,14 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
-        helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
+        label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
+        helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
         fullWidth
         isInvalid={Boolean(schemaSampleSizeState.error)}
         error={schemaSampleSizeState.error?.message}
       >
         <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsSchemaSampleSize"
+          data-test-subj="createDatasetSettingsSchemaSampleSize"
           fullWidth
           min={1}
           step={1}
@@ -457,12 +484,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsQuoteLabel()}
-        helpText={createDatasetFlyoutStrings.settingsQuoteHelp()}
+        label={createDatasetWizardStrings.settingsQuoteLabel}
+        helpText={createDatasetWizardStrings.settingsQuoteHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsQuote"
+          data-test-subj="createDatasetSettingsQuote"
           fullWidth
           value={quoteField.value}
           onChange={(e) => quoteField.onChange(e.target.value)}
@@ -471,12 +498,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsEscapeLabel()}
-        helpText={createDatasetFlyoutStrings.settingsEscapeHelp()}
+        label={createDatasetWizardStrings.settingsEscapeLabel}
+        helpText={createDatasetWizardStrings.settingsEscapeHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsEscape"
+          data-test-subj="createDatasetSettingsEscape"
           fullWidth
           value={escapeField.value}
           onChange={(e) => escapeField.onChange(e.target.value)}
@@ -485,12 +512,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsCommentLabel()}
-        helpText={createDatasetFlyoutStrings.settingsCommentHelp()}
+        label={createDatasetWizardStrings.settingsCommentLabel}
+        helpText={createDatasetWizardStrings.settingsCommentHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsComment"
+          data-test-subj="createDatasetSettingsComment"
           fullWidth
           value={commentField.value}
           onChange={(e) => commentField.onChange(e.target.value)}
@@ -499,12 +526,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsColumnPrefixLabel()}
-        helpText={createDatasetFlyoutStrings.settingsColumnPrefixHelp()}
+        label={createDatasetWizardStrings.settingsColumnPrefixLabel}
+        helpText={createDatasetWizardStrings.settingsColumnPrefixHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsColumnPrefix"
+          data-test-subj="createDatasetSettingsColumnPrefix"
           fullWidth
           value={columnPrefixField.value}
           onChange={(e) => columnPrefixField.onChange(e.target.value)}
@@ -513,12 +540,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsDatetimeFormatLabel()}
-        helpText={createDatasetFlyoutStrings.settingsDatetimeFormatHelp()}
+        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+        helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsDatetimeFormat"
+          data-test-subj="createDatasetSettingsDatetimeFormat"
           fullWidth
           value={datetimeFormatField.value}
           onChange={(e) => datetimeFormatField.onChange(e.target.value)}
@@ -526,12 +553,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
           inputRef={datetimeFormatField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsMultiValueSyntaxLabel()} fullWidth>
+      <EuiFormRow label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel} fullWidth>
         <EuiSelect
-          options={MULTI_VALUE_SYNTAX_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsMultiValueSyntax"
+          options={MULTI_VALUE_SYNTAX_OPTIONS}
+          data-test-subj="createDatasetSettingsMultiValueSyntax"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsMultiValueSyntaxLabel()}
+          aria-label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel}
           value={multiValueSyntaxField.value}
           onChange={(e) => multiValueSyntaxField.onChange(e.target.value)}
           name={multiValueSyntaxField.name}
@@ -539,14 +566,14 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxFieldSizeLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxFieldSizeHelp()}
+        label={createDatasetWizardStrings.settingsMaxFieldSizeLabel}
+        helpText={createDatasetWizardStrings.settingsMaxFieldSizeHelp}
         fullWidth
         isInvalid={Boolean(maxFieldSizeState.error)}
         error={maxFieldSizeState.error?.message}
       >
         <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxFieldSize"
+          data-test-subj="createDatasetSettingsMaxFieldSize"
           fullWidth
           min={0}
           step={1}
@@ -557,12 +584,12 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
           inputRef={maxFieldSizeField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsErrorModeLabel()} fullWidth>
+      <EuiFormRow label={createDatasetWizardStrings.settingsErrorModeLabel} fullWidth>
         <EuiSelect
-          options={ERROR_MODE_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsErrorMode"
+          options={ERROR_MODE_OPTIONS}
+          data-test-subj="createDatasetSettingsErrorMode"
           fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsErrorModeLabel()}
+          aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
           value={errorModeField.value}
           onChange={(e) => errorModeField.onChange(e.target.value)}
           name={errorModeField.name}
@@ -570,14 +597,14 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxErrorsLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxErrorsHelp()}
+        label={createDatasetWizardStrings.settingsMaxErrorsLabel}
+        helpText={createDatasetWizardStrings.settingsMaxErrorsHelp}
         fullWidth
         isInvalid={Boolean(maxErrorsState.error)}
         error={maxErrorsState.error?.message}
       >
         <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxErrors"
+          data-test-subj="createDatasetSettingsMaxErrors"
           fullWidth
           min={0}
           step={1}
@@ -589,14 +616,14 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxErrorRatioLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxErrorRatioHelp()}
+        label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
+        helpText={createDatasetWizardStrings.settingsMaxErrorRatioHelp}
         fullWidth
         isInvalid={Boolean(maxErrorRatioState.error)}
         error={maxErrorRatioState.error?.message}
       >
         <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxErrorRatio"
+          data-test-subj="createDatasetSettingsMaxErrorRatio"
           fullWidth
           min={0}
           max={1}
@@ -613,7 +640,7 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
 }
 
 // ---------------------------------------------------------------------------
-// NDJSON — advanced fields (inside the expander)
+// NDJSON — remaining format fields
 // ---------------------------------------------------------------------------
 
 function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -630,14 +657,14 @@ function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues>
   return (
     <>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
-        helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
+        label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
+        helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
         fullWidth
         isInvalid={Boolean(schemaSampleSizeState.error)}
         error={schemaSampleSizeState.error?.message}
       >
         <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsSchemaSampleSize"
+          data-test-subj="createDatasetSettingsSchemaSampleSize"
           fullWidth
           min={1}
           step={1}
@@ -649,12 +676,12 @@ function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues>
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsDatetimeFormatLabel()}
-        helpText={createDatasetFlyoutStrings.settingsDatetimeFormatHelp()}
+        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+        helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
         fullWidth
       >
         <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsDatetimeFormat"
+          data-test-subj="createDatasetSettingsDatetimeFormat"
           fullWidth
           value={datetimeFormatField.value}
           onChange={(e) => datetimeFormatField.onChange(e.target.value)}

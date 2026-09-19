@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { CreateDatasetFlyoutProps, CreateDatasetFormValues } from './create_dataset_flyout';
-export { CreateDatasetFlyout } from './create_dataset_flyout';
+export { CreateDatasetWizardPage } from './create_dataset_wizard_page';

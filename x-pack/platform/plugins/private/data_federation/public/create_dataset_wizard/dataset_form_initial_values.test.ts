@@ -8,13 +8,13 @@
 import type { DataSetWithName } from '../../common/dataset_types';
 import {
   dataSetFromListItem,
-  dataSetToFlyoutFormValues,
-  emptyDatasetFlyoutFormValues,
-} from './dataset_flyout_initial_values';
+  dataSetToFormValues,
+  emptyDatasetFormValues,
+} from './dataset_form_initial_values';
 
-describe('dataset_flyout_initial_values', () => {
-  it('creates empty flyout form values', () => {
-    const values = emptyDatasetFlyoutFormValues();
+describe('dataset_form_initial_values', () => {
+  it('creates empty form values', () => {
+    const values = emptyDatasetFormValues();
     expect(values.name).toBe('');
     expect(values.description).toBe('');
     expect(values.data_source).toBe('');
@@ -35,7 +35,7 @@ describe('dataset_flyout_initial_values', () => {
     expect(dataSetFromListItem(item)).toEqual({ ...item, description: '' });
   });
 
-  it('maps dataset to flyout values and defaults missing description/settings', () => {
+  it('maps dataset to form values and defaults missing description/settings', () => {
     const data: DataSetWithName = {
       name: 'id',
       data_source: 'source',
@@ -43,7 +43,7 @@ describe('dataset_flyout_initial_values', () => {
       settings: { error_mode: 'skip_row' },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.name).toBe('id');
     expect(result.description).toBe('');
     expect(result.data_source).toBe('source');
@@ -65,7 +65,7 @@ describe('dataset_flyout_initial_values', () => {
       },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.settings.header_row).toBe('false');
     expect(result.settings.hive_partitioning).toBe('true');
   });
@@ -83,7 +83,7 @@ describe('dataset_flyout_initial_values', () => {
       },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.settings.schema_sample_size).toBe('5000');
     expect(result.settings.max_errors).toBe('10');
     expect(result.settings.max_error_ratio).toBe('0.1');
@@ -102,7 +102,7 @@ describe('dataset_flyout_initial_values', () => {
       },
     };
 
-    const result = dataSetToFlyoutFormValues(data);
+    const result = dataSetToFormValues(data);
     expect(result.settings.schema_resolution).toBe('union_by_name');
     expect(result.settings.partition_path).toBe('/year={year}/');
     expect(result.settings.hive_partitioning).toBe('false');

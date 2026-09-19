@@ -8,11 +8,11 @@
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
-} from './create_dataset_flyout_form_state';
+} from './create_dataset_form_state';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
 
-describe('create_dataset_flyout_form_state', () => {
+describe('create_dataset_form_state', () => {
   describe('emptyCreateDatasetSettingsFormValues', () => {
     it('returns empty-string defaults for all fields', () => {
       expect(empty()).toEqual({
