@@ -19,6 +19,8 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useAgentId, useConversationReadOnly } from '../../../../hooks/use_conversation';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
+import { normalizeTraceId } from '../../../../utils/trace_utils';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
@@ -49,7 +51,7 @@ const copyLabels = {
   },
 } as const;
 
-const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
+const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder' as const;
 
 // Round feedback is not modelled in the events timeline yet — it lives only on the
 // round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
@@ -79,6 +81,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
   const agentId = useAgentId();
+  const conversationId = useConversationId();
   const { isReadOnly, isLoading: isConversationReadOnlyLoading } = useConversationReadOnly();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
@@ -92,11 +95,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   // Normalise trace_id — backend models it as `string | string[]` to keep the
   // door open for multi-trace rounds; only the first id is meaningful today.
-  const traceId = useMemo(() => {
-    const id = rawRound?.trace_id;
-    if (!id) return undefined;
-    return Array.isArray(id) ? id[0] : id;
-  }, [rawRound?.trace_id]);
+  const traceId = useMemo(() => normalizeTraceId(rawRound?.trace_id), [rawRound?.trace_id]);
 
   const ebtContext = useMemo(
     () => ({
@@ -201,7 +200,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           )}
           {rawRound && (
             <EuiFlexItem grow={false}>
-              <RoundMetadataPopover rawRound={rawRound} />
+              <RoundMetadataPopover
+                rawRound={rawRound}
+                conversationId={conversationId ?? undefined}
+                agentId={agentId ?? undefined}
+              />
             </EuiFlexItem>
           )}
           {showFeedback && (

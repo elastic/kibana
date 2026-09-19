@@ -48,9 +48,15 @@ const labels = {
 
 interface RoundMetadataPopoverProps {
   rawRound: ConversationRound;
+  conversationId?: string;
+  agentId?: string;
 }
 
-export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawRound }) => {
+export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({
+  rawRound,
+  conversationId,
+  agentId,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);
 
@@ -141,7 +147,14 @@ export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawR
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>
-      {isJsonFlyoutOpen && <RoundJsonFlyout rawRound={rawRound} onClose={closeJsonFlyout} />}
+      {isJsonFlyoutOpen && (
+        <RoundJsonFlyout
+          rawRound={rawRound}
+          conversationId={conversationId}
+          agentId={agentId}
+          onClose={closeJsonFlyout}
+        />
+      )}
     </>
   );
 };

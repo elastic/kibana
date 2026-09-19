@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ConversationShareButton } from './conversation_share_button';
 import { ChatInfoButton } from './chat_info_button';
 import { useConversation } from '../../../hooks/use_conversation';
+import { MoreActionsButton } from '../embeddable_conversation_header/more_actions_button';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -30,6 +31,9 @@ export const ConversationRightActions = () => {
       aria-label={labels.container}
       responsive={false}
     >
+      <EuiFlexItem grow={false}>
+        <MoreActionsButton />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ConversationShareButton />
       </EuiFlexItem>

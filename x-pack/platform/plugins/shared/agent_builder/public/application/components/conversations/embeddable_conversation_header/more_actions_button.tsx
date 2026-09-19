@@ -29,11 +29,15 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
+import { RoundTraceFlyout } from '../conversation_rounds/round_response/round_trace_flyout';
+import { triggerDownload } from '../../../utils/download';
+import { normalizeTraceId } from '../../../utils/trace_utils';
 
-const fullscreenLabels = {
-  actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
-    defaultMessage: 'More',
-  }),
+const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder' as const;
+
+const labels = {
   actionsAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.actionsAriaLabel', {
     defaultMessage: 'More',
   }),
@@ -42,15 +46,6 @@ const fullscreenLabels = {
   }),
   genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'GenAI Settings',
-  }),
-  externalLinkAriaLabel: i18n.translate(
-    'xpack.agentBuilder.conversationActions.externalLinkAriaLabel',
-    {
-      defaultMessage: 'Open in new tab',
-    }
-  ),
-  view: i18n.translate('xpack.agentBuilder.conversationActions.viewSection', {
-    defaultMessage: 'View',
   }),
   fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
     defaultMessage: 'Open in full screen',
@@ -66,6 +61,13 @@ const fullscreenLabels = {
   }),
   emptyMessage: i18n.translate('xpack.agentBuilder.conversationActions.emptyMessage', {
     defaultMessage: '(no message)',
+  }),
+  downloadConversation: i18n.translate(
+    'xpack.agentBuilder.conversationActions.downloadConversation',
+    { defaultMessage: 'Download conversation JSON' }
+  ),
+  loadTrace: i18n.translate('xpack.agentBuilder.conversationActions.loadTrace', {
+    defaultMessage: 'Load trace from file',
   }),
 };
 
@@ -84,6 +86,9 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const isExperimentalEnabled = useExperimentalFeatures();
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
+  const { agent, isLoading: isAgentLoading } = useAgentBuilderAgentById(agentId ?? undefined);
+  const { openFilePicker, isFlyoutOpen, loadedSpans, closeFlyout, fileInputRef, handleFileChange } =
+    useLoadTraceFromFile();
 
   const {
     services: { application, plugins },
@@ -99,28 +104,21 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     });
   }, [conversationRounds]);
 
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
+
   const onAddConversationToDataset = useCallback(() => {
     if (!getAddToDatasetAction) return;
-
     setIsPopoverOpen(false);
     getAddToDatasetAction({
-      label: fullscreenLabels.addToDataset,
-      title: fullscreenLabels.addToDataset,
+      label: labels.addToDataset,
+      title: labels.addToDataset,
       initialExamples: completedRounds.map(({ round, roundIndex }) => {
         const message =
           typeof round.input?.message === 'string' && round.input.message.trim()
             ? round.input.message.trim()
-            : fullscreenLabels.emptyMessage;
-
+            : labels.emptyMessage;
         const shortMessage = message.length > 80 ? `${message.slice(0, 77).trimEnd()}…` : message;
-
-        const traceId =
-          round.trace_id == null
-            ? null
-            : Array.isArray(round.trace_id)
-            ? round.trace_id[0] ?? null
-            : round.trace_id;
-
         return {
           label: i18n.translate('xpack.agentBuilder.conversationActions.turnLabel', {
             defaultMessage: 'Turn {turn}: {message}',
@@ -129,10 +127,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           input: { round },
           output: { steps: round.steps },
           metadata: {
-            source: 'agent_builder',
+            source: ADD_TO_DATASET_METADATA_SOURCE,
             conversation_id: conversation?.id ?? null,
             turn_index: roundIndex,
-            trace_id: traceId,
+            trace_id: normalizeTraceId(round.trace_id) ?? null,
           },
           selected: true,
         };
@@ -140,41 +138,58 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     })?.onClick();
   }, [completedRounds, conversation?.id, getAddToDatasetAction]);
 
-  const showAddToDatasetItem =
-    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
-
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
-
-  const togglePopover = () => {
-    setIsPopoverOpen(!isPopoverOpen);
-  };
-
   const handleOpenFullScreen = useCallback(() => {
-    if (!application) return;
-    if (!conversationId) return;
-
+    if (!application || !conversationId) return;
     setIsPopoverOpen(false);
     onCloseSidebar?.();
-
-    const path = conversationId
-      ? appPaths.agent.conversations.byId({ agentId: agentId!, conversationId: conversationId! })
-      : appPaths.agent.conversations.new({ agentId: agentId! });
-
-    navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_escalation' });
+    navigateToAgentBuilderUrl(
+      appPaths.agent.conversations.byId({ agentId: agentId!, conversationId }),
+      undefined,
+      { entryPointSource: 'inapp_escalation' }
+    );
   }, [application, conversationId, onCloseSidebar, agentId, navigateToAgentBuilderUrl]);
 
+  const handleDownloadConversation = useCallback(() => {
+    if (!conversation) return;
+    setIsPopoverOpen(false);
+    const titleSlug = conversation.title
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 60);
+    const filename = titleSlug ? `conversation-${titleSlug}.json` : 'conversation.json';
+    triggerDownload(
+      filename,
+      JSON.stringify(
+        {
+          conversation_id: conversationId ?? null,
+          agent,
+          conversation,
+          rounds: conversationRounds,
+        },
+        null,
+        2
+      )
+    );
+  }, [conversation, conversationId, agent, conversationRounds]);
+
+  const handleLoadTrace = useCallback(() => {
+    setIsPopoverOpen(false);
+    openFilePicker();
+  }, [openFilePicker]);
+
   const fullScreenMenuItemLabel = useMemo(() => {
-    if (conversationId) {
-      return fullscreenLabels.fullScreen;
-    }
+    if (conversationId) return labels.fullScreen;
     return (
-      <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
-        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
+      <EuiToolTip content={labels.fullScreenDisabledTooltip}>
+        <span tabIndex={0}>{labels.fullScreen}</span>
       </EuiToolTip>
     );
   }, [conversationId]);
+
+  const showAddToDatasetItem =
+    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
 
   const addToDatasetMenuItem = showAddToDatasetItem
     ? [
@@ -189,10 +204,34 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             detail: 'conversation',
           })}
         >
-          {fullscreenLabels.addToDataset}
+          {labels.addToDataset}
         </EuiContextMenuItem>,
       ]
     : [];
+
+  const exportMenuItems = [
+    ...(conversation
+      ? [
+          <EuiContextMenuItem
+            key="downloadConversation"
+            icon="download"
+            disabled={isAgentLoading}
+            data-test-subj="agentBuilderDownloadConversationButton"
+            onClick={handleDownloadConversation}
+          >
+            {labels.downloadConversation}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    <EuiContextMenuItem
+      key="loadTrace"
+      icon="upload"
+      data-test-subj="agentBuilderLoadTraceButton"
+      onClick={handleLoadTrace}
+    >
+      {labels.loadTrace}
+    </EuiContextMenuItem>,
+  ];
 
   const embeddedContextMenuItems = [
     <EuiContextMenuItem
@@ -207,9 +246,9 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         detail: 'conversation',
       })}
     >
-      {fullscreenLabels.agentDetails}
+      {labels.agentDetails}
     </EuiContextMenuItem>,
-    ...(isEmbeddedContext && application
+    ...(application
       ? [
           <EuiContextMenuItem
             key="full-screen"
@@ -240,48 +279,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
               detail: 'conversation',
             })}
           >
-            {fullscreenLabels.genAiSettings}
+            {labels.genAiSettings}
           </EuiContextMenuItem>,
         ]
       : []),
     ...addToDatasetMenuItem,
+    ...exportMenuItems,
   ];
 
-  const fullscreenMenuItems = [
-    <EuiContextMenuItem
-      key="view-current-agent"
-      icon="info"
-      disabled={!manageAgents}
-      onClick={closePopover}
-      href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.AGENT_DETAILS,
-        detail: 'conversation',
-      })}
-    >
-      {fullscreenLabels.agentDetails}
-    </EuiContextMenuItem>,
-    ...(hasAccessToGenAiSettings
-      ? [
-          <EuiContextMenuItem
-            key="agentBuilderSettings"
-            icon="gear"
-            onClick={closePopover}
-            href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
-            data-test-subj="agentBuilderGenAiSettingsButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.GENAI_SETTINGS,
-              detail: 'conversation',
-            })}
-          >
-            {fullscreenLabels.genAiSettings}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    ...addToDatasetMenuItem,
-  ];
+  const fullscreenMenuItems = [...addToDatasetMenuItem, ...exportMenuItems];
 
   const menuItems = isEmbeddedContext ? embeddedContextMenuItems : fullscreenMenuItems;
 
@@ -289,7 +295,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
     size: 's' as const,
-    'aria-label': fullscreenLabels.actionsAriaLabel,
+    'aria-label': labels.actionsAriaLabel,
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
     ...getEbtProps({
@@ -301,16 +307,27 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   return (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+        data-test-subj="moreActionsTraceFileInput"
+      />
       <EuiPopover
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downRight"
-        aria-label={fullscreenLabels.actionsAriaLabel}
+        aria-label={labels.actionsAriaLabel}
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
+      {isFlyoutOpen && (
+        <RoundTraceFlyout initialSpans={loadedSpans ?? undefined} onClose={closeFlyout} />
+      )}
     </>
   );
 };

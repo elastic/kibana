@@ -18,11 +18,26 @@ const title = i18n.translate('xpack.agentBuilder.round.jsonFlyout.title', {
 
 interface RoundJsonFlyoutProps {
   rawRound: ConversationRound;
+  conversationId?: string;
+  agentId?: string;
   onClose: () => void;
 }
 
-export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => {
-  const formattedJson = useMemo(() => JSON.stringify(rawRound, null, 2), [rawRound]);
+export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({
+  rawRound,
+  conversationId,
+  agentId,
+  onClose,
+}) => {
+  const formattedJson = useMemo(
+    () =>
+      JSON.stringify(
+        { conversation_id: conversationId, agent_id: agentId, round: rawRound },
+        null,
+        2
+      ),
+    [rawRound, conversationId, agentId]
+  );
 
   return (
     <EuiFlyout
