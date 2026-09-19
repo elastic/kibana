@@ -31,6 +31,8 @@ import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 import { postFileRoute } from './files/post_file';
 import { getPublicTemplateRoutes } from './templates';
+import { deleteAttachmentRoute } from './attachments/delete_attachment';
+import { deleteAttachmentsRoute } from './attachments/delete_attachments';
 
 export const getExternalRoutes = ({
   isServerless,
@@ -65,5 +67,7 @@ export const getExternalRoutes = ({
     postCaseConfigureRoute,
     getAllAlertsAttachedToCaseRoute,
     postFileRoute,
+    deleteAttachmentRoute,
+    deleteAttachmentsRoute,
     ...getPublicTemplateRoutes(config),
   ] as CaseRoute[];
