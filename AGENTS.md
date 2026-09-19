@@ -135,14 +135,23 @@ git push -u origin feat/my-feature-part-2
 gh pr create --base feat/my-feature-part-1 --title "feat: part 2 — <description>"
 ```
 
-When a PR in the stack merges, GitHub automatically retargets the next PR in the stack to `main`. Because Kibana uses squash merges, the dependent branch still carries the parent's original commits in its ancestry — rebase it onto the updated `main` before requesting review:
+When a PR in the stack merges, GitHub automatically retargets the next PR in the stack to `main`. Because Kibana uses squash merges, cascade a rebase down through every downstream branch in order — saving each branch's old tip before rebasing it, then using that saved SHA to rebase its child:
 
 ```bash
+# After part-1 merges — rebase part-2, then use its old tip to rebase part-3
 git fetch origin
-git rebase --onto origin/main <previous-branch> <current-branch>
-git push --force-with-lease
+old_b=$(git rev-parse feat/my-feature-part-2)
+git rebase --onto origin/main feat/my-feature-part-1 feat/my-feature-part-2
+git push --force-with-lease origin feat/my-feature-part-2
+git rebase --onto feat/my-feature-part-2 $old_b feat/my-feature-part-3
+git push --force-with-lease origin feat/my-feature-part-3
+
+# After part-2 merges — part-3 was already rebased onto part-2, so a simple --onto suffices
+git fetch origin
+git rebase --onto origin/main feat/my-feature-part-2 feat/my-feature-part-3
+git push --force-with-lease origin feat/my-feature-part-3
 ```
 
-This drops the parent's commits from the dependent branch's history so the diff stays focused on only the new layer's changes.
+The `$old_b` step is critical for stacks of three or more: once part-2 is rebased and force-pushed, it no longer shares ancestry with part-3, so using the pre-rebase tip as the exclusion boundary is the only way to correctly identify which commits belong only to part-3.
 
 Include the stack position in each PR description, e.g. `2 of 3 — depends on #N`.
