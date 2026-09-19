@@ -12,23 +12,22 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiStat,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
-import { useGetUrlParams } from '../../../../hooks/use_url_params';
+import { useGetUrlParams, useUrlParams } from '../../../../hooks/use_url_params';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
-import { PLUGIN } from '../../../../../../../common/constants/plugin';
 
 function title(t?: number) {
   return t ?? '-';
 }
 
-interface MonitorStatProps {
+export interface MonitorStatProps {
   dataTestSubj: string;
   statName: string;
   statNo: number | '-';
@@ -38,7 +37,12 @@ interface MonitorStatProps {
   tooltipContent?: string;
 }
 
-const MonitorStat = ({
+const STATS_PER_ROW = 3;
+// Matches the "Pings over time" chart's height below, so the two panels read
+// as an even pair instead of this one collapsing tightly around its content.
+const STATS_AREA_HEIGHT = '180px';
+
+export const MonitorStat = ({
   dataTestSubj,
   statName,
   statNo,
@@ -47,19 +51,22 @@ const MonitorStat = ({
   onClickStat,
   tooltipContent,
 }: MonitorStatProps) => {
-  const description = tooltipContent ? (
+  // Always the same flex structure (icon slot present but empty when there's
+  // no tooltip), so every stat's label sits at the same height/baseline —
+  // conditionally swapping between plain text and a flex-wrapped row shifted
+  // "Pending"/"Stale" (which have a tooltip) out of line with the rest.
+  const description = (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{statName}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIconTip type="question" content={tooltipContent} position="top" />
+        {tooltipContent && <EuiIconTip type="question" content={tooltipContent} position="top" />}
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : (
-    statName
   );
 
   const statComponent = (
     <EuiStat
+      css={{ textAlign: 'start' }}
       data-test-subj={dataTestSubj}
       description={description}
       reverse
@@ -68,26 +75,36 @@ const MonitorStat = ({
       titleSize="m"
     />
   );
-  return isClickable ? (
-    <EuiButtonEmpty data-test-subj={`${dataTestSubj}Btn`} onClick={onClickStat}>
+  const stat = isClickable ? (
+    <EuiButtonEmpty
+      color="text"
+      data-test-subj={`${dataTestSubj}Btn`}
+      onClick={onClickStat}
+      css={{ height: 'auto', blockSize: 'auto', '.euiButtonEmpty__content': { height: 'auto' } }}
+    >
       {statComponent}
     </EuiButtonEmpty>
   ) : (
     statComponent
   );
+
+  return stat;
 };
 
 export function OverviewStatus({
   titleAppend,
   hideTitle,
   areStatsClickable = false,
+  extraStats = [],
 }: {
   titleAppend?: React.ReactNode;
   hideTitle?: boolean;
   areStatsClickable?: boolean;
+  extraStats?: MonitorStatProps[];
 }) {
   const { statusFilter } = useGetUrlParams();
-  const { application } = useKibana().services;
+  const [, updateUrlParams] = useUrlParams();
+  const { euiTheme } = useEuiTheme();
 
   const { status, error: statusError, loading } = useOverviewStatusState();
   const dispatch = useDispatch();
@@ -169,15 +186,20 @@ export function OverviewStatus({
     }
   }, [status, statusFilter]);
 
+  // `updateUrlParams` merges into the existing URL params (like `QuickFilters`
+  // already does), rather than replacing them — a `navigateToApp({ path })`
+  // call here would otherwise discard every other active filter and the
+  // brushed/date-picker range. Clicking the already-selected status clears it,
+  // matching `QuickFilters`' toggle behavior.
   const getOnClickStat = useCallback(
     (statusFilterName: string) => {
       return () => {
-        application?.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-          path: `?statusFilter=${statusFilterName}`,
+        updateUrlParams({
+          statusFilter: statusFilter !== statusFilterName ? statusFilterName : undefined,
         });
       };
     },
-    [application]
+    [statusFilter, updateUrlParams]
   );
 
   const monitorStatData = useMemo(() => {
@@ -198,15 +220,18 @@ export function OverviewStatus({
         isClickable: areStatsClickable,
         onClickStat: getOnClickStat('down'),
       },
-      {
+    ];
+
+    if (statusConfig?.disabledCount) {
+      stats.push({
         dataTestSubj: 'xpack.uptime.synthetics.overview.status.disabled',
         statName: disabledDescription,
-        statNo: title(statusConfig?.disabledCount),
+        statNo: title(statusConfig.disabledCount),
         numberColor: 'subdued',
         isClickable: areStatsClickable,
         onClickStat: getOnClickStat('disabled'),
-      },
-    ];
+      });
+    }
 
     if (statusConfig?.pending) {
       stats.push({
@@ -234,6 +259,19 @@ export function OverviewStatus({
     return stats;
   }, [areStatsClickable, getOnClickStat, statusConfig]);
 
+  const allStats = useMemo(
+    () => [...monitorStatData, ...extraStats],
+    [monitorStatData, extraStats]
+  );
+  // Balance columns (e.g. 4 stats -> 2x2, not a 3-column row with a sparse
+  // remainder row) and lay them out on an actual CSS grid, so every stat
+  // lands in a shared column position across rows — a flex row per row would
+  // otherwise center each row's items independently, and same-column stats
+  // (e.g. "Up" over "Pending") would drift out of alignment whenever a
+  // neighboring column's content width differs row to row.
+  const numRows = Math.max(1, Math.ceil(allStats.length / STATS_PER_ROW));
+  const columns = Math.ceil(allStats.length / numRows);
+
   return (
     <EmbeddablePanelWrapper
       title={headingText}
@@ -242,13 +280,20 @@ export function OverviewStatus({
       hideTitle={hideTitle}
     >
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
-        {monitorStatData.map((props) => (
-          <EuiFlexItem grow={false} key={props.dataTestSubj}>
-            <MonitorStat {...props} />
-          </EuiFlexItem>
+      <div
+        css={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          justifyItems: 'start',
+          alignContent: 'space-around',
+          minHeight: STATS_AREA_HEIGHT,
+          paddingInlineStart: euiTheme.size.base,
+        }}
+      >
+        {allStats.map((props) => (
+          <MonitorStat {...props} key={props.dataTestSubj} />
         ))}
-      </EuiFlexGroup>
+      </div>
     </EmbeddablePanelWrapper>
   );
 }

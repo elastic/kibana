@@ -245,6 +245,16 @@ export class OverviewStatusService {
       pendingConfigs: pagePendingConfigs,
       staleConfigs: pageStaleConfigs,
       disabledConfigs: pageDisabledConfigs,
+      // Unpaginated — computed above, before `paginateConfigs` slices the
+      // `*Configs` maps down to the current page. These buckets are keyed by
+      // `configId` (see `getOverviewConfigKey`), but consumers apply the
+      // result as a `monitor.id` filter, which matches on `monitorQueryId` —
+      // the two differ for e.g. project monitors with multiple locations, so
+      // map to `monitorQueryId` rather than using the map's keys directly.
+      upIds: Object.values(upConfigs).map(({ monitorQueryId }) => monitorQueryId),
+      downIds: Object.values(downConfigs).map(({ monitorQueryId }) => monitorQueryId),
+      pendingIds: Object.values(pendingConfigs).map(({ monitorQueryId }) => monitorQueryId),
+      staleIds: Object.values(staleConfigs).map(({ monitorQueryId }) => monitorQueryId),
       configs,
       total,
       page,

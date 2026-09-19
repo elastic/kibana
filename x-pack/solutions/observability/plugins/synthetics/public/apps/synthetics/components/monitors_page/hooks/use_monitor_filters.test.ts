@@ -97,6 +97,105 @@ describe('useMonitorFilters', () => {
     expect(result.current).toEqual([{ field: 'meta.space_id', values: ['space2'] }]);
   });
 
+  it('should scope to monitor.id for a status filter', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'], downIds: ['id2'] } });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual([{ field: 'monitor.id', values: ['id2'] }]);
+  });
+
+  it('should combine a status filter with other active filters', () => {
+    spaceSpy.mockReturnValue({ space: null } as any);
+    paramSpy.mockReturnValue({ statusFilter: 'pending', projects: ['projectA'] } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'], pendingIds: ['id1'] } });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual([
+      { field: 'monitor.id', values: ['id1'] },
+      { field: 'monitor.project.id', values: ['projectA'] },
+    ]);
+  });
+
+  it('should fall back to a non-matching id when the status filter matches nothing', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'stale' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1'], staleIds: [] } });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].field).toEqual('monitor.id');
+    expect(result.current[0].values).toHaveLength(1);
+    expect(result.current[0].values![0]).not.toEqual('');
+  });
+
+  it('should return the same non-matching id across renders (not a fresh one each time)', () => {
+    // A fresh id per render changes this hook's output identity every render,
+    // which callers keying an async-fetch dependency array off that output
+    // (e.g. via `JSON.stringify`) would see as a perpetually-changing
+    // dependency — refetching, re-rendering, and never settling.
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'stale' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1'], staleIds: [] } });
+
+    const { result, rerender } = renderHook(() => useMonitorFilters({}), {
+      wrapper: WrappedHelper,
+    });
+    const firstValue = result.current[0].values![0];
+    rerender();
+
+    expect(result.current[0].values![0]).toEqual(firstValue);
+  });
+
+  it('should scope to disabledMonitorQueryIds for the disabled status filter', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ statusFilter: 'disabled' } as any);
+    selSPy.mockReturnValue({
+      status: { allIds: ['id1', 'id2'], disabledMonitorQueryIds: ['id2'] },
+    });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual([{ field: 'monitor.id', values: ['id2'] }]);
+  });
+
+  it('should intersect the status filter with the allIds-based schedules filter', () => {
+    spaceSpy.mockReturnValue({} as any);
+    paramSpy.mockReturnValue({ schedules: 'daily', statusFilter: 'up' } as any);
+    selSPy.mockReturnValue({
+      status: { allIds: ['id1', 'id2', 'id3'], upIds: ['id2', 'id3', 'id4'] },
+    });
+
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+
+    // id4 is up but not in allIds (e.g. excluded by a schedule filter); id1 is
+    // in allIds but not up — only the intersection should come through.
+    expect(result.current).toEqual([{ field: 'monitor.id', values: ['id2', 'id3'] }]);
+  });
+
+  it('should append the alerts space filter in the schedules/AND-locations monitor.id branch', () => {
+    // That branch used to return only the `monitor.id` filter — for alerts,
+    // matching a `monitor.id` value is not itself a space boundary, so
+    // omitting the space filter here could scope an alert query across
+    // spaces whenever a schedule filter is active.
+    spaceSpy.mockReturnValue({ space: { id: 'space1' } } as any);
+    paramSpy.mockReturnValue({ schedules: 'daily' } as any);
+    selSPy.mockReturnValue({ status: { allIds: ['id1', 'id2'] } });
+
+    const { result } = renderHook(() => useMonitorFilters({ forAlerts: true }), {
+      wrapper: WrappedHelper,
+    });
+
+    expect(result.current).toEqual([
+      { field: 'monitor.id', values: ['id1', 'id2'] },
+      { field: 'kibana.space_ids', values: ['space1'] },
+    ]);
+  });
+
   it('should handle a combination of parameters', () => {
     spaceSpy.mockReturnValue({ space: { id: 'space3' } } as any);
     paramSpy.mockReturnValue({
