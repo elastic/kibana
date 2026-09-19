@@ -62,7 +62,7 @@
     },
     {
       "id": "42293a2b206815f-b38677823af138c",
-      "title": "EIS Models Page task type filter buttons filter model cards",
+      "title": "EIS Models Page renders the model type filter",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

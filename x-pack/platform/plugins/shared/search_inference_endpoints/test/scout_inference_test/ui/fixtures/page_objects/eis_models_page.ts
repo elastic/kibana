@@ -14,6 +14,8 @@ export class EisModelsPage {
   // Search and Filters
   readonly searchBar: Locator;
   readonly modelFamilyFilter: Locator;
+  readonly modelTypeFilter: Locator;
+  readonly modelTypeFilterList: Locator;
 
   // Model Cards
   readonly allModelCards: Locator;
@@ -87,6 +89,8 @@ export class EisModelsPage {
     this.searchBar = this.page.testSubj.locator('contentListToolbar-searchBox');
     // Resolves to the popover's filter button, so it is clicked directly.
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
+    this.modelTypeFilter = this.page.testSubj.locator('modelTypeFilterMultiselect');
+    this.modelTypeFilterList = this.page.testSubj.locator('modelTypeFilterMultiselect-list');
 
     // Model Cards
     this.allModelCards = this.page.testSubj
@@ -223,10 +227,6 @@ export class EisModelsPage {
 
   public modelCard(modelName: string): Locator {
     return this.page.testSubj.locator(`eisModelCard-${modelName}`);
-  }
-
-  public taskTypeFilter(category: string): Locator {
-    return this.page.testSubj.locator(`eisTaskTypeFilter-${category}`);
   }
 
   public endpointRow(inferenceId: string): Locator {

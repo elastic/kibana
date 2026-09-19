@@ -176,21 +176,21 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
   return [...groups.values()];
 };
 
-export const TASK_TYPE_FILTERS: Array<{ category: TaskTypeCategory; label: string }> = [
+export const MODEL_TYPE_FILTERS: Array<{ key: TaskTypeCategory; label: string }> = [
   {
-    category: 'LLM',
+    key: 'LLM',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.llm', {
       defaultMessage: 'LLM',
     }),
   },
   {
-    category: 'Embedding',
+    key: 'Embedding',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.embedding', {
       defaultMessage: 'Embedding',
     }),
   },
   {
-    category: 'Rerank',
+    key: 'Rerank',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.rerank', {
       defaultMessage: 'Rerank',
     }),
