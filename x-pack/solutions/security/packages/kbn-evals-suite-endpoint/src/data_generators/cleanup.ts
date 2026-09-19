@@ -30,6 +30,7 @@ const RESTRICTED_INDICES = ['.fleet-agents'];
 export const TROUBLESHOOTING_AGENT_ID_PREFIX = 'eval-agent-ts-';
 export const FORENSIC_AGENT_ID_PREFIX = 'eval-agent-forensic-';
 export const POLICY_MANAGEMENT_AGENT_ID_PREFIX = 'eval-agent-pm-';
+export const RESPONSE_ACTIONS_AGENT_ID_PREFIX = 'eval-agent-era-';
 
 interface CleanupClients {
   esClient: Client;
@@ -61,6 +62,10 @@ async function cleanupSeededData({
 
 export async function cleanupTroubleshootingData(clients: CleanupClients): Promise<void> {
   return cleanupSeededData({ ...clients, agentIdPrefix: TROUBLESHOOTING_AGENT_ID_PREFIX });
+}
+
+export async function cleanupResponseActionsData(clients: CleanupClients): Promise<void> {
+  return cleanupSeededData({ ...clients, agentIdPrefix: RESPONSE_ACTIONS_AGENT_ID_PREFIX });
 }
 
 export async function cleanupForensicData(clients: CleanupClients): Promise<void> {

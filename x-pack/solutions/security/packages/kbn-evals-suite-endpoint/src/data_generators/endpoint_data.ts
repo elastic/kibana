@@ -19,7 +19,6 @@ const POLL_INTERVAL_MS = 5_000;
 
 /** Disjoint from the forensic suite's `eval-agent-forensic-` ids (see cleanup.ts). */
 const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
-const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
 
 export async function waitForEndpointPackage(
   kbnClient: KbnClient,
@@ -94,12 +93,14 @@ export async function waitForTransformPropagation(
   esClient: Client,
   log: ToolingLog,
   expectedCounts: { metadataCurrent: number; metadataUnited: number },
-  maxWaitMs = 180_000
+  maxWaitMs = 180_000,
+  agentIdPrefix: string = EVAL_AGENT_ID_PREFIX
 ): Promise<void> {
   const start = Date.now();
+  const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
   log.info(
-    `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
+    `Waiting for transform propagation of '${agentIdPrefix}*': metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
 
   while (Date.now() - start < maxWaitMs) {
@@ -107,12 +108,12 @@ export async function waitForTransformPropagation(
       const [currentCount, unitedCount] = await Promise.all([
         esClient.count({
           index: metadataCurrentIndexPattern,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
       ]);
@@ -149,6 +150,7 @@ export async function waitForTransformPropagation(
 export interface SeedClients {
   esClient: Client;
   internalEsClient: Client;
+  kbnClient?: KbnClient;
 }
 
 interface ExtraDocument {
@@ -289,11 +291,74 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     os,
     policyName,
     policyStatus,
-    policyId,
     endpointStatus = 'enrolled',
     agentVersion = DEFAULT_AGENT_VERSION,
     extraDocuments = [],
   } = scenario;
+
+  let policyId = scenario.policyId;
+
+  // The endpoint metadata route's `buildBaseEndpointMetadataFilter` requires
+  // `united.agent.policy_id` to match a real package policy. Without one, the
+  // filter yields zero policy IDs and every lookup returns `endpoint_not_found`.
+  // Resolve a real agent policy + endpoint package policy, reusing any policy
+  // a previous run left behind so repeated runs stay idempotent.
+  if (clients.kbnClient) {
+    const agentPolicyName = `eval-agent-policy-${agentId}`;
+
+    const existing = await clients.kbnClient.request<{
+      items: Array<{ id: string; name: string }>;
+    }>({
+      method: 'GET',
+      path: '/api/fleet/agent_policies',
+      query: { perPage: 100 },
+    });
+    const foundPolicyId = existing.data.items.find((p) => p.name === agentPolicyName)?.id;
+
+    const realPolicyId =
+      foundPolicyId ??
+      (
+        await clients.kbnClient.request<{ item: { id: string } }>({
+          method: 'POST',
+          path: '/api/fleet/agent_policies',
+          body: {
+            name: agentPolicyName,
+            description: 'eval',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+          },
+        })
+      ).data.item.id;
+
+    const existingPkg = await clients.kbnClient.request<{
+      items: Array<{ id: string; policy_id: string; package?: { name?: string } }>;
+    }>({
+      method: 'GET',
+      path: '/api/fleet/package_policies',
+      query: { perPage: 100 },
+    });
+    const hasEndpointPkg = existingPkg.data.items.some(
+      (p) => p.policy_id === realPolicyId && p.package?.name === 'endpoint'
+    );
+
+    if (!hasEndpointPkg) {
+      await clients.kbnClient.request<{ item: { id: string } }>({
+        method: 'POST',
+        path: '/api/fleet/package_policies',
+        body: {
+          name: `eval-endpoint-policy-${agentId}`,
+          description: 'eval',
+          namespace: 'default',
+          policy_id: realPolicyId,
+          package: { name: 'endpoint', version: '9.5.0' },
+          inputs: [],
+        },
+      });
+    }
+
+    // Use the real policy ID for the fleet agent + metadata docs.
+    policyId = realPolicyId;
+  }
 
   await clients.esClient.create({
     index: 'metrics-endpoint.metadata-default',
@@ -332,6 +397,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     document: {
       '@timestamp': now,
       agent: { id: agentId, version: agentVersion },
+      type: 'PERMANENT',
       local_metadata: { host: { name: hostName } },
       active: true,
       enrolled_at: now,

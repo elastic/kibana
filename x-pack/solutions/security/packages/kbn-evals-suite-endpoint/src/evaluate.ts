@@ -12,6 +12,8 @@ import type { EvaluateForensicDataset } from './evaluate_forensic_dataset';
 import { createEvaluateForensicDataset } from './evaluate_forensic_dataset';
 import type { EvaluatePolicyManagementDataset } from './evaluate_policy_management_dataset';
 import { createEvaluatePolicyManagementDataset } from './evaluate_policy_management_dataset';
+import type { EvaluateResponseActionsDataset } from './evaluate_response_actions_dataset';
+import { createEvaluateResponseActionsDataset } from './evaluate_response_actions_dataset';
 import type { EvaluateSecurityDataset } from './evaluate_dataset';
 import { createEvaluateSecurityDataset } from './evaluate_dataset';
 
@@ -21,6 +23,7 @@ export const evaluate = base.extend<
     evaluateDataset: EvaluateSecurityDataset;
     evaluateForensicDataset: EvaluateForensicDataset;
     evaluatePolicyManagementDataset: EvaluatePolicyManagementDataset;
+    evaluateResponseActionsDataset: EvaluateResponseActionsDataset;
     internalEsClient: Client;
   }
 >({
@@ -57,6 +60,20 @@ export const evaluate = base.extend<
           agentBuilderClient,
           evaluators,
           executorClient,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  evaluateResponseActionsDataset: [
+    ({ agentBuilderClient, evaluators, executorClient, traceEsClient, log }, use) => {
+      use(
+        createEvaluateResponseActionsDataset({
+          agentBuilderClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
         })
       );
     },
