@@ -55,8 +55,9 @@ const andAll = (predicates: ESQLSingleAstItem[]): ESQLSingleAstItem => {
 //
 // The function returns the standalone query shape:
 //   { format: 'standalone', breach: { query: '<full ES|QL text>' } }
-// with no grouping or time_field overrides — those are execution-time compile
-// results' constraint.  grouping is set by deriveRuleFields at write time.
+// with no grouping or time_field overrides — execution-time compile results
+// must not carry them.  grouping is absent on this type: the ungrouped
+// fallback hash gives each output row its own episode.
 //
 // Ref: rule-execution-logic.md "security.detection.threshold"
 //      rule-execution-logic.md "AST composition is the required pattern"
@@ -186,7 +187,7 @@ export const generateThresholdQuery = ({
       breach: { query: queryText },
     },
     // No grouping or time_field overrides: execution-time compile results must
-    // not carry them.  grouping.fields is derived from threshold.field at write
-    // time by deriveRuleFields.
+    // not carry them.  grouping is absent on this type; the STATS ... BY
+    // bucketing lives inside the query text, not on the rule's framework fields.
   };
 };
