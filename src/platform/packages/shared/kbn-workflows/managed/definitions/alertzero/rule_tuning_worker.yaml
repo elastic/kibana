@@ -1,23 +1,20 @@
 version: "1"
 name: Detection Rule Tuning Worker
 description: >
-  Harvests rules whose alerts analysts closed as false positives, fans out one
-  tuning review workflow per rule so every review holds its own approval gate,
-  and joins once every gate has settled to report the decision totals.
+  Harvests rules whose alerts analysts closed as false positives and starts one
+  tuning review workflow per rule, up to a limit of active reviews per space.
+  Each review holds its own approval gate; the sweep does not wait for them.
 enabled: true
 tags:
   - security
   - detection-rule-tuning
 settings:
-  # The limit applies per space. A sweep stays running until analysts answer all
-  # its gates (up to 72h). With max 1, the scheduled sweep every 2h would be
-  # skipped that whole time and no new rule would get diagnosed; 5 allows that
-  # while capping how many sweeps wait. Overlap is safe: the harvest skips rules
-  # with an in-flight review.
+  # One sweep per space at a time. The sweep only starts reviews and finishes in
+  # seconds, so a second sweep would just race the first for the same rules.
   concurrency:
     key: detection-rule-tuning
     strategy: drop
-    max: 5
+    max: 1
 triggers:
   # The per-space Rule Tuning worker owns the 2h schedule. This global sweep stays
   # manual-only so there is one scheduler authority and no cross-space task collision.
@@ -65,13 +62,11 @@ triggers:
 outputs:
   - name: reviews_requested
     type: number
-  - name: reviews_approved
-    type: number
-  - name: reviews_failed
-    type: number
-  - name: rules_applied
+  - name: reviews_in_flight
     type: number
   - name: harvest_failed
+    type: boolean
+  - name: lookup_failed
     type: boolean
 consts:
   # Worker settings. Scheduled runs carry no inputs, so every use goes through
@@ -91,12 +86,12 @@ consts:
   no_rows: []
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
-  # A review can outlive its sweep (sweep cancelled or failed while the child sits
-  # at its gate, or a review started by hand). Its rule would be re-harvested until
-  # the gate resolves, wasting one of the max_rules_per_sweep slots on a branch the
-  # child's per-rule drop concurrency then kills. Listing in-flight reviews up front
-  # lets the harvest skip those rules at the source. Fails open: without this data the
-  # sweep still runs and the drop concurrency remains the backstop.
+  # A review parks at its gate for up to 72h and outlives the sweep that started it.
+  # Its rule would be re-harvested until the gate resolves, wasting one of the
+  # max_rules_per_sweep slots on a launch the child's per-rule drop concurrency then
+  # kills. Listing in-flight reviews up front lets the harvest skip those rules at the
+  # source. Fails open: without this data the sweep still runs and the drop
+  # concurrency remains the backstop.
   - name: list_active_reviews
     type: kibana.request
     with:
@@ -228,31 +223,22 @@ steps:
       enabled_rule_ids: "${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}"
       rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
 
-  # One review execution per rule, launched synchronously inside a parallel
-  # branch so this sweep joins once every gate has settled. The gate itself cannot
-  # live in this run: waitForApproval is rejected inside a parallel branch, and one
-  # execution has exactly one resume slot. Each child parks on its own gate for up
-  # to 72h while its branch sits in WAITING_FOR_CHILD.
-  # No `timeout` or `branch-timeout` here: either one aborts the branch and cancels
-  # the child while the approver is still thinking. The gate's own 72h timeout is
-  # the only clock.
+  # One review execution per rule, started without waiting. Each child parks on
+  # its own approval gate for up to 72h; joining on them here would park this sweep
+  # with them and block the space's scheduled sweeps behind a pending gate.
+  # A start the engine rejects (review disabled, input rejected) must not stop the
+  # remaining rules from getting a review. The child's per-rule drop concurrency
+  # is applied when the child task runs, so a duplicate never fails this step.
   - name: run_reviews
-    type: parallel
+    type: foreach
     foreach: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows }}"
-    # Settled: one dropped or failed review must not skip the other rules'
-    # gates. Failures stay visible in the aggregate results and counts.
-    mode: settled
-    concurrency:
-      # Must cover consts.max_rules_per_sweep (the input can only lower the cap)
-      # so every gate opens at once.
-      max: 10
-      # A branch parked in WAITING_FOR_CHILD frees its slot.
-      count-waiting: false
     steps:
       # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
       # `${{ }}` preserves the value's type (numbers, arrays); `{{ }}` stringifies.
       - name: run_review
-        type: workflow.execute
+        type: workflow.executeAsync
+        on-failure:
+          continue: true
         with:
           workflow-id: system-security-rule-tuning-review
           inputs:
@@ -267,24 +253,16 @@ steps:
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
 
-  # Fan-in: every branch has settled, so each child either resolved its gate and
-  # tagged its alerts, or failed (its error stays in the aggregate results). A
-  # branch output is the child's workflow.output payload: rule_uuid, approved, applied.
-  # Size is computed on its own because comparison operators cannot follow a filter chain.
-  - name: summarize_decisions
-    type: data.set
-    with:
-      reviews_requested: "${{ steps.resolve_fanout_rows.output.rows | size | default: 0 }}"
-      reviews_failed: "${{ steps.run_reviews.output.failed | default: 0 }}"
-      reviews_approved: "${{ steps.run_reviews.output.results | map: 'output' | where: 'approved' | size | default: 0 }}"
-      rules_applied: "${{ steps.run_reviews.output.results | map: 'output' | where: 'applied' | size | default: 0 }}"
-
+  # Decisions are not known here: each review reports its own outcome and tags its
+  # alerts once its gate resolves.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      reviews_requested: "${{ steps.summarize_decisions.output.reviews_requested }}"
-      reviews_approved: "${{ steps.summarize_decisions.output.reviews_approved }}"
-      reviews_failed: "${{ steps.summarize_decisions.output.reviews_failed }}"
-      rules_applied: "${{ steps.summarize_decisions.output.rules_applied }}"
+      # Reviews this sweep tried to start.
+      reviews_requested: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
+      reviews_in_flight: "${{ steps.collect_active_rules.output.expected }}"
+      # Both reads can fail without stopping the sweep. Zero requested after a failed
+      # harvest does not mean no noisy rule.
       harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
