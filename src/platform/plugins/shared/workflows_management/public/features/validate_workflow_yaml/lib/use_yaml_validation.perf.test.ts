@@ -23,7 +23,12 @@ import fs from 'fs';
 import path from 'path';
 import YAML, { LineCounter } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { collectAllVariables, validateVariables, VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import {
+  collectAllVariables,
+  createStepContextResolver,
+  validateVariables,
+  VARIABLE_REGEX_GLOBAL,
+} from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { validateConnectorIds } from './validate_connector_ids';
@@ -190,9 +195,8 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
     );
     timings[`validateVariables (${variableItems.length} vars)`] = benchmarkSync(() => {
       validateVariables(
-        emptyRegistry,
+        createStepContextResolver(emptyRegistry, workflowDefinition, workflowGraph, yamlDocument),
         variableItems,
-        workflowGraph,
         workflowDefinition,
         yamlDocument,
         yamlContent
@@ -293,9 +297,8 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
 
       start = performance.now();
       validateVariables(
-        emptyRegistry,
+        createStepContextResolver(emptyRegistry, workflowDefinition, workflowGraph, yamlDocument),
         variableItems,
-        workflowGraph,
         workflowDefinition,
         yamlDocument,
         yamlContent

@@ -46,7 +46,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -54,7 +54,7 @@ describe('getStepsCollectionSchema', () => {
     );
     expectZodSchemaEqual(stepsCollectionSchema, z.object({}));
   });
-  it('should return steps collection with all predecessors outputs and foreach states for foreach steps', () => {
+  it('should share predecessor entry schemas across step contexts', () => {
     const definition = {
       version: '1' as const,
       name: 'test-workflow',
@@ -85,12 +85,17 @@ describe('getStepsCollectionSchema', () => {
                 message: 'Hello, {{foreach.item}}',
               },
             },
+            {
+              name: 'step-1-foreach-2',
+              type: 'console',
+              with: { message: 'Goodbye, {{foreach.item}}' },
+            },
           ],
         },
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -117,6 +122,16 @@ describe('getStepsCollectionSchema', () => {
     expect(step1Schema).toBeDefined();
     expect(step1Schema.shape.output.def.type).toBe('optional');
     expect(step1Schema.shape.error.def.type).toBe('optional');
+
+    const { schema: nextStepCollectionSchema } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-1-foreach-2'
+    );
+
+    expect(nextStepCollectionSchema.shape['step-1']).toBe(stepsCollectionSchema.shape['step-1']);
+    expect(nextStepCollectionSchema.shape.loop).toBeDefined();
   });
 
   it('should deduplicate predecessor nodes sharing the same stepId', () => {
@@ -146,7 +161,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -189,7 +204,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -227,7 +242,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -267,7 +282,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -310,7 +325,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -350,7 +365,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -375,7 +390,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
-    const withoutPrecomputed = getStepsCollectionSchema(
+    const { schema: withoutPrecomputed } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -384,7 +399,7 @@ describe('getStepsCollectionSchema', () => {
 
     const stepNode = workflowGraph.getStepNode('step-3')!;
     const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
-    const withPrecomputed = getStepsCollectionSchema(
+    const { schema: withPrecomputed } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
@@ -441,7 +456,7 @@ describe('getStepsCollectionSchema', () => {
       ],
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
-    const stepsCollectionSchema = getStepsCollectionSchema(
+    const { schema: stepsCollectionSchema } = getStepsCollectionSchema(
       emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,

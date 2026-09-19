@@ -9,22 +9,19 @@
 
 import type { Document, LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { YamlValidationResult } from '../types';
-import type { WorkflowContextRegistry } from '../context/registry';
+import type { StepContextResolver } from '../context/step_context_resolver';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 
 export function validateLiquidForLoopCollections(
-  registry: WorkflowContextRegistry,
+  stepContext: StepContextResolver,
   yamlString: string,
   yamlDocument: Document,
   lineCounter: LineCounter,
-  workflowGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml
 ): YamlValidationResult[] {
   return validateLiquidYamlScalars(yamlString, yamlDocument, lineCounter, {
-    registry,
-    workflowGraph,
     workflowDefinition,
+    stepContext,
   }).filter((result) => result.owner === 'variable-validation');
 }

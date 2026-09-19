@@ -16,6 +16,33 @@ import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import type { WorkflowContextRegistry } from './registry';
 
+// Share entries across step contexts to avoid quadratic allocations.
+// Foreach entries depend on the resolving context and cannot be shared.
+const stepEntrySchemaCache = new WeakMap<
+  WorkflowContextRegistry,
+  WeakMap<GraphNodeUnion, z.ZodTypeAny>
+>();
+
+function getStepEntrySchema(registry: WorkflowContextRegistry, node: GraphNodeUnion): z.ZodTypeAny {
+  let byNode = stepEntrySchemaCache.get(registry);
+  if (!byNode) {
+    byNode = new WeakMap();
+    stepEntrySchemaCache.set(registry, byNode);
+  }
+  const cached = byNode.get(node);
+  if (cached) {
+    return cached;
+  }
+  const schema = z.lazy(() =>
+    z.object({
+      output: getOutputSchemaForStepType(registry, node).optional(),
+      error: z.any().optional(),
+    })
+  );
+  byNode.set(node, schema);
+  return schema;
+}
+
 /**
  * Folds an array of graph nodes into a steps schema, skipping already-seen
  * and trigger nodes. Mutates `seenStepIds` to track which step IDs have been
@@ -45,12 +72,7 @@ function addNodesToStepsSchema(
     seenStepIds.add(node.stepId);
 
     if (!isEnterForeach(node)) {
-      batch[node.stepId] = z.lazy(() =>
-        z.object({
-          output: getOutputSchemaForStepType(registry, node).optional(),
-          error: z.any().optional(),
-        })
-      );
+      batch[node.stepId] = getStepEntrySchema(registry, node);
     } else {
       flushBatch();
       schema = schema.extend({
@@ -66,13 +88,19 @@ function addNodesToStepsSchema(
   return schema;
 }
 
+export interface StepsCollectionSchema {
+  schema: z.ZodObject;
+  /** Tests emptiness without materializing Zod's lazy shape. */
+  size: number;
+}
+
 export function getStepsCollectionSchema(
   registry: WorkflowContextRegistry,
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string,
   precomputedPredecessors?: GraphNodeUnion[]
-) {
+): StepsCollectionSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
 
@@ -123,5 +151,5 @@ export function getStepsCollectionSchema(
     );
   }
 
-  return stepsSchema;
+  return { schema: stepsSchema, size: seenStepIds.size };
 }

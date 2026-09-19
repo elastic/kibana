@@ -15,6 +15,7 @@ import {
   isEnterForeach,
   isEnterParallel,
   isEnterWhile,
+  type GraphNodeUnion,
   type WorkflowGraph,
 } from '@kbn/workflows/graph';
 import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
@@ -54,22 +55,27 @@ export function getContextSchemaForStep(
 
   const extension: Record<string, z.ZodType> = {};
 
-  const stepsCollectionSchema = getStepsCollectionSchema(
+  const stepsCollection = getStepsCollectionSchema(
     registry,
     baseSchema,
     workflowGraph,
     stepName,
     predecessors
   );
-  if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    extension.steps = stepsCollectionSchema;
+  if (stepsCollection.size > 0) {
+    extension.steps = stepsCollection.schema;
   }
 
   extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors);
 
   let schema = baseSchema.extend(extension) as typeof DynamicStepContextSchema;
 
-  const enrichments = getStepContextSchemaEnrichmentEntries(schema, workflowGraph, stepName);
+  const enrichments = getStepContextSchemaEnrichmentEntries(
+    schema,
+    workflowGraph,
+    stepName,
+    predecessors
+  );
   if (enrichments.length > 0) {
     const enrichmentShape: Record<string, z.ZodType> = {};
     for (const enrichment of enrichments) {
@@ -145,7 +151,8 @@ function maybeExtendWithTemplateLocals(
 function getStepContextSchemaEnrichmentEntries(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
-  stepId: string
+  stepId: string,
+  predecessors: readonly GraphNodeUnion[]
 ) {
   const enrichments: { key: 'foreach' | 'while' | 'item' | 'index'; value: z.ZodType }[] = [];
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
@@ -154,7 +161,7 @@ function getStepContextSchemaEnrichmentEntries(
     throw new Error(`Step node not found for step id: ${stepId}`);
   }
 
-  const stack = workflowExecutionGraph.getNodeStack(stepNode?.id);
+  const stack = workflowExecutionGraph.getNodeStack(stepNode.id, predecessors);
 
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);
