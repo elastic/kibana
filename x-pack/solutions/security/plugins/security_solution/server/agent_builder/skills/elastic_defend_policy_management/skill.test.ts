@@ -15,6 +15,7 @@ import { GET_POLICY_ROLLOUT_STATUS_TOOL_ID } from './tools/get_policy_rollout_st
 import { GET_POLICY_FIELD_REFERENCE_TOOL_ID } from './tools/get_policy_field_reference';
 import { ASSESS_POLICY_CHANGE_TOOL_ID } from './tools/assess_policy_change';
 import { LIST_POLICIES_TOOL_ID } from './tools/list_policies';
+import { APPLY_POLICY_CHANGE_TOOL_ID } from './tools/apply_policy_change';
 import {
   ELASTIC_DEFEND_POLICY_MANAGEMENT_SKILL_ID,
   createElasticDefendPolicyManagementSkill,
@@ -80,6 +81,18 @@ jest.mock(
 );
 
 jest.mock(
+  './tools/apply_policy_change',
+  () => ({
+    APPLY_POLICY_CHANGE_TOOL_ID: 'security.policy_management.apply_policy_change',
+    createApplyPolicyChangeTool: jest.fn((deps: unknown) => ({
+      id: 'security.policy_management.apply_policy_change',
+      ...((deps ?? {}) as object),
+    })),
+  }),
+  { virtual: true }
+);
+
+jest.mock(
   './tools/assess_policy_change',
   () => ({
     ASSESS_POLICY_CHANGE_TOOL_ID: 'security.policy_management.assess_policy_change',
@@ -98,6 +111,7 @@ const INLINE_TOOL_IDS = [
   COMPARE_POLICIES_TOOL_ID,
   GET_POLICY_ROLLOUT_STATUS_TOOL_ID,
   ASSESS_POLICY_CHANGE_TOOL_ID,
+  APPLY_POLICY_CHANGE_TOOL_ID,
 ] as const;
 
 const createSkill = () => {
@@ -129,7 +143,7 @@ describe('createElasticDefendPolicyManagementSkill', () => {
     expect(registryTools).toEqual([platformCoreTools.integrationKnowledge]);
   });
 
-  it('defines exactly six inline tools', async () => {
+  it('defines exactly seven inline tools', async () => {
     const { skill } = createSkill();
     const inlineTools = await skill.getInlineTools?.();
 
@@ -142,7 +156,9 @@ describe('createElasticDefendPolicyManagementSkill', () => {
   it('uses a decision-framed description under the selector length limit', () => {
     const { skill } = createSkill();
     const { description, content } = skill;
-    expect(description).toContain('Elastic Defend integration policy decisions and inspection');
+    expect(description).toContain(
+      'Elastic Defend integration policy decisions, inspection, and applying a confirmed bounded policy change'
+    );
     expect(description).toContain('malware, ransomware, memory threat, and behavior protection');
     expect(content).toContain('broken-host or configuration');
     expect(content).toMatch(/separate troubleshooting\s+question/);
