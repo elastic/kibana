@@ -8,6 +8,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { isMissingValue, NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { createEscapeValue } from './escape_value';
 
@@ -31,6 +32,14 @@ export function datatableToCSV(
     quoteValues,
     escapeFormulaValues,
   });
+  // Placeholder is our own constant, not document content: still quote it when quoting
+  // is on (so a csvSeparator of "-" does not produce `--...`), but never formula-escape
+  // it into "'-".
+  const escapePlaceholder = createEscapeValue({
+    separator: csvSeparator,
+    quoteValues,
+    escapeFormulaValues: false,
+  });
 
   const header: string[] = [];
   const sortedColumnIds: string[] = [];
@@ -48,9 +57,17 @@ export function datatableToCSV(
 
   // Convert the array of row objects to an array of row arrays
   const csvRows = rows.map((row) => {
-    return sortedColumnIds.map((id) =>
-      escapeValues(raw ? row[id] : formatters[id].convertToText(row[id]))
-    );
+    return sortedColumnIds.map((id) => {
+      const value = row[id];
+
+      // Export what the table shows: missing values as a dash, quoted like any other
+      // non-alphanumeric cell but never formula-escaped.
+      if (!raw && isMissingValue(value)) {
+        return escapePlaceholder(NULL_PLACEHOLDER);
+      }
+
+      return escapeValues(raw ? value : formatters[id].convertToText(value));
+    });
   });
 
   return (
