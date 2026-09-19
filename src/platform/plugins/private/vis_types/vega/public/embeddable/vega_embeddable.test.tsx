@@ -28,7 +28,10 @@ import { reportVegaRender } from '../lib/vega_render_telemetry';
 import type { VegaByValueState } from '../../server';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
-jest.mock('@kbn/presentation-util', () => ({ openLazySystemFlyout: jest.fn() }));
+jest.mock('@kbn/presentation-util', () => ({
+  ...jest.requireActual('@kbn/presentation-util'),
+  openLazySystemFlyout: jest.fn(),
+}));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
   extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),

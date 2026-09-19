@@ -56,7 +56,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/zod",
     "@kbn/presentation-publishing-schemas",
-    "@kbn/shared-ux-button-toolbar",
   ],
   "exclude": [
     "target/**/*",

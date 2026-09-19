@@ -9,10 +9,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { EuiFlexGroup, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
+import type { MenuManager } from './menu_manager';
+import { VegaFiltersFlyout } from './vega_filters_flyout';
 import { VegaEditorMenu } from './vega_editor_menu';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 import type { VegaByValueState } from '../../server';
@@ -43,11 +46,15 @@ export const VegaEditorFlyout = ({
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
+  flyoutType = 'push',
+  menuManager,
   isNewPanel = false,
   onPreview,
   onRevert,
   onSave,
 }: {
+  flyoutType?: 'push' | 'overlay';
+  menuManager: MenuManager;
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
@@ -57,9 +64,9 @@ export const VegaEditorFlyout = ({
   onRevert: () => void;
   onSave: (spec: VegaByValueState['spec']) => void;
 }) => {
+  const [activeMenu] = useBatchedPublishingSubjects(menuManager.activeMenu$);
   const initialEditorValue =
     initialSpec.format === 'json' ? JSON.stringify(initialSpec.value, null, 2) : initialSpec.value;
-  const [controlsTarget, setControlsTarget] = useState<HTMLDivElement | null>(null);
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
@@ -91,23 +98,20 @@ export const VegaEditorFlyout = ({
   };
   return (
     <>
-      <EuiFlyoutHeader hasBorder data-test-subj="vegaEditorFlyoutHeader">
+      {activeMenu?.menu === 'filters' &&
+        activeMenu.isOpen &&
+        createPortal(
+          <VegaFiltersFlyout menuManager={menuManager} type={flyoutType} />,
+          document.body
+        )}
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={ariaLabelledBy}>Vega</h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup
-          ref={setControlsTarget}
-          justifyContent="flexEnd"
-          gutterSize="s"
-          responsive={false}
-        />
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyCss}>
         <VegaSpecEditor
-          renderControls={(actions) =>
-            controlsTarget ? createPortal(<VegaEditorMenu {...actions} />, controlsTarget) : null
-          }
+          renderControls={(actions) => <VegaEditorMenu menuManager={menuManager} {...actions} />}
           editorValue={spec}
           initialFormat={initialSpec.format}
           onChange={setSpec}

@@ -7,84 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
+import React from 'react';
+import { EuiWrappingPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { MenuManager } from './menu_manager';
 import type { VegaActionsMenuProps } from '../components/vega_actions_menu';
 import { VegaActionsMenuContent } from '../components/vega_actions_menu';
 import { VegaHelpMenuContent } from '../components/vega_help_menu';
 
-type Menu = 'format' | 'help';
-
 export const VegaEditorMenu = ({
+  menuManager,
   formatHJson,
   formatJson,
-}: VegaActionsMenuProps): React.ReactElement => {
-  const [activeMenu, setActiveMenu] = useState<Menu | null>(null);
-  const closeMenu = (menu: Menu) => {
-    setActiveMenu((current) => (current === menu ? null : current));
-  };
+}: VegaActionsMenuProps & { menuManager: MenuManager }): React.ReactElement | null => {
+  const [activeMenu] = useBatchedPublishingSubjects(menuManager.activeMenu$);
+  if (!activeMenu || activeMenu.menu === 'filters') return null;
+
+  const { menu, button, isOpen } = activeMenu;
+  const closePopover = () => menuManager.close(activeMenu);
   const formatAndClose = (format: () => void) => () => {
     format();
-    closeMenu('format');
+    closePopover();
   };
-  const menus = [
-    {
-      id: 'format',
-      icon: 'gear',
-      buttonLabel: i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {
-        defaultMessage: 'Vega editor options',
-      }),
-      popoverLabel: i18n.translate('visTypeVega.editor.vegaEditorOptionsPopoverAriaLabel', {
-        defaultMessage: 'Vega editor options',
-      }),
-      content: (
+  return (
+    <EuiWrappingPopover
+      key={menu}
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      focusTrapProps={{
+        returnFocus: () => {
+          // Restore focus after the popover focus trap has finished deactivating.
+          requestAnimationFrame(() => {
+            const currentMenu = menuManager.activeMenu$.getValue();
+            if (!currentMenu?.isOpen && currentMenu?.button === button && button.isConnected) {
+              button.focus({ preventScroll: true });
+            }
+          });
+          return false;
+        },
+      }}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      aria-label={
+        menu === 'format'
+          ? i18n.translate('visTypeVega.editor.vegaEditorOptionsPopoverAriaLabel', {
+              defaultMessage: 'Vega editor options',
+            })
+          : i18n.translate('visTypeVega.editor.vegaHelpPopoverAriaLabel', {
+              defaultMessage: 'Vega help',
+            })
+      }
+    >
+      {menu === 'format' ? (
         <VegaActionsMenuContent
           formatHJson={formatAndClose(formatHJson)}
           formatJson={formatAndClose(formatJson)}
         />
-      ),
-    },
-    {
-      id: 'help',
-      icon: 'question',
-      buttonLabel: i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
-        defaultMessage: 'Vega help',
-      }),
-      popoverLabel: i18n.translate('visTypeVega.editor.vegaHelpPopoverAriaLabel', {
-        defaultMessage: 'Vega help',
-      }),
-      content: <VegaHelpMenuContent closePopover={() => closeMenu('help')} />,
-    },
-  ] as const;
-
-  return (
-    <>
-      {menus.map(({ id, icon, buttonLabel, popoverLabel, content }) => (
-        <EuiFlexItem key={id} grow={false}>
-          <EuiPopover
-            button={
-              <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
-                <ToolbarButton
-                  as="iconButton"
-                  iconType={icon}
-                  size="s"
-                  aria-label={buttonLabel}
-                  onClick={() => setActiveMenu((current) => (current === id ? null : id))}
-                />
-              </EuiToolTip>
-            }
-            isOpen={activeMenu === id}
-            closePopover={() => closeMenu(id)}
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-            aria-label={popoverLabel}
-          >
-            {content}
-          </EuiPopover>
-        </EuiFlexItem>
-      ))}
-    </>
+      ) : (
+        <VegaHelpMenuContent closePopover={closePopover} />
+      )}
+    </EuiWrappingPopover>
   );
 };

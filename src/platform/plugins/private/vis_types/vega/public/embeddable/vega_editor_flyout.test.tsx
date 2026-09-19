@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import hjson from 'hjson';
 import { VegaSpecEditor } from '../components/vega_vis_editor';
 import { getNotifications } from '../services';
+import { initializeMenuManager } from './menu_manager';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
 // Exercise real flyout and focus behavior instead of EUI's simplified Jest components.
@@ -47,24 +48,42 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 describe('VegaEditorFlyout', () => {
-  const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {
+  const renderFlyout = ({
+    isNewPanel = false,
+    type = 'push',
+  }: { isNewPanel?: boolean; type?: 'push' | 'overlay' } = {}) => {
     const closeFlyout = jest.fn();
     const onRevert = jest.fn();
     const onPreview = jest.fn();
     const onSave = jest.fn();
+    const menuManager = initializeMenuManager();
     const { unmount } = render(
       <I18nProvider>
-        <EuiFlyout aria-labelledby="vega-flyout-title" onClose={closeFlyout}>
-          <VegaEditorFlyout
-            ariaLabelledBy="vega-flyout-title"
-            closeFlyout={closeFlyout}
-            initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
-            isNewPanel={isNewPanel}
-            onPreview={onPreview}
-            onRevert={onRevert}
-            onSave={onSave}
-          />
-        </EuiFlyout>
+        <EuiProvider>
+          <EuiFlyout
+            id={menuManager.flyoutId}
+            historyKey={menuManager.historyKey}
+            outsideClickCloses
+            session="start"
+            type={type}
+            ownFocus={type !== 'overlay'}
+            aria-labelledby="vega-flyout-title"
+            onClose={closeFlyout}
+            flyoutMenuProps={menuManager.flyoutMenuProps}
+          >
+            <VegaEditorFlyout
+              menuManager={menuManager}
+              flyoutType={type}
+              ariaLabelledBy="vega-flyout-title"
+              closeFlyout={closeFlyout}
+              initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
+              isNewPanel={isNewPanel}
+              onPreview={onPreview}
+              onRevert={onRevert}
+              onSave={onSave}
+            />
+          </EuiFlyout>
+        </EuiProvider>
       </I18nProvider>
     );
     return { closeFlyout, onRevert, onPreview, onSave, unmount };
@@ -74,7 +93,7 @@ describe('VegaEditorFlyout', () => {
     const { onPreview } = renderFlyout();
     const user = userEvent.setup();
 
-    expect(screen.getByRole('heading', { name: 'Vega' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Vega', level: 2 })).toBeInTheDocument();
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
     const previewButton = screen.getByTestId('vegaEditorFlyoutPreviewButton');
 
@@ -160,23 +179,22 @@ describe('VegaEditorFlyout', () => {
     expect(onRevert).not.toHaveBeenCalled();
   });
 
-  it('places gear then help beneath the title in the header and opens only one popover', async () => {
+  it('places gear then help then filters in the flyout menu and opens only one popover', async () => {
     renderFlyout();
     const user = userEvent.setup();
     const options = screen.getByRole('button', { name: 'Vega editor options' });
     const help = screen.getByRole('button', { name: 'Vega help' });
-    const header = screen.getByTestId('vegaEditorFlyoutHeader');
-    expect(within(header).getAllByRole('button')).toEqual([options, help]);
-    expect(screen.getAllByRole('button', { name: 'Vega editor options' })).toHaveLength(1);
-    expect(screen.getAllByRole('button', { name: 'Vega help' })).toHaveLength(1);
-    expect(screen.getByRole('heading', { name: 'Vega' }).compareDocumentPosition(options)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
+    expect(screen.getAllByRole('button').indexOf(options)).toBeLessThan(
+      screen.getAllByRole('button').indexOf(help)
+    );
+    expect(screen.getAllByRole('button').indexOf(help)).toBeLessThan(
+      screen.getAllByRole('button').indexOf(screen.getByRole('button', { name: 'Edit filters' }))
     );
     expect(within(screen.getByTestId('vega-editor')).queryByRole('button')).not.toBeInTheDocument();
     await user.click(options);
     expect(screen.getByText('Reformat as HJSON')).toBeVisible();
     await user.click(help);
-    await waitFor(() => expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument());
+    expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument();
     expect(await screen.findByRole('menuitem', { name: /Kibana Vega help/ })).toHaveAttribute(
       'href',
       'https://elastic.co/vega-help'
@@ -189,40 +207,90 @@ describe('VegaEditorFlyout', () => {
       'href',
       'https://vega.github.io/vega/docs/'
     );
+  });
+
+  it.each(
+    (['push', 'overlay'] as const).flatMap((type) =>
+      ['Back', 'Cancel', 'Apply', 'Close filters', 'Escape'].map((action) => ({ type, action }))
+    )
+  )(
+    'returns from $type filters with $action without ending the edit session',
+    async ({ type, action }) => {
+      const { closeFlyout, onPreview, onSave, onRevert } = renderFlyout({ isNewPanel: true, type });
+      const user = userEvent.setup();
+      const editor = screen.getByRole('textbox', { name: 'Vega spec' });
+      await user.clear(editor);
+      await user.paste('{"mark": "bar"}');
+      await user.click(screen.getByRole('button', { name: 'Vega editor options' }));
+      await user.click(screen.getByText('Reformat as JSON, delete comments'));
+      expect(editor).toHaveAttribute('data-language', 'json');
+      const draft = (editor as HTMLTextAreaElement).value;
+      await user.click(screen.getByTestId('vegaEditorFlyoutPreviewButton'));
+      onPreview.mockClear();
+      for (const popover of ['Vega editor options', 'Vega help']) {
+        await user.click(screen.getByRole('button', { name: popover }));
+        await waitFor(() =>
+          expect(screen.getByRole('dialog', { name: popover })).toContainElement(
+            document.activeElement as HTMLElement
+          )
+        );
+        expect(editor).toHaveAttribute('data-language', 'json');
+        const filtersButton = screen.getByRole('button', { name: 'Edit filters' });
+        await user.click(filtersButton);
+        const filters = screen.getByTestId('vegaFiltersFlyout');
+        expect(within(filters).getByText('Panel level filters')).toBeVisible();
+        expect(screen.getByTestId('vegaFiltersFlyoutBody').textContent).toBe('');
+        expect(within(filters).getByRole('button', { name: 'Apply' })).toBeEnabled();
+        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+        expect(editor.closest('[inert]')).not.toBeNull();
+        expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument();
+        expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+        fireEvent.mouseDown(document.body);
+        fireEvent.mouseUp(document.body);
+        fireEvent.click(document.body);
+        expect(filters).toBeInTheDocument();
+        expect(closeFlyout).not.toHaveBeenCalled();
+        const back = within(filters).getByRole('button', { name: /Back/ });
+        await waitFor(() => expect(back).toHaveFocus());
+        if (action === 'Escape') {
+          await user.keyboard('{Escape}');
+        } else {
+          await user.click(
+            action === 'Back' ? back : within(filters).getByRole('button', { name: action })
+          );
+        }
+        await waitFor(() => expect(filtersButton).toHaveFocus());
+        expect(screen.queryByTestId('vegaFiltersFlyout')).not.toBeInTheDocument();
+        expect(screen.getByRole('textbox')).toBe(editor);
+        expect(editor).toHaveValue(draft);
+        expect(editor).toHaveAttribute('data-language', 'json');
+        expect(screen.getByTestId('vegaEditorFlyoutPreviewButton')).toBeDisabled();
+        expect(closeFlyout).not.toHaveBeenCalled();
+        expect(onSave).not.toHaveBeenCalled();
+        expect(onRevert).not.toHaveBeenCalled();
+        expect(onPreview).not.toHaveBeenCalled();
+      }
+    },
+    15000
+  );
+
+  it('opens with the keyboard and restores focus after Escape', async () => {
+    const { closeFlyout } = renderFlyout();
+    const user = userEvent.setup();
+    const options = screen.getByRole('button', { name: 'Vega editor options' });
+    act(() => options.focus());
+    await user.keyboard('{Enter}');
+    expect(screen.getByText('Reformat as HJSON')).toBeVisible();
     await waitFor(() =>
-      expect(screen.getByRole('dialog', { name: 'Vega help' })).toContainElement(
+      expect(screen.getByRole('dialog', { name: 'Vega editor options' })).toContainElement(
         document.activeElement as HTMLElement
       )
     );
-    await user.click(options);
-    await waitFor(() =>
-      expect(screen.queryByRole('dialog', { name: 'Vega help' })).not.toBeInTheDocument()
-    );
-    expect(screen.getByText('Reformat as HJSON')).toBeVisible();
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(options).toHaveFocus());
+    await waitFor(() => expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument());
+    expect(closeFlyout).not.toHaveBeenCalled();
   });
-
-  it.each(['Vega editor options', 'Vega help'])(
-    'opens %s with the keyboard and restores focus after Escape',
-    async (label) => {
-      const { closeFlyout } = renderFlyout();
-      const user = userEvent.setup();
-      const options = screen.getByRole('button', { name: label });
-      act(() => options.focus());
-      await user.keyboard('{Enter}');
-      expect(screen.getByRole('dialog', { name: label })).toBeVisible();
-      await waitFor(() =>
-        expect(screen.getByRole('dialog', { name: label })).toContainElement(
-          document.activeElement as HTMLElement
-        )
-      );
-      await user.keyboard('{Escape}');
-      await waitFor(() => expect(options).toHaveFocus());
-      await waitFor(() =>
-        expect(screen.queryByRole('dialog', { name: label })).not.toBeInTheDocument()
-      );
-      expect(closeFlyout).not.toHaveBeenCalled();
-    }
-  );
 
   it.each([
     ['Reformat as HJSON', 'hjson'],

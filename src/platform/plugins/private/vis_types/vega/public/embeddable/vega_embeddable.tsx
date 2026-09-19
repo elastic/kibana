@@ -48,7 +48,8 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { openLazySystemFlyout, tracksOverlays } from '@kbn/presentation-util';
+import { initializeMenuManager } from './menu_manager';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -204,18 +205,25 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const initialSpec = spec$.getValue();
+        const menuManager = initializeMenuManager();
+        const flyoutType = (tracksOverlays(parentApi) && parentApi.panelFlyoutType) || 'push';
         openLazySystemFlyout({
           core,
           parentApi,
           returnFocus,
           flyoutProps: {
             size: 'm',
+            id: menuManager.flyoutId,
+            historyKey: menuManager.historyKey,
+            flyoutMenuProps: menuManager.flyoutMenuProps,
             focusedPanelId: uuid,
           },
           loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
             const { VegaEditorFlyout } = await import('./vega_editor_flyout');
             return (
               <VegaEditorFlyout
+                menuManager={menuManager}
+                flyoutType={flyoutType}
                 ariaLabelledBy={ariaLabelledBy}
                 closeFlyout={closeFlyout}
                 initialSpec={initialSpec}

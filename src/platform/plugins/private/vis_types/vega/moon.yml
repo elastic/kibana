@@ -54,9 +54,9 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/scout'
   - '@kbn/presentation-util'
+  - '@kbn/presentation-util-plugin'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
-  - '@kbn/shared-ux-button-toolbar'
 tags:
   - plugin
   - prod
