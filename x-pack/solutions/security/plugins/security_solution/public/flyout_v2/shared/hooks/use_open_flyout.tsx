@@ -18,7 +18,9 @@ import type { FlyoutTelemetryMeta } from './use_flyout_telemetry';
 import { trackFlyoutOpen } from './use_flyout_telemetry';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 import type { MainFlyoutSession } from '../../session_context';
+import { FLYOUT_SURFACE } from '../../../common/lib/telemetry';
 import { getStoredFlyoutType } from './use_flyout_push_vs_overlay';
+import { getStoredFlyoutWidth, setStoredFlyoutWidth } from './use_flyout_width';
 
 /**
  * Opens a system flyout, optionally reporting telemetry for it. When `meta` is provided, an
@@ -55,6 +57,24 @@ export const useOpenFlyout = (): OpenFlyout => {
       // core system flyout keeps this reactive, so the settings menu can switch
       // it live afterwards.
       const type = properties.type ?? getStoredFlyoutType(storage);
+
+      // Persist/restore the user-resized width for main flyouts (document/entity/…) only.
+      // Tool flyouts (surface === TOOL) are skipped: they can open side-by-side with a document,
+      // where a saved standalone width can't be honored (EUI clamps it to the sibling's leftover
+      // space). Child flyouts (session: 'inherit') are also skipped — EUI throws on a numeric size
+      // for children. `defaultSize` records the flyout's default so the settings menu can reset
+      // back to it, and `onResize` persists the width whenever the user resizes.
+      const persistsWidth =
+        properties.session !== 'inherit' && meta?.surface !== FLYOUT_SURFACE.TOOL;
+      const storedWidth = persistsWidth ? getStoredFlyoutWidth(storage) : undefined;
+      const sizeProperties: Partial<OverlaySystemFlyoutOpenOptions> = persistsWidth
+        ? {
+            size: storedWidth ?? properties.size,
+            defaultSize: properties.size,
+            onResize: (width: number) => setStoredFlyoutWidth(storage, width),
+          }
+        : {};
+
       const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
@@ -66,7 +86,7 @@ export const useOpenFlyout = (): OpenFlyout => {
             </FlyoutSessionContextProvider>
           ),
         }),
-        { ...properties, type }
+        { ...properties, type, ...sizeProperties }
       );
 
       if (meta) {
