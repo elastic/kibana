@@ -10,10 +10,13 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { isTerminalStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
+
+const QUIET_WINDOW_MS = 5000;
 
 const FAILING_WORKFLOW_YAML = `
 name: Scout Error Trigger - Failing Workflow
@@ -135,6 +138,28 @@ async function waitForExecution(
   });
 }
 
+/** Subset of the `workflows.failed` payload carried on an error handler execution's context. */
+interface FailedEvent {
+  execution?: { id?: string };
+}
+
+/**
+ * Executions of `handlerWorkflowId` that were triggered by the failure of `failedExecutionId`.
+ * The executions list endpoint omits `context`, so each execution is fetched individually.
+ */
+async function getHandlerExecutionsTriggeredBy(
+  workflowsApi: WorkflowsApiService,
+  handlerWorkflowId: string,
+  failedExecutionId: string
+): Promise<WorkflowExecutionDto[]> {
+  const { results } = await workflowsApi.getExecutions(handlerWorkflowId);
+  const executions = await Promise.all(results.map(({ id }) => workflowsApi.getExecution(id)));
+  return executions.filter((execution): execution is WorkflowExecutionDto => {
+    const event = execution?.context?.event as FailedEvent | undefined;
+    return event?.execution?.id === failedExecutionId;
+  });
+}
+
 spaceTest.describe(
   'Workflow error trigger (workflows.failed)',
   { tag: tags.deploymentAgnostic },
@@ -211,52 +236,40 @@ spaceTest.describe(
     );
 
     spaceTest('filter by workflow name: handler runs when name matches condition', async () => {
-      const { results: initialResults } = await workflowsApi.getExecutions(handlerNameFilterId);
-      const initialCount = initialResults.length;
+      const { workflowExecutionId: failedExecutionId } = await workflowsApi.run(
+        failingWorkflowId,
+        {}
+      );
 
-      await workflowsApi.run(failingWorkflowId, {});
-      const { results: afterMatch } = await waitForConditionOrThrow({
-        action: () => workflowsApi.getExecutions(handlerNameFilterId),
-        condition: ({ results: r }) => r.length >= initialCount + 1,
+      const handlerExecutions = await waitForConditionOrThrow({
+        action: () =>
+          getHandlerExecutionsTriggeredBy(workflowsApi, handlerNameFilterId, failedExecutionId),
+        condition: (executions) => executions.length >= 1,
         interval: 2000,
         timeout: 25_000,
-        errorMessage: ({ results: r }) =>
-          `Name filter handler should have at least ${
-            initialCount + 1
-          } execution(s) after Scout workflow failed, got ${r.length}`,
+        errorMessage: `Name filter handler should have run for failed execution ${failedExecutionId}`,
       });
-      expect(afterMatch.length).toBeGreaterThan(initialCount);
+      expect(handlerExecutions.length).toBeGreaterThan(0);
     });
 
     spaceTest(
       'filter by workflow name: handler does not run when name does not match',
       async () => {
-        const { results: beforeResults } = await workflowsApi.getExecutions(handlerNameFilterId);
-        const countBefore = beforeResults.length;
-
         const { workflowExecutionId: otherExecutionId } = await workflowsApi.run(
           failingOtherWorkflowId,
           {}
         );
         await waitForExecution(workflowsApi, otherExecutionId);
-        const quietAfterMs = Date.now() + 5000;
 
-        const { results: finalResults } = await waitForConditionOrThrow({
-          action: () => workflowsApi.getExecutions(handlerNameFilterId),
-          condition: ({ results: r }) => {
-            if (r.length !== countBefore) {
-              throw new Error(
-                `Name filter handler should stay at ${countBefore} execution(s) after non-Scout workflow failed, got ${r.length}`
-              );
-            }
-            return Date.now() >= quietAfterMs;
-          },
-          interval: 1000,
-          timeout: 25_000,
-          errorMessage: ({ results: r }) =>
-            `Name filter handler count should remain ${countBefore} after quiet window, last count: ${r.length}`,
-        });
-        expect(finalResults).toHaveLength(countBefore);
+        // Negative assertion: soak so a wrongly matched dispatch has time to land.
+        await new Promise((resolve) => setTimeout(resolve, QUIET_WINDOW_MS));
+
+        const handlerExecutions = await getHandlerExecutionsTriggeredBy(
+          workflowsApi,
+          handlerNameFilterId,
+          otherExecutionId
+        );
+        expect(handlerExecutions).toHaveLength(0);
       }
     );
 
