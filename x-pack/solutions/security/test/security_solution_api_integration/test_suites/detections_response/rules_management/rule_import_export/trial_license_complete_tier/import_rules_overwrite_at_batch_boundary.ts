@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { range } from 'lodash';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '../../../utils';
 
@@ -17,6 +18,7 @@ import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '.
  * FTR coverage report / https://github.com/elastic/kibana/issues/275204
  */
 const RULE_COUNT = 568;
+const BATCH_SIZE = RULE_IMPORT_BULK_CREATE_BATCH_SIZE;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -90,7 +92,18 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.total).toBe(RULE_COUNT);
       expect(body.data).toHaveLength(RULE_COUNT);
 
-      const sampleIndexes = [0, 50, 300, 500, RULE_COUNT - 1];
+      // Ends/starts of each chunk plus a few mids — not every rule.
+      const sampleIndexes = [
+        0,
+        50,
+        BATCH_SIZE - 1,
+        BATCH_SIZE,
+        300,
+        BATCH_SIZE * 2 - 1,
+        BATCH_SIZE * 2,
+        500,
+        RULE_COUNT - 1,
+      ];
       for (const i of sampleIndexes) {
         const ruleId = `overwrite-batch-rule-${i}`;
         const found = body.data.find(
@@ -99,6 +112,102 @@ export default ({ getService }: FtrProviderContext): void => {
         );
         const prior = priorByRuleId.get(ruleId);
         expect(found?.name).toBe(`Overwritten ${ruleId}`);
+        expect(found?.id).toBe(prior?.id);
+        expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
+      }
+    });
+
+    it('enables and disables rules when overwriting a full batch', async () => {
+      const enableIds = range(BATCH_SIZE / 2).map((i) => `overwrite-batch-enable-${i}`);
+      const disableIds = range(BATCH_SIZE / 2).map((i) => `overwrite-batch-disable-${i}`);
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          ...enableIds.map((ruleId) =>
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: `Disabled ${ruleId}`,
+              enabled: false,
+            })
+          ),
+          ...disableIds.map((ruleId) =>
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: `Enabled ${ruleId}`,
+              enabled: true,
+            })
+          ),
+        ],
+        overwrite: false,
+      });
+
+      const { body: beforeOverwrite } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: BATCH_SIZE,
+          },
+        })
+        .expect(200);
+
+      const priorByRuleId = new Map<string, { id: string; revision: number }>(
+        beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
+          rule.rule_id,
+          { id: rule.id, revision: rule.revision },
+        ])
+      );
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [
+          ...enableIds.map((ruleId) =>
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: `Enabled ${ruleId}`,
+              enabled: true,
+            })
+          ),
+          ...disableIds.map((ruleId) =>
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: `Disabled ${ruleId}`,
+              enabled: false,
+            })
+          ),
+        ],
+        overwrite: true,
+      });
+
+      const { body } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: BATCH_SIZE,
+          },
+        })
+        .expect(200);
+
+      expect(body.total).toBe(BATCH_SIZE);
+      expect(body.data).toHaveLength(BATCH_SIZE);
+
+      const mid = Math.floor(enableIds.length / 2);
+      const sampleEnable = [enableIds[0], enableIds[mid], enableIds[enableIds.length - 1]];
+      const sampleDisable = [disableIds[0], disableIds[mid], disableIds[disableIds.length - 1]];
+
+      for (const ruleId of sampleEnable) {
+        const found = body.data.find((rule: { rule_id: string }) => rule.rule_id === ruleId);
+        const prior = priorByRuleId.get(ruleId);
+        expect(found?.enabled).toBe(true);
+        expect(found?.name).toBe(`Enabled ${ruleId}`);
+        expect(found?.id).toBe(prior?.id);
+        expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
+      }
+      for (const ruleId of sampleDisable) {
+        const found = body.data.find((rule: { rule_id: string }) => rule.rule_id === ruleId);
+        const prior = priorByRuleId.get(ruleId);
+        expect(found?.enabled).toBe(false);
+        expect(found?.name).toBe(`Disabled ${ruleId}`);
         expect(found?.id).toBe(prior?.id);
         expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
       }
