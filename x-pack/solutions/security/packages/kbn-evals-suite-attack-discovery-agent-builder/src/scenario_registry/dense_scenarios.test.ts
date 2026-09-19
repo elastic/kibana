@@ -402,6 +402,12 @@ describe('AD2 scenario registry (dense profile)', () => {
         Math.min(...rows.map((row) => String(row.process?.command_line ?? '').length)),
       maxCommandLineLength: (rows) =>
         Math.max(...rows.map((row) => String(row.process?.command_line ?? '').length)),
+      // The field one of the reported defects used: `COUNT(*) = 4 AND <4 non-null
+      // command lines>` recovered the references while two of the background
+      // chain's steps carried nulls. Counted explicitly so the sweep pins it
+      // rather than relying on a null collapsing to a zero length above.
+      nullCommandLineCount: (rows) =>
+        rows.filter((row) => row.process?.command_line == null).length,
       filePathCount: (rows) => rows.filter((row) => row.file?.path != null).length,
       rawDocumentCount: (rows) => rawDocumentsByHost.get(rows[0].host?.name) ?? 0,
       distinctProcessNames: (rows) => new Set(rows.map((row) => row.process?.name)).size,
