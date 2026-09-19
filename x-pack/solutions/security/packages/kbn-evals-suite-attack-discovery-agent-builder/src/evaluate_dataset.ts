@@ -184,19 +184,7 @@ export const extractAgentEsqlRowCounts = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
 ): number[] => collectAgentEsqlResults(steps).map((result) => result.rowCount);
 
-const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
-  result.query?.includes(ALERT_INDEX_FAMILY) === true;
-
-/**
- * The same index-family test for a bare query string — the pipeline runs the
- * AD tool's `esql_query` itself, so that query has to be held to the same
- * "reads the alert index" bar as the agent's own retrievals.
- *
- * `null` (no query supplied) is NOT a pass: the pipeline still retrieved
- * something, but nothing about it says it read this fixture's index.
- */
-const readsAlertsIndexQuery = (query: string | null): boolean =>
-  query != null && query.includes(ALERT_INDEX_FAMILY);
+const readsAlertsIndex = (result: AgentEsqlResult): boolean => readsAlertsIndexQuery(result.query);
 
 /**
  * Whether a query carries the example's retrieval scope. A `null` scope (the
@@ -404,6 +392,24 @@ const stripComments = (segment: string): string => {
 };
 
 /**
+ * Whether a query reads the alert index family.
+ *
+ * The pipeline runs the AD tool's `esql_query` itself, so that query is held to
+ * the same "reads the alert index" bar as the agent's own retrievals — and both
+ * sides go through here so they cannot drift apart.
+ *
+ * `null` (no query supplied) is NOT a pass: the pipeline still retrieved
+ * something, but nothing about it says it read this fixture's index.
+ *
+ * Comments are stripped first: `FROM logs-endpoint.events.process-default
+ * // .alerts-security.alerts` reads a different index entirely, and letting the
+ * comment satisfy this check admitted a 95-row count from an unrelated source
+ * as this fixture's population.
+ */
+const readsAlertsIndexQuery = (query: string | null): boolean =>
+  query != null && stripComments(query).includes(ALERT_INDEX_FAMILY);
+
+/**
  * The positions where the marker appears as a filter VALUE rather than as
  * incidental text inside a larger literal.
  *
@@ -469,16 +475,166 @@ const isNegatedMarkerPredicate = (
 };
 
 /**
- * Whether the disjunct positively restricts to the fixture.
+ * A parsed ES|QL boolean expression: `NOT`, `AND`, `OR` and predicate leaves.
  *
- * Requires the marker to appear as a filter VALUE (not as text inside a longer
- * literal) AND to be positively filtered there: `tags == "<marker>"` and
- * `tags LIKE "*<marker>*"` qualify, `message == "see <marker>"` does not.
+ * Whether the marker is REQUIRED cannot be read off the query text. `OR` unions
+ * and `NOT` inverts, so it depends on where the marker sits in the expression
+ * tree:
+ *
+ *   tags == M AND NOT (host.name == "x")              -> scoped (M required)
+ *   status == "open" AND NOT (host.name == "x" AND tags == M)
+ *                                                     -> NOT scoped (M only excluded)
+ *   tags == M AND (severity == "high" OR severity == "critical")
+ *                                                     -> scoped (M required)
+ *
+ * A top-level `OR` split reads the second and third backwards — it accepts the
+ * second and rejects the third.
  */
-const isScopedDisjunct = (disjunct: string, retrievalScope: string): boolean =>
-  markerValuePositions(disjunct, retrievalScope).some(
-    (position) => !isNegatedMarkerPredicate(disjunct, position, retrievalScope)
-  );
+type BooleanNode =
+  | { kind: 'leaf'; text: string }
+  | { kind: 'not'; operand: BooleanNode }
+  | { kind: 'and' | 'or'; operands: BooleanNode[] };
+
+/**
+ * Split on a top-level `operator`, ignoring literals, comments and parentheses.
+ *
+ * Parens are the reason this is not `splitOutsideQuotes`: the `OR` in
+ * `tags == M AND (severity == "high" OR severity == "critical")` is nested
+ * inside a group and does not make the marker optional.
+ */
+const splitTopLevel = (expression: string, operator: RegExp): string[] => {
+  const masked = maskComments(expression);
+  const matcher = new RegExp(operator.source, `${operator.flags.replace(/g/g, '')}g`);
+  const parts: string[] = [];
+  let start = 0;
+  let match = matcher.exec(masked);
+
+  while (match !== null) {
+    const before = masked.slice(0, match.index);
+    const depth = (before.match(/\(/g)?.length ?? 0) - (before.match(/\)/g)?.length ?? 0);
+
+    if (depth === 0) {
+      parts.push(expression.slice(start, match.index));
+      start = match.index + match[0].length;
+    }
+
+    match = matcher.exec(masked);
+  }
+
+  parts.push(expression.slice(start));
+
+  return parts;
+};
+
+/** Whether the whole expression is one parenthesised group. */
+const isWrappedInParens = (expression: string): boolean => {
+  const masked = maskComments(expression).trim();
+  if (!masked.startsWith('(') || !masked.endsWith(')')) return false;
+
+  let depth = 0;
+
+  for (let index = 0; index < masked.length; index++) {
+    if (masked[index] === '(') depth++;
+    if (masked[index] === ')') {
+      depth--;
+      if (depth === 0) return index === masked.length - 1;
+    }
+  }
+
+  return false;
+};
+
+const parseBooleanExpression = (expression: string): BooleanNode => {
+  let text = expression.trim();
+  while (isWrappedInParens(text)) text = text.trim().slice(1, -1).trim();
+
+  const orParts = splitTopLevel(text, /\s+OR\s+/i);
+  if (orParts.length > 1) return { kind: 'or', operands: orParts.map(parseBooleanExpression) };
+
+  const andParts = splitTopLevel(text, /\s+AND\s+/i);
+  if (andParts.length > 1) return { kind: 'and', operands: andParts.map(parseBooleanExpression) };
+
+  const negation = /^NOT\s+/i.exec(text);
+  if (negation !== null) {
+    return { kind: 'not', operand: parseBooleanExpression(text.slice(negation[0].length)) };
+  }
+
+  return { kind: 'leaf', text };
+};
+
+type LeafRole = 'positive' | 'negated' | 'unrelated';
+
+/**
+ * How the marker figures in a leaf: positively filtered (`tags == "<marker>"`),
+ * negatively filtered (`tags != "<marker>"`), or not a filter value at all —
+ * which includes a leaf that merely mentions the marker as data.
+ */
+const leafRole = (text: string, marker: string): LeafRole => {
+  const positions = markerValuePositions(text, marker);
+  if (positions.length === 0) return 'unrelated';
+
+  return positions.some((position) => !isNegatedMarkerPredicate(text, position, marker))
+    ? 'positive'
+    : 'negated';
+};
+
+const collectLeaves = (node: BooleanNode): string[] => {
+  if (node.kind === 'leaf') return [node.text];
+  if (node.kind === 'not') return collectLeaves(node.operand);
+
+  return node.operands.flatMap(collectLeaves);
+};
+
+const evaluateBoolean = (node: BooleanNode, resolve: (leaf: string) => boolean): boolean => {
+  if (node.kind === 'leaf') return resolve(node.text);
+  if (node.kind === 'not') return !evaluateBoolean(node.operand, resolve);
+
+  return node.kind === 'and'
+    ? node.operands.every((operand) => evaluateBoolean(operand, resolve))
+    : node.operands.some((operand) => evaluateBoolean(operand, resolve));
+};
+
+/** Above this many free predicates the assignment search is not attempted. */
+const MAX_FREE_PREDICATES = 16;
+
+/**
+ * Whether a row WITHOUT the marker can satisfy the expression.
+ *
+ * A non-marker row makes every positive marker predicate false, every negated
+ * one true, and every unrelated predicate either way. If any such assignment
+ * satisfies the expression, the expression does not restrict to the fixture —
+ * which is the real question, and the one a text scan cannot answer.
+ *
+ * Unrelated predicates are searched exhaustively (2^n assignments, n bounded by
+ * `MAX_FREE_PREDICATES`); a query with more free predicates than that is treated
+ * as not restricting, since it cannot be PROVEN to restrict.
+ */
+const admitsNonMarkerRow = (node: BooleanNode, marker: string): boolean => {
+  const leaves = collectLeaves(node);
+  const roles = new Map(leaves.map((leaf) => [leaf, leafRole(leaf, marker)] as const));
+  const free = leaves.filter((leaf) => roles.get(leaf) === 'unrelated');
+
+  if (free.length > MAX_FREE_PREDICATES) return true;
+
+  for (let assignment = 0; assignment < 2 ** free.length; assignment++) {
+    // Which unrelated predicates this assignment makes true, read as a base-2
+    // digit per predicate (avoiding bitwise ops, which the repo lint bans).
+    const truthy = new Set(
+      free.filter((_leaf, position) => Math.floor(assignment / 2 ** position) % 2 === 1)
+    );
+    const resolve = (leaf: string): boolean => {
+      const role = roles.get(leaf);
+      if (role === 'positive') return false;
+      if (role === 'negated') return true;
+
+      return truthy.has(leaf);
+    };
+
+    if (evaluateBoolean(node, resolve)) return true;
+  }
+
+  return false;
+};
 
 const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean => {
   if (retrievalScope == null) return true;
@@ -490,15 +646,13 @@ const carriesRetrievalScope = (query: string | null, retrievalScope: string | nu
       .join(' WHERE ');
     if (!whereBody.includes(retrievalScope)) return false;
 
-    // EVERY top-level alternative has to restrict to this fixture. `OR` unions
-    // its branches, so one positively scoped branch cannot narrow the others:
-    // `tags == "<marker>" OR tags == "<other-run>"` is a superset of this
-    // fixture and its rows (and any exact-looking count) may all come from the
-    // other run on the shared index. The tautology case is the same rule — a
-    // `true` branch names no marker, so it fails here too.
-    const disjuncts = splitOutsideQuotes(whereBody, /\s+OR\s+/i);
-
-    return disjuncts.every((disjunct) => isScopedDisjunct(disjunct, retrievalScope));
+    // The marker has to be REQUIRED by the clause — satisfied by every row the
+    // clause admits. `OR` widens (`tags == M OR tags == "<other-run>"` admits
+    // another run's rows), `NOT` excludes rather than requires
+    // (`status == "open" AND NOT (host.name == "x" AND tags == M)` admits rows
+    // without the marker), and a tautological branch (`OR true`) admits
+    // everything. All three fall out of the same test.
+    return !admitsNonMarkerRow(parseBooleanExpression(whereBody), retrievalScope);
   });
 };
 
@@ -520,8 +674,10 @@ const carriesRetrievalScope = (query: string | null, retrievalScope: string | nu
  * returns no marker-bearing field, so the rows cannot carry it either), while
  * 6/6 recorded golden reps whose question names a marker carried it in the
  * query, in four different forms (`tags == "x"`, `tags LIKE "*x*"`,
- * `QSTR("x")`, an OR-chain). All four contain the marker literal, which is why
- * the scope check is a substring test rather than a predicate parse.
+ * `QSTR("x")`, an OR-chain). All four name the marker inside a `WHERE`; whether
+ * that mention RESTRICTS the result depends on its position in the boolean
+ * expression, so the WHERE body is evaluated as a `NOT`/`AND`/`OR` tree rather
+ * than substring-matched.
  */
 const classifyAgentAlertRetrievals = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],

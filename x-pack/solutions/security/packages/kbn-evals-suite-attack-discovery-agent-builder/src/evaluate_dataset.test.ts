@@ -627,6 +627,116 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([95, 95]);
   });
 
+  it('does not let an index named only in a comment satisfy the index check', () => {
+    // The pipeline runs this query itself. Naming the alert index family in a
+    // comment used to satisfy the "reads the alert index" check while the query
+    // read an unrelated index, admitting its 95 rows as this fixture's
+    // population.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const unrelatedIndexWithComment = `FROM logs-endpoint.events.process-default // ${ALERT_INDEX_FAMILY}`;
+
+    expect(
+      extractAgentAlertRetrievalPopulation(
+        [recordedEsqlStep({ query: unrelatedIndexWithComment, rows: 95 })],
+        scope
+      )
+    ).toBe(null);
+
+    const pipeline = { alert_retrieval: [], esql_query: unrelatedIndexWithComment };
+    const counts = computeWorkflowAlertCounts({
+      pipeline,
+      adToolEsqlQuery: unrelatedIndexWithComment,
+      retrievalScope: scope,
+    });
+    expect(counts.retrievedAlertCount).toBe(0);
+  });
+
+  it('does not let a negated group containing the marker satisfy the scope check', () => {
+    // `NOT (tags == X OR host == Y)` excludes the fixture; the old per-branch
+    // text check saw a positive marker mention inside the parens and accepted it.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const negatedGroup = `FROM ${ALERT_INDEX_FAMILY} | WHERE NOT (tags == "${scope}" OR host.name == "wks-ops-40") | LIMIT 95`;
+    const steps = [recordedEsqlStep({ query: negatedGroup, rows: 95 })];
+
+    expect(extractAgentAlertRetrievalPopulation(steps, scope)).toBe(null);
+    expect(extractUnscopedAlertRetrievalRowCounts(steps, scope)).toEqual([95]);
+  });
+
+  it('still accepts a positive marker beside a negated group', () => {
+    // The mirror of the previous case, and the false negative a stricter check
+    // could introduce: a negated UNRELATED group does not stop the marker from
+    // restricting the result.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const legit = `FROM ${ALERT_INDEX_FAMILY} | WHERE tags == "${scope}" AND NOT host.name == "wks-ops-40" | LIMIT 95`;
+
+    expect(
+      extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query: legit, rows: 95 })], scope)
+    ).toBe(95);
+  });
+
+  it('still accepts a grouped OR whose every branch names the marker', () => {
+    // Another false negative to guard: `(A OR B)` where both branches name the
+    // marker still restricts to the fixture.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const grouped = `FROM ${ALERT_INDEX_FAMILY} | WHERE (tags == "${scope}" OR tags LIKE "*${scope}*") | LIMIT 95`;
+
+    expect(
+      extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query: grouped, rows: 95 })], scope)
+    ).toBe(95);
+  });
+
+  it('does not treat an index named only in a comment as an alert retrieval', () => {
+    // The exact shape reported in review: the query reads the endpoint events
+    // index and only MENTIONS the alert family in a trailing comment. Both the
+    // agent-side and pipeline-side index checks used a bare substring test, so
+    // this query's raw-event ids were scored as the dense alert population.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const unrelatedIndexWithComment = `FROM logs-endpoint.events.process-default METADATA _id | WHERE labels.ad_portable_seed == "${scope}" // ${ALERT_INDEX_FAMILY}`;
+
+    expect(
+      extractAgentAlertRetrievalPopulation(
+        [recordedEsqlStep({ query: unrelatedIndexWithComment, rows: 95 })],
+        scope
+      )
+    ).toBe(null);
+
+    const pipeline = { alert_retrieval: [], esql_query: unrelatedIndexWithComment };
+    const counts = computeWorkflowAlertCounts({
+      pipeline,
+      adToolEsqlQuery: unrelatedIndexWithComment,
+      retrievalScope: scope,
+    });
+    expect(counts.retrievedAlertCount).toBe(0);
+  });
+
+  it('does not let the marker inside a negated group count as scoped', () => {
+    // `NOT (host.name == "x" AND tags == <marker>)` excludes the fixture. The
+    // previous implementation took the last textual `AND` before the marker as
+    // the branch start, which landed INSIDE the negated group, so no negation
+    // regex matched and the query was classified as positively scoped.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const negatedGroup = `FROM ${ALERT_INDEX_FAMILY} | WHERE status == "open" AND NOT (host.name == "x" AND tags == "${scope}")`;
+    const steps = [recordedEsqlStep({ query: negatedGroup, rows: 95 })];
+
+    expect(extractAgentAlertRetrievalPopulation(steps, scope)).toBe(null);
+    expect(extractUnscopedAlertRetrievalRowCounts(steps, scope)).toEqual([95]);
+  });
+
+  it('accepts a grouped OR that only refines a positively scoped retrieval', () => {
+    // Splitting on every `OR` without tracking parentheses treated the second
+    // branch of `(severity == "high" OR severity == "critical")` as a top-level
+    // alternative lacking the marker, scoring a correct retrieval as unscoped.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const groupedRefinement = `FROM ${ALERT_INDEX_FAMILY} | WHERE tags == "${scope}" AND (severity == "high" OR severity == "critical")`;
+
+    expect(
+      extractAgentAlertRetrievalPopulation(
+        [recordedEsqlStep({ query: groupedRefinement, rows: 95 })],
+        scope
+      )
+    ).toBe(95);
+  });
+
   it('still accepts the marker when a WHERE clause restricts on it', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const filtering = [
