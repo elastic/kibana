@@ -97,10 +97,26 @@ export class ESQLService extends FtrService {
     const tableBody = await this.retry.try(async () => queryHistory.findByTagName('tbody'));
     const rows = await this.retry.try(async () => tableBody.findAllByTagName('tr'));
 
-    return rows[rowIndex];
+    const row = rows[rowIndex];
+
+    if (!row) {
+      throw new Error(`Starred query row ${rowIndex} not found`);
+    }
+
+    return row;
   }
 
-  public async clickStarredItem(rowIndex = 0) {
+  public async clickStarredItem(rowIndex: number = 0) {
+    await this.retry.waitFor(`starred query row ${rowIndex} to load`, async () => {
+      try {
+        const row = await this.getStarredItem(rowIndex);
+        const toggle = await row.findByTestSubject('ESQLEditor-history-starred-queries-run-button');
+        return await toggle.isDisplayed();
+      } catch {
+        return false;
+      }
+    });
+
     const row = await this.getStarredItem(rowIndex);
     const toggle = await row.findByTestSubject('ESQLEditor-history-starred-queries-run-button');
     await toggle.click();
