@@ -60,10 +60,26 @@ that the reference chains and the background share has to OVERLAP on both sides:
 | `raw` backing | `bg-endpoint-inventory` is `raw: true`, so source-event existence does not discriminate |
 | severity / `risk_score` | `bg-vendor-update` carries high/critical, so severity alone does not discriminate |
 | host / agent id | Occurrence-local; a host never appears on both sides |
+| host aggregates | `bg-endpoint-inventory`'s per-host min/max/sum of risk score, message length, and command-line length all sit INSIDE the reference band |
 
 `dense_scenarios.test.ts` pins each of these. When adding a background template, check
 every field it emits against the reference chains: if the value (or its frequency)
 appears on one side only, the profile is solvable without reasoning.
+
+Two rules that are easy to miss, both learned by breaking them:
+
+1. **A conjunction is as good as a field.** `COUNT(*) = 4 AND MIN(risk_score) >= 72`
+   recovers the reference hosts exactly even though neither predicate does alone, and
+   it took four rounds of single-field fixes to surface. The pinning test therefore
+   sweeps every candidate threshold over every host aggregate and asserts that no
+   single predicate **and no pair** isolates the reference cohort. Any background
+   chain that is the unique holder of a host-level extremum is a key.
+2. **A constant background profile is a single point.** Repeating one chain with only
+   host/rule/process suffixes gives every host the SAME aggregate value, and any
+   threshold that point falls outside of isolates it. Moving the constant does not
+   close the hole — it relocates the key (raising the background minimum risk above
+   the reference maximum simply inverts it). The values have to sit inside the
+   reference band, which means varying them per occurrence.
 
 ### Full profile (out of scope for this package)
 
