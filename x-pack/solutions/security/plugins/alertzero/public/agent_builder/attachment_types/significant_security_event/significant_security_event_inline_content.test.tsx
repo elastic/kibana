@@ -126,6 +126,26 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('No entities recorded')).toBeInTheDocument();
   });
 
+  it('renders entities with specialized user/host chips', () => {
+    render(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            entities: ['dev-user', 'host.name: ci-deploy-runner-07', 'user.name: jdoe'],
+          })
+        )}
+      />
+    );
+
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-0')).toBeInTheDocument();
+    expect(screen.getByText('dev-user')).toBeInTheDocument();
+    expect(screen.getByText('ci-deploy-runner-07')).toBeInTheDocument();
+    expect(screen.getByText('jdoe')).toBeInTheDocument();
+    expect(screen.getAllByText('User').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('Host')).toBeInTheDocument();
+  });
+
   it('renders a Discover link for an event when share returns a URL', () => {
     const event = {
       event_id: 'evt-1',

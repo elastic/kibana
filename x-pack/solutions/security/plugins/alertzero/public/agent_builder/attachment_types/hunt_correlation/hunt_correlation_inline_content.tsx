@@ -24,6 +24,7 @@ import {
   buildThreatReportLookupEsql,
   DiscoverLink,
 } from '../navigation';
+import { EntityChip } from '../entity_chip';
 import { parseHuntCorrelationData } from './types';
 import type { Anchor, DiamondScore, HuntCorrelationAttachment } from './types';
 
@@ -63,6 +64,15 @@ const renderAnchorValue = ({
   );
 
   if (!HASH_LIKE_ANCHOR_KINDS.has(kind)) {
+    if (kind === 'actor') {
+      return (
+        <EntityChip
+          entity={value}
+          kindOverride="actor"
+          testSubj={`alertzeroHuntCorrelationActorChip-${index}`}
+        />
+      );
+    }
     return badge;
   }
 

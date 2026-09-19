@@ -164,7 +164,9 @@ describe('HuntCorrelationInlineContent', () => {
     expect(
       screen.queryByTestId('alertzeroHuntCorrelationAnchorLink-actor-0')
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroHuntCorrelationActorChip-0')).toBeInTheDocument();
     expect(screen.getByText('APT-99')).toBeInTheDocument();
+    expect(screen.getByText('Actor')).toBeInTheDocument();
   });
 
   it('drops malformed anchor entries but keeps the valid ones', () => {

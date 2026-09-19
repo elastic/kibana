@@ -28,6 +28,7 @@ import {
   buildIocLookupEsql,
   DiscoverLink,
 } from '../navigation';
+import { EntityChip } from '../entity_chip';
 import { parseSignificantSecurityEventData } from './types';
 import type {
   ParsedSignificantSecurityEvent,
@@ -429,6 +430,13 @@ export const SignificantSecurityEventInlineContent: React.FC<
 
       <EuiSpacer size="s" />
       <EuiText size="s">
+        <strong>
+          {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.entities', {
+            defaultMessage: 'Entities',
+          })}
+        </strong>
+      </EuiText>
+      <EuiText size="s">
         {parsed.entities.length === 0 ? (
           <span css={cellStyles}>
             {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.entitiesEmpty', {
@@ -436,11 +444,16 @@ export const SignificantSecurityEventInlineContent: React.FC<
             })}
           </span>
         ) : (
-          parsed.entities.map((entity) => (
-            <EuiBadge key={entity} color="hollow" css={{ marginRight: 4, marginBottom: 4 }}>
-              {entity}
-            </EuiBadge>
-          ))
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+            {parsed.entities.map((entity, index) => (
+              <EuiFlexItem grow={false} key={`${entity}-${index}`}>
+                <EntityChip
+                  entity={entity}
+                  testSubj={`alertzeroSignificantSecurityEventEntity-${index}`}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         )}
       </EuiText>
 
