@@ -173,7 +173,7 @@ const injectImageMessages = async (
   for (const result of toolResults) {
     let toolReturn;
     try {
-      toolReturn = extractToolReturn(result);
+      toolReturn = extractToolReturn({ content: result.content, artifact: result.artifact });
     } catch {
       continue;
     }
@@ -315,7 +315,8 @@ const reconstructToolCall = (
 ): ToolCallWithResult | undefined => {
   let results: ToolResult[];
   try {
-    results = extractToolReturn(result).results ?? [];
+    results =
+      extractToolReturn({ content: result.content, artifact: result.artifact }).results ?? [];
   } catch {
     return undefined;
   }
