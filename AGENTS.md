@@ -102,3 +102,39 @@ Follow existing patterns in the target area first; below are common defaults.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
 - Only comment exported functions with one concise sentence and non-trivial code paths.
+
+## Pull Requests
+
+Stacked PRs are enabled for this repository. Prefer a stack of small, focused PRs over a single large one.
+
+### When to stack
+
+Create a stack when the change:
+- Has a natural layering order — e.g., shared types → server implementation → UI — where each layer can be reviewed independently and later layers depend on earlier ones landing first.
+- Crosses domain boundaries (multiple `kibana.jsonc` owners) and each part stands on its own.
+- Would otherwise exceed ~400 lines or ~15 files of diff.
+
+Do not create artificially small slices that have no standalone meaning.
+
+### How to create a stack
+
+Each PR after the first targets the *previous branch*, not `main`:
+
+```bash
+# Layer 1 — targets main
+git checkout -b feat/my-feature-part-1
+# ... implement layer 1 ...
+git push -u origin feat/my-feature-part-1
+gh pr create --base main --title "feat: part 1 — <description>"
+
+# Layer 2 — targets the layer 1 branch
+git checkout feat/my-feature-part-1
+git checkout -b feat/my-feature-part-2
+# ... implement layer 2 ...
+git push -u origin feat/my-feature-part-2
+gh pr create --base feat/my-feature-part-1 --title "feat: part 2 — <description>"
+```
+
+When a PR in the stack merges, GitHub automatically retargets the next PR in the stack to `main`. Note: because Kibana uses squash merges, the retargeted PR will appear to include the squashed base commits — reviewers should focus on the new commits only. Mention this in the PR description.
+
+Include the stack position in each PR description, e.g. `2 of 3 — depends on #N`.
