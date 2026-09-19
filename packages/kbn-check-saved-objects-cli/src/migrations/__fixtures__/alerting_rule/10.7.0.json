@@ -78,10 +78,10 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     },
     {
-      "kind": "signal",
+      "kind": "alert",
       "metadata": {
         "name": "test detection query rule",
-        "description": "a signal-kind rule managed by the security.detection.query builder type",
+        "description": "an alert-kind rule managed by the security.detection.query builder type",
         "tags": [
           "security",
           "detection"
@@ -94,16 +94,16 @@
         "every": "5m",
         "lookback": "10m"
       },
+      "recovery_strategy": "none",
+      "no_data_strategy": "none",
+      "state_transition": {
+        "pending_count": 0
+      },
       "query": {
         "format": "standalone",
         "breach": {
           "query": "FROM logs-* | WHERE process.name == \"cmd.exe\" | LIMIT 100"
         }
-      },
-      "grouping": {
-        "fields": [
-          "host.name"
-        ]
       },
       "enabled": true,
       "createdBy": {
@@ -217,10 +217,10 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     },
     {
-      "kind": "signal",
+      "kind": "alert",
       "metadata": {
         "name": "test detection query rule",
-        "description": "a signal-kind rule managed by the security.detection.query builder type",
+        "description": "an alert-kind rule managed by the security.detection.query builder type",
         "tags": [
           "security",
           "detection"
@@ -246,16 +246,16 @@
         "every": "5m",
         "lookback": "10m"
       },
+      "recovery_strategy": "none",
+      "no_data_strategy": "none",
+      "state_transition": {
+        "pending_count": 0
+      },
       "query": {
         "format": "standalone",
         "breach": {
           "query": "FROM logs-* | WHERE process.name == \"cmd.exe\" | LIMIT 100"
         }
-      },
-      "grouping": {
-        "fields": [
-          "host.name"
-        ]
       },
       "enabled": true,
       "createdBy": {
