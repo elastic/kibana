@@ -185,15 +185,20 @@ describe('QualitySummaryCards', () => {
     expect(setSelectedCard).toHaveBeenCalledWith('failed');
   });
 
-  it('indicates when degraded card is selected', () => {
+  it('indicates the selected card with aria-current without button semantics on the wrapper', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
-    expect(
-      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
-    ).toHaveAttribute('aria-pressed', 'true');
-    expect(
-      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')
-    ).toHaveAttribute('aria-pressed', 'false');
+    const degradedCard = screen.getByTestId(
+      'datasetQualityDetailsSummaryKpiCard-Degraded documents'
+    );
+    const failedCard = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents');
+
+    expect(degradedCard).toHaveAttribute('aria-current', 'true');
+    expect(degradedCard).not.toHaveAttribute('role');
+    expect(degradedCard).not.toHaveAttribute('aria-pressed');
+    expect(failedCard).not.toHaveAttribute('aria-current');
+    expect(failedCard).not.toHaveAttribute('role');
+    expect(failedCard).not.toHaveAttribute('aria-pressed');
   });
 
   it('does not call handleDocsTrendChartChange or setSelectedCard when the already-selected card is clicked', () => {
