@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
@@ -563,6 +564,7 @@ describe('bulkScheduleWorkflow', () => {
       expect.any(Object),
       expect.objectContaining({ request, cloneApiKey: true })
     );
+    expect(taskManager.schedule.mock.calls[0][0].priority).toBe(TaskPriority.Standard);
   });
 
   it('fails a single execution without scheduling when no identity is attached', async () => {
