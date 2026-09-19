@@ -33,10 +33,22 @@ const LazyHelpPopover = React.lazy(async () => {
 
 export function ESQLMenu({
   hideHistory,
+  hideVisor,
+  hideRecommendedQueries,
   onESQLDocsFlyoutVisibilityChanged,
   docsFlyoutSize,
 }: {
   hideHistory?: boolean;
+  /**
+   * Hides the visor (KQL / natural-language search) button. Use when embedding the menu
+   * without the full editor, which owns the visor surface the button would toggle.
+   */
+  hideVisor?: boolean;
+  /**
+   * Hides the recommended-queries section. Use when no `submitEsqlQuery` action is wired,
+   * so picks can't be applied (e.g. the split fragment editors).
+   */
+  hideRecommendedQueries?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
   docsFlyoutSize?: EuiFlyoutProps['size'];
@@ -71,15 +83,17 @@ export function ESQLMenu({
       })}
       buttonSize="s"
     >
-      <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
-          aria-label={searchPlaceholder}
-          onClick={onToggleVisor}
-          isDisabled={!onToggleVisor}
-          data-test-subj="esql-menu-button"
-        />
-      </EuiToolTip>
+      {!hideVisor && (
+        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
+            aria-label={searchPlaceholder}
+            onClick={onToggleVisor}
+            isDisabled={!onToggleVisor}
+            data-test-subj="esql-menu-button"
+          />
+        </EuiToolTip>
+      )}
       {!hideHistory && (
         <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
           {/* eslint-disable-next-line @elastic/eui/button-group-no-invalid-children -- StarDustWrapper only adds a non-disruptive animation wrapper */}

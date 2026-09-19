@@ -1229,6 +1229,21 @@ export function ComposeDiscoverFlyout({
     handleDisableManualSplit,
   ]);
 
+  /*
+   * Header row shown above the editor: the helper text plus the Split (gear)
+   * control on the right. The gear lives here — outside the editor toolbar —
+   * because it acts on how the editor(s) below are rendered (single vs split),
+   * so it reads as an outer control rather than part of the editor's own toolbar.
+   * `sandboxHelpText` and `sandboxHeaderActions` share the same gate, so they
+   * appear (or not) together.
+   */
+  const sandboxHelpContent = sandboxHelpText ? (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem>{sandboxHelpText}</EuiFlexItem>
+      {sandboxHeaderActions && <EuiFlexItem grow={false}>{sandboxHeaderActions}</EuiFlexItem>}
+    </EuiFlexGroup>
+  ) : undefined;
+
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
   // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
   const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
@@ -1455,8 +1470,7 @@ export function ComposeDiscoverFlyout({
                 onBaseEditorMount={onBaseEditorMount}
                 onSingleEditorMount={onSingleEditorMount}
                 onClose={handleSandboxClose}
-                helpText={sandboxHelpText}
-                headerActions={sandboxHeaderActions}
+                helpText={sandboxHelpContent}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
                 title={getQuerySandboxTitle(isBuilderMode)}
               />
