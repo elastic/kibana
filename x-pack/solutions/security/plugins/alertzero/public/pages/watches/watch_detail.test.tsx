@@ -24,10 +24,14 @@ import {
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
 jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
+jest.mock('../../hooks/use_can_write_alertzero', () => ({
+  useCanWriteAlertZero: jest.fn(() => true),
+}));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
 jest.mock('./components/watches_section_layout', () => ({
@@ -42,6 +46,7 @@ jest.mock('./components/watches_section_layout', () => ({
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
+const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
@@ -132,6 +137,7 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCanWriteAlertZero.mockReturnValue(true);
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
@@ -477,5 +483,25 @@ describe('WatchDetailPage', () => {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
     });
+  });
+
+  it('locks worker settings and hides save when the user cannot write', () => {
+    mockUseCanWriteAlertZero.mockReturnValue(false);
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+    expect(
+      within(
+        screen.getByTestId(
+          `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+        )
+      ).getByTestId('alertZeroAutonomySlider')
+    ).toBeDisabled();
   });
 });
