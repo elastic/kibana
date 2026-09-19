@@ -430,7 +430,7 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     ).toEqual([[95], [95], [95]]);
   });
 
-  it('does not accept a WHERE clause whose tautological disjunct keeps the whole index', () => {
+  it('does not accept a WHERE clause whose tautological branch keeps the whole index', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const tautologies = [
       `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR true`,
@@ -451,14 +451,14 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
   });
 
   // The other direction: the stricter check must not reject the shapes the
-  // recorded scoped queries actually use, including a marker branch inside an
-  // OR-chain and a positive marker beside a negated unrelated term.
+  // recorded scoped queries actually use — a positive marker beside a negated
+  // unrelated term, and a marker named in every OR branch.
   it('still accepts a positive marker branch alongside other predicates', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const positive = [
-      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR tags == "other-run"`,
       `FROM .alerts-security.alerts-default | WHERE tags != "unrelated" AND tags == "${scope}"`,
       `FROM .alerts-security.alerts-default | WHERE QSTR("${scope}")`,
+      `FROM .alerts-security.alerts-default | WHERE message LIKE "*${scope}*" OR tags LIKE "*${scope}*"`,
     ];
 
     expect(
@@ -466,6 +466,32 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
         extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
       )
     ).toEqual([95, 95, 95]);
+  });
+
+  // WIDENING: `OR` unions its branches, so a marker in ONE branch does not
+  // narrow the others. Such a query is a superset of this fixture, and on the
+  // shared index its rows — and any exact-looking 95 — may all belong to the
+  // other run. A positive marker in one branch was previously enough, which is
+  // exactly this false positive.
+  it('does not accept a WHERE clause that widens to another run', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const widening = [
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR tags == "other-run"`,
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR tags != "unrelated"`,
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR host.name != "none"`,
+    ];
+
+    expect(
+      widening.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null, null]);
+
+    expect(
+      widening.map((query) =>
+        extractUnscopedAlertRetrievalRowCounts([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([[95], [95], [95]]);
   });
 
   // A disjunct that OPENS with NOT is not the same as a marker predicate that is
@@ -499,6 +525,41 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
         extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
       )
     ).toEqual([null, null, null]);
+  });
+
+  // Quoted literals are DATA, not syntax. The previous implementation removed
+  // comments and split on `|` with plain regexes, so a quoted command line
+  // containing `//` was truncated BEFORE a later marker predicate and a quoted
+  // literal containing `|` split one query into phantom segments. Both shapes
+  // are realistic for these seeded attack chains and both scored a correctly
+  // scoped retrieval as a zero.
+  it('accepts the marker after a quoted URL or pipe literal', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const quoted = [
+      `FROM .alerts-security.alerts-default | WHERE process.command_line LIKE "*https://cdn.example/*" AND tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE process.command_line LIKE "*cmd.exe /c echo a|b*" AND tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE message LIKE "*http://evil.example/x*" AND tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE message == "a | b" AND tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE message LIKE "*WHERE tags == \\"decoy\\"*" AND tags == "${scope}"`,
+    ];
+
+    expect(
+      quoted.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([95, 95, 95, 95, 95]);
+
+    // The escape hatch must not be one-way: a quoted marker is still a marker,
+    // and a marker in a real trailing comment is still ignored.
+    const stillUnscoped = [
+      `FROM .alerts-security.alerts-default | WHERE message == "nothing" // tags == "${scope}"`,
+    ];
+
+    expect(
+      stillUnscoped.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null]);
   });
 
   it('still accepts the marker when a WHERE clause restricts on it', () => {

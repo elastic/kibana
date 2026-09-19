@@ -208,27 +208,151 @@ const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
  *
  * This stays a text check rather than a full predicate parse because the
  * recorded scoped queries spell the marker four different ways (`tags == "x"`,
- * `tags LIKE "*x*"`, `QSTR("x")`, an OR-chain); all four put it inside a
- * `WHERE`, which is what the check requires. It is not a bare substring test
- * either: the marker must appear in a POSITIVE, RESTRICTIVE predicate, so two
+ * `tags LIKE "*x*"`, `QSTR("x")`, and a two-branch OR whose BOTH branches name
+ * the marker); all of them put it inside a `WHERE`, which is what the check
+ * requires. It is not a bare substring test either: the marker must appear in a
+ * POSITIVE, RESTRICTIVE predicate on EVERY top-level alternative, so three
  * classes of unrestricted `WHERE` are rejected —
  *
  * - NEGATION: `WHERE tags != "<marker>"` contains the marker in a restrictive
  *   clause but selects everything EXCEPT this run's documents.
  * - TAUTOLOGY: `WHERE tags == "<marker>" OR true` selects the whole index.
+ * - WIDENING: `WHERE tags == "<marker>" OR tags == "<other-run>"` unions this
+ *   run with another, so its rows (and any exact-looking row count) may all
+ *   belong to the other run on the shared index. A positive marker in ONE
+ *   branch does not narrow the others, which is why the test is `every` rather
+ *   than `some`. The tautology class falls out of the same rule, since a `true`
+ *   branch names no marker.
  *
- * Both were accepted by the previous substring test, and both defeat the
+ * All three were accepted by earlier revisions and all three defeat the
  * exact-population assertion this profile is built on: their rows are an
  * unrelated population that then scored as a complete retrieval of this
  * fixture.
  *
  * Residual limitation, stated plainly: this recognises the operator shapes the
  * recorded queries and the reported payloads use, not ES|QL semantics. A
- * marker reached through a function whose result is then negated, or a
- * tautology spelled outside the recognised forms, still passes. Closing that
- * needs a real predicate evaluator rather than a stricter text check.
+ * marker reached through a function whose result is then negated still passes.
+ * Closing that needs a real predicate evaluator rather than a stricter text
+ * check.
  */
-const TAUTOLOGY_DISJUNCT = /^\s*(true|1\s*==?\s*1)\s*$/i;
+
+/**
+ * Blank out the CONTENTS of quoted literals, preserving every character offset.
+ *
+ * Structural scanning (WHERE / OR / AND / `|`) has to run on this rather than
+ * the raw query: a quoted command line or URL can contain `//`, `|`, ` OR `, or
+ * the word WHERE, and treating those as syntax splits one query into phantom
+ * segments and truncates it before a later marker predicate. Offsets are
+ * preserved so the caller can slice the ORIGINAL string once it has decided
+ * where the real boundaries are.
+ */
+const maskQuotedLiterals = (query: string): string => {
+  const characters = [...query];
+  let quote: string | null = null;
+
+  for (let index = 0; index < characters.length; index++) {
+    const character = characters[index];
+
+    if (quote !== null) {
+      if (character === '\\' && index + 1 < characters.length) {
+        characters[index + 1] = 'x';
+        index++;
+      } else if (character === quote) {
+        quote = null;
+      } else {
+        characters[index] = 'x';
+      }
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    }
+  }
+
+  return characters.join('');
+};
+
+/**
+ * Split on `pattern` only where it is real syntax, never inside a literal.
+ * Boundaries come from the masked query; the slices come from the original, so
+ * the caller keeps its own casing and spacing.
+ */
+const splitOutsideQuotes = (query: string, pattern: RegExp): string[] => {
+  const masked = maskQuotedLiterals(query);
+  const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+  const matcher = new RegExp(pattern.source, flags);
+  const parts: string[] = [];
+  let start = 0;
+  let match = matcher.exec(masked);
+
+  while (match !== null) {
+    parts.push(query.slice(start, match.index));
+    start = match.index + match[0].length;
+    match = matcher.exec(masked);
+  }
+
+  parts.push(query.slice(start));
+  return parts;
+};
+
+/**
+ * Split an ES|QL query into pipeline segments, ignoring `|` and comment markers
+ * that appear inside quoted literals.
+ *
+ * The previous implementation removed comments and split on `|` with plain
+ * regexes. Both are wrong on realistic seeded chains: a quoted command line
+ * containing `//` (`... --url https://cdn.example/x`) was truncated at the
+ * `//` BEFORE a later marker predicate, and a quoted literal containing `|`
+ * split one query into phantom segments. Either way a query that positively
+ * scopes to the run marker was classified unscoped, so its ids were dropped
+ * from the population union and a correct run scored as a zero retrieval.
+ */
+const splitPipelineSegments = (query: string): string[] => {
+  const masked = maskQuotedLiterals(query);
+  const boundaries = [...masked]
+    .map((character, index) => (character === '|' ? index : -1))
+    .filter((index) => index >= 0);
+  const starts = [0, ...boundaries.map((index) => index + 1)];
+
+  return starts.map((start, position) => {
+    const end = position < boundaries.length ? boundaries[position] : query.length;
+    return stripComments(query.slice(start, end));
+  });
+};
+
+/**
+ * Remove ES|QL comments, respecting quoted literals.
+ *
+ * `//` is only a comment when it is not inside a string, which is exactly the
+ * case a command-line literal such as `https://...` creates.
+ */
+const stripComments = (segment: string): string => {
+  const masked = maskQuotedLiterals(segment);
+  let result = '';
+  let index = 0;
+
+  while (index < segment.length) {
+    const isLineComment = masked[index] === '/' && masked[index + 1] === '/';
+    const isBlockComment = masked[index] === '/' && masked[index + 1] === '*';
+
+    if (isLineComment) {
+      const newline = segment.indexOf('\n', index);
+      if (newline < 0) {
+        index = segment.length;
+      } else {
+        index = newline;
+      }
+      result += ' ';
+    } else if (isBlockComment) {
+      const end = segment.indexOf('*/', index + 2);
+      index = end < 0 ? segment.length : end + 2;
+      result += ' ';
+    } else {
+      result += segment[index];
+      index++;
+    }
+  }
+
+  return result;
+};
 
 /**
  * Whether the disjunct's marker literal sits behind a negation operator.
@@ -268,21 +392,21 @@ const carriesRetrievalScope = (query: string | null, retrievalScope: string | nu
   if (retrievalScope == null) return true;
   if (query == null) return false;
 
-  const withoutComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
-
-  return withoutComments.split('|').some((segment) => {
-    const whereBody = segment
-      .split(/\bWHERE\b/i)
+  return splitPipelineSegments(query).some((segment) => {
+    const whereBody = splitOutsideQuotes(segment, /\bWHERE\b/i)
       .slice(1)
       .join(' WHERE ');
     if (!whereBody.includes(retrievalScope)) return false;
 
-    // Split on ` OR ` only: a disjunct that is a literal tautology makes the
-    // whole predicate unrestricted no matter what the other branches say.
-    const disjuncts = whereBody.split(/\s+OR\s+/i);
-    if (disjuncts.some((disjunct) => TAUTOLOGY_DISJUNCT.test(disjunct))) return false;
+    // EVERY top-level alternative has to restrict to this fixture. `OR` unions
+    // its branches, so one positively scoped branch cannot narrow the others:
+    // `tags == "<marker>" OR tags == "<other-run>"` is a superset of this
+    // fixture and its rows (and any exact-looking count) may all come from the
+    // other run on the shared index. The tautology case is the same rule — a
+    // `true` branch names no marker, so it fails here too.
+    const disjuncts = splitOutsideQuotes(whereBody, /\s+OR\s+/i);
 
-    return disjuncts.some(
+    return disjuncts.every(
       (disjunct) =>
         disjunct.includes(retrievalScope) && !isNegatedMarkerPredicate(disjunct, retrievalScope)
     );
