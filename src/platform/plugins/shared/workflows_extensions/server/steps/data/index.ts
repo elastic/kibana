@@ -17,3 +17,5 @@ export * from './data_aggregate_step';
 export * from './data_concat_step';
 export * from './data_parse_json_step';
 export * from './data_stringify_json_step';
+
+export * from './data_load_checkpoint_step';

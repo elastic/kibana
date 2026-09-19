@@ -13,6 +13,7 @@ import {
   dataDedupeStepDefinition,
   dataFilterStepDefinition,
   dataFindStepDefinition,
+  dataLoadCheckpointStepDefinition,
   dataMapStepDefinition,
   dataParseJsonStepDefinition,
   dataRegexExtractStepDefinition,
@@ -22,6 +23,7 @@ import {
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 
 export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
+  serverStepRegistry.register(dataLoadCheckpointStepDefinition);
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
   serverStepRegistry.register(dataFilterStepDefinition);
