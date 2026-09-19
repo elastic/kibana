@@ -148,10 +148,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         ],
       });
 
-      // pending_count=1 and recovering_count=1 force the rule through every
-      // status of the lifecycle (skip thresholds disabled). We assert the
-      // episode id stays the same across pending → active → recovering →
-      // inactive.
+      // pending_count=2 and recovering_count=2 force the rule through every
+      // status of the lifecycle: a count of 2 needs a second consecutive match
+      // to leave the phase, so pending and recovering are both observed. We
+      // assert the episode id stays the same across pending → active →
+      // recovering → inactive.
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-episode-id-stable' },
@@ -161,7 +162,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-episode-id-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          state_transition: { pending_count: 1, recovering_count: 1 },
+          state_transition: { pending_count: 2, recovering_count: 2 },
         })
       );
 

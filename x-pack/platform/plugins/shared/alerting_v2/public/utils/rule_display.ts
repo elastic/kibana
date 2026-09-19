@@ -92,40 +92,56 @@ const recoveryLabel = (n: number) =>
     values: { n },
   });
 
+/**
+ * Returns true when the phase resolves on the very first evaluation:
+ * - count 0: server skips the phase entirely regardless of timeframe.
+ * - count 1 + no timeframe: count is satisfied on first eval.
+ * - count 1 + timeframe + OR (default): count branch alone is sufficient.
+ * - count 1 + timeframe + AND: both dimensions required, not immediate.
+ */
+const isImmediateDelay = (count?: number, timeframe?: string, operator?: string): boolean => {
+  if (count == null) return false;
+  if (count === 0) return true;
+  if (count === 1) return timeframe == null || operator !== 'AND';
+  return false;
+};
+
 export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
-  if (stateTransition?.pending_count == null && stateTransition?.pending_timeframe == null) {
+  const {
+    pending_count: count,
+    pending_timeframe: timeframe,
+    pending_operator: operator,
+  } = stateTransition ?? {};
+
+  if (count == null && timeframe == null) {
     return EMPTY_VALUE;
   }
 
-  if (stateTransition.pending_count === 0 && stateTransition.pending_timeframe == null) {
+  if (isImmediateDelay(count, timeframe, operator)) {
     return IMMEDIATE_LABEL;
   }
 
-  return formatDelay({
-    count: stateTransition.pending_count,
-    countLabel: matchLabel,
-    timeframe: stateTransition.pending_timeframe,
-    operator: stateTransition.pending_operator,
-  });
+  return formatDelay({ count, countLabel: matchLabel, timeframe, operator });
 }
 
 export function formatRecoveryDelay(
   stateTransition: RuleAttachmentData['state_transition']
 ): string {
-  if (stateTransition?.recovering_count == null && stateTransition?.recovering_timeframe == null) {
+  const {
+    recovering_count: count,
+    recovering_timeframe: timeframe,
+    recovering_operator: operator,
+  } = stateTransition ?? {};
+
+  if (count == null && timeframe == null) {
     return EMPTY_VALUE;
   }
 
-  if (stateTransition.recovering_count === 0 && stateTransition.recovering_timeframe == null) {
+  if (isImmediateDelay(count, timeframe, operator)) {
     return IMMEDIATE_LABEL;
   }
 
-  return formatDelay({
-    count: stateTransition.recovering_count,
-    countLabel: recoveryLabel,
-    timeframe: stateTransition.recovering_timeframe,
-    operator: stateTransition.recovering_operator,
-  });
+  return formatDelay({ count, countLabel: recoveryLabel, timeframe, operator });
 }
 
 const NO_DATA_STRATEGY_LABELS: Record<NoDataStrategy, string> = {

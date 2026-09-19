@@ -142,6 +142,66 @@ describe('CountTimeframeStrategy', () => {
     });
   });
 
+  describe('pendingCount of 1 (resolves on the first match)', () => {
+    const stateTransition: RuleResponse['state_transition'] = { pending_count: 1 };
+
+    it('transitions directly to active from inactive on breach', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+      });
+    });
+
+    it('transitions directly to active when no previous episode', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+      });
+    });
+
+    it('stays pending on the first match when an unmet timeframe is ANDed', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition: { pending_count: 1, pending_timeframe: '5m', pending_operator: 'AND' },
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('transitions to active on the first match when an unmet timeframe is ORed', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition: { pending_count: 1, pending_timeframe: '5m', pending_operator: 'OR' },
+      });
+    });
+
+    it('stays pending on an initial recovered event (not a breach)', () => {
+      expectTransition({
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        expectedStatusCount: 0,
+      });
+    });
+
+    it.each(['last_known_status', 'none'] as const)(
+      'stays pending on a no_data event when no_data_strategy is %s (not a breach)',
+      (noDataStrategyValue) => {
+        expectTransition({
+          on: alertEventStatus.no_data,
+          to: alertEpisodeStatus.pending,
+          stateTransition,
+          noDataStrategy: noDataStrategyValue,
+          expectedStatusCount: 0,
+        });
+      }
+    );
+  });
+
   describe('pendingCount threshold', () => {
     const stateTransition: RuleResponse['state_transition'] = { pending_count: 3 };
 
@@ -279,6 +339,33 @@ describe('CountTimeframeStrategy', () => {
     });
   });
 
+  describe('recoveringCount of 1 (resolves on the first recovery)', () => {
+    const stateTransition: RuleResponse['state_transition'] = { recovering_count: 1 };
+
+    it('transitions directly to inactive from active on recovered', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+      });
+    });
+
+    it('stays recovering on the first recovery when an unmet timeframe is ANDed', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.recovering,
+        stateTransition: {
+          recovering_count: 1,
+          recovering_timeframe: '5m',
+          recovering_operator: 'AND',
+        },
+        expectedStatusCount: 1,
+      });
+    });
+  });
+
   describe('recoveringCount threshold', () => {
     const stateTransition: RuleResponse['state_transition'] = { recovering_count: 3 };
 
@@ -380,6 +467,144 @@ describe('CountTimeframeStrategy', () => {
         expectedStatusCount: 2,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+  });
+
+  describe('consecutive evaluations required to leave a phase', () => {
+    const runUntil = ({
+      stateTransition,
+      from,
+      on,
+      until,
+      maxEvaluations = 10,
+    }: {
+      stateTransition: RuleResponse['state_transition'];
+      from?: AlertEpisodeStatus;
+      on: AlertEventStatus;
+      until: AlertEpisodeStatus;
+      maxEvaluations?: number;
+    }) => {
+      let previousEpisode =
+        from != null
+          ? buildLatestAlertEvent({ episodeStatus: from, eventStatus: alertEventStatus.breached })
+          : undefined;
+
+      for (let evaluation = 1; evaluation <= maxEvaluations; evaluation++) {
+        const result = strategy.getNextState(
+          buildStrategyStateTransitionContext({ eventStatus: on, stateTransition, previousEpisode })
+        );
+
+        if (result.status === until) {
+          return evaluation;
+        }
+
+        previousEpisode = buildLatestAlertEvent({
+          episodeStatus: result.status,
+          eventStatus: on,
+          statusCount: result.statusCount,
+        });
+      }
+
+      return -1;
+    };
+
+    it.each([
+      [0, 1],
+      [1, 1],
+      [2, 2],
+      [3, 3],
+      [4, 4],
+    ])('pendingCount %i becomes active on evaluation %i', (pendingCount, expected) => {
+      expect(
+        runUntil({
+          stateTransition: { pending_count: pendingCount },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(expected);
+    });
+
+    it.each([
+      [0, 1],
+      [1, 1],
+      [2, 2],
+      [3, 3],
+      [4, 4],
+    ])('recoveringCount %i becomes inactive on evaluation %i', (recoveringCount, expected) => {
+      expect(
+        runUntil({
+          stateTransition: { recovering_count: recoveringCount },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(expected);
+    });
+
+    it.each([
+      [1, 1],
+      [2, 2],
+      [3, 3],
+    ])(
+      'pendingCount %i still requires %i breach(es) when the first evaluation is a non-breach',
+      (pendingCount, expectedBreaches) => {
+        // Seed the episode with a non-breach event (no previous episode).
+        const firstResult = strategy.getNextState(
+          buildStrategyStateTransitionContext({
+            eventStatus: alertEventStatus.recovered,
+            stateTransition: { pending_count: pendingCount },
+          })
+        );
+        expect(firstResult.status).toBe(alertEpisodeStatus.pending);
+
+        // Now count how many consecutive breaches are needed to activate.
+        let previousEpisode = buildLatestAlertEvent({
+          episodeStatus: firstResult.status,
+          eventStatus: alertEventStatus.recovered,
+          statusCount: firstResult.statusCount,
+        });
+
+        let breachCount = 0;
+        for (let i = 0; i < 10; i++) {
+          breachCount++;
+          const result = strategy.getNextState(
+            buildStrategyStateTransitionContext({
+              eventStatus: alertEventStatus.breached,
+              stateTransition: { pending_count: pendingCount },
+              previousEpisode,
+            })
+          );
+          if (result.status === alertEpisodeStatus.active) break;
+          previousEpisode = buildLatestAlertEvent({
+            episodeStatus: result.status,
+            eventStatus: alertEventStatus.breached,
+            statusCount: result.statusCount,
+          });
+        }
+
+        expect(breachCount).toBe(expectedBreaches);
+      }
+    );
+  });
+
+  describe('phase with no threshold configured', () => {
+    it('enters pending on first breach when only the recovering phase is configured', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition: { recovering_count: 3 },
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('enters recovering on first recovery when only the pending phase is configured', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.recovering,
+        stateTransition: { pending_count: 3 },
+        expectedStatusCount: 1,
       });
     });
   });
