@@ -95,4 +95,37 @@ describe('getExecutionsByIds', () => {
     expect(allReturned).toEqual([...ids].sort());
     expect(new Set(allReturned).size).toBe(ids.length);
   });
+
+  it('fills document.id from _id when sourceIncludes omitted id', async () => {
+    const { esClient, logger } = createSetup();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'step-1',
+          _index: DEFAULT_INDEX,
+          found: true,
+          _seq_no: 7,
+          _primary_term: 1,
+          _source: { spaceId: 'default', status: 'waiting_for_input' },
+        },
+      ],
+    } as never);
+
+    const result = await getExecutionsByIds({
+      esClient,
+      ids: ['step-1'],
+      defaultIndex: DEFAULT_INDEX,
+      options: { sourceIncludes: ['spaceId', 'status'] },
+      logger,
+    });
+
+    expect(result.items).toEqual([
+      expect.objectContaining({
+        document: { spaceId: 'default', status: 'waiting_for_input', id: 'step-1' },
+        seqNo: 7,
+        primaryTerm: 1,
+      }),
+    ]);
+    expect(result.missing).toEqual([]);
+  });
 });
