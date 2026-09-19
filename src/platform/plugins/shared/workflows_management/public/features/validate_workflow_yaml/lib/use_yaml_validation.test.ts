@@ -20,7 +20,12 @@ jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_es
 
 jest.mock('./use_workflow_yaml_validation_context', () => {
   const actual = jest.requireActual('./use_workflow_yaml_validation_context');
+  // Required lazily: the factory body runs before this module's own consts initialize.
+  const { createMockWorkflowContextRegistry: createRegistry } = jest.requireActual(
+    '../../../../common/lib/create_workflow_context_registry.mock'
+  );
   const mockValidationContext = {
+    registry: createRegistry(),
     connectorTypes: { status: 'ready', value: {} },
     connectorsManagementUrl: 'http://test/connectors',
     workflows: { workflows: {}, totalWorkflows: 0 },
@@ -45,6 +50,7 @@ import type { WorkflowLookup } from '@kbn/workflows-yaml';
 import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
 import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
 import { useYamlValidation } from './use_yaml_validation';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
 import { createWorkflowsStore } from '../../../entities/workflows/store/store';
@@ -55,8 +61,11 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 
+const emptyRegistry = createMockWorkflowContextRegistry();
+
 const mockKibanaValue = createUseKibanaMockValue();
 const readyValidationContext: WorkflowYamlValidationContext = {
+  registry: emptyRegistry,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },

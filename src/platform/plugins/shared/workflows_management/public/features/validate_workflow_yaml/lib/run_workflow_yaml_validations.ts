@@ -11,21 +11,24 @@ import type { Document, LineCounter } from 'yaml';
 import type { monaco } from '@kbn/code-editor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { collectAllVariables } from './collect_all_variables';
+import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
+import {
+  collectAllVariables,
+  validateLiquidYamlScalars,
+  validateVariables as validateVariablesInternal,
+} from '@kbn/workflows-yaml';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
-import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 import { validateParallelFanOut } from './validate_parallel_fan_out';
 import { validateParallelMode } from './validate_parallel_mode';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
-import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 export interface RunWorkflowYamlValidationsParams {
+  registry: WorkflowContextRegistry;
   yamlString: string;
   model: monaco.editor.ITextModel;
   yamlDocument: Document;
@@ -43,6 +46,7 @@ export interface RunWorkflowYamlValidationsParams {
  * `collectFullWorkflowYamlValidationResults`.
  */
 export function runWorkflowYamlValidations({
+  registry,
   yamlString,
   model,
   yamlDocument,
@@ -55,8 +59,9 @@ export function runWorkflowYamlValidations({
     yamlString,
     yamlDocument,
     lineCounter,
-    workflowGraph,
-    workflowDefinition
+    workflowGraph && workflowDefinition
+      ? { registry, workflowGraph, workflowDefinition }
+      : undefined
   );
 
   const results: YamlValidationResult[] = [
@@ -79,6 +84,7 @@ export function runWorkflowYamlValidations({
     results.push(
       ...validateTriggerConditions(workflowDefinition, yamlDocument),
       ...validateVariablesInternal(
+        registry,
         variableItems,
         workflowGraph,
         workflowDefinition,
