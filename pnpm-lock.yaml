@@ -5295,9 +5295,18 @@ importers:
       '@kbn/evals-suite-security-esql-generation-regression':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
+      '@kbn/evals-suite-security-forensics-raw-log-corroboration':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-raw-log-corroboration
+      '@kbn/evals-suite-security-forensics-watch':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch
       '@kbn/evals-suite-security-persona-matrix':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix
+      '@kbn/evals-suite-security-watch-escalation-chain':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain
       '@kbn/evals-suite-siem-readiness':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness
@@ -9485,7 +9494,13 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression: {}
 
+  x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-raw-log-corroboration: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch: {}
+
   x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness: {}
 
