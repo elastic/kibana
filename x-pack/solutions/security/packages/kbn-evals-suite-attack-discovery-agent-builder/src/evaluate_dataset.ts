@@ -188,6 +188,17 @@ const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
   result.query?.includes(ALERT_INDEX_FAMILY) === true;
 
 /**
+ * The same index-family test for a bare query string — the pipeline runs the
+ * AD tool's `esql_query` itself, so that query has to be held to the same
+ * "reads the alert index" bar as the agent's own retrievals.
+ *
+ * `null` (no query supplied) is NOT a pass: the pipeline still retrieved
+ * something, but nothing about it says it read this fixture's index.
+ */
+const readsAlertsIndexQuery = (query: string | null): boolean =>
+  query != null && query.includes(ALERT_INDEX_FAMILY);
+
+/**
  * Whether a query carries the example's retrieval scope. A `null` scope (the
  * example declares none) accepts every query: the check belongs to the EXAMPLE,
  * not to the observable.
@@ -294,19 +305,57 @@ const splitOutsideQuotes = (query: string, pattern: RegExp): string[] => {
 };
 
 /**
- * Split an ES|QL query into pipeline segments, ignoring `|` and comment markers
- * that appear inside quoted literals.
+ * Blank out the CONTENTS of comments, preserving every character offset.
  *
- * The previous implementation removed comments and split on `|` with plain
- * regexes. Both are wrong on realistic seeded chains: a quoted command line
- * containing `//` (`... --url https://cdn.example/x`) was truncated at the
- * `//` BEFORE a later marker predicate, and a quoted literal containing `|`
- * split one query into phantom segments. Either way a query that positively
- * scopes to the run marker was classified unscoped, so its ids were dropped
- * from the population union and a correct run scored as a zero retrieval.
+ * Pipeline boundaries have to be located on this rather than on the raw query.
+ * A `|` inside a comment is not a pipeline separator, but locating boundaries
+ * before removing comments invented a second segment out of comment text:
+ *
+ *   FROM ... | LIMIT 95 // | WHERE tags == "<marker>"
+ *
+ * executes as an unscoped 95-row query, yet the comment's `|` split off a
+ * synthetic ` WHERE tags == "<marker>"` segment that looked scoped. Comment
+ * state is now tracked while locating boundaries, so pipes and `WHERE` text
+ * inside comments can never become executable-looking segments.
+ *
+ * Quote state comes from the quote mask, so a `//` inside a quoted literal is
+ * still literal text and does not start a comment.
  */
+const maskComments = (query: string): string => {
+  // Start from the QUOTE mask so literal contents are already blanked: a `|` or
+  // a `//` inside a quoted literal is data, and must not be seen as either a
+  // separator or the start of a comment. Comment spans are then blanked on top.
+  const quoted = maskQuotedLiterals(query);
+  const characters = [...quoted];
+  let index = 0;
+
+  while (index < characters.length) {
+    const isLineComment = quoted[index] === '/' && quoted[index + 1] === '/';
+    const isBlockComment = quoted[index] === '/' && quoted[index + 1] === '*';
+
+    if (isLineComment) {
+      const newline = quoted.indexOf('\n', index);
+      const end = newline < 0 ? characters.length : newline;
+      for (let position = index; position < end; position++) characters[position] = 'x';
+      index = end;
+    } else if (isBlockComment) {
+      const close = quoted.indexOf('*/', index + 2);
+      const end = close < 0 ? characters.length : close + 2;
+      for (let position = index; position < end; position++) characters[position] = 'x';
+      index = end;
+    } else {
+      index++;
+    }
+  }
+
+  return characters.join('');
+};
+
 const splitPipelineSegments = (query: string): string[] => {
-  const masked = maskQuotedLiterals(query);
+  // Boundaries come from the masked copy: a `|` inside a literal or a comment
+  // is data, not a separator. The segments themselves are sliced from the
+  // original and comment-stripped, so callers keep the real query text.
+  const masked = maskComments(query);
   const boundaries = [...masked]
     .map((character, index) => (character === '|' ? index : -1))
     .filter((index) => index >= 0);
@@ -693,7 +742,20 @@ export const computeWorkflowAlertCounts = ({
     ? null
     : getNumber(pipeline.combined_alerts?.alerts_context_count);
 
-  const pipelineCountCarriesScope = carriesRetrievalScope(adToolEsqlQuery, retrievalScope);
+  // The pipeline's own retrieval runs this query, so when the example declares a
+  // scope that query has to clear the same bar as an agent-side retrieval:
+  // carry the scope AND read the alerts index. Scope alone admitted a count from
+  // any marker-bearing source — `FROM logs-endpoint.events.process-default |
+  // WHERE labels.ad_portable_seed == "<marker>"` is scoped but counts seeded
+  // RAW EVENTS, and an exact-looking count from those passed the fixture's
+  // population assertion without any alert being retrieved.
+  //
+  // With NO scope declared there is nothing to gate: the check belongs to the
+  // example, so the count is admitted exactly as before.
+  const pipelineCountCarriesScope =
+    retrievalScope == null ||
+    (carriesRetrievalScope(adToolEsqlQuery, retrievalScope) &&
+      readsAlertsIndexQuery(adToolEsqlQuery));
   const admittedFromAlertRetrieval = pipelineCountCarriesScope ? fromAlertRetrieval : null;
   const admittedFromCombinedAlerts = pipelineCountCarriesScope ? fromCombinedAlerts : null;
   const unscopedPipelineAlertRetrievalCounts = pipelineCountCarriesScope

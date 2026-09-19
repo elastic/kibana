@@ -582,6 +582,51 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     ).toEqual([null, null, null]);
   });
 
+  it('does not let a pipe inside a comment invent a scoped segment', () => {
+    // Pipeline boundaries were located BEFORE comments were removed, so a `|`
+    // in a comment split off a synthetic segment made of comment text:
+    //   FROM ... | LIMIT 95 // | WHERE tags == "<marker>"
+    // executes as an unscoped 95-row query, yet the comment's pipe produced a
+    // second segment that looked fixture-scoped and admitted those arbitrary
+    // rows. Comment state must be tracked while locating boundaries.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const commentOnly = [
+      `FROM .alerts-security.alerts-default METADATA _id | LIMIT 95 // | WHERE tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default METADATA _id | LIMIT 95 /* | WHERE tags == "${scope}" */`,
+      `FROM .alerts-security.alerts-default | LIMIT 95 // WHERE tags == "${scope}"`,
+    ];
+
+    expect(
+      commentOnly.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null, null]);
+  });
+
+  it('does not admit a pipeline count from a query that reads another index', () => {
+    // The pipeline runs the AD tool's query itself, so that query must clear the
+    // same bar as an agent-side retrieval: carry the scope AND read the alerts
+    // index. Scope alone admitted a count of seeded RAW EVENTS (the marker also
+    // labels them), so an exact-looking count could pass the population
+    // assertion with no alert retrieved.
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const otherIndexQuery = `FROM logs-endpoint.events.process-default | WHERE labels.ad_portable_seed == "${scope}" | LIMIT 95`;
+    const pipeline = {
+      alert_retrieval: [{ alerts_context_count: 95, extraction_strategy: 'default_esql' }],
+      combined_alerts: { alerts_context_count: 95 },
+    };
+
+    const result = computeWorkflowAlertCounts({
+      pipeline,
+      adToolEsqlQuery: otherIndexQuery,
+      retrievalScope: scope,
+    });
+
+    expect(result.retrievedAlertCount).toBe(0);
+    expect(result.retrievedAlertCountSource).toBe('unscoped_retrieval');
+    expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([95, 95]);
+  });
+
   it('still accepts the marker when a WHERE clause restricts on it', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const filtering = [
