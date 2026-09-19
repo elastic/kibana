@@ -395,6 +395,7 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-controls-renderer @elastic/kibana-dashboards
 src/platform/packages/private/kbn-cps-common @elastic/appex-sharedux
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
+src/platform/packages/private/kbn-dev-comments @elastic/appex-sharedux
 src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
@@ -843,6 +844,7 @@ src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-signals-metrics-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/dev_comments @elastic/appex-sharedux
 src/platform/plugins/private/event_annotation @elastic/kibana-dashboards
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-dashboards
 src/platform/plugins/private/files_management @elastic/appex-sharedux

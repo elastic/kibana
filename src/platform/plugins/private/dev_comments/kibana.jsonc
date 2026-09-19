@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dev-comments-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "description": "Development-only in-page comments for reviewing UI: pinned to elements, stored in Elasticsearch, launched from the developer toolbar.",
+  "visibility": "private",
+  "plugin": {
+    "id": "devComments",
+    "browser": true,
+    "server": true,
+    "configPath": "dev_comments",
+    "requiredPlugins": [],
+    "requiredBundles": [],
+    "optionalPlugins": ["developerToolbar"]
+  }
+}

@@ -1718,6 +1718,12 @@ importers:
       '@kbn/design-tools':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-design-tools
+      '@kbn/dev-comments':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-dev-comments
+      '@kbn/dev-comments-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/dev_comments
       '@kbn/dev-tools-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dev_tools
@@ -7411,6 +7417,8 @@ importers:
 
   src/platform/packages/private/kbn-data-streams: {}
 
+  src/platform/packages/private/kbn-dev-comments: {}
+
   src/platform/packages/private/kbn-discover-session-constants: {}
 
   src/platform/packages/private/kbn-dot-text: {}
@@ -8316,6 +8324,8 @@ importers:
   src/platform/packages/shared/shared-ux/toolbar_selector: {}
 
   src/platform/plugins/private/advanced_settings: {}
+
+  src/platform/plugins/private/dev_comments: {}
 
   src/platform/plugins/private/event_annotation: {}
 
