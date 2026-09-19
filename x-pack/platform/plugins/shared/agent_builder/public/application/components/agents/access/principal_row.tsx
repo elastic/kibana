@@ -8,15 +8,20 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiAvatar,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSkeletonText,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import {
+  UserAvatar,
+  getUserDisplayName,
+  type UserProfileWithAvatar,
+} from '@kbn/user-profile-components';
 import type {
   AgentAccessControlEntry,
   AgentAccessControlRole,
@@ -27,10 +32,16 @@ import {
   ROLE_LABEL,
   selectableRolesForAccessControlMode,
 } from './role_to_capabilities';
-import { accessFlyoutRemoveAriaLabel, accessFlyoutRoleAriaLabel } from './access_i18n';
+import {
+  accessFlyoutLegacyRoleLocked,
+  accessFlyoutRemoveAriaLabel,
+  accessFlyoutRoleAriaLabel,
+} from './access_i18n';
 
 interface PrincipalRowProps {
   entry: AgentAccessControlEntry;
+  /** Resolved user profile for id-backed entries. Undefined while it loads or for legacy rows. */
+  profile?: UserProfileWithAvatar;
   /** Used to constrain the selectable roles for Public/Shared agents. */
   accessControlMode?: AgentAccessControlMode;
   isDisabled?: boolean;
@@ -41,16 +52,19 @@ interface PrincipalRowProps {
 /**
  * One row in the People section. Layout:
  *
- *   [icon]  [name]                                    [role select ▾]  [✕]
+ *   [avatar]  [name / secondary]                              [role select ▾]  [✕]
  */
 export const PrincipalRow: React.FC<PrincipalRowProps> = ({
   entry,
+  profile,
   accessControlMode,
   isDisabled,
   onChangeRole,
   onRemove,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const isRoleLocked = entry.id === undefined;
 
   const roleOptions = useMemo(() => {
     const allowed = selectableRolesForAccessControlMode(accessControlMode);
@@ -89,17 +103,45 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
     }
   `;
 
+  const displayName = profile ? getUserDisplayName(profile.user) : entry.name;
+  const secondary = profile?.user.email ?? profile?.user.username;
+  const showSecondary = Boolean(secondary && secondary !== displayName);
+
+  const testSubjectSuffix = entry.id ?? entry.name;
+
   return (
-    <div css={rowStyles} data-test-subj={`agentBuilderAclRow-${entry.type}-${entry.name}`}>
+    <div css={rowStyles} data-test-subj={`agentBuilderAclRow-${entry.type}-${testSubjectSuffix}`}>
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiAvatar css={avatarStyles} size="s" name={entry.name} />
+          {profile ? (
+            <UserAvatar
+              css={avatarStyles}
+              user={profile.user}
+              avatar={profile.data?.avatar}
+              size="s"
+            />
+          ) : (
+            <UserAvatar
+              css={avatarStyles}
+              user={entry.name !== undefined ? { username: entry.name } : undefined}
+              size="s"
+            />
+          )}
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiText size="s">
-            <strong>{entry.name}</strong>
-          </EuiText>
+          {displayName === undefined ? (
+            <EuiSkeletonText lines={1} size="s" />
+          ) : (
+            <EuiText size="s">
+              <strong>{displayName}</strong>
+            </EuiText>
+          )}
+          {showSecondary ? (
+            <EuiText size="xs" color="subdued">
+              {secondary}
+            </EuiText>
+          ) : null}
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -110,20 +152,22 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                 min-width: 180px;
               `}
             >
-              <EuiSuperSelect<AgentAccessControlRole>
-                compressed
-                aria-label={accessFlyoutRoleAriaLabel}
-                valueOfSelected={entry.role}
-                options={roleOptions}
-                disabled={isDisabled}
-                onChange={(next) => onChangeRole(next)}
-                popoverProps={{
-                  panelPaddingSize: 's',
-                  panelStyle: { minWidth: 280 },
-                  anchorPosition: 'downRight',
-                }}
-                data-test-subj={`agentBuilderAclRoleSelect-${entry.type}-${entry.name}`}
-              />
+              <EuiToolTip content={isRoleLocked ? accessFlyoutLegacyRoleLocked : undefined}>
+                <EuiSuperSelect<AgentAccessControlRole>
+                  compressed
+                  fullWidth
+                  aria-label={accessFlyoutRoleAriaLabel}
+                  valueOfSelected={entry.role}
+                  options={roleOptions}
+                  disabled={isDisabled || isRoleLocked}
+                  onChange={(next) => onChangeRole(next)}
+                  popoverProps={{
+                    panelPaddingSize: 's',
+                    panelStyle: { minWidth: 280 },
+                    anchorPosition: 'downRight',
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -134,7 +178,6 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                   aria-label={accessFlyoutRemoveAriaLabel}
                   onClick={onRemove}
                   isDisabled={isDisabled}
-                  data-test-subj={`agentBuilderAclRemove-${entry.type}-${entry.name}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>
