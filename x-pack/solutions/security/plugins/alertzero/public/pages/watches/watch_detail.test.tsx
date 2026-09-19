@@ -9,7 +9,8 @@ import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter, Route } from '@kbn/shared-ux-router';
+import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import {
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -305,6 +306,16 @@ describe('WatchDetailPage', () => {
       const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
       expect(accordionToggle).not.toBeNull();
       expect(accordionToggle?.contains(enabledSwitch)).toBe(false);
+    }
+  });
+
+  it('exposes each Worker name in a multi-Worker Watch as a real h2 for screen-reader heading navigation', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const header = screen.getByTestId(`alertZeroWorkerAccordionHeader-${worker.id}`);
+      const heading = within(header).getByRole('heading', { level: 2 });
+      expect(heading).toBeInTheDocument();
     }
   });
 
@@ -638,5 +649,75 @@ describe('WatchDetailPage', () => {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
     });
+  });
+
+  it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {
+    // `/watches/:watchId` keeps the same WatchDetailPage mounted across parameter-only
+    // navigation, so a `useState` initializer alone only runs once — collapsedWorkerIds must
+    // be reset by an effect keyed on watchId, not by the initializer. Give both Watches the
+    // *same* Worker (multi-membership) so the accordion for that Worker's id can be observed
+    // on both sides of the navigation.
+    const sharedWorkers = [...floorWorkers, huntWorker];
+    mockUseWorkers.mockReturnValue({
+      data: { workers: sharedWorkers },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+
+    const history = createMemoryHistory({
+      initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
+    });
+    render(
+      <Router history={history}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </Router>
+    );
+
+    const [first] = floorWorkers;
+    // Collapse the first Worker's accordion on the Floor Watch. With `buttonElement="div"`
+    // EUI puts `aria-expanded` on the arrow control (a real `<button>`), not on the accordion's
+    // own data-test-subj node — and the enable switch is also a button, so query by expanded.
+    const arrowFor = (workerId: string, expanded: boolean) =>
+      within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`)).getByRole('button', {
+        expanded,
+      });
+    fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${first.id}`));
+    expect(arrowFor(first.id, false)).toBeInTheDocument();
+
+    // Navigate (parameter-only change, same component instance) to a different Watch that the
+    // same Worker also belongs to (re-tag it onto the Hunt Watch for this assertion). Its
+    // accordion must come back expanded — the default — not stay collapsed.
+    const workersOnHunt = sharedWorkers.map((worker) =>
+      worker.id === first.id
+        ? { ...worker, watchIds: [...worker.watchIds, SYSTEM_SECURITY_WATCH_HUNT_ID] }
+        : worker
+    );
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue({
+      data: { workers: workersOnHunt },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    act(() => {
+      history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
+    });
+
+    expect(arrowFor(first.id, true)).toBeInTheDocument();
   });
 });

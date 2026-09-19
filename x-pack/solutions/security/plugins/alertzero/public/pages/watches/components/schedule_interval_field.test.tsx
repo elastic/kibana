@@ -48,4 +48,21 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
     expect(amount).toHaveValue(1.9);
     expect(amount).toBeInvalid();
   });
+
+  it('does not commit the stale persisted amount when the unit changes over an invalid draft', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    const unit = screen.getByTestId(`alertZeroTriggerUnit-${WORKER_ID}`);
+
+    // Type an invalid draft (not committed) then switch units. Committing `1d` here (the old
+    // persisted amount) would silently save a cadence the analyst never typed.
+    fireEvent.change(amount, { target: { value: '1.9' } });
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.change(unit, { target: { value: 'd' } });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(amount).toHaveValue(1.9);
+    expect(amount).toBeInvalid();
+  });
 });

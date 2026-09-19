@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import * as i18n from '../settings_translations';
+import { i18n } from '@kbn/i18n';
 
 /** Schedule units the "Every N unit" trigger control offers. */
 export type WorkerTriggerScheduleUnit = 'm' | 'h' | 'd';
-
-const UNIT_LABELS: Record<WorkerTriggerScheduleUnit, string> = {
-  m: i18n.SCHEDULE_UNIT_MINUTES,
-  h: i18n.SCHEDULE_UNIT_HOURS,
-  d: i18n.SCHEDULE_UNIT_DAYS,
-};
 
 /** Parses a Worker's `scheduleInterval` (e.g. `"2h"`) into amount + unit, defaulting to 1h. */
 export const parseWorkerScheduleInterval = (
@@ -27,8 +21,29 @@ export const parseWorkerScheduleInterval = (
   return { amount: Number(match[1]), unit: match[2] as WorkerTriggerScheduleUnit };
 };
 
-/** Human label for the Worker header band's trigger badge, e.g. "Every 2 hours". */
+/**
+ * Human label for the Worker header band's trigger badge, e.g. "Every 2 hours" / "Every 1 hour".
+ * Each unit gets its own ICU-pluralized message (rather than a static plural-only unit string
+ * spliced into a shared template) so a translator can reorder the whole phrase per locale and a
+ * one-unit interval reads correctly in English.
+ */
 export const workerScheduleCadenceLabel = (interval: string | undefined): string => {
   const { amount, unit } = parseWorkerScheduleInterval(interval);
-  return `${i18n.TRIGGER_EVERY} ${amount} ${UNIT_LABELS[unit]}`;
+  switch (unit) {
+    case 'm':
+      return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.minutes', {
+        defaultMessage: 'Every {amount} {amount, plural, one {minute} other {minutes}}',
+        values: { amount },
+      });
+    case 'h':
+      return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.hours', {
+        defaultMessage: 'Every {amount} {amount, plural, one {hour} other {hours}}',
+        values: { amount },
+      });
+    case 'd':
+      return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.days', {
+        defaultMessage: 'Every {amount} {amount, plural, one {day} other {days}}',
+        values: { amount },
+      });
+  }
 };

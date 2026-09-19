@@ -73,7 +73,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
       gutterSize="s"
       responsive={false}
       alignItems="center"
-      wrap={false}
+      wrap
       data-test-subj={`alertZeroTriggerField-${workerId}`}
     >
       <EuiFlexItem grow={false}>
@@ -127,7 +127,9 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
           disabled={isDisabled}
           aria-label={i18n.TRIGGER_UNIT_ARIA_LABEL}
           data-test-subj={`alertZeroTriggerUnit-${workerId}`}
-          onChange={(event) => commit(amount, event.target.value as ScheduleUnit)}
+          onChange={(event) =>
+            commit(Number(amountValue), event.target.value as ScheduleUnit, amountValue)
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

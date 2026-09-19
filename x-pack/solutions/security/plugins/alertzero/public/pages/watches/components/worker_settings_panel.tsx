@@ -271,13 +271,16 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}
           onToggle={(isOpen) => onToggle(worker.id, isOpen)}
+          // `div` so the Worker name can be a real `h2` (a heading inside a `<button>` is
+          // invalid HTML). EUI keeps the arrow as the interactive control in this mode.
+          buttonElement="div"
           buttonContentClassName="alertZeroWorkerAccordion__buttonContent"
           buttonContent={
             <div
               css={accordionHeaderStyles}
               data-test-subj={`alertZeroWorkerAccordionHeader-${worker.id}`}
             >
-              {headerBandContent(`${worker.id}-heading`, 'span')}
+              {headerBandContent(`${worker.id}-heading`, 'h2')}
             </div>
           }
           // Layout rides on EuiAccordion's own props and on nodes we render, not on EUI's

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -97,9 +97,14 @@ export const WatchDetailPage: React.FC = () => {
     ],
     [isDirty, isSaving, onDiscard]
   );
-  // Track which Workers the reader has collapsed (default: all expanded). Resets when
-  // navigating to another Watch (state is keyed on watchId via the parent route change).
+  // Track which Workers the reader has collapsed (default: all expanded). `/watches/:watchId`
+  // keeps this page mounted across parameter-only navigation, so the initializer runs only on
+  // the first Watch — reset the set whenever watchId changes.
   const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    setCollapsedWorkerIds(new Set());
+  }, [watchId]);
 
   const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
     setCollapsedWorkerIds((current) => {
