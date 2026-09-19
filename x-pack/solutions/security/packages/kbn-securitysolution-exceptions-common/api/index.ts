@@ -11,6 +11,7 @@ export * from './create_exception_list_item/create_exception_list_item.gen';
 export * from './create_rule_exceptions/create_rule_exceptions.gen';
 export * from './create_shared_exceptions_list/create_shared_exceptions_list.gen';
 export * from './create_exception_list/create_exception_list.gen';
+export * from './bulk_delete_exception_list/bulk_delete_exception_list.gen';
 export * from './delete_exception_list_item/delete_exception_list_item.gen';
 export * from './delete_exception_list/delete_exception_list.gen';
 export * from './duplicate_exception_list/duplicate_exception_list.gen';
