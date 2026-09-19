@@ -69,242 +69,244 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('Installs packages from direct upload', () => {
-    skipIfNoDockerRegistry(providerContext);
+  describe('EPM - install by upload', () => {
+    describe('Installs packages from direct upload', () => {
+      skipIfNoDockerRegistry(providerContext);
 
-    before(async () => {
-      await fleetAndAgents.setup();
-    });
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
-    afterEach(async () => {
-      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
-        // remove the packages just in case it being installed will affect other tests
-        await deletePackage(testPkgName, testPkgVersion);
+      afterEach(async () => {
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          // remove the packages just in case it being installed will affect other tests
+          await deletePackage(testPkgName, testPkgVersion);
+        }
+      });
+
+      async function uploadPackage() {
+        const buf = fs.readFileSync(testPkgArchiveTgz);
+        // wait 10s before uploading again to avoid getting 429
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        return await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/gzip')
+          .send(buf)
+          .expect(200);
       }
-    });
 
-    async function uploadPackage() {
-      const buf = fs.readFileSync(testPkgArchiveTgz);
-      // wait 10s before uploading again to avoid getting 429
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      return await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/gzip')
-        .send(buf)
-        .expect(200);
-    }
-
-    it('should install a tar archive correctly', async function () {
-      const res = await uploadPackage();
-      expect(res.body.items.length).to.be(33);
-    });
-
-    it('should upgrade when uploading a newer zip archive', async () => {
-      await uploadPackage();
-
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveZipNewer);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
-      expect(res.body.items.length).to.be.greaterThan(32);
-      expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
-
-      await deletePackage(testPkgName, testPkgNewVersion);
-    });
-
-    it('should clean up assets when uninstalling uploaded archive', async () => {
-      await uploadPackage();
-      await deletePackage(testPkgName, testPkgVersion);
-
-      const epmPackageRes = await esClient.search({
-        index: INGEST_SAVED_OBJECT_INDEX,
-        size: 0,
-        rest_total_hits_as_int: true,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'epm-packages.name': testPkgName,
-                },
-              },
-            ],
-          },
-        },
-      });
-      const epmPackageAssetsRes = await esClient.search({
-        index: INGEST_SAVED_OBJECT_INDEX,
-        size: 0,
-        rest_total_hits_as_int: true,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'epm-packages-assets.package_name': testPkgName,
-                },
-              },
-            ],
-          },
-        },
+      it('should install a tar archive correctly', async function () {
+        const res = await uploadPackage();
+        expect(res.body.items.length).to.be(33);
       });
 
-      expect(epmPackageRes.hits.total).to.equal(0);
-      expect(epmPackageAssetsRes.hits.total).to.equal(0);
-    });
+      it('should upgrade when uploading a newer zip archive', async () => {
+        await uploadPackage();
 
-    it('should get 429 when trying to upload packages too soon', async () => {
-      await uploadPackage();
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveZipNewer);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(200);
+        expect(res.body.items.length).to.be.greaterThan(32);
+        expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
 
-      const buf = fs.readFileSync(testPkgArchiveZipNewer);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(429);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":429,"error":"Too Many Requests","message":"Too many requests. Please wait 10s before uploading again."}'
-      );
-    });
+        await deletePackage(testPkgName, testPkgNewVersion);
+      });
 
-    it('should install a zip archive correctly and package info should return correctly after validation', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveZip);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
-      expect(res.body.items.length).to.be(33);
-    });
+      it('should clean up assets when uninstalling uploaded archive', async () => {
+        await uploadPackage();
+        await deletePackage(testPkgName, testPkgVersion);
 
-    it('should throw an error if the archive is zip but content type is gzip', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveZip);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/gzip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Manifest file manifest.yml not found in paths."}'
-      );
-    });
+        const epmPackageRes = await esClient.search({
+          index: INGEST_SAVED_OBJECT_INDEX,
+          size: 0,
+          rest_total_hits_as_int: true,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'epm-packages.name': testPkgName,
+                  },
+                },
+              ],
+            },
+          },
+        });
+        const epmPackageAssetsRes = await esClient.search({
+          index: INGEST_SAVED_OBJECT_INDEX,
+          size: 0,
+          rest_total_hits_as_int: true,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'epm-packages-assets.package_name': testPkgName,
+                  },
+                },
+              ],
+            },
+          },
+        });
 
-    it('should throw an error if the archive is tar.gz but content type is zip', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveTgz);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: End of central directory record signature not found. Either not a zip file, or file is truncated.. Assumed content type was application/zip, check if this matches the archive type."}'
-      );
-    });
+        expect(epmPackageRes.hits.total).to.equal(0);
+        expect(epmPackageAssetsRes.hits.total).to.equal(0);
+      });
 
-    it('should throw an error if the archive contains two top-level directories', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveInvalidTwoToplevels);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Package contains more than one top-level directory; top-level directory found: apache-0.1.4; filePath: apache-0.1.3/manifest.yml"}'
-      );
-    });
+      it('should get 429 when trying to upload packages too soon', async () => {
+        await uploadPackage();
 
-    it('should throw an error if the archive does not contain a manifest', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveInvalidNoManifest);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Manifest file apache-0.1.4/manifest.yml not found in paths."}'
-      );
-    });
+        const buf = fs.readFileSync(testPkgArchiveZipNewer);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(429);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":429,"error":"Too Many Requests","message":"Too many requests. Please wait 10s before uploading again."}'
+        );
+      });
 
-    it('should throw an error if the archive manifest contains invalid YAML', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveInvalidManifestInvalidYaml);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: Nested mappings are not allowed in compact mappings at line 1, column 17:\\n\\nformat_version: 1.0.0\\n                ^\\n."}'
-      );
-    });
+      it('should install a zip archive correctly and package info should return correctly after validation', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveZip);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(200);
+        expect(res.body.items.length).to.be(33);
+      });
 
-    it('should throw an error if the archive manifest misses a mandatory field', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveInvalidManifestMissingField);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, title, owner."}'
-      );
-    });
+      it('should throw an error if the archive is zip but content type is gzip', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveZip);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/gzip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Manifest file manifest.yml not found in paths."}'
+        );
+      });
 
-    it('should throw an error if the toplevel directory name does not match the package key', async function () {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveInvalidToplevelMismatch);
-      const res = await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(400);
-      expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
-      );
-    });
+      it('should throw an error if the archive is tar.gz but content type is zip', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveTgz);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: End of central directory record signature not found. Either not a zip file, or file is truncated.. Assumed content type was application/zip, check if this matches the archive type."}'
+        );
+      });
 
-    it('should not allow users without all access', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveTgz);
-      await supertestWithoutAuth
-        .post(`/api/fleet/epm/packages`)
-        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/gzip')
-        .send(buf)
-        .expect(403);
-    });
+      it('should throw an error if the archive contains two top-level directories', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveInvalidTwoToplevels);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Package contains more than one top-level directory; top-level directory found: apache-0.1.4; filePath: apache-0.1.3/manifest.yml"}'
+        );
+      });
 
-    it('should allow user with all access', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
-      const buf = fs.readFileSync(testPkgArchiveTgz);
-      await supertestWithoutAuth
-        .post(`/api/fleet/epm/packages`)
-        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/gzip')
-        .send(buf)
-        .expect(200);
+      it('should throw an error if the archive does not contain a manifest', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveInvalidNoManifest);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Manifest file apache-0.1.4/manifest.yml not found in paths."}'
+        );
+      });
+
+      it('should throw an error if the archive manifest contains invalid YAML', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveInvalidManifestInvalidYaml);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: Nested mappings are not allowed in compact mappings at line 1, column 17:\\n\\nformat_version: 1.0.0\\n                ^\\n."}'
+        );
+      });
+
+      it('should throw an error if the archive manifest misses a mandatory field', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveInvalidManifestMissingField);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, title, owner."}'
+        );
+      });
+
+      it('should throw an error if the toplevel directory name does not match the package key', async function () {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveInvalidToplevelMismatch);
+        const res = await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(400);
+        expect((res.error as HTTPError).text).to.equal(
+          '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
+        );
+      });
+
+      it('should not allow users without all access', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveTgz);
+        await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages`)
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/gzip')
+          .send(buf)
+          .expect(403);
+      });
+
+      it('should allow user with all access', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        const buf = fs.readFileSync(testPkgArchiveTgz);
+        await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages`)
+          .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/gzip')
+          .send(buf)
+          .expect(200);
+      });
     });
   });
 }

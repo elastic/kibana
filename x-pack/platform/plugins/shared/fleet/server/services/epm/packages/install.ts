@@ -107,6 +107,7 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { checkUploadPackageAssetPrivileges } from './upload_preflight_authz';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
 
@@ -685,6 +686,7 @@ export async function installPackageWithStateMachine(options: {
   automaticInstall?: boolean;
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
+  authorizedSpaces?: string[];
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -709,6 +711,7 @@ export async function installPackageWithStateMachine(options: {
     automaticInstall,
     installedAsDependencyOf,
     skipDependencyCheck,
+    authorizedSpaces,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -835,6 +838,7 @@ export async function installPackageWithStateMachine(options: {
       useStreaming,
       installedAsDependencyOf,
       skipDependencyCheck,
+      authorizedSpaces,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -933,6 +937,7 @@ async function installPackageByUpload({
         );
       }
     }
+
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
@@ -949,6 +954,23 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    let authorizedSpaces: string[] = [];
+    if (
+      !isBundledPackage &&
+      request &&
+      !appContextService.getConfig()?.internal?.skipUploadPackageValidation
+    ) {
+      authorizedSpaces = await checkUploadPackageAssetPrivileges(
+        request,
+        archiveBuffer,
+        contentType,
+        spaceId,
+        pkgName,
+        installedPkg,
+        savedObjectsClient
+      );
+    }
 
     const { paths, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,
@@ -975,6 +997,25 @@ async function installPackageByUpload({
       packageInfo,
     });
 
+    // If preflight ran, verify no new Spaces were added between the preflight snapshot and now.
+    // Throwing here (before setLastUploadInstallCache) keeps the install record untouched so
+    // the caller can retry; throwing inside the state machine would mark the record install_failed.
+    if (authorizedSpaces.length > 0 && installedPkg) {
+      const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+      const isAdditionalSpaceInstall = primarySpaceId !== spaceId;
+      if (!isAdditionalSpaceInstall) {
+        const newSpaces = Object.keys(
+          installedPkg.attributes.additional_spaces_installed_kibana ?? {}
+        ).filter((s) => s !== primarySpaceId && !authorizedSpaces.includes(s));
+        if (newSpaces.length > 0) {
+          throw new FleetUnauthorizedError(
+            `Upload aborted: the package was added to new Spaces (${newSpaces.join(', ')}) after ` +
+              `authorization was checked. Please retry the upload to include all destination Spaces.`
+          );
+        }
+      }
+    }
+
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
       paths,
@@ -999,6 +1040,7 @@ async function installPackageByUpload({
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       useStreaming,
+      authorizedSpaces: authorizedSpaces.length > 0 ? authorizedSpaces : undefined,
     });
   } catch (e) {
     return {

@@ -15,6 +15,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./apis/epm_upload_default/install_by_upload_registry_name'),
       require.resolve('./apis/epm_upload_default/install_by_upload_live_stream'),
+      // Must run last: the successful install in this suite sets the process-wide upload
+      // rate-limit cache; placing it before other upload suites risks 429 instead of
+      // the expected status codes in those suites.
+      require.resolve('./apis/epm_upload_default/upload_preflight_authz'),
     ],
     junit: {
       reportName: 'X-Pack EPM Upload Default API Integration Tests',
