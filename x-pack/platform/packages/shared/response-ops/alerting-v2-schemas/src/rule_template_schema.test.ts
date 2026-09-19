@@ -27,6 +27,7 @@ const exampleTemplateAttributes = {
       pending: { count: 3 },
     },
     recovery: { strategy: 'no_breach' as const },
+    no_data: { strategy: 'ignore' as const },
     artifacts: [
       {
         id: 'kubernetes_otel-pod-crashloopbackoff-v2-runbook',
@@ -307,7 +308,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "alerting_rule_no_data": Object {
-              "description": "What the rule does when it finds no data for a group. Defaults to \`ignore\` when omitted. Not allowed when \`kind\` is \`signal\`.",
+              "description": "What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default.",
               "oneOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_no_data_ignore",
@@ -421,7 +422,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "alerting_rule_recovery": Object {
-              "description": "How an alert recovers. Defaults to \`no_breach\` when omitted. Not allowed when \`kind\` is \`signal\`.",
+              "description": "How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default.",
               "oneOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_recovery_no_breach",

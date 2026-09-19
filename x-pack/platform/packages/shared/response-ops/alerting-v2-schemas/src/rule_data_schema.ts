@@ -212,7 +212,7 @@ export const recoverySchema = z
       .meta({ id: 'alerting_rule_recovery_manual' }),
   ])
   .describe(
-    'How an alert recovers. Defaults to `no_breach` when omitted. Not allowed when `kind` is `signal`.'
+    'How an alert recovers. Required when `kind` is `alert`, and not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_recovery' });
 
@@ -265,7 +265,7 @@ export const noDataSchema = z
     ),
   ])
   .describe(
-    'What the rule does when it finds no data for a group. Defaults to `ignore` when omitted. Not allowed when `kind` is `signal`.'
+    'What the rule does when it finds no data for a group. Required when `kind` is `alert`, and not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_no_data' });
 
@@ -540,6 +540,14 @@ export const isLifecycleConfigAllowedForKind = (data: RuleLifecycleShape): boole
   data.kind !== 'signal' || (data.recovery == null && data.no_data == null);
 
 /**
+ * Alert rules spell out their whole lifecycle. The server never fills either
+ * object in, so absence is a rejected write rather than a default, and no
+ * reader has to interpret a missing `recovery` or `no_data`.
+ */
+export const isLifecycleConfigPresentForKind = (data: RuleLifecycleShape): boolean =>
+  data.kind !== 'alert' || (data.recovery != null && data.no_data != null);
+
+/**
  * Without a breach segment every row of `base` breaches, so a `base + segment`
  * recovery condition can only return groups that are already breaching, and
  * breach wins. Such a rule could never auto-recover, so reject it rather than
@@ -580,6 +588,10 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     })
     .refine(isLifecycleConfigAllowedForKind, {
       message: 'Signal rules cannot set recovery or no_data.',
+      path: ['recovery'],
+    })
+    .refine(isLifecycleConfigPresentForKind, {
+      message: 'Alert rules must set both recovery and no_data.',
       path: ['recovery'],
     })
     .refine(isRecoveryConditionUsableWithBreach, {

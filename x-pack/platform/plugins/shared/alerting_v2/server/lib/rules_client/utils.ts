@@ -11,6 +11,7 @@ import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting
 import {
   IMMUTABLE_RULE_FIELDS,
   isLifecycleConfigAllowedForKind,
+  isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
@@ -190,19 +191,14 @@ function nullToEmptyArray<T>(
 }
 
 /**
- * The lifecycle objects an alert rule is stored with. The API may omit either
- * one; storage never does, so no reader has to interpret absence. Signal rules
- * have no episodes, so they store neither regardless of what was sent.
+ * The lifecycle objects an alert rule is stored with. The request schema
+ * requires both for `kind: alert`, so there is nothing to default. Signal
+ * rules have no episodes, so they store neither regardless of what was sent.
  */
 const toStoredLifecycle = (
   data: Pick<CreateRuleData, 'kind' | 'recovery' | 'no_data'>
 ): Pick<RuleSavedObjectAttributes, 'recovery' | 'no_data'> =>
-  data.kind === 'alert'
-    ? {
-        recovery: data.recovery ?? { strategy: recoveryStrategy.no_breach },
-        no_data: data.no_data ?? { strategy: 'ignore' },
-      }
-    : {};
+  data.kind === 'alert' ? { recovery: data.recovery, no_data: data.no_data } : {};
 
 /**
  * Converts a create-rule API body into saved object attributes.
@@ -352,6 +348,12 @@ export function validateMergedRuleAttributes(
       valid: isLifecycleConfigAllowedForKind(attrs),
       message: 'Signal rules cannot set recovery or no_data.',
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      details: { rule_id: ruleId, rule_kind: attrs.kind },
+    },
+    {
+      valid: isLifecycleConfigPresentForKind(attrs),
+      message: 'Alert rules must set both recovery and no_data.',
+      code: ALERTING_ERROR_CODES.INVALID_ALERT_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
     {

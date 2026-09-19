@@ -40,11 +40,22 @@ import {
   MAX_FIELD_NAME_LENGTH,
 } from './constants';
 
-const validCreateData = {
-  kind: 'alert',
+const validRuleFields = {
   metadata: { name: 'test rule' },
   schedule: { every: '5m' },
   query: { base: 'FROM logs-* | LIMIT 1' },
+};
+
+const validCreateData = {
+  kind: 'alert',
+  ...validRuleFields,
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
+};
+
+const validSignalCreateData = {
+  kind: 'signal',
+  ...validRuleFields,
 };
 
 const composedQuery = {
@@ -66,6 +77,8 @@ describe('createRuleDataSchema', () => {
         time_field: '@timestamp',
         schedule: { every: '5m' },
         query: { base: 'FROM logs-* | LIMIT 1' },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
       });
     });
 
@@ -105,9 +118,19 @@ describe('createRuleDataSchema', () => {
     });
 
     it('accepts kind "signal" without lifecycle configuration', () => {
-      const result = createRuleDataSchema.parse({ ...validCreateData, kind: 'signal' });
+      const result = createRuleDataSchema.parse(validSignalCreateData);
       expect(result.kind).toBe('signal');
     });
+
+    it.each(['recovery', 'no_data'] as const)(
+      'rejects an alert rule that omits %s',
+      (lifecycleField) => {
+        const { [lifecycleField]: _omitted, ...withoutField } = validCreateData;
+        const result = createRuleDataSchema.safeParse(withoutField);
+
+        expect(result.success).toBe(false);
+      }
+    );
 
     it('rejects unknown top-level fields (strict)', () => {
       expect(() =>
@@ -497,8 +520,7 @@ describe('createRuleDataSchema', () => {
       ['manual', { strategy: 'manual' }],
     ])('rejects a signal rule carrying recovery strategy "%s"', (_label, recovery) => {
       const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        kind: 'signal',
+        ...validSignalCreateData,
         query: composedQuery,
         recovery,
       });
@@ -576,8 +598,7 @@ describe('createRuleDataSchema', () => {
       'rejects a signal rule carrying no_data strategy "%s"',
       (strategy) => {
         const result = createRuleDataSchema.safeParse({
-          ...validCreateData,
-          kind: 'signal',
+          ...validSignalCreateData,
           no_data: { strategy },
         });
         expect(result.success).toBe(false);
@@ -790,8 +811,7 @@ describe('createRuleDataSchema', () => {
 
     it('rejects state_transition when kind is "signal"', () => {
       const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        kind: 'signal',
+        ...validSignalCreateData,
         state_transition: { pending: { count: 1 } },
       });
 
@@ -851,13 +871,14 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts a recovering phase when recovery is omitted', () => {
+    it('rejects a recovering phase when recovery is omitted', () => {
+      const { recovery: _recovery, ...withoutRecovery } = validCreateData;
       const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
+        ...withoutRecovery,
         state_transition: { recovering: { count: 2, timeframe: '5m' } },
       });
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
   });
 
@@ -1464,8 +1485,8 @@ describe('updateRuleBodySchema', () => {
       no_data: json.definitions?.alerting_rule_no_data?.description,
     }).toMatchInlineSnapshot(`
       Object {
-        "no_data": "What the rule does when it finds no data for a group. Defaults to \`ignore\` when omitted. Not allowed when \`kind\` is \`signal\`.",
-        "recovery": "How an alert recovers. Defaults to \`no_breach\` when omitted. Not allowed when \`kind\` is \`signal\`.",
+        "no_data": "What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default.",
+        "recovery": "How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default.",
         "time_field": "Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.",
       }
     `);
@@ -1709,12 +1730,7 @@ describe('bulkGetRulesResponseSchema', () => {
 });
 
 describe('bulkCreateRulesRequestSchema', () => {
-  const validItem = {
-    kind: 'alert',
-    metadata: { name: 'test rule' },
-    schedule: { every: '5m' },
-    query: { base: 'FROM logs-* | LIMIT 1' },
-  };
+  const validItem = validCreateData;
 
   it('accepts a single item and defaults enabled to true', () => {
     const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
@@ -1773,7 +1789,7 @@ describe('bulkCreateRulesRequestSchema', () => {
   it('rejects an item that fails create-rule refinements', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [{ ...validItem, kind: 'signal', recovery: { strategy: 'no_breach' } }],
+        rules: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
       })
     ).toThrow();
   });

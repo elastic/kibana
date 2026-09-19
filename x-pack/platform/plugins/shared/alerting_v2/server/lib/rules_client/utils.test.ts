@@ -41,6 +41,8 @@ const baseCreateData: CreateRuleData = {
   time_field: '@timestamp',
   schedule: { every: '5m' },
   query: { base: 'FROM logs-* | LIMIT 1' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
 };
 
 const createRuleSoAttributesWithArtifacts = () =>
@@ -109,7 +111,7 @@ describe('utils', () => {
       expect(result.query).toEqual({ base: 'FROM metrics-*' });
     });
 
-    it('defaults an alert rule to no_breach recovery and ignored no-data', () => {
+    it('stores the lifecycle an alert rule was created with', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
 
       expect(result.recovery).toEqual({ strategy: 'no_breach' });
@@ -131,7 +133,12 @@ describe('utils', () => {
     });
 
     it('stores no lifecycle objects for a signal rule', () => {
-      const data: CreateRuleData = { ...baseCreateData, kind: 'signal' };
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+      };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
