@@ -51,13 +51,8 @@ apiTest.describe(
       });
       await waitForEntityStoreRunning(apiClient, publicHeaders);
 
+      // No `POST /enable`: its scheduled task's immediate first run would race these ad-hoc runs for the single-use LLM interceptors.
       ({ connectorId, llmProxy } = await createLeadGenerationConnector({ apiServices, log }));
-
-      await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { connectorId },
-      });
     });
 
     apiTest.beforeEach(async ({ esClient }) => {
@@ -67,11 +62,6 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
       await cleanupLeadsIndex(esClient, DEFAULT_SPACE_ID);
-      await apiClient.post(LEAD_GENERATION_ROUTES.DISABLE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
       await cleanupLeadGenerationConnector({ apiServices, connectorId, llmProxy });
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: publicHeaders,
