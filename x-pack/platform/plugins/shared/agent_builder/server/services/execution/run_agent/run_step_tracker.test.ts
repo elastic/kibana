@@ -137,7 +137,7 @@ describe('RunStepTracker', () => {
     expect(rewritten.executionProjection()).toEqual([todos('b')]);
   });
 
-  it('still projects a seed-pending call that stayed pending (re-prompted), like resolvePausedToolCallSteps did', () => {
+  it('still projects a seed-pending call that stayed pending (re-prompted)', () => {
     const tracker = new RunStepTracker({ graphName: 'my-graph' });
     tracker.seed([toolCall('pending')], { execution: 'resume', pendingToolCallIds: ['pending'] });
     tracker.recordEvent(progressEvent('pending', 'asked again'));

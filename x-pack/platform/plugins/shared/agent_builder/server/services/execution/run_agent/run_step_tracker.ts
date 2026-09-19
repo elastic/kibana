@@ -176,8 +176,8 @@ export class RunStepTracker implements ToolExecutionBuffer {
   /**
    * The steps this execution owns, ready for `execution_step` persistence: fresh executions own every
    * step; resumes own new steps, rewritten todos, and every call that was pending at seed time (with
-   * only the progression observed since — mirroring today's `resolvePausedToolCallSteps`). Browser
-   * and dedicated-lifecycle calls are dropped using the mirrored render state.
+   * only the progression observed since). Browser and dedicated-lifecycle calls are dropped using
+   * the mirrored render state.
    */
   executionProjection(): ConversationRoundStep[] {
     const owned: ConversationRoundStep[] = [];
