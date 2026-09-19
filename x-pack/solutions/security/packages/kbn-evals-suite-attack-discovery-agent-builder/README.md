@@ -43,6 +43,28 @@ Kibana-native scenario definitions for multi-stage attack chains. All seeding is
   scope and on its cleanup predicate, so two concurrent runs never reach each other's fixture.
 - One provided-alerts eval per chain; rubric/criteria are chain-specific.
 
+#### The target/noise invariant
+
+The dense profile measures whether AD **correlates** the real chains out of a crowded
+index, so no observable may separate target from noise on its own — otherwise a model
+solves the population with one `GROUP BY` and never reads the alerts. Every observable
+that the reference chains and the background share has to OVERLAP on both sides:
+
+| Observable | Why it cannot separate the sides |
+| --- | --- |
+| `_id` | Opaque digests (`ids.ts`); the scenario key is never spelled out |
+| `rule.name` | Occurrences suffix their own names, so both sides span 1–4 |
+| `process.name` | Same — occurrence 1 keeps the literal, later ones suffix |
+| `user.name` | Per-occurrence users; a user maps to exactly one host |
+| chain length | Some background chains are 4 steps, matching the reference chains |
+| `raw` backing | `bg-endpoint-inventory` is `raw: true`, so source-event existence does not discriminate |
+| severity / `risk_score` | `bg-vendor-update` carries high/critical, so severity alone does not discriminate |
+| host / agent id | Occurrence-local; a host never appears on both sides |
+
+`dense_scenarios.test.ts` pins each of these. When adding a background template, check
+every field it emits against the reference chains: if the value (or its frequency)
+appears on one side only, the profile is solvable without reasoning.
+
 ### Full profile (out of scope for this package)
 
 Includes clean profile plus cloud scenarios (AWS, Azure, macOS) and background noise (~110 unrelated alerts + a 40-alert noisy rule cluster). Not automated until discrimination/FPR evaluators exist.
