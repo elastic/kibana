@@ -57,52 +57,28 @@ export interface SemanticLogSearchParams {
   maxPatterns?: number;
   /** Optional KQL filter to scope the search corpus */
   kqlFilter?: string;
+  /** Cancels the Elasticsearch request when the caller is no longer interested in the result */
+  abortSignal?: AbortSignal;
 }
 
-export interface SemanticLogSearchResult {
-  patterns: LogPattern[];
-  /**
-   * Which ranking strategy produced this result. Debug / eval signal only:
-   * callers should not branch on it. Currently always `esql_rerank` when
-   * the service can run; omitted when `unavailable` is true.
-   */
-  strategy?: string;
-  /**
-   * True when the service cannot operate because the cluster has no RERANK
-   * inference endpoint. Callers should fall back to existing lexical search.
-   */
-  unavailable?: boolean;
-}
-
-export interface ExpandPatternParams {
-  esClient: ElasticsearchClient;
-  /** Index, data stream, or index pattern to search */
-  target: string;
-  /** The categorized field from LogPattern */
-  field: string;
-  /** The pattern text from LogPattern */
-  pattern: string;
-  /** Time range in epoch milliseconds */
-  timeRange: TimeRange;
-  /** Number of documents per page (default: 50) */
-  pageSize?: number;
-  /** Sort values from the last document for pagination */
-  searchAfter?: Array<string | number>;
-}
-
-export interface ExpandPatternResult {
-  /** Raw log documents */
-  documents: Array<Record<string, unknown>>;
-  /** Sort values for the next page, undefined when no more pages */
-  searchAfter?: Array<string | number>;
-}
+export type SemanticLogSearchResult =
+  | {
+      status: 'success';
+      patterns: LogPattern[];
+    }
+  | {
+      status: 'unavailable';
+      reason: 'missing_fields' | 'inference_unavailable';
+    }
+  | {
+      status: 'error';
+      reason: 'timeout' | 'cancelled' | 'execution';
+    };
 
 /**
- * Service for semantic log search and pattern expansion.
+ * Service for semantic log search.
  *
- * The implemented search path is RERANK + CATEGORIZE. The pre-indexed rungs
- * (semantic_text / pattern_text) and `expand` are not implemented; the planned
- * direction is to feed patterns from Knowledge Indicators in the AI Index.
+ * The M1 search path is RERANK + CATEGORIZE.
  *
  * The service returns log patterns ranked by semantic relevance to the query,
  * with counts and time bounds for each pattern.
@@ -116,16 +92,6 @@ export interface SemanticLogSearchService {
    * - `count`: prevalence in the time window
    * - `firstSeen` / `lastSeen`: time bounds
    * - `sample`: a representative document
-   *
-   * `strategy` names the ranking path that produced the result. It is a debug
-   * and eval signal, not something callers should branch on.
    */
   search(params: SemanticLogSearchParams): Promise<SemanticLogSearchResult>;
-
-  /**
-   * Expand a pattern to retrieve its raw documents.
-   *
-   * To be implemented.
-   */
-  expand(params: ExpandPatternParams): Promise<ExpandPatternResult>;
 }

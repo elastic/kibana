@@ -71,7 +71,30 @@ describe('searchWithEsqlRerank', () => {
     expect(query).toContain('WHERE KQL("service.name:\\"checkout\\" | DROP message")');
   });
 
-  it('returns strategy esql_rerank when the query succeeds', async () => {
+  it('fails closed on partial results and sets the request timeout', async () => {
+    const logger = loggerMock.create();
+    const query = jest.fn().mockResolvedValue({ ...emptyResponse, is_partial: true });
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+      },
+      logger
+    );
+
+    expect(query).toHaveBeenCalledWith(
+      expect.objectContaining({ allow_partial_results: false }),
+      expect.objectContaining({ requestTimeout: 30_000 })
+    );
+    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('partial results'));
+  });
+
+  it('returns success when the query succeeds', async () => {
     const esClient = {
       esql: { query: jest.fn().mockResolvedValue(emptyResponse) },
     } as unknown as ElasticsearchClient;
@@ -86,10 +109,10 @@ describe('searchWithEsqlRerank', () => {
       loggerMock.create()
     );
 
-    expect(result).toEqual({ patterns: [], strategy: 'esql_rerank' });
+    expect(result).toEqual({ status: 'success', patterns: [] });
   });
 
-  it('reports unavailable and warns when the query fails', async () => {
+  it('returns execution error and warns when the query fails', async () => {
     const logger = loggerMock.create();
     const esClient = {
       esql: { query: jest.fn().mockRejectedValue(new Error('verification_exception')) },
@@ -105,8 +128,52 @@ describe('searchWithEsqlRerank', () => {
       logger
     );
 
-    expect(result).toEqual({ patterns: [], unavailable: true });
+    expect(result).toEqual({ status: 'error', reason: 'execution' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('verification_exception'));
+  });
+
+  it('returns timeout for a transport timeout', async () => {
+    const timeoutError = new Error('request timed out');
+    timeoutError.name = 'TimeoutError';
+    const esClient = {
+      esql: { query: jest.fn().mockRejectedValue(timeoutError) },
+    } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+      },
+      loggerMock.create()
+    );
+
+    expect(result).toEqual({ status: 'error', reason: 'timeout' });
+  });
+
+  it('returns cancelled and forwards the abort signal', async () => {
+    const abortController = new AbortController();
+    const abortError = new Error('request aborted');
+    abortError.name = 'RequestAbortedError';
+    const query = jest.fn().mockRejectedValue(abortError);
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+        abortSignal: abortController.signal,
+      },
+      loggerMock.create()
+    );
+
+    expect(query.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ signal: abortController.signal })
+    );
+    expect(result).toEqual({ status: 'error', reason: 'cancelled' });
   });
 });
 
@@ -170,7 +237,7 @@ describe('esql rerank helpers', () => {
       expect(patterns).toEqual([]);
     });
 
-    it('handles missing optional columns', () => {
+    it('filters out rows missing timestamp columns', () => {
       const response: ESQLSearchResponse = {
         columns: [
           { name: 'pattern', type: 'keyword' },
@@ -181,10 +248,7 @@ describe('esql rerank helpers', () => {
 
       const patterns = parseEsqlPatternResponse(response);
 
-      expect(patterns).toHaveLength(1);
-      expect(patterns[0].pattern).toBe('Error pattern');
-      expect(patterns[0].count).toBe(25);
-      expect(patterns[0].sample).toEqual({ message: '' });
+      expect(patterns).toEqual([]);
     });
 
     it('handles empty response', () => {
@@ -222,11 +286,13 @@ describe('esql rerank helpers', () => {
         columns: [
           { name: 'pattern', type: 'keyword' },
           { name: 'count', type: 'long' },
+          { name: 'first_seen', type: 'date' },
+          { name: 'last_seen', type: 'date' },
         ],
         values: [
-          [null, 10], // null pattern - should be filtered
-          ['Valid', null], // null count - should be filtered
-          ['Valid', 5], // valid - should be included
+          [null, 10, 1704067200000, 1704153600000],
+          ['Valid', null, 1704067200000, 1704153600000],
+          ['Valid', 5, 1704067200000, 1704153600000],
         ],
       };
 
@@ -242,11 +308,13 @@ describe('esql rerank helpers', () => {
         columns: [
           { name: 'pattern', type: 'keyword' },
           { name: 'count', type: 'long' },
+          { name: 'first_seen', type: 'date' },
+          { name: 'last_seen', type: 'date' },
           { name: '_score', type: 'double' },
         ],
         values: [
-          ['Error pattern', 10, 3.46],
-          ['Warning pattern', 5, -2.15],
+          ['Error pattern', 10, 1704067200000, 1704153600000, 3.46],
+          ['Warning pattern', 5, 1704067200000, 1704153600000, -2.15],
         ],
       };
 
@@ -262,8 +330,10 @@ describe('esql rerank helpers', () => {
         columns: [
           { name: 'pattern', type: 'keyword' },
           { name: 'count', type: 'long' },
+          { name: 'first_seen', type: 'date' },
+          { name: 'last_seen', type: 'date' },
         ],
-        values: [['Error pattern', 10]],
+        values: [['Error pattern', 10, 1704067200000, 1704153600000]],
       };
 
       const patterns = parseEsqlPatternResponse(response);

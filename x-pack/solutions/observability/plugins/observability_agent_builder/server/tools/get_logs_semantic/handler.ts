@@ -10,12 +10,25 @@ import type { LogPattern, SemanticLogSearchService } from '@kbn/logs-data-access
 import { parseDatemath } from '../../utils/time';
 
 const MAX_FIELD_VALUE_LENGTH = 500;
+const MAX_SAMPLE_ARRAY_ITEMS = 20;
+const MAX_SAMPLE_OBJECT_FIELDS = 50;
+const MAX_SAMPLE_DEPTH = 3;
 
-const UNAVAILABLE_WARNING =
-  'Semantic log search is not available for this index. The cluster has no RERANK inference endpoint.';
-
-const NO_PATTERNS_WARNING =
-  'No matching log patterns in this time range. Widen the range and keep this tool; do not switch to observability.get_logs.';
+const WARNINGS = {
+  missingFields:
+    'Semantic log search is unavailable because the target does not expose the required message and @timestamp fields. Do not retry with the same target.',
+  inferenceUnavailable:
+    'Semantic log search is unavailable because the cluster has no RERANK inference endpoint. Do not retry.',
+  timeout:
+    'Semantic log search timed out. Narrow the time range or add a KQL filter before retrying once.',
+  cancelled: 'Semantic log search was cancelled. Do not retry automatically.',
+  execution:
+    'Semantic log search failed during execution. Do not retry automatically or fall back silently.',
+  serviceUnavailable: 'Semantic log search is not registered. Do not retry.',
+  missingTarget: 'No log indices are available to search. Do not retry with this tool.',
+  noPatterns:
+    'No log patterns were found in this time range. You may retry once with a different time range or KQL scope.',
+} as const;
 
 interface GetLogsSemanticParams {
   start: string;
@@ -38,9 +51,15 @@ export interface GetLogsSemanticResult {
   /** Sum of the pattern counts, not a document count of the index. */
   totalCount: number;
   semanticQuery: string;
-  strategy?: string;
   warnings: string[];
 }
+
+const emptyResult = (semanticQuery: string, warning: string): GetLogsSemanticResult => ({
+  patterns: [],
+  totalCount: 0,
+  semanticQuery,
+  warnings: [warning],
+});
 
 export async function getLogsSemanticHandler({
   esClient,
@@ -59,13 +78,12 @@ export async function getLogsSemanticHandler({
     throw new Error(`Invalid date range: start="${start}", end="${end}"`);
   }
 
+  if (index.trim().length === 0) {
+    return emptyResult(semanticFilter, WARNINGS.missingTarget);
+  }
+
   if (!semanticLogSearch) {
-    return {
-      patterns: [],
-      totalCount: 0,
-      semanticQuery: semanticFilter,
-      warnings: [UNAVAILABLE_WARNING],
-    };
+    return emptyResult(semanticFilter, WARNINGS.serviceUnavailable);
   }
 
   const result = await semanticLogSearch.search({
@@ -77,13 +95,20 @@ export async function getLogsSemanticHandler({
     kqlFilter,
   });
 
-  if (result.unavailable) {
-    return {
-      patterns: [],
-      totalCount: 0,
-      semanticQuery: semanticFilter,
-      warnings: [UNAVAILABLE_WARNING],
-    };
+  if (result.status === 'unavailable') {
+    const warning =
+      result.reason === 'missing_fields' ? WARNINGS.missingFields : WARNINGS.inferenceUnavailable;
+    return emptyResult(semanticFilter, warning);
+  }
+
+  if (result.status === 'error') {
+    const warning =
+      result.reason === 'timeout'
+        ? WARNINGS.timeout
+        : result.reason === 'cancelled'
+        ? WARNINGS.cancelled
+        : WARNINGS.execution;
+    return emptyResult(semanticFilter, warning);
   }
 
   const patterns = result.patterns.map(toPattern);
@@ -93,16 +118,30 @@ export async function getLogsSemanticHandler({
     patterns,
     totalCount,
     semanticQuery: semanticFilter,
-    strategy: result.strategy,
-    warnings: patterns.length === 0 ? [NO_PATTERNS_WARNING] : [],
+    warnings: patterns.length === 0 ? [WARNINGS.noPatterns] : [],
   };
 }
 
-function truncateFieldValue(value: unknown): unknown {
+function sanitizeSampleValue(value: unknown, depth: number = 0): unknown {
   if (typeof value === 'string' && value.length > MAX_FIELD_VALUE_LENGTH) {
     return value.slice(0, MAX_FIELD_VALUE_LENGTH) + '...';
   }
-  return value;
+  if (value === null || typeof value !== 'object') {
+    return value;
+  }
+  if (depth >= MAX_SAMPLE_DEPTH) {
+    return '[truncated]';
+  }
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, MAX_SAMPLE_ARRAY_ITEMS)
+      .map((item) => sanitizeSampleValue(item, depth + 1));
+  }
+  return Object.fromEntries(
+    Object.entries(value)
+      .slice(0, MAX_SAMPLE_OBJECT_FIELDS)
+      .map(([key, nestedValue]) => [key, sanitizeSampleValue(nestedValue, depth + 1)])
+  );
 }
 
 function toPattern(pattern: LogPattern): GetLogsSemanticResult['patterns'][number] {
@@ -113,10 +152,10 @@ function toPattern(pattern: LogPattern): GetLogsSemanticResult['patterns'][numbe
     firstSeen: pattern.firstSeen,
     lastSeen: pattern.lastSeen,
     sample: {
-      ...(_id !== undefined ? { _id: _id as string } : {}),
-      ...(_index !== undefined ? { _index: _index as string } : {}),
+      ...(typeof _id === 'string' ? { _id } : {}),
+      ...(typeof _index === 'string' ? { _index } : {}),
       ...Object.fromEntries(
-        Object.entries(rest).map(([key, value]) => [key, truncateFieldValue(value)])
+        Object.entries(rest).map(([key, value]) => [key, sanitizeSampleValue(value)])
       ),
     },
     ...(pattern.relevanceScore !== undefined ? { relevanceScore: pattern.relevanceScore } : {}),

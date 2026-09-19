@@ -19,8 +19,6 @@ export type {
   SemanticLogSearchService,
   SemanticLogSearchParams,
   SemanticLogSearchResult,
-  ExpandPatternParams,
-  ExpandPatternResult,
   TimeRange,
 } from '../common/services/semantic_log_search/types';
 

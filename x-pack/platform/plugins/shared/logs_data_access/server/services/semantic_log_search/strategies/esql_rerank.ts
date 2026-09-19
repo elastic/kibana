@@ -9,7 +9,6 @@ import { esql } from '@elastic/esql';
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
-import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type {
   LogPattern,
   SemanticLogSearchParams,
@@ -19,6 +18,7 @@ import {
   CATEGORIZE_SIMILARITY_THRESHOLD,
   DEFAULT_MAX_PATTERNS,
   DEFAULT_RANK_WINDOW,
+  ESQL_REQUEST_TIMEOUT_MS,
   ESQL_TIME_RANGE_FILTER,
 } from '../constants';
 
@@ -36,9 +36,13 @@ const createCellReader = (response: ESQLSearchResponse) => {
   };
 };
 
-/** Timestamps arrive as ISO strings or epoch millis; fall back to now when absent. */
-const toIsoString = (value: unknown): string =>
-  value ? new Date(value as string | number).toISOString() : new Date().toISOString();
+/** Timestamps arrive as ISO strings or epoch millis. */
+const toIsoString = (value: unknown): string | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  return new Date(value as string | number).toISOString();
+};
 
 /**
  * Parse ES|QL response into LogPattern array.
@@ -69,23 +73,39 @@ export function parseEsqlPatternResponse(
       return [];
     }
 
+    const firstSeen = toIsoString(cell(row, 'first_seen'));
+    const lastSeen = toIsoString(cell(row, 'last_seen'));
+
+    if (firstSeen === undefined || lastSeen === undefined) {
+      return [];
+    }
+
     const sample = cell(row, 'sample');
     const score = cell(row, '_score');
 
-    return {
-      field,
-      pattern: String(pattern),
-      count: Number(count),
-      firstSeen: toIsoString(cell(row, 'first_seen')),
-      lastSeen: toIsoString(cell(row, 'last_seen')),
-      // ES|QL CATEGORIZE doesn't provide _id/_index, only the sample message
-      sample: {
-        message: sample ? String(sample) : '',
+    return [
+      {
+        field,
+        pattern: String(pattern),
+        count: Number(count),
+        firstSeen,
+        lastSeen,
+        // ES|QL CATEGORIZE doesn't provide _id/_index, only the sample message
+        sample: {
+          message: sample ? String(sample) : '',
+        },
+        ...(typeof score === 'number' ? { relevanceScore: score } : {}),
       },
-      ...(typeof score === 'number' ? { relevanceScore: score } : {}),
-    };
+    ];
   });
 }
+
+const isCancellationError = (error: unknown, abortSignal?: AbortSignal): boolean =>
+  abortSignal?.aborted === true ||
+  (error instanceof Error && (error.name === 'AbortError' || error.name === 'RequestAbortedError'));
+
+const isTimeoutError = (error: unknown): boolean =>
+  error instanceof Error && error.name === 'TimeoutError';
 
 /**
  * Execute semantic search using ES|QL RERANK + CATEGORIZE.
@@ -109,6 +129,7 @@ export async function searchWithEsqlRerank(
     timeRange,
     maxPatterns = DEFAULT_MAX_PATTERNS,
     kqlFilter,
+    abortSignal,
   } = params;
 
   const startIso = new Date(timeRange.start).toISOString();
@@ -150,10 +171,20 @@ export async function searchWithEsqlRerank(
   const request: EsqlQueryRequest = {
     query: query.print('basic'),
     params: [{ _tstart: startIso }, { _tend: endIso }],
+    allow_partial_results: false,
   };
 
   try {
-    const response = await esClient.esql.query(request);
+    const response = await esClient.esql.query(request, {
+      signal: abortSignal,
+      requestTimeout: ESQL_REQUEST_TIMEOUT_MS,
+    });
+
+    if (response.is_partial) {
+      logger.warn(`ES|QL RERANK query returned partial results for target "${target}"`);
+      return { status: 'error', reason: 'execution' };
+    }
+
     const patterns = parseEsqlPatternResponse(response as ESQLSearchResponse, 'message');
 
     // TODO: derive a "nothing relevant matched" signal from the top _score and surface it as a
@@ -162,18 +193,21 @@ export async function searchWithEsqlRerank(
     // Three data points is not a threshold; measure with the eval suite first.
 
     return {
+      status: 'success',
       patterns,
-      strategy: 'esql_rerank',
     };
   } catch (error) {
-    // Handle missing index gracefully (lazy initialization before first write)
-    if (isEsqlUnknownIndexError(error)) {
-      logger.debug(`ES|QL RERANK: index not found for target "${target}"`);
-      return { patterns: [], unavailable: true };
+    if (isCancellationError(error, abortSignal)) {
+      logger.debug(`ES|QL RERANK query cancelled for target "${target}"`);
+      return { status: 'error', reason: 'cancelled' };
     }
-    // Log other errors (license, ES version, RERANK/CATEGORIZE failures)
+    if (isTimeoutError(error)) {
+      logger.warn(`ES|QL RERANK query timed out for target "${target}"`);
+      return { status: 'error', reason: 'timeout' };
+    }
+
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.warn(`ES|QL RERANK query failed for target "${target}": ${errorMessage}`);
-    return { patterns: [], unavailable: true };
+    return { status: 'error', reason: 'execution' };
   }
 }

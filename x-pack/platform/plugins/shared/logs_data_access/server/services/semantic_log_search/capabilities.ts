@@ -6,47 +6,27 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { CAPABILITY_FIELD_TYPES } from './constants';
+import { REQUIRED_FIELDS } from './constants';
 
 /**
- * Target capabilities for semantic log search.
- */
-export interface TargetCapabilities {
-  /** Whether the target has semantic search capability (pre-indexed embeddings) */
-  hasSemanticCapability: boolean;
-  /** Whether the target has exact template resolution (pattern_text) */
-  hasPatternCapability: boolean;
-}
-
-/**
- * Detect capabilities for a target index/data stream/pattern.
+ * Checks that the target exposes every field required by runtime semantic search.
  *
- * Uses the field_caps API to check if the target has semantic_text or pattern_text fields.
- * Returns false/false if the target does not exist or is not accessible.
+ * Errors are intentionally propagated so callers do not misreport authorization or transport
+ * failures as missing fields.
  */
-export async function detectCapabilities(
+export async function hasRequiredFields(
   esClient: ElasticsearchClient,
   target: string
-): Promise<TargetCapabilities> {
-  try {
-    const response = await esClient.fieldCaps({
-      index: target,
-      fields: ['*'],
-    });
+): Promise<boolean> {
+  const response = await esClient.fieldCaps({
+    index: target,
+    fields: [...REQUIRED_FIELDS],
+  });
 
-    const fields = Object.values(response.fields);
-
-    return {
-      hasSemanticCapability: fields.some((field) => CAPABILITY_FIELD_TYPES.semantic in field),
-      hasPatternCapability: fields.some((field) => CAPABILITY_FIELD_TYPES.pattern in field),
-    };
-  } catch (error) {
-    // Target does not exist or is not accessible
-    return {
-      hasSemanticCapability: false,
-      hasPatternCapability: false,
-    };
-  }
+  return REQUIRED_FIELDS.every((field) => {
+    const capabilities = response.fields[field];
+    return capabilities !== undefined && Object.keys(capabilities).length > 0;
+  });
 }
 
 /** The default rerank inference endpoint available in ES 9.3+ */
