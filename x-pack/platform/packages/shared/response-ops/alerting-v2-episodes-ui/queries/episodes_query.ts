@@ -56,7 +56,16 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * Only set for classic alert rows; native episodes never use this.
    */
   is_muted?: boolean;
+  /**
+   * Flattened grouping values copied from classic `kibana.alert.grouping`
+   * (e.g. `{ 'host.name': 'web-01' }`). Used to render grouping tags on source
+   * (v1) alert rows. V2 episodes never set this.
+   */
+  source_grouping?: Record<string, unknown>;
 }
+
+/** True when the row came from an additional episode data source, not the v2 pipeline. */
+export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
