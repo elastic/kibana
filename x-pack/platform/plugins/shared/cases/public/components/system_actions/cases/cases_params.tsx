@@ -39,6 +39,11 @@ import { useKibana } from '../../../common/lib/kibana';
 import { KibanaServices } from '../../../common/lib/kibana/services';
 import { TemplateSelector } from '../../create/templates';
 import { TemplateSelectorV2 } from './template_selector_v2';
+import { useGetTemplates } from '../../templates_v2/hooks/use_get_templates';
+import {
+  getTemplateSettingsAndConnectorFromYaml,
+  normalizeTemplateConnector,
+} from '../../templates_v2/utils/template_settings_yaml';
 import type { CasesConfigurationUITemplate } from '../../../containers/types';
 import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
 import { getConfigurationByOwner } from '../../../containers/configure/utils';
@@ -221,6 +226,19 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [currentConfiguration.templates, templateId]
   );
   const selectedTemplateHasConnector = !!selectedTemplate?.caseFields?.connector;
+
+  const { data: v2TemplatesData } = useGetTemplates({
+    queryParams: { page: 1, perPage: 10000, owner: [owner], isEnabled: true },
+  });
+
+  const selectedV2TemplateHasConnector = useMemo(() => {
+    if (!isTemplatesV2Enabled || !templateId) return false;
+    const v2Template = (v2TemplatesData?.templates ?? []).find((t) => t.templateId === templateId);
+    if (!v2Template?.definition) return false;
+    const { connector } = getTemplateSettingsAndConnectorFromYaml(v2Template.definition);
+    return !!normalizeTemplateConnector(connector);
+  }, [isTemplatesV2Enabled, templateId, v2TemplatesData?.templates]);
+
   const defaultTemplate = useMemo(() => {
     return {
       key: DEFAULT_EMPTY_TEMPLATE_KEY,
@@ -391,7 +409,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             />
           )}
         </EuiFlexItem>
-        {!isTemplatesV2Enabled && selectedTemplateHasConnector ? (
+        {selectedTemplateHasConnector || selectedV2TemplateHasConnector ? (
           <EuiFlexItem grow={true}>
             <EuiCheckbox
               id={`auto-push-case-${index}`}

@@ -650,6 +650,7 @@ describe('CasesParamsFields renders', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+      mockUseGetTemplates.mockReturnValue({ data: { templates: [] }, isLoading: false });
     });
 
     it('renders the v2 template selector when templates.enabled is true', async () => {
@@ -660,11 +661,41 @@ describe('CasesParamsFields renders', () => {
       expect(screen.queryByTestId('create-case-template-select')).not.toBeInTheDocument();
     });
 
-    it('does not render auto-push checkbox on v2 path', async () => {
+    it('does not render auto-push checkbox when v2 template has no connector', async () => {
       enableTemplatesV2();
-      render(<CasesParamsFields {...defaultProps} />);
+      mockUseGetTemplates.mockReturnValue({
+        data: { templates: [{ templateId: 'tmpl-v2', definition: 'title: Test' }] },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
 
       expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
+    });
+
+    it('renders auto-push checkbox when v2 template has a connector', async () => {
+      enableTemplatesV2();
+      const definition = `connector:\n  type: .jira\n  id: jira-connector-id\n  fields: null\n`;
+      mockUseGetTemplates.mockReturnValue({
+        data: { templates: [{ templateId: 'tmpl-v2', definition }] },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
     });
 
     it('writes templateId and templateVersion when onChange fires on v2 selector', async () => {
