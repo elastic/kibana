@@ -36,6 +36,11 @@ const OVERLAY_VIEWPORT = { width: 800, height: 1200 };
  */
 const FIELDS_GRID_TEST_SUBJ = '[data-test-subj="UnifiedDocViewerTableGrid"]';
 
+const FLYOUT_TEST_SUBJ = '[data-test-subj="docViewerFlyout"]';
+
+/** Scanned alongside the flyout: the cell popover mounts in an EUI portal. */
+const EXPANSION_POPOVER_TEST_SUBJ = '[data-test-subj="euiDataGridExpansionPopover"]';
+
 spaceTest.describe(
   'Discover doc viewer flyout - accessibility',
   { tag: '@local-stateful-classic' },
@@ -186,7 +191,7 @@ spaceTest.describe(
 
       await spaceTest.step('push flyout', async () => {
         const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="docViewerFlyout"]'],
+          include: [FLYOUT_TEST_SUBJ],
           exclude: [FIELDS_GRID_TEST_SUBJ],
         });
         expect(violations).toStrictEqual([]);
@@ -196,11 +201,37 @@ spaceTest.describe(
         await page.setViewportSize(OVERLAY_VIEWPORT);
 
         const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="docViewerFlyout"]'],
+          include: [FLYOUT_TEST_SUBJ],
           exclude: [FIELDS_GRID_TEST_SUBJ],
         });
         expect(violations).toStrictEqual([]);
       });
     });
+
+    spaceTest(
+      'has no automated a11y violations in the source tab or an expanded field cell',
+      async ({ page, pageObjects }) => {
+        const { docViewer } = pageObjects;
+
+        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+
+        await spaceTest.step('source tab', async () => {
+          await docViewer.openTab('doc_view_source');
+          // No grid exclusion needed: the JSON editor replaces the fields table.
+          const { violations } = await page.checkA11y({ include: [FLYOUT_TEST_SUBJ] });
+          expect(violations).toStrictEqual([]);
+        });
+
+        await spaceTest.step('expanded field name cell', async () => {
+          await docViewer.expandFieldNameCell('extension');
+
+          const { violations } = await page.checkA11y({
+            include: [FLYOUT_TEST_SUBJ, EXPANSION_POPOVER_TEST_SUBJ],
+            exclude: [FIELDS_GRID_TEST_SUBJ],
+          });
+          expect(violations).toStrictEqual([]);
+        });
+      }
+    );
   }
 );

@@ -282,6 +282,12 @@ export abstract class LayoutMixin extends SaveMixin {
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
 
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
+  }
+
   async createRuntimeField({
     fieldName,
     script,
@@ -708,14 +714,19 @@ export abstract class LayoutMixin extends SaveMixin {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  /**
-   * Pick a histogram chart interval (e.g. `"Day"`).
-   */
-  async setChartInterval(intervalTitle: string) {
+  /** Opens the histogram's interval selector popover without picking an option. */
+  async openChartIntervalSelector() {
     await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
       state: 'visible',
     });
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.openChartIntervalSelector();
     await this.page
       .locator(
         `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`

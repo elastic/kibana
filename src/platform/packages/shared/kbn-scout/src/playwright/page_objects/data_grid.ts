@@ -579,6 +579,27 @@ export class DataGrid {
     await expandedButton.waitFor({ state: 'visible' });
   }
 
+  /** Opens the grid toolbar's column-sorting popover. */
+  async openSortPopover() {
+    await this.page.testSubj.click('dataGridColumnSortingButton');
+    await this.page.testSubj.locator('dataGridColumnSortingPopover').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Toggles the grid's full-screen mode. The same button enters and exits, so
+   * callers pair the calls.
+   */
+  async toggleFullScreen() {
+    const button = this.page.testSubj.locator('dataGridFullScreenButton');
+    await button.waitFor({ state: 'visible' });
+    const wasPressed = (await button.getAttribute('aria-pressed')) === 'true';
+
+    await button.click();
+    await button
+      .and(this.page.locator(`[aria-pressed="${wasPressed ? 'false' : 'true'}"]`))
+      .waitFor({ state: 'visible' });
+  }
+
   async openInTableSearch() {
     const input = this.getInTableSearchInput();
 
