@@ -25,8 +25,10 @@ import {
   sendUpdateAgentlessPolicy,
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
+  useStartServices,
 } from '../../../../hooks';
 import type { RequestError } from '../../../../hooks';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 import type {
   PackagePolicyConfigRecord,
   UpdatePackagePolicy,
@@ -119,6 +121,11 @@ export function usePackagePolicyWithRelatedData(
   const isAgentlessOption = agentlessUIEnabled && (options.isAgentless ?? false);
   const isAgentlessPolicy = isAgentlessOption || (agentlessUIEnabled && detectedAgentless);
   const yaml = useYaml();
+  const { notifications } = useStartServices();
+  // The policy is saved either way; only the identity's template details is missing.
+  const iacPersistOptions = {
+    onIacPersistError: () => notifications.toasts.addWarning(IAC_TEMPLATE_WRITE_FAILED_TOAST),
+  };
 
   // Form state
   const [isEdited, setIsEdited] = useState(false);
@@ -167,13 +174,18 @@ export function usePackagePolicyWithRelatedData(
           // Pass `packageInfo` so the write-side input/stream allow-check matches the read path
           // (`agentlessPolicyToPackagePolicy`); without it an unedited load→save could flip input
           // enablement for deployment-mode-restricted packages.
-          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups, packageInfo)
+          toNewAgentlessPolicy(restPackagePolicy as NewPackagePolicy, varGroups, packageInfo),
+          iacPersistOptions
         );
         setFormState('SUBMITTED');
         return { data: { item }, error: null };
       }
 
-      const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
+      const result = await sendUpdatePackagePolicy(
+        packagePolicyId,
+        restPackagePolicy,
+        iacPersistOptions
+      );
 
       setFormState('SUBMITTED');
 

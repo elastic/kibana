@@ -401,26 +401,30 @@ describe('edit package policy page', () => {
 
     await waitFor(() => {
       const { id, ...restProps } = mockPackagePolicy;
-      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('nginx-1', {
-        ...restProps,
-        vars: {},
-        inputs: [
-          {
-            ...mockPackagePolicy.inputs[0],
-            enabled: false,
-            streams: [
-              {
-                ...mockPackagePolicy.inputs[0].streams[0],
-                enabled: false,
-              },
-              {
-                ...mockPackagePolicy.inputs[0].streams[1],
-                enabled: false,
-              },
-            ],
-          },
-        ],
-      });
+      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+        'nginx-1',
+        {
+          ...restProps,
+          vars: {},
+          inputs: [
+            {
+              ...mockPackagePolicy.inputs[0],
+              enabled: false,
+              streams: [
+                {
+                  ...mockPackagePolicy.inputs[0].streams[0],
+                  enabled: false,
+                },
+                {
+                  ...mockPackagePolicy.inputs[0].streams[1],
+                  enabled: false,
+                },
+              ],
+            },
+          ],
+        },
+        expect.objectContaining({ onIacPersistError: expect.any(Function) })
+      );
       expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith('/navigate/path');
     });
   });
@@ -773,7 +777,8 @@ describe('edit package policy page', () => {
           'nginx-1',
           expect.objectContaining({
             policy_ids: ['agent-policy-1', 'agent-policy-2'],
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
       });
     });
@@ -826,7 +831,8 @@ describe('edit package policy page', () => {
           'nginx-1',
           expect.objectContaining({
             policy_ids: ['agent-policy-1', 'fleet-server-policy'],
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         )
       );
     });
