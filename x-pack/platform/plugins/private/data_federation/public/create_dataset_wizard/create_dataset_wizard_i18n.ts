@@ -62,7 +62,7 @@ export const createDatasetWizardStrings = {
 
   nameHelp: i18n.translate('xpack.dataFederation.createDatasetForm.nameHelp', {
     defaultMessage:
-      'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
+      'Unique name for use in queries. Lowercase letters, dashes, underscores, and numbers are supported',
   }),
 
   namePlaceholder: i18n.translate('xpack.dataFederation.createDatasetForm.namePlaceholder', {
@@ -579,10 +579,6 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Must be a non-negative integer.',
     }
   ),
-
-  cancelButton: i18n.translate('xpack.dataFederation.createDatasetForm.cancelButton', {
-    defaultMessage: 'Cancel',
-  }),
 
   addButton: i18n.translate('xpack.dataFederation.createDatasetForm.addButton', {
     defaultMessage: 'Add',

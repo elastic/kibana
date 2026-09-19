@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
@@ -145,15 +144,6 @@ export function CreateDatasetWizardPage({
                   : createDatasetWizardStrings.pageTitle}
               </h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={goToDatasets}
-              disabled={isSaving}
-              data-test-subj="createDatasetWizardCancel"
-            >
-              {createDatasetWizardStrings.cancelButton}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
