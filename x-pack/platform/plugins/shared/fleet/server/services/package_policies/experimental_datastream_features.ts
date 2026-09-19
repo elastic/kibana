@@ -208,14 +208,23 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     } = rawIndexTemplate as IndexTemplate;
     let updatedIndexTemplate = indexTemplate;
 
+    // Reject mutually exclusive combination: a data stream cannot be both TSDB and columnar.
+    if (featureMapEntry.features.tsdb && featureMapEntry.features.columnar) {
+      throw new Error(
+        `data stream ${featureMapEntry.data_stream} cannot have both tsdb and columnar enabled simultaneously`
+      );
+    }
+
     if (isTSDBOptInChanged) {
       const indexTemplateBody = {
-        ...indexTemplate,
+        ...updatedIndexTemplate,
         template: {
-          ...(indexTemplate.template ?? {}),
+          ...(updatedIndexTemplate.template ?? {}),
           settings: {
-            ...(indexTemplate.template?.settings ?? {}),
+            ...(updatedIndexTemplate.template?.settings ?? {}),
             index: {
+              // Preserve any existing index settings (sort, codec, etc.) — only set mode.
+              ...(updatedIndexTemplate.template?.settings?.index ?? {}),
               mode: featureMapEntry.features.tsdb ? 'time_series' : undefined,
             },
           },
@@ -228,7 +237,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         name: featureMapEntry.data_stream,
         ...indexTemplateBody,
         _meta: {
-          has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
+          has_experimental_data_stream_indexing_features:
+            featureMapEntry.features.tsdb || featureMapEntry.features.columnar,
         },
         // GET brings string | string[] | undefined but this PUT expects string[]
         ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
@@ -238,14 +248,21 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     }
 
     if (isColumnarOptInChanged) {
+      // For non-logs data streams the logs profile defaults (host.name sort, logs pipeline) are
+      // inappropriate, so use the base columnar mode instead of logsdb_columnar.
+      const dsType = featureMapEntry.data_stream.split('-')[0];
+      const columnarMode = dsType === 'logs' ? 'logsdb_columnar' : 'columnar';
+
       const indexTemplateBody = {
-        ...indexTemplate,
+        ...updatedIndexTemplate,
         template: {
-          ...(indexTemplate.template ?? {}),
+          ...(updatedIndexTemplate.template ?? {}),
           settings: {
-            ...(indexTemplate.template?.settings ?? {}),
+            ...(updatedIndexTemplate.template?.settings ?? {}),
             index: {
-              mode: featureMapEntry.features.columnar ? 'logsdb_columnar' : undefined,
+              // Preserve any existing index settings (sort, codec, etc.) — only set mode.
+              ...(updatedIndexTemplate.template?.settings?.index ?? {}),
+              mode: featureMapEntry.features.columnar ? columnarMode : undefined,
             },
           },
         },
@@ -257,7 +274,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         name: featureMapEntry.data_stream,
         ...indexTemplateBody,
         _meta: {
-          has_experimental_data_stream_indexing_features: featureMapEntry.features.columnar,
+          has_experimental_data_stream_indexing_features:
+            featureMapEntry.features.tsdb || featureMapEntry.features.columnar,
         },
         // GET brings string | string[] | undefined but this PUT expects string[]
         ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
