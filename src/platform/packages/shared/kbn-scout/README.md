@@ -248,6 +248,8 @@ The `page_objects` directory contains all the Page Objects that represent Platfo
 - If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)).
 - If it represents a core Platform surface with no natural owner (Discover, Dashboard, etc.), add it here so other teams can reuse it.
 
+For the full rules (three tiers, shared vs solution vs plugin-local, frozen fixture keys) see the [placement policy](../../../../../docs/extend/testing/page-objects.md#scout-page-objects-placement).
+
 Page Objects must be registered with the `createLazyPageObject` function, which guarantees its instance is lazy-initialized. This way, we can have all the page objects available in the test context, but only the ones that are called will be actually initialized:
 
 ```ts

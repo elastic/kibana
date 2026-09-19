@@ -38,6 +38,27 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 - Solution Scout packages may provide additional page objects (their internal folder layout varies—search within the package for `page_objects` if you need the source).
 - Plugin-local page objects: `<plugin-root>/test/scout/ui/fixtures/page_objects`
 
+### Placement policy [scout-page-objects-placement]
+
+Use this when deciding whether a new helper belongs in `@kbn/scout`, a solution package, or your plugin.
+
+**Three tiers.** The tier follows what renders the UI the helper targets, not the helper's name or current folder.
+
+| Tier                    | Lives in                                                                                | Wraps                                                                                                     | Reached through                      |
+| ----------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| EUI component object    | `@elastic/eui-test-helpers`, re-exported from `kbn-scout/src/playwright/eui_components` | One EUI component. Re-exports only                                                                        | `page.components.<name>(testSubj)`   |
+| Kibana component object | `kbn-scout/src/playwright/ui_components`                                                | One shared Kibana component, rendered by two or more plugins (from a `@kbn/*` package, a plugin, or core) | `pageObjects.<key>` or direct import |
+| App page object         | `kbn-scout/src/playwright/page_objects`, a solution package, or plugin-local            | One screen that a single plugin renders (an app, a management section, a chrome area)                     | `pageObjects.<key>`                  |
+
+**Where it goes.**
+
+- A helper for a shared Kibana component goes in `@kbn/scout`, even if only one plugin's tests use it today. The component is already rendered by several plugins, so their tests will need it too. If the helper sits in the first plugin that needed it, the next plugin copies it.
+- A helper for a screen that a platform plugin renders goes in `@kbn/scout` only when tests outside that plugin drive it, or when a `@kbn/scout` fixture depends on it (the login page under `browserAuth`). If only the plugin's own tests drive it, keep it plugin-local. Any change to `@kbn/scout` re-runs the whole Scout suite.
+- A helper for a screen that a solution plugin renders goes in that solution's Scout package when two or more of the solution's plugins drive it, otherwise plugin-local. Never in `@kbn/scout`.
+- Before adding a class, search all Scout locations for the same class name. Same name in two places is a duplicate until proven otherwise.
+
+**Fixture keys are public API.** `pageObjects.<key>`, `page.components.<key>` and `apiServices.<key>` never change. A file may move between tiers or folders and keep its key.
+
 To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
 
 ## Create and register a new page object in your plugin
