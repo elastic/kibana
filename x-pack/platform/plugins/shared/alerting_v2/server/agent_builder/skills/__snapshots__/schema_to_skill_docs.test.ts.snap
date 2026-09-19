@@ -434,8 +434,8 @@ Use \`set_query\` to define the ES|QL condition that should fire the rule. Optio
 |---|---|---|---|
 | \`operation\` | \\"set_query\\" | required |  |
 | \`query\` | object | required | Detection query configuration. |
-| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default. |
-| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default. |
+| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
+| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
 
 ##### \`query\`
 
@@ -518,8 +518,8 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 | \`time_field\` | string | required | Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`. (min length: 1, max length: 128, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |
 | \`query\` | object | required | Detection query configuration. |
-| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default. |
-| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default. |
+| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
+| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
 | \`state_transition\` | object \\\\| null | optional |  |
 | \`grouping\` | object | optional | Grouping configuration. |
 | \`artifacts\` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. (max items: 100) |

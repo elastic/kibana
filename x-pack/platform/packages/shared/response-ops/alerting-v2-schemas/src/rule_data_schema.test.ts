@@ -1485,8 +1485,8 @@ describe('updateRuleBodySchema', () => {
       no_data: json.definitions?.alerting_rule_no_data?.description,
     }).toMatchInlineSnapshot(`
       Object {
-        "no_data": "What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default.",
-        "recovery": "How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. There is no default.",
+        "no_data": "What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`.",
+        "recovery": "How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`.",
         "time_field": "Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.",
       }
     `);
