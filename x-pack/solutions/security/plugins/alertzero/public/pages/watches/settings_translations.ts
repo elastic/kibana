@@ -624,6 +624,11 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 /* Alert Triage Worker extras                                                 */
 /* -------------------------------------------------------------------------- */
 
+export const WORKER_SETTINGS_ALERT_ANALYSIS_LINK = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.alertAnalysisSettingsLink',
+  { defaultMessage: 'Go to Alert analysis settings' }
+);
+
 export const MINIMUM_CONFIDENCE_SCORE_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreLabel',
   { defaultMessage: 'Minimum confidence score' }

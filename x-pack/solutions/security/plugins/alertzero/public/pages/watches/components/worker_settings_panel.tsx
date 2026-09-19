@@ -233,7 +233,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               {errorLink ? (
                 <>
                   {' '}
-                  <EuiLink href={errorLink}>Go to Alert analysis settings</EuiLink>
+                  <EuiLink href={errorLink}>
+                    {settingsI18n.WORKER_SETTINGS_ALERT_ANALYSIS_LINK}
+                  </EuiLink>
                 </>
               ) : null}
             </p>
