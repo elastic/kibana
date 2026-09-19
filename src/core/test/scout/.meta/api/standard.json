@@ -1,5 +1,5 @@
 {
-  "sha1": "0963f5b1de87594c99f747894644562d0c2af19f",
+  "sha1": "e7df724f23c87c8c2b28e5a66588d325de74e5ba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -287,7 +287,7 @@
     {
       "id": "2392b373cc723ee-ab33734347ca58f",
       "title": "kibana status api returns version, status and metrics fields",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -300,8 +300,28 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/status.spec.ts",
-        "line": 19,
-        "column": 11
+        "line": 21,
+        "column": 5
+      }
+    },
+    {
+      "id": "2392b373cc723ee-872c3803747abcc",
+      "title": "kibana status api returns at least the overall status level to a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/status.spec.ts",
+        "line": 58,
+        "column": 12
       }
     },
     {

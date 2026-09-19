@@ -5,16 +5,26 @@
  * 2.0.
  */
 
+import { mkdtempSync, rmSync } from 'fs';
 import type { Socket } from 'net';
-import { Observable } from 'rxjs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { BehaviorSubject, Observable } from 'rxjs';
 
+import type { LoggerContextConfigInput, ServiceStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { AppenderConfigType, OtelAppenderPluginConfig } from '@kbn/core-logging-server';
+import type {
+  AppenderConfigType,
+  FileAppenderPluginConfig,
+  OtelAppenderPluginConfig,
+} from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
@@ -1159,5 +1169,155 @@ describe('#filterEvent', () => {
         },
       ])
     ).toBeFalsy();
+  });
+});
+
+describe('runtime audit log write failures', () => {
+  let testDir: string;
+
+  beforeEach(() => {
+    testDir = mkdtempSync(join(tmpdir(), 'kbn-audit-service-'));
+  });
+
+  afterEach(() => {
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  const setupWithFileAppender = (
+    securityLicense: SecurityLicense = licenseMock.create({ allowAuditLogging: true })
+  ) => {
+    const fileName = join(testDir, 'audit.log');
+    const audit = new AuditService(logger);
+    const statusMock = statusServiceMock.createSetupContract();
+
+    audit.setup({
+      license: securityLicense,
+      config: createAuditConfig({
+        enabled: true,
+        appender: { type: 'file', fileName, layout: { type: 'json' } },
+      }),
+      logging,
+      status: statusMock,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    const loggingConfigs: LoggerContextConfigInput[] = [];
+    (logging.configure.mock.calls[0][0] as Observable<LoggerContextConfigInput>).subscribe((c) =>
+      loggingConfigs.push(c)
+    );
+
+    const statuses: ServiceStatus[] = [];
+    (statusMock.set.mock.calls[0][0] as Observable<ServiceStatus>).subscribe((s) =>
+      statuses.push(s)
+    );
+
+    return { audit, fileName, loggingConfigs, statuses };
+  };
+
+  const auditAppender = (loggerContextConfig: LoggerContextConfigInput) =>
+    (loggerContextConfig.appenders as Record<string, FileAppenderPluginConfig>).auditTrailAppender;
+
+  it('hands the appender an `onWriteError` handler so a mid-write failure cannot crash Kibana', () => {
+    const { audit, loggingConfigs } = setupWithFileAppender();
+
+    const appender = auditAppender(loggingConfigs[0]);
+
+    expect(appender.type).toEqual('file');
+    expect(appender.onWriteError).toEqual(expect.any(Function));
+    audit.stop();
+  });
+
+  it('reports degraded when the appender fails mid-write, not only at startup', () => {
+    const { audit, fileName, loggingConfigs, statuses } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.available);
+
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+    expect(statuses.at(-1)!.summary).toEqual('Audit log cannot be written');
+    expect(statuses.at(-1)!.detail).toContain('ENOSPC');
+    audit.stop();
+  });
+
+  it('turns the audit logger off once a write has failed, so the appender stops being used', () => {
+    const { audit, fileName, loggingConfigs } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    expect(loggingConfigs[0].loggers![0].level).toEqual('info');
+
+    onWriteError!({ path: fileName, code: 'EROFS', reason: 'EROFS: read-only file system' });
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    audit.stop();
+  });
+
+  it('reconfigures the logger only once, no matter how many writes fail before it goes off', () => {
+    const { audit, fileName, loggingConfigs } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+    const configCount = loggingConfigs.length;
+
+    // The appender now discards an errored stream and reopens the file, so records still in flight
+    // before the logger turns off each report a failure.
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(loggingConfigs).toHaveLength(configCount + 1);
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    audit.stop();
+  });
+
+  it('stays paused across a license change, since the probe cannot see a full disk', () => {
+    const features$ = new BehaviorSubject({
+      allowAuditLogging: true,
+    } as SecurityLicenseFeatures);
+    const { audit, fileName, loggingConfigs, statuses } = setupWithFileAppender(
+      licenseMock.create(features$)
+    );
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+
+    features$.next({ allowAuditLogging: false } as SecurityLicenseFeatures);
+    features$.next({ allowAuditLogging: true } as SecurityLicenseFeatures);
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    expect(auditAppender(loggingConfigs.at(-1)!).type).toEqual('console');
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+    audit.stop();
+  });
+
+  it('always installs its own handler, ignoring anything an operator put in the appender config', () => {
+    const operatorHandler = jest.fn();
+    const auditHandler = jest.fn();
+    const auditConfig = createAuditConfig({
+      enabled: true,
+      appender: {
+        type: 'file',
+        fileName: join(testDir, 'audit.log'),
+        layout: { type: 'json' },
+        onWriteError: operatorHandler,
+      } as AppenderConfigType,
+    });
+
+    const loggingConfig = createLoggingConfig(
+      auditConfig,
+      false,
+      undefined,
+      auditHandler
+    )({ allowAuditLogging: true });
+    auditAppender(loggingConfig).onWriteError!({ path: 'audit.log', reason: 'ENOSPC' });
+
+    expect(auditHandler).toHaveBeenCalledTimes(1);
+    expect(operatorHandler).not.toHaveBeenCalled();
   });
 });
