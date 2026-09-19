@@ -101,6 +101,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     const isTSDBOptInChanged = hasFeatureChanged('tsdb');
 
+    const isColumnarOptInChanged = hasFeatureChanged('columnar');
+
     const isDocValueOnlyNumericChanged = hasFeatureChanged('doc_value_only_numeric');
     const isDocValueOnlyOtherChanged = hasFeatureChanged('doc_value_only_other');
 
@@ -108,6 +110,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       [
         isSyntheticSourceOptInChanged,
         isTSDBOptInChanged,
+        isColumnarOptInChanged,
         isDocValueOnlyNumericChanged,
         isDocValueOnlyOtherChanged,
       ].every((hasFlagChange) => !hasFlagChange)
@@ -226,6 +229,35 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         ...indexTemplateBody,
         _meta: {
           has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
+        },
+        // GET brings string | string[] | undefined but this PUT expects string[]
+        ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
+          ? [indexTemplateBody.ignore_missing_component_templates].flat()
+          : undefined,
+      });
+    }
+
+    if (isColumnarOptInChanged) {
+      const indexTemplateBody = {
+        ...indexTemplate,
+        template: {
+          ...(indexTemplate.template ?? {}),
+          settings: {
+            ...(indexTemplate.template?.settings ?? {}),
+            index: {
+              mode: featureMapEntry.features.columnar ? 'logsdb_columnar' : undefined,
+            },
+          },
+        },
+      };
+
+      updatedIndexTemplate = indexTemplateBody as IndexTemplate;
+
+      await esClient.indices.putIndexTemplate({
+        name: featureMapEntry.data_stream,
+        ...indexTemplateBody,
+        _meta: {
+          has_experimental_data_stream_indexing_features: featureMapEntry.features.columnar,
         },
         // GET brings string | string[] | undefined but this PUT expects string[]
         ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates

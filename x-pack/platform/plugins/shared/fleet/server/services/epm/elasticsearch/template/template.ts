@@ -83,6 +83,7 @@ export function getTemplate({
   hidden,
   registryElasticsearch,
   isIndexModeTimeSeries,
+  indexMode,
   type,
   isOtelInputType,
 }: {
@@ -94,6 +95,7 @@ export function getTemplate({
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
+  indexMode?: string;
   isOtelInputType?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
@@ -104,6 +106,7 @@ export function getTemplate({
     registryElasticsearch,
     hidden,
     isIndexModeTimeSeries,
+    indexMode,
   });
   if (template.template.settings.index.final_pipeline) {
     throw new PackageInvalidArchiveError(
@@ -336,6 +339,7 @@ function getBaseTemplate({
   hidden,
   registryElasticsearch,
   isIndexModeTimeSeries,
+  indexMode,
 }: {
   templateIndexPattern: string;
   packageName: string;
@@ -344,6 +348,7 @@ function getBaseTemplate({
   hidden?: boolean;
   registryElasticsearch: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
+  indexMode?: string;
 }): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
 
@@ -351,6 +356,10 @@ function getBaseTemplate({
   if (isIndexModeTimeSeries) {
     settingsIndex = {
       mode: 'time_series',
+    };
+  } else if (indexMode) {
+    settingsIndex = {
+      mode: indexMode,
     };
   }
 

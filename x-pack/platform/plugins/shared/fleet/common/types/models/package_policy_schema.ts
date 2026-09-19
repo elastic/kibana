@@ -175,6 +175,7 @@ export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
       tsdb: schema.maybe(schema.boolean({ defaultValue: false })),
       doc_value_only_numeric: schema.maybe(schema.boolean({ defaultValue: false })),
       doc_value_only_other: schema.maybe(schema.boolean({ defaultValue: false })),
+      columnar: schema.maybe(schema.boolean({ defaultValue: false })), // tech preview: logsdb_columnar index mode
     }),
   }),
   { maxSize: 100 }

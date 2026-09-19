@@ -311,21 +311,30 @@ async function updateIndexTemplateIfTsdsDisabled({
   logger: Logger;
   indexTemplate: IndexTemplateEntry;
 }) {
+  // Mode-changing index modes that require the index template to be installed before
+  // component templates when the mode is being removed, so that the write index rolls
+  // off the previous mode before new mappings are applied.
+  const changingIndexModes = ['time_series', 'logsdb_columnar', 'columnar', 'logsdb'];
+
   try {
     const existingIndexTemplate = await esClient.indices.getIndexTemplate({
       name: indexTemplate.templateName,
     });
+    const existingMode =
+      existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode;
+    const newMode = indexTemplate.indexTemplate.template.settings.index.mode;
+
     if (
-      existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode ===
-        'time_series' &&
-      indexTemplate.indexTemplate.template.settings.index.mode !== 'time_series'
+      existingMode !== undefined &&
+      changingIndexModes.includes(existingMode as string) &&
+      existingMode !== newMode
     ) {
       await installTemplate({ esClient, logger, template: indexTemplate });
     }
   } catch (e) {
     if (e.statusCode === 404) {
       logger.debug(
-        `Index template ${indexTemplate.templateName} does not exist, skipping time_series check`
+        `Index template ${indexTemplate.templateName} does not exist, skipping index mode check`
       );
     } else {
       logger.warn(
@@ -653,6 +662,18 @@ export function prepareTemplate({
     !!experimentalDataStreamFeature?.features.tsdb ||
     (isOtelInputType && dataStream.type === 'metrics');
 
+  // Columnar index mode family: declared in the manifest or opted in via experimental feature.
+  // "columnar" is the base mode; "logsdb_columnar" adds the logs profile on top.
+  // When a user opts in via the experimental feature, we default to logsdb_columnar (logs profile).
+  const manifestColumnarMode =
+    dataStream.elasticsearch?.index_mode === 'logsdb_columnar' ||
+    dataStream.elasticsearch?.index_mode === 'columnar'
+      ? dataStream.elasticsearch.index_mode
+      : undefined;
+  const resolvedIndexMode =
+    manifestColumnarMode ??
+    (experimentalDataStreamFeature?.features.columnar ? 'logsdb_columnar' : undefined);
+
   const validFields = processFields(fields);
 
   const mappings = generateMappings(validFields, isIndexModeTimeSeries);
@@ -694,6 +715,7 @@ export function prepareTemplate({
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
     isIndexModeTimeSeries,
+    indexMode: resolvedIndexMode,
     type: dataStream.type,
     isOtelInputType,
   });

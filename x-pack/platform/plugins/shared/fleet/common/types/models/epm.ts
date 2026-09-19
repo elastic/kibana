@@ -539,7 +539,7 @@ export interface RegistryElasticsearch {
   'index_template.data_stream'?: RegistryDataStreamProperties;
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
-  index_mode?: 'time_series';
+  index_mode?: 'time_series' | 'logsdb_columnar' | 'columnar';
   dynamic_dataset?: boolean;
   dynamic_namespace?: boolean;
 }
@@ -751,7 +751,8 @@ export type ExperimentalIndexingFeature =
   | 'synthetic_source'
   | 'tsdb'
   | 'doc_value_only_numeric'
-  | 'doc_value_only_other';
+  | 'doc_value_only_other'
+  | 'columnar'; // tech preview: logsdb_columnar index mode
 
 export interface ExperimentalDataStreamFeature {
   data_stream: string;
