@@ -100,6 +100,7 @@ import { getDefaultFormFields } from './defaults';
 import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
+import { ParameterValuesEditor, ParameterValuesVisibilityToggle } from '../fields/parameter_values';
 
 export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
   'xpack.synthetics.monitorConfig.locations.apiPrivateOnlyErrorMessage',
@@ -1136,8 +1137,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.params.label', {
       defaultMessage: 'Parameters',
     }),
+    labelAppend: <ParameterValuesVisibilityToggle />,
     controlled: true,
-    component: JSONEditor,
+    component: ParameterValuesEditor,
     props: (): JSONCodeEditorProps => ({
       id: 'syntheticsMonitorConfigParams',
       height: '100px',

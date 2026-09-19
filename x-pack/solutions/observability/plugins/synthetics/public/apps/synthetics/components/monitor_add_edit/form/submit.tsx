@@ -22,6 +22,7 @@ import type { SyntheticsMonitor } from '../types';
 import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
 import { getAddMonitorCancelHref } from './cancel_href';
+import { useParameterValues } from './parameter_values_context';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
@@ -44,9 +45,14 @@ export const ActionBar = ({
 
   const [monitorsPendingDeletion, setMonitorsPendingDeletion] = useState<string[]>([]);
 
-  const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
+  const [submission, setSubmission] = useState<
+    { monitor: SyntheticsMonitor; preserveMaskedParams: boolean } | undefined
+  >(undefined);
 
-  const { status, loading, isEdit } = useMonitorSave({ monitorData });
+  const { parametersAreMasked } = useParameterValues();
+  const { status, loading, isEdit } = useMonitorSave({
+    submission,
+  });
 
   const canEditSynthetics = useCanEditSynthetics();
 
@@ -54,7 +60,10 @@ export const ActionBar = ({
 
   const formSubmitter = (formData: Record<string, any>) => {
     if (isValid) {
-      setMonitorData(format(formData, readOnly));
+      setSubmission({
+        monitor: format(formData, readOnly),
+        preserveMaskedParams: parametersAreMasked,
+      });
     }
   };
 

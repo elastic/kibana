@@ -50,6 +50,17 @@ type ProjectMonitor = Record<string, any>;
 
 const MONITOR_SO_TYPES = [syntheticsMonitorSavedObjectType, 'synthetics-monitor'];
 
+const SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE = {
+  elasticsearch: { cluster: [], indices: [{ names: ['*'], privileges: ['all'] }] },
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: { uptime: ['all', 'can_read_param_values'] },
+    },
+  ],
+} satisfies KibanaRole;
+
 apiTest.describe(
   'AddProjectMonitorsPrivateLocations',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
@@ -379,7 +390,9 @@ apiTest.describe(
         kibanaServerUrl = config.hosts.kibana;
         log = workerLog;
 
-        const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
+        const { apiKeyHeader: editorKey } = await requestAuth.getApiKeyForCustomRole(
+          SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE
+        );
         editorHeaders = mergeSyntheticsApiHeaders(editorKey, { Accept: 'application/json' });
         const { apiKeyHeader: viewerKey } = await requestAuth.getApiKey('viewer');
         viewerHeaders = mergeSyntheticsApiHeaders(viewerKey, { Accept: 'application/json' });

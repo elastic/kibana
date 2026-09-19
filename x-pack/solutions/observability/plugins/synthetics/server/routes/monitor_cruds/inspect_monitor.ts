@@ -20,6 +20,7 @@ import { validateMonitor } from './monitor_validation';
 import { getPrivateLocationsForMonitor } from './add_monitor/utils';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { PackagePolicyLink } from '../../../common/types';
+import { canRevealParameterValues } from '../../../common/utils/can_reveal_parameter_values';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -69,14 +70,14 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       normalizedMonitor
     );
 
-    const canSave =
-      Boolean(
-        (
-          await server.coreStart?.capabilities.resolveCapabilities(request, {
-            capabilityPath: 'uptime.*',
-          })
-        ).uptime.save
-      ) ?? false;
+    const capabilities = await server.coreStart?.capabilities.resolveCapabilities(request, {
+      capabilityPath: 'uptime.*',
+    });
+    const canSave = Boolean(capabilities?.uptime?.save);
+    const canRevealParams = canRevealParameterValues({
+      canSave,
+      canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
+    });
 
     try {
       const newMonitorId = id || normalizedMonitor.config_id || uuidV4();
@@ -92,7 +93,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         { monitor: monitorWithNamespace as MonitorFields, id: newMonitorId },
         privateLocations,
         spaceId,
-        hideParams,
+        hideParams || !canRevealParams,
         canSave
       );
 
