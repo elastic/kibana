@@ -26,6 +26,9 @@ const ENTITY_KIND_LABEL: Record<AttachmentEntityKind, string> = {
   service: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.service', {
     defaultMessage: 'Service',
   }),
+  role: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.role', {
+    defaultMessage: 'Role',
+  }),
   actor: i18n.translate('xpack.alertzero.agentBuilder.attachments.entityChip.kind.actor', {
     defaultMessage: 'Actor',
   }),

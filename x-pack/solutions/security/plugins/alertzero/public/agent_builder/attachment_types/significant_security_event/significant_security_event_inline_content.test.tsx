@@ -126,13 +126,17 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('No entities recorded')).toBeInTheDocument();
   });
 
-  it('renders entities with specialized user/host chips', () => {
+  it('renders entities with specialized user/host/role chips', () => {
     render(
       <SignificantSecurityEventInlineContent
         {...renderProps(
           buildAttachment({
             ...baseData,
-            entities: ['dev-user', 'host.name: ci-deploy-runner-07', 'user.name: jdoe'],
+            entities: [
+              'entity:generic:arn:aws:iam::123456789012:user/dev-user',
+              'entity:generic:arn:aws:iam::123456789012:role/escalated-role',
+              'entity:generic:host:ci-deploy-runner-07',
+            ],
           })
         )}
       />
@@ -140,10 +144,14 @@ describe('SignificantSecurityEventInlineContent', () => {
 
     expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-0')).toBeInTheDocument();
     expect(screen.getByText('dev-user')).toBeInTheDocument();
+    expect(screen.getByText('escalated-role')).toBeInTheDocument();
     expect(screen.getByText('ci-deploy-runner-07')).toBeInTheDocument();
-    expect(screen.getByText('jdoe')).toBeInTheDocument();
-    expect(screen.getAllByText('User').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('User')).toBeInTheDocument();
+    expect(screen.getByText('Role')).toBeInTheDocument();
     expect(screen.getByText('Host')).toBeInTheDocument();
+    expect(
+      screen.queryByText('entity:generic:arn:aws:iam::123456789012:user/dev-user')
+    ).not.toBeInTheDocument();
   });
 
   it('renders a Discover link for an event when share returns a URL', () => {

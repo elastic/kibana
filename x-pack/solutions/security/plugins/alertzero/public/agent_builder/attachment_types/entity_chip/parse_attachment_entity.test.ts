@@ -26,6 +26,28 @@ describe('parseAttachmentEntity', () => {
     });
   });
 
+  it('parses SSE EUIDs into short names and kinds', () => {
+    expect(
+      parseAttachmentEntity('entity:generic:arn:aws:iam::123456789012:user/dev-user')
+    ).toEqual({
+      kind: 'user',
+      name: 'dev-user',
+      raw: 'entity:generic:arn:aws:iam::123456789012:user/dev-user',
+    });
+    expect(
+      parseAttachmentEntity('entity:generic:arn:aws:iam::123456789012:role/escalated-role')
+    ).toEqual({
+      kind: 'role',
+      name: 'escalated-role',
+      raw: 'entity:generic:arn:aws:iam::123456789012:role/escalated-role',
+    });
+    expect(parseAttachmentEntity('entity:generic:host:ci-deploy-runner-07')).toEqual({
+      kind: 'host',
+      name: 'ci-deploy-runner-07',
+      raw: 'entity:generic:host:ci-deploy-runner-07',
+    });
+  });
+
   it('treats bare emails as users and host-like values as hosts', () => {
     expect(parseAttachmentEntity('dev-user@corp.example').kind).toBe('user');
     expect(parseAttachmentEntity('ci-deploy-runner-07').kind).toBe('host');
