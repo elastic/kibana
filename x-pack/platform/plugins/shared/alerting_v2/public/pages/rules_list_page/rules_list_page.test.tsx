@@ -29,6 +29,7 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
 let mockCanWriteActionPolicies = true;
 let mockToursEnabled = true;
@@ -64,6 +65,8 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
@@ -225,6 +228,7 @@ describe('RulesListPage', () => {
     window.localStorage.clear();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
     mockCanWriteActionPolicies = true;
     mockToursEnabled = true;
@@ -245,6 +249,14 @@ describe('RulesListPage', () => {
     await waitForRules();
 
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+    await waitForRules();
+
+    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
   });
 
   describe('centralized action policies banner', () => {

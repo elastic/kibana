@@ -11,6 +11,17 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -31,6 +42,11 @@ const renderFlyout = () =>
 describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
   });
 
   it('renders the flyout with create rule options', () => {
@@ -83,15 +99,18 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when agent builder is unavailable', () => {
+    mockAreAgentBuilderSkillsAvailable = false;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
+    };
     render(
       <I18nProvider>
         <RuleCreateOptionsFlyout
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          createWithAgentDisabled
-          createWithAgentTooltipText="Missing privileges"
           onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
