@@ -227,7 +227,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   );
   const selectedTemplateHasConnector = !!selectedTemplate?.caseFields?.connector;
 
-  const { data: v2TemplatesData } = useGetTemplates({
+  const { data: v2TemplatesData, isLoading: isLoadingV2Templates } = useGetTemplates({
     queryParams: { page: 1, perPage: 10000, owner: [owner], isEnabled: true },
   });
 
@@ -429,7 +429,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             />
           )}
         </EuiFlexItem>
-        {selectedTemplateHasConnector || selectedV2TemplateHasConnector ? (
+        {(!isTemplatesV2Enabled && selectedTemplateHasConnector) ||
+        (!isLoadingV2Templates && selectedV2TemplateHasConnector) ? (
           <EuiFlexItem grow={true}>
             <EuiCheckbox
               id={`auto-push-case-${index}`}
