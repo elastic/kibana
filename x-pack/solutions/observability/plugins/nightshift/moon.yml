@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
+  - '@kbn/llm-trace-waterfall'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/observability-shared-plugin'
