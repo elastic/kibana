@@ -59,7 +59,7 @@ export {
   TimelineEvent,
   Investigation,
   Proposal,
-  Incident,
+  Escalation,
 } from './components/investigation.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
