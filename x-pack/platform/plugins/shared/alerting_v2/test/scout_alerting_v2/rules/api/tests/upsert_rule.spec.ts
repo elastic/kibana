@@ -133,11 +133,9 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
-          recovery_strategy: undefined,
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | LIMIT 10' },
-          },
+          recovery: undefined,
+          no_data: undefined,
+          query: { base: 'FROM logs-* | LIMIT 10' },
           metadata: { name: 'alert-rule' },
         }),
       });
@@ -276,11 +274,11 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest('validation: should reject body with empty query.breach', async ({ apiClient }) => {
+  apiTest('validation: should reject body with an empty query.base', async ({ apiClient }) => {
     const response = await apiClient.put(getRuleUrl('any-id'), {
       headers: writerHeaders,
       body: buildCreateRuleData({
-        query: { format: 'standalone', breach: { query: '' } },
+        query: { base: '' },
       }),
     });
     expect(response).toHaveStatusCode(400);
@@ -288,14 +286,14 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'validation: should reject a recovering delay when recovery is disabled',
+    'validation: should reject a recovering delay when recovery never happens',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('any-id'), {
         headers: writerHeaders,
         body: buildCreateRuleData({
           metadata: { name: 'upsert-inert-recovery-delay' },
-          recovery_strategy: 'none',
-          state_transition: { pending_count: 0, recovering_count: 2 },
+          recovery: { strategy: 'manual' },
+          state_transition: { pending: { count: 0 }, recovering: { count: 2 } },
         }),
       });
       expect(response).toHaveStatusCode(400);

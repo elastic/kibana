@@ -80,6 +80,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         renderCustomRecovery={props.renderCustomRecovery}
       />
     ),
+    fields: ['recovery'],
   },
   details: {
     id: 'details',

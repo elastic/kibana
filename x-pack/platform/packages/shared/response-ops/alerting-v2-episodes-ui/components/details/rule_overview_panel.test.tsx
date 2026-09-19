@@ -16,7 +16,7 @@ const mockRule = {
   enabled: true,
   kind: 'signal',
   metadata: { name: 'My rule' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | WHERE foo=1' } },
+  query: { base: 'FROM logs-* | WHERE foo=1' },
 } as unknown as RuleResponse;
 
 const alertRule = { ...mockRule, kind: 'alert' } as unknown as RuleResponse;
@@ -61,7 +61,6 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
     const composedRule = {
       ...mockRule,
       query: {
-        format: 'composed',
         base: 'FROM logs-*',
         breach: { segment: '| WHERE foo > 10' },
       },

@@ -176,20 +176,10 @@ export const isAlertTabDisabled = (
     return false;
   }
 
-  if (typeof baseQueryOrRuleQuery === 'string') {
-    return baseQueryOrRuleQuery.trim().length === 0;
-  }
+  const base =
+    typeof baseQueryOrRuleQuery === 'string' ? baseQueryOrRuleQuery : baseQueryOrRuleQuery.base;
 
-  if (baseQueryOrRuleQuery.format === 'composed') {
-    return baseQueryOrRuleQuery.base.trim().length === 0;
-  }
-
-  const base = baseQueryOrRuleQuery.no_data?.query ?? '';
-  if (base.trim().length > 0) {
-    return false;
-  }
-
-  return baseQueryOrRuleQuery.breach.query.trim().length === 0;
+  return base.trim().length === 0;
 };
 
 export const resolveActiveQueryTab = (

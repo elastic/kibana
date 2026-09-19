@@ -18,8 +18,9 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   querySchema,
-  composedQuerySchema,
-  standaloneQuerySchema,
+  recoverySchema,
+  noDataSchema,
+  stateTransitionSchema,
   scheduleSchema,
   metadataSchema,
   ruleResponseMetadataSchema,
@@ -112,8 +113,9 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [bulkCreateRulesRequestSchema, 'alerting_bulk_create_rules_request'],
   [bulkCreateRulesResponseSchema, 'alerting_bulk_create_rules_response'],
   [querySchema, 'alerting_rule_query'],
-  [composedQuerySchema, 'alerting_composed_rule_query'],
-  [standaloneQuerySchema, 'alerting_standalone_rule_query'],
+  [recoverySchema, 'alerting_rule_recovery'],
+  [noDataSchema, 'alerting_rule_no_data'],
+  [stateTransitionSchema, 'alerting_rule_state_transition'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
   [ruleResponseMetadataSchema, 'alerting_rule_response_metadata'],
@@ -173,7 +175,8 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
 
 /** Discriminated unions whose every variant must be named for OAS to emit a discriminator mapping. */
 const DISCRIMINATED_UNIONS: ReadonlyArray<readonly [string, z.ZodType]> = [
-  ['querySchema', querySchema],
+  ['recoverySchema', recoverySchema],
+  ['noDataSchema', noDataSchema],
   ['actionPolicyDestinationSchema', actionPolicyDestinationSchema],
   ['createSeriesAlertActionBodySchema', createSeriesAlertActionBodySchema],
   ['createEpisodeAlertActionBodySchema', createEpisodeAlertActionBodySchema],

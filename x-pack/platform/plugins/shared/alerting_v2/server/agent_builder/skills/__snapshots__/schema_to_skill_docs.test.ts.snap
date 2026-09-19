@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Operations Schema Reference
 
 #### \`operation: \\"set_metadata\\"\`
@@ -60,7 +62,9 @@ Use \`validate\` as the last operation to confirm the action policy is complete 
 | \`operation\` | \\"validate\\" | required |  |"
 `;
 
-exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy API Schema Reference
 
 ## Top-Level Fields
@@ -76,7 +80,9 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
 
-exports[`schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Workflow Dispatch Payload
 
 Catalog of fields the dispatcher passes as \`inputs.payload\`. In Liquid:
@@ -146,7 +152,9 @@ steps:
 \`\`\`"
 `;
 
-exports[`schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Dispatch Flow
 
 The end-to-end notification path:
@@ -163,7 +171,9 @@ The end-to-end notification path:
 Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events."
 `;
 
-exports[`schema_to_skill_docs generateEpisodeLifecycleDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateEpisodeLifecycleDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Episode Lifecycle
 
 Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:
@@ -178,7 +188,9 @@ Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has 
 Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw signal events with no episode tracking."
 `;
 
-exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Grouping Modes
 
 - \`per_episode\`: one notification per alert episode lifecycle (default).
@@ -188,7 +200,9 @@ exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skil
 Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
 
-exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Matchers
 
 A matcher selects which alert **episodes** a policy applies to.
@@ -261,7 +275,9 @@ To add tags while keeping an existing KQL filter, resend the current \`expressio
 \`\`\`"
 `;
 
-exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Multi-rule Action Policies
 
 Use this path when the user wants **one policy across several rules**, a space-wide
@@ -300,25 +316,30 @@ not by a single rule name.
 For the default one-rule path, see [single-rule action policies](./action-policy-single-rule.md)."
 `;
 
-exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# No-Data Strategy
 
-\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present.
+\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'ignore' }\`.
 
-| Value | Behaviour |
+| Strategy | Behaviour |
 |---|---|
-| \`last_known_status\` | Keeps the alert's last status when the rule finds no data. |
-| \`emit\` | Not accepted when creating or updating rules. Do not send this value. |
-| \`recover\` | Marks the alert \`inactive\` the first time the rule finds no data for the alert. |
-| \`none\` | Ignores runs where the rule finds no data. |
+| \`ignore\` | Never checks for presence. Runs where a group is absent are not classified. |
+| \`keep_last\` | Keeps the episode's previous status when the rule finds no data. |
+| \`resolve\` | Marks the episode \`inactive\` the first time the rule finds no data. |
+| \`alert\` | Marks the episode \`active\` when the rule finds no data. |
 
-When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
-\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
+Every strategy except \`ignore\` may carry its own presence query:
+\`no_data: { strategy: 'keep_last', query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`.
+Omit \`query\` to use \`query.base\` to decide whether a group has data.
 
-Signal rules cannot set \`no_data_strategy\` ([rule-kind reference](./rule-kind.md))."
+Signal rules cannot set \`no_data\` ([rule-kind reference](./rule-kind.md))."
 `;
 
-exports[`schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Notifications via Action Policies
 
 Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.
@@ -337,18 +358,21 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-management\` skill for notification setup."
 `;
 
-exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Recovery Strategy
 
-\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\` ([rule-kind reference](./rule-kind.md)).
+\`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'no_breach' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).
 
-- \`no_breach\`: Recovers an alert when the breach query no longer returns matches.
-- \`query\`: Recovers an alert when a separate recovery query matches. Requires \`query.recovery\`.
-- \`none\`: The rule never marks an alert as \`recovered\`, even after the breach query stops returning matches.
+- \`no_breach\`: Recovers a group when it stops appearing in the breach results.
+- \`condition\`: Recovers a group when \`query.base\` plus this segment returns it. Requires \`query.breach\`.
+- \`query\`: Recovers a group when this independent query returns it.
+- \`manual\`: Never recovers automatically. Only user actions close the episode.
 
-When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
-- **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
-- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`"
+The two query-backed strategies carry their own ES|QL:
+- \`recovery: { strategy: 'condition', segment: 'WHERE avg_cpu < 0.6' }\` — the segment is appended to \`query.base\`. This requires \`query.breach\`: without a breach segment every row of \`base\` already breaches, so the recovery condition could only return groups that are breaching and the rule would never recover.
+- \`recovery: { strategy: 'query', query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu < 0.6' }\` — an independent full query, usable with or without \`query.breach\`."
 `;
 
 exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -359,7 +383,7 @@ Rules declare a \`kind\` of \`alert\` (Alerts) or \`signal\` (Events). This is t
 ### Alerts (\`kind: alert\`)
 Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
 Episode statuses: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
-State transition fields: \`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`.
+State transition fields: \`pending\`, \`recovering\`.
 
 ### Events (\`kind: signal\`)
 Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
@@ -409,9 +433,16 @@ Use \`set_query\` to define the ES|QL condition that should fire the rule. Optio
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_query\\" | required |  |
-| \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
-| \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional |  |
-| \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional |  |
+| \`query\` | object | required | Detection query configuration. |
+| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
+| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
+
+##### \`query\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`base\` | string | required | The detection query, and the only place a \`FROM\` lives. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
+| \`breach\` | object | optional | Breach condition appended to \`base\`. Omit to treat every row returned by \`base\` as a breach. |
 
 #### \`operation: \\"set_grouping\\"\`
 
@@ -428,11 +459,25 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`pending_count\` | integer | optional | Number of consecutive matches required before the alert becomes \`active\`. (min: 0, max: 1000) |
-| \`pending_timeframe\` | string | optional | Time window used with \`pending_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
-| \`recovering_count\` | integer | optional | Number of consecutive recoveries required before the alert becomes \`inactive\`. (min: 0, max: 1000) |
-| \`recovering_timeframe\` | string | optional | Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`. (max length: 32) |
+| \`pending\` | object | optional | Gating for the \`breached\` → \`active\` transition. |
+| \`recovering\` | object | optional | Gating for the \`recovered\` → \`inactive\` transition. |
 | \`operation\` | \\"set_state_transition\\" | required |  |
+
+##### \`pending\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`count\` | integer | optional | Number of consecutive matches required before the alert becomes \`active\`. \`0\` skips the \`pending\` phase. (min: 0, max: 1000) |
+| \`timeframe\` | string | optional | Time window used with \`count\`, for example \`5m\` or \`15m\`. (max length: 32) |
+| \`operator\` | \\"AND\\" \\\\| \\"OR\\" | optional | The operator that combines \`count\` and \`timeframe\`. \`AND\` requires both, \`OR\` requires either. Only allowed when both are set. (enum: AND \\\\| OR) |
+
+##### \`recovering\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`count\` | integer | optional | Number of consecutive recoveries required before the alert becomes \`inactive\`. \`0\` skips the \`recovering\` phase. (min: 0, max: 1000) |
+| \`timeframe\` | string | optional | Time window used with \`count\`, for example \`5m\` or \`15m\`. (max length: 32) |
+| \`operator\` | \\"AND\\" \\\\| \\"OR\\" | optional | The operator that combines \`count\` and \`timeframe\`. \`AND\` requires both, \`OR\` requires either. Only allowed when both are set. (enum: AND \\\\| OR) |
 
 #### \`operation: \\"set_dashboards\\"\`
 
@@ -472,36 +517,98 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 | \`metadata\` | object | required | Rule metadata. |
 | \`time_field\` | string | required | Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`. (min length: 1, max length: 128, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |
-| \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
-| \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional | The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. |
-| \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional | How the rule behaves when it finds no data for a group. If you omit this field or set it to \`none\`, those runs are ignored. If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules. |
+| \`query\` | object | required | Detection query configuration. |
+| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | How an alert recovers. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
+| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when it finds no data for a group. Required when \`kind\` is \`alert\`, and not allowed when \`kind\` is \`signal\`. |
 | \`state_transition\` | object \\\\| null | optional |  |
 | \`grouping\` | object | optional | Grouping configuration. |
 | \`artifacts\` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. (max items: 100) |
 
-## Query Formats
-
-#### \`format: \\"composed\\"\`
-
-Composed query: a shared base with appendable breach and recovery segments.
+## Query
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`format\` | \\"composed\\" | required |  |
-| \`base\` | string | required | Base ES\\\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
-| \`breach\` | object | optional | Breach detection configuration. Omit to treat every base row as a breach. |
-| \`recovery\` | object | optional | Recovery query segment. Required when recovery_strategy is \\"query\\". |
+| \`base\` | string | required | The detection query, and the only place a \`FROM\` lives. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
+| \`breach\` | object | optional | Breach condition appended to \`base\`. Omit to treat every row returned by \`base\` as a breach. |
 
-#### \`format: \\"standalone\\"\`
-
-Standalone queries: independent full queries for breach, recovery, and no_data.
+#### \`breach\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`format\` | \\"standalone\\" | required |  |
-| \`breach\` | object | required | Breach detection configuration (required). |
-| \`recovery\` | object | optional | Recovery query. Required when recovery_strategy is \\"query\\". |
-| \`no_data\` | object | optional | No-data detection query. Required when no_data_strategy is not \\"none\\". |"
+| \`segment\` | string | required | A clause appended to \`query.base\`, for example \`WHERE avg_cpu > 0.85\`. (min length: 1, max length: 10000) |
+
+## Recovery Strategies
+
+#### \`strategy: \\"no_breach\\"\`
+
+Recovers a group when it stops appearing in the breach results.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"no_breach\\" | required |  |
+
+#### \`strategy: \\"condition\\"\`
+
+Recovers a group when \`query.base\` plus this segment returns it. Requires \`query.breach\`.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"condition\\" | required |  |
+| \`segment\` | string | required | A clause appended to \`query.base\`, for example \`WHERE avg_cpu < 0.60\`. (min length: 1, max length: 10000) |
+
+#### \`strategy: \\"query\\"\`
+
+Recovers a group when this independent query returns it.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"query\\" | required |  |
+| \`query\` | string | required | Full ES\\\\|QL query for recovery detection. (min length: 1, max length: 10000) |
+
+#### \`strategy: \\"manual\\"\`
+
+Never recovers automatically. Only user actions close the episode.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"manual\\" | required |  |
+
+## No-Data Strategies
+
+#### \`strategy: \\"ignore\\"\`
+
+Never checks for presence. Runs where a group is absent are not classified.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"ignore\\" | required |  |
+
+#### \`strategy: \\"keep_last\\"\`
+
+Keeps the episode's previous status when the rule finds no data.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"keep_last\\" | required |  |
+| \`query\` | string | optional | Presence query. When omitted, \`query.base\` decides whether a group has data. (min length: 1, max length: 10000) |
+
+#### \`strategy: \\"resolve\\"\`
+
+Marks the episode \`inactive\` the first time the rule finds no data.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"resolve\\" | required |  |
+| \`query\` | string | optional | Presence query. When omitted, \`query.base\` decides whether a group has data. (min length: 1, max length: 10000) |
+
+#### \`strategy: \\"alert\\"\`
+
+Marks the episode \`active\` when the rule finds no data.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`strategy\` | \\"alert\\" | required |  |
+| \`query\` | string | optional | Presence query. When omitted, \`query.base\` decides whether a group has data. (min length: 1, max length: 10000) |"
 `;
 
 exports[`schema_to_skill_docs generateSeverityDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -524,7 +631,9 @@ Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`
   \`| EVAL severity = CASE(cpu > 0.95, \\"critical\\", cpu > 0.8, \\"high\\", \\"medium\\")\`"
 `;
 
-exports[`schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Single-rule Action Policies
 
 Use this path when the user wants notifications for **one specific rule**.
@@ -579,7 +688,28 @@ If the user explicitly requests a cross-rule or shared policy, consult the
 [multi-rule action policies reference](./action-policy-multi-rule.md)."
 `;
 
-exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`
+] = `
+"## State Transition
+
+Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
+
+- \`pending\` — Gating for the \`breached\` → \`active\` transition.
+  - \`pending.count\` — Number of consecutive matches required before the alert becomes \`active\`. \`0\` skips the \`pending\` phase.
+  - \`pending.timeframe\` — Time window used with \`count\`, for example \`5m\` or \`15m\`.
+  - \`pending.operator\` — The operator that combines \`count\` and \`timeframe\`. \`AND\` requires both, \`OR\` requires either. Only allowed when both are set.
+- \`recovering\` — Gating for the \`recovered\` → \`inactive\` transition.
+  - \`recovering.count\` — Number of consecutive recoveries required before the alert becomes \`inactive\`. \`0\` skips the \`recovering\` phase.
+  - \`recovering.timeframe\` — Time window used with \`count\`, for example \`5m\` or \`15m\`.
+  - \`recovering.operator\` — The operator that combines \`count\` and \`timeframe\`. \`AND\` requires both, \`OR\` requires either. Only allowed when both are set.
+
+State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema."
+`;
+
+exports[
+  `schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Throttle / Grouping Compatibility
 
 - \`per_episode\`: one notification per alert episode lifecycle (default).
@@ -597,7 +727,9 @@ validates compatibility after all operations run.
 Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md)."
 `;
 
-exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Throttle Strategies
 
 - \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
@@ -608,7 +740,9 @@ exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed
 Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
 
-exports[`schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Workflows
 
 A workflow is a **concrete automation defined in YAML** that executes when dispatched by an action policy.

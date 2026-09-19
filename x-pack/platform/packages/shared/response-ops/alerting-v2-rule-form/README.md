@@ -152,8 +152,17 @@ interface FormValues {
     lookback: string; // Duration string
   };
   query: {
-    breach: string;           // The breach ES|QL query
-    recover?: string;         // Optional custom recovery ES|QL query
+    base: string;             // Root ES|QL query
+    breach: { segment: string }; // Condition appended to `base`; '' means no breach condition
+  };
+  recovery?: {
+    strategy: RecoveryStrategy;  // 'no_breach' | 'condition' | 'query' | 'manual'
+    segment?: string;            // strategy 'condition'
+    query?: string;              // strategy 'query'
+  };
+  noData?: {
+    strategy: NoDataStrategy;    // 'ignore' | 'keep_last' | 'resolve' | 'alert'
+    query?: string;
   };
   grouping?: {
     fields: string[];         // Columns to group alerts by
@@ -161,7 +170,7 @@ interface FormValues {
 }
 ```
 
-> The form keeps a simple `{ breach, recover? }` shape internally. It is translated to the canonical API shape (`{ format: 'standalone', breach: { query }, recovery?: { query } }`) by `mapFormValuesToRuleRequest`, with a top-level `recovery_strategy: 'query'` emitted alongside when a recovery query is present. The form does not currently surface `no_data`, `no_data_strategy`, or `recovery_strategy: 'no_breach'`; they are dropped on round-trip and need to be set through the canonical API or the Compose Discover flyout if required.
+> `recovery` and `noData` widen the API's discriminated unions so React Hook Form can hold a partially-filled member; `mapFormValuesToRuleRequest` projects the field the selected strategy needs and omits both blocks for `kind: 'signal'`, which the API forbids them on. `query.breach` is dropped from the request when the segment is blank.
 
 ## Required Services
 

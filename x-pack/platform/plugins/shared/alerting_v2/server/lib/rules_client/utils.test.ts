@@ -40,7 +40,9 @@ const baseCreateData: CreateRuleData = {
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  query: { base: 'FROM logs-* | LIMIT 1' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
 };
 
 const createRuleSoAttributesWithArtifacts = () =>
@@ -87,37 +89,81 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBeUndefined();
     });
 
-    it('persists an omitted composed breach block as an empty segment', () => {
+    it('stores the query exactly as sent', () => {
       const data: CreateRuleData = {
         ...baseCreateData,
-        query: { format: 'composed', base: 'FROM metrics-*' },
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
       };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
       expect(result.query).toEqual({
-        format: 'composed',
         base: 'FROM metrics-*',
-        breach: { segment: '' },
+        breach: { segment: 'WHERE cpu > 0.9' },
       });
     });
 
-    it('leaves a populated composed breach segment untouched', () => {
+    it('stores a breach-less query without inventing a breach block', () => {
+      const data: CreateRuleData = { ...baseCreateData, query: { base: 'FROM metrics-*' } };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.query).toEqual({ base: 'FROM metrics-*' });
+    });
+
+    it('stores the lifecycle an alert rule was created with', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
+      expect(result.no_data).toEqual({ strategy: 'ignore' });
+    });
+
+    it('stores the lifecycle objects the request provided', () => {
       const data: CreateRuleData = {
         ...baseCreateData,
-        query: {
-          format: 'composed',
-          base: 'FROM metrics-*',
-          breach: { segment: 'WHERE cpu > 0.9' },
-        },
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
       };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
-      expect(result.query).toEqual({
-        format: 'composed',
-        base: 'FROM metrics-*',
-        breach: { segment: 'WHERE cpu > 0.9' },
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
+      expect(result.no_data).toEqual({ strategy: 'alert', query: 'FROM heartbeat-*' });
+    });
+
+    it('stores no lifecycle objects for a signal rule', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result).not.toHaveProperty('recovery');
+      expect(result).not.toHaveProperty('no_data');
+    });
+
+    it('normalises a null state_transition to an absent one', () => {
+      const data: CreateRuleData = { ...baseCreateData, state_transition: null };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.state_transition).toBeUndefined();
+    });
+
+    it('stores the state_transition phases the request provided', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        state_transition: { pending: { count: 3, timeframe: '5m', operator: 'AND' } },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.state_transition).toEqual({
+        pending: { count: 3, timeframe: '5m', operator: 'AND' },
       });
     });
   });
@@ -210,7 +256,7 @@ describe('utils', () => {
 
     it('clears state_transition when update sends null (immediate mode)', () => {
       const existing = createRuleSoAttributes({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
       const updateData: UpdateRuleData = {
         state_transition: null,
@@ -222,12 +268,12 @@ describe('utils', () => {
         version: 2,
       });
 
-      expect(result.state_transition).toBeNull();
+      expect(result.state_transition).toBeUndefined();
     });
 
     it('preserves existing state_transition when update omits it', () => {
       const existing = createRuleSoAttributes({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
       const updateData: UpdateRuleData = {};
 
@@ -237,13 +283,13 @@ describe('utils', () => {
         version: 2,
       });
 
-      expect(result.state_transition).toEqual({ pending_count: 3 });
+      expect(result.state_transition).toEqual({ pending: { count: 3 } });
     });
 
     it('sets state_transition when update provides a value', () => {
       const existing = createRuleSoAttributes({});
       const updateData: UpdateRuleData = {
-        state_transition: { pending_count: 5 },
+        state_transition: { pending: { count: 5 } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -252,7 +298,7 @@ describe('utils', () => {
         version: 2,
       });
 
-      expect(result.state_transition).toEqual({ pending_count: 5 });
+      expect(result.state_transition).toEqual({ pending: { count: 5 } });
     });
 
     it('preserves metadata.builder_type when query is not changed', () => {
@@ -277,7 +323,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        query: { base: 'FROM new-index | LIMIT 1' },
       };
 
       expect(() =>
@@ -294,7 +340,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        query: { base: 'FROM new-index | LIMIT 1' },
         metadata: { builder_type: null },
       };
 
@@ -312,7 +358,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        query: { base: 'FROM new-index | LIMIT 1' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -327,10 +373,10 @@ describe('utils', () => {
     it('allows strategy change on a builder rule without clearing builder_type', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
-        recovery_strategy: 'no_breach',
+        recovery: { strategy: 'no_breach' },
       });
       const updateData: UpdateRuleData = {
-        recovery_strategy: 'none',
+        recovery: { strategy: 'manual' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -347,7 +393,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        query: { base: 'FROM new-index | LIMIT 1' },
         metadata: { builder_type: 'threshold' },
       };
 
@@ -380,10 +426,10 @@ describe('utils', () => {
     it('does not auto-clear metadata.builder_type when same query is sent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -395,13 +441,13 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('does not auto-clear metadata.builder_type when the same conditionless composed query is resent', () => {
+    it('does not auto-clear metadata.builder_type when the same breach-less query is resent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
-        query: { format: 'composed', base: 'FROM metrics-*', breach: { segment: '' } },
+        query: { base: 'FROM metrics-*' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'composed', base: 'FROM metrics-*' },
+        query: { base: 'FROM metrics-*' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -411,19 +457,15 @@ describe('utils', () => {
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
-      expect(result.query).toEqual({
-        format: 'composed',
-        base: 'FROM metrics-*',
-        breach: { segment: '' },
-      });
+      expect(result.query).toEqual({ base: 'FROM metrics-*' });
     });
 
-    it('normalizes an omitted composed breach block on update', () => {
+    it('replaces the query wholesale, dropping a breach block the update omits', () => {
       const existing = createRuleSoAttributes({
-        query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'composed', base: 'FROM logs-*' },
+        query: { base: 'FROM logs-*' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -432,11 +474,67 @@ describe('utils', () => {
         version: 2,
       });
 
-      expect(result.query).toEqual({
-        format: 'composed',
-        base: 'FROM logs-*',
-        breach: { segment: '' },
+      expect(result.query).toEqual({ base: 'FROM logs-*' });
+    });
+
+    it('preserves the stored query when the update omits it', () => {
+      const existing = createRuleSoAttributes({
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
       });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'user-2', updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.query).toEqual({ base: 'FROM logs-*', breach: { segment: 'WHERE error' } });
+    });
+
+    it('replaces recovery wholesale rather than merging the stored member', () => {
+      const existing = createRuleSoAttributes({
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+      });
+      const updateData: UpdateRuleData = { recovery: { strategy: 'no_breach' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
+    });
+
+    it('replaces no_data wholesale, dropping the presence query of the stored member', () => {
+      const existing = createRuleSoAttributes({
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      });
+      const updateData: UpdateRuleData = { no_data: { strategy: 'keep_last' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.no_data).toEqual({ strategy: 'keep_last' });
+    });
+
+    it('preserves the stored recovery and no_data when the update omits them', () => {
+      const existing = createRuleSoAttributes({
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        no_data: { strategy: 'resolve', query: 'FROM heartbeat-*' },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'user-2', updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
+      expect(result.no_data).toEqual({ strategy: 'resolve', query: 'FROM heartbeat-*' });
     });
 
     it('preserves stored artifacts when the update does not touch them', () => {
@@ -531,49 +629,57 @@ describe('utils', () => {
       expect(response.metadata.description).toBe('Round-trip desc');
     });
 
-    it('omits the breach block when the stored composed segment is empty', () => {
+    it('returns the stored query unchanged', () => {
       const attrs = createRuleSoAttributes({
-        query: { format: 'composed', base: 'FROM metrics-*', breach: { segment: '' } },
-      });
-
-      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-
-      expect(result.query).toEqual({ format: 'composed', base: 'FROM metrics-*' });
-    });
-
-    it('preserves an unrelated recovery segment when omitting an empty breach block', () => {
-      const attrs = createRuleSoAttributes({
-        query: {
-          format: 'composed',
-          base: 'FROM metrics-*',
-          breach: { segment: '' },
-          recovery: { segment: 'WHERE cpu < 0.5' },
-        },
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
       });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.query).toEqual({
-        format: 'composed',
         base: 'FROM metrics-*',
-        recovery: { segment: 'WHERE cpu < 0.5' },
+        breach: { segment: 'WHERE cpu > 0.9' },
       });
     });
 
-    it('round-trips a conditionless composed query through create → transform', () => {
+    it('exposes the stored recovery and no_data objects', () => {
+      const attrs = createRuleSoAttributes({
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
+      expect(result.no_data).toEqual({ strategy: 'alert', query: 'FROM heartbeat-*' });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('leaves a signal rule without lifecycle objects', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.recovery).toBeUndefined();
+      expect(result.no_data).toBeUndefined();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('round-trips a breach-less query through create → transform', () => {
       const createData: CreateRuleData = {
         ...baseCreateData,
-        query: { format: 'composed', base: 'FROM metrics-*' },
+        query: { base: 'FROM metrics-*' },
       };
 
       const soAttrs = transformCreateRuleBodyToRuleSoAttributes(createData, serverFields);
       const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-2', soAttrs);
 
-      expect(soAttrs.query).toEqual({
-        format: 'composed',
-        base: 'FROM metrics-*',
-        breach: { segment: '' },
-      });
+      expect(soAttrs.query).toEqual({ base: 'FROM metrics-*' });
       expect(response.query).toEqual(createData.query);
     });
 
@@ -670,32 +776,29 @@ describe('utils', () => {
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
 
-    it('does not throw for a valid signal rule (standalone, breach-only)', () => {
+    it('does not throw for a valid signal rule, which carries no lifecycle objects', () => {
       const attrs = createRuleSoAttributes({
         kind: 'signal',
-        recovery_strategy: undefined,
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        recovery: undefined,
+        no_data: undefined,
+        query: { base: 'FROM logs-* | LIMIT 1' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
 
-    it('throws INVALID_SIGNAL_RULE (400) when a signal rule uses a composed query', () => {
+    it('throws INVALID_SIGNAL_RULE (400) when a signal rule sets recovery', () => {
       const attrs = createRuleSoAttributes({
         kind: 'signal',
-        recovery_strategy: undefined,
-        query: {
-          format: 'composed',
-          base: 'FROM logs-*',
-          breach: { segment: 'WHERE error' },
-        },
+        recovery: { strategy: 'no_breach' },
+        no_data: undefined,
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
         expect.objectContaining({
           isBoom: true,
           output: expect.objectContaining({ statusCode: 400 }),
-          message: 'kind "signal" requires query.format "standalone".',
+          message: 'Signal rules cannot set recovery or no_data.',
           data: {
             code: 'INVALID_SIGNAL_RULE',
             details: { rule_id: 'rule-1', rule_kind: 'signal' },
@@ -704,16 +807,16 @@ describe('utils', () => {
       );
     });
 
-    it('throws INVALID_SIGNAL_RULE when a signal rule sets a recovery_strategy', () => {
+    it('throws INVALID_SIGNAL_RULE when a signal rule sets no_data', () => {
       const attrs = createRuleSoAttributes({
         kind: 'signal',
-        recovery_strategy: 'no_breach',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        recovery: undefined,
+        no_data: { strategy: 'keep_last' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
         expect.objectContaining({
-          message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+          message: 'Signal rules cannot set recovery or no_data.',
           data: {
             code: 'INVALID_SIGNAL_RULE',
             details: { rule_id: 'rule-1', rule_kind: 'signal' },
@@ -722,178 +825,101 @@ describe('utils', () => {
       );
     });
 
-    it('throws INVALID_SIGNAL_RULE when a signal rule sets a no_data_strategy', () => {
-      const attrs = createRuleSoAttributes({
-        kind: 'signal',
-        recovery_strategy: undefined,
-        no_data_strategy: 'last_known_status',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
-        },
-      });
-
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
-        expect.objectContaining({
-          data: {
-            code: 'INVALID_SIGNAL_RULE',
-            details: { rule_id: 'rule-1', rule_kind: 'signal' },
-          },
-        })
-      );
-    });
-
-    it('throws INVALID_RULE_QUERY_CONFIG (400) when a query.recovery block has no "query" strategy', () => {
+    it('throws INVALID_RULE_QUERY_CONFIG (400) when a "condition" recovery has no breach to contrast with', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          recovery: { query: 'FROM logs-* | LIMIT 2' },
-        },
+        query: { base: 'FROM logs-*' },
+        recovery: { strategy: 'condition', segment: 'WHERE NOT error' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
         expect.objectContaining({
           isBoom: true,
           output: expect.objectContaining({ statusCode: 400 }),
-          message: 'query.recovery is only allowed when recovery_strategy is "query".',
+          message: 'recovery.strategy "condition" requires query.breach.',
           data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
         })
       );
     });
 
-    it('throws INVALID_RULE_QUERY_CONFIG when a composed query.recovery segment has no "query" strategy', () => {
+    it('does not throw for a "condition" recovery alongside a breach segment', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
-        query: {
-          format: 'composed',
-          base: 'FROM logs-*',
-          breach: { segment: 'WHERE error' },
-          recovery: { segment: 'WHERE NOT error' },
-        },
-      });
-
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
-        expect.objectContaining({
-          isBoom: true,
-          output: expect.objectContaining({ statusCode: 400 }),
-          message: 'query.recovery is only allowed when recovery_strategy is "query".',
-          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
-        })
-      );
-    });
-
-    it('throws INVALID_RULE_QUERY_CONFIG when recovery_strategy "query" has no recovery block', () => {
-      const attrs = createRuleSoAttributes({
-        kind: 'alert',
-        recovery_strategy: 'query',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-      });
-
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
-        expect.objectContaining({
-          message: 'query.recovery is required when recovery_strategy is "query".',
-          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
-        })
-      );
-    });
-
-    it('throws INVALID_RULE_QUERY_CONFIG when a composed rule sets recovery_strategy "query" with no recovery segment', () => {
-      const attrs = createRuleSoAttributes({
-        kind: 'alert',
-        recovery_strategy: 'query',
-        query: {
-          format: 'composed',
-          base: 'FROM logs-*',
-          breach: { segment: 'WHERE error' },
-        },
-      });
-
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
-        expect.objectContaining({
-          message: 'query.recovery is required when recovery_strategy is "query".',
-          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
-        })
-      );
-    });
-
-    it('throws INVALID_RULE_QUERY_CONFIG when a query.no_data block has no strategy', () => {
-      const attrs = createRuleSoAttributes({
-        kind: 'alert',
-        no_data_strategy: undefined,
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
-        },
-      });
-
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
-        expect.objectContaining({
-          message:
-            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
-        })
-      );
-    });
-
-    it('throws INVALID_RULE_QUERY_CONFIG when a no_data_strategy has no no_data block (standalone)', () => {
-      const attrs = createRuleSoAttributes({
-        kind: 'alert',
-        no_data_strategy: 'last_known_status',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-      });
-
-      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
-        expect.objectContaining({
-          message:
-            'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
-        })
-      );
-    });
-
-    it('does not require a no_data block for a composed-format rule (base query is the data-presence query)', () => {
-      const attrs = createRuleSoAttributes({
-        kind: 'alert',
-        no_data_strategy: 'last_known_status',
-        query: {
-          format: 'composed',
-          base: 'FROM logs-*',
-          breach: { segment: 'WHERE error' },
-        },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'condition', segment: 'WHERE NOT error' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
 
-    it('throws INVALID_STATE_TRANSITION_CONFIG (400) when a recovering delay is set while recovery is disabled', () => {
+    it('throws INVALID_RULE_QUERY_CONFIG when the recovery segment does not compose onto the base', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
-        recovery_strategy: 'none',
-        state_transition: { recovering_count: 3 },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'condition', segment: 'WHERE (' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
         expect.objectContaining({
           isBoom: true,
           output: expect.objectContaining({ statusCode: 400 }),
-          message:
-            'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+          message: 'recovery.segment does not compose into a valid ES|QL query with query.base.',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not check composition for recovery strategies that carry no segment', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE NOT error' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not require a presence query — the base query is the fallback', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        no_data: { strategy: 'keep_last' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('accepts the "alert" no-data strategy', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG (400) when a recovering delay is set under manual recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        state_transition: { recovering: { count: 3 } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',
           data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
         })
       );
     });
 
-    it('throws INVALID_STATE_TRANSITION_CONFIG when a recovering_timeframe is set while recovery is unset', () => {
+    it('throws INVALID_STATE_TRANSITION_CONFIG when only a recovering timeframe is set under manual recovery', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
-        recovery_strategy: undefined,
-        state_transition: { recovering_timeframe: '5m' },
+        recovery: { strategy: 'manual' },
+        state_transition: { recovering: { timeframe: '5m' } },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
@@ -903,21 +929,21 @@ describe('utils', () => {
       );
     });
 
-    it('does not throw for a recovering delay when recovery is enabled', () => {
+    it('does not throw for a recovering delay when recovery can happen', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
-        recovery_strategy: 'no_breach',
-        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+        recovery: { strategy: 'no_breach' },
+        state_transition: { recovering: { count: 3, timeframe: '5m' } },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
 
-    it('throws INVALID_STATE_TRANSITION_CONFIG for recovering_count 0 when recovery is disabled', () => {
+    it('throws INVALID_STATE_TRANSITION_CONFIG for a recovering count of 0 under manual recovery', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
-        recovery_strategy: 'none',
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        recovery: { strategy: 'manual' },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
@@ -925,6 +951,16 @@ describe('utils', () => {
           data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
         })
       );
+    });
+
+    it('does not throw for a pending delay under manual recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        state_transition: { pending: { count: 3 } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
   });
 

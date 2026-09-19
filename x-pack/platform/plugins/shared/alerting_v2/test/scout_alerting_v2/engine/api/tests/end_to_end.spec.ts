@@ -101,10 +101,7 @@ apiTest.describe(
           buildCreateRuleData({
             metadata: { name: 'end-to-end-active' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -148,10 +145,7 @@ apiTest.describe(
           buildCreateRuleData({
             metadata: { name: 'end-to-end-recovery' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -178,8 +172,7 @@ apiTest.describe(
         });
 
         // 3) Director must annotate the recovery as `inactive` before the
-        //    dispatcher can fire on it (`state_transition: { recovering_count:
-        //    0 }` from the builder default skips the `recovering` step).
+        //    dispatcher can fire on it (`state_transition: { recovering: { count: //    0 } }` from the builder default skips the `recovering` step).
         await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
           episodeStatus: 'inactive',
         });

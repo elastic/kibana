@@ -65,7 +65,7 @@ const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleD
     metadata: { name: 'CPU usage', description: 'High CPU', tags: ['prod'] },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
     ...overrides,
   } as CreateRuleData);
 

@@ -9,16 +9,6 @@ import type { RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { splitResultToRuleQuery } from './use_heuristic_split';
 
-const preserveRecoveryBlock = (
-  source: RuleQuery,
-  result: Extract<RuleQuery, { format: 'composed' }>
-): Extract<RuleQuery, { format: 'composed' }> => {
-  if (source.format === 'composed' && source.recovery) {
-    return { ...result, recovery: source.recovery };
-  }
-  return result;
-};
-
 /**
  * Sandbox query shape when opting into manual split.
  *
@@ -26,33 +16,19 @@ const preserveRecoveryBlock = (
  * in create mode. When the split succeeds, pre-populates base and alert tabs;
  * otherwise the full pipeline lives in `base` with an empty alert segment so
  * the user can define the split manually (split_failed, no_alert_condition, empty).
- *
- * Preserves any custom recovery block from {@link sourceQuery}.
  */
 export const enterManualSplitQuery = (sourceQuery: RuleQuery): RuleQuery => {
   const fullQuery = getBreachQuery(sourceQuery);
   const { query, outcome } = splitResultToRuleQuery(fullQuery);
 
-  if (outcome === 'success') {
-    return preserveRecoveryBlock(sourceQuery, query);
-  }
-
-  return preserveRecoveryBlock(sourceQuery, {
-    format: 'composed',
-    base: fullQuery,
-    breach: { segment: '' },
-  });
+  return outcome === 'success' ? query : { base: fullQuery, breach: { segment: '' } };
 };
 
 /**
  * Sandbox query shape when returning to the unified editor: the combined pipeline
  * is stored in `base` with an empty segment so `getBreachQuery` returns it verbatim.
- *
- * Preserves any custom recovery block from {@link sourceQuery}.
  */
-export const exitManualSplitQuery = (sourceQuery: RuleQuery): RuleQuery =>
-  preserveRecoveryBlock(sourceQuery, {
-    format: 'composed',
-    base: getBreachQuery(sourceQuery),
-    breach: { segment: '' },
-  });
+export const exitManualSplitQuery = (sourceQuery: RuleQuery): RuleQuery => ({
+  base: getBreachQuery(sourceQuery),
+  breach: { segment: '' },
+});

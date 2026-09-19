@@ -121,22 +121,18 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    const expectedQuery =
-      rule.query.format === 'standalone'
-        ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${NON_STREAMING_MAX_ROWS}`
-        : '';
+    const expectedQuery = `${rule.query.base.trimEnd()}\n| LIMIT ${NON_STREAMING_MAX_ROWS}`;
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: expectedQuery, drop_null_columns: true }),
       expect.objectContaining({ signal: abortController.signal })
     );
   });
 
-  it('concatenates base and breach segment for composed format rules', async () => {
+  it('concatenates base and breach segment when the rule carries a breach segment', async () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
       query: {
-        format: 'composed',
         base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
         breach: { segment: 'WHERE avg(cpu) > 0.9' },
       },
@@ -153,14 +149,11 @@ describe('ExecuteRuleQueryStep', () => {
     );
   });
 
-  it('runs base with LIMIT for a conditionless composed rule', async () => {
+  it('runs base with LIMIT for a rule without a breach segment', async () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
-      query: {
-        format: 'composed',
-        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
-      },
+      query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
     });
     const state = createRulePipelineState({ rule });
 
@@ -178,7 +171,7 @@ describe('ExecuteRuleQueryStep', () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
-      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      query: { base: 'FROM logs-*' },
     });
     const state = createRulePipelineState({ rule });
 
@@ -195,7 +188,7 @@ describe('ExecuteRuleQueryStep', () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
-      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      query: { base: 'FROM logs-*' },
     });
     const state = createRulePipelineState({ rule });
 
@@ -212,7 +205,7 @@ describe('ExecuteRuleQueryStep', () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     });
     const state = createRulePipelineState({ rule });
 
@@ -452,7 +445,7 @@ describe('ExecuteRuleQueryStep', () => {
       ]);
 
       const rule = createRuleResponse({
-        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        query: { base: 'FROM logs-*' },
       });
       const state = createRulePipelineState({ rule });
 

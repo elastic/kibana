@@ -162,7 +162,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
       tags: ['prod'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
     time_field: '@timestamp',
     createdBy: 'elastic',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -178,7 +178,7 @@ const mockRules: RuleApiResponse[] = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] as string[], version: 1 },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   }),
 ];
 

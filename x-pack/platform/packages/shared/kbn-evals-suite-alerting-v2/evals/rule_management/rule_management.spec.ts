@@ -122,7 +122,7 @@ evaluate.describe(
                       expect.arrayContaining(['host.name'])
                     );
                     expect(
-                      attachment!.state_transition?.pending_timeframe ??
+                      attachment!.state_transition?.pending?.timeframe ??
                         attachment!.schedule?.lookback
                     ).toEqual('5m');
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
@@ -161,7 +161,7 @@ evaluate.describe(
                       expect.arrayContaining(['host.name'])
                     );
                     expect(
-                      attachment!.state_transition?.pending_timeframe ??
+                      attachment!.state_transition?.pending?.timeframe ??
                         attachment!.schedule?.lookback
                     ).toEqual('5m');
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
@@ -257,36 +257,36 @@ evaluate.describe(
           description:
             'Composes an alert, then applies one recovery behavior per example: custom ' +
             'threshold, no automatic recovery, or recover when the breach clears. Separate ' +
-            'examples cover composed and standalone query formats.',
+            'examples cover segmented (shared base plus breach segment) and single-query rules.',
           examples: [
             recoveryExample({
               hostMetricsIndex,
-              format: 'composed',
-              strategy: 'query',
+              style: 'segmented',
+              strategy: 'condition',
             }),
             recoveryExample({
               hostMetricsIndex,
-              format: 'composed',
-              strategy: 'none',
+              style: 'segmented',
+              strategy: 'manual',
             }),
             recoveryExample({
               hostMetricsIndex,
-              format: 'composed',
+              style: 'segmented',
               strategy: 'no_breach',
             }),
             recoveryExample({
               hostMetricsIndex,
-              format: 'standalone',
+              style: 'single',
               strategy: 'query',
             }),
             recoveryExample({
               hostMetricsIndex,
-              format: 'standalone',
-              strategy: 'none',
+              style: 'single',
+              strategy: 'manual',
             }),
             recoveryExample({
               hostMetricsIndex,
-              format: 'standalone',
+              style: 'single',
               strategy: 'no_breach',
             }),
           ],
@@ -306,39 +306,49 @@ evaluate.describe(
           name: 'alerting-v2: no-data strategy updates',
           description:
             'Composes an alert, then applies one no-data behavior per example: hold last ' +
-            'known status, recover when quiet, or ignore missing data. Separate examples ' +
-            'cover composed (base as data-presence query) and standalone (explicit no_data ' +
-            'query) formats.',
+            'known status, resolve when quiet, alert on absence, or ignore missing data. ' +
+            'Separate examples cover using the base query as the data-presence query and ' +
+            'supplying an explicit no_data query.',
           examples: [
             noDataExample({
               hostMetricsIndex,
-              format: 'composed',
-              strategy: 'last_known_status',
+              style: 'segmented',
+              strategy: 'keep_last',
             }),
             noDataExample({
               hostMetricsIndex,
-              format: 'composed',
-              strategy: 'recover',
+              style: 'segmented',
+              strategy: 'resolve',
             }),
             noDataExample({
               hostMetricsIndex,
-              format: 'composed',
-              strategy: 'none',
+              style: 'segmented',
+              strategy: 'alert',
             }),
             noDataExample({
               hostMetricsIndex,
-              format: 'standalone',
-              strategy: 'last_known_status',
+              style: 'segmented',
+              strategy: 'ignore',
             }),
             noDataExample({
               hostMetricsIndex,
-              format: 'standalone',
-              strategy: 'recover',
+              style: 'single',
+              strategy: 'keep_last',
             }),
             noDataExample({
               hostMetricsIndex,
-              format: 'standalone',
-              strategy: 'none',
+              style: 'single',
+              strategy: 'resolve',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              style: 'single',
+              strategy: 'alert',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              style: 'single',
+              strategy: 'ignore',
             }),
           ],
         },

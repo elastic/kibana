@@ -10,9 +10,11 @@ export type {
   StateTransitionDelayMode,
   RuleNotificationsValue,
   RuleQuery,
-  ComposedQuery,
-  StandaloneQuery,
+  RuleRecovery,
+  RuleNoData,
   RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from './types';
 export { getBreachQuery, getRecoverQuery } from './utils/query_helpers';
 export {

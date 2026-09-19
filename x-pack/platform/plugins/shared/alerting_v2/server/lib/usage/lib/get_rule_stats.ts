@@ -7,11 +7,37 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { NoDataStrategy, QueryFormat, RecoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { NoDataStrategy, RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { AGENT_BUILDER_TAG } from '../../../agent_builder/common/constants';
 import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
 import type { RuleStatsAggregations, RuleStatsResults } from './types';
+
+/**
+ * A runtime field over an attribute that is stored with `enabled: false` and so
+ * has to be read from `_source`. Walks `path` and emits the leaf only when
+ * every level along the way is present.
+ */
+const runtimeField = (
+  type: 'long' | 'keyword' | 'date',
+  path: readonly string[],
+  emit: (value: string) => string
+) => ({
+  type,
+  script: {
+    source: `
+      def node = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+      ${path.map((key) => `if (node == null) return; node = node['${key}'];`).join('\n      ')}
+      if (node != null) ${emit('node')};
+    `,
+  },
+});
+
+const emitLong = (path: readonly string[]) =>
+  runtimeField('long', path, (value) => `emit((long) ${value})`);
+const emitKeyword = (path: readonly string[]) => runtimeField('keyword', path, (v) => `emit(${v})`);
+const emitDate = (path: readonly string[]) =>
+  runtimeField('date', path, (value) => `emit(Instant.parse(${value}).toEpochMilli())`);
 
 export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleStatsResults> {
   const response = await esClient.search({
@@ -25,174 +51,21 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
     },
     // Runtime mappings for fields stored with enabled:false (not indexed, read from _source)
     runtime_mappings: {
-      rule_pending_count: {
-        type: 'long',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def st = rule['state_transition'];
-              if (st != null) {
-                def v = st['pending_count'];
-                if (v != null) emit((long) v);
-              }
-            }
-          `,
-        },
-      },
-      rule_recovering_count: {
-        type: 'long',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def st = rule['state_transition'];
-              if (st != null) {
-                def v = st['recovering_count'];
-                if (v != null) emit((long) v);
-              }
-            }
-          `,
-        },
-      },
-      rule_pending_timeframe: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def st = rule['state_transition'];
-              if (st != null) {
-                def v = st['pending_timeframe'];
-                if (v != null) emit(v);
-              }
-            }
-          `,
-        },
-      },
-      rule_recovering_timeframe: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def st = rule['state_transition'];
-              if (st != null) {
-                def v = st['recovering_timeframe'];
-                if (v != null) emit(v);
-              }
-            }
-          `,
-        },
-      },
-      rule_grouping_fields_count: {
-        type: 'long',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def grouping = rule['grouping'];
-              if (grouping != null) {
-                def fields = grouping['fields'];
-                if (fields != null) emit((long) fields.size());
-              }
-            }
-          `,
-        },
-      },
-      rule_schedule_every: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def schedule = rule['schedule'];
-              if (schedule != null) {
-                def v = schedule['every'];
-                if (v != null) emit(v);
-              }
-            }
-          `,
-        },
-      },
-      rule_schedule_lookback: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def schedule = rule['schedule'];
-              if (schedule != null) {
-                def v = schedule['lookback'];
-                if (v != null) emit(v);
-              }
-            }
-          `,
-        },
-      },
-      rule_created_at: {
-        type: 'date',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def v = rule['createdAt'];
-              if (v != null) emit(Instant.parse(v).toEpochMilli());
-            }
-          `,
-        },
-      },
-      rule_updated_at: {
-        type: 'date',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def v = rule['updatedAt'];
-              if (v != null) emit(Instant.parse(v).toEpochMilli());
-            }
-          `,
-        },
-      },
-      rule_query_format: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def query = rule['query'];
-              if (query != null) {
-                def v = query['format'];
-                if (v != null) emit(v);
-              }
-            }
-          `,
-        },
-      },
-      rule_recovery_strategy: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def v = rule['recovery_strategy'];
-              if (v != null) emit(v);
-            }
-          `,
-        },
-      },
-      rule_no_data_strategy: {
-        type: 'keyword',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def v = rule['no_data_strategy'];
-              if (v != null) emit(v);
-            }
-          `,
-        },
-      },
+      rule_pending_count: emitLong(['state_transition', 'pending', 'count']),
+      rule_recovering_count: emitLong(['state_transition', 'recovering', 'count']),
+      rule_pending_timeframe: emitKeyword(['state_transition', 'pending', 'timeframe']),
+      rule_recovering_timeframe: emitKeyword(['state_transition', 'recovering', 'timeframe']),
+      rule_grouping_fields_count: runtimeField(
+        'long',
+        ['grouping', 'fields'],
+        (v) => `emit((long) ${v}.size())`
+      ),
+      rule_schedule_every: emitKeyword(['schedule', 'every']),
+      rule_schedule_lookback: emitKeyword(['schedule', 'lookback']),
+      rule_created_at: emitDate(['createdAt']),
+      rule_updated_at: emitDate(['updatedAt']),
+      rule_recovery_strategy: emitKeyword(['recovery', 'strategy']),
+      rule_no_data_strategy: emitKeyword(['no_data', 'strategy']),
     },
     aggs: {
       count_enabled: {
@@ -231,9 +104,6 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
       min_created_at: {
         min: { field: 'rule_created_at', format: 'strict_date_time' },
       },
-      count_by_query_format: {
-        terms: { field: 'rule_query_format', size: TERMS_SIZE },
-      },
       count_by_recovery_strategy: {
         terms: { field: 'rule_recovery_strategy', size: TERMS_SIZE },
       },
@@ -262,7 +132,6 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
     count_with_grouping: aggs?.count_with_grouping.doc_count ?? 0,
     avg_grouping_fields_count: aggs?.avg_grouping_fields_count.value ?? null,
     min_created_at: aggs?.min_created_at.value_as_string ?? null,
-    count_by_query_format: bucketsToRecord<QueryFormat>(aggs?.count_by_query_format?.buckets),
     count_by_recovery_strategy: bucketsToRecord<RecoveryStrategy>(
       aggs?.count_by_recovery_strategy?.buckets
     ),

@@ -39,15 +39,9 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-1', tags: [AGENT_BUILDER_TAG] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | LIMIT 10' },
-            no_data: { query: 'FROM metrics-* | STATS c = COUNT(*)' },
-          },
+          query: { base: 'FROM metrics-* | LIMIT 10' },
           grouping: { fields: ['host.name', 'service.name'] },
-          no_data_strategy: 'last_known_status',
-          // Builder defaults to `no_breach`; original FTR rule had no recovery strategy.
-          recovery_strategy: undefined,
+          no_data: { strategy: 'keep_last', query: 'FROM metrics-* | STATS c = COUNT(*)' },
         })
       ),
       apiServices.alertingV2.rules.create(
@@ -56,9 +50,9 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'signal-rule-1' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
-          // Signal rules forbid state_transition and recovery_strategy; grouping omitted to match original.
-          recovery_strategy: undefined,
+          query: { base: 'FROM logs-* | LIMIT 10' },
+          recovery: undefined,
+          no_data: undefined,
           state_transition: undefined,
           grouping: undefined,
         })
@@ -69,13 +63,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-2' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | LIMIT 5' },
-            no_data: { query: 'FROM metrics-* | STATS c = COUNT(*)' },
-          },
-          no_data_strategy: 'recover',
-          recovery_strategy: undefined,
+          query: { base: 'FROM metrics-* | LIMIT 5' },
+          no_data: { strategy: 'resolve', query: 'FROM metrics-* | STATS c = COUNT(*)' },
           grouping: undefined,
         })
       ),
@@ -85,12 +74,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-3' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | LIMIT 5' },
-            recovery: { query: 'FROM metrics-* | LIMIT 3' },
-          },
-          recovery_strategy: 'query',
+          query: { base: 'FROM metrics-* | LIMIT 5' },
+          recovery: { strategy: 'query', query: 'FROM metrics-* | LIMIT 3' },
           grouping: undefined,
         })
       ),
@@ -100,9 +85,9 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-4' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
-          recovery_strategy: 'none',
-          no_data_strategy: 'none',
+          query: { base: 'FROM metrics-* | LIMIT 5' },
+          recovery: { strategy: 'manual' },
+          no_data: { strategy: 'ignore' },
           grouping: undefined,
         })
       ),
@@ -113,12 +98,26 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           query: {
-            format: 'composed',
             base: 'FROM metrics-* | STATS count = COUNT(*) BY host.name',
             breach: { segment: '| WHERE count > 5' },
           },
-          no_data_strategy: 'recover',
-          recovery_strategy: 'no_breach',
+          no_data: { strategy: 'resolve' },
+          recovery: { strategy: 'no_breach' },
+          grouping: undefined,
+        })
+      ),
+      apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'alert-rule-6' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          query: {
+            base: 'FROM metrics-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count > 5' },
+          },
+          recovery: { strategy: 'condition', segment: 'WHERE count <= 5' },
+          no_data: { strategy: 'alert' },
           grouping: undefined,
         })
       ),
@@ -158,13 +157,13 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     expect(state.has_errors).toBe(false);
 
     // Rule stats
-    expect(state.count_total).toBe(6);
-    expect(state.count_enabled).toBe(5);
+    expect(state.count_total).toBe(7);
+    expect(state.count_enabled).toBe(6);
     expect(state.count_agent_builder_assisted).toBe(1);
-    expect(state.count_by_kind).toStrictEqual({ alert: 5, signal: 1 });
+    expect(state.count_by_kind).toStrictEqual({ alert: 6, signal: 1 });
     expect(sortByName(state.count_by_schedule)).toStrictEqual([
       { name: '1m', value: 1 },
-      { name: '5m', value: 5 },
+      { name: '5m', value: 6 },
     ]);
     expect(sortByName(state.count_by_lookback)).toStrictEqual([
       { name: '10m', value: 1 },
@@ -172,12 +171,17 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     ]);
     expect(state.count_with_grouping).toBe(1);
     expect(state.avg_grouping_fields_count).toBe(2);
-    expect(state.count_by_query_format).toStrictEqual({ standalone: 5, composed: 1 });
-    expect(state.count_by_recovery_strategy).toStrictEqual({ no_breach: 1, query: 1, none: 1 });
+    expect(state.count_by_recovery_strategy).toStrictEqual({
+      no_breach: 3,
+      query: 1,
+      condition: 1,
+      manual: 1,
+    });
     expect(state.count_by_no_data_strategy).toStrictEqual({
-      last_known_status: 1,
-      recover: 2,
-      none: 1,
+      ignore: 2,
+      keep_last: 1,
+      resolve: 2,
+      alert: 1,
     });
 
     expect(state.executions_delay_p50_ms).toBeDefined();
