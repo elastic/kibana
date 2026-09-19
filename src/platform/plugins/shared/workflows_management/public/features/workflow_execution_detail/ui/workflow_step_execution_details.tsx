@@ -33,7 +33,9 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { ForeachIterationsSection } from './foreach_iterations_section';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { StepExecutionLogs } from './step_execution_logs';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
+import { isEngineStepLogsEligible } from '../model/is_engine_step_logs_eligible';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
@@ -319,6 +321,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         stepExecution={stepExecution}
                         mode="output"
                         allStepExecutions={allStepExecutions}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {isEngineStepLogsEligible(stepExecution.stepType, stepExecution.id) && (
+                    <EuiFlexItem grow={false}>
+                      <StepExecutionLogs
+                        workflowExecutionId={workflowExecutionId}
+                        stepExecutionId={stepExecution.id}
                       />
                     </EuiFlexItem>
                   )}

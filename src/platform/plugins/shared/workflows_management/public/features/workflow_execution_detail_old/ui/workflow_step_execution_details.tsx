@@ -41,6 +41,8 @@ import {
   type ApprovalLabels,
   ResumeExecutionButton,
 } from '../../workflow_execution_detail/ui/resume_execution_button';
+import { isEngineStepLogsEligible } from '../../workflow_execution_detail/model/is_engine_step_logs_eligible';
+import { StepExecutionLogs } from '../../workflow_execution_detail/ui/step_execution_logs';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -163,7 +165,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         }
         return pseudoTabs;
       }
-      return [
+      const stepTabs: { id: string; name: string }[] = [
         {
           id: 'output',
           name: hasError ? 'Error' : 'Output',
@@ -173,7 +175,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Input',
         },
       ];
-    }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType]);
+      if (isEngineStepLogsEligible(stepExecution?.stepType, stepExecution?.id ?? '')) {
+        stepTabs.push({
+          id: 'logs',
+          name: i18n.translate('workflowsManagement.stepExecutionDetails.logsTab', {
+            defaultMessage: 'Logs',
+          }),
+        });
+      }
+      return stepTabs;
+    }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType, stepExecution]);
 
     const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
@@ -278,9 +289,10 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ))}
             </EuiTabs>
           </EuiFlexItem>
-          {isFinished ? (
+          {/* Logs fetch independently of step input/output, so the tab can open before the step finishes. */}
+          {isFinished || selectedTabId === 'logs' ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
-              {isLoadingStepData ? (
+              {isLoadingStepData && selectedTabId !== 'logs' ? (
                 <EuiPanel hasShadow={false} paddingSize="m">
                   <EuiSkeletonText lines={4} />
                 </EuiPanel>
@@ -364,6 +376,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                       )}
                       <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                     </>
+                  )}
+                  {selectedTabId === 'logs' && (
+                    <StepExecutionLogs
+                      workflowExecutionId={workflowExecutionId}
+                      stepExecutionId={stepExecution.id}
+                      embedded
+                    />
                   )}
                 </>
               )}

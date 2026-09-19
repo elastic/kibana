@@ -45,7 +45,9 @@ describe('createBaseHandlerContext', () => {
     ).toHaveBeenCalledWith({ x: 1 }, undefined);
 
     context.logger.info('hello', { meta: true });
-    expect(mocks.workflowLogger.logInfo).toHaveBeenCalledWith('hello', { meta: true });
+    expect(mocks.stepExecutionRuntime.stepLogger.logInfo).toHaveBeenCalledWith('hello', {
+      meta: true,
+    });
   });
 
   it('creates a renderer that snapshots the workflow context once', () => {

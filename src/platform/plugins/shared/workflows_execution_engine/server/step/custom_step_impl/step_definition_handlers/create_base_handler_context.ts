@@ -20,6 +20,9 @@ export function createBaseHandlerContext(
   stepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger
 ): StepHandlerContext {
+  // Per-step logger is what the Logs panel queries; fall back to the workflow logger
+  // when a node has not opened a step execution yet.
+  const eventLogger = stepExecutionRuntime.stepLogger ?? workflowLogger;
   return {
     input,
     rawInput: rawInput || {},
@@ -57,10 +60,10 @@ export function createBaseHandlerContext(
       },
     },
     logger: {
-      debug: (message, meta) => workflowLogger.logDebug(message, meta),
-      info: (message, meta) => workflowLogger.logInfo(message, meta),
-      warn: (message, meta) => workflowLogger.logWarn(message, meta),
-      error: (message, error) => workflowLogger.logError(message, error),
+      debug: (message, meta) => eventLogger.logDebug(message, meta),
+      info: (message, meta) => eventLogger.logInfo(message, meta),
+      warn: (message, meta) => eventLogger.logWarn(message, meta),
+      error: (message, error) => eventLogger.logError(message, error),
     },
     abortSignal: stepExecutionRuntime.abortController.signal,
     stepId: node.stepId,

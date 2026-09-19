@@ -51,6 +51,12 @@ export const createHandlerTestMocks = (initialPersistedState?: Record<string, un
     failStep: jest.fn(),
     setInput: jest.fn(),
     stepExecutionId: 'step-exec-1',
+    stepLogger: {
+      logInfo: jest.fn(),
+      logError: jest.fn(),
+      logDebug: jest.fn(),
+      logWarn: jest.fn(),
+    },
     workflowExecution: { workflowDefinition: {} },
     getCurrentStepState: jest.fn(() => persistedState.value),
     setCurrentStepState: jest.fn((state: Record<string, unknown> | undefined) => {

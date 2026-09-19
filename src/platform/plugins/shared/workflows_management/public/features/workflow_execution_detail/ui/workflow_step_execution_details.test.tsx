@@ -20,6 +20,10 @@ jest.mock('./step_execution_data_view', () => ({
   ),
 }));
 
+jest.mock('./step_execution_logs', () => ({
+  StepExecutionLogs: () => <div data-test-subj="workflowStepExecutionLogs" />,
+}));
+
 jest.mock('./foreach_iterations_section', () => ({
   ForeachIterationsSection: () => <div data-test-subj="workflowExecutionIterationsSection" />,
 }));
@@ -135,6 +139,7 @@ describe('WorkflowStepExecutionDetails', () => {
 
     expect(screen.getByTestId('step-execution-data-view-input')).toBeInTheDocument();
     expect(screen.getByTestId('step-execution-data-view-output')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepExecutionLogs')).toBeInTheDocument();
   });
 
   it('renders Iterations for foreach without inventing an Output section', () => {
@@ -181,6 +186,7 @@ describe('WorkflowStepExecutionDetails', () => {
     expect(
       container.querySelector('[data-test-subj="workflowExecutionTrigger"]')
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepExecutionLogs')).not.toBeInTheDocument();
   });
 
   it('renders with workflowStepExecutionDetails data-test-subj for regular step', () => {
@@ -193,5 +199,6 @@ describe('WorkflowStepExecutionDetails', () => {
     expect(
       container.querySelector('[data-test-subj="workflowStepExecutionDetails"]')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepExecutionLogs')).toBeInTheDocument();
   });
 });
