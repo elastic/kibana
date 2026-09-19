@@ -1,0 +1,75 @@
+version: '1'
+name: Decision Tree Reinforce
+description: >
+  Post-round workflow that distills a completed investigation into the decision
+  tree for its symptom. Prepares the turn from the stored trees and learnings,
+  then runs the reinforcement agent, which validates and persists its edits.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - decision-tree
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The user message that started this round.
+        response:
+          type: string
+          description: The assistant's final response for this round.
+        conversation_id:
+          type: string
+          description: Conversation id for the completed round, when present.
+        round_id:
+          type: string
+          description: Id of the completed conversation round.
+        agent_id:
+          type: string
+          description: Agent id that produced the round.
+        tool_calls:
+          type: array
+          description: >
+            Tool calls from the completed round. Used to see which decision-tree
+            files the investigator actually opened.
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: false
+
+steps:
+  # Failures here are deliberately not swallowed: this workflow runs as a post-execution hook,
+  # which logs a failed execution and moves on rather than aborting the investigation. Letting a
+  # step fail loudly is what makes a broken reinforcement visible at all.
+  - name: prepare_turn
+    type: nightshift.decisionTreePrepare
+    with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      agent_id: '{{ inputs.agent_id }}'
+      tool_calls: '{{ inputs.tool_calls }}'
+
+  # Nothing else installs this agent: the investigation workflow only ensures the investigator,
+  # and this workflow is the sole caller of the reinforcement agent.
+  - name: ensure_reinforcement_agent
+    type: nightshift.ensureInvestigationAgent
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      agent_id: significant-events.decision-tree-reinforcement
+
+  # The agent runs in its own conversation, so its own beforeAgent hook hydrates the
+  # trees into that conversation's sandbox rather than the investigator's.
+  - name: reinforce_decision_trees
+    type: ai.agent
+    agent-id: significant-events.decision-tree-reinforcement
+    connector-id-by-feature: 'significant_events_investigation'
+    plugin-id: 'significant_events_investigation'
+    aggregate-by: 'significant_events'
+    create-conversation: true
+    timeout: 900s
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      message: '{{ steps.prepare_turn.output.message }}'
