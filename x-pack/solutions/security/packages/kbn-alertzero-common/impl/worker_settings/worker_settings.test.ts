@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -23,6 +24,7 @@ import {
 import {
   WORKER_SETTINGS_DECLARATIONS,
   createDefaultWorkerSettings,
+  getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
 } from '.';
 import type { WorkerSettingsDeclaration } from './types';
@@ -144,6 +146,30 @@ describe('allowed autonomy levels', () => {
   it('defaults to manual when allowed, otherwise the first declared level', () => {
     expect(buildDefaultWorkerSettings(twoLevels).autonomy).toBe('manual');
     expect(buildDefaultWorkerSettings(noManual).autonomy).toBe('supervised');
+  });
+
+  // The real catalog narrows per Worker: what a Worker's gate can honour is a fact about the
+  // Worker, not a UI choice. Asserting the registered sets keeps a later "allow everything"
+  // edit from silently re-opening a level the gate cannot run.
+  it('narrows the registered Workers to the levels their gates support', () => {
+    expect(getAllowedAutonomyLevels(ATTACK_DISCOVERY)).toEqual(['manual', 'supervised']);
+    expect(getAllowedAutonomyLevels(RULE_TUNING)).toEqual(['manual', 'assisted']);
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)).toEqual([
+      'manual',
+      'assisted',
+    ]);
+    // Triage and threat hunt keep the full dial.
+    expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'assisted', 'supervised']);
+  });
+
+  it('rejects a PATCH naming a level the Worker does not allow', () => {
+    expect(
+      issuesOf(ATTACK_DISCOVERY, {
+        workerId: ATTACK_DISCOVERY,
+        autonomy: 'assisted',
+        scheduleInterval: '24h',
+      })
+    ).toContain('autonomy');
   });
 });
 

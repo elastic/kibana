@@ -97,7 +97,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     deepLinkId: SecurityPageName.alertZeroWatchFloor,
-    name: 'Watch Floor',
+    name: 'Triage Watch',
     color: '#16b3a6',
   },
   {
@@ -116,7 +116,7 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
   {
     id: SYSTEM_SECURITY_WATCH_DEEP_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDeep,
-    name: 'Deep Watch',
+    name: 'Forensics Watch',
     color: '#8b5cf6',
     isBeta: true,
   },
@@ -204,6 +204,28 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
 ] as const;
 
 export type SystemSecurityWorkerCatalogEntry = (typeof SYSTEM_SECURITY_WORKER_CATALOG)[number];
+
+/** Default and bounds for Rule Tuning's analysis window, matching the sweep input. */
+export const ANALYSIS_WINDOW_DAYS_DEFAULT = 14;
+export const ANALYSIS_WINDOW_DAYS_MIN = 1;
+export const ANALYSIS_WINDOW_DAYS_MAX = 30;
+
+/**
+ * Watch-owned custom setting field names per Worker. Shared fields (workerId, autonomy,
+ * scheduleInterval) are omitted. A Worker absent from this map is shared-only and needs no
+ * custom settings component.
+ */
+export const WORKER_CUSTOM_SETTING_FIELDS = {
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: ['analysisWindowDays'],
+} as const satisfies Partial<
+  Record<(typeof SYSTEM_SECURITY_WORKER_IDS)[number], readonly string[]>
+>;
+
+export type WorkerCustomSettingField =
+  (typeof WORKER_CUSTOM_SETTING_FIELDS)[keyof typeof WORKER_CUSTOM_SETTING_FIELDS][number];
+
+export const getWorkerCustomSettingFields = (workerId: string): readonly string[] =>
+  (WORKER_CUSTOM_SETTING_FIELDS as Partial<Record<string, readonly string[]>>)[workerId] ?? [];
 
 /**
  * Units offered for a Worker's schedule interval, ordered for display. Seconds are excluded: the

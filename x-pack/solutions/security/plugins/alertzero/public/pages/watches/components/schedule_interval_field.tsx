@@ -5,106 +5,133 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { WORKER_SCHEDULE_UNITS, type WorkerScheduleUnit } from '@kbn/alertzero-common';
+import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import * as i18n from '../settings_translations';
 
-interface ScheduleIntervalFieldProps {
-  current: string;
-  isDisabled?: boolean;
-  onChange: (scheduleInterval: string) => void;
-}
+/** Schedule units offered by the "Every N unit" trigger control. */
+const UNIT_OPTIONS = [
+  { value: 'm', text: i18n.SCHEDULE_UNIT_MINUTES },
+  { value: 'h', text: i18n.SCHEDULE_UNIT_HOURS },
+  { value: 'd', text: i18n.SCHEDULE_UNIT_DAYS },
+] as const;
 
-interface ParsedInterval {
-  value: number;
-  unit: WorkerScheduleUnit;
-}
+type ScheduleUnit = (typeof UNIT_OPTIONS)[number]['value'];
 
-const DEFAULT_PARSED_INTERVAL: ParsedInterval = { value: 24, unit: 'h' };
-const INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
-
-const parseInterval = (interval: string): ParsedInterval | undefined => {
-  const match = INTERVAL_PATTERN.exec(interval);
-  return match ? { value: Number(match[1]), unit: match[2] as WorkerScheduleUnit } : undefined;
+const parseInterval = (interval: string | undefined): { amount: number; unit: ScheduleUnit } => {
+  const match = /^(\d+)([mhd])$/.exec(interval ?? '');
+  if (!match) return { amount: 1, unit: 'h' };
+  return { amount: Number(match[1]), unit: match[2] as ScheduleUnit };
 };
 
-/** Number + unit interval control, controlled by `current`; every valid change updates the page draft immediately. */
+const formatInterval = (amount: number, unit: ScheduleUnit): string => `${amount}${unit}`;
+
+interface ScheduleIntervalFieldProps {
+  workerId: string;
+  current: string;
+  isDisabled?: boolean;
+  onChange: (interval: string) => void;
+}
+
+/**
+ * Trigger row ported from the Sep 14 prototype (notdaybreak_mvp
+ * WorkerSettingsForm): plain "Every N unit" amount + unit select. Commits on
+ * change; an amount that is not a whole number of units stays on screen flagged
+ * instead of being floored into a different cadence.
+ */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
+  workerId,
   current,
   isDisabled,
   onChange,
 }) => {
-  const { value, unit } = parseInterval(current) ?? DEFAULT_PARSED_INTERVAL;
+  const { amount, unit } = useMemo(() => parseInterval(current), [current]);
+  const [amountDraft, setAmountDraft] = useState<string | null>(null);
 
   const commit = useCallback(
-    (next: ParsedInterval) => {
-      const interval = `${next.value}${next.unit}`;
-      if (interval !== current) {
-        onChange(interval);
-      }
-    },
-    [current, onChange]
-  );
-
-  const onValueChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = event.target.value.trim();
-      if (!/^[1-9][0-9]*$/.test(raw)) {
+    (nextAmount: number, nextUnit: ScheduleUnit, rawDraft?: string) => {
+      // A typed value that is not a whole number of units (1.9, 0) is not a cadence this control can
+      // store, and flooring it would silently save a different one. Keep it on screen — and flagged
+      // by `amountInvalid` below — instead of committing.
+      if (!Number.isInteger(nextAmount) || nextAmount < 1) {
+        setAmountDraft(rawDraft ?? String(nextAmount));
         return;
       }
-      commit({ value: Number(raw), unit });
+      setAmountDraft(null);
+      onChange(formatInterval(nextAmount, nextUnit));
     },
-    [commit, unit]
+    [onChange]
   );
 
-  const onUnitChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      commit({ value, unit: event.target.value as WorkerScheduleUnit });
-    },
-    [commit, value]
-  );
-
-  const unitOptions = useMemo(
-    () =>
-      WORKER_SCHEDULE_UNITS.map((option) => ({
-        value: option,
-        text: i18n.scheduleUnitLabel(option, value),
-      })),
-    [value]
-  );
+  const amountValue = amountDraft ?? String(amount);
+  const amountInvalid =
+    amountDraft != null && (!/^\d+$/.test(amountDraft) || Number(amountDraft) < 1);
 
   return (
-    <EuiFormRow
-      label={i18n.SCHEDULE_INTERVAL_LABEL}
-      helpText={i18n.SCHEDULE_INTERVAL_HELP_TEXT}
-      fullWidth
-      data-test-subj="alertZeroScheduleIntervalField"
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+      alignItems="center"
+      wrap
+      data-test-subj={`alertZeroTriggerField-${workerId}`}
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={2}>
-          <EuiFieldNumber
-            fullWidth
-            min={1}
-            value={value}
-            disabled={isDisabled}
-            onChange={onValueChange}
-            aria-label={i18n.SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL}
-            data-test-subj="alertZeroScheduleIntervalValue"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiSelect
-            fullWidth
-            value={unit}
-            options={unitOptions}
-            disabled={isDisabled}
-            onChange={onUnitChange}
-            aria-label={i18n.SCHEDULE_INTERVAL_UNIT_ARIA_LABEL}
-            data-test-subj="alertZeroScheduleIntervalUnit"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" aria-hidden="true">
+          <span>{i18n.TRIGGER_EVERY}</span>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 88px;
+          flex: 0 0 88px;
+        `}
+      >
+        <EuiFieldNumber
+          value={amountValue}
+          compressed
+          fullWidth
+          min={1}
+          step={1}
+          isInvalid={amountInvalid}
+          disabled={isDisabled}
+          aria-label={i18n.TRIGGER_AMOUNT_ARIA_LABEL}
+          data-test-subj={`alertZeroTriggerAmount-${workerId}`}
+          onChange={(event) => {
+            const raw = event.target.value;
+            if (raw === '') {
+              setAmountDraft('');
+              return;
+            }
+            const next = Number(raw);
+            if (Number.isFinite(next)) {
+              commit(next, unit, raw);
+            }
+          }}
+          onBlur={() => setAmountDraft(null)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 120px;
+          flex: 0 0 120px;
+        `}
+      >
+        <EuiSelect
+          options={UNIT_OPTIONS.map(({ value, text }) => ({ value, text }))}
+          value={unit}
+          compressed
+          fullWidth
+          disabled={isDisabled}
+          aria-label={i18n.TRIGGER_UNIT_ARIA_LABEL}
+          data-test-subj={`alertZeroTriggerUnit-${workerId}`}
+          onChange={(event) =>
+            commit(Number(amountValue), event.target.value as ScheduleUnit, amountValue)
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

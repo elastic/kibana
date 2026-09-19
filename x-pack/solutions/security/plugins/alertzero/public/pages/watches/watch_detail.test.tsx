@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter, Route } from '@kbn/shared-ux-router';
+import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import {
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -31,12 +34,58 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: 
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
 jest.mock('./components/watches_section_layout', () => ({
-  WatchesSectionLayout: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <div>
-      <h1>{title}</h1>
-      {children}
-    </div>
-  ),
+  WatchesSectionLayout: ({
+    children,
+    title,
+    headerPrimaryActionItem,
+    headerItems,
+  }: {
+    children: React.ReactNode;
+    title: string;
+    headerPrimaryActionItem?: {
+      label: string;
+      testId?: string;
+      disableButton?: boolean | (() => boolean);
+      isLoading?: boolean;
+      run: () => void;
+    };
+    headerItems?: Array<{
+      label: string;
+      testId?: string;
+      disableButton?: boolean | (() => boolean);
+      run: () => void;
+    }>;
+  }) => {
+    const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
+      typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
+    return (
+      <div>
+        <h1>{title}</h1>
+        {headerItems?.map((item) => (
+          <button
+            key={item.testId}
+            type="button"
+            data-test-subj={item.testId}
+            disabled={resolveDisabled(item.disableButton)}
+            onClick={() => item.run()}
+          >
+            {item.label}
+          </button>
+        ))}
+        {headerPrimaryActionItem ? (
+          <button
+            type="button"
+            data-test-subj={headerPrimaryActionItem.testId}
+            disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+            onClick={() => headerPrimaryActionItem.run()}
+          >
+            {headerPrimaryActionItem.label}
+          </button>
+        ) : null}
+        {children}
+      </div>
+    );
+  },
 }));
 
 const mockUseWatch = jest.mocked(useWatch);
@@ -160,7 +209,7 @@ describe('WatchDetailPage', () => {
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();
-      expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     }
 
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
@@ -176,10 +225,20 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
     );
 
-    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue')).toHaveValue(24);
-    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('h');
     expect(
-      within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')
+      within(attackDiscovery).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveValue(24);
+    expect(
+      within(attackDiscovery).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveValue('h');
+    expect(
+      within(alertTriage).queryByTestId(
+        `alertZeroTriggerRow-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
     ).not.toBeInTheDocument();
   });
 
@@ -200,8 +259,112 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
-    expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
+  });
+
+  it('renders Worker settings in accordions for multi-Worker Watches and a static panel for a single-Worker Watch', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+    }
+
+    // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
+    renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [huntWorker]);
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerAccordion-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('lays the accordion out with its own nodes and keeps the enable switch out of the toggle button', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const header = screen.getByTestId(`alertZeroWorkerAccordionHeader-${worker.id}`);
+      const body = screen.getByTestId(`alertZeroWorkerSettingsBody-${worker.id}`);
+      expect(header).toBeInTheDocument();
+      expect(body).toBeInTheDocument();
+      // The band and the body carry the padding: EUI's own accordion nodes stay untouched.
+      expect(getComputedStyle(header).padding).toBe('16px');
+      expect(getComputedStyle(body).padding).toBe('16px');
+
+      // The switch is itself a <button> (EuiSwitch's own DOM node), so it can't be asserted
+      // to sit outside "a button" — it has to sit outside the accordion's own toggle button
+      // (EUI's `.euiAccordion__button`), the one that expands/collapses the section, or a
+      // click on the switch would also toggle the accordion.
+      const accordionToggle = header.closest(
+        '.euiAccordion__triggerWrapper, .euiAccordion__button'
+      );
+      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
+      expect(accordionToggle).not.toBeNull();
+      expect(accordionToggle?.contains(enabledSwitch)).toBe(false);
+    }
+  });
+
+  it('exposes each Worker name in a multi-Worker Watch as a real h2 for screen-reader heading navigation', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const header = screen.getByTestId(`alertZeroWorkerAccordionHeader-${worker.id}`);
+      const heading = within(header).getByRole('heading', { level: 2 });
+      expect(heading).toBeInTheDocument();
+    }
+  });
+
+  it('styles its accordion through EuiAccordion props, not through EUI private classes', () => {
+    // `.euiAccordion__*` is EUI internals rather than a public contract, so an EUI update may
+    // reshape it — the panel has to carry its own nodes and style them instead.
+    const panelSource = readFileSync(
+      join(__dirname, 'components/worker_settings_panel.tsx'),
+      'utf8'
+    );
+    expect(panelSource).not.toMatch(/\.euiAccordion__/);
+  });
+
+  it('renders each member as a section in a single column — no summary rail', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    const [first, second] = floorWorkers;
+    expect(screen.queryByTestId('alertZeroWatchWorkersRail')).not.toBeInTheDocument();
+
+    const firstSection = screen.getByTestId(`alertZeroWatchWorkerSection-${first.id}`);
+    const secondSection = screen.getByTestId(`alertZeroWatchWorkerSection-${second.id}`);
+    expect(firstSection).toBeInTheDocument();
+    expect(secondSection).toBeInTheDocument();
+    // Document order: first Worker's section precedes the second's in the single column.
+    const allSections = screen.getAllByTestId(/^alertZeroWatchWorkerSection-/);
+    expect(allSections.indexOf(firstSection)).toBeLessThan(allSections.indexOf(secondSection));
+  });
+
+  it('offers only the autonomy levels a Worker allows', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    // Attack Discovery has no assisted gate; Alert Triage carries the full dial.
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    expect(within(attackDiscovery).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(
+      within(attackDiscovery).getByTestId('alertZeroAutonomyCard-supervised')
+    ).toBeInTheDocument();
+    expect(
+      within(attackDiscovery).queryByTestId('alertZeroAutonomyCard-assisted')
+    ).not.toBeInTheDocument();
+
+    const alertTriage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+    );
+    for (const level of ['manual', 'assisted', 'supervised'] as const) {
+      expect(within(alertTriage).getByTestId(`alertZeroAutonomyCard-${level}`)).toBeInTheDocument();
+    }
   });
 
   it('shows a Worker-load error instead of an empty member list', () => {
@@ -260,7 +423,7 @@ describe('WatchDetailPage', () => {
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();
-      expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     }
     expect(
       screen.queryByTestId(
@@ -319,9 +482,14 @@ describe('WatchDetailPage', () => {
       screen.getByTestId(
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
       ),
-      within(ruleTuning).getByTestId('alertZeroAutonomySlider'),
-      within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue'),
-      within(ruleTuning).getByTestId('alertZeroScheduleIntervalUnit'),
+      // EuiCheckableCard puts the test subject on its wrapper; the disabled state is on the input.
+      within(within(ruleTuning).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio'),
+      within(ruleTuning).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      ),
+      within(ruleTuning).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      ),
       within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays'),
     ];
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
@@ -426,7 +594,9 @@ describe('WatchDetailPage', () => {
     const attackDiscovery = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
     );
-    const value = within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue');
+    const value = within(attackDiscovery).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
     fireEvent.change(value, { target: { value: '1' } });
@@ -449,7 +619,9 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
     );
     const window = within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays');
-    const interval = within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue');
+    const interval = within(ruleTuning).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
 
     fireEvent.change(window, { target: { value: '7' } });
     fireEvent.change(interval, { target: { value: '6' } });
@@ -477,5 +649,75 @@ describe('WatchDetailPage', () => {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
     });
+  });
+
+  it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {
+    // `/watches/:watchId` keeps the same WatchDetailPage mounted across parameter-only
+    // navigation, so a `useState` initializer alone only runs once — collapsedWorkerIds must
+    // be reset by an effect keyed on watchId, not by the initializer. Give both Watches the
+    // *same* Worker (multi-membership) so the accordion for that Worker's id can be observed
+    // on both sides of the navigation.
+    const sharedWorkers = [...floorWorkers, huntWorker];
+    mockUseWorkers.mockReturnValue({
+      data: { workers: sharedWorkers },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+
+    const history = createMemoryHistory({
+      initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
+    });
+    render(
+      <Router history={history}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </Router>
+    );
+
+    const [first] = floorWorkers;
+    // Collapse the first Worker's accordion on the Floor Watch. With `buttonElement="div"`
+    // EUI puts `aria-expanded` on the arrow control (a real `<button>`), not on the accordion's
+    // own data-test-subj node — and the enable switch is also a button, so query by expanded.
+    const arrowFor = (workerId: string, expanded: boolean) =>
+      within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`)).getByRole('button', {
+        expanded,
+      });
+    fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${first.id}`));
+    expect(arrowFor(first.id, false)).toBeInTheDocument();
+
+    // Navigate (parameter-only change, same component instance) to a different Watch that the
+    // same Worker also belongs to (re-tag it onto the Hunt Watch for this assertion). Its
+    // accordion must come back expanded — the default — not stay collapsed.
+    const workersOnHunt = sharedWorkers.map((worker) =>
+      worker.id === first.id
+        ? { ...worker, watchIds: [...worker.watchIds, SYSTEM_SECURITY_WATCH_HUNT_ID] }
+        : worker
+    );
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue({
+      data: { workers: workersOnHunt },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    act(() => {
+      history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
+    });
+
+    expect(arrowFor(first.id, true)).toBeInTheDocument();
   });
 });

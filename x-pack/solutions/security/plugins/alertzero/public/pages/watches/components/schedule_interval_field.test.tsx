@@ -5,101 +5,64 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import { ScheduleIntervalField } from './schedule_interval_field';
 
-const renderField = (current = '24h', onChange: jest.Mock = jest.fn()) => {
-  const { rerender } = render(<ScheduleIntervalField current={current} onChange={onChange} />);
-  return {
-    onChange,
-    rerender,
-    value: () => screen.getByTestId('alertZeroScheduleIntervalValue') as HTMLInputElement,
-    unit: () => screen.getByTestId('alertZeroScheduleIntervalUnit') as HTMLSelectElement,
-  };
-};
+describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
+  const onChange = jest.fn();
 
-describe('ScheduleIntervalField', () => {
-  it('decomposes the interval into a value and a unit', () => {
-    const { value, unit } = renderField('30m');
+  beforeEach(() => {
+    onChange.mockClear();
+  });
+  const WORKER_ID = 'system-security-floor-attack-discovery';
 
-    expect(value().value).toBe('30');
-    expect(unit().value).toBe('m');
+  it('parses the current interval into amount and unit selects', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="4h" onChange={onChange} />);
+    expect(screen.getByDisplayValue('4')).toBeInTheDocument();
+    expect(screen.getByTestId(`alertZeroTriggerUnit-${WORKER_ID}`).textContent).toContain('hours');
   });
 
-  it('offers minutes, hours and days but not seconds', () => {
-    const { unit } = renderField();
-
-    expect([...unit().options].map((option) => option.value)).toEqual(['m', 'h', 'd']);
+  it('commits a valid change as a scheduleInterval string', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    fireEvent.change(amount, { target: { value: '2' } });
+    expect(onChange).toHaveBeenLastCalledWith('2h');
   });
 
-  it('reports each valid number change to the parent immediately, without blur', () => {
-    const { onChange, value } = renderField('24h');
-
-    fireEvent.change(value(), { target: { value: '3' } });
-    fireEvent.change(value(), { target: { value: '30' } });
-
-    expect(onChange.mock.calls).toEqual([['3h'], ['30h']]);
-  });
-
-  it('persists immediately when the unit changes', () => {
-    const { onChange, unit } = renderField('24h');
-
-    fireEvent.change(unit(), { target: { value: 'm' } });
-
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith('24m');
-  });
-
-  it('does not report an unchanged value', () => {
-    const { onChange, value } = renderField('24h');
-
-    fireEvent.change(value(), { target: { value: '24' } });
-
+  it('shows an inline error and does not commit when the amount is invalid', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    fireEvent.change(amount, { target: { value: '0' } });
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('ignores a non-positive-integer entry', () => {
-    const { onChange, value } = renderField('24h');
+  it('keeps a fractional amount on screen flagged instead of saving a floored cadence', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
 
-    fireEvent.change(value(), { target: { value: '0' } });
-    fireEvent.change(value(), { target: { value: '-5' } });
-    fireEvent.blur(value());
+    fireEvent.change(amount, { target: { value: '1.9' } });
 
-    expect(value().value).toBe('24');
+    // Committing here would persist 1h — a cadence the analyst never asked for.
     expect(onChange).not.toHaveBeenCalled();
+    expect(amount).toHaveValue(1.9);
+    expect(amount).toBeInvalid();
   });
 
-  it('re-syncs when the parent resets the value', () => {
-    const { rerender, value } = renderField('24h');
+  it('does not commit the stale persisted amount when the unit changes over an invalid draft', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    const unit = screen.getByTestId(`alertZeroTriggerUnit-${WORKER_ID}`);
 
-    rerender(<ScheduleIntervalField current="15m" onChange={jest.fn()} />);
+    // Type an invalid draft (not committed) then switch units. Committing `1d` here (the old
+    // persisted amount) would silently save a cadence the analyst never typed.
+    fireEvent.change(amount, { target: { value: '1.9' } });
+    expect(onChange).not.toHaveBeenCalled();
 
-    expect(value().value).toBe('15');
-    expect(screen.getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('m');
-  });
+    fireEvent.change(unit, { target: { value: 'd' } });
 
-  it('follows the parent after a change and reports the next edit against it', () => {
-    const onChange = jest.fn();
-    const Controlled: React.FC = () => {
-      const [current, setCurrent] = useState('24h');
-      return (
-        <ScheduleIntervalField
-          current={current}
-          onChange={(interval) => {
-            onChange(interval);
-            setCurrent(interval);
-          }}
-        />
-      );
-    };
-    render(<Controlled />);
-    const value = screen.getByTestId('alertZeroScheduleIntervalValue');
-
-    fireEvent.change(value, { target: { value: '30' } });
-    fireEvent.change(value, { target: { value: '3' } });
-
-    expect(onChange.mock.calls).toEqual([['30h'], ['3h']]);
-    expect(value).toHaveValue(3);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(amount).toHaveValue(1.9);
+    expect(amount).toBeInvalid();
   });
 });

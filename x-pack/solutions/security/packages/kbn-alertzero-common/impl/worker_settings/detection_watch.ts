@@ -15,7 +15,6 @@
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  WATCH_AUTONOMY_LEVELS,
 } from '../../constants';
 import { RuleTuningWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -31,12 +30,14 @@ export const RULE_TUNING_DEFAULT_EXTRAS: RuleTuningWorkerExtras = {
 
 export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  // Rule changes always land through a review gate, so there is no unattended (supervised) level.
+  allowedAutonomyLevels: ['manual', 'assisted'],
   scheduleInterval: { defaultValue: '2h' },
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
 };
 
 export const RULE_CREATION_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  // As above: a created rule is proposed for review, never enabled unattended.
+  allowedAutonomyLevels: ['manual', 'assisted'],
 };

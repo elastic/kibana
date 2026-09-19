@@ -151,11 +151,23 @@ describe('createWorkerSettingsRegistration', () => {
     it('leaves the interval untouched when only autonomy is patched', () => {
       const applied = registration.applyPatch(
         { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
-        { autonomy: 'assisted' }
+        { autonomy: 'supervised' }
       );
 
       expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'assisted', scheduleInterval: '15m' },
+        values: { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '15m' },
+      });
+    });
+
+    it('rejects an autonomy patch outside the levels this Worker allows', () => {
+      // Attack Discovery has no assisted gate, so the patch is refused rather than stored.
+      const applied = registration.applyPatch(
+        { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
+        { autonomy: 'assisted' }
+      );
+
+      expect(applied).toMatchObject({
+        invalid: expect.stringContaining('autonomy'),
       });
     });
   });
@@ -203,15 +215,16 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it('replaces extras whole when the patch supplies them', () => {
+      // Seeded at a level this Worker allows (manual/assisted); the assertion is about extras.
       expect(
         registration.applyPatch(
-          { ...storedDefaults, autonomyLevel: 'supervised' },
+          { ...storedDefaults, autonomyLevel: 'assisted' },
           { extras: { analysisWindowDays: 7 } }
         )
       ).toEqual({
         values: {
           ...storedDefaults,
-          autonomyLevel: 'supervised',
+          autonomyLevel: 'assisted',
           extras: { analysisWindowDays: 7 },
         },
       });
