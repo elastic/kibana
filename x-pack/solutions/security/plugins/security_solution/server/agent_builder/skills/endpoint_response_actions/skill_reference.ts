@@ -32,4 +32,6 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 
 This skill is **read-only** and currently covers: list endpoints, host status, response action status lookup.
 
-Not available from chat: isolate, release/unisolate, scan, running processes, execute, kill-process, suspend-process, get-file, upload, runscript, memory-dump. Do not attempt these with this skill or any other tool — direct the analyst to the Response Actions UI instead.`;
+Not available from chat: isolate, release/unisolate, scan, running processes, execute, kill-process, suspend-process, get-file, upload, runscript, memory-dump. Do not attempt these with this skill or any other tool — direct the analyst to the Response Actions UI instead.
+
+A request for one of those actions is declined **without looking anything up** — no host lookup, no API discovery, no Elasticsearch query — say it is not available from chat and point the analyst to the Response Actions UI.`;
