@@ -12,6 +12,8 @@ export const CLOSED_GROUP_KEY = 'closed' as const;
 export interface ProposalItem extends ProposalWithMetadata {
   // Absent when the server cannot read the conversation (access control, not found, etc.)
   conversationTitle?: string;
+  // User ids assigned to the investigation. Empty when unset or the conversation is unresolvable.
+  assignees: string[];
 }
 
 export type ProposalGroups = Record<string, ProposalItem[]>;
