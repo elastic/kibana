@@ -19,20 +19,26 @@ import { useCanSaveSequenceRule } from './use_can_save_sequence_rule';
 
 export interface SequenceBuilderHeaderProps {
   step: SequenceBuilderStep;
+  sidebarOpen: boolean;
   seqValues: SequenceFormValues;
   isSaving: boolean;
+  ruleFetchError?: boolean;
   rulesListHref: string;
   onStepChange: (step: SequenceBuilderStep) => void;
+  onToggleDetails: () => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
 export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
   step,
+  sidebarOpen,
   seqValues,
   isSaving,
+  ruleFetchError,
   rulesListHref,
   onStepChange,
+  onToggleDetails,
   onSave,
   onCancel,
 }) => {
@@ -58,6 +64,12 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
 
   const saveDisabledReason = useMemo(() => {
     if (isSaving) return undefined;
+    if (ruleFetchError) {
+      return i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveDisabledRuleFetchTooltip', {
+        defaultMessage:
+          'One or more rules could not be found. Remove missing rules to enable saving.',
+      });
+    }
     if (!sequenceValid) {
       return i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveDisabledSequenceTooltip', {
         defaultMessage: 'Add at least two steps with rules to save',
@@ -69,7 +81,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
       });
     }
     return undefined;
-  }, [isSaving, sequenceValid, canSave]);
+  }, [isSaving, ruleFetchError, sequenceValid, canSave]);
 
   const menu = useMemo((): AppHeaderMenu => {
     const items: AppHeaderMenu['items'] = [
@@ -82,7 +94,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
         order: 1,
         run: () => onStepChange('alert'),
         disableButton: isSaving,
-        isSelected: step === 'alert',
+        isSelected: step === 'alert' && !sidebarOpen,
         testId: 'sequenceBuilderGoToAlert',
       },
       {
@@ -99,8 +111,20 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
           : i18n.translate('xpack.alertingV2.sequenceBuilderPage.recoveryDisabledTooltip', {
               defaultMessage: 'Add at least two steps with rules to proceed',
             }),
-        isSelected: step === 'recovery',
+        isSelected: step === 'recovery' && !sidebarOpen,
         testId: 'sequenceBuilderGoToRecovery',
+      },
+      {
+        id: 'details',
+        label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.detailsButton', {
+          defaultMessage: 'Details',
+        }),
+        iconType: 'gear',
+        order: 3,
+        run: onToggleDetails,
+        disableButton: isSaving,
+        isSelected: sidebarOpen,
+        testId: 'sequenceBuilderOpenDetails',
       },
     ];
 
@@ -114,12 +138,23 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
         iconType: 'check',
         run: onSave,
         isLoading: isSaving,
-        disableButton: !canSave,
+        disableButton: !canSave || ruleFetchError,
         tooltipContent: saveDisabledReason,
         testId: 'sequenceBuilderSave',
       },
     };
-  }, [step, isSaving, sequenceValid, canSave, saveDisabledReason, onStepChange, onSave]);
+  }, [
+    step,
+    sidebarOpen,
+    isSaving,
+    ruleFetchError,
+    sequenceValid,
+    canSave,
+    saveDisabledReason,
+    onStepChange,
+    onToggleDetails,
+    onSave,
+  ]);
 
   return (
     <AppHeader

@@ -97,6 +97,12 @@ export const ruleExecutionKeys = {
     [...ruleExecutionKeys.all, 'list', filters] as const,
 };
 
+export const sequenceBuilderKeys = {
+  all: ['sequenceBuilder'] as const,
+  editRule: (id: string) => [...sequenceBuilderKeys.all, 'editRule', id] as const,
+  ruleFetch: (ruleIds: string[]) => [...sequenceBuilderKeys.all, 'ruleFetch', ...ruleIds] as const,
+};
+
 export const userProfileKeys = {
   all: ['userProfile'] as const,
   bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
