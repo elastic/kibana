@@ -322,9 +322,10 @@ export const registerGetPipelineDataRoute = (
             gateEntries?.filter((e): e is AlertRetrievalPipelineDataResponse => e !== null) ?? [];
 
           // Step 3: Extract generation data from generation workflow.
-          // When alert_retrieval_mode is 'provided', also fetch the generation step's
-          // input so Step 2.5 can reconstruct the alert retrieval data from the
-          // pre-provided alerts.
+          // The generation execution is fetched with its step inputs because the
+          // resolved `generate_discoveries` step input is the authoritative record
+          // of the alerts generation actually received: it feeds Step 5b (gate
+          // inspect).
           //
           // Fallback: When the event log hasn't been indexed yet (early polling), the
           // client can pass the generation workflow run ID as a query parameter.
@@ -336,8 +337,18 @@ export const registerGetPipelineDataRoute = (
                   workflowRunId: clientGenerationWorkflowRunId,
                 }
               : null);
-          const isProvidedMode =
-            tracking.diagnosticsContext?.config?.alertRetrievalMode === 'provided';
+          // Whether the alerts were supplied up front rather than retrieved by a
+          // workflow. This is read from the tracking data itself, never from
+          // `diagnosticsContext.config.alertRetrievalMode`: that field mirrors
+          // `workflowConfig.alert_retrieval_mode`, which is typed as the built-in
+          // default-retrieval query mode (`custom_query | esql`) and is derived by
+          // every bridge as `mode === 'esql' ? 'esql' : 'custom_query'`, so it never
+          // holds `provided` — not even for a run whose alerts were supplied.
+          // `tracking.providedAlerts` is written to the event log on exactly the
+          // supplied-alerts path (no alert-retrieval workflow executions and a
+          // non-empty alert set), so it is both necessary and sufficient here.
+          const hasProvidedAlerts =
+            tracking.providedAlerts != null && tracking.providedAlerts.length > 0;
 
           // Always fetch step inputs so we can extract the actual alerts the
           // generate step received from the 'generate_discoveries' step's
@@ -397,18 +408,25 @@ export const registerGetPipelineDataRoute = (
                   })
               : null;
 
-          // Step 2.5: For 'provided' mode, reconstruct alert retrieval data from either:
-          // (a) the generation step's input (available after the step completes), or
-          // (b) the event log tracking data written at generate-step-started time
-          //     (available immediately during the running state, before step.input is populated).
-          // This surfaces the provided alerts in the Alert Retrieval section of the flyout
-          // both while the generation is running AND after it completes.
-          const effectiveProvidedAlerts: string[] | null =
-            generationStepAlerts ?? tracking.providedAlerts ?? null;
+          // Step 2.5: For a supplied-alerts run, reconstruct alert retrieval data
+          // from the alerts the run was *given* — `tracking.providedAlerts`,
+          // written to the event log at generate-step-started time, so it is
+          // available both while generation is running and after it completes.
+          // This surfaces the provided alerts in the Alert Retrieval section of
+          // the flyout with a count that does not change as the run progresses.
+          //
+          // The resolved `generate_discoveries` step input is deliberately NOT the
+          // value source: it is the set generation actually analysed, which for a
+          // supplied-alerts run also carries any net-new alerts the gate added, and
+          // it is attached to the gate entry in Step 5b for inspect. Sourcing this
+          // entry from it would label gate additions as supplied and pull them into
+          // the combined Alerts-retrieval view, which Step 5 scopes to the
+          // retrieval phase.
+          const effectiveProvidedAlerts: string[] | null = tracking.providedAlerts ?? null;
 
           if (
             alertRetrievalData == null &&
-            isProvidedMode &&
+            hasProvidedAlerts &&
             Array.isArray(effectiveProvidedAlerts) &&
             effectiveProvidedAlerts.length > 0
           ) {
