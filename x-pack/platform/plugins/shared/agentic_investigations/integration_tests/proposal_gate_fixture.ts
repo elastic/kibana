@@ -50,17 +50,24 @@ const createInMemoryStorage = () => {
   const documents = new Map<string, { document: ProposalDocument; seqNo: number }>();
   let seqNo = 0;
 
-  /** Only the `ids` + `spaceId` shape `ProposalsService.load` issues. */
-  const idFromQuery = (query: unknown): string | undefined => {
-    const filter =
-      (query as { bool?: { filter?: Array<Record<string, any>> } })?.bool?.filter ?? [];
-    for (const clause of filter) {
-      const values = clause?.ids?.values;
-      if (Array.isArray(values)) {
-        return values[0];
-      }
+  type Clause = Record<string, any>;
+
+  /** Evaluates the handful of clause shapes the service's queries actually use
+   *  against one document — enough for `load`, `getLatestRevision`, and any
+   *  future query built the same way, not a general ES query engine. */
+  const matchesClause = (id: string, document: ProposalDocument, clause: Clause): boolean => {
+    if (clause.ids) {
+      return (clause.ids.values as string[]).includes(id);
     }
-    return undefined;
+    if (clause.term) {
+      const [field, value] = Object.entries(clause.term)[0] as [string, unknown];
+      return (document as unknown as Record<string, unknown>)[field] === value;
+    }
+    if (clause.exists) {
+      const field = clause.exists.field as string;
+      return (document as unknown as Record<string, unknown>)[field] !== undefined;
+    }
+    throw new Error(`createInMemoryStorage: unsupported query clause ${JSON.stringify(clause)}`);
   };
 
   return {
@@ -71,11 +78,21 @@ const createInMemoryStorage = () => {
         return { _id: id };
       }),
       search: jest.fn(async ({ query }: { query: unknown }) => {
-        const id = idFromQuery(query);
-        const entry = id ? documents.get(id) : undefined;
-        const hits = entry
-          ? [{ _id: id!, _source: entry.document, _seq_no: entry.seqNo, _primary_term: 1 }]
-          : [];
+        const bool = (query as { bool?: { filter?: Clause[]; must_not?: Clause[] } })?.bool ?? {};
+        const filter = bool.filter ?? [];
+        const mustNot = bool.must_not ?? [];
+        const hits = [...documents.entries()]
+          .filter(
+            ([id, { document }]) =>
+              filter.every((clause) => matchesClause(id, document, clause)) &&
+              mustNot.every((clause) => !matchesClause(id, document, clause))
+          )
+          .map(([id, { document, seqNo: docSeqNo }]) => ({
+            _id: id,
+            _source: document,
+            _seq_no: docSeqNo,
+            _primary_term: 1,
+          }));
         return { hits: { hits, total: { value: hits.length } } };
       }),
     } as unknown as ProposalsStorageClient,
@@ -101,11 +118,16 @@ export interface ProposalGateFixture {
   stepExecutions: (
     stepId: string,
     stepType?: string
-  ) => Array<{ status: string; stepType?: string; output?: unknown }>;
+  ) => Array<{ status: string; stepType?: string; input?: unknown; output?: unknown }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
+  /**
+   * Revises the current live proposal through the real `ProposalsService`,
+   * while the gate is still parked on the predecessor.
+   */
+  revise: (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => Promise<void>;
   /**
    * Wakes the parked gate past its deadline with no answer, which is what the
    * scheduled wake task does in production. The fixture's task manager mock has
@@ -193,6 +215,17 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       };
       engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
       await engine.resumeWorkflow();
+    },
+    /**
+     * Revises the current live proposal through the real service, the same
+     * path the `revise_proposal_tool`/HTTP route take — not a direct storage
+     * write. Lets a test park a gate, revise the proposal under it, then
+     * resume, and check the revision (not the trigger's original input) is
+     * what actually reaches `execute_action`.
+     */
+    revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
+      const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
+      await service.revise({ id: live.id, ...overrides }, live.spaceId ?? 'fake_space_id');
     },
     timeOutGate: async () => {
       // No `resumeInput`, which is the whole signal: the step reads the wait as
