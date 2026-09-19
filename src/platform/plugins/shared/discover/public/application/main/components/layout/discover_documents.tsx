@@ -77,6 +77,8 @@ import type {
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
+import { getEsqlDatatableFromDocuments } from '../../../../utils/get_esql_datatable_from_documents';
+import { getGridRequestId } from '../../../../utils/get_grid_request_id';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
@@ -374,13 +376,55 @@ function DiscoverDocumentsComponent({
       }),
     [rowHeight, dataGridUiState, services.storage, configRowHeight]
   );
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
+  // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
+  const { table: esqlTable } = useMemo(
+    () =>
+      getEsqlDatatableFromDocuments({
+        documentsValue: documentState,
+        isEsqlMode,
+      }),
+    [documentState, isEsqlMode]
+  );
+  // New result identity after refresh - keeps sparkline cache from reusing a stale series.
+  const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
+  const searchContext = useMemo(() => {
+    if (!isEsqlMode || !esqlTable || !query) {
+      return undefined;
+    }
+    return {
+      query,
+      table: esqlTable,
+      filters,
+      timeRange: requestParams.timeRangeAbsolute,
+      esqlVariables,
+      searchSessionId: requestParams.searchSessionId,
+      // Match the table's ES|QL fast-mode setting on the sparkline follow-up.
+      isApproximate: esqlApproximation,
+      requestId,
+    };
+  }, [
+    esqlApproximation,
+    esqlTable,
+    esqlVariables,
+    filters,
+    isEsqlMode,
+    query,
+    requestId,
+    requestParams.searchSessionId,
+    requestParams.timeRangeAbsolute,
+  ]);
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
+      searchContext,
+      // Spinner while the grid is fetching; warning icon if it finished without context.
+      isDataLoading,
     }),
-    [dataView, cellRendererDensity, cellRendererRowHeight]
+    [cellRendererDensity, cellRendererRowHeight, dataView, isDataLoading, searchContext]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -464,8 +508,6 @@ function DiscoverDocumentsComponent({
   const setCascadedDocumentsDataGridUiState = useCurrentTabAction(
     internalStateActions.setCascadedDocumentsDataGridUiState
   );
-  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
