@@ -95,12 +95,16 @@ export type {
   WorkflowContextRegistry,
 } from './common/validation/context/registry';
 export { getContextSchemaForPath } from './common/validation/context/get_context_for_path';
-export { createStepContextResolver } from './common/validation/context/step_context_resolver';
+export {
+  createStepContextResolver,
+  type StepContextResolver,
+} from './common/validation/context/step_context_resolver';
 
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';
 export { validateVariables } from './common/validation/variables/validate_variables';
 export { validateLiquidYamlScalars } from './common/validation/variables/validate_liquid_yaml_scalars';
+export { validateLiquidForLoopCollections } from './common/validation/variables/validate_liquid_for_loop_collections';
 
 // Yaml editing utilities
 export { insertStep, modifyStep, modifyStepProperty, deleteStep } from './lib/yaml_edit';

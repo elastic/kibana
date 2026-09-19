@@ -10,6 +10,7 @@
 import type { Document } from 'yaml';
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import type { VariableItem, YamlValidationResult } from '../types';
+import type { VariableValidationOptions } from './validate_variable';
 import { validateVariable } from './validate_variable';
 import { getContextSchemaWithTemplateLocals } from '../context/extend_context_with_template_locals';
 import { extendWithPathSpecificContext } from '../context/get_context_for_path';
@@ -22,7 +23,8 @@ export function validateVariables(
   variableItems: VariableItem[],
   workflowDefinition: WorkflowYaml,
   yamlDocument?: Document | null,
-  yamlString?: string
+  yamlString?: string,
+  options?: VariableValidationOptions
 ): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
 
@@ -80,7 +82,7 @@ export function validateVariables(
     }
 
     if (context !== null) {
-      const error = validateVariable(variableItem, context);
+      const error = validateVariable(variableItem, context, options);
       if (error) {
         errors.push(error);
       }
