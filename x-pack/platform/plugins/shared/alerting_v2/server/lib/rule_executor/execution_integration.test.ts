@@ -357,6 +357,103 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
     });
   });
 
+  // ─── Healthy run — alert-kind detection-rule shape ───────────────────────
+  //
+  // Exercises the same four-step chain for the configuration this phase
+  // delivers: kind: 'alert', both strategies 'none', state_transition set,
+  // no stored query.  The fixture builder type is registered with kind: 'alert'
+  // so the kind-pin check accepts it; the signal-kind fixture above stays
+  // unchanged because the framework still supports that kind.
+
+  describe('healthy run — alert-kind detection-rule shape', () => {
+    const ALERT_FIELDS: FixtureFields = {
+      q: 'host.name: alert-host',
+      severity: 'critical',
+      risk_score: 90,
+    };
+    const ALERT_SIG_ID = 'test-sig-alert-002';
+
+    let alertPipeline: PipelineSetup;
+    let alertRule: ReturnType<typeof createRuleResponse>;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2025-06-01T12:00:00.000Z'));
+
+      // Register the fixture type with kind: 'alert' to match the detection-rule shape.
+      const registry = makeRegistry(makeFixtureDefinition({ kind: 'alert' }));
+      alertPipeline = createPipeline(registry);
+
+      alertRule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        no_data_strategy: 'none',
+        state_transition: { pending_count: 0 },
+        // Detection rules have no persisted query; effectiveQuery comes from generateQuery.
+        query: undefined,
+        grouping: undefined,
+        schedule: { every: '5m', lookback: '10m' },
+        metadata: {
+          builder_type: FIXTURE_TYPE_ID,
+          builder_fields: ALERT_FIELDS,
+          signature_id: ALERT_SIG_ID,
+        },
+      });
+
+      alertPipeline.mockEsClient.esql.query.mockResolvedValue(
+        createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['alert-host-1']])
+      );
+
+      alertPipeline.mockStorage.bulkIndexDocs.mockResolvedValue({
+        attempted: 1,
+        docs: [],
+        errors: [],
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('compile step: resolves effectiveQuery from builder_fields even with no stored query', async () => {
+      const initialStream = createPipelineStream([createRulePipelineState({ rule: alertRule })]);
+      const results = await collectStreamResults(
+        alertPipeline.compileStep.executeStream(initialStream)
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe('continue');
+      if (results[0].type !== 'continue') throw new Error('expected continue');
+
+      const { effectiveQuery } = results[0].state;
+      expect(effectiveQuery).toBeDefined();
+      expect(effectiveQuery!.format).toBe('standalone');
+      if (effectiveQuery!.format !== 'standalone') throw new Error('wrong format');
+      expect(effectiveQuery!.breach.query).toContain(ALERT_FIELDS.q);
+    });
+
+    it('full chain: produces alert-kind events and completes without error', async () => {
+      const results = await runFullPipeline(alertPipeline, alertRule);
+
+      for (const result of results) {
+        expect(result.type).toBe('continue');
+      }
+
+      expect(alertPipeline.mockStorage.bulkIndexDocs).toHaveBeenCalledTimes(1);
+      const storageCall = alertPipeline.mockStorage.bulkIndexDocs.mock.calls[0][0];
+      expect(storageCall.docs).toHaveLength(1);
+
+      const stored = storageCall.docs[0] as Record<string, unknown>;
+      // The builder type is registered with kind: 'alert', so events carry type 'alert'.
+      expect(stored.type).toBe('alert');
+      expect(stored.severity).toBe('critical');
+      expect((stored.data as Record<string, unknown>)['kibana.alert.risk_score']).toBe(90);
+      expect((stored.data as Record<string, unknown>)['kibana.alert.rule.rule_id']).toBe(
+        ALERT_SIG_ID
+      );
+    });
+  });
+
   // ─── Failure cases ───────────────────────────────────────────────────────
 
   describe('failure cases', () => {
