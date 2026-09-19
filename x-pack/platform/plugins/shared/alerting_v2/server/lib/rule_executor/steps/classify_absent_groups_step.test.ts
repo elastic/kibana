@@ -164,6 +164,10 @@ describe('ClassifyAbsentGroupsStep', () => {
     });
 
     it("emits no final batch when recovery_strategy is 'none' and no_data_strategy is 'none'", async () => {
+      // This is the shape detection rules take after the A.1 kind flip: kind: 'alert'
+      // with both strategies 'none'. They pass the kind gate above but exit through the
+      // strategy check (!recoveryEnabled && !noDataEnabled) before the active-groups
+      // query ever runs. The kind gate is covered separately by the signal-rules case.
       const { step, internalEsClient } = createStep();
 
       const state = createRulePipelineState({
