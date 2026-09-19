@@ -17,6 +17,8 @@ import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { TestProviders } from '../../mock';
 import * as i18n from './translations';
 import { mockUserProfiles } from './mocks';
+import { ASSIGNEES_SELECTABLE_MAX_HEIGHT } from './constants';
+import { ASSIGNEES_SELECTABLE_TEST_ID } from './test_ids';
 
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
@@ -111,5 +113,27 @@ describe.skip('<AssigneesSelectable />', () => {
       [['user-id-1']],
       [[]],
     ]);
+  });
+});
+
+describe('<AssigneesSelectable /> height', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles[0],
+    });
+    (useSuggestUsers as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles,
+    });
+  });
+
+  it('should cap the height of the selectable', () => {
+    const { getByTestId } = renderAssigneesSelectable({ assignedUserIds: [] });
+
+    expect(getByTestId(ASSIGNEES_SELECTABLE_TEST_ID).firstElementChild).toHaveStyle({
+      maxHeight: `${ASSIGNEES_SELECTABLE_MAX_HEIGHT}px`,
+    });
   });
 });
