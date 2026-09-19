@@ -2435,6 +2435,131 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/_add_events:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/_add_events</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Append custom events to a conversation's timeline. The caller must be the owner, a member, or the conversation must be public. Server assigns id, created_at, and actor for each event; the body provides type and data. Only registered custom event types are accepted — built-in lifecycle types are rejected. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-agent-builder-conversations-conversation-id-add-events
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              addEventsRequestExample:
+                description: Example request appending two custom events to a conversation
+                value:
+                  events:
+                    - data:
+                        text: First note on this conversation
+                      type: text_note
+                    - data:
+                        text: Second note on this conversation
+                      type: text_note
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                events:
+                  description: Events to append. Between 1 and 10.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: true
+                        description: The event payload. Its shape is defined by the event type.
+                        type: object
+                        properties: {}
+                      type:
+                        description: The registered custom event type.
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                      - data
+                  maxItems: 10
+                  minItems: 1
+                  type: array
+              required:
+                - events
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                addEventsResponseExample:
+                  description: Example response returning the materialized events with server-assigned fields
+                  value:
+                    events:
+                      - actor:
+                          id: u_abc123_uid
+                          type: user
+                          username: elastic
+                        created_at: '2026-09-14T10:00:00.000Z'
+                        data:
+                          text: First note on this conversation
+                        id: 7d3f1a2b-4c5e-6f7a-8b9c-0d1e2f3a4b5c
+                        type: text_note
+                      - actor:
+                          id: u_abc123_uid
+                          type: user
+                          username: elastic
+                        created_at: '2026-09-14T10:00:00.000Z'
+                        data:
+                          text: Second note on this conversation
+                        id: 8e4f2b3c-5d6f-7a8b-9c0d-1e2f3a4b5c6d
+                        type: text_note
+          description: Indicates a successful response
+      summary: Add events to a conversation
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/conversations/${CONVERSATION_ID}/_add_events" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "elastic-api-version: 2023-10-31" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "events": [
+                  { "type": "text_note", "data": { "text": "A note on this conversation" } }
+                ]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/conversations/${CONVERSATION_ID}/_add_events
+            {
+              "events": [
+                { "type": "text_note", "data": { "text": "A note on this conversation" } }
+              ]
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}/access_control:
     put:
       description: |-
@@ -8293,7 +8418,8 @@ paths:
                         grouping_mode: per_episode
                         id: action-policy-1
                         matcher:
-                          expression: 'rule.tags: "production"'
+                          tags:
+                            - production
                         name: Notify on production alerts
                         snoozed_until: null
                         throttle:
@@ -8418,7 +8544,8 @@ paths:
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'rule.tags: "production"'
+                    tags:
+                      - production
                   name: Notify on production alerts
                   throttle:
                     strategy: on_status_change
@@ -8446,7 +8573,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -9296,7 +9424,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9412,7 +9540,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9442,7 +9570,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -9566,7 +9695,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9608,7 +9737,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts (updated)
                     snoozed_until: null
                     throttle:
@@ -9748,7 +9878,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The identifier for the action policy.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9769,7 +9899,8 @@ paths:
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'rule.tags: "production"'
+                    tags:
+                      - production
                   name: Notify on production alerts
                   throttle:
                     strategy: on_status_change
@@ -9797,7 +9928,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -9830,7 +9962,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -9971,7 +10104,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10001,7 +10134,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -10141,7 +10275,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10171,7 +10305,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -10311,7 +10446,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10351,7 +10486,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
                     throttle:
@@ -10491,7 +10627,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10521,7 +10657,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     throttle:
@@ -10661,7 +10798,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
+        - description: The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -90235,8 +90372,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fips_agents:
           type: number
         fleet_server_host_id:
@@ -90722,12 +90868,12 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. `matcher.tags` is separate from the policy's own `tags` field, which is used to organize and filter action policies. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 256
                 minLength: 1
@@ -91468,12 +91614,12 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. `matcher.tags` is separate from the policy's own `tags` field, which is used to organize and filter action policies. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 256
                 minLength: 1
@@ -92292,12 +92438,12 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
             tags:
-              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. `matcher.tags` is separate from the policy's own `tags` field, which is used to organize and filter action policies. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
               items:
                 maxLength: 256
                 minLength: 1
@@ -97274,6 +97420,11 @@ components:
                               type: string
                       required:
                         - key
+                sources:
+                  items:
+                    type: string
+                  maxItems: 3
+                  type: array
                 sourceURI:
                   type: string
                 ssl:
@@ -100837,6 +100988,12 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
+                          type:
+                            default: default
+                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            enum:
+                              - default
+                            type: string
                           view_mode:
                             anyOf:
                               - enum:
@@ -100957,11 +101114,172 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
+                          type:
+                            default: default
+                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            enum:
+                              - default
+                            type: string
                           wrap_lines:
                             description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
                             type: boolean
                         required:
                           - data_source
+                      - additionalProperties: false
+                        description: An ES|QL tab with saved metrics grid settings. The dashboard panel stores these settings and restores them in Discover. The panel does not render the metrics grid.
+                        properties:
+                          column_order:
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            items:
+                              description: Field name of a column in display order.
+                              type: string
+                            maxItems: 100
+                            type: array
+                          column_settings:
+                            additionalProperties:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                width:
+                                  description: Optional width of the column in pixels.
+                                  minimum: 0
+                                  type: number
+                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            type: object
+                          counter_aggregation:
+                            description: Aggregation applied to counter metric fields.
+                            enum:
+                              - avg
+                              - sum
+                              - min
+                              - max
+                            type: string
+                          data_source:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+                          default_rendered_nodes:
+                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            maximum: 200
+                            minimum: 10
+                            type: number
+                          density:
+                            anyOf:
+                              - enum:
+                                  - compact
+                                type: string
+                              - enum:
+                                  - expanded
+                                type: string
+                              - enum:
+                                  - normal
+                                type: string
+                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                          dimensions:
+                            description: Fields used to group metrics in the metrics grid.
+                            items:
+                              maxLength: 1000
+                              type: string
+                            maxItems: 5
+                            type: array
+                          documents_display_mode:
+                            anyOf:
+                              - enum:
+                                  - table
+                                type: string
+                              - enum:
+                                  - json
+                                type: string
+                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                          gauge_aggregation:
+                            description: Aggregation applied to gauge metric fields.
+                            enum:
+                              - avg
+                              - sum
+                              - min
+                              - max
+                            type: string
+                          header_row_height:
+                            anyOf:
+                              - maximum: 5
+                                minimum: 1
+                                type: number
+                              - enum:
+                                  - auto
+                                type: string
+                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                          hide_nulls:
+                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            type: boolean
+                          histogram_percentile:
+                            description: Percentile displayed for histogram metric fields.
+                            enum:
+                              - p50
+                              - p75
+                              - p90
+                              - p95
+                              - p99
+                            type: string
+                          row_height:
+                            anyOf:
+                              - maximum: 20
+                                minimum: 1
+                                type: number
+                              - enum:
+                                  - auto
+                                type: string
+                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                          rows_per_page:
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            maximum: 10000
+                            minimum: 1
+                            type: number
+                          sample_size:
+                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            maximum: 10000
+                            minimum: 10
+                            type: number
+                          search_term:
+                            description: Search term used to filter metrics in the metrics grid.
+                            maxLength: 1000
+                            type: string
+                          sort:
+                            default: []
+                            description: Sort configuration for the data table (field and direction).
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                direction:
+                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  enum:
+                                    - asc
+                                    - desc
+                                  type: string
+                                name:
+                                  description: The name of the field to sort by.
+                                  type: string
+                              required:
+                                - name
+                                - direction
+                            maxItems: 100
+                            type: array
+                          type:
+                            description: A tab with saved metrics grid settings. Requires an ES|QL data source. These settings are used only when the query supports the metrics experience.
+                            enum:
+                              - metrics
+                            type: string
+                          wrap_lines:
+                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            type: boolean
+                        required:
+                          - data_source
+                          - type
+                          - dimensions
+                          - search_term
+                          - counter_aggregation
+                          - gauge_aggregation
+                          - histogram_percentile
+                        title: Metrics tab
+                        type: object
                   maxItems: 1
                   minItems: 1
                   type: array
@@ -107185,8 +107503,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string
@@ -115235,8 +115562,17 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
+            maxLength: 500
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string

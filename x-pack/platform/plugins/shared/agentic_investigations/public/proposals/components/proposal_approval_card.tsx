@@ -136,7 +136,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
       try {
         await dismissMutation.mutateAsync({
           id: proposalId,
-          body: { dismissReason, rationale },
+          body: { dismissReason, rationale: rationale.trim() || undefined },
         });
         setMode('view');
       } catch {
@@ -245,7 +245,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           }),
           color: 'danger',
           onClick: handleDismissConfirm,
-          isDisabled: isLoading || !rationale,
+          isDisabled: isLoading || !rationale.trim(),
           isLoading,
           'data-test-subj': `agenticInvestigationsProposalDismissConfirm-${proposalId}`,
         };
