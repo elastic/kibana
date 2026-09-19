@@ -6,6 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
@@ -14,7 +15,7 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
-import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
+import type { RetryNotice, ToolRenderStateMap } from '../transient_state';
 import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
 /** Never call from the tool-result path — image bytes must not enter tool results. */
@@ -57,16 +58,24 @@ export interface PromptFactoryParams {
   conversationTemplates: ConversationTemplatesService;
 }
 
-export interface ResearchAgentPromptRuntimeParams {
+/** The current run as seen by the prompt renderer: the authoritative steps plus transient state. */
+export interface CurrentRunPromptParams {
   cycleLimit: number;
-  actions: ResearchAgentAction[];
+  steps: ConversationRoundStep[];
+  renderState: ToolRenderStateMap;
+  pendingToolCallIds: string[];
+  retryNotices: RetryNotice[];
 }
 
-export interface AnswerAgentPromptRuntimeParams {
-  cycleLimit: number;
-  actions: ResearchAgentAction[];
-  answerActions: AnswerAgentAction[];
+export interface HandoverParams {
+  message: string;
+  forceful: boolean;
 }
+
+export type ResearchAgentPromptRuntimeParams = CurrentRunPromptParams;
+export type AnswerAgentPromptRuntimeParams = CurrentRunPromptParams & {
+  handover?: HandoverParams;
+};
 
 export interface PromptFactory {
   getMainPrompt(params: ResearchAgentPromptRuntimeParams): Promise<BaseMessageLike[]>;

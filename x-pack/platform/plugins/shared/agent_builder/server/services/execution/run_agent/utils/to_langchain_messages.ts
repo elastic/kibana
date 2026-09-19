@@ -41,7 +41,7 @@ import {
   formatExecutionFailedNotice,
   formatSystemNotice,
   formatSubagentRosterNotice,
-} from '../prompts/utils/actions';
+} from '../prompts/utils/notices';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
