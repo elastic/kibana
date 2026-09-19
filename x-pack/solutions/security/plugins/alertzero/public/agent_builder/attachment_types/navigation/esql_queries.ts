@@ -140,3 +140,22 @@ export const buildEntityLookupEsql = ({
     value
   )}`;
 };
+
+/**
+ * ES|QL lookup for hunt correlation `ioc_set_hash` anchors on threat reports.
+ * (Hash anchors use a nested Discover filter instead; see
+ * `buildDiscoverThreatReportNestedIocUrl`.)
+ */
+export const buildThreatReportIocSetHashLookupEsql = ({
+  value,
+}: {
+  value: string;
+}): string | undefined => {
+  if (!value.trim()) {
+    return undefined;
+  }
+
+  return `FROM ${quoteEsqlIdentifier(
+    THREAT_REPORTS_INDEX_PATTERN
+  )} | WHERE ${buildFieldEqualityWhere(['extracted.ioc_set_hash'], value)}`;
+};

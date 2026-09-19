@@ -20,7 +20,8 @@ import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import type { AttachmentNavigationDeps } from '../navigation';
 import {
   buildDiscoverEsqlUrl,
-  buildIocLookupEsql,
+  buildDiscoverThreatReportNestedIocUrl,
+  buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   DiscoverLink,
 } from '../navigation';
@@ -77,8 +78,19 @@ const renderAnchorValue = ({
     return badge;
   }
 
-  const esql = buildIocLookupEsql({ type: 'hash', value });
-  const href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
+  // Hash anchors are report-only nested IOCs; ES|QL cannot filter nested fields.
+  // ioc_set_hash is a top-level keyword on threat reports.
+  let href: string | undefined;
+  if (kind === 'hash') {
+    href = buildDiscoverThreatReportNestedIocUrl({
+      share: navigation.share,
+      iocType: 'hash',
+      value,
+    });
+  } else {
+    const esql = buildThreatReportIocSetHashLookupEsql({ value });
+    href = esql ? buildDiscoverEsqlUrl({ share: navigation.share, esql }) : undefined;
+  }
 
   return (
     <span css={{ marginRight: 4 }}>

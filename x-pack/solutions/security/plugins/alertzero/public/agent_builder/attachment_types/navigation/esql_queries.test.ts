@@ -10,6 +10,7 @@ import {
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildIocLookupEsql,
+  buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
   getAlertsIndex,
@@ -88,5 +89,12 @@ describe('esql_queries', () => {
   it('returns undefined entity lookup for generic/unknown kinds', () => {
     expect(buildEntityLookupEsql({ kind: 'generic', value: 'x' })).toBeUndefined();
     expect(buildEntityLookupEsql({ kind: 'user', value: '  ' })).toBeUndefined();
+  });
+
+  it('builds threat report ioc_set_hash lookup ES|QL', () => {
+    expect(buildThreatReportIocSetHashLookupEsql({ value: 'set-hash-1' })).toBe(
+      'FROM ".kibana-threat-reports*" | WHERE extracted.ioc_set_hash == "set-hash-1"'
+    );
+    expect(buildThreatReportIocSetHashLookupEsql({ value: '  ' })).toBeUndefined();
   });
 });

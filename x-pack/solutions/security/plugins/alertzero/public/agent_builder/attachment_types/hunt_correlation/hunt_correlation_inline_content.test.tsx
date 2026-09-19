@@ -14,7 +14,11 @@ import {
   HUNT_CORRELATION_ATTACHMENT_EMPTY_TEST_ID,
 } from './hunt_correlation_inline_content';
 import type { HuntCorrelationAttachment } from './types';
-import { buildEntityLookupEsql, buildIocLookupEsql, buildThreatReportLookupEsql } from '../navigation';
+import {
+  buildEntityLookupEsql,
+  buildThreatReportIocSetHashLookupEsql,
+  buildThreatReportLookupEsql,
+} from '../navigation';
 
 const buildAttachment = (data: HuntCorrelationAttachment['data']): HuntCorrelationAttachment =>
   ({ id: 'att-1', type: 'security.hunt_correlation', data } as HuntCorrelationAttachment);
@@ -138,22 +142,44 @@ describe('HuntCorrelationInlineContent', () => {
         { kind: 'actor', value: 'APT-99' },
       ],
     };
-    const hashEsql = buildIocLookupEsql({ type: 'hash', value: hashValue });
-    const iocSetEsql = buildIocLookupEsql({ type: 'hash', value: iocSetHashValue });
+    const iocSetEsql = buildThreatReportIocSetHashLookupEsql({ value: iocSetHashValue });
     const actorEsql = buildEntityLookupEsql({ kind: 'actor', value: 'APT-99' });
+    const getRedirectUrl = jest.fn(
+      (params: { query?: { esql?: string }; filters?: unknown[] }) => {
+        if (params.filters) {
+          return `https://example.test/discover?nested=hash`;
+        }
+        return `https://example.test/discover?esql=${encodeURIComponent(params.query?.esql ?? '')}`;
+      }
+    );
+    const shareWithNested = {
+      url: {
+        locators: {
+          get: () => ({ getRedirectUrl }),
+        },
+      },
+    } as unknown as SharePluginStart;
 
     render(
       <HuntCorrelationInlineContent
-        {...renderProps(buildAttachment(data), { ...defaultNavigation, share: mockShare })}
+        {...renderProps(buildAttachment(data), { ...defaultNavigation, share: shareWithNested })}
       />
     );
 
     const hashLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-hash-0');
-    expect(hashLink).toHaveAttribute(
-      'href',
-      `https://example.test/discover?esql=${encodeURIComponent(hashEsql as string)}`
-    );
+    expect(hashLink).toHaveAttribute('href', 'https://example.test/discover?nested=hash');
     expect(hashLink).toHaveTextContent(hashValue);
+    expect(getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            query: expect.objectContaining({
+              nested: expect.objectContaining({ path: 'extracted.iocs' }),
+            }),
+          }),
+        ]),
+      })
+    );
 
     const iocSetLink = screen.getByTestId('alertzeroHuntCorrelationAnchorLink-ioc_set_hash-0');
     expect(iocSetLink).toHaveAttribute(

@@ -15,6 +15,10 @@ export {
 export { buildAlertDetailsPath, buildAlertDetailsUrl } from './build_alert_details_url';
 export { buildDiscoverEsqlUrl } from './build_discover_esql_url';
 export type { DiscoverLookupTimeRange } from './build_discover_esql_url';
+export {
+  buildDiscoverThreatReportNestedIocUrl,
+  THREAT_REPORTS_LOOKUP_DATA_VIEW_ID,
+} from './build_discover_threat_report_nested_ioc_url';
 export { DiscoverLink } from './discover_link';
 export type { DiscoverLinkProps } from './discover_link';
 export {
@@ -22,6 +26,7 @@ export {
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildIocLookupEsql,
+  buildThreatReportIocSetHashLookupEsql,
   buildThreatReportLookupEsql,
   buildThreatReportsInEsql,
   escapeEsqlString,
