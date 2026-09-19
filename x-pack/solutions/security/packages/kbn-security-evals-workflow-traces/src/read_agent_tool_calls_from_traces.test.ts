@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { toHashedId } from '@kbn/agent-builder-server';
 import { readAgentToolCallsFromTraces } from './read_agent_tool_calls_from_traces';
 
 const silentLog = {
@@ -46,7 +47,7 @@ describe('readAgentToolCallsFromTraces', () => {
     const queries = client.transport.request.mock.calls.map(
       (call) => (call[0] as { body: { query: string } }).body.query
     );
-    expect(queries[0]).toContain('attributes.gen_ai.conversation.id == "conv-1"');
+    expect(queries[0]).toContain('attributes.gen_ai.conversation.id IN ("conv-1"');
     expect(queries[0]).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(queries[0]).not.toContain('trace.id ==');
     expect(queries[0]).toContain('LIMIT 10000');
@@ -71,9 +72,12 @@ describe('readAgentToolCallsFromTraces', () => {
 
     const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
       .query;
-    expect(query).toContain(
-      'attributes.gen_ai.conversation.id IN ("conv-draft", "conv-review", "conv-rewrite")'
-    );
+    // Each id is present; the clause also carries each id's hashed variant, so
+    // this asserts membership rather than an exact closed list.
+    for (const id of ['conv-draft', 'conv-review', 'conv-rewrite']) {
+      expect(query).toContain(`"${id}"`);
+    }
+    expect(query).toContain('attributes.gen_ai.conversation.id IN (');
     expect(result.toolCallIds).toEqual(['platform.core.search', 'platform.core.esql']);
     expect(result.unavailable).toBe(false);
   });
@@ -195,7 +199,10 @@ describe('readAgentToolCallsFromTraces', () => {
 
     const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
       .query;
-    expect(query).toContain('attributes.gen_ai.conversation.id IN ("conv-1", "conv-2")');
+    // Dedupe is what this test guards: each raw id appears exactly once even
+    // though it was supplied twice.
+    expect(query.split('"conv-1"').length - 1).toBe(1);
+    expect(query.split('"conv-2"').length - 1).toBe(1);
   });
   it('keeps the failure column out of KEEP unless failures are requested', async () => {
     const client = mockClient([
@@ -235,5 +242,107 @@ describe('readAgentToolCallsFromTraces', () => {
       .query;
     expect(query).toContain('attributes.gen_ai.tool.call.failed');
     expect(result.failedToolCallIds).toEqual(['platform.core.esql']);
+  });
+
+  describe('anonymized conversation ids', () => {
+    // AgentBuilderSpanProcessor hashes gen_ai.conversation.id before export unless
+    // agentBuilder:tracing:includeRealIds is on (default off). Real value from toHashedId.
+    const REAL_ID = 'c9682441-2d72-4e5f-9a1b-0c3d4e5f6a7b';
+    // Hardcoded on purpose: computing it with toHashedId here would assert the implementation
+    // against itself. Independently reproducible: sha256(REAL_ID) hex, first 16 chars.
+    const HASHED_ID = 'cccbfba40403ea00';
+
+    it('matches the hash Agent Builder writes onto spans', () => {
+      // Guards drift: if toHashedId's scheme changes, the evaluator's join
+      // silently stops matching and tool metrics go quietly empty.
+      expect(toHashedId(REAL_ID)).toBe(HASHED_ID);
+    });
+
+    it('queries the hashed conversation id, not just the raw workflow id', async () => {
+      const client = mockClient([
+        { columns: [{ name: 'tool_id' }], values: [['platform.core.search']] },
+      ]);
+
+      await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: REAL_ID,
+        log: silentLog,
+      });
+
+      const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
+        .query;
+      // Without this the join matches nothing on a default stack and the suite
+      // reports "no agent TOOL spans" instead of the real trajectory.
+      expect(query).toContain(HASHED_ID);
+      expect(HASHED_ID).toHaveLength(16);
+    });
+
+    it('still queries the raw id so includeRealIds stacks keep working', async () => {
+      const client = mockClient([
+        { columns: [{ name: 'tool_id' }], values: [['platform.core.search']] },
+      ]);
+
+      await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: REAL_ID,
+        log: silentLog,
+      });
+
+      const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
+        .query;
+      expect(query).toContain(REAL_ID);
+      expect(query).toContain(' IN (');
+    });
+
+    it('resolves tool calls when spans carry only the hashed id', async () => {
+      const client = mockClient([
+        {
+          columns: [{ name: 'tool_id' }],
+          values: [['platform.core.search'], ['platform.core.esql']],
+        },
+      ]);
+
+      const result = await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: REAL_ID,
+        log: silentLog,
+      });
+
+      expect(result).toEqual({
+        toolCallIds: ['platform.core.search', 'platform.core.esql'],
+        unavailable: false,
+      });
+    });
+
+    it('does not emit duplicate variants for an already-hashed id', async () => {
+      const client = mockClient([
+        { columns: [{ name: 'tool_id' }], values: [['platform.core.search']] },
+      ]);
+
+      await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: [REAL_ID, REAL_ID],
+        log: silentLog,
+      });
+
+      const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
+        .query;
+      expect(query.split(HASHED_ID).length - 1).toBe(1);
+      expect(query.split(`"${REAL_ID}"`).length - 1).toBe(1);
+    });
+
+    it('rejects hashed ids that would break out of the ES|QL literal', async () => {
+      const client = mockClient([
+        { columns: [{ name: 'tool_id' }], values: [['platform.core.search']] },
+      ]);
+
+      const result = await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: 'conv"-injection',
+        log: silentLog,
+      });
+
+      expect(result.unavailable).toBe(true);
+    });
   });
 });
