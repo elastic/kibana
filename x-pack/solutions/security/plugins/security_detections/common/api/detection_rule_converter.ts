@@ -47,7 +47,8 @@
  *   Internal fields that never surface: kind, time_field, grouping,
  *   recovery_strategy, no_data_strategy, state_transition, artifacts,
  *   metadata.owner, metadata.ownership, metadata.version (the mutation
- *   sequence), and the saved-object concurrency token.
+ *   sequence), and the saved-object concurrency token.  All are constant
+ *   across detection rules and not part of the domain model.
  *
  * Ref: rule-domain-model.md "Two models, one converter"
  *      rule-domain-model.md "How public fields map onto the stored rule"
@@ -175,15 +176,18 @@ export interface DetectionRuleCreateInput {
  * the framework's `CreateRuleData`.
  *
  * Detection rules always have:
- *   - `kind: 'signal'` — they collect evidence, not alert episodes.
+ *   - `kind: 'alert'` — they produce alert episodes visible on the Episodes page.
  *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — sent
  *     explicitly so stored detection rules are uniform even if the framework
- *     default ever changes.  The framework's create schema accepts only absence
- *     or `'none'` for signal rules.
+ *     default ever changes.  An alert rule may carry either strategy at any
+ *     value; sending `'none'` explicitly is this API's choice, not the schema's
+ *     constraint.
+ *   - `state_transition: { pending_count: 0 }` — zero consecutive breaches
+ *     required, so the alert activates immediately on the first match.
  *   - No persisted `query` — the framework compiles the query at execution time
  *     from `metadata.builder_fields`.
- *   - No `state_transition` or `grouping` — signal-kind rules do not use those
- *     framework features.
+ *   - No `grouping` — detection rules do not use the framework's grouping
+ *     feature; the ungrouped fallback hash gives each result row its own episode.
  *
  * Empty tags: the framework rejects `metadata.tags = []`, so the field is
  * omitted when the caller provides an empty array.
@@ -204,10 +208,12 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
   return {
     kind,
     // Sent explicitly so stored detection rules are uniform regardless of the
-    // framework default.  The framework's create schema accepts only 'none' for
-    // signal rules.
+    // framework default.
     recovery_strategy: 'none',
     no_data_strategy: 'none',
+    // Zero consecutive breaches required: the alert activates immediately on
+    // the first match, with no pending window.
+    state_transition: { pending_count: 0 },
     schedule: {
       every: props.schedule.interval,
       ...(props.schedule.lookback !== undefined ? { lookback: props.schedule.lookback } : {}),
@@ -241,6 +247,11 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
  *     the stored tags instead of clearing them.
  *   - Sends `schedule.lookback: null` (not omit) when absent — omission would
  *     keep the stored lookback.
+ *   - Restates `state_transition: { pending_count: 0 }`, `recovery_strategy:
+ *     'none'` and `no_data_strategy: 'none'` explicitly.  The public PUT
+ *     routes through `updateRule`, whose merge reads an omitted field as "keep
+ *     stored", so the values would survive a PUT today by accident.  Restating
+ *     them makes every invariant explicit rather than load-bearing-and-implicit.
  *
  * The stored source is restated with the caller's new `version` number.
  * `type` and `id` are immutable and come from the stored source; only
@@ -273,6 +284,12 @@ export function toFrameworkReplace(
   };
 
   return {
+    // All three lifecycle invariants are restated on every full write so they
+    // are explicit rather than surviving by accident through the merge's
+    // "omitted = keep stored" rule.
+    recovery_strategy: 'none',
+    no_data_strategy: 'none',
+    state_transition: { pending_count: 0 },
     schedule: schedulePayload,
     metadata: {
       name: props.name,
@@ -388,7 +405,8 @@ export function toFrameworkPatch(merged: DetectionRulePatchedInput): UpdateRuleD
  *
  * Internal fields never surfaced:
  *   - `kind`, `time_field`, `grouping`, `recovery_strategy`, `no_data_strategy`,
- *     `state_transition`, `artifacts` — constant or meaningless for signal rules.
+ *     `state_transition`, `artifacts` — constant across detection rules and not
+ *     part of the domain model.
  *   - `metadata.owner`, `metadata.ownership` — internal machinery.
  *   - `metadata.version` — the mutation sequence, not the content version.
  *   - The saved-object concurrency token (`rule.version`).

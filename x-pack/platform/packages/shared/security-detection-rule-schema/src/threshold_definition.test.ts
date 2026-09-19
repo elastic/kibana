@@ -9,7 +9,6 @@ import {
   securityDetectionThreshold,
   securityDetectionThresholdManifest,
   validateThresholdFields,
-  deriveThresholdRuleFields,
 } from './threshold_definition';
 import {
   thresholdBuilderFieldsSchema,
@@ -41,7 +40,7 @@ const makeInput = (fields: ThresholdBuilderFields) => ({
   fields,
   rule: {
     id: 'rule-id-fixture',
-    kind: 'signal' as const,
+    kind: 'alert' as const,
     schedule: { every: '5m' },
     time_field: '@timestamp',
   },
@@ -217,51 +216,6 @@ describe('validateThresholdFields', () => {
       },
     };
     expect(validateThresholdFields(fields)).toEqual([]);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// deriveRuleFields
-// ---------------------------------------------------------------------------
-
-describe('deriveThresholdRuleFields', () => {
-  it('maps threshold.field to grouping.fields', () => {
-    const fields: ThresholdBuilderFields = {
-      severity: 'high',
-      risk_score: 73,
-      index: ['logs-*'],
-      query: '',
-      language: 'kuery',
-      threshold: { field: ['user.name', 'source.ip'], value: 5 },
-    };
-    const derived = deriveThresholdRuleFields(fields);
-    expect(derived).toEqual({ grouping: { fields: ['user.name', 'source.ip'] } });
-  });
-
-  it('returns grouping.fields as [] when threshold.field is empty', () => {
-    const fields: ThresholdBuilderFields = {
-      severity: 'high',
-      risk_score: 73,
-      index: ['logs-*'],
-      query: '',
-      language: 'kuery',
-      threshold: { field: [], value: 5 },
-    };
-    const derived = deriveThresholdRuleFields(fields);
-    expect(derived).toEqual({ grouping: { fields: [] } });
-  });
-
-  it('does not set time_field (threshold does not derive it)', () => {
-    const fields: ThresholdBuilderFields = {
-      severity: 'high',
-      risk_score: 73,
-      index: ['logs-*'],
-      query: '',
-      language: 'kuery',
-      threshold: { field: ['host.name'], value: 3 },
-    };
-    const derived = deriveThresholdRuleFields(fields);
-    expect(derived.time_field).toBeUndefined();
   });
 });
 
@@ -470,8 +424,8 @@ describe('securityDetectionThreshold definition', () => {
     expect(securityDetectionThreshold.type).toBe('security.detection.threshold');
   });
 
-  it('pins kind to signal', () => {
-    expect(securityDetectionThreshold.kind).toBe('signal');
+  it('pins kind to alert', () => {
+    expect(securityDetectionThreshold.kind).toBe('alert');
   });
 
   it('declares ownership as security/detection', () => {
@@ -493,8 +447,8 @@ describe('securityDetectionThreshold definition', () => {
     expect(securityDetectionThreshold.validateFields).toBeDefined();
   });
 
-  it('has deriveRuleFields set', () => {
-    expect(securityDetectionThreshold.deriveRuleFields).toBeDefined();
+  it('does not carry deriveRuleFields (grouping derivation removed; ungrouped fallback applies)', () => {
+    expect(securityDetectionThreshold.deriveRuleFields).toBeUndefined();
   });
 
   it('has generateQuery set', () => {

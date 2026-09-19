@@ -65,12 +65,12 @@ describe('BUILDER_TYPE_ID_TO_ALIAS', () => {
 });
 
 describe('ALIAS_TO_KIND', () => {
-  it('maps query → signal', () => {
-    expect(ALIAS_TO_KIND.query).toBe('signal');
+  it('maps query → alert', () => {
+    expect(ALIAS_TO_KIND.query).toBe('alert');
   });
 
-  it('maps threshold → signal', () => {
-    expect(ALIAS_TO_KIND.threshold).toBe('signal');
+  it('maps threshold → alert', () => {
+    expect(ALIAS_TO_KIND.threshold).toBe('alert');
   });
 
   it('is consistent with ALIAS_MAP entry kind pins', () => {
@@ -81,9 +81,9 @@ describe('ALIAS_TO_KIND', () => {
 });
 
 describe('ALIAS_MAP entries', () => {
-  it('every entry pins kind: signal', () => {
+  it('every entry pins kind: alert', () => {
     for (const entry of ALIAS_MAP) {
-      expect(entry.kind).toBe('signal');
+      expect(entry.kind).toBe('alert');
     }
   });
 
