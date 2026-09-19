@@ -135,6 +135,14 @@ git push -u origin feat/my-feature-part-2
 gh pr create --base feat/my-feature-part-1 --title "feat: part 2 — <description>"
 ```
 
-When a PR in the stack merges, GitHub automatically retargets the next PR in the stack to `main`. Note: because Kibana uses squash merges, the retargeted PR will appear to include the squashed base commits — reviewers should focus on the new commits only. Mention this in the PR description.
+When a PR in the stack merges, GitHub automatically retargets the next PR in the stack to `main`. Because Kibana uses squash merges, the dependent branch still carries the parent's original commits in its ancestry — rebase it onto the updated `main` before requesting review:
+
+```bash
+git fetch origin
+git rebase --onto origin/main <previous-branch> <current-branch>
+git push --force-with-lease
+```
+
+This drops the parent's commits from the dependent branch's history so the diff stays focused on only the new layer's changes.
 
 Include the stack position in each PR description, e.g. `2 of 3 — depends on #N`.
