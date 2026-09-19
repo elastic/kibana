@@ -50,13 +50,23 @@ const queryStringInputStyles = {
         // matches; target the icons group that actually contains the clear button instead.
         // paddingRight alone cannot keep unbroken / nowrap glyphs from painting under the ×
         // because textarea overflow clips at the padding edge.
+        //
+        // Inset the scrim by the field border on the trailing / block edges so it covers
+        // glyph paint without painting over the input border (review feedback on #289442).
         '> .euiFormControlLayoutIcons:has(.euiFormControlLayoutClearButton)': {
           backgroundColor: euiTheme.components.forms.background,
-          // Match the clearable paddingRight affordance (xxl) and sit flush to the
-          // field edge so the scrim covers the full gutter EUI insets from `right`.
+          // Match the clearable paddingRight affordance (xxl).
           width: euiTheme.size.xxl,
           justifyContent: 'center',
-          insetInlineEnd: 0,
+          // Stay inside the border — previous flush `insetInlineEnd: 0` covered it.
+          insetInlineEnd: euiTheme.border.width.thin,
+          top: euiTheme.border.width.thin,
+          bottom: euiTheme.border.width.thin,
+          height: 'auto',
+          maxHeight: 'none',
+          // Match EUI form control radius, stepped in by the border so corners align.
+          borderStartEndRadius: `calc(${euiTheme.border.radius.small} - ${euiTheme.border.width.thin})`,
+          borderEndEndRadius: `calc(${euiTheme.border.radius.small} - ${euiTheme.border.width.thin})`,
         },
       },
       '.kbnQueryBar__textarea': {
