@@ -49,10 +49,10 @@ describe('getLogsSemanticHandler', () => {
 
   it('maps ranked patterns and sums their counts without querying Elasticsearch', async () => {
     const search = jest.fn().mockResolvedValue({
+      status: 'success',
       patterns: rankedPatterns,
-      strategy: 'esql_rerank',
     });
-    const semanticLogSearch = { search, expand: jest.fn() } as unknown as SemanticLogSearchService;
+    const semanticLogSearch = { search } as SemanticLogSearchService;
 
     const result = await getLogsSemanticHandler({
       esClient: mockEsClient,
@@ -92,14 +92,13 @@ describe('getLogsSemanticHandler', () => {
       ],
       totalCount: 140,
       semanticQuery: 'connection failures',
-      strategy: 'esql_rerank',
       warnings: [],
     });
   });
 
   it('passes kqlFilter and maxPatterns through to the service', async () => {
-    const search = jest.fn().mockResolvedValue({ patterns: [], strategy: 'esql_rerank' });
-    const semanticLogSearch = { search, expand: jest.fn() } as unknown as SemanticLogSearchService;
+    const search = jest.fn().mockResolvedValue({ status: 'success', patterns: [] });
+    const semanticLogSearch = { search } as SemanticLogSearchService;
 
     await getLogsSemanticHandler({
       esClient: mockEsClient,
@@ -121,6 +120,7 @@ describe('getLogsSemanticHandler', () => {
 
   it('truncates long sample field values', async () => {
     const search = jest.fn().mockResolvedValue({
+      status: 'success',
       patterns: [
         {
           field: 'message',
@@ -131,35 +131,66 @@ describe('getLogsSemanticHandler', () => {
           sample: { message: 'x'.repeat(520) },
         },
       ],
-      strategy: 'esql_rerank',
     });
 
     const result = await getLogsSemanticHandler({
       esClient: mockEsClient,
       params: baseParams,
-      semanticLogSearch: { search, expand: jest.fn() } as unknown as SemanticLogSearchService,
+      semanticLogSearch: { search } as SemanticLogSearchService,
     });
 
     expect(result.patterns[0].sample.message).toBe(`${'x'.repeat(500)}...`);
   });
 
-  it('returns an unavailable warning when the service cannot run', async () => {
-    const search = jest.fn().mockResolvedValue({ patterns: [], unavailable: true });
+  it('bounds nested sample values', async () => {
+    const search = jest.fn().mockResolvedValue({
+      status: 'success',
+      patterns: [
+        {
+          ...rankedPatterns[0],
+          sample: {
+            nested: {
+              level1: {
+                level2: {
+                  level3: {
+                    level4: 'hidden',
+                  },
+                },
+              },
+            },
+            items: Array.from({ length: 25 }, (_, index) => `item-${index}`),
+          },
+        },
+      ],
+    });
 
     const result = await getLogsSemanticHandler({
       esClient: mockEsClient,
       params: baseParams,
-      semanticLogSearch: { search, expand: jest.fn() } as unknown as SemanticLogSearchService,
+      semanticLogSearch: { search } as SemanticLogSearchService,
     });
 
-    expect(result).toEqual({
-      patterns: [],
-      totalCount: 0,
-      semanticQuery: 'connection failures',
-      warnings: [
-        'Semantic log search is not available for this index. The cluster has no RERANK inference endpoint.',
-      ],
+    expect(result.patterns[0].sample.nested).toEqual({
+      level1: { level2: { level3: '[truncated]' } },
     });
+    expect(result.patterns[0].sample.items).toHaveLength(20);
+  });
+
+  it.each([
+    ['missing_fields', 'target does not expose the required message and @timestamp fields'],
+    ['inference_unavailable', 'cluster has no RERANK inference endpoint'],
+  ] as const)('returns an actionable unavailable warning for %s', async (reason, warning) => {
+    const search = jest.fn().mockResolvedValue({ status: 'unavailable', reason });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.patterns).toEqual([]);
+    expect(result.warnings[0]).toContain(warning);
+    expect(result.warnings[0]).toContain('Do not retry');
   });
 
   it('returns an unavailable warning when the service is missing', async () => {
@@ -170,26 +201,62 @@ describe('getLogsSemanticHandler', () => {
 
     expect(result.patterns).toEqual([]);
     expect(result.warnings).toHaveLength(1);
-    expect(result.warnings[0]).toContain('not available');
+    expect(result.warnings[0]).toContain('not registered');
   });
 
-  it('warns when no patterns match, without switching tools', async () => {
-    const search = jest.fn().mockResolvedValue({ patterns: [], strategy: 'esql_rerank' });
+  it('does not call the service when the target is empty', async () => {
+    const search = jest.fn();
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: { ...baseParams, index: '' },
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(search).not.toHaveBeenCalled();
+    expect(result.warnings[0]).toContain('No log indices');
+  });
+
+  it('warns when no patterns match and limits retries', async () => {
+    const search = jest.fn().mockResolvedValue({ status: 'success', patterns: [] });
 
     const result = await getLogsSemanticHandler({
       esClient: mockEsClient,
       params: baseParams,
-      semanticLogSearch: { search, expand: jest.fn() } as unknown as SemanticLogSearchService,
+      semanticLogSearch: { search } as SemanticLogSearchService,
     });
 
-    expect(result).toEqual({
-      patterns: [],
-      totalCount: 0,
-      semanticQuery: 'connection failures',
-      strategy: 'esql_rerank',
-      warnings: [
-        'No matching log patterns in this time range. Widen the range and keep this tool; do not switch to observability.get_logs.',
-      ],
+    expect(result.patterns).toEqual([]);
+    expect(result.warnings[0]).toContain('retry once');
+  });
+
+  it.each([
+    ['timeout', 'Narrow the time range or add a KQL filter before retrying once'],
+    ['cancelled', 'Do not retry automatically'],
+    ['execution', 'Do not retry automatically or fall back silently'],
+  ] as const)('maps %s errors to actionable warnings', async (reason, warning) => {
+    const search = jest.fn().mockResolvedValue({ status: 'error', reason });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
     });
+
+    expect(result.patterns).toEqual([]);
+    expect(result.warnings[0]).toContain(warning);
+  });
+
+  it('rejects an invalid date range before calling the service', async () => {
+    const search = jest.fn();
+
+    await expect(
+      getLogsSemanticHandler({
+        esClient: mockEsClient,
+        params: { ...baseParams, start: '' },
+        semanticLogSearch: { search } as SemanticLogSearchService,
+      })
+    ).rejects.toThrow('Invalid date range');
+    expect(search).not.toHaveBeenCalled();
   });
 });

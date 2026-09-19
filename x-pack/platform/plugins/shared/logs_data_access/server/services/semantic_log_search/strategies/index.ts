@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { searchWithSemanticAndPattern } from './semantic_and_pattern';
-export { searchWithSemanticOnly } from './semantic_only';
 export { searchWithEsqlRerank } from './esql_rerank';

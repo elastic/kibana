@@ -43,6 +43,8 @@ const getLogsSemanticSchema = z.object({
   index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe('Log index pattern').optional(),
   semanticFilter: z
     .string()
+    .trim()
+    .min(1)
     .max(MAX_SHORT_STRING_LENGTH)
     .describe(
       dedent(`Natural language query for logs. Finds and ranks log patterns by semantic relevance.
@@ -62,9 +64,9 @@ const getLogsSemanticSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(20)
     .default(10)
-    .describe('Maximum number of ranked message patterns to return. Defaults to 10.'),
+    .describe('Maximum number of ranked message patterns to return (1-20). Defaults to 10.'),
 });
 
 export function createGetLogsSemanticTool({
@@ -97,17 +99,18 @@ export function createGetLogsSemanticTool({
       How to use:
       - Set semanticFilter to the natural language question. The ranking is the answer; do not iterate.
       - Combine with kqlFilter to scope the corpus (for example semanticFilter: "timeout errors" and kqlFilter: "service.name: payment").
-      - If this returns no patterns, widen the time range and call this tool again. Do not fall back to \`${OBSERVABILITY_GET_LOGS_TOOL_ID}\`.
+      - If no patterns are found, retry at most once with a different time range or a narrower KQL scope.
+      - Follow warnings exactly. Do not retry unavailable, cancelled, or execution failures, and do not silently present keyword results as semantic results.
 
       Response structure:
       - patterns: ranked message patterns, each with count, firstSeen, lastSeen, and a sample document
       - totalCount: sum of the pattern counts, not a document count of the index
       - semanticQuery: the query that was ranked
-      - strategy: the ranking path that produced the result (debug)
       - warnings: empty on success
 
       When NOT to use:
       - Exploring log volume, trends, or iteratively excluding noise — use \`${OBSERVABILITY_GET_LOGS_TOOL_ID}\` (the funnel workflow)
+      - Listing recurring groups without a semantic question — use \`observability.get_log_groups\`
       - Log rate spike/dip analysis — use run_log_rate_analysis`
     ),
     schema: getLogsSemanticSchema,
@@ -146,7 +149,8 @@ export function createGetLogsSemanticTool({
           ],
         };
       } catch (error) {
-        logger.error(`get_logs_semantic failed: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`get_logs_semantic failed: ${errorMessage}`);
         logger.debug(error);
 
         return {
@@ -154,7 +158,7 @@ export function createGetLogsSemanticTool({
             {
               type: ToolResultType.error,
               data: {
-                message: `Semantic log search failed: ${error.message}`,
+                message: 'Semantic log search failed unexpectedly.',
               },
             },
           ],

@@ -10,70 +10,58 @@ import type {
   SemanticLogSearchService,
   SemanticLogSearchParams,
   SemanticLogSearchResult,
-  ExpandPatternParams,
-  ExpandPatternResult,
 } from '../../../common/services/semantic_log_search/types';
 import type { RegisterServicesParams } from '../register_services';
-import { detectCapabilities, detectRerankCapability } from './capabilities';
+import { hasRequiredFields, detectRerankCapability } from './capabilities';
+import { DEFAULT_MAX_PATTERNS, MAX_PATTERNS } from './constants';
 import { searchWithEsqlRerank } from './strategies';
 
-/**
- * Search for log patterns matching a natural language query.
- *
- * The implemented path is RERANK + CATEGORIZE. The pre-indexed rungs
- * (semantic_text / pattern_text) are stubbed; the planned direction is to
- * feed patterns from Knowledge Indicators in the AI Index rather than
- * querying logs at request time.
- */
+const hasValidParams = ({
+  target,
+  nlQuery,
+  timeRange,
+  maxPatterns = DEFAULT_MAX_PATTERNS,
+}: SemanticLogSearchParams): boolean =>
+  target.trim().length > 0 &&
+  nlQuery.trim().length > 0 &&
+  Number.isFinite(timeRange.start) &&
+  Number.isFinite(timeRange.end) &&
+  timeRange.start < timeRange.end &&
+  Number.isInteger(maxPatterns) &&
+  maxPatterns >= 1 &&
+  maxPatterns <= MAX_PATTERNS;
+
+/** Search for log patterns matching a natural language query. */
 export async function search(
   params: SemanticLogSearchParams,
   logger: Logger
 ): Promise<SemanticLogSearchResult> {
   const { esClient, target } = params;
 
-  const capabilities = await detectCapabilities(esClient, target);
-
-  // Level 1: semantic_text + pattern_text (to be implemented)
-  if (capabilities.hasSemanticCapability && capabilities.hasPatternCapability) {
-    // return searchWithSemanticAndPattern(params, capabilities);
+  if (!hasValidParams(params)) {
+    logger.warn('Semantic log search rejected invalid parameters');
+    return { status: 'error', reason: 'execution' };
   }
 
-  // Level 2: semantic_text only (to be implemented)
-  if (capabilities.hasSemanticCapability) {
-    // return searchWithSemanticOnly(params, capabilities);
+  try {
+    if (!(await hasRequiredFields(esClient, target))) {
+      return { status: 'unavailable', reason: 'missing_fields' };
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.warn(`Semantic log search field capability check failed: ${message}`);
+    return { status: 'error', reason: 'execution' };
   }
 
   const hasRerank = await detectRerankCapability(esClient);
   if (!hasRerank) {
-    return { patterns: [], unavailable: true };
+    return { status: 'unavailable', reason: 'inference_unavailable' };
   }
+
   return searchWithEsqlRerank(params, logger);
 }
 
-/**
- * Expand a pattern to retrieve raw documents.
- *
- * To be implemented. See git history for a previous implementation attempt
- * (may or may not be useful as reference).
- */
-export async function expand(_params: ExpandPatternParams): Promise<ExpandPatternResult> {
-  throw new Error('to be implemented');
-}
-
-/**
- * Creates the semantic log search service.
- *
- * The service provides two operations:
- * - `search`: finds log patterns matching a natural language query
- * - `expand`: retrieves raw documents for a specific pattern (to be implemented)
- *
- * The capability ladder:
- * 1. semantic_text + pattern_text: to be implemented (AI Index / Knowledge Indicators)
- * 2. semantic_text only: to be implemented (AI Index / Knowledge Indicators)
- * 3. RERANK + CATEGORIZE: the implemented path, runtime semantic ranking via ES|QL
- *
- * If RERANK is not available, `search` returns `{ patterns: [], unavailable: true }`.
- */
+/** Creates the runtime semantic log search service. */
 export function createSemanticLogSearchService(
   params: RegisterServicesParams
 ): SemanticLogSearchService {
@@ -81,6 +69,5 @@ export function createSemanticLogSearchService(
 
   return {
     search: (searchParams) => search(searchParams, logger),
-    expand,
   };
 }

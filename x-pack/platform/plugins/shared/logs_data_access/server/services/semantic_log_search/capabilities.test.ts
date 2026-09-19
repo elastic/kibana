@@ -6,160 +6,22 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { detectCapabilities, detectRerankCapability } from './capabilities';
+import { hasRequiredFields, detectRerankCapability } from './capabilities';
 
 describe('capabilities', () => {
-  describe('detectCapabilities', () => {
-    it('detects semantic_text fields', async () => {
+  describe('hasRequiredFields', () => {
+    it('returns true when message and @timestamp are available', async () => {
       const mockEsClient = {
         fieldCaps: jest.fn().mockResolvedValue({
           fields: {
             message: {
-              semantic_text: {
-                type: 'semantic_text',
+              match_only_text: {
+                type: 'match_only_text',
                 searchable: true,
                 aggregatable: false,
               },
             },
-          },
-        }),
-      } as unknown as ElasticsearchClient;
-
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
-
-      expect(result).toEqual({
-        hasSemanticCapability: true,
-        hasPatternCapability: false,
-      });
-      expect(mockEsClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'logs-*',
-        fields: ['*'],
-      });
-    });
-
-    it('detects pattern_text fields', async () => {
-      const mockEsClient = {
-        fieldCaps: jest.fn().mockResolvedValue({
-          fields: {
-            message: {
-              pattern_text: {
-                type: 'pattern_text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-          },
-        }),
-      } as unknown as ElasticsearchClient;
-
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
-
-      expect(result).toEqual({
-        hasSemanticCapability: false,
-        hasPatternCapability: true,
-      });
-    });
-
-    it('detects both capabilities', async () => {
-      const mockEsClient = {
-        fieldCaps: jest.fn().mockResolvedValue({
-          fields: {
-            message: {
-              semantic_text: {
-                type: 'semantic_text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-            log_message: {
-              pattern_text: {
-                type: 'pattern_text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-          },
-        }),
-      } as unknown as ElasticsearchClient;
-
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
-
-      expect(result).toEqual({
-        hasSemanticCapability: true,
-        hasPatternCapability: true,
-      });
-    });
-
-    it('detects fields across multiple field types', async () => {
-      const mockEsClient = {
-        fieldCaps: jest.fn().mockResolvedValue({
-          fields: {
-            'event.message': {
-              semantic_text: {
-                type: 'semantic_text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-            'message.semantic': {
-              semantic_text: {
-                type: 'semantic_text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-          },
-        }),
-      } as unknown as ElasticsearchClient;
-
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
-
-      expect(result).toEqual({
-        hasSemanticCapability: true,
-        hasPatternCapability: false,
-      });
-    });
-
-    it('returns false for both when target does not exist', async () => {
-      const mockEsClient = {
-        fieldCaps: jest.fn().mockRejectedValue(new Error('index_not_found_exception')),
-      } as unknown as ElasticsearchClient;
-
-      const result = await detectCapabilities(mockEsClient, 'non-existent-*');
-
-      expect(result).toEqual({
-        hasSemanticCapability: false,
-        hasPatternCapability: false,
-      });
-    });
-
-    it('returns false for both when no fields exist', async () => {
-      const mockEsClient = {
-        fieldCaps: jest.fn().mockResolvedValue({
-          fields: {},
-        }),
-      } as unknown as ElasticsearchClient;
-
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
-
-      expect(result).toEqual({
-        hasSemanticCapability: false,
-        hasPatternCapability: false,
-      });
-    });
-
-    it('returns false when only standard field types exist', async () => {
-      const mockEsClient = {
-        fieldCaps: jest.fn().mockResolvedValue({
-          fields: {
-            message: {
-              text: {
-                type: 'text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-            timestamp: {
+            '@timestamp': {
               date: {
                 type: 'date',
                 searchable: true,
@@ -170,52 +32,54 @@ describe('capabilities', () => {
         }),
       } as unknown as ElasticsearchClient;
 
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
+      const result = await hasRequiredFields(mockEsClient, 'logs-*');
 
-      expect(result).toEqual({
-        hasSemanticCapability: false,
-        hasPatternCapability: false,
+      expect(result).toBe(true);
+      expect(mockEsClient.fieldCaps).toHaveBeenCalledWith({
+        index: 'logs-*',
+        fields: ['message', '@timestamp'],
       });
     });
 
-    it('detects capabilities when field has conflicting types across indices', async () => {
+    it.each(['message', '@timestamp'])('returns false when %s is missing', async (missingField) => {
       const mockEsClient = {
         fieldCaps: jest.fn().mockResolvedValue({
-          fields: {
-            message: {
-              semantic_text: {
-                type: 'semantic_text',
-                searchable: true,
-                aggregatable: false,
-              },
-              text: {
-                type: 'text',
-                searchable: true,
-                aggregatable: false,
-              },
-            },
-            content: {
-              pattern_text: {
-                type: 'pattern_text',
-                searchable: true,
-                aggregatable: false,
-              },
-              keyword: {
-                type: 'keyword',
-                searchable: true,
-                aggregatable: true,
-              },
-            },
-          },
+          fields:
+            missingField === 'message'
+              ? {
+                  '@timestamp': {
+                    date: { type: 'date', searchable: true, aggregatable: true },
+                  },
+                }
+              : {
+                  message: {
+                    text: { type: 'text', searchable: true, aggregatable: false },
+                  },
+                },
         }),
       } as unknown as ElasticsearchClient;
 
-      const result = await detectCapabilities(mockEsClient, 'logs-*');
+      const result = await hasRequiredFields(mockEsClient, 'logs-*');
 
-      expect(result).toEqual({
-        hasSemanticCapability: true,
-        hasPatternCapability: true,
-      });
+      expect(result).toBe(false);
+    });
+
+    it('returns false when the target has no mapped fields', async () => {
+      const mockEsClient = {
+        fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+      } as unknown as ElasticsearchClient;
+
+      const result = await hasRequiredFields(mockEsClient, 'logs-*');
+
+      expect(result).toBe(false);
+    });
+
+    it('propagates field capability errors', async () => {
+      const mockEsClient = {
+        fieldCaps: jest.fn().mockRejectedValue(new Error('forbidden')),
+      } as unknown as ElasticsearchClient;
+
+      await expect(hasRequiredFields(mockEsClient, 'logs-*')).rejects.toThrow('forbidden');
     });
   });
 
