@@ -22,7 +22,12 @@ import type {
   AttachmentsFindResponse,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import type { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  Attachments,
+  Attachment,
+  UnifiedAttachment,
+  UnifiedAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -336,4 +341,68 @@ export const findAttachments = async ({
     .expect(expectedHttpCode);
 
   return body;
+};
+
+// -----------------------------V2 Unified Attachments API----------------------------
+
+export const addAttachmentV2 = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 201,
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: UnifiedAttachmentPayload;
+  auth?: { user: User; space: string | null } | null;
+  expectedHttpCode?: number;
+  headers?: Record<string, string | string[]>;
+}): Promise<UnifiedAttachment> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/attachments`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: attachment } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return attachment;
+};
+
+export const updateAttachmentV2 = async ({
+  supertest,
+  caseId,
+  attachmentId,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  attachmentId: string;
+  req: UnifiedAttachmentPayload & { version: string };
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+}): Promise<UnifiedAttachment> => {
+  const apiCall = supertest.put(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: attachment } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return attachment;
 };
