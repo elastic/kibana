@@ -7,6 +7,7 @@
 
 import { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
+import { getModelFamilyFromName } from './model_family_from_name';
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
 
@@ -79,14 +80,23 @@ export const getConnectorPlatform = (connector: InferenceConnector): ModelPlatfo
 
 export const getConnectorFamily = (
   connector: InferenceConnector,
-  // use this later to get model family from model name
-  _modelName?: string
+  modelName?: string
 ): ModelFamily => {
+  // A single `Elastic` provider fronts Anthropic, Google and OpenAI models alike, so
+  // the model name is the only signal that tells them apart; deriving family from the
+  // provider stamped every EIS model as Claude, including `google-gemini-3.1-pro`.
+  const resolvedModelName = modelName ?? getConnectorDefaultModel(connector);
+  if (resolvedModelName) {
+    const familyFromName = getModelFamilyFromName(resolvedModelName);
+    if (familyFromName) {
+      return familyFromName;
+    }
+  }
+
   const provider = getConnectorProvider(connector);
 
   switch (provider) {
     case ModelProvider.Anthropic:
-    case ModelProvider.Elastic:
       return ModelFamily.Claude;
 
     case ModelProvider.Google:
@@ -94,6 +104,11 @@ export const getConnectorFamily = (
 
     case ModelProvider.OpenAI:
       return ModelFamily.GPT;
+
+    // An Elastic connector whose model name told us nothing is genuinely unknown; keep
+    // the historical Claude default so callers keep a total function.
+    case ModelProvider.Elastic:
+      return ModelFamily.Claude;
   }
 
   return ModelFamily.GPT;
