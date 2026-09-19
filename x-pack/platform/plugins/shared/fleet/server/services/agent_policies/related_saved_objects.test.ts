@@ -9,7 +9,7 @@ import type { AgentPolicy, Output } from '../../types';
 import { createAppContextStartContractMock, createSavedObjectClientMock } from '../../mocks';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
-import { getDownloadSourceForAgentPolicy } from '../../routes/agent/source_uri_utils';
+import { getDownloadSourcesForAgentPolicy } from '../../routes/agent/source_uri_utils';
 import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 import { bulkGetFleetProxies } from '../fleet_proxies';
 import { OutputNotFoundError } from '../../errors';
@@ -22,7 +22,7 @@ jest.mock('../fleet_server_host');
 jest.mock('../fleet_proxies');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockedGetDownloadSourceForAgentPolicy = getDownloadSourceForAgentPolicy as jest.Mock;
+const mockedGetDownloadSourcesForAgentPolicy = getDownloadSourcesForAgentPolicy as jest.Mock;
 const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock;
 const mockedBulkGetFleetProxies = bulkGetFleetProxies as jest.Mock;
 
@@ -51,7 +51,7 @@ const basePolicy: AgentPolicy = {
 describe('fetchRelatedSavedObjects', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    mockedGetDownloadSourceForAgentPolicy.mockResolvedValue({ proxy_id: undefined });
+    mockedGetDownloadSourcesForAgentPolicy.mockResolvedValue([]);
     mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue(undefined);
     mockedBulkGetFleetProxies.mockResolvedValue([]);
     mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-es');

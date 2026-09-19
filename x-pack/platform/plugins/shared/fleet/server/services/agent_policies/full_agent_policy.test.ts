@@ -1868,12 +1868,14 @@ describe('getFullAgentPolicy', () => {
       proxies: [],
       dataOutput: otlpOutput,
       monitoringOutput: otlpOutput,
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1921,12 +1923,14 @@ describe('getFullAgentPolicy', () => {
       proxies: [],
       dataOutput: otlpOutput,
       monitoringOutput: otlpOutput,
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
@@ -1968,12 +1972,14 @@ describe('getFullAgentPolicy', () => {
       proxies: [],
       dataOutput: otlpOutput,
       monitoringOutput: otlpOutput,
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
+      downloadSources: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+      ],
       downloadSourceProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
