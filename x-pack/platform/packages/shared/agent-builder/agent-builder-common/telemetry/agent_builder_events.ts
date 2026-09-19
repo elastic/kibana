@@ -16,6 +16,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
   UiClick: `${TELEMETRY_PREFIX}_ui_click`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
+  ImageUploadRejected: `${TELEMETRY_PREFIX}_image_upload_rejected`,
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
   ToolCreated: `${TELEMETRY_PREFIX}_tool_created`,
@@ -35,6 +36,8 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
   HitlPromptShown: `${TELEMETRY_PREFIX}_hitl_prompt_shown`,
   HitlQuestionAnswered: `${TELEMETRY_PREFIX}_hitl_question_answered`,
+  FeedbackSubmitted: `${TELEMETRY_PREFIX}_feedback_submitted`,
+  FeedbackRetracted: `${TELEMETRY_PREFIX}_feedback_retracted`,
 } as const;
 
 export type OptInSource =
@@ -69,6 +72,12 @@ export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
   item_count?: number;
+}
+
+export interface ReportImageUploadRejectedParams {
+  reason: 'too_large' | 'invalid_type' | 'too_many';
+  mime_type?: string;
+  file_size?: number;
 }
 
 export type AgentBuilderUiClickElementKind =
@@ -303,11 +312,66 @@ export interface ReportHitlQuestionAnsweredParams {
   selected_option_count: number;
 }
 
+export interface ReportFeedbackSubmittedParams {
+  /** Round that received feedback */
+  round_id: string;
+  conversation_id?: string;
+  /** up or down */
+  vote: string;
+  /** Predefined chip IDs selected by the user */
+  chips: string[];
+  /**
+   * Free-text comment from the user. Only sent when non-empty.
+   * The modal disclosure names Elastic as the recipient and links to the
+   * Elastic Privacy Statement (https://www.elastic.co/legal/privacy-statement).
+   */
+  comment?: string;
+  /** OTel trace ID of the round — correlates with traces-* and round_complete events */
+  trace_id?: string;
+  /** LLM connector used for this round */
+  connector_id?: string;
+  /** Model identifier */
+  model?: string;
+  /** Agent ID */
+  agent_id?: string;
+  /** Tool IDs called during the round */
+  tool_names?: string[];
+  /** Total input tokens used */
+  input_tokens?: number;
+  /** Total output tokens generated */
+  output_tokens?: number;
+  /** Number of LLM API calls made during the round */
+  llm_calls?: number;
+}
+
+export interface ReportFeedbackRetractedParams {
+  /** Round whose feedback was retracted */
+  round_id: string;
+  conversation_id?: string;
+  /** OTel trace ID of the round */
+  trace_id?: string;
+  /** LLM connector used for this round */
+  connector_id?: string;
+  /** Model identifier */
+  model?: string;
+  /** Agent ID */
+  agent_id?: string;
+  /** Tool IDs called during the round */
+  tool_names?: string[];
+  /** Total input tokens used */
+  input_tokens?: number;
+  /** Total output tokens generated */
+  output_tokens?: number;
+  /** Number of LLM API calls made during the round */
+  llm_calls?: number;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
   [AGENT_BUILDER_EVENT_TYPES.UiClick]: ReportUiClickParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
+  [AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected]: ReportImageUploadRejectedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
@@ -332,6 +396,8 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
   [AGENT_BUILDER_EVENT_TYPES.HitlPromptShown]: ReportHitlPromptShownParams;
   [AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered]: ReportHitlQuestionAnsweredParams;
+  [AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted]: ReportFeedbackSubmittedParams;
+  [AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted]: ReportFeedbackRetractedParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -339,6 +405,7 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportUiClickParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
+  | EventTypeOpts<ReportImageUploadRejectedParams>
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
@@ -357,13 +424,16 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportInappChatOpenParams>
   | EventTypeOpts<ReportFullscreenEntryPointParams>
   | EventTypeOpts<ReportHitlPromptShownParams>
-  | EventTypeOpts<ReportHitlQuestionAnsweredParams>;
+  | EventTypeOpts<ReportHitlQuestionAnsweredParams>
+  | EventTypeOpts<ReportFeedbackSubmittedParams>
+  | EventTypeOpts<ReportFeedbackRetractedParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
   | typeof AGENT_BUILDER_EVENT_TYPES.UiClick
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
+  | typeof AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
@@ -382,7 +452,9 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
   | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
   | typeof AGENT_BUILDER_EVENT_TYPES.HitlPromptShown
-  | typeof AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered;
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered
+  | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted
+  | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -511,6 +583,33 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'integer',
       _meta: {
         description: 'Number of items added via bulk add-to-chat. Absent for single-item pathways.',
+        optional: true,
+      },
+    },
+  },
+};
+
+const IMAGE_UPLOAD_REJECTED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected,
+  schema: {
+    reason: {
+      type: 'keyword',
+      _meta: {
+        description: 'Why the image was rejected before upload (too_large|invalid_type|too_many)',
+        optional: false,
+      },
+    },
+    mime_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'MIME type of the rejected file',
+        optional: true,
+      },
+    },
+    file_size: {
+      type: 'integer',
+      _meta: {
+        description: 'Size in bytes of the rejected file',
         optional: true,
       },
     },
@@ -1339,11 +1438,139 @@ const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const FEEDBACK_SUBMITTED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted,
+  schema: {
+    round_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the round that received feedback', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    vote: {
+      type: 'keyword',
+      _meta: { description: '"up" or "down"', optional: false },
+    },
+    chips: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Selected chip ID' },
+      },
+      _meta: { description: 'Predefined chip IDs selected by the user', optional: false },
+    },
+    comment: {
+      type: 'text',
+      _meta: {
+        description:
+          'Free-text comment from the user. Only present when non-empty. ' +
+          'Users are shown a disclosure before submitting.',
+        optional: true,
+      },
+    },
+    trace_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'OTel trace ID — correlates with traces-* and round_complete events',
+        optional: true,
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: { description: 'LLM connector used for this round', optional: true },
+    },
+    model: {
+      type: 'keyword',
+      _meta: { description: 'Model identifier', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    tool_names: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Tool ID called during the round' },
+      },
+      _meta: { description: 'IDs of tools called during the round', optional: true },
+    },
+    input_tokens: {
+      type: 'long',
+      _meta: { description: 'Total input tokens used', optional: true },
+    },
+    output_tokens: {
+      type: 'long',
+      _meta: { description: 'Total output tokens generated', optional: true },
+    },
+    llm_calls: {
+      type: 'long',
+      _meta: { description: 'Number of LLM API calls made during the round', optional: true },
+    },
+  },
+};
+
+const FEEDBACK_RETRACTED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted,
+  schema: {
+    round_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the round whose feedback was retracted', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    trace_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'OTel trace ID — correlates with traces-* and round_complete events',
+        optional: true,
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: { description: 'LLM connector used for this round', optional: true },
+    },
+    model: {
+      type: 'keyword',
+      _meta: { description: 'Model identifier', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    tool_names: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Tool ID called during the round' },
+      },
+      _meta: { description: 'IDs of tools called during the round', optional: true },
+    },
+    input_tokens: {
+      type: 'long',
+      _meta: { description: 'Total input tokens used', optional: true },
+    },
+    output_tokens: {
+      type: 'long',
+      _meta: { description: 'Total output tokens generated', optional: true },
+    },
+    llm_calls: {
+      type: 'long',
+      _meta: { description: 'Number of LLM API calls made during the round', optional: true },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
   UI_CLICK_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
+  IMAGE_UPLOAD_REJECTED_EVENT,
   MANAGE_ENTITY_LIST_VIEW_EVENT,
   USED_BY_WARNING_SHOWN_EVENT,
   USED_BY_WARNING_PROCEEDED_EVENT,
@@ -1351,6 +1578,8 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   FULLSCREEN_ENTRY_POINT_EVENT,
   HITL_PROMPT_SHOWN_EVENT,
   HITL_QUESTION_ANSWERED_EVENT,
+  FEEDBACK_SUBMITTED_EVENT,
+  FEEDBACK_RETRACTED_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [

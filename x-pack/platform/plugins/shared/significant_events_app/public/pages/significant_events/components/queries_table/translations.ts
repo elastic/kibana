@@ -175,3 +175,12 @@ export const BULK_DEMOTE_ERROR_TITLE = i18n.translate(
   'xpack.significantEventsApp.queriesTable.bulkDemoteError',
   { defaultMessage: 'Failed to remove selected rules' }
 );
+
+/** Shown when CPS has linked projects. Rules match generation: all linked projects, not the space picker. */
+export const DETECTION_SCOPE_HELP_TEXT = i18n.translate(
+  'xpack.significantEventsApp.queriesTable.detectionScopeHelpText',
+  {
+    defaultMessage:
+      'Rules run across all projects linked through cross-project search, regardless of the project scope configured for this space.',
+  }
+);

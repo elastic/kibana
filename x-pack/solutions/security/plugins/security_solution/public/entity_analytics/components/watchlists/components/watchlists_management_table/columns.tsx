@@ -112,7 +112,7 @@ const WatchlistsActionsMenu = ({
       disableScreenReaderOutput
     >
       <EuiButtonIcon
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         aria-label={i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
           {

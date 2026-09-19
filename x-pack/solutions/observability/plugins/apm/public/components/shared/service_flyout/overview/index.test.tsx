@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
@@ -20,12 +20,18 @@ let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransacti
   null;
 
 const mockUseServiceFlyoutContext = jest.fn();
+const mockUseProjectRouting = jest.fn<string | undefined, []>(() => undefined);
 jest.mock('../service_flyout_context', () => ({
   useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
 jest.mock('../hooks/use_service_has_system_metrics', () => ({
   useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
+}));
+
+// Avoid pulling the real plugin module (heavy import graph) into this test.
+jest.mock('../hooks/use_project_routing', () => ({
+  useProjectRouting: () => mockUseProjectRouting(),
 }));
 
 jest.mock('@kbn/apm-ui-shared', () => ({
@@ -45,13 +51,54 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
+const mockTransactionDetailFlyoutProps = jest.fn();
+jest.mock('../../transaction_detail_flyout', () => ({
+  TransactionDetailFlyout: (props: {
+    filters: { transactionName: string };
+    onClose: () => void;
+    preferDocumentBasedCharts?: boolean;
+    schema?: string;
+    indices?: unknown;
+    deps: { lens?: unknown; dataViews?: unknown };
+  }) => {
+    mockTransactionDetailFlyoutProps(props);
+    return (
+      <div data-test-subj="transactionDetailFlyoutMock">
+        <span>{props.filters.transactionName}</span>
+        <button type="button" onClick={props.onClose}>
+          close
+        </button>
+      </div>
+    );
+  },
+}));
+const mockServiceFlyoutApmCharts = jest.fn((_props: unknown) => (
+  <div data-test-subj="apmChartsMock" />
+));
+jest.mock('./apm_charts', () => ({
+  ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
+}));
+
 const service: ServiceFlyoutService = {
   name: 'opbeans-java',
   agentName: 'java',
 };
 
-function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {}) {
+function buildContextValue({
+  refreshToken = 0,
+  schema = 'ecs' as const,
+  filters = {},
+  preferDocumentBasedCharts,
+  transactionType = 'request',
+}: {
+  refreshToken?: number;
+  schema?: 'ecs' | 'otel' | 'unknown';
+  filters?: Record<string, unknown>;
+  preferDocumentBasedCharts?: boolean;
+  transactionType?: string;
+} = {}) {
   return {
+    preferDocumentBasedCharts,
     deps: {
       core: {
         http: {},
@@ -63,10 +110,11 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
     },
     service,
     indices: null,
+    flyoutHistoryKey: Symbol('test-service-flyout-history'),
     capabilities: {
       loading: false,
       error: undefined,
-      schema: 'ecs' as const,
+      schema,
       header: { serviceNameLink: true, badges: true },
       overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
       footer: { alerts: true, slos: true },
@@ -77,16 +125,29 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       setRange: jest.fn(),
-      transactionType: 'request',
+      transactionType,
       setTransactionType: jest.fn(),
       refreshToken,
       onRefresh: jest.fn(),
+      ...filters,
     },
   };
 }
 
-function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
-  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken }));
+function renderOverview({
+  refreshToken,
+  transactionType,
+  preferDocumentBasedCharts,
+  schema,
+}: {
+  refreshToken?: number;
+  transactionType?: string;
+  preferDocumentBasedCharts?: boolean;
+  schema?: 'ecs' | 'otel' | 'unknown';
+} = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(
+    buildContextValue({ refreshToken, transactionType, preferDocumentBasedCharts, schema })
+  );
   return render(
     <IntlProvider locale="en">
       <ServiceFlyoutOverview />
@@ -96,6 +157,7 @@ function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseProjectRouting.mockReturnValue(undefined);
   transactionsSectionProps = null;
 });
 
@@ -152,10 +214,103 @@ describe('ServiceFlyoutOverview capabilities loading and error states', () => {
   });
 });
 
-describe('ServiceFlyoutOverview key metrics indices loading and error states', () => {
+describe('ServiceFlyoutOverview key metrics chart implementation per schema', () => {
+  it('renders the shared APM chart components for ECS services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'ecs' }));
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics')).toBeInTheDocument();
+  });
+
+  it('renders the shared APM chart components for unknown-schema services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'unknown' }));
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for ECS services in document-based hosts (Discover)', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'ecs', preferDocumentBasedCharts: true }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for OTel services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'otel' }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('seeds the latency aggregation type from the flyout filters', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({ filters: { latencyAggregationType: 'p95' } })
+    );
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(mockServiceFlyoutApmCharts).toHaveBeenCalledWith(
+      expect.objectContaining({ latencyAggregationType: 'p95' })
+    );
+  });
+});
+
+describe('ServiceFlyoutOverview OTel key metrics indices loading and error states', () => {
   it('renders a skeleton for key metrics while indices are loading', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
+      ...buildContextValue({ schema: 'otel' }),
       indices: undefined,
     });
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
@@ -173,7 +328,7 @@ describe('ServiceFlyoutOverview key metrics indices loading and error states', (
 
   it('renders a warning callout for key metrics when indices fail to load', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
+      ...buildContextValue({ schema: 'otel' }),
       indices: null,
     });
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
@@ -193,7 +348,7 @@ describe('ServiceFlyoutOverview key metrics indices loading and error states', (
 
   it('renders key metrics charts when indices are available', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
+      ...buildContextValue({ schema: 'otel' }),
       indices: {
         transaction: 'traces-apm*',
         span: 'traces-apm*',
@@ -234,6 +389,120 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     renderOverview({ refreshToken: 42 });
 
     expect(transactionsSectionProps?.refreshToken).toBe(42);
+  });
+
+  it('opens TransactionDetailFlyout when a transaction name is clicked', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ preferDocumentBasedCharts: true, schema: 'ecs' });
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+    expect(transactionsSectionProps?.onTransactionClick).toEqual(expect.any(Function));
+    expect(transactionsSectionProps?.isTransactionExpanded).toEqual(expect.any(Function));
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preferDocumentBasedCharts: true,
+        schema: 'ecs',
+        indices: null,
+        deps: expect.objectContaining({
+          lens: undefined,
+          dataViews: undefined,
+        }),
+      })
+    );
+    expect(
+      transactionsSectionProps!.isTransactionExpanded!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      })
+    ).toBe(true);
+  });
+
+  it('closes TransactionDetailFlyout when the same transaction is clicked again', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    const item = {
+      name: 'GET /api/orders',
+      transactionType: 'request',
+      latency: { value: 1 },
+      throughput: { value: 1 },
+      errorRate: { value: 0 },
+    };
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('does not open TransactionDetailFlyout when transaction type is missing', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ transactionType: '' });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('closes TransactionDetailFlyout when onClose is called', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { getByRole, queryByTestId } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(queryByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+    act(() => {
+      getByRole('button', { name: 'close' }).click();
+    });
+    expect(queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+  it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
+    mockUseProjectRouting.mockReturnValue('_alias:*');
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(transactionsSectionProps?.projectRouting).toBe('_alias:*');
+  });
+
+  it('forwards undefined projectRouting when CPS routing is unset', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(transactionsSectionProps?.projectRouting).toBeUndefined();
   });
 });
 

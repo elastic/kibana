@@ -13,6 +13,25 @@ describe('TelemetryConfiguration', () => {
     telemetryConfiguration.resetAllToDefault();
   });
 
+  describe('telemetryConfiguration default health_diagnostic_config', () => {
+    it('includes a non-empty apiQueryAllowlist', () => {
+      const { apiQueryAllowlist } = telemetryConfiguration.health_diagnostic_config;
+      expect(apiQueryAllowlist).toBeDefined();
+      expect(apiQueryAllowlist.length).toBeGreaterThan(0);
+      expect(apiQueryAllowlist[0]).toHaveProperty('path');
+    });
+
+    it('includes _transform/*/_stats in the default allowlist', () => {
+      const { apiQueryAllowlist } = telemetryConfiguration.health_diagnostic_config;
+      expect(apiQueryAllowlist.some((e) => e.path === '_transform/*/_stats')).toBe(true);
+    });
+
+    it('includes _ml/trained_models/_stats in the default allowlist', () => {
+      const { apiQueryAllowlist } = telemetryConfiguration.health_diagnostic_config;
+      expect(apiQueryAllowlist.some((e) => e.path === '_ml/trained_models/_stats')).toBe(true);
+    });
+  });
+
   describe('query_config', () => {
     it('should have proper default configuration', async () => {
       const expectedDefaults = {

@@ -700,8 +700,7 @@ describe('datatable cell renderer', () => {
     it('should not adjust link color when there is no background color', () => {
       const isDarkMode = false;
       renderThemedCellRenderer(columnConfig, isDarkMode, null);
-      const linkColor = '#1750BA';
-      expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
+      expect(screen.getByRole('button').style.color).toBe('');
     });
 
     it('should not adjust link color when colorMode is none', () => {
@@ -717,8 +716,7 @@ describe('datatable cell renderer', () => {
         ],
       };
       renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
-      const linkColor = '#1750BA'; // Default EuiLink color for light mode
-      expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
+      expect(screen.getByRole('button').style.color).toBe('');
     });
 
     it('should not adjust link color when colorMode is text', () => {
@@ -734,8 +732,7 @@ describe('datatable cell renderer', () => {
         ],
       };
       renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
-      const linkColor = '#1750BA'; // Default EuiLink color for light mode
-      expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
+      expect(screen.getByRole('button').style.color).toBe('');
     });
   });
 

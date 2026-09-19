@@ -15,10 +15,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../components/spark_plot';
+import { DurabilityBadge } from '../durability_badge/durability_badge';
+import { getKnowledgeIndicatorExpiresAt } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
@@ -30,6 +32,7 @@ import {
   MATCH_QUERY_TYPE_LABEL,
   STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
+  DURABILITY_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
   MINIMIZE_DETAILS_ARIA_LABEL,
@@ -46,6 +49,7 @@ interface UseKnowledgeIndicatorsColumnsParams {
   selectedKnowledgeIndicatorId: string | undefined;
   toggleSelectedKnowledgeIndicator: (ki: KnowledgeIndicator) => void;
   setKnowledgeIndicatorsToDelete: (items: KnowledgeIndicator[]) => void;
+  canManage: boolean;
 }
 
 export const useKnowledgeIndicatorsColumns = ({
@@ -53,9 +57,10 @@ export const useKnowledgeIndicatorsColumns = ({
   selectedKnowledgeIndicatorId,
   toggleSelectedKnowledgeIndicator,
   setKnowledgeIndicatorsToDelete,
-}: UseKnowledgeIndicatorsColumnsParams) =>
-  useMemo<Array<EuiBasicTableColumn<KnowledgeIndicator>>>(
-    () => [
+  canManage,
+}: UseKnowledgeIndicatorsColumnsParams) => {
+  return useMemo(() => {
+    const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
       {
         name: TITLE_COLUMN_LABEL,
         render: (ki: KnowledgeIndicator) => {
@@ -71,7 +76,7 @@ export const useKnowledgeIndicatorsColumns = ({
                 >
                   <EuiButtonIcon
                     data-test-subj="knowledgeIndicatorsDetailsButton"
-                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    iconType={isExpanded ? 'minimize' : 'maximize'}
                     aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
                     onClick={() => toggleSelectedKnowledgeIndicator(ki)}
                   />
@@ -94,7 +99,9 @@ export const useKnowledgeIndicatorsColumns = ({
           }
 
           const occurrences = occurrencesByQueryId[ki.query.id];
-          if (!occurrences) return null;
+          if (!occurrences) {
+            return null;
+          }
 
           return (
             <SparkPlot
@@ -136,6 +143,13 @@ export const useKnowledgeIndicatorsColumns = ({
         },
       },
       {
+        name: DURABILITY_COLUMN_LABEL,
+        width: '128px',
+        render: (ki: KnowledgeIndicator) => (
+          <DurabilityBadge expiresAt={getKnowledgeIndicatorExpiresAt(ki)} compact />
+        ),
+      },
+      {
         name: ACTIONS_COLUMN_LABEL,
         width: '96px',
         align: 'right',
@@ -147,11 +161,18 @@ export const useKnowledgeIndicatorsColumns = ({
           />
         ),
       },
-    ],
-    [
-      occurrencesByQueryId,
-      selectedKnowledgeIndicatorId,
-      toggleSelectedKnowledgeIndicator,
-      setKnowledgeIndicatorsToDelete,
-    ]
-  );
+    ];
+
+    if (!canManage) {
+      return columns.filter((column) => column.name !== ACTIONS_COLUMN_LABEL);
+    }
+
+    return columns;
+  }, [
+    canManage,
+    occurrencesByQueryId,
+    selectedKnowledgeIndicatorId,
+    toggleSelectedKnowledgeIndicator,
+    setKnowledgeIndicatorsToDelete,
+  ]);
+};

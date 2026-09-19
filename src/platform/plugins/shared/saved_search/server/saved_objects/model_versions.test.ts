@@ -92,7 +92,7 @@ describe('model_versions', () => {
       expect(typeVersionGuesser(createDocument(attributes))).toBe(12);
     });
 
-    it('should return the discover session version for v13 documents', () => {
+    it('should return a non-legacy version for v13+ documents', () => {
       const attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V13> = {
         title: 'discover session',
         description: '',
@@ -116,7 +116,7 @@ describe('model_versions', () => {
         ],
       };
 
-      expect(typeVersionGuesser(createDocument(attributes))).toBe(13);
+      expect(typeVersionGuesser(createDocument(attributes))).toBeGreaterThan(12);
     });
 
     it('should preserve the pre-guesser fallback by returning the latest version when no schema matches', () => {
@@ -126,7 +126,8 @@ describe('model_versions', () => {
         tabs: [],
       });
 
-      expect(typeVersionGuesser(document)).toBe(13);
+      const latestVersion = Math.max(...Object.keys(DISCOVER_SESSION_MODEL_VERSIONS).map(Number));
+      expect(typeVersionGuesser(document)).toBe(latestVersion);
     });
   });
 });

@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSwitch } from '@elastic/eui';
+import { EuiSkeletonText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ContentListFooter,
@@ -20,17 +20,15 @@ import {
 } from '@kbn/content-list';
 import type { ContentListItem } from '@kbn/content-list';
 import {
-  TAG_FILTER_ID,
   useContentListItems,
   useContentListSelection,
   useContentListState,
 } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
-import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
+import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { useFetchTags } from '../../../hooks/use_fetch_tags';
 import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPoliciesBulkActions } from './action_policies_bulk_actions';
@@ -68,10 +66,6 @@ interface Props {
   enablePolicy: (id: string) => void;
   disablePolicy: (id: string) => void;
 }
-
-const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.title', {
-  defaultMessage: 'Tags',
-});
 
 const ENABLED_FILTER_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.filter.enabled.title',
@@ -134,7 +128,7 @@ export const ActionPoliciesTableContent = ({
   );
   const updatedByUids = useMemo(
     () =>
-      items.map((item) => toPolicy(item).updatedBy).filter((uid): uid is string => Boolean(uid)),
+      items.map((item) => toPolicy(item).updated_by).filter((uid): uid is string => Boolean(uid)),
     [items]
   );
   const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({
@@ -150,7 +144,6 @@ export const ActionPoliciesTableContent = ({
       <RefetchConnector onReady={onRefetchReady} />
       <ContentListToolbar>
         <ContentListToolbar.Filters>
-          <TagsFilter />
           <EnabledFilter />
         </ContentListToolbar.Filters>
       </ContentListToolbar>
@@ -160,34 +153,18 @@ export const ActionPoliciesTableContent = ({
         scrollableInline
         responsiveBreakpoint={false}
       >
-        <Column.Name showDescription onClick={(item) => setPolicyToViewId(toPolicy(item).id)} />
-        <DestinationsColumn />
-        <Column
-          id="tags"
-          name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.tags', {
-            defaultMessage: 'Tags',
-          })}
-          render={(item) => {
-            const { tags } = toPolicy(item);
-            if (!tags?.length) return null;
-            return (
-              <EuiFlexGroup gutterSize="xs" wrap>
-                {tags.map((tag) => (
-                  <EuiFlexItem grow={false} key={tag}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            );
-          }}
+        <Column.Name
+          showDescription
+          onClick={(item) => setPolicyToViewId(toPolicy(item).id)}
+          maxWidth="400px"
         />
+        <DestinationsColumn />
         <Column.UpdatedAt />
         <Column
           id="updatedBy"
           name={UPDATED_BY_COLUMN_NAME}
-          width="150px"
           render={(item) => {
-            const { updatedBy } = toPolicy(item);
+            const { updated_by: updatedBy } = toPolicy(item);
             if (!updatedBy) return null;
             if (isProfileLoadingRef.current)
               return (
@@ -248,12 +225,12 @@ export const ActionPoliciesTableContent = ({
           name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
             defaultMessage: 'Notify',
           })}
-          width="50px"
+          width="60px"
           render={(item) => {
             const policy = toPolicy(item);
             if (!policy.enabled || !canWrite) return null;
             return (
-              <ActionPolicySnoozePopover
+              <ActionPolicySnoozeButton
                 policy={policy}
                 onSnooze={onSnooze}
                 onCancelSnooze={onCancelSnooze}
@@ -261,6 +238,7 @@ export const ActionPoliciesTableContent = ({
                   (isSnoozing && snoozeVariables?.id === policy.id) ||
                   (isUnsnoozing && unsnoozeVariables === policy.id)
                 }
+                isDisabled={isBulkActionInProgress}
               />
             );
           }}
@@ -270,6 +248,7 @@ export const ActionPoliciesTableContent = ({
           name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
             defaultMessage: 'Actions',
           })}
+          width="80px"
           render={(item) => {
             const policy = toPolicy(item);
             return (
@@ -280,8 +259,6 @@ export const ActionPoliciesTableContent = ({
                 onEdit={onEdit}
                 onClone={onClone}
                 onDelete={onDelete}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
                 onUpdateApiKey={onUpdateApiKey}
                 isDisabled={isBulkActionInProgress}
               />
@@ -319,6 +296,10 @@ export const ActionPoliciesTableContent = ({
             (isEnabling && enableVariables === policyToView.id) ||
             (isDisabling && disableVariables === policyToView.id)
           }
+          isSnoozeLoading={
+            (isSnoozing && snoozeVariables?.id === policyToView.id) ||
+            (isUnsnoozing && unsnoozeVariables === policyToView.id)
+          }
         />
       )}
     </>
@@ -346,6 +327,7 @@ const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void 
 
 const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
   const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
+  const { refetch } = useContentListState();
 
   if (selectedCount === 0) return null;
 
@@ -356,11 +338,17 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((p) => p.id);
+    // The list is fetched through the content list data source, so invalidating
+    // the policy query keys is not enough to reflect the new state.
+    const onSuccess = () => {
+      clearSelection();
+      refetch();
+    };
 
     if (action === 'snooze' && snoozedUntil) {
-      bulkAction({ action, ids, snoozedUntil }, { onSuccess: clearSelection });
+      bulkAction({ action, ids, snoozedUntil }, { onSuccess });
     } else if (action !== 'snooze') {
-      bulkAction({ action, ids }, { onSuccess: clearSelection });
+      bulkAction({ action, ids }, { onSuccess });
     }
   };
 
@@ -373,37 +361,6 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     />
   );
 };
-
-const TagsFilterComponent = ({
-  query,
-  onChange,
-}: {
-  query?: Query;
-  onChange?: (query: Query) => void;
-}) => {
-  const { data: tagNames = [] } = useFetchTags();
-  const options = useMemo(() => tagNames.map((tag) => ({ key: tag, label: tag })), [tagNames]);
-  return (
-    <SelectableFilterPopover
-      fieldName={TAG_FILTER_ID}
-      title={TAGS_FILTER_TITLE}
-      query={query}
-      onChange={onChange}
-      options={options}
-      renderOption={(option, { isActive }) => (
-        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
-      )}
-      data-test-subj="actionPoliciesTagsFilter"
-    />
-  );
-};
-
-const TagsFilter = filter.createComponent({
-  resolve: () => ({
-    type: 'custom_component' as const,
-    component: TagsFilterComponent,
-  }),
-});
 
 const EnabledFilterComponent = ({
   query,
@@ -422,6 +379,7 @@ const EnabledFilterComponent = ({
       <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
     )}
     singleSelection
+    hideSearch
     data-test-subj="actionPoliciesEnabledFilter"
   />
 );

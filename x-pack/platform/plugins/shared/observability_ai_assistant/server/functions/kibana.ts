@@ -9,16 +9,6 @@ import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-const getAccess = (pathname: string): 'public' | 'internal' => {
-  return pathname === '/internal' || pathname.startsWith('/internal/') ? 'internal' : 'public';
-};
-
-const getErrorTargetUrl = (error: unknown): string | undefined => {
-  if (error instanceof Error && 'request' in error) {
-    return (error as Error & { request?: Request }).request?.url;
-  }
-};
-
 export function registerKibanaFunction({
   functions,
   resources,
@@ -56,7 +46,7 @@ export function registerKibanaFunction({
       },
     },
     async ({ arguments: { method, pathname, body, query } }, signal) => {
-      const { request, logger } = resources;
+      const { request } = resources;
       const core = await resources.plugins.core.start();
       const fetchOptions = {
         method,
@@ -64,29 +54,12 @@ export function registerKibanaFunction({
         body,
         signal,
         forwardRequestHeaders: true,
-        access: getAccess(pathname),
+        access: 'internal',
         asResponse: true,
       } as const;
 
-      try {
-        const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
-
-        logger.info(
-          `Called Kibana API by forwarding request from "${
-            request.rewrittenUrl ?? request.url
-          }" to: "${method} ${response.request.url}"`
-        );
-
-        return { content: response.body };
-      } catch (error) {
-        const targetUrl = getErrorTargetUrl(error) ?? pathname;
-        logger.error(
-          `Error calling Kibana API by forwarding request from "${
-            request.rewrittenUrl ?? request.url
-          }" to: "${method} ${targetUrl}". Failed with ${error}`
-        );
-        throw error;
-      }
+      const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
+      return { content: response.body };
     }
   );
 }

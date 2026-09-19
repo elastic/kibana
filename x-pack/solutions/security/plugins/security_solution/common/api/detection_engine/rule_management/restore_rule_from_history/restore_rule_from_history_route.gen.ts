@@ -25,11 +25,11 @@ export const RestoreRuleFromHistoryRequestParams = lazySchema(() =>
     /**
      * The rule's object `id` value (Saved Object id).
      */
-    ruleId: RuleObjectId,
+    ruleId: RuleObjectId.describe("The rule's object `id` value (Saved Object id)."),
     /**
      * The unique identifier of the history entry to restore to.
      */
-    changeId: UUID,
+    changeId: UUID.describe('The unique identifier of the history entry to restore to.'),
   })
 );
 export type RestoreRuleFromHistoryRequestParams = z.infer<
@@ -47,7 +47,9 @@ The value is required to restore a rule. To restore a deleted rule the revision
 has to be omitted.
 
       */
-    revision: RuleRevision.optional(),
+    revision: RuleRevision.optional().describe(
+      "The caller's known current revision of the rule for concurrency control.\nThe value is required to restore a rule. To restore a deleted rule the revision\nhas to be omitted.\n"
+    ),
   })
 );
 export type RestoreRuleFromHistoryRequestBody = z.infer<typeof RestoreRuleFromHistoryRequestBody>;
@@ -61,7 +63,12 @@ export const RestoreRuleFromHistoryResponse = lazySchema(() =>
     /**
      * True when the rule was already at the requested historical state and no update was applied.
      */
-    no_change: z.boolean().optional(),
+    no_change: z
+      .boolean()
+      .optional()
+      .describe(
+        'True when the rule was already at the requested historical state and no update was applied.'
+      ),
   })
 );
 export type RestoreRuleFromHistoryResponse = z.infer<typeof RestoreRuleFromHistoryResponse>;

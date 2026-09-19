@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiPageHeaderSection,
-  EuiPageTemplate,
-  EuiSelect,
-  EuiTitle,
-  type EuiButtonGroupOptionProps,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
-import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
-import { PlaygroundHeaderDocs } from './playground_header_docs';
-import { SaveNewPlaygroundButton } from './save_new_playground_button';
-import { Toolbar } from './toolbar';
+import { docLinks } from '../../common/doc_links';
+import { useKibana } from '../hooks/use_kibana';
+import { LOCAL_STORAGE_KEY as PLAYGROUND_SESSION_LOCAL_STORAGE_KEY } from '../providers/unsaved_form_provider';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
+import { hasSavedPlaygroundFormErrors } from '../utils/saved_playgrounds';
+import { SelectIndicesFlyout } from './select_indices_flyout';
+import { SavePlaygroundModal } from './saved_playground/save_playground_modal';
+import { ViewCodeFlyout } from './view_code/view_code_flyout';
+import { useShowFileUploadFlyout } from './upload_file_button';
 
 interface HeaderProps {
   pageMode: PlaygroundPageMode;
   viewMode: PlaygroundViewMode;
   showDocs?: boolean;
   onModeChange: (mode: PlaygroundViewMode) => void;
-  onSelectPageModeChange: (mode: PlaygroundPageMode) => void;
   isActionsDisabled?: boolean;
 }
 
@@ -39,93 +36,130 @@ export const Header: React.FC<HeaderProps> = ({
   onModeChange,
   showDocs = false,
   isActionsDisabled = false,
-  onSelectPageModeChange,
 }) => {
-  const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
-  const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
-    {
-      id: PlaygroundViewMode.preview,
-      label:
-        pageMode === PlaygroundPageMode.chat
-          ? i18n.translate('xpack.searchPlayground.header.view.chat', {
-              defaultMessage: 'Chat',
-            })
-          : i18n.translate('xpack.searchPlayground.header.view.preview', {
-              defaultMessage: 'Preview',
-            }),
-      'data-test-subj': 'chatMode',
+  const { history } = useKibana().services;
+  const {
+    formState: { errors: formErrors },
+  } = useFormContext<PlaygroundForm>();
+  const selectedIndices = useWatch<PlaygroundForm, PlaygroundFormFields.indices>({
+    name: PlaygroundFormFields.indices,
+  });
+  const hasNoIndices = !selectedIndices || selectedIndices.length === 0;
+  const hasFormErrors = hasSavedPlaygroundFormErrors(formErrors);
+  const showFileUploadFlyout = useShowFileUploadFlyout();
+
+  const [showDataFlyout, setShowDataFlyout] = useState<boolean>(false);
+  const [showViewCodeFlyout, setShowViewCodeFlyout] = useState<boolean>(false);
+  const [showSavePlaygroundModal, setShowSavePlaygroundModal] = useState<boolean>(false);
+
+  const onNavigateToNewPlayground = useCallback(
+    (id: string) => {
+      setShowSavePlaygroundModal(false);
+      localStorage.removeItem(PLAYGROUND_SESSION_LOCAL_STORAGE_KEY);
+      history.push(`/p/${id}/${PlaygroundPageMode.Chat}`);
     },
-    {
-      id: PlaygroundViewMode.query,
-      label: i18n.translate('xpack.searchPlayground.header.view.query', {
-        defaultMessage: 'Query',
-      }),
-      'data-test-subj': 'queryMode',
-    },
-  ];
+    [history]
+  );
+
+  const tabs = useMemo<AppHeaderTab[]>(
+    () => [
+      {
+        id: PlaygroundViewMode.preview,
+        label:
+          pageMode === PlaygroundPageMode.chat
+            ? i18n.translate('xpack.searchPlayground.header.view.chat', {
+                defaultMessage: 'Chat',
+              })
+            : i18n.translate('xpack.searchPlayground.header.view.preview', {
+                defaultMessage: 'Preview',
+              }),
+        isSelected: viewMode === PlaygroundViewMode.preview,
+        onClick: () => onModeChange(PlaygroundViewMode.preview),
+        disabled: isActionsDisabled,
+        'data-test-subj': 'chatMode',
+      },
+      {
+        id: PlaygroundViewMode.query,
+        label: i18n.translate('xpack.searchPlayground.header.view.query', {
+          defaultMessage: 'Query',
+        }),
+        isSelected: viewMode === PlaygroundViewMode.query,
+        onClick: () => onModeChange(PlaygroundViewMode.query),
+        disabled: isActionsDisabled,
+        'data-test-subj': 'queryMode',
+      },
+    ],
+    [pageMode, viewMode, onModeChange, isActionsDisabled]
+  );
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'data',
+          label: i18n.translate('xpack.searchPlayground.dataActionButton', {
+            defaultMessage: 'Data',
+          }),
+          iconType: 'database',
+          run: () => setShowDataFlyout(true),
+          disableButton: hasNoIndices,
+          testId: 'dataSourceActionButton',
+        },
+        {
+          id: 'export',
+          label: i18n.translate('xpack.searchPlayground.export.actionButtonLabel', {
+            defaultMessage: 'Export',
+          }),
+          iconType: 'export',
+          run: () => setShowViewCodeFlyout(true),
+          disableButton: hasNoIndices,
+          testId: 'viewCodeActionButton',
+        },
+        {
+          id: 'uploadFile',
+          label: i18n.translate('xpack.searchPlayground.setupPage.uploadFileLabel', {
+            defaultMessage: 'Upload file',
+          }),
+          iconType: 'plusCircle',
+          overflow: true,
+          run: showFileUploadFlyout,
+          testId: 'uploadFileButton',
+        },
+      ],
+      primaryActionItem: {
+        id: 'save',
+        label: i18n.translate('xpack.searchPlayground.header.saveButton.text', {
+          defaultMessage: 'Save',
+        }),
+        iconType: 'save',
+        run: () => setShowSavePlaygroundModal(true),
+        disableButton: hasFormErrors || isActionsDisabled,
+        testId: 'playground-save-button',
+      },
+    }),
+    [hasNoIndices, hasFormErrors, isActionsDisabled, showFileUploadFlyout]
+  );
 
   return (
-    <EuiPageTemplate.Header
-      css={({ euiTheme }) => ({
-        '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
-        backgroundColor: euiTheme.colors.emptyShade,
-      })}
-      data-test-subj="chat-playground-home-page"
-      paddingSize="s"
-    >
-      <EuiPageHeaderSection>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiTitle
-            css={{ whiteSpace: 'nowrap' }}
-            data-test-subj="chat-playground-home-page-title"
-            size="xs"
-          >
-            <h2>
-              <FormattedMessage
-                id="xpack.searchPlayground.unsaved.pageTitle"
-                defaultMessage="Unsaved playground"
-              />
-            </h2>
-          </EuiTitle>
-
-          {isSearchModeEnabled && (
-            <EuiSelect
-              data-test-subj="page-mode-select"
-              options={[
-                { value: PlaygroundPageMode.Chat, text: 'Chat' },
-                { value: PlaygroundPageMode.Search, text: 'Search' },
-              ]}
-              value={pageMode}
-              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
-                defaultMessage: 'Page mode',
-              })}
-              onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
-            />
-          )}
-        </EuiFlexGroup>
-      </EuiPageHeaderSection>
-      <EuiPageHeaderSection>
-        <EuiButtonGroup
-          legend="viewMode"
-          options={options}
-          idSelected={viewMode}
-          onChange={(id: string) => onModeChange(id as PlaygroundViewMode)}
-          buttonSize="compressed"
-          isDisabled={isActionsDisabled}
-          data-test-subj="viewModeSelector"
-        />
-      </EuiPageHeaderSection>
-      <EuiPageHeaderSection
-        css={({ euiTheme }) => ({
-          paddingRight: euiTheme.size.s,
+    <>
+      <AppHeader
+        title={i18n.translate('xpack.searchPlayground.unsaved.pageTitle', {
+          defaultMessage: 'Unsaved playground',
         })}
-      >
-        <EuiFlexGroup alignItems="center">
-          {showDocs && <PlaygroundHeaderDocs />}
-          <Toolbar selectedPageMode={pageMode} />
-          <SaveNewPlaygroundButton disabled={isActionsDisabled} />
-        </EuiFlexGroup>
-      </EuiPageHeaderSection>
-    </EuiPageTemplate.Header>
+        tabs={tabs}
+        menu={menu}
+        docLink={showDocs ? docLinks.chatPlayground : undefined}
+      />
+      {showDataFlyout && <SelectIndicesFlyout onClose={() => setShowDataFlyout(false)} />}
+      {showViewCodeFlyout && (
+        <ViewCodeFlyout selectedPageMode={pageMode} onClose={() => setShowViewCodeFlyout(false)} />
+      )}
+      {showSavePlaygroundModal && (
+        <SavePlaygroundModal
+          onNavigateToNewPlayground={onNavigateToNewPlayground}
+          onClose={() => setShowSavePlaygroundModal(false)}
+        />
+      )}
+    </>
   );
 };

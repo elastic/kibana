@@ -24,6 +24,7 @@ interface UseAppMenuDataResult {
   getTopTabMenuItems: UnifiedTabsProps['getTopTabMenuItems'];
   getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'];
   topNavMenuItems: AppMenuConfig | undefined;
+  shareAction: ReturnType<typeof useTopNavMenuItems>['shareAction'];
 }
 
 export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAppMenuDataResult => {
@@ -99,6 +100,6 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   return {
     getTopTabMenuItems,
     getAdditionalTabMenuItems,
-    topNavMenuItems,
+    ...topNavMenuItems,
   };
 };

@@ -41,7 +41,15 @@ export type NightshiftStorybookScenario =
   | 'error';
 
 export type NightshiftLifecycleScenario = 'populated' | 'loading' | 'empty' | 'error';
-export type NightshiftStreamFeaturesScenario = 'populated' | 'loading' | 'empty' | 'error';
+export type NightshiftStreamFeaturesScenario =
+  | 'populated'
+  | 'loading'
+  | 'empty'
+  | 'error'
+  | 'partialError';
+
+/** The one stream `partialError` refuses to serve, so the others still resolve their services. */
+const UNREACHABLE_STREAM_NAME = 'logs.inventory-service';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -111,7 +119,12 @@ const createServices = ({
 }) => {
   const closedEventUuids = new Set<string>();
   const significantEventsRepositoryClient = {
-    fetch: async (route: string, options?: { params?: { path?: { id?: string } } }) => {
+    fetch: async (
+      route: string,
+      options?: {
+        params?: { path?: { id?: string; name?: string }; query?: { event_id?: string } };
+      }
+    ) => {
       if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
           return neverResolve();
@@ -123,12 +136,13 @@ const createServices = ({
           throw new Error('The significant events request failed');
         }
         const response = getEventsResponse(scenario);
-        return {
-          ...response,
-          hits: response.hits.map((event) =>
+        const requestedEventId = options?.params?.query?.event_id;
+        const hits = response.hits
+          .filter((event) => !requestedEventId || event.event_id === requestedEventId)
+          .map((event) =>
             closedEventUuids.has(event.event_uuid) ? { ...event, status: 'closed' as const } : event
-          ),
-        };
+          );
+        return { ...response, hits, total: hits.length };
       }
 
       if (route === 'GET /internal/significant_events/events/{id}/lifecycle') {
@@ -168,6 +182,12 @@ const createServices = ({
         }
         if (streamFeaturesScenario === 'empty') {
           return { features: [] };
+        }
+        if (
+          streamFeaturesScenario === 'partialError' &&
+          options?.params?.path?.name === UNREACHABLE_STREAM_NAME
+        ) {
+          throw new Error(`The ${UNREACHABLE_STREAM_NAME} features request failed`);
         }
       }
 

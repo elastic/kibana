@@ -9,12 +9,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
-import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
+import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/nightshift-ai';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { identifyKIQueries } from './identify_ki_queries';
 
-jest.mock('@kbn/streams-ai', () => ({
+jest.mock('@kbn/nightshift-ai', () => ({
   identifyKIQueries: jest.fn(),
 }));
 
@@ -77,6 +77,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
         get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
         add_queries: { calls: 0, failures: 0, latency_ms: 0 },
       },
+      reasoningDiagnostics: { externalContentToolContinuations: 0 },
     });
   });
 
@@ -88,6 +89,35 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.additionalToolCallbacks).toBeUndefined();
     expect(args.maxSteps).toBeUndefined();
     expect(args.systemPrompt).toBe('SYSTEM');
+  });
+
+  it('forwards reasoning diagnostics from the shared agent', async () => {
+    generateSignificantEventsMock.mockResolvedValueOnce({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      toolUsage: {
+        get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
+        add_queries: { calls: 0, failures: 0, latency_ms: 0 },
+      },
+      reasoningDiagnostics: { externalContentToolContinuations: 4 },
+    });
+
+    const result = await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      buildDeps()
+    );
+
+    expect(result.reasoningDiagnostics).toEqual({ externalContentToolContinuations: 4 });
+  });
+
+  it('forwards maxDurationMs to the shared agent', async () => {
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM', maxDurationMs: 300000 },
+      buildDeps()
+    );
+
+    const args = generateSignificantEventsMock.mock.calls[0][0];
+    expect(args.maxDurationMs).toBe(300000);
   });
 
   it('forwards the SCS tools, appends the prompt snippet, and raises the step budget', async () => {
@@ -104,29 +134,6 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.systemPrompt).toContain('SYSTEM');
     expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
     expect(args.maxSteps).toBe(10);
-  });
-
-  it('merges memory and SCS tools when both are provided', async () => {
-    const semanticCodeSearchTools = makeCodeTools();
-    const memoryTools = {
-      tools: {
-        memory_search: { description: 'm', schema: { type: 'object' as const, properties: {} } },
-      },
-      callbacks: { memory_search: jest.fn() },
-      promptSnippet: 'MEMORY_SNIPPET',
-    };
-
-    await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
-      buildDeps({ memoryTools, semanticCodeSearchTools })
-    );
-
-    const args = generateSignificantEventsMock.mock.calls[0][0];
-    expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual(
-      [...SCS_TOOL_NAMES, 'memory_search'].sort()
-    );
-    expect(args.systemPrompt).toContain('MEMORY_SNIPPET');
-    expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
   });
 
   it('forwards Significant Event context tools and appends the prompt snippet', async () => {

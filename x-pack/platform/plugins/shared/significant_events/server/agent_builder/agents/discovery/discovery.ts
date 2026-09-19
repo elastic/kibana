@@ -16,13 +16,13 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID = 'platform.sig_events.d
 
 export const discoveryAgentType = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
-  name: 'Significant Events Discovery',
+  name: 'Nightshift Triager',
   description:
     'Correlates related detections into significant events using shared infrastructure, temporal proximity, and causal plausibility, verifies current state, and writes final event records with status, calibrated severity, and supporting evidence.',
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID, 'significant-events-memory'],
+    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
     // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
     // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
     enable_elastic_capabilities: false,

@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -25,7 +26,12 @@ const hostHash = buildGroupHash({
 });
 
 describe('detectDataPresence', () => {
-  const { loggerService } = createLoggerService();
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+
+  beforeEach(() => {
+    ({ loggerService, mockLogger } = createLoggerService());
+  });
 
   function setup() {
     const scoped = createQueryService();
@@ -79,6 +85,31 @@ describe('detectDataPresence', () => {
     expect(result).toEqual(new Set());
   });
 
+  it('logs the data-presence query without the query text, filter, or params', async () => {
+    const { queryService, scopedEsClient } = setup();
+    scopedEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
+    );
+    const input = createRuleExecutionInput();
+
+    await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input,
+      logger: loggerService,
+    });
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'Executing data-presence query',
+      expect.objectContaining({
+        labels: expect.objectContaining({ rule_id: input.ruleId }),
+      })
+    );
+    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    expect(debugMessage).not.toContain('FROM metrics');
+    expect(debugMessage).not.toContain('host.name');
+  });
+
   it('records the group hashes reported by the no-data query', async () => {
     const { queryService, scopedEsClient } = setup();
 
@@ -120,6 +151,7 @@ describe('detectDataPresence', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
 
+    const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
       rule: createRuleResponse({
@@ -132,13 +164,13 @@ describe('detectDataPresence', () => {
           breach: { segment: 'WHERE AVG(cpu) > 0.9' },
         },
       }),
-      input: createRuleExecutionInput(),
+      input,
       logger: loggerService,
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: baseQuery }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(result).toEqual(new Set([hostHash]));
   });
@@ -160,6 +192,25 @@ describe('detectDataPresence', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  it('surfaces content-length-exceeded errors as TaskErrorSource.USER', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('data_presence');
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

@@ -55,12 +55,12 @@ describe('ToolCallStep', () => {
     expect(screen.getByText('tool: search')).toBeInTheDocument();
   });
 
-  it('shows "tool: search" and "ran." and opens the response flyout directly on click', async () => {
+  it('shows "tool: search" and "ran" and opens the response flyout directly on click', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ToolCallStep step={makeStep([otherResult('r1')])} />);
     const status = screen.getByRole('status');
     expect(status.querySelector('.euiBadge')).toHaveTextContent('tool: search');
-    expect(status).toHaveTextContent('ran.');
+    expect(status).toHaveTextContent('ran');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('ToolCallStep', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('still shows "ran." for an error result, with the danger badge color', () => {
+  it('still shows "ran" for an error result, with the danger badge color', () => {
     renderWithProviders(<ToolCallStep step={makeStep([errorResult('r1')])} />);
     const badge = screen.getByRole('status').querySelector('.euiBadge');
     expect(badge).toHaveTextContent('tool: search');

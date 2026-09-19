@@ -7,19 +7,26 @@
 
 import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
-import { isUndefined, omitBy } from 'lodash';
+import { isUndefined, omit, omitBy } from 'lodash';
 import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import {
+  invalidateStoredConnectorEventIdentity,
+  loadPreviousConnectorEventIdentity,
+  mintInboundEventIdentityAttributes,
+  toRawActionIdentityAttributes,
+} from '../../../../inbound/event_identity';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -75,6 +82,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
   const requestedAuthTypeId = getAuthTypeId(secrets, config);
+
+  ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+
   const requestedAuthMode = inferAuthMode({
     authTypeRegistry: context.authTypeRegistry,
     secrets,
@@ -158,17 +168,32 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       : validatedActionTypeConfig;
 
+  const previousIdentity = connectorTypeHasInboundEvents(actionTypeId)
+    ? await loadPreviousConnectorEventIdentity(context, id)
+    : undefined;
+  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
+    connectorId: id,
+    actionTypeId,
+  });
+
+  const attributesWithoutIdentity = omit(attributes, [
+    'apiKey',
+    'uiamApiKey',
+    'uiamApiKeyExternal',
+  ]);
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create<RawAction>(
         'action',
         {
-          ...attributes,
+          ...attributesWithoutIdentity,
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configForSave as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configForSave,
+          secrets: validatedActionTypeSecrets,
+          ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         omitBy(
           {
@@ -181,6 +206,12 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       )
   );
+
+  if (result instanceof Error) {
+    await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  } else {
+    await invalidateStoredConnectorEventIdentity(context, id, previousIdentity);
+  }
 
   const wasSuccessful = !(result instanceof Error);
   const label = `connectorId: "${id}"; type: ${actionTypeId}`;
@@ -208,6 +239,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   if (!wasSuccessful) {
     throw result;
   }
+
+  await context.evictClientPool?.(id);
 
   try {
     await context.connectorTokenClient.deleteConnectorTokens({

@@ -410,7 +410,7 @@ describe('generateOpenApiDocument', () => {
           output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         });
 
-        await expect(buildOas(base, extended)).rejects.toThrowError(
+        await expect(buildOas(base, extended)).rejects.toThrow(
           /OAS shared schema collision for id "package_policy_status_response"/
         );
       });
@@ -635,6 +635,76 @@ describe('generateOpenApiDocument', () => {
       expect(result.paths['/v1-1']!.get!.tags).toEqual(['v1']);
       expect(result.paths['/v1-2']!.get!.tags).toEqual(['v2', 'v3']);
       expect(result.paths['/v2-1']!.get!.tags).toEqual([]);
+    });
+  });
+
+  describe('operationId', () => {
+    it('uses an explicit ID when provided and derives one when omitted', async () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [
+              {
+                path: '/explicit/{id}/{path*}',
+                method: 'put',
+                options: { operationId: 'upsert-dashboard', access: 'public' },
+              },
+              {
+                path: '/derived/{id}/{path*}',
+                method: 'get',
+                options: { access: 'public' },
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              {
+                path: '/explicit-v',
+                method: 'put',
+                options: {
+                  access: 'public',
+                  operationId: 'upsert-visualization',
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
+              {
+                path: '/derived-v',
+                method: 'get',
+                options: {
+                  access: 'public',
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const result = await generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(result.paths['/explicit/{id}/{path}']!.put!.operationId).toBe('upsert-dashboard');
+      expect(result.paths['/derived/{id}/{path}']!.get!.operationId).toBe('get-derived-id-path');
+      expect(result.paths['/explicit-v']!.put!.operationId).toBe('upsert-visualization');
+      expect(result.paths['/derived-v']!.get!.operationId).toBe('get-derived-v');
     });
   });
 
@@ -1001,7 +1071,7 @@ describe('generateOpenApiDocument', () => {
           { routers, versionedRouters },
           { title: 'test', baseUrl: 'https://test.oas', version: '99.99.99' }
         )
-      ).rejects.toThrowError(/OAS shared schema collision for id "package_policy_status_response"/);
+      ).rejects.toThrow(/OAS shared schema collision for id "package_policy_status_response"/);
     });
 
     it('does not throw when two routes register the same id with the same shape', async () => {

@@ -11,6 +11,8 @@ import { ExecutionStatus } from '@kbn/agent-builder-common';
 
 const createMockExecutor = (overrides: Partial<SubAgentExecutor> = {}): SubAgentExecutor => ({
   executeSubAgent: jest.fn(),
+  createSubAgent: jest.fn(),
+  sendToSubAgent: jest.fn(),
   getExecution: jest.fn(),
   ...overrides,
 });

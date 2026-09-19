@@ -8,13 +8,20 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import {
+  CANNOT_PERFORM_ACTION_SYNTHETICS,
+  NEED_PERMISSIONS_PRIVATE_LOCATIONS,
+} from '../../common/components/permissions';
+import { useRegisterSettingsHeaderAction } from '../settings_header_action';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
 import type { NewLocation } from './add_or_edit_location_flyout';
 import { AddOrEditLocationFlyout } from './add_or_edit_location_flyout';
+import { getPrivateLocationEditPayload } from './get_private_location_edit_payload';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   selectPrivateLocationFlyoutVisible,
@@ -44,10 +51,29 @@ export const ManagePrivateLocations = () => {
 
   const isPrivateLocationFlyoutVisible = useSelector(selectPrivateLocationFlyoutVisible);
   const privateLocationToEdit = useSelector(selectPrivateLocationToEdit);
+  const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
   const setIsFlyoutOpen = useCallback(
     (val: boolean) => dispatch(setIsPrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
+  const canCreateLocation = Boolean(canSave && canManagePrivateLocations);
+  const createLocationAction = useMemo(
+    () => ({
+      id: 'createPrivateLocation',
+      label: CREATE_LOCATION_LABEL,
+      iconType: 'plusCircle',
+      testId: 'addPrivateLocationButton',
+      disableButton: !canCreateLocation,
+      tooltipContent: !canCreateLocation
+        ? canSave
+          ? NEED_PERMISSIONS_PRIVATE_LOCATIONS
+          : CANNOT_PERFORM_ACTION_SYNTHETICS
+        : undefined,
+      run: () => setIsFlyoutOpen(true),
+    }),
+    [canCreateLocation, canSave, setIsFlyoutOpen]
+  );
+  useRegisterSettingsHeaderAction(createLocationAction);
 
   const {
     onCreateLocationAPI,
@@ -67,12 +93,11 @@ export const ManagePrivateLocations = () => {
 
   const handleSubmit = (formData: NewLocation) => {
     if (privateLocationToEdit) {
-      const isLabelChanged = formData.label !== privateLocationToEdit.label;
-      const areTagsChanged = !isEqual(formData.tags, privateLocationToEdit.tags);
-      if (!isLabelChanged && !areTagsChanged) {
+      const editPayload = getPrivateLocationEditPayload(formData, privateLocationToEdit);
+      if (!editPayload) {
         onCloseFlyout();
       } else {
-        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label, tags: formData.tags });
+        onEditLocationAPI(privateLocationToEdit.id, editPayload);
       }
     } else {
       onCreateLocationAPI(formData);
@@ -117,3 +142,7 @@ export const ManagePrivateLocations = () => {
     </SpacesContextProvider>
   );
 };
+
+const CREATE_LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
+  defaultMessage: 'Create location',
+});

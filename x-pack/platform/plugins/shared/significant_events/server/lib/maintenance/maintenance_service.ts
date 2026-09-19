@@ -7,10 +7,10 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -40,6 +40,18 @@ import {
 } from './managed_workflow_targets';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
+
+/**
+ * Maintenance SO attributes after branding spaceId fields at the SO → domain
+ * boundary. Wire schemas remain `schema.string()`.
+ */
+type LoadedMaintenanceState = Omit<
+  SignificantEventsMaintenanceStateAttributes,
+  'disabledWorkflows' | 'pausedSettings'
+> & {
+  disabledWorkflows: MaintenanceWorkflowTarget[];
+  pausedSettings?: PausedFeatureSettings;
+};
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -152,7 +164,7 @@ const setV2RulesEnabled = async (
     ? await rulesClient.bulkEnableRules({ ids })
     : await rulesClient.bulkDisableRules({ ids });
   const fatalErrors = errors.filter(
-    (error) => error.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND
+    (error) => error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
   );
   const erroredIds = new Set(errors.map((error) => error.id));
   return {
@@ -190,10 +202,19 @@ export const createSignificantEventsMaintenanceService = ({
     return next;
   };
 
-  const getSoClient = (request: KibanaRequest): SavedObjectsClientContract =>
-    server.core.savedObjects.getScopedClient(request, {
-      includedHiddenTypes: [SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE],
-    });
+  // Lazy: this factory runs in plugin setup, before `server.core` is assigned
+  // in start(). Route authz is the user gate (Nightshift read for status, Nightshift
+  // manage for pause/resume). This SO is hidden, agnostic, and not listed on
+  // any Nightshift privilege `savedObject` array. A scoped client then checks
+  // `saved_object:significant-events-maintenance-state/get` and 403s every
+  // Nightshift-only user once the document exists. Same pattern as run quotas.
+  let soClient: SavedObjectsClientContract | undefined;
+  const getSoClient = (): SavedObjectsClientContract => {
+    soClient ??= server.core.savedObjects.createInternalRepository([
+      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+    ]);
+    return soClient;
+  };
 
   const normalizePausedSettings = (
     raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
@@ -201,19 +222,29 @@ export const createSignificantEventsMaintenanceService = ({
     raw
       ? {
           continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
-          scheduledDiscoveryEnabledSpaceIds: [...raw.scheduledDiscoveryEnabledSpaceIds],
+          scheduledDiscoveryEnabledSpaceIds:
+            raw.scheduledDiscoveryEnabledSpaceIds.map(brandSpaceId),
         }
       : undefined;
 
-  const readState = async (
-    soClient: SavedObjectsClientContract
-  ): Promise<SignificantEventsMaintenanceStateAttributes | undefined> => {
+  /** Brand SO-loaded workflow targets once at the SO → domain boundary. */
+  const brandDisabledWorkflows = (
+    workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
+  ): MaintenanceWorkflowTarget[] =>
+    (workflows ?? []).map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
+
+  const readState = async (): Promise<LoadedMaintenanceState | undefined> => {
     try {
-      const so = await soClient.get<SignificantEventsMaintenanceStateAttributes>(
+      const so = await getSoClient().get<SignificantEventsMaintenanceStateAttributes>(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
-      return so.attributes;
+      // Brand spaceId fields once on SO load (wire schema stays schema.string()).
+      return {
+        ...so.attributes,
+        disabledWorkflows: brandDisabledWorkflows(so.attributes.disabledWorkflows),
+        pausedSettings: normalizePausedSettings(so.attributes.pausedSettings),
+      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
         return undefined;
@@ -223,10 +254,9 @@ export const createSignificantEventsMaintenanceService = ({
   };
 
   const writeState = async (
-    soClient: SavedObjectsClientContract,
     attributes: SignificantEventsMaintenanceStateAttributes
   ): Promise<void> => {
-    await soClient.create<SignificantEventsMaintenanceStateAttributes>(
+    await getSoClient().create<SignificantEventsMaintenanceStateAttributes>(
       SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
       attributes,
       { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
@@ -236,7 +266,7 @@ export const createSignificantEventsMaintenanceService = ({
   const getAllSpaceIds = async (
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<string[]> => {
+  ): Promise<SpaceId[]> => {
     const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
     if (!spacesClient) {
       failures.push({
@@ -248,6 +278,7 @@ export const createSignificantEventsMaintenanceService = ({
     }
     try {
       // SpacesClient.getAll already loads every space SO (up to xpack.spaces.maxSpaces).
+      // Space.id is already branded as SpaceId.
       const spaces = await spacesClient.getAll();
       const ids = spaces.map((space) => space.id);
       return ids.length > 0 ? [...new Set([DEFAULT_SPACE_ID, ...ids])] : [DEFAULT_SPACE_ID];
@@ -440,7 +471,7 @@ export const createSignificantEventsMaintenanceService = ({
     workflowsDisabledThisSweep: number;
     rulesDisabledThisSweep: number;
     failures: SignificantEventsMaintenanceFailure[];
-    spaceIds: string[];
+    spaceIds: SpaceId[];
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
@@ -502,15 +533,13 @@ export const createSignificantEventsMaintenanceService = ({
    * Reassert still throws so workflow install cannot succeed while reassert fails.
    */
   const persistPause = async ({
-    soClient,
     request,
     existing,
     mode,
     updatedBy,
   }: {
-    soClient: SavedObjectsClientContract;
     request: KibanaRequest;
-    existing: SignificantEventsMaintenanceStateAttributes | undefined;
+    existing: LoadedMaintenanceState | undefined;
     mode: 'pause' | 'reassert';
     updatedBy?: string;
   }): Promise<{
@@ -523,7 +552,7 @@ export const createSignificantEventsMaintenanceService = ({
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
     if (normalizeState(existing?.state) !== 'paused') {
       try {
-        await writeState(soClient, {
+        await writeState({
           state: 'paused',
           updatedAt: new Date().toISOString(),
           updatedBy: actor,
@@ -570,7 +599,7 @@ export const createSignificantEventsMaintenanceService = ({
       pausedSettings = await featureSettings.pauseFeatureSettings({
         request,
         spaceIds: sweep.spaceIds,
-        previous: normalizePausedSettings(existing?.pausedSettings),
+        previous: existing?.pausedSettings,
         failures: sweep.failures,
       });
     } else {
@@ -596,7 +625,7 @@ export const createSignificantEventsMaintenanceService = ({
 
     // 3. Final snapshot write.
     try {
-      await writeState(soClient, {
+      await writeState({
         state: 'paused',
         updatedAt: new Date().toISOString(),
         updatedBy: actor,
@@ -638,15 +667,13 @@ export const createSignificantEventsMaintenanceService = ({
 
   return {
     async getState({ request }) {
-      return normalizeState((await readState(getSoClient(request)))?.state);
+      return normalizeState((await readState())?.state);
     },
 
     async pause({ request, updatedBy }) {
       return withTransitionLock(async () => {
-        const soClient = getSoClient(request);
-        const existing = await readState(soClient);
+        const existing = await readState();
         const { summary, sweep } = await persistPause({
-          soClient,
           request,
           existing,
           mode: 'pause',
@@ -664,8 +691,7 @@ export const createSignificantEventsMaintenanceService = ({
 
     async resume({ request, updatedBy }) {
       return withTransitionLock(async () => {
-        const soClient = getSoClient(request);
-        const existing = await readState(soClient);
+        const existing = await readState();
         const currentState = normalizeState(existing?.state);
         const recordedWorkflows = existing?.disabledWorkflows ?? [];
         const recordedRuleIds = existing?.disabledRuleIds ?? [];
@@ -679,7 +705,7 @@ export const createSignificantEventsMaintenanceService = ({
 
         const failures: SignificantEventsMaintenanceFailure[] = [];
         const mgmt = server.workflowsManagement?.management;
-        const pausedSettings = normalizePausedSettings(existing?.pausedSettings);
+        const pausedSettings = existing?.pausedSettings;
         // First resume from paused gates settings-backed workflows. A retry of
         // leftover inventory already filtered those once — retry everything left.
         const isFirstResumeFromPaused = currentState === 'paused';
@@ -735,7 +761,7 @@ export const createSignificantEventsMaintenanceService = ({
         };
 
         try {
-          await writeState(soClient, {
+          await writeState({
             state: 'enabled',
             updatedAt: new Date().toISOString(),
             updatedBy,
@@ -770,14 +796,12 @@ export const createSignificantEventsMaintenanceService = ({
 
     async reassertPausedWorkflows({ request }) {
       return withTransitionLock(async () => {
-        const soClient = getSoClient(request);
-        const existing = await readState(soClient);
+        const existing = await readState();
         if (normalizeState(existing?.state) !== 'paused') {
           return;
         }
 
         const { summary, sweep } = await persistPause({
-          soClient,
           request,
           existing,
           mode: 'reassert',
@@ -794,8 +818,7 @@ export const createSignificantEventsMaintenanceService = ({
     },
 
     async getStatus({ request }) {
-      const soClient = getSoClient(request);
-      const existing = await readState(soClient);
+      const existing = await readState();
       const state = normalizeState(existing?.state);
       let featureSettingsStatus:
         | Awaited<ReturnType<typeof featureSettings.readFeatureSettingsStatus>>

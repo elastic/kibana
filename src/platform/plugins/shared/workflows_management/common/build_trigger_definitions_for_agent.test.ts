@@ -141,6 +141,34 @@ describe('lookupTriggerDefinitionsForAgent', () => {
     expect(trigger.description).toContain('Emitted when any workflow');
   });
 
+  it('requires connector-id in jsonSchema when requiresConnectorId is set', () => {
+    const result = lookupTriggerDefinitionsForAgent({
+      registeredTriggers: [
+        {
+          id: 'example.connector_event',
+          stability: 'tech_preview' as const,
+          eventSchema: z.object({ action: z.string() }),
+          title: 'Example connector event',
+          description: 'Emitted when an example connector receives an event.',
+          requiresConnectorId: true,
+        },
+      ],
+      triggerType: 'example.connector_event',
+    });
+
+    expect(isTriggerDefinitionsLookupError(result)).toBe(false);
+    if (isTriggerDefinitionsLookupError(result)) {
+      return;
+    }
+
+    const jsonSchema = result.triggerTypes[0].jsonSchema as {
+      required?: string[];
+      properties?: Record<string, unknown>;
+    };
+    expect(jsonSchema.properties).toHaveProperty('connector-id');
+    expect(jsonSchema.required).toEqual(expect.arrayContaining(['type', 'connector-id']));
+  });
+
   it('omits examples when registered trigger has no documentation', () => {
     const result = lookupTriggerDefinitionsForAgent({
       registeredTriggers: [

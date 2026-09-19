@@ -70,6 +70,13 @@ export const productDocumentationTool = (
     id: platformCoreTools.productDocumentation,
     type: ToolType.builtin,
     description: `Search and retrieve documentation about Elastic products (Kibana, Elasticsearch, Elastic Security, Elastic Observability).`,
+    annotations: {
+      title: 'Search Elastic Product Documentation',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: productDocumentationSchema,
     handler: async ({ query, product, max = 3 }, { modelProvider, logger, request }) => {
       const llmTasks = await getLlmTasks();

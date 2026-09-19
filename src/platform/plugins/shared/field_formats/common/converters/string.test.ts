@@ -53,6 +53,39 @@ describe('String Format', () => {
     expect(string.convertToReact('Zm9vYmFy')).toBe('foobar');
   });
 
+  test('decode a base64 string with multi-byte UTF-8 characters', () => {
+    const string = new StringFormat(
+      {
+        transform: 'base64',
+      },
+      jest.fn()
+    );
+    const base64 = Buffer.from('été', 'utf8').toString('base64');
+    expect(string.convertToText(base64)).toBe('été');
+    expect(string.convertToReact(base64)).toBe('été');
+  });
+
+  test('decode a base64 string when window.atob is unavailable', () => {
+    const string = new StringFormat(
+      {
+        transform: 'base64',
+      },
+      jest.fn()
+    );
+    const originalAtob = window.atob;
+    Object.defineProperty(window, 'atob', { value: undefined, configurable: true, writable: true });
+    try {
+      expect(string.convertToText('Zm9vYmFy')).toBe('foobar');
+      expect(string.convertToText(Buffer.from('été', 'utf8').toString('base64'))).toBe('été');
+    } finally {
+      Object.defineProperty(window, 'atob', {
+        value: originalAtob,
+        configurable: true,
+        writable: true,
+      });
+    }
+  });
+
   test('convert a string to title case', () => {
     const string = new StringFormat(
       {

@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ManageRegionsModal } from './manage_regions_modal';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
 import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
+import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import * as eisUtils from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_region_policy');
 jest.mock('../../hooks/use_save_region_policy');
+jest.mock('../../hooks/use_delete_region_policy');
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../utils/eis_utils', () => ({
   ...jest.requireActual('../../utils/eis_utils'),
@@ -28,9 +30,12 @@ const mockGetAvailableRegions = jest.mocked(eisUtils.getAvailableRegions);
 const mockGetAvailableGeos = jest.mocked(eisUtils.getAvailableGeos);
 const mockUseRegionPolicy = jest.mocked(useRegionPolicy);
 const mockUseSaveRegionPolicy = jest.mocked(useSaveRegionPolicy);
+const mockUseDeleteRegionPolicy = jest.mocked(useDeleteRegionPolicy);
 const mockUseEisModels = jest.mocked(useEisModels);
 
 const mockSaveMutate = jest.fn();
+const mockDeleteMutate = jest.fn();
+let capturedDeleteOnSuccess: (() => void) | undefined;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -54,6 +59,10 @@ const endpointWithRegions = {
   },
 };
 
+const toggleCustomPolicyOn = () => {
+  fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+};
+
 describe('ManageRegionsModal', () => {
   const onClose = jest.fn();
 
@@ -69,6 +78,15 @@ describe('ManageRegionsModal', () => {
       isLoading: false,
     } as unknown as ReturnType<typeof useSaveRegionPolicy>);
 
+    capturedDeleteOnSuccess = undefined;
+    mockUseDeleteRegionPolicy.mockImplementation((onSuccess) => {
+      capturedDeleteOnSuccess = onSuccess;
+      return {
+        mutate: mockDeleteMutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useDeleteRegionPolicy>;
+    });
+
     // Default hook returns — individual tests override as needed
     mockUseRegionPolicy.mockReturnValue({
       data: null,
@@ -83,7 +101,7 @@ describe('ManageRegionsModal', () => {
   });
 
   describe('loading state', () => {
-    it('renders a loading spinner while region policy is fetching', () => {
+    it('disables the custom policy toggle while region policy is fetching', () => {
       mockUseRegionPolicy.mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -98,10 +116,11 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageGeosLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsCustomPolicyToggle')).toBeDisabled();
+      expect(screen.queryByTestId('manageGeosLoading')).not.toBeInTheDocument();
     });
 
-    it('renders a loading spinner while eis models are fetching', () => {
+    it('disables the custom policy toggle while eis models are fetching', () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -116,12 +135,13 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageGeosLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsCustomPolicyToggle')).toBeDisabled();
+      expect(screen.queryByTestId('manageGeosLoading')).not.toBeInTheDocument();
     });
   });
 
   describe('empty state', () => {
-    it('shows a warning callout when no regions are available on Regions tab', async () => {
+    it('shows the empty message when no regions are available on Regions tab', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -136,16 +156,18 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to see the no-regions warning.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsNoRegions')).toBeInTheDocument();
-        expect(screen.getByText('No regions available')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsNoRegions')).toHaveTextContent(
+          'No regions available'
+        );
       });
     });
 
-    it('shows a warning callout when no geos are available on Geo tab', async () => {
+    it('shows the empty message when no geos are available on Geo tab', async () => {
       mockGetAvailableGeos.mockReturnValue([]);
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
@@ -160,7 +182,8 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      fireEvent.click(screen.getByTestId('manageRegionsGeoTab'));
+      toggleCustomPolicyOn();
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeGeo'));
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsNoGeos')).toBeInTheDocument();
@@ -168,16 +191,78 @@ describe('ManageRegionsModal', () => {
     });
   });
 
-  describe('tabs', () => {
-    it('renders Geo and Regions tabs', () => {
+  describe('custom-policy toggle', () => {
+    it('hides the tabs when the toggle is OFF (no existing policy)', () => {
       render(
         <Wrapper>
           <ManageRegionsModal onClose={onClose} />
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsGeoTab')).toBeInTheDocument();
-      expect(screen.getByTestId('manageRegionsRegionsTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeGeo')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeRegions')).not.toBeInTheDocument();
+    });
+
+    it('reveals the tabs when the toggle is clicked ON', () => {
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      toggleCustomPolicyOn();
+
+      expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeRegions')).toBeInTheDocument();
+    });
+
+    it('shows the tabs by default when an existing policy is loaded', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeRegions')).toBeInTheDocument();
+    });
+
+    it('hides the tabs when the toggle is turned OFF on an existing policy', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+
+      expect(screen.queryByTestId('manageRegionsLocationTypeGeo')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeRegions')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('tabs', () => {
+    it('renders Geo and Regions tabs when the toggle is ON', () => {
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      toggleCustomPolicyOn();
+
+      expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeRegions')).toBeInTheDocument();
     });
 
     it('defaults to Geo tab when no policy exists', async () => {
@@ -187,8 +272,13 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      toggleCustomPolicyOn();
+
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsGeoTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
       });
     });
 
@@ -199,10 +289,14 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      fireEvent.click(screen.getByTestId('manageRegionsGeoTab'));
+      toggleCustomPolicyOn();
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeGeo'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsGeoTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
       });
     });
 
@@ -221,7 +315,10 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsGeoTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
       });
     });
   });
@@ -237,24 +334,25 @@ describe('ManageRegionsModal', () => {
           <ManageRegionsModal onClose={onClose} />
         </Wrapper>
       );
-      fireEvent.click(screen.getByTestId('manageRegionsGeoTab'));
+      toggleCustomPolicyOn();
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeGeo'));
     };
 
     it('renders geo zone rows for each available geo', async () => {
       renderWithGeoTab();
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneRow-eu')).toBeInTheDocument();
-        expect(screen.getByTestId('geoZoneRow-us')).toBeInTheDocument();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeInTheDocument();
+        expect(screen.getByTestId('geoZoneCheckbox-us')).toBeInTheDocument();
       });
     });
 
-    it('shows all geo zones checked by default when there is no policy', async () => {
+    it('shows no geo zones checked by default when there is no policy', async () => {
       renderWithGeoTab();
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeChecked();
-        expect(screen.getByTestId('geoZoneCheckbox-us')).toBeChecked();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'false');
+        expect(screen.getByTestId('geoZoneCheckbox-us')).toHaveAttribute('aria-checked', 'false');
       });
     });
 
@@ -272,8 +370,8 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeChecked();
-        expect(screen.getByTestId('geoZoneCheckbox-us')).not.toBeChecked();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'true');
+        expect(screen.getByTestId('geoZoneCheckbox-us')).toHaveAttribute('aria-checked', 'false');
       });
     });
 
@@ -284,20 +382,22 @@ describe('ManageRegionsModal', () => {
         expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeInTheDocument();
       });
 
-      // No policy → starts checked (all routes allowed). Click to uncheck it.
-      expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeChecked();
+      // No policy → starts unchecked. Click to check it.
+      expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'false');
       fireEvent.click(screen.getByTestId('geoZoneCheckbox-eu'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).not.toBeChecked();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'true');
       });
     });
 
-    it('shows "N of N selected" on the geo toolbar when no policy exists', async () => {
+    it('shows "0 of N selected" on the geo toolbar when no policy exists', async () => {
       renderWithGeoTab();
 
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
       });
     });
   });
@@ -318,19 +418,18 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to see zone headers.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       // us-east-1 → North America zone, europe-west1 → Europe zone
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZone-us')).toBeInTheDocument();
-        expect(screen.getByTestId('manageRegionsZone-eu')).toBeInTheDocument();
-        expect(screen.getByText('North America')).toBeInTheDocument();
-        expect(screen.getByText('Europe')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsZone-us')).toHaveTextContent('North America');
+        expect(screen.getByTestId('manageRegionsZone-eu')).toHaveTextContent('Europe');
       });
     });
 
-    it('expands a zone when the region count text/icon is clicked', async () => {
+    it('shows "0 of N selected" when there is no existing policy', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -345,40 +444,15 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneCountToggle-us')).toBeInTheDocument();
-      });
-
-      // Clicking the count/icon button (not the zone title) should expand the zone.
-      fireEvent.click(screen.getByTestId('manageRegionsZoneCountToggle-us'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
-      });
-    });
-
-    it('shows "N of N selected" when there is no existing policy', async () => {
-      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
-        typeof useRegionPolicy
-      >);
-      mockUseEisModels.mockReturnValue({
-        data: [endpointWithRegions],
-        isLoading: false,
-      } as unknown as ReturnType<typeof useEisModels>);
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
-
+      toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to verify the regions toolbar count.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
-      // No policy → all regions pre-selected (no restrictions)
+      // No policy → nothing pre-selected
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
       });
     });
 
@@ -407,7 +481,9 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
       });
     });
 
@@ -430,17 +506,19 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // Expand North America zone to see its checkboxes
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-eu'));
-
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
-        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
     });
 
-    it('defaults to all regions checked when there is no existing policy', async () => {
+    it('defaults to no regions checked when there is no existing policy', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -455,17 +533,19 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to inspect individual checkboxes.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneToggle-us')).toBeInTheDocument();
-      });
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-eu'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
-        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
+        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
     });
 
@@ -489,22 +569,26 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
     });
   });
 
   describe('Select all button', () => {
-    it('shows "Deselect all" when all are selected, and deselects all on click', async () => {
-      // No policy → all regions pre-selected.
+    it('shows "Select all" when none are selected, and selects all on click', async () => {
+      // No policy → nothing pre-selected.
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -519,18 +603,24 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      toggleCustomPolicyOn();
+
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent(
-          'Deselect all'
+        expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent('Select all');
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
         );
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
 
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
-        expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent('Select all');
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
+        expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent(
+          'Deselect all'
+        );
       });
     });
 
@@ -568,7 +658,9 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
 
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent('Select all');
       });
     });
@@ -601,7 +693,9 @@ describe('ManageRegionsModal', () => {
 
       // Existing policy seeded → isDirty = false → Save disabled.
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
       });
 
       expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
@@ -622,15 +716,14 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // Default tab is Geo — switch to Regions, expand US zone, uncheck a region to make dirty.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      toggleCustomPolicyOn();
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneToggle-us')).toBeInTheDocument();
-      });
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-      await waitFor(() => {
-        // No policy → all selected; uncheck us-east-1 to make isDirty = true.
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
+        // No policy → nothing selected; check us-east-1 so a selection exists.
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       });
 
@@ -641,7 +734,7 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('confirmRegionChangeModal')).toBeInTheDocument();
+        expect(screen.getByTestId('confirmRegionSelectionModal')).toBeInTheDocument();
       });
 
       // mockSaveMutate not yet called — confirmation is pending
@@ -679,30 +772,32 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // Expand North America and uncheck us-east-1
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
 
       // Click "Save preferences" → opens confirmation modal
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('confirmRegionChangeModal')).toBeInTheDocument();
+        expect(screen.getByTestId('confirmRegionSelectionModal')).toBeInTheDocument();
       });
 
-      // Click "Save" in confirmation modal → triggers actual save
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      fireEvent.click(screen.getByTestId('confirmRegionSelectionSaveButton'));
 
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] },
+        { body: { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] } },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -722,13 +817,14 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
+      toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to make a change there.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
       });
 
-      // Deselect a region to make the form dirty, then open confirmation.
+      // Select a region to make the form dirty, then open confirmation.
       fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
@@ -736,13 +832,13 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('confirmRegionChangeModal')).toBeInTheDocument();
+        expect(screen.getByTestId('confirmRegionSelectionModal')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+      fireEvent.click(screen.getByTestId('confirmRegionSelectionCancelButton'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('confirmRegionChangeModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('confirmRegionSelectionModal')).not.toBeInTheDocument();
       });
 
       expect(mockSaveMutate).not.toHaveBeenCalled();
@@ -768,7 +864,8 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // Default tab is Geo — uncheck a geo (all pre-selected) to make it dirty.
+      toggleCustomPolicyOn();
+      // Default tab is Geo — check a geo (none pre-selected) to make it dirty.
       await waitFor(() => {
         expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeInTheDocument();
       });
@@ -778,14 +875,13 @@ describe('ManageRegionsModal', () => {
       });
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
       await waitFor(() => {
-        expect(screen.getByTestId('confirmRegionChangeModal')).toBeInTheDocument();
+        expect(screen.getByTestId('confirmRegionSelectionModal')).toBeInTheDocument();
       });
 
-      // Cancel the confirmation — this exercises the handleCancelConfirmation path.
-      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+      fireEvent.click(screen.getByTestId('confirmRegionSelectionCancelButton'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('confirmRegionChangeModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('confirmRegionSelectionModal')).not.toBeInTheDocument();
       });
 
       // The parent modal must still be open and the outer onClose must NOT have fired.
@@ -828,19 +924,169 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('confirmRegionChangeModal')).toBeInTheDocument();
+        expect(screen.getByTestId('confirmRegionSelectionModal')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      fireEvent.click(screen.getByTestId('confirmRegionSelectionSaveButton'));
 
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ allowed_geos: ['us'] }),
+        expect.objectContaining({ body: expect.objectContaining({ allowed_geos: ['us'] }) }),
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
+      expect(mockSaveMutate.mock.calls[0][0]).not.toHaveProperty('force');
       expect(mockSaveMutate).not.toHaveBeenCalledWith(
-        expect.objectContaining({ allowed_regions: expect.anything() }),
+        expect.objectContaining({
+          body: expect.objectContaining({ allowed_regions: expect.anything() }),
+        }),
         expect.anything()
       );
+    });
+  });
+
+  describe('delete policy flow', () => {
+    it('opens the delete confirmation when the toggle is turned OFF and Save is clicked', async () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // Existing policy → toggle ON by default. Turn it OFF.
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('confirmDeleteRegionPolicyModal')).toBeInTheDocument();
+      });
+
+      expect(mockDeleteMutate).not.toHaveBeenCalled();
+    });
+
+    it('does not delete the policy until the acknowledge checkbox is ticked', async () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('confirmDeleteRegionPolicyModal')).toBeInTheDocument();
+      });
+
+      // Confirm button is disabled until acknowledgement.
+      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+      expect(confirmButton).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge'));
+
+      expect(confirmButton).toBeEnabled();
+      fireEvent.click(confirmButton);
+
+      expect(mockDeleteMutate).toHaveBeenCalledWith();
+    });
+
+    it('cancels the delete confirmation without deleting and leaves the parent modal open', async () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
+
+      const deleteConfirm = await screen.findByTestId('confirmDeleteRegionPolicyModal');
+
+      // Scope the cancel lookup to the delete confirmation, otherwise the
+      // parent modal's own Cancel button would also match.
+      fireEvent.click(within(deleteConfirm).getByTestId('confirmModalCancelButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('confirmDeleteRegionPolicyModal')).not.toBeInTheDocument();
+      });
+
+      expect(mockDeleteMutate).not.toHaveBeenCalled();
+      expect(screen.getByTestId('manageRegionsModal')).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('closes both modals when delete succeeds', async () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      mockDeleteMutate.mockImplementation(() => capturedDeleteOnSuccess?.());
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('confirmDeleteRegionPolicyModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the delete confirmation and parent modal open when delete fails', async () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      // Simulate a failed mutation: no onSuccess callback is invoked.
+      mockDeleteMutate.mockImplementation(() => {});
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('confirmDeleteRegionPolicyModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockDeleteMutate).toHaveBeenCalled();
+      expect(screen.getByTestId('confirmDeleteRegionPolicyModal')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsModal')).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 
@@ -865,7 +1111,7 @@ describe('ManageRegionsModal', () => {
   });
 
   describe('Save button disabled state', () => {
-    it('is enabled when no policy exists (first-time setup)', async () => {
+    it('is disabled when no policy exists and the toggle is OFF (first-time default)', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -880,9 +1126,59 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // No policy → isNewPolicy=true → Save enabled as long as at least 1 selected.
+      // No policy → toggle OFF → nothing to save yet.
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
+      });
+    });
+
+    it('is disabled when the toggle is switched ON with no selections (first-time setup)', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
+        typeof useRegionPolicy
+      >);
+      mockUseEisModels.mockReturnValue({
+        data: [endpointWithRegions],
+        isLoading: false,
+      } as unknown as ReturnType<typeof useEisModels>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      toggleCustomPolicyOn();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
+        expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
+      });
+    });
+
+    it('is enabled once a selection is made after switching the toggle ON (first-time setup)', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
+        typeof useRegionPolicy
+      >);
+      mockUseEisModels.mockReturnValue({
+        data: [endpointWithRegions],
+        isLoading: false,
+      } as unknown as ReturnType<typeof useEisModels>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      toggleCustomPolicyOn();
+      fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
       });
     });
@@ -924,24 +1220,32 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // No policy → Save enabled (first-time setup, all geos selected).
-      await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
-        expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
-      });
+      toggleCustomPolicyOn();
 
-      // Deselect all → totalGeosSelected=0 → Save disabled.
-      fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
+      // No policy + toggle ON → nothing selected yet → Save disabled.
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
       });
 
-      // Re-select all → Save enabled again.
+      // Select all → Save enabled.
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
+      });
+
+      // Deselect all again → Save disabled.
+      fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
+        expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
       });
     });
   });
@@ -965,8 +1269,9 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsErrorCallout')).toBeInTheDocument();
-      expect(screen.getByText('Failed to load region data')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsErrorCallout')).toHaveTextContent(
+        'Failed to load region data'
+      );
     });
 
     it('renders a danger callout when the EIS models fetch fails', () => {
@@ -992,7 +1297,7 @@ describe('ManageRegionsModal', () => {
   });
 
   describe('info callout', () => {
-    it('renders the info callout by default', () => {
+    it('is hidden until the custom policy toggle is switched on', () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -1005,6 +1310,10 @@ describe('ManageRegionsModal', () => {
           <ManageRegionsModal onClose={onClose} />
         </Wrapper>
       );
+
+      expect(screen.queryByTestId('manageRegionsCallout')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
 
       expect(screen.getByTestId('manageRegionsCallout')).toBeInTheDocument();
     });
@@ -1023,14 +1332,9 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      const dismissButton = screen
-        .getByTestId('manageRegionsCallout')
-        .querySelector('[data-test-subj="euiDismissCalloutButton"]');
-      expect(dismissButton).not.toBeNull();
-      if (!dismissButton) {
-        return;
-      }
-      fireEvent.click(dismissButton);
+      fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
+
+      fireEvent.click(screen.getByTestId('manageRegionsCalloutDismiss'));
 
       expect(screen.queryByTestId('manageRegionsCallout')).not.toBeInTheDocument();
     });

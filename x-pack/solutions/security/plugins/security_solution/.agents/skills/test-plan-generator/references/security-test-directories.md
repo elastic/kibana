@@ -51,13 +51,13 @@ These skills describe test file conventions, runner commands, authentication pat
 
 | Type | File pattern | Runner |
 |---|---|---|
-| Unit | `*.test.ts` (co-located with source) | `yarn test:jest` |
-| Integration (Jest) | `*.test.ts` under `__tests__/` or adjacent; `jest.integration.config.js` | `yarn test:jest_integration` |
+| Unit | `*.test.ts` (co-located with source) | `pnpm test:jest` |
+| Integration (Jest) | `*.test.ts` under `__tests__/` or adjacent; `jest.integration.config.js` | `pnpm test:jest_integration` |
 | API integration (FTR) | `x-pack/solutions/security/test/security_solution_api_integration/` | `node scripts/functional_tests` |
 | Functional / E2E (FTR) | `x-pack/solutions/security/test/functional/` | `node scripts/functional_tests` |
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/**/*.cy.ts` | Cypress runner |
-| Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
-| Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+| Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout run-tests` |
+| Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout run-tests` |
 
 ---
 

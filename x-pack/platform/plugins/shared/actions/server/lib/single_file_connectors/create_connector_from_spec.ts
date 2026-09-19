@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION, connectorSpecHasEvents } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 
@@ -22,6 +22,10 @@ import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
+import {
+  createConnectorNetworkSettings,
+  createPlatformServices,
+} from './create_connector_network_settings';
 
 const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
@@ -39,6 +43,7 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
   return {
     ...baseActions,
     [TEST_CONNECTOR_SUB_ACTION]: {
+      scope: 'read',
       handler: spec.test.handler,
       input: z4.unknown().optional(),
     },
@@ -50,16 +55,36 @@ export const createConnectorTypeFromSpec = (
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
+  const networkSettings = createConnectorNetworkSettings(configUtils);
+  const platform = createPlatformServices(configUtils);
 
   const hasTest = Boolean(spec.test.enabled);
-  const hasActions = Boolean(spec.actions);
+  const hasActions = Object.keys(spec.actions ?? {}).length > 0;
+  const hasEvents = connectorSpecHasEvents(spec);
+
+  if (hasTest && !hasActions && hasEvents) {
+    throw new Error(
+      `Connector spec "${spec.metadata.id}" cannot enable test without outbound actions.`
+    );
+  }
+
+  if (!hasActions && !hasEvents && !hasTest) {
+    throw new Error('No actions or events defined');
+  }
+
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
+  const schemaForConfig = spec.schema;
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
         actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
+        getCredential: actions.getCredential,
+        getClientLeasePool: actions.getClientLeasePool,
+        getRelayClient: actions.getRelayClient,
+        networkSettings,
+        platform,
       })
     : undefined;
 
@@ -73,7 +98,7 @@ export const createConnectorTypeFromSpec = (
     name: spec.metadata.displayName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
-      config: generateConfigSchema(spec.schema),
+      config: generateConfigSchema(schemaForConfig),
       secrets: generateSecretsSchema(spec.auth, configUtils),
       ...(paramsValidator ? { params: paramsValidator } : {}),
     },

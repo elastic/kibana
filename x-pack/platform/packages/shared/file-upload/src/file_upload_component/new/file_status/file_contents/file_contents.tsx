@@ -16,8 +16,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { type FindFileStructureResponse } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -199,7 +199,7 @@ const PreviewLimitMessage: FC<PropsWithChildren<{ wrapInCallout?: boolean }>> = 
   children,
 }) => {
   return wrapInCallout ? (
-    <EuiCallOut announceOnMount size="s" color="primary" title={children} />
+    <KbnInfoCallout announceOnMount size="s" title={children} />
   ) : (
     <>
       <EuiSpacer size="s" />

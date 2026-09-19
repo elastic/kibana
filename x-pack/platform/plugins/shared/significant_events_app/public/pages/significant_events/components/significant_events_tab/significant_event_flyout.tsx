@@ -11,36 +11,43 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiText,
+  EuiSpacer,
   EuiTitle,
   EuiToolTip,
   copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import { getSeverityLabel, type SignificantEvent } from '@kbn/significant-events-schema';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
+import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
+import { getConfidenceColor } from '../../../../components/knowledge_indicators/utils/get_confidence_color';
+import { DismissEventModal } from './dismiss_event_modal';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
-import { formatTimestamp } from '../../../../util/formatters';
+import { SeverityBadge } from '../severity_badge/severity_badge';
 import { SignificantEventDetails } from '../../../../components/significant_event_details/significant_event_details';
 import { EventInvestigations } from './event_investigations';
 import { hasRunningInvestigation } from '../shared/investigation_status';
@@ -70,6 +77,7 @@ const CLOSE_EVENT_LABEL = i18n.translate(
     defaultMessage: 'Close significant event',
   }
 );
+
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.actionsMenuButtonAriaLabel',
   {
@@ -77,6 +85,12 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
+const DISMISS_EVENT_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.dismissEvent',
+  {
+    defaultMessage: 'Dismiss significant event',
+  }
+);
 const COPY_LINK_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.copyLink',
   {
@@ -121,17 +135,53 @@ const CONFIDENCE_LABEL = i18n.translate(
     defaultMessage: 'Confidence',
   }
 );
+const STATUS_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.statusLabel',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+const EMPTY_VALUE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.emptyValue',
+  { defaultMessage: '—' }
+);
 
 interface SignificantEventFlyoutProps {
-  event: SignificantEvent;
+  event: SignificantEventResponse;
   onClose: () => void;
 }
+
+const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
+  if (items.length === 0) {
+    return (
+      <EuiText size="s" color="subdued">
+        {EMPTY_VALUE}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+      {items.map((item, idx) => (
+        <EuiFlexItem grow={false} key={`${item}-${idx}`}>
+          <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
 
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
     services: { focusedSignificantEventService },
-    core: { notifications },
+    core: {
+      notifications,
+      application: {
+        capabilities: { nightshift },
+      },
+    },
   } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
@@ -141,6 +191,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
   // versions via findByEventId (no time filter), so it captures newly-written
@@ -175,7 +226,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     onUpdateSuccess: onClose,
   });
 
-  const isClosed = latestEvent.status === 'closed';
+  const isOpen = latestEvent.status === 'open';
 
   useInterval(
     refetchLifecycle,
@@ -191,9 +242,16 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, [latestEvent, focusedSignificantEventService]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId} hideCloseButton>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      type="push"
+      ownFocus={false}
+      size="40%"
+      hideCloseButton
+    >
       <FlyoutToolbarHeader>
-        {!isClosed && (
+        {isOpen && canManage && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}
@@ -201,7 +259,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                 <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="sigEventFlyoutActionsButton"
-                    iconType="boxesVertical"
+                    iconType="ellipsis"
                     aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                     isLoading={isUpdating}
                     isDisabled={isUpdating}
@@ -217,6 +275,18 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               <EuiContextMenuPanel
                 items={[
                   <EuiContextMenuItem
+                    key="dismiss-event"
+                    icon="eyeSlash"
+                    color="primary"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      setIsActionsMenuOpen(false);
+                      setIsDismissModalOpen(true);
+                    }}
+                  >
+                    {DISMISS_EVENT_LABEL}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
                     key="close-event"
                     icon="cross"
                     color="danger"
@@ -224,7 +294,10 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     onClick={() => {
                       if (!isUpdating) {
                         setIsActionsMenuOpen(false);
-                        updateEventStatus({ eventUuid: latestEvent.event_uuid, status: 'closed' });
+                        updateEventStatus({
+                          eventUuid: latestEvent.event_uuid,
+                          status: 'closed',
+                        });
                       }
                     }}
                     data-test-subj="sigEventCloseButton"
@@ -235,6 +308,16 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               />
             </EuiPopover>
           </EuiFlexItem>
+        )}
+        {isDismissModalOpen && (
+          <DismissEventModal
+            eventUuid={latestEvent.event_uuid}
+            onClose={() => setIsDismissModalOpen(false)}
+            onSuccess={() => {
+              setIsDismissModalOpen(false);
+              onClose();
+            }}
+          />
         )}
         <EuiFlexItem grow={false}>
           <EuiToolTip content={COPY_LINK_ARIA_LABEL} disableScreenReaderOutput>
@@ -264,23 +347,40 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       </FlyoutToolbarHeader>
 
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{event.title}</h2>
+        </EuiTitle>
+        <EuiText size="xs" color="subdued">
+          {formatTimestamp(event.created_at ?? event['@timestamp'])}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <BadgeRow items={event.stream_names ?? []} color="hollow" />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={STATUS_LABEL}>
               <EuiBadge color={getSignificantEventStatusColor(event.status)}>
                 {SIGNIFICANT_EVENT_STATUS_LABELS[event.status]}
               </EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={SEVERITY_LABEL}>
+              <SeverityBadge score={Number.parseInt(event.severity, 10)} />
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          {event.confidence != null && (
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
+                <EuiHealth
+                  color={getConfidenceColor(Math.round(event.confidence * 100))}
+                  textSize="xs"
+                >
+                  {`${Math.round(event.confidence * 100)}%`}
+                </EuiHealth>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>{event.title}</h2>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            {formatTimestamp(event['@timestamp'])}
-            {` · ${SEVERITY_LABEL}: ${getSeverityLabel(event.severity)}`}
-            {event.confidence != null &&
-              ` · ${CONFIDENCE_LABEL}: ${Math.round(event.confidence * 100)}%`}
-          </EuiText>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
@@ -301,13 +401,9 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             {isLifecycleLoading ? (
               <EuiLoadingSpinner size="m" />
             ) : isLifecycleError ? (
-              <EuiCallOut
-                announceOnMount
-                title={LIFECYCLE_ERROR}
-                color="danger"
-                iconType="error"
-                size="s"
-              />
+              <KbnDangerCallout announceOnMount title={LIFECYCLE_ERROR} size="s">
+                {LIFECYCLE_ERROR}
+              </KbnDangerCallout>
             ) : (
               <LifecycleTimeline data={lifecycleData} />
             )}
@@ -315,33 +411,35 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                activityBlockTooltip ??
-                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
-              }
-            >
-              <EuiButton
-                iconType="inspect"
-                onClick={() => {
-                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
-                }}
-                isDisabled={isTriggering || blocksActivity}
-                hasAriaDisabled={blocksActivity}
-                isLoading={isTriggering}
-                fill
-                size="s"
-                data-test-subj="sigEventRunInvestigationButton"
+      {canManage && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  activityBlockTooltip ??
+                  (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
+                }
               >
-                {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+                <EuiButton
+                  iconType="inspect"
+                  onClick={() => {
+                    if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
+                  }}
+                  isDisabled={isTriggering || blocksActivity}
+                  hasAriaDisabled={blocksActivity}
+                  isLoading={isTriggering}
+                  fill
+                  size="s"
+                  data-test-subj="sigEventRunInvestigationButton"
+                >
+                  {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

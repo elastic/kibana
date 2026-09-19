@@ -17,7 +17,10 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 
 /** @internal */
 const buildSearchQuery = (
@@ -40,6 +43,8 @@ const buildSearchQuery = (
 interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
   endpointService: EndpointAppContextService;
+  /** Required for the Endpoint index read to fan out under CPS. The Fleet index read never fans out */
+  scoped?: ScopedEndpointServices;
   /** List of specific action ids to filter for */
   actionIds?: string[];
   /** List of specific agent ids to filter for */
@@ -75,6 +80,13 @@ export const fetchActionResponses = async <
 
 /**
  * Fetch Response Action response documents from the Endpoint index
+ *
+ * Safe to fan out with no space filter: the read is bounded by action ids, and no result reaches the
+ * caller unless the matching action request passes its own space check. On the details path that
+ * check runs in parallel with this read rather than before it, so ids can reach the fanned-out index
+ * ahead of validation, but a failure there discards this result too. These documents carry no space
+ * field of their own anyway.
+ *
  * @param esClient
  * @param actionIds
  * @param agentIds
@@ -85,16 +97,23 @@ export const fetchEndpointActionResponses = async <
 >({
   esClient,
   endpointService,
+  scoped,
   actionIds,
   agentIds,
 }: FetchActionResponsesOptions): Promise<
   Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
 > => {
   const ccsEnabled = await endpointService.isCcsEnabled();
-  const searchResponse = await esClient
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const readEsClient = cpsRead && scoped ? scoped.getEsClient() : esClient;
+  const searchResponse = await readEsClient
     .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
       {
-        index: prefixIndexPatternsWithCcs(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN, ccsEnabled),
+        // CCS is suppressed once this read fans out, for the reason given in the search strategy
+        index: prefixIndexPatternsWithCcs(
+          ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          ccsEnabled && !cpsRead
+        ),
         size: ACTIONS_SEARCH_PAGE_SIZE,
         query: buildSearchQuery(actionIds, agentIds),
       },
@@ -110,6 +129,10 @@ export const fetchEndpointActionResponses = async <
 
 /**
  * Fetch Response Action response documents from the Fleet index
+ *
+ * Stays on the internal client under CPS: `.fleet-*` is excluded from project routing, so third party
+ * agent responses, which land here rather than in the Endpoint index, cannot be read across projects.
+ *
  * @param esClient
  * @param actionIds
  * @param agentIds

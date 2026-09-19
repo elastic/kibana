@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-dashboards-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,17 +14,21 @@ project:
   title: '@kbn/agent-builder-dashboards-plugin'
   description: Moon project for @kbn/agent-builder-dashboards-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
+  - '@kbn/custom-content-common'
+  - '@kbn/custom-content-server'
   - '@kbn/agent-builder-server'
   - '@kbn/controls-constants'
+  - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/agent-builder-dashboards-common'
   - '@kbn/zod'

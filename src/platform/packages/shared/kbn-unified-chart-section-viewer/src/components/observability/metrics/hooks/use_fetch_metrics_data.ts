@@ -8,14 +8,10 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import useLatest from 'react-use/lib/useLatest';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import {
-  buildJoinedFilter,
-  buildMetricsInfoQuery,
-  escapeStringValue,
-  hasTransformationalCommand,
-} from '@kbn/esql-utils';
+import { buildJoinedFilter, buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
@@ -28,6 +24,7 @@ import {
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
+import { buildEsqlQueryFailureEvent } from '../telemetry/build_esql_query_failure_event';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -49,12 +46,10 @@ export function useFetchMetricsData({
   /** Forwarded as `profile_id` APM label on captured errors. */
   profileId: string;
 }): MetricsInfo {
-  const { trackMetricsInfo } = useTelemetry();
+  const { trackMetricsInfo, trackEsqlQueryFailure } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
-
-  const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
   // Pre-fetch defense against dimensions the active stream does not map.
   // Pushing a field name that is not in the dataView into the
@@ -85,6 +80,12 @@ export function useFetchMetricsData({
     );
     return buildMetricsInfoQuery(esql, appliedDimensionNames, declaredDimensionFilter);
   }, [esql, appliedDimensionNames]);
+
+  // Read inside the error effect without keying it on the query, so only a
+  // freshly landed error triggers a report.
+  const metricsInfoQueryRef = useLatest(metricsInfoQuery);
+
+  const shouldFetch = isComponentVisible && !!metricsInfoQuery;
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
@@ -186,10 +187,25 @@ export function useFetchMetricsData({
         profile_id: profileId,
       },
     });
-  }, [error, profileId, reportError]);
+
+    // EBT counterpart of the APM report above: powers the failure-rate
+    // dashboards, which need the ES error type and category as queryable
+    // fields rather than APM labels. The query is read through a ref so a
+    // rebuilt query cannot re-report an error that already landed.
+    const failureEvent = buildEsqlQueryFailureEvent({
+      error,
+      esqlQuery: metricsInfoQueryRef.current,
+    });
+    if (failureEvent) {
+      trackEsqlQueryFailure(failureEvent);
+    }
+  }, [error, profileId, reportError, metricsInfoQueryRef, trackEsqlQueryFailure]);
+
+  const isInitialState = !loading && !value && !error;
+  const isPendingResponse = isComponentVisible && isInitialState;
 
   return {
-    loading,
+    loading: loading || isPendingResponse,
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],

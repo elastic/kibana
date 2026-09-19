@@ -9,9 +9,16 @@ import type {
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { AttachmentRequest, AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, bulkCreateAttachments } from '../../../../common/lib/api';
+import {
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  bulkCreateAttachments,
+} from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -71,6 +78,49 @@ export default ({ getService }: FtrProviderContext): void => {
               data: { content: 'invalid' },
               owner: 'securitySolutionFixture',
             },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
+    // Legacy `externalReference` / `persistableState` wire shapes are only accepted
+    // for migrated type ids (EXTERNAL_REFERENCE_TYPE_MAP / PERSISTABLE_STATE_TYPE_MAP),
+    // which route through the transformer to a registered unified type. An unmapped id
+    // has no unified target and must be rejected — this replaces the removed
+    // custom-ER/PS-type registration coverage.
+    describe('legacy wire shapes with an unmapped type', () => {
+      it('400s for a legacy externalReference with an unmapped type id', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'externalReference',
+              externalReferenceId: 'ref-id',
+              externalReferenceStorage: { type: 'elasticSearchDoc' },
+              externalReferenceAttachmentTypeId: 'not.mapped.external.reference',
+              externalReferenceMetadata: null,
+              owner: 'securitySolutionFixture',
+            } as unknown as AttachmentRequest,
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s for a legacy persistableState with an unmapped type id', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'persistableState',
+              persistableStateAttachmentTypeId: 'not.mapped.persistable.state',
+              persistableStateAttachmentState: { foo: 'foo' },
+              owner: 'securitySolutionFixture',
+            } as unknown as AttachmentRequest,
           ],
           expectedHttpCode: 400,
         });
@@ -153,6 +203,26 @@ export default ({ getService }: FtrProviderContext): void => {
               data: { content: 'no owner' },
             } as unknown as UnifiedValueAttachmentPayload,
           ],
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
+    // The v1 alert id/index length check moved into toUnifiedAttachmentPayload so it
+    // still fires before the client during unified conversion. Lock the 400.
+    describe('legacy alert id/index pairing', () => {
+      it('400s for a v1 alert with mismatched alertId and index array lengths', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: AttachmentType.alert,
+            alertId: ['alert-1', 'alert-2'],
+            index: ['index-1'],
+            rule: { id: 'rule-1', name: 'rule-name' },
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentRequestV2,
           expectedHttpCode: 400,
         });
       });

@@ -25,6 +25,15 @@ export interface CreateOAuthClientResponse extends OAuthClient {
 
 export type GetOAuthClientResponse = OAuthClient;
 
+export interface UpdateOAuthClientPayload {
+  client_name?: string | null;
+  client_metadata?: Record<string, string | null>;
+  client_logo?: OAuthClientLogo | null;
+  redirect_uris?: string[];
+}
+
+export type UpdateOAuthClientResponse = OAuthClient;
+
 export interface RevokeOAuthClientPayload {
   reason?: string;
 }

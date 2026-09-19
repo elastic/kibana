@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -13,6 +13,7 @@ import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
 } from '../../../../common/types/saved_objects';
+import { routeId } from '../../zod_query';
 import { validateSpaceId } from '../services/validate_space_id';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import type { ProjectMonitor } from '../../../../common/runtime_types';
@@ -20,7 +21,7 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
-import { assertCanUpdateMonitorInAllSpaces } from '../monitor_locations_utils';
+import { assertCanPerformMonitorBulkActionInAllSpaces } from '../monitor_locations_utils';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 const MAX_BROWSER_MONITORS = 250;
@@ -30,27 +31,19 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
-    query: schema.object({
+    query: z.strictObject({
       // primarily used for testing purposes, to specify the type of saved object
-      savedObjectType: schema.maybe(
-        schema.oneOf(
-          [
-            schema.literal(syntheticsMonitorSavedObjectType),
-            schema.literal(legacySyntheticsMonitorTypeSingle),
-          ],
-          {
-            defaultValue: syntheticsMonitorSavedObjectType,
-          }
-        )
-      ),
+      savedObjectType: z
+        .enum([syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle])
+        .optional()
+        .default(syntheticsMonitorSavedObjectType),
     }),
-    params: schema.object({
-      projectName: schema.string(),
+    params: z.strictObject({
+      projectName: routeId,
     }),
-    body: schema.object({
-      monitors: schema.arrayOf(schema.any(), {
-        maxSize: MAX_BROWSER_MONITORS + MAX_LIGHTWEIGHT_MONITORS,
-      }),
+    // Monitor field codecs stay in the project formatter (Phase 4b).
+    body: z.strictObject({
+      monitors: z.array(z.unknown()).max(MAX_BROWSER_MONITORS + MAX_LIGHTWEIGHT_MONITORS),
     }),
   },
   options: {
@@ -181,7 +174,10 @@ const validMultiSpacePrivileges = async (
 ) => {
   const spacesList = [...new Set(monitors.flatMap((monitor) => monitor.spaces ?? []))];
   if (spacesList.length > 0) {
-    const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(routeContext, spacesList);
+    const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+      routeContext,
+      spacesList
+    );
     if (spaceAuthError) {
       throw spaceAuthError;
     }
