@@ -230,4 +230,33 @@ describe('getAllConnectorsRoute', () => {
 
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
+
+  it('maps inboundEventsEnabled to inbound_events_enabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getAllConnectorsRoute(router, licenseState);
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'inbound',
+        actionTypeId: '.inboundWebhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        inboundEventsEnabled: true,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).toEqual(expect.objectContaining({ inbound_events_enabled: true }));
+  });
 });

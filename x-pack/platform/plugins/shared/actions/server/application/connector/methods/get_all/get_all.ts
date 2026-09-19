@@ -22,6 +22,10 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
+import {
+  attachInboundEventsEnabled,
+  hasInboundEventIdentityAttributes,
+} from '../../../../inbound/instance_inbound_events';
 import type { GetAllUnsecuredParams } from './types/params';
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
@@ -97,9 +101,13 @@ async function getAllHelper({
   savedObjectsClient,
   connectorTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
+  const connectorIdsWithIdentity = new Set<string>();
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
+    if (hasInboundEventIdentityAttributes(rawAction.attributes)) {
+      connectorIdsWithIdentity.add(rawAction.id);
+    }
     const connector = connectorFromSavedObject(
       rawAction,
       isConnectorDeprecated(rawAction.attributes),
@@ -144,7 +152,10 @@ async function getAllHelper({
 
   validateConnectors(connectors, logger);
 
-  return connectors;
+  return attachInboundEventsEnabled({
+    connectors,
+    connectorIdsWithIdentity,
+  });
 }
 
 const validateConnectors = (connectors: ConnectorWithExtraFindData[], logger: Logger) => {
@@ -205,7 +216,10 @@ export async function getAllSystemConnectors({
 
   validateConnectors(connectors, context.logger);
 
-  return connectors;
+  return attachInboundEventsEnabled({
+    connectors,
+    connectorIdsWithIdentity: new Set(),
+  });
 }
 
 async function injectExtraFindData({

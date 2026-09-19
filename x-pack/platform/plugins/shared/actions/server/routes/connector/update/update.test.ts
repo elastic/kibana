@@ -94,6 +94,47 @@ describe('updateConnectorRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('forwards inbound_events_enabled', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState);
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        inboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'Datadog prod',
+          config: {},
+          secrets: {},
+          inbound_events_enabled: true,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: expect.objectContaining({ inboundEventsEnabled: true }),
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ inbound_events_enabled: true }),
+    });
+  });
+
   it('ensures the license allows deleting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

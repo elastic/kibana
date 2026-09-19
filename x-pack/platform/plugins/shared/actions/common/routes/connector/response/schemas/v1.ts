@@ -50,6 +50,14 @@ export const connectorResponseSchema = schema.object(
         },
       })
     ),
+    inbound_events_enabled: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_response' } }
 );

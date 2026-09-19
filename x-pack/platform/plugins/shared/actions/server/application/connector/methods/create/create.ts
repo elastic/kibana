@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
@@ -26,10 +27,21 @@ import {
   mintInboundEventIdentityAttributes,
   toRawActionIdentityAttributes,
 } from '../../../../inbound/event_identity';
+import {
+  assertInboundEventsToggleAllowed,
+  resolveCreateInboundEventsEnabled,
+  shouldMintInboundIdentity,
+} from '../../../../inbound/instance_inbound_events';
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: {
+    actionTypeId,
+    name,
+    config,
+    secrets,
+    inboundEventsEnabled: requestedInboundEventsEnabled,
+  },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -146,10 +158,20 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
-  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
-    connectorId: id,
+  assertInboundEventsToggleAllowed({
     actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
   });
+  const inboundEventsEnabled = resolveCreateInboundEventsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
+  const identityAttributes = shouldMintInboundIdentity({ actionTypeId, inboundEventsEnabled })
+    ? await mintInboundEventIdentityAttributes(context, {
+        connectorId: id,
+        actionTypeId,
+      })
+    : undefined;
 
   const result = await tryCatch(
     async () =>
@@ -234,5 +256,6 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(connectorTypeHasInboundEvents(actionTypeId) ? { inboundEventsEnabled } : {}),
   };
 }

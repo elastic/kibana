@@ -26,6 +26,14 @@ export const updateConnectorBodySchema = schema.object(
     secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
       defaultValue: {},
     }),
+    inbound_events_enabled: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.',
+        },
+      })
+    ),
   },
   { meta: { id: 'update_connector' } }
 );

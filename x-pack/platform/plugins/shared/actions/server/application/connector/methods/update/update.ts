@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omit, omitBy } from 'lodash';
 import type { Connector } from '../../types';
@@ -27,6 +27,14 @@ import {
   mintInboundEventIdentityAttributes,
   toRawActionIdentityAttributes,
 } from '../../../../inbound/event_identity';
+import { deleteIngressCredentialForConnector } from '../../../../inbound/ingress_credential';
+import {
+  assertInboundEventsToggleAllowed,
+  hasInboundEventIdentityAttributes,
+  resolveInboundEventsEnabled,
+  resolveUpdateInboundEventsEnabled,
+  shouldMintInboundIdentity,
+} from '../../../../inbound/instance_inbound_events';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -77,7 +85,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode } = attributes;
-  const { name, config, secrets } = action;
+  const { name, config, secrets, inboundEventsEnabled: requestedInboundEventsEnabled } = action;
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
@@ -168,13 +176,41 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       : validatedActionTypeConfig;
 
+  assertInboundEventsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
   const previousIdentity = connectorTypeHasInboundEvents(actionTypeId)
     ? await loadPreviousConnectorEventIdentity(context, id)
     : undefined;
-  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
-    connectorId: id,
+  const previouslyEnabled = resolveInboundEventsEnabled({
     actionTypeId,
+    hasIdentity: hasInboundEventIdentityAttributes(previousIdentity ?? {}),
   });
+  const inboundEventsEnabled = resolveUpdateInboundEventsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+    previouslyEnabled,
+  });
+  const shouldDisableInbound =
+    connectorTypeIsDual(actionTypeId) && !inboundEventsEnabled && previouslyEnabled;
+
+  // Delete credentials first so the hub 404s immediately. If the overwrite then
+  // fails, identity is still present and rotate can mint a new token.
+  if (shouldDisableInbound) {
+    await deleteIngressCredentialForConnector({
+      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+      connectorId: id,
+      logger: context.logger,
+    });
+  }
+
+  const identityAttributes = shouldMintInboundIdentity({ actionTypeId, inboundEventsEnabled })
+    ? await mintInboundEventIdentityAttributes(context, {
+        connectorId: id,
+        actionTypeId,
+      })
+    : undefined;
 
   const attributesWithoutIdentity = omit(attributes, [
     'apiKey',
@@ -269,5 +305,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(connectorTypeHasInboundEvents(actionTypeId) ? { inboundEventsEnabled } : {}),
   };
 }
