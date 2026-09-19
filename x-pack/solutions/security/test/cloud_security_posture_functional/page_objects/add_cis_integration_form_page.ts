@@ -442,7 +442,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const waitUntilLaunchCloudFormationButtonAppears = async () =>
-    await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
+    await testSubjects.existOrFail(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
 
   const clickSaveIntegrationButton = async () => {
     const optionToBeClicked = await findOptionInPage(TEST_IDS.SAVE_INTEGRATION);

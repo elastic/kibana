@@ -137,19 +137,17 @@ export default function (providerContext: FtrProviderContext) {
          * sometimes it takes a while to save the integration so added timeout to wait for post install modal
          */
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           const modal = await cisIntegration.getPostInstallModal();
           if (!modal) {
             logger.debug('Post install modal not found');
           }
           expect(modal !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
+              roleArn
+          ).to.be(true);
         });
-
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-            roleArn
-        ).to.be(true);
       });
     });
 
@@ -177,7 +175,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -216,7 +213,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -259,7 +255,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -287,7 +282,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -323,7 +317,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -363,7 +356,6 @@ export default function (providerContext: FtrProviderContext) {
         const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickPolicyToBeEdited(integrationName);
@@ -407,7 +399,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
