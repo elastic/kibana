@@ -11,6 +11,31 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import { resolveMaxStepSizeBytes } from '../../errors';
+
+const getMaxStepSizeBytes = (
+  node: AtomicGraphNode,
+  stepExecutionRuntime: StepExecutionRuntime
+): number => {
+  const stepMaxStepSize = (node.configuration as { 'max-step-size'?: string } | undefined)?.[
+    'max-step-size'
+  ];
+  const workflowMaxStepSize =
+    stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings?.['max-step-size'];
+  let pluginMaxResponseSize: number | { getValueInBytes: () => number } | undefined;
+  try {
+    pluginMaxResponseSize =
+      stepExecutionRuntime.contextManager.getDependencies().config?.maxResponseSize;
+  } catch {
+    pluginMaxResponseSize = undefined;
+  }
+
+  return resolveMaxStepSizeBytes({
+    stepMaxStepSize,
+    workflowMaxStepSize,
+    pluginMaxResponseSize,
+  });
+};
 
 export function createBaseHandlerContext(
   input: unknown,
@@ -24,6 +49,7 @@ export function createBaseHandlerContext(
     input,
     rawInput: rawInput || {},
     config: config || {}, // TODO: pick only the config properties that are defined in the step definition
+    maxStepSizeBytes: getMaxStepSizeBytes(node, stepExecutionRuntime),
     contextManager: {
       getContext: () => {
         return stepExecutionRuntime.contextManager.getContext();
