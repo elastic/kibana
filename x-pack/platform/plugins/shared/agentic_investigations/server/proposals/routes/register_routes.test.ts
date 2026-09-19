@@ -14,6 +14,7 @@ import {
   ProposalConflictError,
   ProposalExpiredError,
   ProposalForbiddenError,
+  ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from '../services/errors';
 import type { RouteDependencies } from '../types';
@@ -256,6 +257,27 @@ describe('investigation proposals routes', () => {
     );
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 410 }));
+  });
+
+  it('should map an action input the action can never accept to 400', async () => {
+    const revise = jest
+      .fn()
+      .mockRejectedValue(new ProposalInvalidActionInputError('missing required field: ruleId'));
+    const { posts, byPath } = registerAndCollect({ revise });
+    const response = httpServerMock.createResponseFactory();
+
+    await byPath(posts, '/revisions').handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        params: { proposalId: 'proposal-1' },
+        body: { actionInput: { threshold: 5 } },
+      }),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'missing required field: ruleId' },
+    });
   });
 
   it('should map revising a missing proposal to 404', async () => {

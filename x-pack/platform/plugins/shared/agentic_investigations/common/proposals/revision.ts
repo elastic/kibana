@@ -11,6 +11,7 @@ import {
   MAX_COMMENT_LENGTH,
   proposalConfidenceSchema,
   proposalImpactSchema,
+  proposalStatusSchema,
 } from './proposal';
 
 /**
@@ -44,6 +45,6 @@ export type ReviseProposalRequest = z.infer<typeof reviseProposalRequestSchema>;
 export const reviseProposalResponseSchema = z.object({
   proposalId: z.string(),
   revision: z.number().int().min(1),
-  status: z.string(),
+  status: proposalStatusSchema,
 });
 export type ReviseProposalResponse = z.infer<typeof reviseProposalResponseSchema>;
