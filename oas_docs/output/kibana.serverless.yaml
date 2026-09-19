@@ -92064,7 +92064,7 @@ components:
       required:
         - name
     Kibana_HTTP_APIs_alerting_rule_no_data:
-      description: What the rule does when it finds no data for a group. Required when `kind` is `alert`; defaults to `ignore` when omitted. Not allowed when `kind` is `signal`.
+      description: What the rule does when it finds no data for a group. Required when `kind` is `alert`, and not allowed when `kind` is `signal`.
       discriminator:
         mapping:
           alert: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
@@ -92151,7 +92151,7 @@ components:
       required:
         - base
     Kibana_HTTP_APIs_alerting_rule_recovery:
-      description: How an alert recovers. Required when `kind` is `alert`; defaults to `no_breach` when omitted. Not allowed when `kind` is `signal`.
+      description: How an alert recovers. Required when `kind` is `alert`, and not allowed when `kind` is `signal`.
       discriminator:
         mapping:
           condition: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery_condition'
