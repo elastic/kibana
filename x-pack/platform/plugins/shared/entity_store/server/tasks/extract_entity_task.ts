@@ -16,26 +16,52 @@ import type {
   RunResult,
 } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
-import { TasksConfig } from './config';
+import { TasksConfig, type EntityStoreTaskConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
-import type { EntityType } from '../../common/domain/definitions/entity_schema';
+import type { EntityType, ExtractionMode } from '../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { isDualProcessEnabled } from '../infra/feature_flags';
-import { resolveExtractionMode } from '../../common/domain/definitions/registry';
+import {
+  hasPriorityExtractionGate,
+  resolveExtractionMode,
+} from '../../common/domain/definitions/registry';
+import { ENGINE_STATUS } from '../domain/constants';
+import { EngineDescriptorTypeName, EngineDescriptorClient } from '../domain/saved_objects';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
-function getTaskType(entityType: EntityType): string {
-  const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
-  return `${config.type}:${entityType}`;
+/** The priority and single processes share one task; non-priority has its own so the two can run
+ * on independent schedules and be started, stopped and monitored separately. */
+const TASK_CONFIG_BY_MODE = {
+  single: TasksConfig[EntityStoreTaskType.enum.extractEntity],
+  priority: TasksConfig[EntityStoreTaskType.enum.extractEntity],
+  nonPriority: TasksConfig[EntityStoreTaskType.enum.extractEntityNonPriority],
+} as const satisfies Record<ExtractionMode, EntityStoreTaskConfig>;
+
+export function getExtractEntityTaskConfig(
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
+): EntityStoreTaskConfig {
+  return TASK_CONFIG_BY_MODE[extractionMode];
 }
 
-export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
-  return `${getTaskType(entityType)}:${namespace}`;
+function getTaskType(
+  entityType: EntityType,
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
+): string {
+  return `${getExtractEntityTaskConfig(extractionMode).type}:${entityType}`;
+}
+
+export function getExtractEntityTaskId(
+  entityType: EntityType,
+  namespace: string,
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
+): string {
+  return `${getTaskType(entityType, extractionMode)}:${namespace}`;
 }
 
 export const getNewSchedule = (
@@ -52,6 +78,64 @@ export const getNewSchedule = (
   }
 };
 
+/**
+ * Ensures the non-priority task exists and that nonPriorityStatus is initialised for engines
+ * that predate model version 10 (where the field was introduced). Called on every shared-task
+ * tick; ensureScheduled is idempotent so repeated calls are cheap no-ops once the task exists.
+ * The SO update only fires when nonPriorityStatus is null (first run after upgrade).
+ */
+async function bootstrapNonPriorityTask({
+  core,
+  fakeRequest,
+  entityType,
+  namespace,
+  dualProcessEnabled,
+  logger,
+}: {
+  core: types.EntityStoreCoreSetup;
+  fakeRequest: KibanaRequest;
+  entityType: EntityType;
+  namespace: string;
+  dualProcessEnabled: boolean;
+  logger: Logger;
+}): Promise<void> {
+  try {
+    const [coreStart, pluginsStart] = await core.getStartServices();
+
+    await pluginsStart.taskManager.ensureScheduled(
+      {
+        id: getExtractEntityTaskId(entityType, namespace, EXTRACTION_MODE.nonPriority),
+        taskType: `${getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).type}:${entityType}`,
+        schedule: { interval: getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority).interval! },
+        state: { namespace },
+        params: {},
+      },
+      { request: fakeRequest }
+    );
+
+    const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
+    const engineDescriptorClient = new EngineDescriptorClient(
+      soClient as unknown as SavedObjectsClientContract,
+      namespace,
+      logger,
+      true
+    );
+    const descriptor = await engineDescriptorClient.findOrThrow(entityType);
+
+    if (descriptor.nonPriorityStatus === null || descriptor.nonPriorityStatus === undefined) {
+      await engineDescriptorClient.update(entityType, {
+        nonPriorityStatus: dualProcessEnabled ? ENGINE_STATUS.STARTED : ENGINE_STATUS.STOPPED,
+      });
+    }
+  } catch (err) {
+    logger.warn(
+      `Non-priority task bootstrap failed for ${entityType} in ${namespace}: ${
+        (err as Error).message
+      }`
+    );
+  }
+}
+
 async function runTask({
   taskInstance,
   fakeRequest,
@@ -60,11 +144,16 @@ async function runTask({
   logger,
   core,
   isServerless,
+  extractionMode: registeredExtractionMode,
 }: RunContext & {
   entityType: EntityType;
   logger: Logger;
   core: types.EntityStoreCoreSetup;
   isServerless: boolean;
+  /** The mode this task is registered for. The shared task registers as `single` and resolves
+   * `single` vs `priority` from the flag per run; the non-priority task registers as
+   * `nonPriority`, which the flag never resolves to. */
+  extractionMode: ExtractionMode;
 }): Promise<RunResult> {
   logger.info(`Running extract entity task`);
 
@@ -74,7 +163,18 @@ async function runTask({
 
   const [coreStart] = await core.getStartServices();
   const dualProcessEnabled = await isDualProcessEnabled(coreStart.featureFlags);
-  const extractionMode = resolveExtractionMode(dualProcessEnabled, entityType);
+
+  // The task definitions are registered unconditionally, so the flag is read per run: it can be
+  // flipped while a task is already scheduled. Non-priority extraction only exists in dual-process
+  // mode, so with the flag off this run does nothing rather than falling back to another mode.
+  if (registeredExtractionMode === EXTRACTION_MODE.nonPriority && !dualProcessEnabled) {
+    return { state: currentState };
+  }
+
+  const extractionMode =
+    registeredExtractionMode === EXTRACTION_MODE.nonPriority
+      ? registeredExtractionMode
+      : resolveExtractionMode(dualProcessEnabled, entityType);
 
   if (
     await shouldDeleteOrphanedEntityStoreTask({
@@ -96,6 +196,20 @@ async function runTask({
         ...currentState,
       },
     };
+  }
+
+  if (
+    hasPriorityExtractionGate(entityType) &&
+    registeredExtractionMode !== EXTRACTION_MODE.nonPriority
+  ) {
+    await bootstrapNonPriorityTask({
+      core,
+      fakeRequest,
+      entityType,
+      namespace,
+      dualProcessEnabled,
+      logger,
+    });
   }
 
   let remote = false;
@@ -194,50 +308,83 @@ export function registerExtractEntityTasks({
   isServerless: boolean;
 }): void {
   try {
-    const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
     entityTypes.forEach((type) => {
-      const taskType = getTaskType(type);
-      taskManager.registerTaskDefinitions({
-        [taskType]: {
-          title: config.title,
-          timeout: config.timeout,
-          createTaskRunner: ({
-            taskInstance,
-            signal,
-            fakeRequest,
-            executionUuid,
-            setCustomTaskRunEventFields,
-          }) => ({
-            run: () =>
-              wrapTaskRun({
-                spanName: 'entityStore.task.extract_entity.run',
-                namespace: taskInstance.state.namespace,
-                attributes: {
-                  'entity_store.task.id': taskInstance.id,
-                  'entity_store.task.type': taskType,
-                  'entity_store.entity.type': type,
-                },
-                run: () =>
-                  runTask({
-                    taskInstance,
-                    signal,
-                    executionUuid,
-                    setCustomTaskRunEventFields,
-                    logger: logger.get(taskInstance.id),
-                    core,
-                    entityType: type,
-                    fakeRequest,
-                    isServerless,
-                  }),
-              }),
-          }),
-        },
-      });
+      // Single and priority share this task, so registering it as 'single' covers both.
+      registerOne({ taskManager, logger, core, isServerless, type });
+
+      // Unconditional: setup runs before the flag is readable, and the flag gates execution.
+      if (hasPriorityExtractionGate(type)) {
+        registerOne({
+          taskManager,
+          logger,
+          core,
+          isServerless,
+          type,
+          extractionMode: EXTRACTION_MODE.nonPriority,
+        });
+      }
     });
   } catch (e) {
     logger.error(`Error registering extract entity tasks, received ${e.message}`);
     throw e;
   }
+}
+
+function registerOne({
+  taskManager,
+  logger,
+  core,
+  isServerless,
+  type,
+  extractionMode = EXTRACTION_MODE.single,
+}: {
+  core: types.EntityStoreCoreSetup;
+  taskManager: TaskManagerSetupContract;
+  logger: Logger;
+  isServerless: boolean;
+  type: EntityType;
+  extractionMode?: ExtractionMode;
+}): void {
+  const config = getExtractEntityTaskConfig(extractionMode);
+  const taskType = getTaskType(type, extractionMode);
+
+  taskManager.registerTaskDefinitions({
+    [taskType]: {
+      title: config.title,
+      timeout: config.timeout,
+      createTaskRunner: ({
+        taskInstance,
+        signal,
+        fakeRequest,
+        executionUuid,
+        setCustomTaskRunEventFields,
+      }) => ({
+        run: () =>
+          wrapTaskRun({
+            spanName: 'entityStore.task.extract_entity.run',
+            namespace: taskInstance.state.namespace,
+            attributes: {
+              'entity_store.task.id': taskInstance.id,
+              'entity_store.task.type': taskType,
+              'entity_store.entity.type': type,
+            },
+            run: () =>
+              runTask({
+                taskInstance,
+                signal,
+                executionUuid,
+                setCustomTaskRunEventFields,
+                logger: logger.get(taskInstance.id),
+                core,
+                entityType: type,
+                fakeRequest,
+                isServerless,
+                extractionMode,
+              }),
+          }),
+      }),
+    },
+  });
 }
 
 export async function scheduleExtractEntityTask({
@@ -247,6 +394,7 @@ export async function scheduleExtractEntityTask({
   namespace,
   frequency,
   request,
+  extractionMode = EXTRACTION_MODE.single,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -254,11 +402,12 @@ export async function scheduleExtractEntityTask({
   frequency: string;
   namespace: string;
   request: KibanaRequest;
+  extractionMode?: ExtractionMode;
 }): Promise<void> {
   try {
-    const taskType = getTaskType(type);
-    const taskId = getExtractEntityTaskId(type, namespace);
-    const interval = frequency ?? TasksConfig[EntityStoreTaskType.enum.extractEntity].interval;
+    const taskType = getTaskType(type, extractionMode);
+    const taskId = getExtractEntityTaskId(type, namespace, extractionMode);
+    const interval = frequency ?? getExtractEntityTaskConfig(extractionMode).interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,
@@ -280,13 +429,15 @@ export async function stopExtractEntityTask({
   logger,
   type,
   namespace,
+  extractionMode = EXTRACTION_MODE.single,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   type: EntityType;
   namespace: string;
+  extractionMode?: ExtractionMode;
 }): Promise<void> {
-  const taskId = getExtractEntityTaskId(type, namespace);
+  const taskId = getExtractEntityTaskId(type, namespace, extractionMode);
   await taskManager.removeIfExists(taskId);
   logger.debug(`removed extract entity task: ${taskId}`);
 }

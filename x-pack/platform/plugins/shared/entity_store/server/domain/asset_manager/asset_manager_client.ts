@@ -70,8 +70,15 @@ import {
   getLegacySecurityMetadataEntitiesDataStreamName,
 } from './metadata_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
-import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import type {
+  ExtractionMode,
+  ManagedEntityDefinition,
+} from '../../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import {
+  getEntityDefinition,
+  hasPriorityExtractionGate,
+} from '../../../common/domain/definitions/registry';
 import {
   type TelemetryReporter,
   ENTITY_STORE_DELETION_EVENT,
@@ -95,6 +102,7 @@ interface AssetManagerDependencies {
   analytics: TelemetryReporter;
   savedObjectsClient: SavedObjectsClientContract;
   isLegacySecurityAssetsMigrationEnabled?: () => Promise<boolean>;
+  isDualProcessEnabled?: () => Promise<boolean>;
 }
 
 export class AssetManagerClient {
@@ -111,6 +119,7 @@ export class AssetManagerClient {
   private readonly analytics: TelemetryReporter;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly isLegacySecurityAssetsMigrationEnabled: () => Promise<boolean>;
+  private readonly isDualProcessEnabled: () => Promise<boolean>;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -127,6 +136,7 @@ export class AssetManagerClient {
     this.savedObjectsClient = deps.savedObjectsClient;
     this.isLegacySecurityAssetsMigrationEnabled =
       deps.isLegacySecurityAssetsMigrationEnabled ?? (async () => false);
+    this.isDualProcessEnabled = deps.isDualProcessEnabled ?? (async () => false);
   }
 
   public async init(
@@ -213,7 +223,13 @@ export class AssetManagerClient {
     }
   }
 
+  /** True when this type runs two processes: the flag is on and it has a priority variant. */
+  private async isDualProcessType(type: EntityType): Promise<boolean> {
+    return hasPriorityExtractionGate(type) && (await this.isDualProcessEnabled());
+  }
+
   public async start(request: KibanaRequest, type: EntityType) {
+    const dualProcess = await this.isDualProcessType(type);
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
@@ -229,22 +245,68 @@ export class AssetManagerClient {
         namespace: this.namespace,
         request,
       });
+
+      if (hasPriorityExtractionGate(type)) {
+        const { frequency: nonPriorityFrequency } = await this.getLogExtractionConfig(
+          type,
+          EXTRACTION_MODE.nonPriority
+        );
+        await scheduleExtractEntityTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          type,
+          frequency: nonPriorityFrequency,
+          namespace: this.namespace,
+          request,
+          extractionMode: EXTRACTION_MODE.nonPriority,
+        });
+        await this.engineDescriptorClient.update(type, {
+          nonPriorityStatus: dualProcess ? ENGINE_STATUS.STARTED : ENGINE_STATUS.STOPPED,
+          nonPriorityError: null,
+        });
+      }
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
+      if (hasPriorityExtractionGate(type)) {
+        // Starting is all or nothing: leaving one process scheduled without the other would
+        // silently extract half the logs. Removal is idempotent, so this is safe whichever step
+        // failed.
+        await this.removeExtractionTasks(type);
+      }
+      await this.engineDescriptorClient.update(type, {
+        status: ENGINE_STATUS.ERROR,
+        ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : {}),
+      });
       throw error;
     }
   }
 
+  /**
+   * Removes both extraction tasks. Runs regardless of the flag: a task scheduled while it was on
+   * must not survive a stop issued after it was turned off. `priority` and `single` resolve to the
+   * same task id, so covering `priority` also covers the single process.
+   */
+  private async removeExtractionTasks(type: EntityType) {
+    await Promise.all(
+      ([EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority] as const).map((extractionMode) =>
+        stopExtractEntityTask({
+          taskManager: this.taskManager,
+          logger: this.logger,
+          type,
+          namespace: this.namespace,
+          extractionMode,
+        })
+      )
+    );
+  }
+
   public async stop(type: EntityType) {
     try {
-      await stopExtractEntityTask({
-        taskManager: this.taskManager,
-        logger: this.logger,
-        type,
-        namespace: this.namespace,
+      await this.removeExtractionTasks(type);
+      await this.engineDescriptorClient.update(type, {
+        status: ENGINE_STATUS.STOPPED,
+        ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.STOPPED } : {}),
       });
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STOPPED });
     } catch (error) {
       this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
@@ -387,12 +449,15 @@ export class AssetManagerClient {
   }
 
   /** Log extraction config in effect for one entity type. */
-  public async getLogExtractionConfig(type: EntityType): Promise<LogExtractionConfig> {
+  public async getLogExtractionConfig(
+    type: EntityType,
+    extractionMode: ExtractionMode = EXTRACTION_MODE.single
+  ): Promise<LogExtractionConfig> {
     const [globalOverrides, engine] = await Promise.all([
       this.globalStateClient.findLogExtractionOverrides(),
       this.engineDescriptorClient.findOrThrow(type),
     ]);
-    return getMergedConfig(type, globalOverrides, engine.logExtractionConfig);
+    return getMergedConfig(type, globalOverrides, engine.logExtractionConfig, extractionMode);
   }
 
   private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
@@ -535,14 +600,14 @@ export class AssetManagerClient {
       indexComponents,
       componentTemplateComponents,
       ilmPolicyComponents,
-      taskComponent,
+      taskComponents,
     ] = await Promise.all([
       this.getEntityDefinitionComponent(definition),
       this.getIndexTemplateComponents(),
       this.getIndexComponents(),
       this.getComponentTemplateComponents(definition),
       this.getIlmPolicyComponents(),
-      this.getExtractEntityTaskComponent(type),
+      this.getExtractEntityTaskComponents(type),
     ]);
 
     return [
@@ -551,7 +616,7 @@ export class AssetManagerClient {
       ...indexComponents,
       ...componentTemplateComponents,
       ...ilmPolicyComponents,
-      taskComponent,
+      ...taskComponents,
     ];
   }
 
@@ -605,8 +670,24 @@ export class AssetManagerClient {
     );
   }
 
-  private async getExtractEntityTaskComponent(type: EntityType): Promise<EngineComponentStatus> {
-    const taskId = getExtractEntityTaskId(type, this.namespace);
+  /**
+   * One component per extraction task. Dual-process types report the non-priority task in addition
+   * to the shared one, so each process exposes its own runs and last error. The component id is the
+   * task id, which already differs between the two.
+   */
+  private async getExtractEntityTaskComponents(type: EntityType): Promise<EngineComponentStatus[]> {
+    const modes: ExtractionMode[] = (await this.isDualProcessType(type))
+      ? [EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority]
+      : [EXTRACTION_MODE.single];
+
+    return Promise.all(modes.map((extractionMode) => this.getTaskComponent(type, extractionMode)));
+  }
+
+  private async getTaskComponent(
+    type: EntityType,
+    extractionMode: ExtractionMode
+  ): Promise<EngineComponentStatus> {
+    const taskId = getExtractEntityTaskId(type, this.namespace, extractionMode);
     try {
       const task = await this.taskManager.get(taskId);
       return {
