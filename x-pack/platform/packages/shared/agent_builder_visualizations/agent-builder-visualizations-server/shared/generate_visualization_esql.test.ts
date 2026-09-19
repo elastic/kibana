@@ -81,6 +81,7 @@ describe('generateVisualizationEsql', () => {
         esClient: asCurrentUser,
         additionalInstructions: 'esql-instructions',
         timeRange: { from: 'now-7d', to: 'now' },
+        execute: 'schema',
       })
     );
   });
