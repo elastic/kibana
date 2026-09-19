@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BuilderTypeDefinition,
-  BuilderTypeManifest,
-  DerivedRuleFields,
-} from '@kbn/alerting-v2-rule-builders';
+import type { BuilderTypeDefinition, BuilderTypeManifest } from '@kbn/alerting-v2-rule-builders';
 import { DETECTION_RULE_FRAGMENT_SUB_FIELD_MAPPINGS } from './detection_rule_common_fields';
 import { enrichDetectionRuleEvent } from './enrich_detection_rule_event';
 import {
@@ -74,52 +70,47 @@ export const validateThresholdFields = (fields: ThresholdBuilderFields): string[
 };
 
 // ---------------------------------------------------------------------------
-// deriveRuleFields
-//
-// Maps threshold.field to grouping.fields so the framework's group hashing
-// keys on the right fields.  Runs on every write (create, update, upsert) on
-// the parsed fields; the values persist on the rule and stay stable across runs.
-//
-// When threshold.field is empty (no grouping), grouping.fields is set to []
-// which means no grouping — the STATS command has no BY clause.
-//
-// Ref: rule-execution-logic.md "Derived rule fields at write time"
-// ---------------------------------------------------------------------------
-export const deriveThresholdRuleFields = (fields: ThresholdBuilderFields): DerivedRuleFields => ({
-  grouping: { fields: fields.threshold.field },
-});
-
-// ---------------------------------------------------------------------------
 // securityDetectionThreshold — the full BuilderTypeDefinition
 //
 // Properties:
 //   type:         'security.detection.threshold'
 //   name:         human-readable display name
-//   kind:         'signal' — detection events are signal-kind
+//   kind:         'alert' — detection events are alert-kind (persistent-mode
+//                 workaround; see alert-modes.md)
 //   ownership:    managed by security/detection
 //   compilation:  'execution_time' — query compiled on every run, never stored
 //   manifest:     version 1 above
 //   validateFields: rejects overlapping cardinality/grouping field
-//   deriveRuleFields: maps threshold.field → grouping.fields at write time
 //   generateQuery:  compiles the ES|QL breach query
 //   enrichRuleEvent: stamps severity, risk_score, and signature_id
+//
+// grouping is intentionally absent.  The STATS ... BY and the IS NOT NULL
+// guards come from threshold.field directly, inside generateThresholdQuery.
+// The framework's grouping field sits on top of those output rows and decides
+// episode lifetime, not bucketing.  With deriveRuleFields dropped, the
+// ungrouped fallback hash gives each output row its own episode, so one
+// qualifying bucket produces one alert per run.
+//
+// Removing deriveRuleFields also removes a latent failure: an empty
+// threshold.field would have produced grouping: { fields: [] }, which the
+// saved-object schema rejects because it requires one to ten entries.
 //
 // Ref: rule-type-registration.md "What a registration declares"
 //      rule-execution-logic.md "security.detection.threshold"
 //      rule-event-generation-logic.md "What the POC types stamp"
+//      alert-modes.md "Configuring a persistent mode with what exists today"
 // ---------------------------------------------------------------------------
 export const securityDetectionThreshold: BuilderTypeDefinition<ThresholdBuilderFields> = {
   type: 'security.detection.threshold',
   name: 'Threshold',
   description:
     'Detects events that meet a count or cardinality threshold within a grouping of field values.',
-  kind: 'signal',
+  kind: 'alert',
   ownership: { solution: 'security', domain: 'detection' },
   compilation: 'execution_time',
   builderFieldsSchema: thresholdBuilderFieldsSchema,
   validateFields: validateThresholdFields,
   manifest: securityDetectionThresholdManifest,
-  deriveRuleFields: deriveThresholdRuleFields,
   generateQuery: generateThresholdQuery,
   enrichRuleEvent: enrichDetectionRuleEvent,
 };

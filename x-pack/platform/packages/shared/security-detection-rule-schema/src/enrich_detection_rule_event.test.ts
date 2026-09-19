@@ -17,7 +17,7 @@ const BASE_FIELDS: DetectionRuleCommonFields = {
 const BASE_RULE = {
   id: 'rule-uuid-1',
   signature_id: 'sig-abc-123',
-  kind: 'signal' as const,
+  kind: 'alert' as const,
 };
 
 describe('enrichDetectionRuleEvent', () => {

@@ -160,14 +160,22 @@ const generateCustomQuery = ({
 // Exported so the security_detections plugin can register this type with a
 // single import in Phase 8.
 //
+// kind is pinned to 'alert' so that every detection produces an episode
+// visible on the Alerting v2 Episodes surface.  The companion lifecycle
+// configuration (recovery_strategy: none, no_data_strategy: none,
+// state_transition: { pending_count: 0 }) is sent by the converter in the
+// security_detections plugin, not here.  Together the combination is the
+// persistent-mode workaround described in alert-modes.md.
+//
 // Ref: rule-type-registration.md "What a registration declares"
+//      alert-modes.md "Configuring a persistent mode with what exists today"
 // ---------------------------------------------------------------------------
 
 export const securityDetectionQuery: BuilderTypeDefinition<CustomQueryBuilderFields> = {
   type: 'security.detection.query',
   name: 'Custom Query',
   description: 'A detection rule that runs a KQL or Lucene query against specified data sources.',
-  kind: 'signal',
+  kind: 'alert',
   ownership: { solution: 'security', domain: 'detection' },
   compilation: 'execution_time',
   builderFieldsSchema: customQueryBuilderFieldsSchema,

@@ -114,7 +114,7 @@ const THRESHOLD_CREATE_INPUT: DetectionRuleCreateInput = {
  * This simulates what the framework returns after creating the rule.
  *
  * Only the fields the converter reads are required here; all others use
- * sentinel values (e.g. kind: 'signal', no query for execution-time rules).
+ * sentinel values (e.g. kind: 'alert', no query for execution-time rules).
  */
 function buildFrameworkResponse(
   input: DetectionRuleCreateInput,
@@ -147,7 +147,8 @@ function buildFrameworkResponse(
 
   return {
     id: '0d3f4c1a-7b2e-4b8f-9c6d-1e5a8f0b2c3d',
-    kind: 'signal',
+    kind: 'alert',
+    state_transition: { pending_count: 0 },
     time_field: '@timestamp',
     schedule: {
       every: input.schedule.interval,
@@ -256,11 +257,11 @@ describe('toFrameworkCreate + toPublicResponse — Custom Query round-trip', () 
     expect((frameworkData as { query?: unknown }).query).toBeUndefined();
   });
 
-  it('pins kind: "signal" (read from ALIAS_TO_KIND, not hardcoded)', () => {
-    // ALIAS_TO_KIND['query'] === 'signal'; the converter reads the map entry
+  it('pins kind: "alert" (read from ALIAS_TO_KIND, not hardcoded)', () => {
+    // ALIAS_TO_KIND['query'] === 'alert'; the converter reads the map entry
     // rather than hardcoding the string so future alias entries with a
     // different pin require no change to the converter.
-    expect(frameworkData.kind).toBe('signal');
+    expect(frameworkData.kind).toBe('alert');
   });
 
   it('sets source to internal with version 1', () => {
@@ -660,7 +661,7 @@ describe('toPublicResponse — unknown builder type', () => {
 });
 
 // ---------------------------------------------------------------------------
-// toFrameworkCreate: does not set internal fields
+// toFrameworkCreate: uniform detection-rule fields
 // ---------------------------------------------------------------------------
 
 describe('toFrameworkCreate — uniform detection-rule fields', () => {
@@ -676,8 +677,10 @@ describe('toFrameworkCreate — uniform detection-rule fields', () => {
     expect(frameworkData.no_data_strategy).toBe('none');
   });
 
-  it('does not set state_transition', () => {
-    expect('state_transition' in frameworkData).toBe(false);
+  it('sets state_transition: { pending_count: 0 } for immediate active transition', () => {
+    // pending_count: 0 means zero consecutive breaches are required before the
+    // alert activates, so the first match immediately produces an active alert.
+    expect(frameworkData.state_transition).toEqual({ pending_count: 0 });
   });
 
   it('does not set grouping', () => {
@@ -690,5 +693,32 @@ describe('toFrameworkCreate — uniform detection-rule fields', () => {
 
   it('does not set a query (execution-time compilation)', () => {
     expect('query' in frameworkData).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// toFrameworkReplace: uniform detection-rule lifecycle invariants
+// ---------------------------------------------------------------------------
+
+describe('toFrameworkReplace — uniform detection-rule lifecycle invariants', () => {
+  const storedSource: RuleSource = { type: 'internal', version: 1 };
+  const frameworkData = toFrameworkReplace(QUERY_CREATE_INPUT, storedSource) as Record<
+    string,
+    unknown
+  >;
+
+  it('restates recovery_strategy: "none" on every full write', () => {
+    // Must be explicit rather than surviving through the merge's "omitted = keep
+    // stored" rule, so a future change in merge semantics cannot silently break
+    // the invariant.
+    expect(frameworkData.recovery_strategy).toBe('none');
+  });
+
+  it('restates no_data_strategy: "none" on every full write', () => {
+    expect(frameworkData.no_data_strategy).toBe('none');
+  });
+
+  it('restates state_transition: { pending_count: 0 } on every full write', () => {
+    expect(frameworkData.state_transition).toEqual({ pending_count: 0 });
   });
 });
