@@ -31,13 +31,13 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
 }) => {
   const [draft, setDraft] = useState(() => toDisplay(current));
   const draftRef = useRef(toDisplay(current));
-  const lastPersistedRef = useRef(current);
+  const lastPersistedRef = useRef(toDecimal(toDisplay(current)));
   const onChangeRef = useRef(onChange);
 
   onChangeRef.current = onChange;
 
   useEffect(() => {
-    lastPersistedRef.current = current;
+    lastPersistedRef.current = toDecimal(toDisplay(current));
     const next = toDisplay(current);
     draftRef.current = next;
     setDraft(next);
