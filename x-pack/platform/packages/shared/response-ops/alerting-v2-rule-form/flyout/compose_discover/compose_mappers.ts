@@ -60,7 +60,8 @@ const mapStateTransition = (formValues: FormValues) => {
 
 export const composeFormToCreateRequest = (
   formValues: FormValues,
-  builderType?: string
+  builderType?: string,
+  builderFields?: Record<string, unknown>
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
@@ -75,10 +76,11 @@ export const composeFormToCreateRequest = (
       owner: formValues.metadata.owner,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
       ...(builderType ? { builder_type: builderType } : {}),
+      ...(builderFields ? { builder_fields: builderFields } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    query: ruleQueryToApiQuery(formValues.query),
+    ...(builderFields ? {} : { query: ruleQueryToApiQuery(formValues.query) }),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
@@ -91,9 +93,10 @@ export const composeFormToCreateRequest = (
 
 export const composeFormToUpdateRequest = (
   formValues: FormValues,
-  builderType?: string
+  builderType?: string,
+  builderFields?: Record<string, unknown>
 ): UpdateRuleData => {
-  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
+  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType, builderFields);
   const {
     grouping,
     state_transition,
@@ -108,6 +111,14 @@ export const composeFormToUpdateRequest = (
     metadata: {
       ...metadata,
       builder_type: metadata.builder_type ?? null,
+      // Only clear builder_fields when leaving builder mode. When a builder
+      // has no toFields yet (no builder_fields support), omit the key so the
+      // server preserves whatever is already stored.
+      ...(builderFields != null
+        ? { builder_fields: builderFields }
+        : !builderType
+        ? { builder_fields: null }
+        : {}),
       // Empty tags must be sent as an explicit `null` to clear them; omitting
       // the key would preserve the existing tags on a partial update.
       tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
@@ -154,7 +165,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
+    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy, rule.kind),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
     noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),

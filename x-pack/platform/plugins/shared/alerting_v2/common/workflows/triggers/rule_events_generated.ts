@@ -130,17 +130,17 @@ export const ruleEventsGeneratedTriggerCommonDefinition: CommonTriggerDefinition
       i18n.translate(
         'xpack.alertingV2.workflowTriggers.ruleEventsGenerated.documentation.example',
         {
-          defaultMessage: `## Run only for signal rules tagged "security"
+          defaultMessage: `## Run only for detection rules tagged "security"
 \`\`\`yaml
 triggers:
   - type: {triggerId}
     on:
-      condition: 'event.rule.kind: "signal" and event.rule.tags: "security"'
+      condition: 'event.rule.kind: "alert" and event.rule.tags: "security"'
 \`\`\``,
           values: { triggerId: RuleEventsGeneratedTriggerId },
         }
       ),
     ],
   },
-  snippets: { condition: 'event.rule.kind: "signal"' },
+  snippets: { condition: 'event.rule.kind: "alert"' },
 };

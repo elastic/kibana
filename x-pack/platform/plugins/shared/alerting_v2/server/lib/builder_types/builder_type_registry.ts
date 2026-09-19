@@ -1,0 +1,186 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { injectable } from 'inversify';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
+import { BuilderQueryGenerationError } from '@kbn/alerting-v2-rule-builders';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import { assertValidDefinition } from './assert_valid_definition';
+import { globalFoldedVersions } from './folded_versions';
+import type { FoldedVersionsRecord } from './folded_versions';
+import type {
+  GeneratedQuery,
+  OpaqueBuilderFields,
+  QueryGenerationInput,
+  RegisteredBuilderType,
+} from './types';
+
+@injectable()
+export class BuilderTypeRegistry {
+  private readonly types = new Map<string, RegisteredBuilderType>();
+
+  /**
+   * Record of (type, version) pairs that have been folded into alerting_v2's
+   * model versions. Defaults to the module-level singleton populated by
+   * fromBuilderManifest() calls in rule_model_versions.ts (step 2.3).
+   * Override via withFoldedVersions() in tests to inject a fixture.
+   */
+  private foldedVersions: FoldedVersionsRecord = globalFoldedVersions;
+
+  /**
+   * Injects a custom FoldedVersionsRecord for use in tests.
+   * Returns `this` for chaining: `new BuilderTypeRegistry().withFoldedVersions(fixture)`.
+   */
+  public withFoldedVersions(record: FoldedVersionsRecord): this {
+    this.foldedVersions = record;
+    return this;
+  }
+
+  public register(definition: RegisteredBuilderType): void {
+    // Check 1a: setup-phase-only — enforced at the bind_contract level by
+    //   restricting registerBuilderType to the setup contract only.
+    // Check 1b: no duplicate id — fail fast before the more expensive checks.
+    if (this.types.has(definition.type)) {
+      throw new Error(`Builder type "${definition.type}" is already registered`);
+    }
+
+    // Checks 2–8 (id format, bounded schema, ignore_above, kind pin,
+    // manifest consistency, managed-type completeness, mode consistency).
+    assertValidDefinition(definition, this.foldedVersions);
+
+    this.types.set(definition.type, Object.freeze({ ...definition }));
+  }
+
+  public get(type: string): RegisteredBuilderType | undefined {
+    return this.types.get(type);
+  }
+
+  public has(type: string): boolean {
+    return this.types.has(type);
+  }
+
+  public getAll(): RegisteredBuilderType[] {
+    return [...this.types.values()];
+  }
+
+  /**
+   * Compiles the builder fields into a query at write time. Synchronous: if the
+   * registered `generateQuery` returns a Promise, this method throws immediately,
+   * because async generation is only supported at execution time (step 6.1).
+   */
+  public generate(
+    builderType: string,
+    builderFields: OpaqueBuilderFields,
+    rule: QueryGenerationInput<OpaqueBuilderFields>['rule']
+  ): GeneratedQuery {
+    const definition = this.types.get(builderType);
+    if (!definition) {
+      throw Boom.badRequest(
+        `Unknown rule builder type "${builderType}". Registered types: ${
+          this.describeRegistered() || 'none'
+        }.`,
+        {
+          code: ALERTING_ERROR_CODES.UNKNOWN_BUILDER_TYPE,
+          details: { builder_type: builderType, registered: [...this.types.keys()] },
+        }
+      );
+    }
+
+    const fields = this.parseFields(definition, builderFields);
+
+    let result: GeneratedQuery | Promise<GeneratedQuery>;
+    try {
+      result = definition.generateQuery({ fields, rule });
+    } catch (error) {
+      if (error instanceof BuilderQueryGenerationError) {
+        throw Boom.badRequest(
+          `Rule builder "${builderType}" could not generate a query: ${error.message}`,
+          {
+            code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
+            details: {
+              builder_type: builderType,
+              ...(error.path === undefined ? {} : { path: error.path }),
+            },
+          }
+        );
+      }
+      throw error;
+    }
+
+    if (result instanceof Promise) {
+      throw new Error(
+        `Rule builder "${builderType}" generateQuery returned a Promise at write time. ` +
+          `Async generation is only supported at execution time (compilation: 'execution_time').`
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Runs `builderFields` through the registered schema. Limits are enforced
+   * once, at registration, where `assertBoundedSchema` proves every registrable
+   * schema is fully bounded.
+   */
+  private parseFields(
+    definition: RegisteredBuilderType,
+    builderFields: OpaqueBuilderFields
+  ): OpaqueBuilderFields {
+    const invalid = (message: string, errors?: unknown): Boom.Boom =>
+      Boom.badRequest(message, {
+        code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
+        details: {
+          builder_type: definition.type,
+          ...(errors === undefined ? {} : { errors }),
+        },
+      });
+
+    let result;
+    try {
+      result = definition.builderFieldsSchema.safeParse(builderFields);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw invalid(
+        `builder_fields for builder type "${definition.type}" failed validation: ${message}`
+      );
+    }
+
+    if (!result.success) {
+      throw invalid(
+        `builder_fields for builder type "${definition.type}" are invalid: ${stringifyZodError(
+          result.error
+        )}`,
+        treeifyError(result.error)
+      );
+    }
+
+    // Run the extra validation hook after the schema parse succeeds.
+    // Its errors reject the write exactly like schema errors.
+    // Ref: rule-validation.md "The extra validation hook"
+    if (definition.validateFields) {
+      const hookErrors = definition.validateFields(result.data);
+      if (hookErrors.length > 0) {
+        throw invalid(
+          `builder_fields for builder type "${definition.type}" are invalid: ${hookErrors.join(
+            '; '
+          )}`
+        );
+      }
+    }
+
+    return result.data;
+  }
+
+  private describeRegistered(): string {
+    return [...this.types.keys()].map((type) => `"${type}"`).join(', ');
+  }
+}
+
+/** Injectable token alias — the class itself is the service identifier. */
+export type BuilderTypeRegistryContract = BuilderTypeRegistry;

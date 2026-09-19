@@ -7,7 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
-import type { CreateRuleData, UpdateRuleData, Query, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  Query,
+  RuleOwnership,
+  RuleResponse,
+  RuleSource,
+} from '@kbn/alerting-v2-schemas';
 import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
@@ -23,8 +29,15 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
-import type { BulkOperationError, RotationCandidate } from './types';
+import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
+import type { BuilderTypeRegistry } from '../builder_types';
+import type { CallerIdentity } from './caller_identity';
+import type {
+  BulkOperationError,
+  ResolvedCreateRuleData,
+  ResolvedUpdateRuleData,
+  RotationCandidate,
+} from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -158,6 +171,283 @@ export function assertImmutableUnchanged(
 }
 
 /**
+ * Enforces the omitted-means-keep immutability rule for `metadata.signature_id`
+ * on update (PATCH) and upsert replace (PUT) calls.
+ *
+ * - `undefined` (field omitted) → keep stored value, no error.
+ * - Equal to stored → pass through, no error.
+ * - Different from stored → 409 conflict.
+ *
+ * This is stricter than both v1 (silently ignores mismatches) and v2's own
+ * `kind` PATCH handling (silently preserves). The mismatch is a caller bug
+ * that an error surfaces early.
+ */
+export function assertSignatureIdUnchanged(
+  incomingSignatureId: string | null | undefined,
+  existing: RuleSavedObjectAttributes
+): void {
+  if (incomingSignatureId == null) {
+    // Omitted or null — keep stored value, no error.
+    return;
+  }
+  if (incomingSignatureId !== existing.metadata.signature_id) {
+    throw Boom.conflict('metadata.signature_id cannot be changed after creation.', {
+      code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
+      details: { fields: ['metadata.signature_id'] },
+    });
+  }
+}
+
+/**
+ * Enforces the `metadata.source` immutability rules for update (PATCH) and
+ * upsert replace (PUT) calls.
+ *
+ * - `undefined` (source omitted) → keep stored value, no error.
+ * - `source.type` differs from stored → 409 conflict.
+ * - `source.id` differs from stored (same type, derived variants) → 409 conflict.
+ * - `source.version` differs → allowed; it is the only owner-writable sub-field.
+ *
+ * When there is no stored source (pre-migration rule), the check is skipped and
+ * the caller's value is accepted — the model-version migration in step 4.5
+ * backfills all existing rules with `{ type: 'internal', version: 1 }`.
+ *
+ * Ref: rule-source.md "Who writes the source"
+ */
+export function assertRuleSourceUnchanged(
+  incomingSource: RuleSource | undefined,
+  existing: RuleSavedObjectAttributes
+): void {
+  if (incomingSource == null) {
+    // Source omitted — keep stored value, no error.
+    return;
+  }
+  const stored = existing.metadata.source;
+  if (stored == null) {
+    // Pre-migration rule: no stored source yet. Accept the incoming value.
+    return;
+  }
+
+  const changed: string[] = [];
+
+  if (incomingSource.type !== stored.type) {
+    changed.push('metadata.source.type');
+  } else {
+    // Same type: if both variants carry an id, compare them.
+    const incomingId = 'id' in incomingSource ? incomingSource.id : undefined;
+    const storedId = 'id' in stored ? stored.id : undefined;
+    if (incomingId !== storedId) {
+      changed.push('metadata.source.id');
+    }
+  }
+
+  if (changed.length > 0) {
+    throw Boom.conflict(
+      `metadata.source fields cannot be changed after creation: ${changed.join(', ')}.`,
+      {
+        code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
+        details: { fields: changed },
+      }
+    );
+  }
+}
+
+/**
+ * Derives the `metadata.ownership` value for a new rule from the registry.
+ *
+ * For a rule whose `builderType` is a registered managed type, copies
+ * `{ managed: true, solution, domain }` from the type's declaration.
+ * For everything else — no builder type, or an unmanaged registered type —
+ * returns `{ managed: false }`, with `app` filled from the caller identity
+ * when an in-process caller declared one.
+ *
+ * `app` is frozen at creation (records the originator, not the last writer),
+ * so it is only filled here, never on update.
+ *
+ * Ref: rule-ownership.md "The invariant and how it holds"
+ * Ref: rule-ownership.md "Caller identity"
+ */
+export function deriveOwnership(
+  registry: BuilderTypeRegistry,
+  builderType: string | undefined | null,
+  app?: string
+): RuleOwnership {
+  if (builderType != null) {
+    const definition = registry.get(builderType);
+    if (definition?.ownership != null) {
+      return {
+        managed: true,
+        solution: definition.ownership.solution,
+        domain: definition.ownership.domain,
+      };
+    }
+  }
+  return app !== undefined ? { managed: false, app } : { managed: false };
+}
+
+/**
+ * Shared parameter shape for both the throwing and non-throwing gate helpers.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ * Ref: rule-ownership.md "Path by path"
+ */
+interface ManagedWriteCheckParams {
+  registry: BuilderTypeRegistry;
+  callerIdentity: CallerIdentity | undefined;
+  /**
+   * The stored ownership object from `metadata.ownership`. Pass `undefined`
+   * on create paths where no stored rule exists yet.
+   */
+  storedOwnership: RuleOwnership | undefined;
+  /**
+   * The effective builder type (stored or requested). Used to consult the
+   * current registration for the managed declaration even when the stored
+   * ownership mark is absent or unmanaged.
+   */
+  builderType: string | undefined | null;
+}
+
+/**
+ * Returns the owning `{ solution, domain }` when the caller may NOT write the
+ * rule, or `undefined` when the write is allowed.
+ *
+ * A rule is managed when **either** its stored `metadata.ownership.managed` is
+ * `true` **or** its `builder_type`'s current registration declares `ownership`.
+ * Both halves are checked so the gate stays closed when the owning plugin is
+ * disabled (stored field holds it) and before a become-managed transition's
+ * backfill has run (registration holds it).
+ *
+ * Match is on `solution` alone — the solution is the trust boundary.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ */
+export function getManagedWriteOwner({
+  registry,
+  callerIdentity,
+  storedOwnership,
+  builderType,
+}: ManagedWriteCheckParams): { solution: string; domain: string } | undefined {
+  let owningSolution: string | undefined;
+  let owningDomain: string | undefined;
+
+  if (storedOwnership != null && storedOwnership.managed === true) {
+    // First half: the stored mark says managed.
+    owningSolution = storedOwnership.solution;
+    owningDomain = storedOwnership.domain;
+  } else if (builderType != null) {
+    // Second half: the current registration declares ownership.
+    const registration = registry.get(builderType);
+    if (registration?.ownership != null) {
+      owningSolution = registration.ownership.solution;
+      owningDomain = registration.ownership.domain;
+    }
+  }
+
+  // Not a managed rule — write proceeds.
+  if (owningSolution === undefined) {
+    return undefined;
+  }
+
+  // Managed rule — caller with matching solution may write it.
+  if (callerIdentity?.solution === owningSolution) {
+    return undefined;
+  }
+
+  return { solution: owningSolution, domain: owningDomain! };
+}
+
+/**
+ * Per-rule bulk error for a managed rule the caller is not allowed to write.
+ * Used by the four bulk executors to report refused rules as per-item results
+ * rather than failing the entire request.
+ *
+ * Ref: rule-ownership.md "Path by path"
+ */
+export const managedRuleWriteError = (
+  ruleId: string,
+  solution: string,
+  domain: string,
+  name?: string
+): BulkOperationError => ({
+  id: ruleId,
+  error: {
+    code: ALERTING_ERROR_CODES.RULE_IS_MANAGED,
+    message: `Rule is managed by solution "${solution}" / domain "${domain}" and may not be written by this caller`,
+    ...nameDetails(name),
+  },
+});
+
+/**
+ * Asserts that the calling client may write to a managed rule, or may create
+ * a rule of a managed type. Delegates to {@link getManagedWriteOwner} and
+ * throws `RULE_IS_MANAGED` (400) when that returns an owner.
+ *
+ * For mutating paths that already have the stored rule, pass the stored
+ * ownership and the stored/effective builder type. For create paths (no stored
+ * rule), pass `storedOwnership: undefined` and the requested builder type —
+ * the registration half of the gate applies.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ * Ref: rule-ownership.md "Path by path"
+ */
+export function assertManagedRuleWrite(params: ManagedWriteCheckParams): void {
+  const owner = getManagedWriteOwner(params);
+  if (owner !== undefined) {
+    throw Boom.badRequest(
+      `Rule is managed by solution "${owner.solution}" / domain "${owner.domain}" and may not be written by this caller`,
+      {
+        code: ALERTING_ERROR_CODES.RULE_IS_MANAGED,
+        details: { solution: owner.solution, domain: owner.domain },
+      }
+    );
+  }
+}
+
+/**
+ * Asserts that a write's `kind` is compatible with the kind pin declared by
+ * the builder type's registration.  When the builder type pins a `kind`, any
+ * rule whose kind differs is rejected with RULE_KIND_MISMATCH (400).
+ *
+ * - Passes when `builderType` is absent (no-builder rule — kind unconstrained).
+ * - Passes when the builder type is not in the registry (unregistered; handled
+ *   elsewhere) or its registration carries no `kind` pin.
+ * - Throws when the write's `kind` differs from the pin.
+ *
+ * Call sites:
+ *   - createRule: pass `parsed.kind` and `parsed.metadata?.builder_type`.
+ *   - updateRule: pass `existingAttrs.kind` (kind is immutable) and the
+ *     effective builder type after the update resolves.
+ *   - upsertRule replace branch: pass `parsed.kind` and the effective builder
+ *     type from the PUT body (kind is immutable — assertImmutableUnchanged runs
+ *     first and guarantees it matches the stored kind).
+ *
+ * Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+ * Ref: rule-types.md "Which kind detection rules use"
+ */
+export function assertKindPinMatch(
+  registry: BuilderTypeRegistry,
+  writeKind: string,
+  builderType: string | null | undefined
+): void {
+  if (!builderType) return;
+  const definition = registry.get(builderType);
+  if (!definition || definition.kind === undefined) return;
+  if (writeKind !== definition.kind) {
+    throw Boom.badRequest(
+      `Rule kind '${writeKind}' does not match the kind pin '${definition.kind}' ` +
+        `declared by builder type '${builderType}'`,
+      {
+        code: ALERTING_ERROR_CODES.RULE_KIND_MISMATCH,
+        details: {
+          write_kind: writeKind,
+          required_kind: definition.kind,
+          builder_type: builderType,
+        },
+      }
+    );
+  }
+}
+
+/**
  * Returns just the immutable fields from `attrs`, suitable for spreading at
  * the end of an attribute builder so subsequent code cannot accidentally
  * overwrite them.
@@ -210,13 +500,136 @@ function nullToEmptyArray<T>(
  * or a zero-downtime upgrade — and `find` fails as a whole rather than per
  * document, so one such rule would break the entire rules list.
  */
-const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] =>
+export const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] =>
   query.format === 'composed'
     ? { ...query, breach: { segment: query.breach?.segment ?? '' } }
     : query;
 
-/** Inverse of {@link toStoredQuery}: an empty stored segment reads back as an omitted block. */
-const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
+/**
+ * Recursively removes keys whose value is `undefined`, `null`, or an empty
+ * array from a plain object or array. The result can be compared with `isEqual`
+ * without false positives from the difference between an explicit `undefined`
+ * value and an absent key.
+ *
+ * This is necessary because `buildUpdateRuleAttributes` normalizes on the way
+ * in, and those normalizations produce stored forms that differ from an
+ * entirely absent key in the stored document:
+ *
+ * - `tags: undefined` vs absent key — `isEqual({tags: undefined}, {})` is
+ *   `false` in lodash; keys with `undefined` values are stripped.
+ * - `state_transition: null` (from `applyNullableUpdate(null, undefined)`) vs
+ *   an absent `state_transition` in a rule that was never given one — `null`
+ *   values are stripped so both sides compare as absent.
+ * - `artifacts: []` (from `nullToEmptyArray(null, undefined)`) vs an absent
+ *   `artifacts` in a rule created without artifacts — empty arrays are stripped
+ *   so both sides compare as absent.
+ *
+ * Stripping is applied symmetrically to both sides of the diff, so real
+ * changes still register: a stored `null` is also stripped, meaning
+ * `null → { type: 'foo' }` still differs after normalization, and a non-empty
+ * `[{...}]` is never empty after mapping so it is never stripped.
+ *
+ * `opaqueKeys` names keys whose values are passed through verbatim — no
+ * recursion and no stripping inside them. Use this for fields the design says
+ * must diff as one whole value (e.g. `builder_fields`), where an empty array
+ * inside the container is real content, not an absent-field normalisation.
+ *
+ * Ref: rule-versions.md "How the diff runs"
+ */
+function deepOmitUndefined(value: unknown, opaqueKeys: ReadonlySet<string> = new Set()): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => deepOmitUndefined(item, opaqueKeys));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
+        .map(([k, v]) => [k, opaqueKeys.has(k) ? v : deepOmitUndefined(v, opaqueKeys)])
+    );
+  }
+  return value;
+}
+
+/**
+ * Strips the four fields excluded from the revision diff so that equal values
+ * on those fields never inflate the comparison. The result is a plain object
+ * safe to pass to `isEqual`.
+ *
+ * Exclusion list (per rule-versions.md "What moves it and what does not"):
+ *   - `updatedAt` / `updatedBy`  — stamped on every write
+ *   - `metadata.version`         — incremented on every mutation
+ *   - `metadata.revision`        — the field being computed
+ *
+ * `enabled` and the create stamps (`createdAt`, `createdBy`) are excluded by
+ * construction — update paths always preserve them from storage, so they are
+ * equal before the diff even runs.
+ */
+function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, unknown> {
+  const { updatedAt, updatedBy, metadata, ...rest } = attrs;
+  // `version` and `revision` are excluded; all other metadata fields are kept.
+
+  const { version: _version, revision: _revision, ...restMetadata } = metadata;
+  return { ...rest, metadata: restMetadata };
+}
+
+/**
+ * `builder_fields` is treated as an opaque key by `deepOmitUndefined`: its
+ * value is passed through verbatim, with no internal stripping of `null`,
+ * `undefined`, or empty arrays. The design says the container diffs as one
+ * whole value — "any difference in the container is both correct and cheap"
+ * (rule-versions.md "How the diff runs") — so an empty array inside it
+ * (e.g. `references: []`) is real caller-owned content, not a normalisation
+ * artifact, and must register as a change.
+ */
+const BUILDER_FIELDS_OPAQUE_KEYS: ReadonlySet<string> = new Set(['builder_fields']);
+
+/**
+ * Returns the next `metadata.revision` value for an update or upsert-replace
+ * write. Compares the computed next attributes against the stored attributes,
+ * ignoring the four excluded fields. Bumps the counter by exactly one on the
+ * first non-excluded difference; a write that changes nothing meaningful returns
+ * the current revision unchanged.
+ *
+ * The diff runs at the attribute level (not the request-payload level) so that
+ * v2's PATCH normalization — `null` clears, query rewriting — is already applied
+ * before the comparison. A payload that normalizes to no change produces no bump.
+ *
+ * `builder_fields` is compared as one value because updates replace the
+ * container wholesale. The normalization does not recurse into it, so an
+ * empty array inside the container (e.g. `references: []`) registers as a
+ * change rather than being silently erased.
+ *
+ * Before comparing, both sides are normalized by `deepOmitUndefined`: keys
+ * with `undefined`, `null`, or empty-array values are stripped. This makes
+ * the three PATCH normalizations transparent to the diff:
+ *   - `tags: null`           → `undefined` (absent) — equal to an absent key
+ *   - `state_transition: null` (clear) → stripped — equal to an absent key
+ *   - `artifacts: null`      → `[]` → stripped — equal to an absent key
+ * A write that sends any of these against a rule that never had the field does
+ * not move the revision counter.
+ *
+ * Ref: rule-versions.md "How the diff runs"
+ */
+export function computeNextRevision(
+  nextAttrs: RuleSavedObjectAttributes,
+  storedAttrs: RuleSavedObjectAttributes
+): number {
+  const current = storedAttrs.metadata.revision ?? RULE_REVISION_FALLBACK;
+  const nextNorm = deepOmitUndefined(stripForRevisionDiff(nextAttrs), BUILDER_FIELDS_OPAQUE_KEYS);
+  const storedNorm = deepOmitUndefined(
+    stripForRevisionDiff(storedAttrs),
+    BUILDER_FIELDS_OPAQUE_KEYS
+  );
+  return isEqual(nextNorm, storedNorm) ? current : current + 1;
+}
+
+/**
+ * Inverse of {@link toStoredQuery}: an empty stored segment reads back as an
+ * omitted block. Returns `undefined` when `query` is absent — execution-compiled
+ * rules have no stored query and must not emit one in the response.
+ */
+const toApiQuery = (query: RuleSavedObjectAttributes['query'] | undefined): Query | undefined => {
+  if (query == null) return undefined;
   if (query.format !== 'composed' || query.breach.segment.trim()) {
     return query;
   }
@@ -225,10 +638,15 @@ const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
 };
 
 /**
- * Converts a create-rule API body into saved object attributes.
+ * Converts a create-rule API body into saved object attributes. The body's
+ * query must already be settled by `resolveCreateRuleBuilder`, since a
+ * builder-authored body carries its parameters instead of a query.
+ *
+ * `signatureId` is separated from `data` so the caller can supply the
+ * generated-or-preserved value without mutating the parsed request body.
  */
 export function transformCreateRuleBodyToRuleSoAttributes(
-  data: CreateRuleData,
+  data: ResolvedCreateRuleData,
   serverFields: {
     enabled: boolean;
     createdBy: string | null;
@@ -236,9 +654,26 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     updatedBy: string | null;
     updatedAt: string;
     version: number;
+    /** Resolved signature id — caller-supplied or UUID v4 generated by createRule. */
+    signatureId: string;
+    /**
+     * Resolved source. For create: `data.metadata.source ?? { type: 'internal', version: 1 }`.
+     * For upsert replace: `body.metadata.source ?? storedSource ?? { type: 'internal', version: 1 }`.
+     * Callers own the resolution because the fallback differs between the two paths.
+     *
+     * Ref: rule-source.md "Who writes the source"
+     */
+    source: RuleSource;
+    /**
+     * Server-derived ownership. For create: from `deriveOwnership(registry, builder_type)`.
+     * For upsert replace: always the stored value — ownership is immutable.
+     *
+     * Ref: rule-ownership.md "The invariant and how it holds"
+     */
+    ownership: RuleOwnership;
   }
 ): RuleSavedObjectAttributes {
-  const { version, ...restServerFields } = serverFields;
+  const { version, signatureId, source, ownership, ...restServerFields } = serverFields;
   return {
     kind: data.kind,
     metadata: {
@@ -246,15 +681,28 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       description: data.metadata.description,
       owner: data.metadata.owner,
       tags: data.metadata.tags,
-      builder_type: data.metadata.builder_type,
+      signature_id: signatureId,
+      // `metadata.builder_type: null` is accepted in the PUT body as the
+      // explicit-clear signal (rule-types.md "What this design needs"). The
+      // replace branch normalises it away via resolveReplaceRuleBuilder before
+      // reaching here, but guard defensively so null never reaches storage.
+      builder_type: data.metadata.builder_type ?? undefined,
+      builder_fields: data.metadata.builder_fields,
+      source,
       version,
+      // Seed revision at 0: a freshly created rule has had no meaningful edits.
+      revision: 0,
+      ownership,
     },
     time_field: data.time_field,
     schedule: {
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    query: toStoredQuery(data.query),
+    // Absent for execution-time builder rules, which compile a query on every
+    // run and persist nothing in `query`.
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    ...(data.query !== undefined ? { query: toStoredQuery(data.query) } : {}),
     recovery_strategy: data.recovery_strategy,
     no_data_strategy: data.no_data_strategy,
     state_transition: data.state_transition,
@@ -262,41 +710,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     artifacts: data.artifacts,
     ...restServerFields,
   };
-}
-
-/**
- * Resolves `metadata.builder_type` for an update.
- *
- * Builder rules require an explicit `metadata.builder_type: null` in the request
- * to clear the field when the query changes.
- */
-function resolveBuilderType(
-  updateData: UpdateRuleData,
-  existingAttrs: RuleSavedObjectAttributes
-): string | undefined {
-  if (updateData.metadata?.builder_type !== undefined) {
-    return updateData.metadata.builder_type ?? undefined;
-  }
-
-  // Compare in stored shape so an unchanged conditionless query (`breach`
-  // omitted in the body, empty segment on disk) does not read as a change.
-  const queryChanged =
-    updateData.query !== undefined &&
-    !isEqual(toStoredQuery(updateData.query), existingAttrs.query);
-
-  if (queryChanged && existingAttrs.metadata.builder_type) {
-    throw Boom.badRequest(
-      'Cannot update the query on a builder rule without explicitly clearing ' +
-        'metadata.builder_type. Send metadata.builder_type: null to confirm the transition to ES|QL mode.',
-      { code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED }
-    );
-  }
-
-  if (queryChanged) {
-    return undefined;
-  }
-
-  return existingAttrs.metadata.builder_type;
 }
 
 /**
@@ -312,26 +725,76 @@ function resolveBuilderType(
  */
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
-  updateData: UpdateRuleData,
+  updateData: ResolvedUpdateRuleData,
   serverFields: { updatedBy: string | null; updatedAt: string; version: number }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
-  return {
+  // Build next attributes without revision first; revision is derived from the
+  // diff of this intermediate state against the stored attributes.
+  const withoutRevision: RuleSavedObjectAttributes = {
     ...existingAttrs,
     metadata: {
       ...existingAttrs.metadata,
       ...updateData.metadata,
-      builder_type: resolveBuilderType(updateData, existingAttrs),
+      // `signature_id` is immutable — always restore from storage so an update
+      // that sends the field (equal value, which the caller validated upstream)
+      // or omits it does not accidentally overwrite the stored value.
+      signature_id: existingAttrs.metadata.signature_id,
+      // `null` → clear (undefined): the SO schema uses `maybe()` without
+      // `nullable()`. Builder resolution has already rejected the combinations
+      // that would leave the pair inconsistent.
+      builder_type: nullToUndefined(
+        updateData.metadata?.builder_type,
+        existingAttrs.metadata.builder_type
+      ),
+      builder_fields: nullToUndefined(
+        updateData.metadata?.builder_fields,
+        existingAttrs.metadata.builder_fields
+      ),
       // `null` clears all tags. The SO schema is `maybe(...)` without
       // `nullable()`, so the cleared value must be stored as `undefined`.
       tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
+      // source — omit keeps stored value; when provided, `type` and `id` are
+      // forced from storage (assertRuleSourceUnchanged in the rules client
+      // validates the caller did not try to change them), and only `version`
+      // can move. If stored source is absent (pre-migration), accept the
+      // incoming value as-is.
+      source: (() => {
+        const incoming = updateData.metadata?.source;
+        if (incoming === undefined) return existingAttrs.metadata.source;
+        const stored = existingAttrs.metadata.source;
+        if (stored === undefined) return incoming;
+        // Force type and id from storage; only version is owner-writable.
+        return { ...stored, version: incoming.version };
+      })(),
+      // `ownership` is immutable for the rule's life — always restore from
+      // storage. No request body ever carries this field; the spread of
+      // `updateData.metadata` above cannot reach it. The explicit assignment
+      // guards against future schema drift and documents the contract clearly.
+      ownership: existingAttrs.metadata.ownership,
       version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
-    schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    // `query` - callers must send a complete new shape (we can't merge across formats),
-    // so omitted = preserved, present = full replacement.
-    query: updateData.query !== undefined ? toStoredQuery(updateData.query) : existingAttrs.query,
+    schedule: {
+      ...existingAttrs.schedule,
+      ...updateData.schedule,
+      // `null` → clear (undefined). SO schema uses maybe() without nullable(),
+      // so a cleared lookback must be stored as undefined (absent), not null.
+      lookback: nullToUndefined(updateData.schedule?.lookback, existingAttrs.schedule.lookback),
+    },
+    // `query` semantics for the resolved update data:
+    //   undefined  → preserve existing (ordinary PATCH with no query change)
+    //   null       → clear (execution-time type; must carry no stored query, even
+    //                if an old write-time type compiled one)
+    //   Query      → replace with the new value
+    //
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    query:
+      updateData.query === null
+        ? undefined
+        : updateData.query !== undefined
+        ? toStoredQuery(updateData.query)
+        : existingAttrs.query,
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     recovery_strategy: nullToUndefined(
       updateData.recovery_strategy,
@@ -357,6 +820,17 @@ export function buildUpdateRuleAttributes(
     // can leak through if someone adds a new immutable field to the registry.
     ...pickImmutable(existingAttrs),
   };
+
+  // Revision: diff the computed next state against stored state, excluding the
+  // four always-changing fields, then bump by at most one.
+  // Ref: rule-versions.md "How the diff runs"
+  return {
+    ...withoutRevision,
+    metadata: {
+      ...withoutRevision.metadata,
+      revision: computeNextRevision(withoutRevision, existingAttrs),
+    },
+  };
 }
 
 /**
@@ -378,7 +852,15 @@ export function validateMergedRuleAttributes(
     details: Record<string, unknown>;
   }> = [
     {
-      valid: isSignalUsingStandaloneFormat(attrs),
+      // Execution-time builder rules have no stored query (`attrs.query == null`),
+      // so the standalone-format invariant is vacuously satisfied — the query is
+      // compiled per run and validated there. Key the escape on `attrs.query == null`
+      // rather than `builder_fields != null`: write-time builder rules carry both
+      // `builder_fields` and a persisted `query`, so the backstop must still apply
+      // to them. Only execution-time rules genuinely have no query.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      valid: attrs.query == null || isSignalUsingStandaloneFormat(attrs),
       message: 'kind "signal" requires query.format "standalone".',
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
@@ -396,7 +878,13 @@ export function validateMergedRuleAttributes(
       details: { rule_id: ruleId },
     },
     {
-      valid: isRecoveryQueryProvidedForStrategy(attrs),
+      // Mirror the wire-schema `builder_fields != null` escape for
+      // `isRecoveryQueryProvidedForStrategy` (createRuleDataSchema line 759,
+      // replaceRuleBodySchema line 840): execution-time rules have no stored query,
+      // so recovery_strategy 'query' with no query block is vacuously valid (the
+      // recovery query is compiled per run). Same `query == null` key as above to
+      // keep write-time builder rules under the backstop.
+      valid: attrs.query == null || isRecoveryQueryProvidedForStrategy(attrs),
       message: 'query.recovery is required when recovery_strategy is "query".',
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
@@ -450,15 +938,32 @@ export function transformRuleSoAttributesToRuleApiResponse(
       description: attrs.metadata.description,
       owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
+      // Falls back to the object id for rules created before this field was
+      // introduced (pending the model-version migration in step 4.5 which
+      // backfills `signature_id ?? doc.id`), matching the migration's own logic.
+      signature_id: attrs.metadata.signature_id ?? id,
       builder_type: attrs.metadata.builder_type,
+      builder_fields: attrs.metadata.builder_fields,
+      // Falls back to the default for rules created before this field was
+      // introduced (pending the model-version migration in step 4.5 which
+      // backfills `{ type: 'internal', version: 1 }`).
+
+      source: (attrs.metadata.source ?? { type: 'internal', version: 1 }) as RuleSource,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
+      // Falls back to 0 for rules created before this field was introduced
+      // (pending the model-version migration in step 4.5).
+      revision: attrs.metadata.revision ?? RULE_REVISION_FALLBACK,
+      // Falls back to `{ managed: false }` for rules created before this field
+      // was introduced (pending the model-version migration in step 4.5 which
+      // stamps the type-aware value).
+      ownership: (attrs.metadata.ownership ?? { managed: false }) as RuleOwnership,
     },
     time_field: attrs.time_field,
     schedule: {
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    query: toApiQuery(attrs.query),
+    ...(attrs.query ? { query: toApiQuery(attrs.query) } : {}),
     recovery_strategy: attrs.recovery_strategy,
     no_data_strategy: attrs.no_data_strategy,
     state_transition: attrs.state_transition,

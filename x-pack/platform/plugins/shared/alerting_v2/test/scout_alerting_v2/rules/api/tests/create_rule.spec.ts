@@ -52,7 +52,18 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.kind).toBe(body.kind);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual({
+        ...body.metadata,
+        version: 1,
+        // Step 4 response-only fields: server-derived, never accepted from a request body.
+        signature_id: response.body.metadata.signature_id,
+        revision: 0,
+        source: { type: 'internal', version: 1 },
+        ownership: { managed: false },
+      });
+      // signature_id is a server-generated identifier; verify it is a non-empty string.
+      expect(typeof response.body.metadata.signature_id).toBe('string');
+      expect(response.body.metadata.signature_id.length).toBeGreaterThan(0);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
 
@@ -377,7 +388,17 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual({
+        ...body.metadata,
+        version: 1,
+        // Step 4 response-only fields: server-derived, never accepted from a request body.
+        signature_id: response.body.metadata.signature_id,
+        revision: 0,
+        source: { type: 'internal', version: 1 },
+        ownership: { managed: false },
+      });
+      expect(typeof response.body.metadata.signature_id).toBe('string');
+      expect(response.body.metadata.signature_id.length).toBeGreaterThan(0);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
       expect(response.body.state_transition).toStrictEqual(body.state_transition);
