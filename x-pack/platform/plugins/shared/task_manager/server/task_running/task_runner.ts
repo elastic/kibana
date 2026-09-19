@@ -15,9 +15,8 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { flow, identity, omit } from 'lodash';
+import { flow, identity, isEqual, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
@@ -51,7 +50,11 @@ import type {
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
-import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
+import {
+  getTaskReclaimReason,
+  isVersionConflictError,
+  resolveTaskDocumentConflicts,
+} from './resolve_so_conflicts';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
@@ -182,6 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
+  private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
   private taskRunEventCustomFields?: Record<string, unknown>;
 
@@ -367,6 +371,9 @@ export class TaskManagerRunner implements TaskRunner {
     // We extract it here because the narrowing is lost inside the async closure below
     // since this.instance is a mutable class property.
     const { startedAt } = this.instance.task;
+    // Snapshot the schedule before the heartbeat can refresh `this.instance` from the store, so
+    // completion can tell whether the schedule was changed externally while the task was running.
+    this.scheduleAtRunStart = this.instance.task.schedule;
 
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
@@ -425,7 +432,8 @@ export class TaskManagerRunner implements TaskRunner {
         );
 
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
-        const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+        const stopUpdatingLongRunningTasks =
+          this.updateRetryAtOnIntervalForLongRunningTasks(startedAt);
 
         try {
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
@@ -675,6 +683,9 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     let shouldTaskBeDisabled = false;
+    // Set when the next runAt is derived from the schedule (not returned by the task runner), so the
+    // conflict resolver can recompute it if the schedule was changed externally during the run.
+    let getRunAtForSchedule: ((schedule: IntervalSchedule | RruleSchedule) => Date) | undefined;
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -698,19 +709,29 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.Idle });
           }
 
-          const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
+          // A schedule changed externally during the run takes precedence over the one returned by the task runner.
+          const scheduleChangedDuringRun = !isEqual(
+            this.instance.task.schedule,
+            this.scheduleAtRunStart
+          );
+          const updatedTaskSchedule = scheduleChangedDuringRun
+            ? this.instance.task.schedule
+            : reschedule ?? this.instance.task.schedule;
+          const nextRunAtForSchedule = (schedule?: IntervalSchedule | RruleSchedule) =>
+            getNextRunAt(
+              {
+                runAt: this.instance.task.runAt,
+                startedAt: this.instance.task.startedAt,
+                schedule,
+              },
+              this.getPollInterval(),
+              this.logger
+            );
+          if (!runAt) {
+            getRunAtForSchedule = nextRunAtForSchedule;
+          }
           return asOk({
-            runAt:
-              runAt ||
-              getNextRunAt(
-                {
-                  runAt: this.instance.task.runAt,
-                  startedAt: this.instance.task.startedAt,
-                  schedule: updatedTaskSchedule,
-                },
-                this.getPollInterval(),
-                this.logger
-              ),
+            runAt: runAt || nextRunAtForSchedule(updatedTaskSchedule),
             state,
             schedule: updatedTaskSchedule,
             attempts,
@@ -790,24 +811,14 @@ export class TaskManagerRunner implements TaskRunner {
             })
           );
         } catch (error) {
-          const isVersionConflict =
-            SavedObjectsErrorHelpers.isConflictError(error) ||
-            error.status === 409 ||
-            error.statusCode === 409 ||
-            error.error?.type === 'version_conflict_engine_exception';
-
-          if ((this.isExpired || this.isCancelled) && isVersionConflict) {
-            this.logger.warn(
-              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
-              { tags: [this.id, this.taskType] }
-            );
-          } else if (isVersionConflict) {
+          if (isVersionConflictError(error)) {
             await resolveTaskDocumentConflicts({
               taskId: this.id,
               partialTask,
               originalTask,
               bufferedTaskStore: this.bufferedTaskStore,
               logger: this.logger,
+              getRunAtForSchedule,
             });
           } else {
             throw error;
@@ -976,11 +987,12 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private updateRetryAtOnIntervalForLongRunningTasks() {
+  private updateRetryAtOnIntervalForLongRunningTasks(startedAt: Date) {
     let stopped = false;
 
     const updateRetryAt = async () => {
       if (!stopped) {
+        const taskInstance = this.instance.task;
         try {
           // Set retryAt to now + 5m
           const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -992,26 +1004,44 @@ export class TaskManagerRunner implements TaskRunner {
               tags: [this.id, this.taskType],
             }
           );
-          const taskInstance = this.instance.task;
-          this.instance = asReadyToRun(
-            (await this.bufferedTaskStore.partialUpdate(
-              {
-                id: taskInstance.id,
-                retryAt: updatedRetryAt,
-              },
-              { validate: false, doc: taskInstance }
-            )) as ConcreteTaskInstanceWithStartedAt
+          const updatedTask = await this.bufferedTaskStore.partialUpdate(
+            {
+              id: taskInstance.id,
+              version: taskInstance.version,
+              retryAt: updatedRetryAt,
+            },
+            { validate: false, doc: taskInstance }
           );
+          this.instance = asReadyToRun({ ...updatedTask, startedAt });
         } catch (error) {
-          // If there is a 409 conflict error, stop the timer and try to cancel the task
-          // as this task may have been picked up by another Kibana node.
-          if (SavedObjectsErrorHelpers.isConflictError(error)) {
-            stop();
-            this.logger.warn(
-              `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
-              { tags: [this.id, this.taskType] }
-            );
-            await this.cancel();
+          if (isVersionConflictError(error)) {
+            let currentTask: ConcreteTaskInstance | undefined;
+            try {
+              currentTask = await this.bufferedTaskStore.get(this.id);
+            } catch (e) {
+              this.logger.warn(
+                `Unable to update retryAt for long running task: ${this.id} - could not re-read the current task document to check for a reclaim (${e.message}), will retry on the next interval`,
+                { tags: [this.id, this.taskType] }
+              );
+            }
+
+            const reclaimReason = currentTask && getTaskReclaimReason(currentTask, taskInstance);
+            if (reclaimReason) {
+              // The task was reclaimed by another Kibana node, stop the timer and cancel the task.
+              stop();
+              this.logger.warn(
+                `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
+                { tags: [this.id, this.taskType] }
+              );
+              await this.cancel();
+            } else if (currentTask) {
+              // Update to the current task, and retryAt on the next interval.
+              this.instance = asReadyToRun({ ...currentTask, startedAt });
+              this.logger.warn(
+                `Conflict error trying to update retryAt for a long-running task: ${this.id} - updated to the current task document, will retry on the next interval`,
+                { tags: [this.id, this.taskType] }
+              );
+            }
           } else {
             this.logger.warn(
               `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,
