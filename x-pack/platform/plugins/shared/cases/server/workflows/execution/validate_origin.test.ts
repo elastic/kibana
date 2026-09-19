@@ -9,7 +9,11 @@ import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
 import {
+  getTriggerSelectionType,
   parseSelectedAlertPairs,
+  parseSelectedTriggerPairs,
+  rejectQuerySelection,
+  validateSelectionMembership,
   validateOrigin as validateOriginWithAttachments,
 } from './validate_origin';
 
@@ -23,7 +27,7 @@ const theCase = {
  * Test wrapper: derives `attachedAlerts` from the case comments (mirroring the source used in
  * production for the legacy alert attachment shape) and parses `inputs` through
  * `parseSelectedAlertPairs` — the same code path the service uses — so the validated set is
- * identical to what alert preprocessing later fetches.
+ * identical to what trigger preprocessing later fetches.
  */
 const validateOrigin = (
   params: Omit<
@@ -363,6 +367,28 @@ describe('parseSelectedAlertPairs', () => {
     expect(parseSelectedAlertPairs({ event: { alertIds: undefined } })).toEqual([]);
   });
 
+  it('ignores document selections', () => {
+    expect(
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'document',
+          documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+        },
+      })
+    ).toEqual([]);
+  });
+
+  it('allows a document trigger with pre-expanded documents (no server-side expansion)', () => {
+    expect(
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'document',
+          documents: [{ id: 'doc-1', index: 'logs-default', data: {} }],
+        },
+      })
+    ).toEqual([]);
+  });
+
   it('throws 400 when alertIds is not an array', () => {
     expect(() => parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })).toThrow(
       'inputs.event.alertIds must be an array.'
@@ -418,5 +444,136 @@ describe('parseSelectedAlertPairs', () => {
       { _id: 'alert-1', _index: '.alerts-a' },
       { _id: 'alert-2', _index: '.alerts-b' },
     ]);
+  });
+});
+
+describe('trigger selection membership', () => {
+  it('detects alert and document trigger selections', () => {
+    expect(getTriggerSelectionType({ event: { triggerType: 'alert' } })).toBe('alert');
+    expect(getTriggerSelectionType({ event: { triggerType: 'document' } })).toBe('document');
+    expect(
+      getTriggerSelectionType({
+        event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] },
+      })
+    ).toBe('alert');
+    expect(
+      getTriggerSelectionType({
+        event: { documents: [{ id: 'event-1', index: 'logs-default', data: {} }] },
+      })
+    ).toBe('document');
+    expect(getTriggerSelectionType({ event: { triggerType: 'manual' } })).toBeUndefined();
+  });
+
+  it('rejects conflicting trigger selection types', () => {
+    expect(() =>
+      getTriggerSelectionType({
+        event: {
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+          documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+        },
+      })
+    ).toThrow('Case workflow inputs cannot mix alert and document selections.');
+    expect(() =>
+      getTriggerSelectionType({
+        event: {
+          triggerType: 'manual',
+          documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+        },
+      })
+    ).toThrow('Case workflow document selection requires triggerType "document".');
+  });
+
+  it('rejects query-based selections', () => {
+    expect(() =>
+      rejectQuerySelection({
+        event: { querySelection: { index: '.alerts-*', query: { match_all: {} } } },
+      })
+    ).toThrow('Query-based trigger selections are not supported for case workflows.');
+  });
+
+  it('parses explicit alert and document IDs', () => {
+    expect(
+      parseSelectedTriggerPairs(
+        { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        'alert'
+      )
+    ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
+  });
+
+  it('parses pre-expanded alert and document selections', () => {
+    expect(
+      parseSelectedTriggerPairs(
+        { event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        'alert'
+      )
+    ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documents: [{ _id: 'legacy-event-1', _index: 'logs-default' }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'legacy-event-1', index: 'logs-default' }]);
+  });
+
+  it('rejects an empty trigger selection', () => {
+    expect(() => parseSelectedTriggerPairs({ event: { documentIds: [] } }, 'document')).toThrow(
+      'Case workflow document selection cannot be empty.'
+    );
+  });
+
+  it('rejects a selection containing a document outside the case', () => {
+    expect(() =>
+      validateSelectionMembership({
+        selectionType: 'document',
+        selectedTargets: [{ id: 'outside-event', index: 'logs-default' }],
+        attachedDocuments: [
+          {
+            id: 'event-1',
+            index: 'logs-default',
+            attached_at: '2026-09-16T00:00:00.000Z',
+          },
+        ],
+      })
+    ).toThrow('All selected documents must belong to the case.');
+  });
+
+  it('accepts a selection when every pair is attached', () => {
+    expect(() =>
+      validateSelectionMembership({
+        selectionType: 'alert',
+        selectedTargets: [{ id: 'alert-1', index: '.alerts' }],
+        attachedDocuments: [
+          {
+            id: 'alert-1',
+            index: '.alerts',
+            attached_at: '2026-09-16T00:00:00.000Z',
+          },
+        ],
+      })
+    ).not.toThrow();
   });
 });

@@ -98,7 +98,7 @@ describe('Execution Routes', () => {
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
-      runWorkflowWithAlertPreprocessing: jest.fn(),
+      runWorkflowWithPreprocessing: jest.fn(),
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
@@ -180,7 +180,7 @@ describe('Execution Routes', () => {
 
     it('should call api methods with correct arguments when workflow is valid', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflowWithAlertPreprocessing.mockResolvedValue({
+      mockApi.runWorkflowWithPreprocessing.mockResolvedValue({
         workflowExecutionId: 'exec-1',
         inputs: { k: 'v' },
       });
@@ -193,7 +193,7 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
-      expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
+      expect(mockApi.runWorkflowWithPreprocessing).toHaveBeenCalledWith({
         workflow: {
           id: 'wf-1',
           name: 'Test',
@@ -219,7 +219,7 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
-      expect(mockApi.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+      expect(mockApi.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
     });
 
     it('should return bad request when workflow is not valid', async () => {
@@ -259,9 +259,9 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {
+    it('should return custom error when api.runWorkflowWithPreprocessing throws', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('engine failed'));
+      mockApi.runWorkflowWithPreprocessing.mockRejectedValue(new Error('engine failed'));
       const h = handler('POST', path)!;
       const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
 

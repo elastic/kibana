@@ -100,3 +100,10 @@ export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
  * trigger node. Matches `HIGHLIGHTED_STEP_TRIGGER` in workflows_management.
  */
 export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
+
+/**
+ * Upper bound on how many documents/alerts a single trigger selection expands to. The server
+ * applies this to explicit IDs and query selections; the UI uses it to warn that only the first N
+ * query matches will be processed. Shared so the enforced limit and the UI message never drift.
+ */
+export const MAX_RUN_WORKFLOW_DOCS = 10000;
