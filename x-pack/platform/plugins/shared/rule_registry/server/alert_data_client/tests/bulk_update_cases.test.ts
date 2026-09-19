@@ -306,4 +306,83 @@ describe('bulkUpdateCases', () => {
       `"You cannot attach more than 10 cases to an alert"`
     );
   });
+
+  it('throws and does not write when a document is missing the authorization fields', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'forged-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const forgedAlerts = [{ id: 'forged-id', index: 'alert-index' }];
+
+    await expect(
+      alertsClient.bulkUpdateCases({ caseIds, alerts: forgedAlerts })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Invalid alert found with id of \\"forged-id\\" and operation get"`
+    );
+
+    expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+  });
+
+  it('throws when only some documents in a batch are missing the authorization fields', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+            [ALERT_RULE_CONSUMER]: 'apm',
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+        {
+          found: true,
+          _id: 'forged-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const mixedAlerts = [
+      { id: 'alert-id', index: 'alert-index' },
+      { id: 'forged-id', index: 'alert-index' },
+    ];
+
+    await expect(
+      alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Invalid alert found with id of \\"forged-id\\" and operation get"`
+    );
+
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      message: 'Failed attempt to access alert [id=forged-id]',
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Invalid alert found with id of "forged-id" and operation get',
+      },
+    });
+  });
 });
