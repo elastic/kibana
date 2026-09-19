@@ -9,8 +9,8 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
-  NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/deductive_investigator.md.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
@@ -45,53 +45,67 @@ export const DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION =
 export const getDeductiveInvestigationAgentType = ({
   sandboxEnabled,
   cortexEnabled,
+  memoryEnabled = false,
   telemetryConnectorId,
 }: {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
+  memoryEnabled?: boolean;
   telemetryConnectorId?: string;
-}): AgentTypeDefinition => ({
-  id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
-  name: DEDUCTIVE_INVESTIGATION_AGENT_NAME,
-  description: DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
-  avatar_icon: 'logoElastic',
-  baseConfiguration: {
-    instructions,
-    skill_ids: [],
-    tools: [
-      {
-        tool_ids: [
-          platformSignificantEventsTools.reportInvestigationProgress,
-          ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-        ],
-      },
-    ],
-    enable_elastic_capabilities: false,
-    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-    // Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
-    // the sandbox and Cortex; without the sandbox the step would throw on every round.
-    ...(sandboxEnabled && cortexEnabled
-      ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
-      : {}),
-    ...(cortexEnabled
-      ? { post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] }
-      : {}),
-  },
-});
+}): AgentTypeDefinition => {
+  // One beforeAgent and one afterExecution workflow: Agent Builder runs those
+  // lists in series. Obtain runs first in each; cortex + memory then run in
+  // parallel against the same sandbox_id the bash tools derive.
+  const materializeIds =
+    sandboxEnabled && (cortexEnabled || memoryEnabled)
+      ? [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]
+      : [];
+  const optimizeIds = cortexEnabled || memoryEnabled ? [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] : [];
+
+  return {
+    id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
+    name: DEDUCTIVE_INVESTIGATION_AGENT_NAME,
+    description: DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
+    avatar_icon: 'logoElastic',
+    baseConfiguration: {
+      instructions,
+      skill_ids: [],
+      tools: [
+        {
+          tool_ids: [
+            platformSignificantEventsTools.reportInvestigationProgress,
+            ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+          ],
+        },
+      ],
+      enable_elastic_capabilities: false,
+      connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+      ...(materializeIds.length > 0 ? { workflow_ids: materializeIds } : {}),
+      ...(optimizeIds.length > 0 ? { post_execution_workflow_ids: optimizeIds } : {}),
+    },
+  };
+};
 
 export const registerDeductiveInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
   {
     sandboxEnabled,
     cortexEnabled,
+    memoryEnabled,
     telemetryConnectorId,
   }: {
     sandboxEnabled: boolean;
     cortexEnabled: boolean;
+    memoryEnabled?: boolean;
     telemetryConnectorId?: string;
-  } = { sandboxEnabled: false, cortexEnabled: false }
+  } = { sandboxEnabled: false, cortexEnabled: false, memoryEnabled: false }
 ): void => {
   agentBuilder.agents.registerType(
-    getDeductiveInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })
+    getDeductiveInvestigationAgentType({
+      sandboxEnabled,
+      cortexEnabled,
+      memoryEnabled,
+      telemetryConnectorId,
+    })
   );
 };

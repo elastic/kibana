@@ -12,6 +12,12 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
+import {
+  DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
+  DEDUCTIVE_INVESTIGATION_AGENT_NAME,
+  NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
+  NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
+} from '../agents/deductive_investigation';
 
 export const installInvestigationAgent = async ({
   agentBuilder,
@@ -34,6 +40,35 @@ export const installInvestigationAgent = async ({
         'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
       labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
       avatar_symbol: 'NI',
+      access_control: { access_mode: AgentAccessControlMode.Public },
+      configuration: {
+        tools: [],
+        skill_ids: [],
+        connector_ids: [],
+      },
+    },
+  });
+};
+
+export const installDeductiveInvestigationAgent = async ({
+  agentBuilder,
+  spaceId,
+  availability,
+}: {
+  agentBuilder: AgentBuilderPluginStart;
+  spaceId: string;
+  availability?: AgentAvailabilityConfig;
+}): Promise<void> => {
+  await agentBuilder.agents.ensure({
+    spaceId,
+    availability,
+    agent: {
+      id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
+      type: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
+      name: DEDUCTIVE_INVESTIGATION_AGENT_NAME,
+      description: DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION,
+      labels: ['observability', 'nightshift', 'investigation', 'cortex', 'semantic-memory'],
+      avatar_symbol: 'ND',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
         tools: [],

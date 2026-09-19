@@ -7,13 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { SANDBOX_BASH_TOOL_ID } from './tool';
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
 export const renderElasticManifest = (connectorId: string): string =>
   [
     '# Elasticsearch telemetry',
     '',
-    `Query this cluster by passing \`connector_id: "${connectorId}"\` to \`nightshift_sandbox_bash\`.`,
+    `Query this cluster by passing \`connector_id: "${connectorId}"\` to \`${SANDBOX_BASH_TOOL_ID}\`.`,
     'Credentials are not stored here: for that single command only, the environment contains',
     '',
     '- `CONNECTOR_CONFIG_URL` — Elasticsearch URL',

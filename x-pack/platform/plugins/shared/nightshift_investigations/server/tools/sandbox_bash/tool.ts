@@ -16,7 +16,7 @@ import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
-export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
+export const SANDBOX_BASH_TOOL_ID = 'bash';
 
 const sandboxBashSchema = z.object({
   command: z

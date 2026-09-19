@@ -11,7 +11,9 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { runCortexOptimize } from '../cortex/register_cortex';
+import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import { runMemoryOptimize } from '../memory/register_memory';
+import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -22,25 +24,27 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
  */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
-export const cortexOptimizeStepDefinition = ({
+export const memoryOptimizeStepDefinition = ({
   getInference,
   getSearchInferenceEndpoints,
+  getSandboxStart,
   logger,
   isEnabled,
 }: {
   getInference: () => InferenceServerStart | undefined;
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
-    id: 'nightshift.cortexOptimize',
-    label: 'Optimize Nightshift Cortex',
+    id: 'nightshift.memoryOptimize',
+    label: 'Optimize Nightshift Semantic Memory',
     category: StepCategory.Ai,
     description:
-      'Proposes Cortex wiki edits from a completed investigation round and writes them ' +
-      'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
-      'the optimizer currently reads the transcript, not the sandbox files.',
+      'Labels recalled Semantic Memory pages from a completed investigation round and ' +
+      'extracts durable customer-environment facts into the AI index. Reads ' +
+      '/workspace/memories/.recalled.json from the sandbox_id hydrate wrote.',
     inputSchema: z.object({
       prompt: z
         .string()
@@ -55,10 +59,13 @@ export const cortexOptimizeStepDefinition = ({
         .string()
         .max(1024)
         .optional()
-        .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+        .describe(
+          'Workspace key from nightshift.obtainSandbox. Already space-scoped. ' +
+            'Omit when there is no conversation sandbox.'
+        ),
     }),
     outputSchema: z.object({
-      status: z.literal('ok').describe('The optimizer finished without throwing.'),
+      status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
       skipped: z.boolean().optional(),
     }),
     handler: async (context) => {
@@ -66,22 +73,38 @@ export const cortexOptimizeStepDefinition = ({
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const sandboxStart = getSandboxStart();
+      const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
+      let session: SandboxSession | undefined;
+      if (sandboxStart && sandboxId) {
+        try {
+          session = sandboxStart.getSessionForSpace(
+            spaceId,
+            unscopeConversationId(spaceId, sandboxId)
+          );
+        } catch {
+          session = undefined;
+        }
+      }
+
       await withTimeout(
         (signal) =>
-          runCortexOptimize({
+          runMemoryOptimize({
             request: context.contextManager.getFakeRequest(),
             agentId: context.input.agent_id,
             userMessage: context.input.prompt,
             assistantMessage: context.input.response,
+            session,
             esClient: context.contextManager.getScopedEsClient(),
-            spaceId: context.contextManager.getContext().workflow.spaceId,
+            spaceId,
             signal,
             logger,
             getInference,
             getSearchInferenceEndpoints,
           }),
         OPTIMIZE_TIMEOUT_MS,
-        `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+        `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
       );
 
       return { output: { status: 'ok' as const } };

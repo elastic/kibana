@@ -23,15 +23,23 @@ import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
-import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
+import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import {
+  installDeductiveInvestigationAgent,
+  installInvestigationAgent,
+} from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
+import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerMemoryAiIndex } from './memory/register_memory';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -82,6 +90,7 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
+  private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
@@ -97,8 +106,12 @@ export class NightshiftInvestigationsPlugin
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+    }
+    if (this.memoryEnabled) {
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -130,6 +143,7 @@ export class NightshiftInvestigationsPlugin
       registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
+        memoryEnabled: this.memoryEnabled,
         telemetryConnectorId,
       });
       plugins.agentBuilder.tools.register(
@@ -194,21 +208,46 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
         );
-        if (this.cortexEnabled) {
-          plugins.workflowsExtensions.registerStepDefinition(
-            cortexHydrateStepDefinition({
-              getSandboxStart: () => this.sandboxStart,
-              logger: this.logger.get('cortex'),
-            })
-          );
-          plugins.workflowsExtensions.registerStepDefinition(
-            cortexOptimizeStepDefinition({
-              getInference: () => this.inference,
-              getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
-              logger: this.logger.get('cortex'),
-            })
-          );
-        }
+        // Obtain + materialize steps are always registered so the combined workflow
+        // can no-op a disabled writer branch instead of failing on an unknown
+        // step type. Obtain runs first and hands sandbox_id to both writers.
+        plugins.workflowsExtensions.registerStepDefinition(
+          obtainSandboxStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('sandbox'),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          cortexHydrateStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('cortex'),
+            isEnabled: () => this.cortexEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryMaterializeToSandboxStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('memory'),
+            isEnabled: () => this.memoryEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          cortexOptimizeStepDefinition({
+            getInference: () => this.inference,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            logger: this.logger.get('cortex'),
+            isEnabled: () => this.cortexEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryOptimizeStepDefinition({
+            getInference: () => this.inference,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('memory'),
+            isEnabled: () => this.memoryEnabled,
+          })
+        );
       }
 
       registerRoutes({
@@ -276,6 +315,14 @@ export class NightshiftInvestigationsPlugin
         spaceId: DEFAULT_SPACE_ID,
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
+      });
+      void installDeductiveInvestigationAgent({
+        agentBuilder: plugins.agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+      }).catch((err) => {
+        this.logger.error(
+          `Failed to install deductive investigation agent in default space: ${err.message}`
+        );
       });
     }
 
@@ -362,8 +409,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
-    if (this.cortexEnabled) {
-      await installCortexWorkflows({ client });
+    if (this.cortexEnabled || this.memoryEnabled) {
+      await installSandboxMaterializeWorkspaceWorkflow({ client });
+      await installAgentOptimizationsWorkflow({ client });
     }
     await client.ready();
   }
