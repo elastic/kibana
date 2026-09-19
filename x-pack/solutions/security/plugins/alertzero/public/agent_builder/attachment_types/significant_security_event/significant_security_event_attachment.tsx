@@ -38,6 +38,7 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
 }): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
   getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
   getIcon: () => 'flag',
+  getHeader: () => ({ icon: 'flag' }),
   renderInlineContent: (props) => (
     <React.Suspense fallback={<EuiSkeletonText lines={3} />}>
       <LazySignificantSecurityEventInlineContent {...props} navigation={navigation} />

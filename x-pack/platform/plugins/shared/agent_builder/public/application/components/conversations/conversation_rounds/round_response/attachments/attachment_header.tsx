@@ -128,10 +128,11 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
-
-  if (!hasCloseButton && !hasActionButtons) {
-    return null;
-  }
+  const showPreviewClose = previewBadgeState === 'previewing' && Boolean(onClosePreview);
+  // Always render the title/icon header, even when there are no trailing actions.
+  // Attachments like Significant Security Event are content-only (no Discover exit) but
+  // still need the chrome title from getLabel.
+  const hasTrailingActions = hasActionButtons || showPreviewClose || hasCloseButton;
 
   return (
     <div ref={measureRef} style={{ width: '100%' }}>
@@ -211,40 +212,47 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           {/* End: action buttons + close button */}
-          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {previewBadgeState !== 'previewing' && hasActionButtons && (
-                <EuiFlexItem grow={false}>
-                  <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
-                </EuiFlexItem>
-              )}
-              {previewBadgeState === 'previewing' && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
-                    {CLOSE_PREVIEW_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              {onClose && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                      iconType="cross"
-                      onClick={onClose}
-                      size="s"
+          {hasTrailingActions && (
+            <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                {previewBadgeState !== 'previewing' && hasActionButtons && (
+                  <EuiFlexItem grow={false}>
+                    <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
+                  </EuiFlexItem>
+                )}
+                {showPreviewClose && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
                       color="text"
-                      {...getEbtProps({
-                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                        action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
-                        detail: 'attachment',
-                      })}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                      size="s"
+                      iconType="cross"
+                      onClick={onClosePreview}
+                    >
+                      {CLOSE_PREVIEW_LABEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
+                {onClose && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                        iconType="cross"
+                        onClick={onClose}
+                        size="s"
+                        color="text"
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
+                          detail: 'attachment',
+                        })}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </div>

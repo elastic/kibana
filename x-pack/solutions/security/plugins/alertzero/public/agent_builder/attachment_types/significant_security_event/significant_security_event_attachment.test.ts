@@ -63,6 +63,13 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it('returns the flag icon for the attachment chrome header', () => {
+      const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+      expect(definition.getHeader?.({ attachment: {} as never })).toEqual({ icon: 'flag' });
+    });
+  });
+
   describe('renderInlineContent', () => {
     it('is defined', () => {
       const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
