@@ -19,8 +19,7 @@ import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/214268
-describe.skip('<ControlGeneralView />', () => {
+describe('<ControlGeneralView />', () => {
   const onChange = jest.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
@@ -185,15 +184,16 @@ describe.skip('<ControlGeneralView />', () => {
   });
 
   it('prevents the user from adding more than MAX_SELECTORS_AND_RESPONSES_PER_TYPE', async () => {
+    const user = userEvent.setup();
     const { getByTestId } = render(
       <WrappedComponent
         policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
       />
     );
 
-    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await user.click(getByTestId('cloud-defend-btnAddSelector'));
     expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
-  });
+  }, 30000);
 
   it('allows the user to duplicate the selector', async () => {
     const { getByTestId, getAllByTestId } = render(<WrappedComponent />);
