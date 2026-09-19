@@ -8,16 +8,25 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { RuleSummaryFlyoutContainer } from './rule_summary_flyout_container';
 
+const mockHttp = { basePath: { prepend: (path: string) => `/base${path}` } };
 jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({ canWrite: () => true }),
-  CoreStart: (key: string) => key,
+  useService: (token: unknown) => {
+    if (token === 'CoreStart(http)') return mockHttp;
+    return { canWrite: () => true };
+  },
+  CoreStart: (key: string) => `CoreStart(${key})`,
 }));
 
 jest.mock('../../../../hooks/use_fetch_rule', () => ({ useFetchRule: jest.fn() }));
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule', () => ({
+  useFetchSourceRule: jest.fn(),
+}));
 
 const mockMutation = { mutate: jest.fn(), isLoading: false };
 jest.mock('../../../../hooks/use_delete_rule', () => ({ useDeleteRule: () => mockMutation }));
@@ -54,7 +63,22 @@ jest.mock('../../../entity_not_found_flyout', () => ({
   EntityNotFoundFlyout: () => <div data-test-subj="mockEntityNotFoundFlyout" />,
 }));
 
+jest.mock('../source_rule_summary_flyout', () => ({
+  SourceRuleSummaryFlyout: ({
+    rule,
+    ruleDetailsHref,
+  }: {
+    rule: RuleResponse;
+    ruleDetailsHref: string | null;
+  }) => (
+    <div data-test-subj="mockSourceRuleSummaryFlyout" data-href={ruleDetailsHref}>
+      {rule.metadata?.name}
+    </div>
+  ),
+}));
+
 const mockUseFetchRule = jest.mocked(useFetchRule);
+const mockUseFetchSourceRule = jest.mocked(useFetchSourceRule);
 
 const makeRule = (name: string) =>
   ({ id: 'rule-1', metadata: { name } } as unknown as RuleApiResponse);
@@ -77,49 +101,111 @@ const renderContainer = (overrides: Partial<ContainerProps> = {}) =>
 const mockFetchRuleResult = (
   result: Partial<ReturnType<typeof useFetchRule>>
 ): ReturnType<typeof useFetchRule> =>
-  ({ data: undefined, isLoading: false, isError: false, ...result } as ReturnType<
+  ({ data: undefined, isLoading: false, isError: false, error: null, ...result } as ReturnType<
     typeof useFetchRule
   >);
+
+const noSourceRule: ReturnType<typeof useFetchSourceRule> = {
+  rule: undefined,
+  ruleDetailsHref: null,
+  isLoading: false,
+  isError: false,
+};
 
 describe('RuleSummaryFlyoutContainer', () => {
   beforeEach(() => {
     mockMutation.isLoading = false;
+    mockUseFetchSourceRule.mockReturnValue(noSourceRule);
   });
 
-  it('renders the loading flyout while the rule is in flight', () => {
-    mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
+  describe('v2 rules (no sourceRuleInfo)', () => {
+    it('renders the loading flyout while the rule is in flight', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
 
-    renderContainer();
+      renderContainer();
 
-    expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
+    });
+
+    it('renders the fetched rule', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('Fetched rule') }));
+
+      renderContainer();
+
+      expect(screen.getByTestId('mockRuleSummaryFlyout')).toHaveTextContent('Fetched rule');
+    });
+
+    it('forwards toggle loading to the flyout', () => {
+      mockMutation.isLoading = true;
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
+
+      renderContainer();
+
+      expect(screen.getByTestId('mockRuleSummaryFlyout')).toHaveAttribute(
+        'data-toggle-loading',
+        'true'
+      );
+    });
+
+    it('renders the not found flyout when the v2 fetch fails', () => {
+      mockUseFetchRule.mockReturnValue(
+        mockFetchRuleResult({ isError: true, error: new Error('server error') })
+      );
+
+      renderContainer();
+
+      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
+    });
+
+    it('does not call useFetchRule with undefined when sourceRuleInfo is absent', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
+
+      renderContainer();
+
+      expect(mockUseFetchRule).toHaveBeenCalledWith('rule-1');
+    });
   });
 
-  it('renders the fetched rule', () => {
-    mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('Fetched rule') }));
+  describe('source rules (sourceRuleInfo provided)', () => {
+    it('skips the v2 fetch and resolves via the data source', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
+      mockUseFetchSourceRule.mockReturnValue({
+        rule: { id: 'rule-1', metadata: { name: 'Classic rule' } } as unknown as RuleResponse,
+        ruleDetailsHref: '/base/app/management/insightsAndAlerting/triggersActions/rule/rule-1',
+        isLoading: false,
+        isError: false,
+      });
 
-    renderContainer();
+      renderContainer({ sourceRuleInfo: {} });
 
-    expect(screen.getByTestId('mockRuleSummaryFlyout')).toHaveTextContent('Fetched rule');
-  });
+      expect(mockUseFetchRule).toHaveBeenCalledWith(undefined);
+      expect(screen.getByTestId('mockSourceRuleSummaryFlyout')).toHaveTextContent('Classic rule');
+      expect(screen.getByTestId('mockSourceRuleSummaryFlyout')).toHaveAttribute(
+        'data-href',
+        '/base/app/management/insightsAndAlerting/triggersActions/rule/rule-1'
+      );
+    });
 
-  it('forwards toggle loading to the flyout', () => {
-    mockMutation.isLoading = true;
-    mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
+    it('renders loading while the source rule is being resolved', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+      mockUseFetchSourceRule.mockReturnValue({
+        ...noSourceRule,
+        isLoading: true,
+      });
 
-    renderContainer();
+      renderContainer({ sourceRuleInfo: {} });
 
-    expect(screen.getByTestId('mockRuleSummaryFlyout')).toHaveAttribute(
-      'data-toggle-loading',
-      'true'
-    );
-  });
+      expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
+    });
 
-  it('renders the not found flyout when the fetch fails', () => {
-    mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isError: true }));
+    it('renders entity not found when the source cannot resolve the rule', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+      mockUseFetchSourceRule.mockReturnValue(noSourceRule);
 
-    renderContainer();
+      renderContainer({ sourceRuleInfo: {} });
 
-    expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
+    });
   });
 });

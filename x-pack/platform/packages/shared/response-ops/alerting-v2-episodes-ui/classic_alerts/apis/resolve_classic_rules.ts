@@ -24,15 +24,47 @@ const buildClassicRuleIdsFilter = (ids: string[]): string =>
     )
   );
 
-interface ClassicFindRulesResponse {
-  data: Array<{ id: string; name: string; [key: string]: unknown }>;
+interface ClassicRule {
+  id: string;
+  name: string;
+  tags?: string[];
+  enabled?: boolean;
+  schedule?: { interval?: string };
+  params?: Record<string, unknown>;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
-const adaptClassicRule = (rule: ClassicFindRulesResponse['data'][number]): RuleResponse =>
-  ({
+interface ClassicFindRulesResponse {
+  data: ClassicRule[];
+}
+
+const extractGroupingFields = (params: Record<string, unknown> | undefined): string[] => {
+  const value = params?.termField ?? params?.groupBy;
+  return (Array.isArray(value) ? value : [value]).filter(
+    (v): v is string => typeof v === 'string' && v.length > 0
+  );
+};
+
+const adaptClassicRule = (rule: ClassicRule): RuleResponse => {
+  const groupingFields = extractGroupingFields(rule.params);
+  return {
     id: rule.id,
-    metadata: { name: rule.name },
-  } as unknown as RuleResponse);
+    enabled: rule.enabled ?? false,
+    metadata: {
+      name: rule.name,
+      tags: rule.tags ?? [],
+    },
+    schedule: rule.schedule?.interval ? { every: rule.schedule.interval } : undefined,
+    grouping: groupingFields.length > 0 ? { fields: groupingFields } : undefined,
+    created_by: rule.created_by ?? null,
+    updated_by: rule.updated_by ?? null,
+    created_at: rule.created_at ?? '',
+    updated_at: rule.updated_at ?? '',
+  } as unknown as RuleResponse;
+};
 
 export interface ResolveClassicRulesParams {
   ids: string[];
@@ -47,16 +79,12 @@ export const resolveClassicRules = async ({
     return [];
   }
 
-  try {
-    const response = await http.post<ClassicFindRulesResponse>(CLASSIC_RULES_FIND_API_PATH, {
-      body: JSON.stringify({
-        filter: buildClassicRuleIdsFilter(ids),
-        per_page: ids.length,
-        page: 1,
-      }),
-    });
-    return response.data.map(adaptClassicRule);
-  } catch {
-    return [];
-  }
+  const response = await http.post<ClassicFindRulesResponse>(CLASSIC_RULES_FIND_API_PATH, {
+    body: JSON.stringify({
+      filter: buildClassicRuleIdsFilter(ids),
+      per_page: ids.length,
+      page: 1,
+    }),
+  });
+  return response.data.map(adaptClassicRule);
 };

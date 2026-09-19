@@ -215,6 +215,9 @@ const AlertEpisodesListPageContent = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const [sourceRuleInfoToView, setSourceRuleInfoToView] = useState<
+    { category?: string } | undefined
+  >();
   const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
   const {
     flyout: composeFlyout,
@@ -225,9 +228,10 @@ const AlertEpisodesListPageContent = () => {
 
   // The rule and the episode flyout occupy the same edge of the screen, so only one of them
   // can be open at a time.
-  const openRuleFlyout = useCallback((ruleId: string) => {
+  const openRuleFlyout = useCallback((ruleId: string, sourceRuleInfo?: { category?: string }) => {
     setExpandedDoc(undefined);
     setRuleIdToView(ruleId);
+    setSourceRuleInfoToView(sourceRuleInfo);
   }, []);
 
   const expandDoc = useCallback((doc?: DataTableRecord) => {
@@ -402,8 +406,14 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
-    [rulesLocators]
+    (ruleId: string, isSourceRule?: boolean) => {
+      if (isSourceRule) {
+        const sourceHref = additionalDataSource?.getRuleDetailsHref?.(ruleId);
+        return sourceHref ? services.http.basePath.prepend(sourceHref) : '';
+      }
+      return rulesLocators.getRedirectUrl({ ruleId });
+    },
+    [rulesLocators, additionalDataSource, services.http.basePath]
   );
   const getEpisodeDetailsHref = useCallback(
     (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
@@ -676,6 +686,7 @@ const AlertEpisodesListPageContent = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
+          sourceRuleInfo={sourceRuleInfoToView}
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

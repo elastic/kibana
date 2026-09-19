@@ -9,6 +9,7 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_INSTANCE_ID,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
@@ -57,6 +58,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_STATUS,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_CONSUMER,
   ALERT_SEVERITY,
@@ -89,6 +91,7 @@ export interface ClassicAlertSource {
   [ALERT_STATUS]?: string;
   [ALERT_RULE_UUID]?: string;
   [ALERT_RULE_NAME]?: string;
+  [ALERT_RULE_CATEGORY]?: string;
   [ALERT_SEVERITY]?: string;
   [ALERT_WORKFLOW_STATUS]?: string;
   [ALERT_WORKFLOW_TAGS]?: string | string[];
@@ -168,6 +171,7 @@ export const mapClassicAlertToEpisode = (
     last_ack_action: source[ALERT_WORKFLOW_STATUS] === 'acknowledged' ? 'ack' : null,
     episode_data: null,
     severity: normalizeV1Severity(source[ALERT_SEVERITY]),
+    rule_category: source[ALERT_RULE_CATEGORY],
     supports_actions: false,
     supports_timeline: false,
     source_action_context: actionContext,
