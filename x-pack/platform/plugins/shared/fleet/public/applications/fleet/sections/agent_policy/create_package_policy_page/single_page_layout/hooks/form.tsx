@@ -42,11 +42,7 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import {
-  isVerificationError,
-  packageToPackagePolicy,
-  ExperimentalFeaturesService,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -280,9 +276,7 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
 
   // only used to store the resulting policy (package or agentless) once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<SavedPolicyResult>();
@@ -511,9 +505,11 @@ export function useOnSubmit({
         isAgentlessSelected ? 'agentless' : 'default',
         packageInfo
       );
-      const visibleForVarGroup =
-        !enableVarGroups ||
-        isInputVisibleForVarGroupSelections(input, packageInfo, varGroupSelections);
+      const visibleForVarGroup = isInputVisibleForVarGroupSelections(
+        input,
+        packageInfo,
+        varGroupSelections
+      );
       if (allowedForDeploymentMode && visibleForVarGroup) {
         if (isAgentlessSelected && !input.enabled && isSingleAgentlessInput) {
           return {
@@ -531,7 +527,6 @@ export function useOnSubmit({
     packagePolicy.var_group_selections,
     isAgentlessSelected,
     packageInfo,
-    enableVarGroups,
   ]);
 
   // Compare current vs desired input enabled states so the effect below only fires

@@ -291,9 +291,6 @@ describe('edit package policy page', () => {
     (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-      enableVarGroups: true,
-    } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
 
@@ -799,7 +796,6 @@ describe('edit package policy page', () => {
   describe('agentless policies UI kill switch', () => {
     it('skips the package-policy read when the isAgentless hint is set and the switch is on', async () => {
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
         enableAgentlessPoliciesUI: true,
       } as any);
       testRenderer.history.push('?isAgentless=true');
@@ -812,7 +808,6 @@ describe('edit package policy page', () => {
 
     it('ignores the isAgentless hint and keeps the package-policy read when the switch is off', async () => {
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
         enableAgentlessPoliciesUI: false,
       } as any);
       testRenderer.history.push('?isAgentless=true');

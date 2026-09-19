@@ -52,7 +52,6 @@ import {
 import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
 
 import {
@@ -108,10 +107,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     hideInVarGroupOptions,
   }) => {
     const { docLinks, cloud } = useStartServices();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const varGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const varGroups = packageInfo.var_groups;
 
     const isAgentless =
       (isEditPage || isAgentlessSelected) && Boolean(packagePolicy.supports_agentless);
