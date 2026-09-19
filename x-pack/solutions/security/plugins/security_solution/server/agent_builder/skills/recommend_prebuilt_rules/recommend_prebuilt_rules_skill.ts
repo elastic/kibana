@@ -105,6 +105,13 @@ The overview is **not** required for searches that use no \`tags\` filter (e.g. 
 
 For **install recommendations**, also call \`security.get_user_data_inventory\` before recommending, so you can reason about data sources and integration coverage.
 
+## Tool Discipline
+
+- **Answer from data already in the conversation.** If a previous tool result already answers the question — a \`total\` from an earlier search, the cached inventory, overview, or MITRE coverage — answer from it directly. Do not re-call a tool to re-fetch or re-confirm data you already hold; the three context tools are session-cached, and the same rule applies to every \`security.find_prebuilt_rules\` result.
+- **Rule-catalog facts come only from this skill's tools.** Never call \`platform.core.search\`, \`platform.core.execute_esql\`, \`platform.core.generate_esql\`, \`platform.core.list_indices\`, or \`platform.core.index_explorer\` to hunt for rules, tags, or MITRE coverage — the installable catalog is only visible through \`security.find_prebuilt_rules\`, and ad-hoc index queries cannot see it. If a filter returns nothing, say so or broaden the filter; do not fall back to raw index searches.
+- **Bound corroboration.** One survey, one shortlist, one deepen pass per user request. Do not re-run the same \`security.find_prebuilt_rules\` filter to double-check a result you already have, and do not fan out extra searches "just in case" — if a result looks wrong, tighten or change the filter rather than repeating the call.
+- **Stop when the answer is delivered.** Once you have presented the recommendation, count, or coverage answer, make no further tool calls that turn — no post-answer verification calls and no extra searches after the result is on the page.
+
 ## Grounding
 
 Every tag value, rule name, \`rule_id\`, count, total, and MITRE tactic/technique you state must come from a tool result in this conversation. Never invent tag values, rule names, or counts.
