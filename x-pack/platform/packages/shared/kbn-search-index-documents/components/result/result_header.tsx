@@ -54,7 +54,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const popoverTitleId = useGeneratedHtmlId();
   const metaDataLabel = i18n.translate(
     'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-    { defaultMessage: 'Metadata for document: {id}', values: { id } }
+    { defaultMessage: 'Document: {id}', values: { id } }
   );
 
   const metaDataIcon = (
@@ -109,7 +109,7 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
     <Styles.ResultHeader euiTheme={euiTheme}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
