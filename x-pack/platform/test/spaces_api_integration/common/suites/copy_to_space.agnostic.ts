@@ -188,7 +188,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               type: 'dashboard',
               meta: {
                 title: `This is the ${spaceId} test space CTS dashboard`,
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
               },
               destinationId: dashboardDestinationId,
               managed: false,
@@ -235,7 +235,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               id: `cts_ip_1_${spaceId}`,
               type: 'index-pattern',
               meta: {
-                icon: 'indexPatternApp',
+                icon: 'pattern',
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
               destinationId: indexPatternDestinationId,
@@ -244,21 +244,21 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
             {
               id: `cts_vis_1_${spaceId}`,
               type: 'visualization',
-              meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+              meta: { icon: 'chartBarVertical', title: `CTS vis 1 from ${spaceId} space` },
               destinationId: vis1DestinationId,
               managed: false,
             },
             {
               id: `cts_vis_2_${spaceId}`,
               type: 'visualization',
-              meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+              meta: { icon: 'chartBarVertical', title: `CTS vis 2 from ${spaceId} space` },
               destinationId: vis2DestinationId,
               managed: false,
             },
             {
               id: `cts_vis_3_${spaceId}`,
               type: 'visualization',
-              meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
+              meta: { icon: 'chartBarVertical', title: `CTS vis 3 from ${spaceId} space` },
               destinationId: vis3DestinationId,
               managed: false,
             },
@@ -266,7 +266,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               id: `cts_dashboard_${spaceId}`,
               type: 'dashboard',
               meta: {
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
                 title: `This is the ${spaceId} test space CTS dashboard`,
               },
               destinationId: dashboardDestinationId,
@@ -367,7 +367,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               id: `cts_ip_1_${spaceId}`,
               type: 'index-pattern',
               meta: {
-                icon: 'indexPatternApp',
+                icon: 'pattern',
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
               overwrite: true,
@@ -377,21 +377,21 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
             {
               id: `cts_vis_1_${spaceId}`,
               type: 'visualization',
-              meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+              meta: { icon: 'chartBarVertical', title: `CTS vis 1 from ${spaceId} space` },
               destinationId: vis1DestinationId,
               managed: false,
             },
             {
               id: `cts_vis_2_${spaceId}`,
               type: 'visualization',
-              meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+              meta: { icon: 'chartBarVertical', title: `CTS vis 2 from ${spaceId} space` },
               destinationId: vis2DestinationId,
               managed: false,
             },
             {
               id: `cts_vis_3_${spaceId}`,
               type: 'visualization',
-              meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
+              meta: { icon: 'chartBarVertical', title: `CTS vis 3 from ${spaceId} space` },
               overwrite: true,
               destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               managed: false,
@@ -400,7 +400,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               id: `cts_dashboard_${spaceId}`,
               type: 'dashboard',
               meta: {
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
                 title: `This is the ${spaceId} test space CTS dashboard`,
               },
               overwrite: true,
@@ -437,14 +437,14 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
         {
           id: `cts_vis_1_${spaceId}`,
           type: 'visualization',
-          meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+          meta: { icon: 'chartBarVertical', title: `CTS vis 1 from ${spaceId} space` },
           destinationId: vis1DestinationId,
           managed: false,
         },
         {
           id: `cts_vis_2_${spaceId}`,
           type: 'visualization',
-          meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+          meta: { icon: 'chartBarVertical', title: `CTS vis 2 from ${spaceId} space` },
           destinationId: vis2DestinationId,
           managed: false,
         },
@@ -459,7 +459,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           type: 'dashboard',
           meta: {
             title: `This is the ${spaceId} test space CTS dashboard`,
-            icon: 'dashboardApp',
+            icon: 'productDashboard',
           },
         },
         {
@@ -471,7 +471,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           type: 'index-pattern',
           meta: {
             title: `Copy to Space index pattern 1 from ${spaceId} space`,
-            icon: 'indexPatternApp',
+            icon: 'pattern',
           },
         },
         {
@@ -483,7 +483,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           type: 'visualization',
           meta: {
             title: `CTS vis 3 from ${spaceId} space`,
-            icon: 'visualizeApp',
+            icon: 'chartBarVertical',
           },
         },
       ];

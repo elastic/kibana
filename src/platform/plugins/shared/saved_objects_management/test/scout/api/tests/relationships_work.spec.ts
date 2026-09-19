@@ -41,7 +41,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           relationship: 'child',
           meta: {
             title: 'saved_objects*',
-            icon: 'indexPatternApp',
+            icon: 'pattern',
             namespaceType: 'multiple',
             hiddenType: false,
           },
@@ -53,7 +53,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           relationship: 'parent',
           meta: {
             title: 'VisualizationFromSavedSearch',
-            icon: 'visualizeApp',
+            icon: 'chartBarVertical',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
           },
@@ -77,7 +77,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           type: 'visualization',
           relationship: 'child',
           meta: {
-            icon: 'visualizeApp',
+            icon: 'chartBarVertical',
             title: 'Visualization',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
@@ -89,7 +89,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           type: 'visualization',
           relationship: 'child',
           meta: {
-            icon: 'visualizeApp',
+            icon: 'chartBarVertical',
             title: 'VisualizationFromSavedSearch',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
@@ -114,7 +114,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           type: 'search',
           relationship: 'child',
           meta: {
-            icon: 'discoverApp',
+            icon: 'productDiscover',
             title: 'OneRecord',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
@@ -126,7 +126,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           type: 'dashboard',
           relationship: 'parent',
           meta: {
-            icon: 'dashboardApp',
+            icon: 'productDashboard',
             title: 'Dashboard',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
@@ -151,7 +151,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           type: 'search',
           relationship: 'parent',
           meta: {
-            icon: 'discoverApp',
+            icon: 'productDiscover',
             title: 'OneRecord',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
@@ -163,7 +163,7 @@ apiTest.describe('relationships - should work', { tag: tags.deploymentAgnostic }
           type: 'visualization',
           relationship: 'parent',
           meta: {
-            icon: 'visualizeApp',
+            icon: 'chartBarVertical',
             title: 'Visualization',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
