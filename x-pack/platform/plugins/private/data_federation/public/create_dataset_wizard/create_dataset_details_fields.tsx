@@ -115,7 +115,6 @@ export function CreateDatasetDetailsFields({
           data-test-subj="createDatasetDescription"
           fullWidth
           rows={1}
-          placeholder={createDatasetWizardStrings.descriptionPlaceholder}
           value={descriptionField.value}
           onChange={(e) => descriptionField.onChange(e.target.value)}
           name={descriptionField.name}

@@ -91,7 +91,7 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetName')).toHaveAttribute('placeholder', 'e.g. my-dataset');
     expect(getByText('Description (optional)')).toBeInTheDocument();
     expect(getByText('A brief description to identify this dataset')).toBeInTheDocument();
-    expect(getByTestId('createDatasetDescription')).toHaveAttribute('placeholder', 'Type text');
+    expect(getByTestId('createDatasetDescription')).not.toHaveAttribute('placeholder');
     expect(
       getByText('URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)')
     ).toBeInTheDocument();

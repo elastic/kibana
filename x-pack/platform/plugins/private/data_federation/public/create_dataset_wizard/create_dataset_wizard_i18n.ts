@@ -41,7 +41,7 @@ export const createDatasetWizardStrings = {
     }),
 
   nameRequired: i18n.translate('xpack.dataFederation.createDatasetForm.nameRequired', {
-      defaultMessage: 'Name is required.',
+    defaultMessage: 'Name is required.',
   }),
 
   nameAlreadyExists: i18n.translate('xpack.dataFederation.createDatasetForm.nameAlreadyExists', {
@@ -77,13 +77,6 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'A brief description to identify this dataset',
   }),
 
-  descriptionPlaceholder: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.descriptionPlaceholder',
-    {
-      defaultMessage: 'Type text',
-    }
-  ),
-
   connectNewDataSourceDropDownOptionLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.connectNewDataSourceDropDownOptionLabel',
     {
@@ -114,7 +107,7 @@ export const createDatasetWizardStrings = {
   }),
 
   resourceHelp: i18n.translate('xpack.dataFederation.createDatasetForm.resourceHelp', {
-    defaultMessage: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
+    defaultMessage: 'URI with path and glob pattern (e.g. s3://logs-bucket/access/**/*.parquet)',
   }),
 
   settingsFormatRequired: i18n.translate(
@@ -477,19 +470,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsQuoteLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsQuoteLabel',
-    {
-      defaultMessage: 'Quote character',
-    }
-  ),
+  settingsQuoteLabel: i18n.translate('xpack.dataFederation.createDatasetForm.settingsQuoteLabel', {
+    defaultMessage: 'Quote character',
+  }),
 
-  settingsQuoteHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsQuoteHelp',
-    {
-      defaultMessage: 'The character used to quote fields.',
-    }
-  ),
+  settingsQuoteHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsQuoteHelp', {
+    defaultMessage: 'The character used to quote fields.',
+  }),
 
   settingsEscapeLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEscapeLabel',
@@ -498,12 +485,9 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsEscapeHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsEscapeHelp',
-    {
-      defaultMessage: 'The character used to escape special characters.',
-    }
-  ),
+  settingsEscapeHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsEscapeHelp', {
+    defaultMessage: 'The character used to escape special characters.',
+  }),
 
   settingsCommentLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsCommentLabel',
