@@ -10,12 +10,20 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
+import {
+  DATADOG_ALERT_EVENT_ID,
+  DATADOG_ALERT_EVENT_KEY,
+  DATADOG_CONNECTOR_TYPE_ID,
+} from './constants';
 import {
   CancelDowntimeInputSchema,
   CreateIncidentInputSchema,
   DATADOG_SITE_API_URLS,
   DATADOG_SITES,
+  DatadogReceivedEventSchema,
   GetAlertEventsInputSchema,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
@@ -112,9 +120,22 @@ function formatDatadogError(action: string, error: unknown): Error {
 const joinCsv = (values: string[] | undefined): string | undefined =>
   values && values.length > 0 ? values.join(',') : undefined;
 
+const handleDatadogEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => ({
+  type: 'emit',
+  events: [
+    {
+      eventId: DATADOG_ALERT_EVENT_ID,
+      correlationKey: uuidv4(),
+      payload: {
+        body: ctx.rawBody,
+      },
+    },
+  ],
+});
+
 export const Datadog: ConnectorSpec = {
   metadata: {
-    id: '.datadog',
+    id: DATADOG_CONNECTOR_TYPE_ID,
     displayName: 'Datadog',
     description: i18n.translate('core.kibanaConnectorSpecs.datadog.metadata.description', {
       defaultMessage:
@@ -562,6 +583,23 @@ export const Datadog: ConnectorSpec = {
         }
       },
     },
+  },
+
+  events: {
+    definitions: {
+      [DATADOG_ALERT_EVENT_KEY]: {
+        eventId: DATADOG_ALERT_EVENT_ID,
+        title: i18n.translate('core.kibanaConnectorSpecs.datadog.events.alert.title', {
+          defaultMessage: 'Alert',
+        }),
+        description: i18n.translate('core.kibanaConnectorSpecs.datadog.events.alert.description', {
+          defaultMessage:
+            'A Datadog alert webhook payload was accepted on the connector ingest URL.',
+        }),
+        eventSchema: DatadogReceivedEventSchema,
+      },
+    },
+    handleEvents: handleDatadogEvents,
   },
 
   skill: [
