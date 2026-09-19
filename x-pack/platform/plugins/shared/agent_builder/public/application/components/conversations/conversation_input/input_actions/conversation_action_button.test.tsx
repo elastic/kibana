@@ -21,7 +21,6 @@ const defaultStreamState = {
   canCancel: false,
   cancel: jest.fn(),
   pendingMessage: undefined,
-  error: undefined,
   isResuming: false,
   isResponseLoading: false,
   sendMessage: jest.fn(),
@@ -88,7 +87,6 @@ describe('ConversationActionButton', () => {
         resetToPendingMessage={resetToPendingMessage}
       />
     );
-
     expect(
       screen.queryByTestId('agentBuilderConversationInputSubmitButton')
     ).not.toBeInTheDocument();

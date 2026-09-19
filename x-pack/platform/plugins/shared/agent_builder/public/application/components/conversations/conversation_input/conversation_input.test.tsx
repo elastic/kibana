@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ConversationInput } from './conversation_input';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -21,6 +21,7 @@ import {
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -51,6 +52,9 @@ jest.mock('../../../context/conversation/conversation_context', () => ({
 jest.mock('../../../hooks/use_submit_message', () => ({
   useSubmitMessage: jest.fn(),
 }));
+jest.mock('../../../hooks/use_send_user_message', () => ({
+  useSendUserMessage: jest.fn(),
+}));
 jest.mock('../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
@@ -64,7 +68,23 @@ jest.mock('./message_editor', () => ({
   CommandBadgeSerializationError: class extends Error {},
 }));
 jest.mock('./input_actions', () => ({
-  InputActions: () => null,
+  InputActions: ({
+    showTriggerModeToggle,
+    triggerMode,
+    onTriggerModeChange,
+  }: {
+    showTriggerModeToggle: boolean;
+    triggerMode: string;
+    onTriggerModeChange: (mode: string) => void;
+  }) =>
+    showTriggerModeToggle ? (
+      <input
+        data-test-subj="mock-agent-toggle"
+        type="checkbox"
+        checked={triggerMode === 'always'}
+        onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
+      />
+    ) : null,
 }));
 jest.mock('./attachment_pill', () => ({
   AttachmentPill: ({
@@ -92,6 +112,7 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
 }));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  formatAgentBuilderErrorMessage: (error: Error) => error.message,
 }));
 
 const mockedUseConversationStream = jest.mocked(useConversationStream);
@@ -105,12 +126,15 @@ const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
 const mockedUseConversationId = jest.mocked(useConversationId);
 const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
+const mockedUseSendUserMessage = jest.mocked(useSendUserMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 
 const submitMessage = jest.fn();
+const sendUserMessage = jest.fn();
+const addErrorToast = jest.fn();
 const editorController = {
   focus: jest.fn(),
   getContent: jest.fn().mockReturnValue('hello agent'),
@@ -129,7 +153,6 @@ describe('ConversationInput', () => {
 
     mockedUseConversationStream.mockReturnValue({
       pendingMessage: undefined,
-      error: undefined,
       isResuming: false,
       isResponseLoading: false,
     } as never);
@@ -157,9 +180,14 @@ describe('ConversationInput', () => {
       },
     } as never);
     mockedUseExperimentalFeatures.mockReturnValue(true);
-    mockedUseSubmitMessage.mockReturnValue(submitMessage);
+    mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
+    sendUserMessage.mockResolvedValue({ id: 'conv-1' });
+    mockedUseSendUserMessage.mockReturnValue({
+      mutateAsync: sendUserMessage,
+      isLoading: false,
+    } as never);
     mockedUseToasts.mockReturnValue({
-      addErrorToast: jest.fn(),
+      addErrorToast,
       addSuccessToast: jest.fn(),
     } as never);
     mockedUseMessageEditor.mockReturnValue({
@@ -189,6 +217,62 @@ describe('ConversationInput', () => {
     expect(submitMessage).toHaveBeenCalledTimes(1);
     expect(submitMessage).toHaveBeenCalledWith('hello agent');
     expect(editorController.clear).toHaveBeenCalledTimes(1);
+  });
+
+  describe('run agent toggle', () => {
+    it('is not offered for a new conversation', () => {
+      render(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+    });
+
+    it('is not offered when experimental features are off', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+
+      render(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+    });
+
+    it('sends without running the agent when switched off and clears the editor on success', async () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      const onSubmit = jest.fn();
+
+      render(<ConversationInput onSubmit={onSubmit} />);
+
+      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(sendUserMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).not.toHaveBeenCalled();
+      await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the editor content and shows a toast when the send fails', async () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      sendUserMessage.mockRejectedValue(new Error('boom'));
+
+      render(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      await waitFor(() => expect(addErrorToast).toHaveBeenCalledWith({ title: 'boom' }));
+      expect(editorController.clear).not.toHaveBeenCalled();
+    });
+
+    it('runs the agent when switched on', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+
+      render(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(sendUserMessage).not.toHaveBeenCalled();
+    });
   });
 
   it('hides the message input for read-only conversations', () => {

@@ -6,27 +6,7 @@
  */
 
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import {
-  isConversationCreatedEvent,
-  isMessageChunkEvent,
-  isMessageCompleteEvent,
-  isPromptRequestEvent,
-  isReasoningEvent,
-  isRoundCompleteEvent,
-  isToolCallEvent,
-  isToolProgressEvent,
-  isToolResultEvent,
-  isThinkingCompleteEvent,
-  isCompactionStartedEvent,
-  isCompactionCompletedEvent,
-  isBackgroundAgentCompleteEvent,
-  isTodosUpdatedEvent,
-  ConversationRoundStepType,
-} from '@kbn/agent-builder-common';
-import {
-  createReasoningStep,
-  createToolCallStep,
-} from '@kbn/agent-builder-common/chat/conversation';
+import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
@@ -42,14 +22,10 @@ interface SubscribeOptions {
 }
 
 /**
- * Subscribe to a chat event stream and dispatch every event to the conversation cache via
- * `conversationActions`. Returns a Promise that resolves when the stream completes (success
- * or abort) and rejects on a real error.
- *
- * Plain function (not a hook) so mutation `mutationFn` can call it inline. Takes
- * `conversationActions` as a parameter rather than reading from React context — each mutation
- * builds its own actions targeting the mutation-owned conversation id, so events keep writing
- * to the right cache regardless of where the user has navigated.
+ * Subscribe to a chat event stream. Live content is folded by `ConversationStreamService`;
+ * this only reacts to the events that mean the server has written something (refetch) and to
+ * browser tool calls. Returns a Promise that resolves when the stream completes (success or
+ * abort) and rejects on a real error.
  */
 export const subscribeToChatEvents = ({
   events$,
@@ -59,46 +35,10 @@ export const subscribeToChatEvents = ({
   isAborted,
 }: SubscribeOptions): Promise<void> => {
   const nextChatEvent = (event: ChatEvent) => {
-    if (isMessageChunkEvent(event)) {
-      conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
-    } else if (isMessageCompleteEvent(event)) {
-      conversationActions.setAssistantMessage({
-        assistantMessage: event.data.message_content,
-      });
-    } else if (isToolProgressEvent(event)) {
-      conversationActions.setToolCallProgress({
-        progress: {
-          message: event.data.message,
-          metadata: event.data.metadata ?? {},
-        },
-        toolCallId: event.data.tool_call_id,
-      });
-    } else if (isReasoningEvent(event)) {
-      // Skip transient reasoning entirely. The backend emits these as
-      // throwaway "thinking..." placeholders that aren't meant to be
-      // persisted, rendered as a step, or surfaced as the live indicator.
-      if (event.data.transient) {
-        return;
-      }
-      conversationActions.clearAssistantMessage();
-      conversationActions.addReasoningStep({
-        step: createReasoningStep({
-          reasoning: event.data.reasoning,
-          tool_call_id: event.data.tool_call_id,
-          tool_call_group_id: event.data.tool_call_group_id,
-        }),
-      });
-    } else if (isToolCallEvent(event)) {
-      conversationActions.addToolCall({
-        step: createToolCallStep({
-          params: event.data.params,
-          results: [],
-          tool_call_id: event.data.tool_call_id,
-          tool_id: event.data.tool_id,
-          tool_call_group_id: event.data.tool_call_group_id,
-          tool_origin: event.data.tool_origin,
-        }),
-      });
+    if (isExecutionStartedEvent(event)) {
+      conversationActions.onExecutionStarted();
+    } else if (isExecutionTerminatedEvent(event)) {
+      conversationActions.onExecutionTerminated();
     } else if (isBrowserToolCallEvent(event)) {
       const toolId = event.data.tool_id;
       if (toolId && browserToolExecutor && browserApiTools) {
@@ -123,42 +63,6 @@ export const subscribeToChatEvents = ({
             });
         }
       }
-    } else if (isToolResultEvent(event)) {
-      const { tool_call_id: toolCallId, results } = event.data;
-      conversationActions.setToolCallResult({ results, toolCallId });
-    } else if (isRoundCompleteEvent(event)) {
-      if (event.data.attachments) {
-        conversationActions.setAttachments({ attachments: event.data.attachments });
-      }
-      conversationActions.onRoundComplete(event.data.round);
-    } else if (isConversationCreatedEvent(event)) {
-      conversationActions.onConversationCreated({ title: event.data.title });
-    } else if (isThinkingCompleteEvent(event)) {
-      conversationActions.setTimeToFirstToken({
-        timeToFirstToken: event.data.time_to_first_token,
-      });
-    } else if (isPromptRequestEvent(event)) {
-      conversationActions.addPendingPrompt({
-        prompt: event.data.prompt,
-      });
-    } else if (isCompactionStartedEvent(event)) {
-      conversationActions.addCompactionStep({
-        tokenCountBefore: event.data.token_count_before,
-      });
-    } else if (isCompactionCompletedEvent(event)) {
-      conversationActions.setCompactionStepComplete({
-        tokenCountAfter: event.data.token_count_after,
-        summarizedRoundCount: event.data.summarized_round_count,
-      });
-    } else if (isBackgroundAgentCompleteEvent(event)) {
-      conversationActions.addBackgroundExecutionCompleteStep({
-        step: {
-          type: ConversationRoundStepType.backgroundAgentComplete,
-          ...event.data.execution,
-        },
-      });
-    } else if (isTodosUpdatedEvent(event)) {
-      conversationActions.addOrUpdateTodosStep({ todos: event.data.data.todos });
     }
   };
 

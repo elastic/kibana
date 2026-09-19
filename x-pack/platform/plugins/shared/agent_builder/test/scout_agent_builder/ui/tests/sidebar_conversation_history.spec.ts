@@ -70,7 +70,7 @@ test.describe.skip(
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.selectEmbeddableConversation(conversationIds[0]);
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             CONVERSATION_DATA[0].expectedResponse
           );
         }).toPass({ timeout: 120_000 });
@@ -78,7 +78,7 @@ test.describe.skip(
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.selectEmbeddableConversation(conversationIds[1]);
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             CONVERSATION_DATA[1].expectedResponse
           );
         }).toPass({ timeout: 120_000 });

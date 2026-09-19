@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 const connectorFlexItemStyles = css`
   flex-shrink: 1;
@@ -17,18 +19,28 @@ const connectorFlexItemStyles = css`
   overflow: hidden;
 `;
 
+const runAgentLabel = i18n.translate('xpack.agentBuilder.conversationInput.runAgentSwitch.label', {
+  defaultMessage: 'Run agent',
+});
+
 interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
+  isSubmitting: boolean;
   resetToPendingMessage: () => void;
-  agentId?: string;
+  showTriggerModeToggle: boolean;
+  triggerMode: ChatTriggerMode;
+  onTriggerModeChange: (mode: ChatTriggerMode) => void;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
+  isSubmitting,
   resetToPendingMessage,
-  agentId,
+  showTriggerModeToggle,
+  triggerMode,
+  onTriggerModeChange,
 }) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup
@@ -42,10 +54,25 @@ export const InputActions: React.FC<InputActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          {showTriggerModeToggle && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={runAgentLabel}
+                checked={triggerMode === ChatTriggerMode.Always}
+                onChange={(event) =>
+                  onTriggerModeChange(
+                    event.target.checked ? ChatTriggerMode.Always : ChatTriggerMode.Never
+                  )
+                }
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ConversationActionButton
               onSubmit={onSubmit}
               isSubmitDisabled={isSubmitDisabled}
+              isSubmitting={isSubmitting}
               resetToPendingMessage={resetToPendingMessage}
             />
           </EuiFlexItem>

@@ -10,17 +10,17 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { RoundTraceFlyout } from './round_trace_flyout';
+import { TraceFlyout } from './trace_flyout';
 
 const ariaLabel = i18n.translate('xpack.agentBuilder.round.traceButton.ariaLabel', {
   defaultMessage: 'View Trace',
 });
 
-interface RoundTraceButtonProps {
+interface TraceButtonProps {
   traceId: string;
 }
 
-export const RoundTraceButton: React.FC<RoundTraceButtonProps> = ({ traceId }) => {
+export const TraceButton: React.FC<TraceButtonProps> = ({ traceId }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
@@ -40,7 +40,7 @@ export const RoundTraceButton: React.FC<RoundTraceButtonProps> = ({ traceId }) =
           detail: 'conversation',
         })}
       />
-      {isFlyoutOpen && <RoundTraceFlyout traceId={traceId} onClose={closeFlyout} />}
+      {isFlyoutOpen && <TraceFlyout traceId={traceId} onClose={closeFlyout} />}
     </>
   );
 };

@@ -185,6 +185,7 @@ export {
   type AgentCreateRequest,
   type AgentUpdateRequest,
   type AgentDeleteRequest,
+  type PromptRequest,
 } from './agents';
 export {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
@@ -250,6 +251,7 @@ export {
   isTodosStep,
   findTodosStep,
   type TodosStep,
+  type TodoItem,
   carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
@@ -407,6 +409,7 @@ export {
   resumeExecutionId,
   parseExecutionId,
   executionTerminatedEventId,
+  executionStepEventId,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,

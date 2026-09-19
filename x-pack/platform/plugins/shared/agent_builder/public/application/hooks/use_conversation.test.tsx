@@ -15,11 +15,12 @@ import {
   ConversationAccessControlRole,
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
+import { NEVER } from 'rxjs';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
-import { pendingRoundId } from '../utils/new_conversation';
+import { ConversationStreamService } from '../../services/events/conversation_stream_service';
 import { queryKeys } from '../query_keys';
-import { useConversation, useIsUnpersistedConversation } from './use_conversation';
+import { useConversation, useConversationReadOnly } from './use_conversation';
 
 jest.mock('../context/conversation/use_conversation_id', () => ({
   useConversationId: jest.fn(),
@@ -44,90 +45,14 @@ jest.mock('./use_last_agent_id', () => ({
   useLastAgentId: () => ({ agentId: undefined }),
 }));
 
+const stubConversationStreamService = new ConversationStreamService({
+  getChatEvents$: () => NEVER,
+  getStreamEnded$: () => NEVER,
+});
+
 const mockUseConversationId = jest.mocked(useConversationId);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseStreamRecord = jest.mocked(useStreamRecord);
-
-const createConversation = (roundIds: string[]) =>
-  ({
-    id: 'conversation-1',
-    rounds: roundIds.map((id) => ({ id })),
-  } as Conversation);
-
-const renderUseIsUnpersistedConversation = ({
-  conversation = createConversation([]),
-  isStreaming = false,
-  pendingMessage,
-  error,
-}: {
-  conversation?: Conversation;
-  isStreaming?: boolean;
-  pendingMessage?: string;
-  error?: Error;
-} = {}) => {
-  mockUseConversationId.mockReturnValue('conversation-1');
-  mockUseStreamingContext.mockReturnValue({
-    activeStreams: isStreaming ? new Map([['conversation-1', { type: 'send' }]]) : new Map(),
-    byConversationId: {},
-    mutateSendMessage: jest.fn(),
-    mutateResumeRound: jest.fn(),
-    cancelStream: jest.fn(),
-    cancelAllStreams: jest.fn(),
-    removeError: jest.fn(),
-    removeAllErrors: jest.fn(),
-  });
-  mockUseStreamRecord.mockReturnValue({
-    pendingMessage,
-    error,
-    errorSteps: [],
-  });
-
-  return renderHook(() => useIsUnpersistedConversation(conversation));
-};
-
-describe('useIsUnpersistedConversation', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns true while a new conversation still has the optimistic pending round', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: createConversation([pendingRoundId]),
-      isStreaming: true,
-    });
-
-    expect(result.current).toBe(true);
-  });
-
-  it('returns true after an unpersisted new conversation stream fails', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: createConversation([]),
-      pendingMessage: 'hello',
-      error: new Error('boom'),
-    });
-
-    expect(result.current).toBe(true);
-  });
-
-  it('returns false during later streams on persisted conversations', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: createConversation(['round-1']),
-      isStreaming: true,
-    });
-
-    expect(result.current).toBe(false);
-  });
-
-  it('returns false for persisted conversations with rounds after stream errors', () => {
-    const { result } = renderUseIsUnpersistedConversation({
-      conversation: createConversation(['round-1']),
-      pendingMessage: 'hello',
-      error: new Error('boom'),
-    });
-
-    expect(result.current).toBe(false);
-  });
-});
 
 const conversationId = 'conversation-1';
 
@@ -181,14 +106,13 @@ describe('useConversation polling', () => {
     mockUseStreamingContext.mockReturnValue({
       activeStreams: new Map(),
       byConversationId: {},
+      conversationStreamService: stubConversationStreamService,
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
       cancelAllStreams: jest.fn(),
-      removeError: jest.fn(),
-      removeAllErrors: jest.fn(),
     });
-    mockUseStreamRecord.mockReturnValue({ errorSteps: [] });
+    mockUseStreamRecord.mockReturnValue({});
   });
 
   afterEach(() => {
@@ -277,17 +201,33 @@ describe('useConversation polling', () => {
     queryClient.clear();
   });
 
-  it('does not poll while this conversation is streaming', async () => {
+  const setStreaming = () => {
     mockUseStreamingContext.mockReturnValue({
       activeStreams: new Map([[conversationId, { type: 'send' }]]),
       byConversationId: {},
+      conversationStreamService: stubConversationStreamService,
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
       cancelAllStreams: jest.fn(),
-      removeError: jest.fn(),
-      removeAllErrors: jest.fn(),
     });
+  };
+
+  it('fetches a streaming conversation like any other', async () => {
+    setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
+    const { queryClient, Wrapper } = createWrapper();
+
+    renderHook(() => useConversation(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+
+    queryClient.clear();
+  });
+
+  it('keeps fetching a streaming conversation once it is in the cache', async () => {
+    setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
     const { queryClient, Wrapper } = createWrapper();
     queryClient.setQueryData(
       queryKeys.conversations.byId(conversationId),
@@ -296,9 +236,26 @@ describe('useConversation polling', () => {
 
     renderHook(() => useConversation(), { wrapper: Wrapper });
 
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+
+    queryClient.clear();
+  });
+
+  it('does not poll a shared conversation while this client streams into it', async () => {
+    setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
+    const { queryClient, Wrapper } = createWrapper();
+    queryClient.setQueryData(
+      queryKeys.conversations.byId(conversationId),
+      createFetchedConversation(publicAcl)
+    );
+
+    renderHook(() => useConversation(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
     await advance(10_000);
 
-    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockGet).toHaveBeenCalledTimes(1);
 
     queryClient.clear();
   });
@@ -334,6 +291,36 @@ describe('useConversation polling', () => {
     expect(mockGet).toHaveBeenCalledTimes(2);
     expect(result.current.conversation).toBe(firstConversation);
 
+    queryClient.clear();
+  });
+});
+
+describe('useConversationReadOnly', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseConversationId.mockReturnValue(conversationId);
+    mockUseStreamRecord.mockReturnValue({});
+  });
+
+  const setStreaming = (isStreaming: boolean) =>
+    mockUseStreamingContext.mockReturnValue({
+      activeStreams: isStreaming ? new Map([[conversationId, { type: 'send' }]]) : new Map(),
+      byConversationId: {},
+      conversationStreamService: stubConversationStreamService,
+      mutateSendMessage: jest.fn(),
+      mutateResumeRound: jest.fn(),
+      cancelStream: jest.fn(),
+      cancelAllStreams: jest.fn(),
+    });
+
+  it('reports loading while an opened conversation is fetched for the first time', async () => {
+    setStreaming(false);
+    mockGet.mockReturnValue(new Promise(() => {}));
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useConversationReadOnly(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
     queryClient.clear();
   });
 });

@@ -16,10 +16,8 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { createNewRound, pendingRoundId } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
-import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
@@ -31,23 +29,13 @@ export const useConversation = () => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { byConversationId } = useStreamingContext();
 
-  // Disable the query when this conversation is being written to by a stream, OR when
-  // its cached state shows a HITL pause, OR when there's an unpersisted error in the
-  // per-conversation error map. The cache is authoritative in all three cases; a
-  // refetch would race with optimistic chunks (streaming), or with the resume mutation
-  // about to fire (HITL), or 404 a fresh conversation that errored before the backend
-  // persisted it (overriding the in-round error UI with "Conversation not found").
-  const isAwaitingPrompt =
-    queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
-    ConversationRoundStatus.awaitingPrompt;
-
+  const cached = queryClient.getQueryData<Conversation>(queryKey);
   const isThisConversationStreaming = useIsCurrentConversationStreaming();
 
-  const hasUnpersistedError = conversationId
-    ? Boolean(byConversationId[conversationId]?.error)
-    : false;
+  // @todo: HITL guard (#291069), unchanged.
+  const isAwaitingPrompt =
+    cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
 
   const {
     data: conversation,
@@ -58,11 +46,7 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    enabled:
-      Boolean(conversationId) &&
-      !isThisConversationStreaming &&
-      !isAwaitingPrompt &&
-      !hasUnpersistedError,
+    enabled: Boolean(conversationId) && !isAwaitingPrompt,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -80,8 +64,12 @@ export const useConversation = () => {
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
     // Shared conversations can be written to by other participants, so poll for their rounds.
+    // Do not poll while this client streams: the poll would show the saved copy of the pending
+    // message before `execution_started` supplies the id that lets the timeline match the two.
     refetchInterval: (data) =>
-      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
+      isSharedConversation(data?.access_control) && !isThisConversationStreaming
+        ? POLL_INTERVAL_MS
+        : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
@@ -156,41 +144,14 @@ export const useConversationReadOnly = () => {
 
   return {
     isReadOnly: conversation?.read_only ?? false,
-    // Not `isLoading`: v4 reports it for disabled queries too, and this query stays disabled
-    // for the whole stream that creates a conversation.
+    // Not `isLoading`: v4 reports it for disabled queries too.
     isLoading: Boolean(conversationId) && !conversation && isFetching,
   };
 };
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const conversationId = useConversationId();
-  const { pendingMessage, error, errorSteps } = useStreamRecord(conversationId);
-
-  const conversationRounds = useMemo(() => {
-    const rounds = conversation?.rounds ?? [];
-    if (Boolean(error) && pendingMessage) {
-      const pendingRound = createNewRound({
-        userMessage: pendingMessage,
-        steps: errorSteps,
-      });
-      return [...rounds, pendingRound];
-    }
-    return rounds;
-  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
-
-  return conversationRounds;
-};
-
-// Returns a flattened list of all steps across all rounds.
-// CAUTION: This uses `conversationRounds.length` as useMemo key to prevent re-renders during streaming. This will return stale data for the last round. It will only contain the complete set of steps up until the previous round.
-export const useStepsFromPrevRounds = () => {
-  const conversationRounds = useConversationRounds();
-
-  return useMemo(() => {
-    return conversationRounds.flatMap(({ steps }) => steps);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationRounds.length]); // only depend on length to avoid re-renders during streaming
+  return useMemo(() => conversation?.rounds ?? [], [conversation?.rounds]);
 };
 
 export const useHasActiveConversation = () => {
@@ -202,17 +163,6 @@ export const useHasActiveConversation = () => {
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
-};
-
-export const useIsUnpersistedConversation = (conversation?: Conversation) => {
-  const conversationId = useConversationId();
-  const { pendingMessage, error } = useStreamRecord(conversationId);
-  const isConversationStreaming = useIsCurrentConversationStreaming();
-
-  return Boolean(
-    (isConversationStreaming && conversation?.rounds[0]?.id === pendingRoundId) ||
-      (error && pendingMessage && conversation?.rounds.length === 0)
-  );
 };
 
 export const useIsAwaitingPrompt = () => {

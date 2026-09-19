@@ -71,7 +71,7 @@ export const renderAttachmentTagParser = createTagParser({
   createNode: (attributes, position) => ({
     type: renderAttachmentElement.tagName,
     attachmentId: attributes.attachmentId,
-    attachmentVersion: attributes.version,
+    version: attributes.version,
     position,
   }),
 });

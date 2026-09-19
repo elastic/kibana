@@ -16,35 +16,41 @@
  *   - `activeStreams`: `Map<conversationId, { type }>`. Each in-flight stream owns one
  *     entry. Set synchronously when each mutation kicks off; deleted in the mutation's
  *     `finally`. Multiple entries can coexist — concurrent streams.
- *   - `byConversationId`: per-conversation pending message, error, and errorSteps.
- *     Persists across stream end so a user can hit Retry after a failure.
+ *   - `byConversationId`: per-conversation pending message, kept until its saved copy is
+ *     fetched or the stream is stopped.
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import produce from 'immer-v9';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ConversationStreamService } from '../../../services/events';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import type { ResumeRoundVars } from './use_resume_round_mutation';
 import type { ActiveStream, StreamRecord } from './types';
+import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
 
 export interface StreamingContextValue {
+  conversationStreamService: ConversationStreamService;
   activeStreams: Map<string, ActiveStream>;
   byConversationId: Record<string, StreamRecord>;
   mutateSendMessage: (vars: SendMessageVars) => void;
   mutateResumeRound: (vars: ResumeRoundVars) => void;
   cancelStream: (conversationId: string) => void;
   cancelAllStreams: () => void;
-  removeError: (conversationId: string) => void;
-  removeAllErrors: () => void;
 }
 
 const StreamingContext = createContext<StreamingContextValue | null>(null);
 
-const emptyRecord: StreamRecord = { errorSteps: [] };
+const emptyRecord: StreamRecord = {};
 
-export const StreamingProvider = ({ children }: { children: React.ReactNode }) => {
+export const StreamingProvider = ({
+  conversationStreamService,
+  children,
+}: {
+  conversationStreamService: ConversationStreamService;
+  children: React.ReactNode;
+}) => {
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
   const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
 
@@ -61,71 +67,41 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     });
   }, []);
 
-  const setPendingMessage = useCallback((conversationId: string, message: string) => {
-    setByConversationId(
-      produce((draft) => {
-        if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-        draft[conversationId].pendingMessage = message;
-      })
-    );
-  }, []);
-
-  const clearPendingMessage = useCallback((conversationId: string) => {
-    setByConversationId(
-      produce((draft) => {
-        if (draft[conversationId]) {
-          delete draft[conversationId].pendingMessage;
-        }
-      })
-    );
-  }, []);
-
-  const setError = useCallback(
-    (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => {
+  const setPendingMessage = useCallback(
+    (conversationId: string, message: string, attachments?: OptimisticAttachments) => {
       setByConversationId(
         produce((draft) => {
-          if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-          draft[conversationId].error = error;
-          draft[conversationId].errorSteps = errorSteps;
+          draft[conversationId] = {
+            ...draft[conversationId],
+            pendingMessage: message,
+            pendingAttachments: attachments,
+          };
         })
       );
     },
     []
   );
 
-  const removeError = useCallback((conversationId: string) => {
+  const clearPendingMessage = useCallback((conversationId: string) => {
     setByConversationId(
       produce((draft) => {
-        const record = draft[conversationId];
-        if (record) {
-          delete record.error;
-          record.errorSteps = [];
-        }
-      })
-    );
-  }, []);
-
-  const removeAllErrors = useCallback(() => {
-    setByConversationId(
-      produce((draft) => {
-        for (const id of Object.keys(draft)) {
-          delete draft[id].error;
-          draft[id].errorSteps = [];
+        if (draft[conversationId]) {
+          delete draft[conversationId].pendingMessage;
+          delete draft[conversationId].pendingAttachments;
         }
       })
     );
   }, []);
 
   const sendMutation = useSendMessageMutation({
+    conversationStreamService,
     setPendingMessage,
     clearPendingMessage,
-    setError,
-    clearError: removeError,
     clearActiveStream,
   });
 
   const resumeMutation = useResumeRoundMutation({
-    setError,
+    conversationStreamService,
     clearActiveStream,
   });
 
@@ -155,11 +131,9 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   }, [sendCancelAll, resumeCancelAll]);
 
   // Wrappers around `mutate` that set the per-id `activeStreams` entry SYNCHRONOUSLY before
-  // queueing the mutation. Without this, callers like `useSubmitMessage` (which call
-  // `mutate` and then immediately navigate to `/conversations/<uuid>`) would render the new
-  // URL with no `activeStreams` entry — the `useConversation` gate would open, fire a GET
-  // for the not-yet-persisted conversation, and 404. The mutation's `mutationFn` runs
-  // asynchronously, so setting the entry from inside `mutationFn` is too late.
+  // queueing the mutation, so the conversation reads as streaming (Stop, the scroll anchor) in
+  // the same render as the send. The mutation's `mutationFn` runs asynchronously, so setting the
+  // entry from inside it is too late.
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
       setActiveStream(vars.conversationId, {
@@ -181,24 +155,22 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
 
   const value = useMemo<StreamingContextValue>(
     () => ({
+      conversationStreamService,
       activeStreams,
       byConversationId,
       mutateSendMessage,
       mutateResumeRound,
       cancelStream,
       cancelAllStreams,
-      removeError,
-      removeAllErrors,
     }),
     [
+      conversationStreamService,
       activeStreams,
       byConversationId,
       mutateSendMessage,
       mutateResumeRound,
       cancelStream,
       cancelAllStreams,
-      removeError,
-      removeAllErrors,
     ]
   );
 
@@ -211,6 +183,11 @@ export const useStreamingContext = () => {
     throw new Error('useStreamingContext must be used within a StreamingProvider');
   }
   return context;
+};
+
+export const useConversationStreamService = (): ConversationStreamService => {
+  const { conversationStreamService } = useStreamingContext();
+  return conversationStreamService;
 };
 
 export const useStreamRecord = (conversationId: string | undefined): StreamRecord => {
