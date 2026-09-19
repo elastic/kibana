@@ -128,12 +128,16 @@ export const SignalDetailFlyout = ({
       }),
       description: signalData.producer,
     },
-    {
-      title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.rowCount', {
-        defaultMessage: 'Rows returned',
-      }),
-      description: String(signalData.returned.row_count),
-    },
+    ...(signalData.returned.row_count === undefined
+      ? []
+      : [
+          {
+            title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.rowCount', {
+              defaultMessage: 'Rows returned',
+            }),
+            description: String(signalData.returned.row_count),
+          },
+        ]),
     {
       title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.duration', {
         defaultMessage: 'Duration (ms)',
