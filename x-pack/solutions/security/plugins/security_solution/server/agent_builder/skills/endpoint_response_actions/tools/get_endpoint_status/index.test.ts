@@ -165,7 +165,9 @@ describe('getEndpointStatusTool', () => {
           {
             page: 0,
             pageSize: 1,
-            kuery: 'agent.id: agent-123',
+            // Constrained by the hostname as well as the ID, so a mismatched
+            // pair cannot return another host's status.
+            kuery: 'agent.id: agent-123 AND united.endpoint.host.hostname: my-host',
           },
           // Scoped services are required for this read to fan out under CPS.
           expect.objectContaining({ isCpsRead: expect.any(Function) })
@@ -395,10 +397,65 @@ describe('getEndpointStatusTool', () => {
         const data = results[0].data as Record<string, unknown>;
         expect(data.found).toBe(true);
         expect(data.agentId).toBe('live-b');
+        // The ID read stays constrained by the hostname it was requested for:
+        // querying `agent.id` alone would return whatever host owns that ID and
+        // then label the result with the caller's hostname, reporting (or
+        // isolating) the wrong machine when the pair does not match.
         expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-          { page: 0, pageSize: 1, kuery: 'agent.id: live-b' },
+          {
+            page: 0,
+            pageSize: 1,
+            kuery: 'agent.id: live-b AND united.endpoint.host.hostname: duplicated-host',
+          },
           expect.objectContaining({ isCpsRead: expect.any(Function) })
         );
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('does not report status for an agent ID that belongs to a different hostname', async () => {
+      // An agent ID supplied alongside a hostname it does not belong to must not
+      // resolve: the metadata read is hostname-constrained, so it finds nothing
+      // and the caller gets endpoint_not_found instead of another host's status.
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [
+            { id: 'live-a', status: 'online' },
+            { id: 'live-b', status: 'online' },
+          ],
+        }),
+      };
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler(
+          { hostName: 'other-host', agentId: 'live-b' },
+          mockContext
+        );
+
+        const results = assertStandardReturn(result);
+        const data = results[0].data as Record<string, unknown>;
+        expect(data.found).toBe(false);
+        expect(data.reason).toBe('endpoint_not_found');
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =

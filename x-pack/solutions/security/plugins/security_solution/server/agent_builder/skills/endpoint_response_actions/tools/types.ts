@@ -61,6 +61,14 @@ export const MAX_ACTION_HOSTS = 50;
 export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
 
 /**
+ * Errors reported for one action. `getActionCompletionInfo` appends every
+ * unsuccessful agent response's errors into this aggregate array, so a large
+ * failed fan-out can carry thousands of entries (with arbitrarily long text)
+ * even after hosts, outputs and agentState are capped.
+ */
+export const MAX_ACTION_ERRORS = 20;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -340,6 +348,26 @@ export function summarizeAgentState(agentState: unknown): AgentStateSummary | un
   };
 }
 
+/**
+ * Bounds `ActionDetails.errors` — the aggregate list of error strings from
+ * every unsuccessful agent in a fan-out — and reports how many were dropped.
+ * Entries are additionally string-truncated through the same value bounder the
+ * other output fields use, since one agent's error text is unbounded.
+ */
+export function summarizeActionErrors(errors: unknown): ActionErrorsSummary | undefined {
+  if (!Array.isArray(errors)) {
+    return undefined;
+  }
+
+  const kept = errors.slice(0, MAX_ACTION_ERRORS);
+
+  return {
+    errors: kept.map((entry, index) => boundOutputValue(entry, `errors[${index}]`).value),
+    totalErrors: errors.length,
+    ...(errors.length > kept.length ? { errorsTruncated: errors.length - kept.length } : {}),
+  };
+}
+
 interface BoundedOutputValue {
   value: unknown;
   truncatedPaths: string[];
@@ -355,6 +383,12 @@ export interface AgentStateSummary {
   agentState: Record<string, unknown>;
   totalAgents: number;
   agentsTruncated?: number;
+}
+
+export interface ActionErrorsSummary {
+  errors: unknown[];
+  totalErrors: number;
+  errorsTruncated?: number;
 }
 
 export interface ActionOutputAgentSummary {

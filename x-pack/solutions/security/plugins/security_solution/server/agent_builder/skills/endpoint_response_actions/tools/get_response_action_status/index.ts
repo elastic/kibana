@@ -17,6 +17,7 @@ import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import {
   insufficientPrivilegesResult,
   responseActionErrorResult,
+  summarizeActionErrors,
   summarizeActionHosts,
   summarizeActionOutputs,
   summarizeAgentState,
@@ -101,9 +102,10 @@ export const getResponseActionStatusTool = (
                 // exactly what `agentState` carries. Bounded like `hosts`.
                 ...(summarizeAgentState(actionDetails.agentState) ?? {}),
                 // Documented on ActionDetails: the error reason(s) when
-                // `wasSuccessful` is false. Without this the agent can tell
-                // an analyst an action failed but never why.
-                errors: actionDetails.errors,
+                // `wasSuccessful` is false. Bounded like `hosts`/`agentState`:
+                // a failed fan-out aggregates one error list per agent, so the
+                // raw array is unbounded even though the other fields are not.
+                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
                 startedAt: actionDetails.startedAt,
                 completedAt: actionDetails.completedAt,
                 createdBy: actionDetails.createdBy,

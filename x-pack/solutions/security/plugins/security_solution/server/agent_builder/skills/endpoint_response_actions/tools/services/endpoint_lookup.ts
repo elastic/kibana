@@ -123,6 +123,32 @@ async function collectPages<T>(
 }
 
 /**
+ * Totals to report for an incomplete candidate set.
+ *
+ * Only the collections that were actually truncated contribute: a non-truncated
+ * collection was fully examined, so its `total` describes a set already merged
+ * into the result rather than a set of unexamined records. Summing just the
+ * truncated ones also avoids Fleet's misleading `total: 0` — in the linked
+ * project case Fleet sees none of the agents while metadata sees hundreds, so
+ * preferring Fleet's number would report `totalCandidates: 0` next to a
+ * candidate list that is plainly not empty.
+ */
+function totalCandidatesOf(
+  fleet: { truncated: boolean; total?: number },
+  metadata: { truncated: boolean; total?: number }
+): { totalCandidates?: number } {
+  const totals = [fleet, metadata]
+    .filter((collection) => collection.truncated && collection.total !== undefined)
+    .map((collection) => collection.total as number);
+
+  if (!totals.length) {
+    return {};
+  }
+
+  return { totalCandidates: totals.reduce((sum, total) => sum + total, 0) };
+}
+
+/**
  * Resolves a hostname to a single Fleet agent + its response-action `agentType`.
  *
  * Why this service exists:
@@ -271,7 +297,24 @@ export function createEndpointLookupService(
         ...metadata.candidates.filter((c) => !fleetIds.has(c.agentId)),
       ];
 
+      // An incomplete candidate set is treated the same way as a genuine
+      // duplicate for the same reason: an unexamined record could be another
+      // live machine. This check MUST precede the empty-merge return below —
+      // when every fetched candidate was filtered out by Space visibility the
+      // merge is empty, but a visible agent may still exist on a page that was
+      // never walked, so asserting `not_found` here would be a false negative.
+      const truncated = fleet.truncated || metadata.truncated;
+
       if (!merged.length) {
+        if (truncated) {
+          return {
+            kind: 'ambiguous',
+            candidates: [],
+            truncated: true,
+            ...totalCandidatesOf(fleet, metadata),
+          };
+        }
+
         return { kind: 'not_found' };
       }
 
@@ -293,11 +336,9 @@ export function createEndpointLookupService(
       // reason: an unexamined record could be another live machine, so the
       // lookup refuses to answer rather than resolving from a partial page.
       const live = sorted.filter((c) => c.isLive);
-      const truncated = fleet.truncated || metadata.truncated;
 
       if (truncated || live.length > 1) {
         const toReport = truncated ? sorted : live;
-        const totalCandidates = truncated ? fleet.total ?? metadata.total : undefined;
 
         return {
           kind: 'ambiguous',
@@ -305,7 +346,7 @@ export function createEndpointLookupService(
             .slice(0, MAX_AMBIGUOUS_CANDIDATES)
             .map((c) => ({ agentId: c.agentId, status: c.status })),
           ...(truncated ? { truncated: true as const } : {}),
-          ...(totalCandidates === undefined ? {} : { totalCandidates }),
+          ...totalCandidatesOf(fleet, metadata),
         };
       }
 

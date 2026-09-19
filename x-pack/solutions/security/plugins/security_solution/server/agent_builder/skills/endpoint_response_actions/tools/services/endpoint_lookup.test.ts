@@ -265,6 +265,34 @@ describe('createEndpointLookupService', () => {
     expect(result).toEqual({ kind: 'not_found' });
   });
 
+  it('refuses to resolve when every candidate was hidden by space scoping on a truncated page', async () => {
+    // Reachable false-negative: Fleet returns a FULL page (so more records may
+    // exist beyond it) and reports a total, but every fetched agent is filtered
+    // out by space visibility. The merge is then empty — but a visible agent can
+    // still exist on a page that was never walked, so asserting `not_found`
+    // would tell the analyst the host does not exist when it merely was not
+    // examined. The truncation check must therefore precede the empty-merge
+    // return.
+    const listAgents = jest.fn(async ({ page }: { page: number }) => ({
+      agents: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
+        id: `hidden-${page}-${i}`,
+        status: 'online',
+      })),
+      total: 500,
+    }));
+
+    const { lookup } = buildService({
+      listAgents,
+      ensureInCurrentSpace: jest.fn().mockRejectedValue(new NotFoundError('Agent not found')),
+    });
+
+    const result = await lookup.resolveByHostName('hidden-but-plentiful-host');
+
+    expect(result).toEqual(
+      expect.objectContaining({ kind: 'ambiguous', truncated: true, totalCandidates: 500 })
+    );
+  });
+
   it('does not report ambiguity for agents hidden by space scoping', async () => {
     // Both would be "live" matches, but only one is visible here — that is a
     // single valid answer, not an ambiguous hostname.
@@ -362,6 +390,30 @@ describe('createEndpointLookupService', () => {
       const result = await lookup.resolveByHostName('plain-host');
 
       expect(result).toHaveProperty('endpoint.agentId', 'only-agent');
+    });
+
+    it('reports the linked-project total when Fleet reports zero for the same hostname', async () => {
+      // Fleet is origin-only and reports `total: 0` when it matched nothing,
+      // while the linked-project metadata read found the records. Treating that
+      // 0 as the candidate count (`fleet.total ?? metadata.total`) would report
+      // "0 candidates" for a hostname that genuinely has more than one page.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [], total: 0 }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
+            metadata: { agent: { id: `linked-${i}` } },
+            host_status: HostStatus.HEALTHY,
+          })),
+          total: 400,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('linked-only-host');
+
+      expect(result).toEqual(
+        expect.objectContaining({ kind: 'ambiguous', truncated: true, totalCandidates: 400 })
+      );
     });
 
     it('refuses to resolve when the linked-project metadata page is truncated', async () => {

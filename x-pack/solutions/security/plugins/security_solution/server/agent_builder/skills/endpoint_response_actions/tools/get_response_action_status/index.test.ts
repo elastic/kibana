@@ -20,7 +20,7 @@ import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import { getResponseActionStatusTool } from '.';
-import { MAX_ACTION_HOSTS, MAX_AGENT_STATE_ENTRIES } from '../types';
+import { MAX_ACTION_ERRORS, MAX_ACTION_HOSTS, MAX_AGENT_STATE_ENTRIES } from '../types';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -164,6 +164,38 @@ describe('getResponseActionStatusTool', () => {
     // Without the error reason the agent can report the failure but not why
     // it happened.
     expect(data.errors).toEqual(['Endpoint command failed: scan target not found']);
+  });
+
+  it('bounds actionDetails.errors for a large failed fan-out', async () => {
+    // getActionCompletionInfo appends every unsuccessful agent's errors into
+    // this one array, so a failed batch can carry thousands of entries even
+    // after hosts/outputs/agentState are capped.
+    const errors = Array.from({ length: 500 }, (_, i) => `agent-${i}: command failed`);
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'scan',
+      status: 'failed',
+      wasSuccessful: false,
+      isCompleted: true,
+      wasCanceled: false,
+      hosts: { 'agent-123': { name: 'pr-272111-defend-demo' } },
+      parameters: {},
+      outputs: {},
+      errors,
+      startedAt: '2026-07-13T14:10:00.000Z',
+      completedAt: '2026-07-13T14:12:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+    expect((data.errors as unknown[]).length).toBe(MAX_ACTION_ERRORS);
+    expect(data.totalErrors).toBe(500);
+    expect(data.errorsTruncated).toBe(500 - MAX_ACTION_ERRORS);
   });
 
   it('bounds the hosts and per-agent state of a fan-out action', async () => {

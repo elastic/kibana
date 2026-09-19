@@ -123,16 +123,24 @@ export const getEndpointStatusTool = (
 
         // Get detailed status from endpoint metadata service. `scoped` (built
         // above for the lookup) is threaded through so this read also fans out
-        // to linked projects under CPS. When the caller supplied an agent ID
-        // the read is scoped by that id alone — the metadata query is filtered
-        // to the policies visible in this space, so an agent from another
-        // space stays invisible here just as it does in `list_endpoints`.
+        // to linked projects under CPS.
+        //
+        // The caller-supplied `agentId` path is constrained by the hostname as
+        // well, not just the id. A model pairing a candidate id with the wrong
+        // hostname would otherwise be told that other machine's isolation and
+        // status under the hostname it asked about — reporting the wrong host
+        // is exactly the failure the ambiguity branch exists to prevent, so the
+        // id is a disambiguator within this hostname, not a bypass of it. The
+        // query is still filtered to the policies visible in this space, so an
+        // agent from another space stays invisible here as in `list_endpoints`.
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
         const hostInfo = await metadataService.getHostMetadataList(
           {
             page: 0,
             pageSize: 1,
-            kuery: `agent.id: ${escapeKuery(agentId)}`,
+            kuery: `agent.id: ${escapeKuery(
+              agentId
+            )} AND united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
           },
           scoped
         );
