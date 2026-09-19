@@ -45,9 +45,11 @@ const describeApiTypeSchema = z.object({
     ),
 });
 
-export const createDescribeApiTypeTool = (): InternalBuiltinToolDefinition<
-  typeof describeApiTypeSchema
-> => {
+export const createDescribeApiTypeTool = ({
+  discoveryEnabled,
+}: {
+  discoveryEnabled: boolean;
+}): InternalBuiltinToolDefinition<typeof describeApiTypeSchema> => {
   return {
     id: internalTools.describeApiType,
     type: ToolType.builtin,
@@ -73,6 +75,7 @@ The types each one stubbed are listed in its \`expandable_types\`.`,
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };
