@@ -112,7 +112,7 @@ Stacked PRs are enabled for this repository. Prefer a stack of small, focused PR
 Create a stack when the change:
 - Has a natural layering order — e.g., shared types → server implementation → UI — where each layer can be reviewed independently and later layers depend on earlier ones landing first.
 - Crosses domain boundaries (multiple `kibana.jsonc` owners) and each part stands on its own.
-- Would otherwise exceed ~400 lines or ~15 files of diff.
+- Would otherwise exceed ~500 lines added or ~20 files changed (based on Kibana PR data, review engagement drops sharply past these thresholds).
 
 Do not create artificially small slices that have no standalone meaning.
 
