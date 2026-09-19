@@ -290,10 +290,13 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
   });
 
   // A query that keeps no identity (`KEEP` without `METADATA _id`) cannot be
-  // unioned — its rows' identities are unknown — so its row count stands in as
-  // that retrieval's own contribution. That can only undercount; it must never
-  // inflate the population past what a single retrieval observed.
-  it('falls back to the row count when a result carries no `_id` column', () => {
+  // unioned — its rows' identities are unknown — and its row count is not a
+  // count of distinct alerts either: `MV_EXPAND` or an aggregation makes rows
+  // that are not one-to-one with the alerts behind them, so admitting the count
+  // let a scoped query over FEWER distinct alerts score as a complete
+  // retrieval. It contributes nothing; the row count survives only as
+  // diagnostics.
+  it('refuses to take an id-less row count as the alert population', () => {
     const steps = [
       recordedEsqlStep({
         query: denseRetrievalQuery,
@@ -302,10 +305,12 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
       }),
     ];
 
-    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBeNull();
+    // Diagnostics keep the observation so the null is still explainable.
+    expect(extractAgentEsqlRowCounts(steps)).toEqual([95]);
   });
 
-  it('takes the larger of the union and an id-less result, never their sum', () => {
+  it('counts only the id-bearing results, never an id-less row count alongside them', () => {
     const steps = [
       recordedEsqlStep({ query: denseRetrievalQuery, ids: denseAlertIds(50) }),
       recordedEsqlStep({
@@ -315,7 +320,25 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
       }),
     ];
 
+    // 50, not max(50, 45)=50 and not 95: the id-less result cannot be shown to
+    // hold 45 DISTINCT alerts of this fixture, so it adds nothing.
     expect(extractAgentAlertRetrievalPopulation(steps)).toBe(50);
+  });
+
+  // The reported defect: an id-less result whose inflated row count exceeds the
+  // id union used to become the population, so a scoped query touching fewer
+  // distinct alerts than the fixture holds could still score a full retrieval.
+  it('does not let an inflated id-less row count outrank the id union', () => {
+    const steps = [
+      recordedEsqlStep({ query: denseRetrievalQuery, ids: denseAlertIds(10) }),
+      recordedEsqlStep({
+        query: `${denseRetrievalQuery}\n  | MV_EXPAND process.args`,
+        rows: 95,
+        includeIdColumn: false,
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(10);
   });
 
   it('falls back to the step params for the query text when the result carries none', () => {

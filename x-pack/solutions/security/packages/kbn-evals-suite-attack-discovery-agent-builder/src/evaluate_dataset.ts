@@ -320,11 +320,20 @@ const classifyAgentAlertRetrievals = (
  * failure. The recorded ES|QL payload carries `_id` per row, so the identities
  * are there to union.
  *
- * A result that reports no `_id` column cannot be unioned at all — its rows'
- * identities are unknown — so its row count stands in as that retrieval's own
- * contribution, which can only undercount. `null` when the example ran no
- * scoped alerts retrieval (an unscoped-only run observes none of this
- * fixture's population; see `computeWorkflowAlertCounts` for what that scores).
+ * Only a result that CARRIES `_id` can support a distinct-alert population. A
+ * result without that column has rows whose identities are unknown, and its
+ * row count is not a count of distinct alerts: ES|QL transformations such as
+ * `MV_EXPAND` or an aggregation produce rows that are not one-to-one with the
+ * alerts they came from, so admitting a row count let a scoped query over
+ * FEWER distinct alerts score as a complete retrieval — the exact population
+ * assertion this profile exists to make. Such a result therefore contributes
+ * NOTHING to the population and is kept only as diagnostics
+ * (`extractAgentEsqlRowCounts`), which can only undercount.
+ *
+ * `null` when the example's scoped retrievals yielded no verifiable identity at
+ * all (every one omitted `_id`), and when the example ran no scoped alerts
+ * retrieval (an unscoped-only run observes none of this fixture's population;
+ * see `computeWorkflowAlertCounts` for what that scores).
  */
 export const extractAgentAlertRetrievalPopulation = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
@@ -333,17 +342,17 @@ export const extractAgentAlertRetrievalPopulation = (
   const { scoped } = classifyAgentAlertRetrievals(steps, retrievalScope);
   if (scoped.length === 0) return null;
 
+  const idBearing = scoped.filter(
+    (result): result is AgentEsqlResult & { alertIds: string[] } => result.alertIds !== null
+  );
+  if (idBearing.length === 0) return null;
+
   const ids = new Set<string>();
-  let largestIdlessRowCount = 0;
-  for (const result of scoped) {
-    if (result.alertIds === null) {
-      largestIdlessRowCount = Math.max(largestIdlessRowCount, result.rowCount);
-    } else {
-      for (const id of result.alertIds) ids.add(id);
-    }
+  for (const result of idBearing) {
+    for (const id of result.alertIds) ids.add(id);
   }
 
-  return Math.max(ids.size, largestIdlessRowCount);
+  return ids.size;
 };
 
 /**

@@ -352,7 +352,7 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
           71,
           `The signed inventory agent enumerated installed packages on ${host} for the asset catalog using its granted elevated service account`,
           'inventory-agent',
-          null,
+          `inventory-agent --catalog ${catalogPath} --elevated`,
           'file',
           catalogPath
         ),
@@ -362,7 +362,7 @@ export const AD2_DENSE_BACKGROUND_TEMPLATES: readonly BackgroundTemplate[] = [
           23,
           `${host} uploaded its scheduled inventory report to the internal fleet server`,
           'inventory-agent',
-          null,
+          `inventory-agent --upload ${host}-catalog.json`,
           'network',
           `fleet.internal.example.net/report/${host}`
         ),

@@ -330,6 +330,40 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('does not let 4-alert host cardinality plus command-line coverage separate the sides', () => {
+    // The reported defect: `bg-endpoint-inventory` was the only 4-step
+    // background chain and two of its four steps had a null command line, so
+    // "group by host, keep hosts with 4 alerts AND 4 non-null command lines"
+    // recovered exactly the four references — every clean chain is 4 steps with
+    // command lines on all of them. Measured before the fix: of the 10
+    // four-alert hosts, exactly 4 had 4/4 non-null command lines and those were
+    // the references. The tuple has to overlap on both counts.
+    const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const byHost = new Map<string, Array<{ commandLine: string | null }>>();
+
+    for (const alert of plan.alerts as unknown as Array<{
+      source: { host?: { name?: string }; process?: { command_line?: string | null } };
+    }>) {
+      const host = alert.source?.host?.name ?? '(none)';
+      const rows = byHost.get(host) ?? [];
+      rows.push({ commandLine: alert.source?.process?.command_line ?? null });
+      byHost.set(host, rows);
+    }
+
+    const fourAlertHosts = [...byHost.entries()].filter(([, rows]) => rows.length === 4);
+    expect(fourAlertHosts).toHaveLength(10);
+
+    const withFullCommandLineCoverage = fourAlertHosts.filter(([, rows]) =>
+      rows.every((row) => row.commandLine != null)
+    );
+
+    // Before the fix this cell held exactly the 4 references; the background
+    // chain's nulls are what excluded it. Both sides must now occupy it, so the
+    // tuple selects neither — the references are inside it, and so is noise.
+    expect(withFullCommandLineCoverage.length).toBeGreaterThan(4);
+    expect(withFullCommandLineCoverage.length).toBe(fourAlertHosts.length);
+  });
+
   it('does not let process-name frequency separate target from noise', () => {
     // Same invariant as rule-name frequency, one field over: `process.name` is
     // exposed on the alert, and measured on the emitted dense plan every clean
