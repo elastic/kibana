@@ -167,6 +167,7 @@ apiTest.describe.skip(
         metadata: { name: ruleTitle },
         schedule: { every: '1m', lookback: '1m' },
         recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
         query: { base: 'FROM logs-* | LIMIT 10' },
         time_field: '@timestamp',
         grouping: { fields: ['host.name'] },

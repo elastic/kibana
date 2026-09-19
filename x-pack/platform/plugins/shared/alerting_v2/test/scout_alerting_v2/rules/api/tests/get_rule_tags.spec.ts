@@ -114,6 +114,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
           kind: 'signal',
           state_transition: undefined,
           recovery: undefined,
+          no_data: undefined,
           metadata: { name: 'signal-rule', tags: ['signal-tag'] },
         })
       );
@@ -142,6 +143,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
           kind: 'signal',
           state_transition: undefined,
           recovery: undefined,
+          no_data: undefined,
           metadata: { name: 'signal-rule', tags: ['signal-tag'] },
         })
       );

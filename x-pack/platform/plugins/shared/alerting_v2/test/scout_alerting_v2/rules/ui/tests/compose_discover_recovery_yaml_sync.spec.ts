@@ -40,6 +40,8 @@ const yamlRule = ({
     'recovery:',
     `  strategy: ${recoveryStrategy}`,
     ...(recoverySegment ? [`  segment: ${recoverySegment}`] : []),
+    'no_data:',
+    '  strategy: ignore',
   ];
   return lines.join('\n');
 };

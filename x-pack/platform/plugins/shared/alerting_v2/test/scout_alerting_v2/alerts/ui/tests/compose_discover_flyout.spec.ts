@@ -229,6 +229,7 @@ test.describe(
             kind: 'signal',
             state_transition: undefined,
             recovery: undefined,
+            no_data: undefined,
             query: { base: TEST_QUERY },
             metadata: { name: EDIT_RULE_NAME },
             artifacts: [
@@ -292,6 +293,7 @@ test.describe(
             kind: 'signal',
             state_transition: undefined,
             recovery: undefined,
+            no_data: undefined,
             query: { base: NO_TIME_FIELD_QUERY },
             metadata: { name: NO_TIME_FIELD_RULE_NAME },
           })

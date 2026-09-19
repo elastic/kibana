@@ -58,6 +58,8 @@ const baseCreateData: CreateRuleParams['data'] = {
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
   query: { base: 'FROM logs-* | LIMIT 1' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
@@ -1617,7 +1619,7 @@ describe('RulesClient', () => {
         await expect(
           client.upsertRule({
             id: 'rule-id-1',
-            data: { ...baseCreateData, kind: 'signal' },
+            data: { ...baseCreateData, kind: 'signal', recovery: undefined, no_data: undefined },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 409 },

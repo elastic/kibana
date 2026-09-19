@@ -42,8 +42,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           query: { base: 'FROM metrics-* | LIMIT 10' },
           grouping: { fields: ['host.name', 'service.name'] },
           no_data: { strategy: 'keep_last', query: 'FROM metrics-* | STATS c = COUNT(*)' },
-          // Omitting `recovery` lets the server apply its `no_breach` default.
-          recovery: undefined,
         })
       ),
       apiServices.alertingV2.rules.create(
@@ -53,8 +51,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           time_field: '@timestamp',
           schedule: { every: '5m' },
           query: { base: 'FROM logs-* | LIMIT 10' },
-          // Signal rules forbid state_transition and recovery; grouping omitted to match original.
           recovery: undefined,
+          no_data: undefined,
           state_transition: undefined,
           grouping: undefined,
         })
@@ -67,7 +65,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           schedule: { every: '5m' },
           query: { base: 'FROM metrics-* | LIMIT 5' },
           no_data: { strategy: 'resolve', query: 'FROM metrics-* | STATS c = COUNT(*)' },
-          recovery: undefined,
           grouping: undefined,
         })
       ),

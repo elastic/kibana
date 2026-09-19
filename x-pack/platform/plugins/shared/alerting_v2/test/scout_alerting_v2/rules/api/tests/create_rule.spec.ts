@@ -213,6 +213,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     const body = buildCreateRuleData({
       kind: 'signal',
       recovery: undefined,
+      no_data: undefined,
       state_transition: { pending: { count: 3, timeframe: '5m' } },
     });
     const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -228,6 +229,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       kind: 'signal',
       state_transition: undefined,
       recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' },
+      no_data: undefined,
       query: { base: 'FROM logs-* | LIMIT 1' },
     });
     const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -323,12 +325,13 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   apiTest(
     'create: returns 201 with the signal kind round-tripped to the response',
     async ({ apiClient, apiServices }) => {
-      // Signal rules must opt out of the default `state_transition`,
-      // which the schema only allows for `kind: 'alert'`.
+      // Signal rules must opt out of the defaults the schema only allows for
+      // `kind: 'alert'`.
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
         recovery: undefined,
+        no_data: undefined,
         query: { base: 'FROM logs-* | LIMIT 10' },
         metadata: { name: 'created-signal-rule' },
       });
@@ -384,23 +387,27 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'create: defaults recovery and no_data on an alert rule that omits both',
-    async ({ apiClient, apiServices }) => {
-      const { recovery: _recovery, ...body } = buildCreateRuleData({
-        metadata: { name: 'default-lifecycle-rule' },
+    'validation: rejects an alert rule that omits recovery or no_data',
+    async ({ apiClient }) => {
+      const { recovery: _recovery, ...withoutRecovery } = buildCreateRuleData({
+        metadata: { name: 'alert-rule-without-recovery' },
         state_transition: undefined,
       });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.recovery).toStrictEqual({ strategy: 'no_breach' });
-      expect(response.body.no_data).toStrictEqual({ strategy: 'ignore' });
 
-      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
-      expect(persisted.recovery).toStrictEqual({ strategy: 'no_breach' });
-      expect(persisted.no_data).toStrictEqual({ strategy: 'ignore' });
+      const { no_data: _noData, ...withoutNoData } = buildCreateRuleData({
+        metadata: { name: 'alert-rule-without-no-data' },
+        state_transition: undefined,
+      });
+
+      for (const body of [withoutRecovery, withoutNoData]) {
+        const response = await apiClient.post(testData.RULE_API_PATH, {
+          headers: writerHeaders,
+          body,
+        });
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
     }
   );
 

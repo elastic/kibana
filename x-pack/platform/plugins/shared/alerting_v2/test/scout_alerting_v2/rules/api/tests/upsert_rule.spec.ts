@@ -134,6 +134,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
           kind: 'signal',
           state_transition: undefined,
           recovery: undefined,
+          no_data: undefined,
           query: { base: 'FROM logs-* | LIMIT 10' },
           metadata: { name: 'alert-rule' },
         }),

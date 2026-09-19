@@ -10,7 +10,7 @@ import type {
   CreateRuleData,
   RuleTemplateData,
 } from '@kbn/alerting-v2-schemas';
-import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -29,10 +29,12 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
  *   because the schema forbids state_transition for `kind: 'signal'`.
  * - `recovery: { strategy: 'no_breach' }` so that, by default, rules recover
  *   whenever a previously-breaching group stops appearing in the breach query
- *   results. Signal rules must opt out by passing `recovery: undefined`
- *   because the schema forbids recovery on `kind: 'signal'`. Tests that
- *   override `query` should keep a recovering `recovery` strategy if they want
- *   the executor to emit recovery events.
+ *   results, and `no_data: { strategy: 'ignore' }` so absence is not
+ *   classified. Alert rules must carry both. Signal rules must opt out by
+ *   passing `recovery: undefined` and `no_data: undefined`, because the schema
+ *   forbids them on `kind: 'signal'`. Tests that override `query` should keep a
+ *   recovering `recovery` strategy if they want the executor to emit recovery
+ *   events.
  * - When a caller turns recovery off (`recovery: { strategy: 'manual' }`)
  *   without supplying its own `state_transition`, `buildCreateRuleData` strips
  *   the default `recovering` block, since the write API rejects an inert
@@ -43,6 +45,7 @@ const DEFAULTS: CreateRuleData = {
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
   recovery: { strategy: recoveryStrategy.no_breach },
+  no_data: { strategy: noDataStrategy.ignore },
   query: { base: 'FROM logs-* | LIMIT 10' },
   time_field: '@timestamp',
   grouping: { fields: ['host.name'] },

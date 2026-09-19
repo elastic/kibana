@@ -29,6 +29,7 @@ const validTemplateAttributes = {
     },
     state_transition: { pending: { count: 3 } },
     recovery: { strategy: 'no_breach' as const },
+    no_data: { strategy: 'ignore' as const },
     query: {
       base: 'TS metrics-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
       breach: {

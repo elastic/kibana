@@ -25,6 +25,7 @@ const exampleTemplateAttributes = {
       pending: { count: 3 },
     },
     recovery: { strategy: 'no_breach' as const },
+    no_data: { strategy: 'ignore' as const },
     artifacts: [
       {
         id: 'kubernetes_otel-pod-crashloopbackoff-v2-runbook',

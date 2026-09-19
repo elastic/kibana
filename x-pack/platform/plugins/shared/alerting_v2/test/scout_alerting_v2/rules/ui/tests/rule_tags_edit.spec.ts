@@ -69,7 +69,6 @@ test.describe('Rule tags — edit via ES|QL form', { tag: '@local-stateful-class
             breach: { segment: '| WHERE count > 5' },
           },
           time_field: '@timestamp',
-          recovery: undefined,
         })
       );
       ruleId = rule.id;

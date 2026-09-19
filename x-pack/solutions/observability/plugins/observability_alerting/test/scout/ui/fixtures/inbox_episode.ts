@@ -41,6 +41,8 @@ export const seedInboxEpisode = async (
       metadata: { name },
       schedule: { every: '1h' },
       query: { base: 'FROM logs-* | LIMIT 1' },
+      recovery: { strategy: 'no_breach' },
+      no_data: { strategy: 'ignore' },
     },
   });
 

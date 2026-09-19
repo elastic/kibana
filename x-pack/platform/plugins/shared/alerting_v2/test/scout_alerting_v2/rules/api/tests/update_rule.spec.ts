@@ -534,6 +534,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
           kind: 'signal',
           state_transition: undefined,
           recovery: undefined,
+          no_data: undefined,
           query: { base: 'FROM logs-* | LIMIT 10' },
           metadata: { name: 'signal-rule' },
         })
@@ -576,6 +577,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       kind: 'signal',
       state_transition: undefined,
       recovery: undefined,
+      no_data: undefined,
       query: { base: 'FROM logs-* | LIMIT 10' },
       metadata: { name },
     });

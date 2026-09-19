@@ -868,10 +868,9 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
               query: {
                 base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-signal-no-recovery" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
-              // Signal rules cannot configure recovery, so omit it. They must
-              // also opt out of state_transition (schema forbids it for "signal").
               state_transition: undefined,
               recovery: undefined,
+              no_data: undefined,
             })
           );
 
