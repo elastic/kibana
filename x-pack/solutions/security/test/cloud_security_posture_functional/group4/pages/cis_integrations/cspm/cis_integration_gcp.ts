@@ -235,11 +235,12 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-
-        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
+        });
       });
     });
 
@@ -371,12 +372,14 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
+        });
       });
       it('Users are able to switch credentials_type from/to Credential File fields ', async () => {
         const credentialFileName = 'CRED_FILE_TEST_NAME';
