@@ -24,7 +24,7 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import { registerEluHistoryRoute } from './routes/elu_history';
-import { exponentialMovingAverage } from './exponential_moving_average';
+import { createExponentialMovingAverage } from './exponential_moving_average';
 
 /**
  * The period of time for the average ELU calculation.
@@ -76,6 +76,7 @@ export class MetricsService
       this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
     );
     const collectionInterval = config.interval.asMilliseconds();
+    const eluHistoryAlgorithm = http.rateLimiter.algorithm;
 
     this.metricsCollector = new OpsMetricsCollector(
       http.server,
@@ -99,9 +100,19 @@ export class MetricsService
         map((opsMetrics) => opsMetrics.process.event_loop_utilization.utilization),
         (elu$) =>
           zip(
-            elu$.pipe(exponentialMovingAverage(EluTerm.Short, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(EluTerm.Medium, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(EluTerm.Long, collectionInterval))
+            elu$.pipe(
+              createExponentialMovingAverage(eluHistoryAlgorithm, EluTerm.Short, collectionInterval)
+            ),
+            elu$.pipe(
+              createExponentialMovingAverage(
+                eluHistoryAlgorithm,
+                EluTerm.Medium,
+                collectionInterval
+              )
+            ),
+            elu$.pipe(
+              createExponentialMovingAverage(eluHistoryAlgorithm, EluTerm.Long, collectionInterval)
+            )
           ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
       )
       .subscribe(this.elu$);

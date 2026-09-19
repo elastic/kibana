@@ -222,6 +222,49 @@ describe('MetricsService', () => {
       ]);
     });
 
+    it('emits time-weighted ELU values when configured', async () => {
+      let now = 1_000;
+      jest.spyOn(Date, 'now').mockImplementation(() => now);
+      httpMock.rateLimiter = { ...httpMock.rateLimiter, algorithm: 'time-weighted-ema' };
+
+      mockOpsCollector.collect
+        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0));
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
+      const { getEluMetrics$ } = await metricsService.start();
+      const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
+
+      now += testInterval;
+      jest.advanceTimersByTime(testInterval);
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      now += testInterval;
+      jest.advanceTimersByTime(testInterval);
+      await new Promise((resolve) => process.nextTick(resolve));
+      await metricsService.stop();
+
+      jest.spyOn(Date, 'now').mockRestore();
+
+      await expect(eluMetricsPromise).resolves.toEqual([
+        expect.objectContaining({
+          short: expect.closeTo(0.007, 3),
+          medium: expect.closeTo(0.003, 3),
+          long: expect.closeTo(0.002, 3),
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.013, 3),
+          medium: expect.closeTo(0.007, 3),
+          long: expect.closeTo(0.003, 3),
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.02, 2),
+          medium: expect.closeTo(0.01, 2),
+          long: expect.closeTo(0.005, 3),
+        }),
+      ]);
+    });
+
     it('omits metrics from log message if they are missing or malformed', async () => {
       const opsLogger = logger.get('metrics', 'ops');
       mockOpsCollector.collect.mockResolvedValueOnce(

@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { type RateLimiterConfig, rateLimiterConfigSchema } from './config';
+export {
+  type RateLimiterConfig,
+  type RateLimiterEluHistoryAlgorithm,
+  rateLimiterConfigSchema,
+  rateLimiterEluHistoryAlgorithms,
+} from './config';
