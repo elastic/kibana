@@ -233,11 +233,31 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
   const selectedV2TemplateHasConnector = useMemo(() => {
     if (!isTemplatesV2Enabled || !templateId) return false;
-    const v2Template = (v2TemplatesData?.templates ?? []).find((t) => t.templateId === templateId);
+    const v2Templates = v2TemplatesData?.templates ?? [];
+    // Mirror the three-step bridge used by TemplateSelectorV2's effectiveTemplateId so that rules
+    // storing a legacy v1 key in templateId still show the checkbox before the user re-selects.
+    let v2Template = v2Templates.find((t) => t.templateId === templateId);
+    if (!v2Template) {
+      v2Template = v2Templates.find((t) => t.legacyKey === templateId);
+    }
+    if (!v2Template) {
+      const legacyName = currentConfiguration.templates.find((t) => t.key === templateId)?.name;
+      if (legacyName) {
+        const normalizedName = legacyName.trim().toLocaleLowerCase();
+        v2Template = v2Templates.find(
+          (t) => t.name.trim().toLocaleLowerCase() === normalizedName
+        );
+      }
+    }
     if (!v2Template?.definition) return false;
     const { connector } = getTemplateSettingsAndConnectorFromYaml(v2Template.definition);
     return !!normalizeTemplateConnector(connector);
-  }, [isTemplatesV2Enabled, templateId, v2TemplatesData?.templates]);
+  }, [
+    isTemplatesV2Enabled,
+    templateId,
+    v2TemplatesData?.templates,
+    currentConfiguration.templates,
+  ]);
 
   const defaultTemplate = useMemo(() => {
     return {

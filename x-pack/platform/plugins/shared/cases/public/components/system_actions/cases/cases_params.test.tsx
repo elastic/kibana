@@ -681,7 +681,12 @@ describe('CasesParamsFields renders', () => {
 
     it('renders auto-push checkbox when v2 template has a connector', async () => {
       enableTemplatesV2();
-      const definition = `connector:\n  type: .jira\n  id: jira-connector-id\n  fields: null\n`;
+      const definition = [
+        'connector:',
+        '  type: .jira',
+        '  id: jira-connector-id',
+        '  fields: null',
+      ].join('\n');
       mockUseGetTemplates.mockReturnValue({
         data: { templates: [{ templateId: 'tmpl-v2', definition }] },
         isLoading: false,
@@ -691,6 +696,33 @@ describe('CasesParamsFields renders', () => {
         actionParams: {
           ...actionParams,
           subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
+    });
+
+    it('renders auto-push checkbox for a legacy v1 key bridged to a v2 template with connector', async () => {
+      enableTemplatesV2();
+      const definition = [
+        'connector:',
+        '  type: .jira',
+        '  id: jira-connector-id',
+        '  fields: null',
+      ].join('\n');
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [{ templateId: 'tmpl-v2-uuid', legacyKey: 'legacy-key-1', definition }],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          // Rule still stores the pre-migration v1 key, not the v2 UUID
+          subActionParams: { ...actionParams.subActionParams, templateId: 'legacy-key-1' },
         },
       };
       render(<CasesParamsFields {...props} />);
