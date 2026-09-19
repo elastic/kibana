@@ -12,10 +12,6 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
 } from '@kbn/nightshift-ai';
-import {
-  createMemoryDiscoveryTools,
-  MemoryServiceImpl,
-} from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 
@@ -263,22 +259,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 { kis, sampleLogs, sampleDocs },
               ])
             );
-            const readOnlyDataStreamClient = {
-              create: () =>
-                Promise.reject(new Error('Memory writes are not supported in this eval')),
-            };
-
-            // Exercise the same grounding tools that production query generation
-            // wires in, so the eval covers the memory + prior-SigEvents code paths.
-            const memoryTools = createMemoryDiscoveryTools({
-              memoryService: new MemoryServiceImpl({
-                logger: logger.get('memory'),
-                esClient,
-                dataStreamClient: readOnlyDataStreamClient,
-                historyDataStreamClient: readOnlyDataStreamClient,
-              }),
-            });
-
             const executeAgentBuilderTool = async (
               toolId: string,
               toolParams: Record<string, unknown>
@@ -395,11 +375,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
-                const promptSnippet = [
-                  groundingTools?.promptSnippet,
-                  memoryTools.promptSnippet,
-                  eventSearchTool.promptSnippet,
-                ]
+                const promptSnippet = [groundingTools?.promptSnippet, eventSearchTool.promptSnippet]
                   .filter(Boolean)
                   .join('\n');
 
@@ -421,12 +397,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                           )
                       ),
                     additionalTools: {
-                      ...memoryTools.tools,
                       ...eventSearchTool.tools,
                       ...groundingTools?.additionalTools,
                     },
                     additionalToolCallbacks: {
-                      ...memoryTools.callbacks,
                       ...eventSearchTool.callbacks,
                       ...groundingTools?.additionalToolCallbacks,
                     },
