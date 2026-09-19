@@ -522,12 +522,7 @@ export function useOnSubmit({
       }
       return { ...input, enabled: false };
     });
-  }, [
-    packagePolicy.inputs,
-    packagePolicy.var_group_selections,
-    isAgentlessSelected,
-    packageInfo,
-  ]);
+  }, [packagePolicy.inputs, packagePolicy.var_group_selections, isAgentlessSelected, packageInfo]);
 
   // Compare current vs desired input enabled states so the effect below only fires
   // when a var_group selection actually hides or reveals an input, preventing
