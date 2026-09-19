@@ -94,10 +94,10 @@
       "version": 1
     },
     {
-      "kind": "signal",
+      "kind": "alert",
       "metadata": {
         "name": "test detection query rule",
-        "description": "a signal-kind rule managed by the security.detection.query builder type",
+        "description": "an alert-kind rule managed by the security.detection.query builder type",
         "tags": [
           "security",
           "detection"
@@ -131,7 +131,18 @@
       },
       "createdAt": "2025-01-01T00:00:00.000Z",
       "updatedAt": "2025-01-01T00:00:00.000Z",
-      "version": 1
+      "version": 1,
+      "recovery": {
+        "strategy": "manual"
+      },
+      "no_data": {
+        "strategy": "ignore"
+      },
+      "state_transition": {
+        "pending": {
+          "count": 0
+        }
+      }
     }
   ],
   "10.9.0": [
@@ -251,10 +262,10 @@
       "version": 1
     },
     {
-      "kind": "signal",
+      "kind": "alert",
       "metadata": {
         "name": "test detection query rule",
-        "description": "a signal-kind rule managed by the security.detection.query builder type",
+        "description": "an alert-kind rule managed by the security.detection.query builder type",
         "tags": [
           "security",
           "detection"
@@ -301,7 +312,18 @@
       },
       "createdAt": "2025-01-01T00:00:00.000Z",
       "updatedAt": "2025-01-01T00:00:00.000Z",
-      "version": 1
+      "version": 1,
+      "recovery": {
+        "strategy": "manual"
+      },
+      "no_data": {
+        "strategy": "ignore"
+      },
+      "state_transition": {
+        "pending": {
+          "count": 0
+        }
+      }
     }
   ]
 }
