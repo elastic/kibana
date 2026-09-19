@@ -8,23 +8,43 @@
  */
 
 import type { Filter } from '..';
+import { isCombinedFilter } from '../build_filters/combined_filter';
 
+/**
+ * Updates filters that point to the old data view ID, including nested filters inside AND/OR groups.
+ *
+ * Example: changing the data view ID from X to D updates meta.index like this:
+ *   AND group:          X -> D
+ *     bytes filter:     X -> D
+ *     status filter:    Y -> Y
+ *     unreferenced:     undefined -> undefined
+ */
 export function updateFilterReferences(
   filters: Filter[],
   fromDataView: string,
   toDataView: string | undefined
-) {
+): Filter[] {
   return (filters || []).map((filter) => {
-    if (filter.meta.index === fromDataView) {
-      return {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          index: toDataView,
-        },
-      };
-    } else {
-      return filter;
+    let updatedFilter = filter;
+    // Update data view references in nested filters too, including those inside nested AND/OR groups.
+    if (isCombinedFilter(filter)) {
+      const params = updateFilterReferences(filter.meta.params, fromDataView, toDataView);
+
+      if (params.some((child, index) => child !== filter.meta.params[index])) {
+        updatedFilter = { ...filter, meta: { ...filter.meta, params } };
+      }
     }
+
+    if (updatedFilter.meta.index !== fromDataView) {
+      return updatedFilter;
+    }
+
+    return {
+      ...updatedFilter,
+      meta: {
+        ...updatedFilter.meta,
+        index: toDataView,
+      },
+    };
   });
 }

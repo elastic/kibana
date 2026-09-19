@@ -12,7 +12,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { internalStateActions } from '..';
-import { selectHasUnsavedChanges } from './unsaved_changes';
+import { searchSourceComparator, selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createContextAwarenessMocks } from '../../../../../context_awareness/__mocks__/context_awareness';
@@ -52,6 +52,37 @@ const setup = async () => {
 };
 
 describe('selectHasUnsavedChanges', () => {
+  describe('inline Data View identity', () => {
+    const inlineDataView = { id: 'inline-id', title: 'logs-*', timeFieldName: '@timestamp' };
+
+    it('treats equivalent definitions with local metadata as unchanged', () => {
+      expect(
+        searchSourceComparator(
+          { index: inlineDataView },
+          { index: { ...inlineDataView, version: 'local-version', managed: true } }
+        )
+      ).toBe(true);
+    });
+
+    it('detects a definition change even when the ID stays the same', () => {
+      expect(
+        searchSourceComparator(
+          { index: inlineDataView },
+          { index: { ...inlineDataView, title: 'other-logs-*' } }
+        )
+      ).toBe(false);
+    });
+
+    it('detects an ID change even when the definition stays the same', () => {
+      expect(
+        searchSourceComparator(
+          { index: inlineDataView },
+          { index: { ...inlineDataView, id: 'other-inline-id' } }
+        )
+      ).toBe(false);
+    });
+  });
+
   it('returns false when there is no persisted discover session', async () => {
     const services = createDiscoverServicesMock();
     const { internalState, runtimeStateManager, initializeTabs, addNewTab } =

@@ -9,6 +9,7 @@
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -51,7 +52,13 @@ import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
+import { setAdHocDataViews } from './data_views';
+import {
+  reconcileSessionInlineDataViewIds,
+  replaceDataViewReferencesInAppState,
+  replaceDataViewReferencesInFilters,
+  type InlineDataViewIdReplacement,
+} from '../../utils/reconcile_session_inline_data_view_ids';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -389,7 +396,17 @@ export const initializeTabs = createInternalStateAsyncThunk(
       discoverSessionId,
       shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
-    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+    {
+      dispatch,
+      getState,
+      extra: {
+        services,
+        tabsStorageManager,
+        customizationContext,
+        runtimeStateManager,
+        urlStateStorage,
+      },
+    }
   ) {
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
@@ -445,23 +462,98 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
+    let reconciledInitialTabState = initialTabState;
+    let selectedTabReplacement: InlineDataViewIdReplacement | undefined;
+    let reconciledReplacedIds: string[] = [];
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
       shouldClearAllTabs,
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-      prepareSession: (session, localTabs, selectedTabId) =>
-        assignSessionDataViewIds(session, localTabs, {
-          tabId: selectedTabId ?? session.tabs[0]?.id,
-          dataViewSpec: initialTabState?.dataViewSpec,
-        }),
+      // Reconcile document, local and navigation identities before any of them is consumed.
+      prepareSession: (session, localTabs, selectedTabId) => {
+        const reconciled = reconcileSessionInlineDataViewIds({
+          session,
+          localTabs,
+          navigation: {
+            tabId: selectedTabId ?? session.tabs[0]?.id,
+            dataViewSpec: initialTabState?.dataViewSpec,
+          },
+        });
+
+        selectedTabReplacement = reconciled.selectedTabReplacement;
+        reconciledReplacedIds = reconciled.replacedIds;
+
+        if (initialTabState) {
+          reconciledInitialTabState = {
+            ...initialTabState,
+            dataViewSpec: reconciled.navigationDataViewSpec,
+            defaultState: replaceDataViewReferencesInAppState(
+              initialTabState.defaultState,
+              selectedTabReplacement
+            ),
+          };
+        }
+
+        return { session: reconciled.session, localTabs: reconciled.localTabs };
+      },
     });
+
+    if (selectedTabReplacement) {
+      const urlAppState = urlStateStorage.get<DiscoverAppState>(APP_STATE_URL_KEY) ?? undefined;
+      const urlGlobalState =
+        urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY) ?? undefined;
+      const urlUpdates: Array<Promise<string | undefined>> = [];
+
+      if (urlAppState) {
+        urlUpdates.push(
+          urlStateStorage.set(
+            APP_STATE_URL_KEY,
+            replaceDataViewReferencesInAppState(urlAppState, selectedTabReplacement),
+            { replace: true }
+          )
+        );
+      }
+      if (urlGlobalState?.filters) {
+        urlUpdates.push(
+          urlStateStorage.set(
+            GLOBAL_STATE_URL_KEY,
+            {
+              ...urlGlobalState,
+              filters: replaceDataViewReferencesInFilters(
+                urlGlobalState.filters,
+                selectedTabReplacement
+              ),
+            },
+            { replace: true }
+          )
+        );
+      }
+
+      await Promise.all(urlUpdates);
+    }
+
+    if (reconciledReplacedIds.length) {
+      const replacedIds = new Set(reconciledReplacedIds);
+      const retainedIds = new Set(
+        [...initialTabsState.allTabs, ...initialTabsState.recentlyClosedTabs].flatMap((tab) => {
+          const index = tab.initialInternalState?.serializedSearchSource?.index;
+          return index && typeof index === 'object' && index.id ? [index.id] : [];
+        })
+      );
+      const currentAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+      const nextAdHocDataViews = currentAdHocDataViews.filter(
+        ({ id }) => !id || !replacedIds.has(id) || retainedIds.has(id)
+      );
+      if (nextAdHocDataViews.length !== currentAdHocDataViews.length) {
+        dispatch(setAdHocDataViews(nextAdHocDataViews));
+      }
+    }
 
     // Hand the location state over to the tab initialization before updating the URL below, which
     // discards it, so initial state such as ad hoc data view specs is passed on
-    services.initialTabStateService.capture(initialTabState);
+    services.initialTabStateService.capture(reconciledInitialTabState);
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state

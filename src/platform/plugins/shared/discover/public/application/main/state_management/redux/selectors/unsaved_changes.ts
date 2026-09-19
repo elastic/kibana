@@ -8,7 +8,7 @@
  */
 
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { isEqual, isObject, omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
@@ -33,6 +33,10 @@ import {
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { getSerializedSearchSourceDataViewDetails } from '../utils';
+import {
+  getDataViewSpecKey,
+  getInlineDataView,
+} from '../../../../../../common/session/inline_data_view';
 
 export interface HasUnsavedChangesResult {
   hasUnsavedChanges: boolean;
@@ -181,13 +185,38 @@ const FILTER_COMPARE_OPTIONS: FilterCompareOptions = {
   state: false, // We don't compare filter types (global vs appState).
 };
 
-// ad-hoc data view id can change, so we rather compare the ES|QL query itself here
-const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
-  isOfAggregateQueryType(searchSource.query)
-    ? searchSource.query.esql
-    : isObject(searchSource.index)
-    ? searchSource.index.id
-    : searchSource.index;
+const hasSameDataViewIdentity = (
+  searchSourceA: SerializedSearchSourceFields,
+  searchSourceB: SerializedSearchSourceFields
+) => {
+  // Ad-hoc ES|QL Data View IDs are derived from the query and can change independently.
+  const queryA = searchSourceA.query;
+  const queryB = searchSourceB.query;
+
+  if (isOfAggregateQueryType(queryA)) {
+    return isOfAggregateQueryType(queryB) && queryA.esql === queryB.esql;
+  }
+
+  if (isOfAggregateQueryType(queryB)) {
+    return false;
+  }
+
+  const inlineDataViewA = getInlineDataView(searchSourceA);
+  const inlineDataViewB = getInlineDataView(searchSourceB);
+  if (inlineDataViewA || inlineDataViewB) {
+    if (!inlineDataViewA || !inlineDataViewB || inlineDataViewA.id !== inlineDataViewB.id) {
+      return false;
+    }
+
+    // An inline definition can be edited without replacing its ID; that is a real unsaved change.
+    return getDataViewSpecKey(inlineDataViewA) === getDataViewSpecKey(inlineDataViewB);
+  }
+
+  const getReferencedDataViewId = ({ index }: SerializedSearchSourceFields) =>
+    index && typeof index === 'object' ? index.id : index;
+
+  return getReferencedDataViewId(searchSourceA) === getReferencedDataViewId(searchSourceB);
+};
 
 export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,
@@ -201,7 +230,7 @@ export const searchSourceComparator: TabComparators['serializedSearchSource'] = 
     // we don't show the unsaved changes badge
     isEqualFilters(filtersA, filtersB, FILTER_COMPARE_OPTIONS) &&
     isEqual(searchSourceA.query, searchSourceB.query) &&
-    getAdjustedDataViewId(searchSourceA) === getAdjustedDataViewId(searchSourceB)
+    hasSameDataViewIdentity(searchSourceA, searchSourceB)
   );
 };
 
