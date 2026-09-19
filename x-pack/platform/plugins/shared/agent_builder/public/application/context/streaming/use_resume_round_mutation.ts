@@ -10,7 +10,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,6 +21,7 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
+import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
@@ -33,6 +34,7 @@ export interface ResumeRoundVars {
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
   clearActiveStream: (conversationId: string) => void;
+  markStreamStarted: (conversationId: string) => void;
 }
 
 type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
@@ -44,6 +46,7 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
 export const useResumeRoundMutation = ({
   conversationStreamService,
   clearActiveStream,
+  markStreamStarted,
 }: UseResumeRoundMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
@@ -51,9 +54,7 @@ export const useResumeRoundMutation = ({
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useResumeRoundMutation` is called exactly once — by the `StreamingProvider`.
-  const controllersRef = useRef<Map<string, { controller: AbortController; executionId: string }>>(
-    new Map()
-  );
+  const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -75,7 +76,8 @@ export const useResumeRoundMutation = ({
       }
       const controller = new AbortController();
       const executionId = uuidv4();
-      controllersRef.current.set(vars.conversationId, { controller, executionId });
+      const handle: StreamHandle = { controller, executionId, abortRequested: false };
+      controllersRef.current.set(vars.conversationId, handle);
 
       // Optimistically populate ask_user_question step answers before clearing the prompt —
       // pending_prompts is needed to reconstruct the step, so this must come first.
@@ -101,7 +103,10 @@ export const useResumeRoundMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
-            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+            if (isExecutionStartedEvent(event)) {
+              markStreamStarted(vars.conversationId);
+            }
+            if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
               timelineExecutionId ??= event.execution_id;
             }
           })
@@ -113,7 +118,7 @@ export const useResumeRoundMutation = ({
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
-          isAborted: () => controller.signal.aborted,
+          isAborted: () => isStreamCancelled(handle),
         }).catch(() => {});
 
         clearActiveStream(vars.conversationId);
@@ -137,10 +142,9 @@ export const useResumeRoundMutation = ({
 
   const cancel = useCallback(
     (conversationId: string) => {
-      const entry = controllersRef.current.get(conversationId);
-      if (entry) {
-        chatService.abort(entry.executionId).catch(() => {});
-        entry.controller.abort();
+      const handle = controllersRef.current.get(conversationId);
+      if (handle) {
+        requestAbort(handle, chatService);
       }
     },
     [chatService]

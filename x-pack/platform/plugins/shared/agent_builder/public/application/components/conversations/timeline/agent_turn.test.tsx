@@ -11,6 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import { createExecutionFailedEvent } from './items/execution_failed_event.factory';
+import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from './types';
 import { Timeline } from './timeline';
@@ -79,6 +81,18 @@ const completedLive: TimelineItem = {
   response: undefined,
 };
 const completedSaved: TimelineItem = { ...completedLive, steps: [...steps] };
+const failed: TimelineItem = {
+  ...running,
+  status: 'failed',
+  terminal: createExecutionFailedEvent({ execution_id: executionId }),
+  response: undefined,
+};
+const aborted: TimelineItem = {
+  ...running,
+  status: 'aborted',
+  terminal: createExecutionAbortedEvent({ execution_id: executionId }),
+  response: undefined,
+};
 
 const renderTimeline = (item: TimelineItem, conversationAttachments?: VersionedAttachment[]) =>
   render(
@@ -115,6 +129,42 @@ describe('AgentTurn', () => {
     renderTimeline({ ...running, triggerAttachmentRefs: [{ attachment_id: 'att-2', version: 1 }] });
 
     expect(screen.queryByTestId('references')).not.toBeInTheDocument();
+  });
+
+  it('renders the steps that ran above a collapsed error line for a failed turn', () => {
+    renderTimeline(failed);
+
+    fireEvent.click(screen.getByRole('button', { name: /tool/ }));
+    expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+    expect(screen.getByTestId('agentBuilderExecutionFailedToggle')).toHaveTextContent(
+      'An error occurred'
+    );
+    expect(screen.queryByTestId('agentBuilderRoundError')).not.toBeInTheDocument();
+  });
+
+  it('expands the error details on click and keeps them open through the saved replacement', () => {
+    const { rerender } = renderTimeline(failed);
+
+    fireEvent.click(screen.getByTestId('agentBuilderExecutionFailedToggle'));
+    expect(screen.getByTestId('agentBuilderRoundError')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderRoundErrorRetryButton')).not.toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <EuiProvider>
+          <Timeline items={[{ ...failed, steps: [...steps] }]} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+    expect(screen.getByTestId('agentBuilderRoundError')).toBeInTheDocument();
+  });
+
+  it('renders the steps that ran above the stopped notice for an aborted turn', () => {
+    renderTimeline(aborted);
+
+    fireEvent.click(screen.getByRole('button', { name: /tool/ }));
+    expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+    expect(screen.getByText('Response stopped by petr')).toBeInTheDocument();
   });
 
   it('keeps an expanded tool group open through completion and the saved replacement', () => {

@@ -10,13 +10,19 @@ import React from 'react';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
 
-const getStackTrace = (error: unknown) => {
-  if (error instanceof Error && typeof error.stack === 'string') {
-    return error.stack;
+// The message followed by the cause chain, innermost last. Errors here are rebuilt from the
+// persisted event, so a stack trace would only point at the deserializer.
+const getErrorDetails = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return formatAgentBuilderErrorMessage(error);
   }
-
-  // Fallback to agentBuilder error formatter
-  return formatAgentBuilderErrorMessage(error);
+  const lines = [error.message];
+  let cause: unknown = error.cause;
+  while (cause instanceof Error) {
+    lines.push(`Caused by: ${cause.name}: ${cause.message}`);
+    cause = cause.cause;
+  }
+  return lines.join('\n');
 };
 
 const labels = {
@@ -39,7 +45,7 @@ export const GenericRoundError: React.FC<GenericRoundErrorProps> = ({ error }) =
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="none">
         <EuiCodeBlock language="text" isCopyable paddingSize="m" lineNumbers overflowHeight={500}>
-          {getStackTrace(error)}
+          {getErrorDetails(error)}
         </EuiCodeBlock>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

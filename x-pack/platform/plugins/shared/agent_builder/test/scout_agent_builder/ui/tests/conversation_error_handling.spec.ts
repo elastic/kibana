@@ -27,14 +27,12 @@ test.describe(
       await deleteAllConversationsFromEs(esClient);
     });
 
-    test('shows error message when there is an error and allows user to retry', async ({
+    test('shows a failed turn as a collapsible error, live and after reload', async ({
       page,
       pageObjects,
       llmProxy,
     }) => {
       const MOCKED_INPUT = 'test error message';
-      const MOCKED_RESPONSE = 'This is a successful response after retry';
-      const MOCKED_TITLE = 'Error Handling Test';
 
       await pageObjects.agentBuilder.navigateToApp();
 
@@ -50,28 +48,19 @@ test.describe(
       await expect(async () => {
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
+      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeHidden();
 
+      await pageObjects.agentBuilder.expandError();
       await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
+      await expect(page.testSubj.locator('agentBuilderGenericRoundError')).toBeVisible();
 
-      await setupAgentDirectAnswer({
-        proxy: llmProxy,
-        title: MOCKED_TITLE,
-        response: MOCKED_RESPONSE,
-      });
-
-      await pageObjects.agentBuilder.clickRetryButton();
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      await page.reload();
 
       await expect(async () => {
-        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
-          MOCKED_RESPONSE
-        );
-      }).toPass({ timeout: 120_000 });
-
-      await expect(async () => {
-        expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(false);
+        expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
+      await pageObjects.agentBuilder.expandError();
+      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
     });
 
     test('shows a "not found" prompt when conversation ID does not exist', async ({
@@ -123,9 +112,6 @@ test.describe(
       await expect(async () => {
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
-
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
 
       await pageObjects.agentBuilder.clickNewConversationButton();
 
@@ -185,9 +171,6 @@ test.describe(
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
 
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
-
       await pageObjects.agentBuilder.navigateToConversationViaHistory(successfulConversationId);
 
       await expect(async () => {
@@ -201,7 +184,7 @@ test.describe(
       }).toPass({ timeout: 120_000 });
     });
 
-    test('clears the error when the user sends a new message', async ({
+    test('keeps the failed turn and continues the conversation on the next message', async ({
       page,
       pageObjects,
       llmProxy,
@@ -209,7 +192,7 @@ test.describe(
       const ERROR_INPUT = 'error message';
       const NEW_INPUT = 'new message after error';
       const NEW_RESPONSE = 'This is a successful response after error';
-      const MOCKED_TITLE = 'Error Cleared Test';
+      const MOCKED_TITLE = 'Error Kept Test';
 
       await pageObjects.agentBuilder.navigateToApp();
 
@@ -226,9 +209,6 @@ test.describe(
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
 
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
-
       await setupAgentDirectAnswer({
         proxy: llmProxy,
         title: MOCKED_TITLE,
@@ -239,13 +219,10 @@ test.describe(
       await pageObjects.agentBuilder.sendMessage();
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      await expect(page.testSubj.locator('agentBuilderResponseMessage')).toBeVisible({
-        timeout: 120_000,
-      });
-
-      await expect(async () => {
-        expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(false);
-      }).toPass({ timeout: 60_000 });
+      await expect(
+        page.locator('[data-test-subj="agentBuilderResponseMessage"]', { hasText: NEW_RESPONSE })
+      ).toBeVisible({ timeout: 120_000 });
+      await expect(page.testSubj.locator('agentBuilderExecutionFailedToggle')).toHaveCount(1);
     });
 
     test('keeps the previous conversation rounds visible when there is an error', async ({
@@ -282,9 +259,6 @@ test.describe(
       await expect(async () => {
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
-
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
 
       await expect(
         page.locator('[data-test-subj="agentBuilderResponseMessage"]', { hasText: FIRST_RESPONSE })

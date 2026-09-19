@@ -216,12 +216,14 @@ export class AgentBuilderApp {
     return newTitle;
   }
 
-  async clickRetryButton() {
-    await this.page.testSubj.click('agentBuilderRoundErrorRetryButton');
+  /** The collapsed "An error occurred" line of a failed turn. */
+  async isErrorVisible() {
+    return this.page.testSubj.locator('agentBuilderExecutionFailedToggle').isVisible();
   }
 
-  async isErrorVisible() {
-    return this.page.testSubj.locator('agentBuilderRoundError').isVisible();
+  /** Expands the failed turn's error line to show the error details. */
+  async expandError() {
+    await this.page.testSubj.click('agentBuilderExecutionFailedToggle');
   }
 
   async navigateToToolsLanding() {
