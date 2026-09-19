@@ -40,7 +40,9 @@ const SPACE = flag('--space', 'default');
 const CLEAN = args.includes('--clean');
 const RUN = args.includes('--run');
 const INDEX = `.alerts-security.alerts-${SPACE}`;
-const AUTH = 'elastic:changeme';
+const ES_USERNAME = process.env.ES_USERNAME ?? 'elastic';
+const ES_PASSWORD = process.env.ES_PASSWORD ?? 'changeme';
+const AUTH = `${ES_USERNAME}:${ES_PASSWORD}`;
 
 // Workers install lazily per space under `${workerId}-${spaceId}`, so the run route needs the
 // space-suffixed id. The bare registered id 404s even once the Worker is installed and enabled.
