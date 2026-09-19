@@ -34,10 +34,9 @@ import type { Logger } from '@kbn/logging';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
-import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
-import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
+import { BROWSER_TOOL_PREFIX, TOOLS_WITH_DEDICATED_STEP_LIFECYCLE, steps, tags } from './constants';
 import { extractToolReturn } from './utils/extract_tool_return';
 import {
   isBackgroundExecutionCompleteAction,
@@ -51,13 +50,6 @@ import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
-
-/**
- * Tools that have their own dedicated step lifecycle event and therefore should NOT produce a default `toolCallEvent`.
- */
-const TOOLS_WITH_DEDICATED_STEP_LIFECYCLE: ReadonlySet<string> = new Set([
-  internalTools.askUserQuestion,
-]);
 
 export const convertGraphEvents = ({
   graphName,
