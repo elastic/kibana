@@ -14,7 +14,7 @@ import type {
   ToolResult,
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
-import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
@@ -184,7 +184,7 @@ describe('renderStepsToMessages', () => {
         {
           type: ConversationRoundStepType.backgroundAgentComplete,
           execution_id: 'x1',
-          status: 'completed',
+          status: ExecutionStatus.completed,
           response: { message: 'done' },
         },
         {

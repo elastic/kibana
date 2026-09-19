@@ -11,6 +11,7 @@ import {
   ToolResultType,
   isTodosStep,
   type ConversationRoundStep,
+  type ReasoningStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import {
@@ -19,7 +20,7 @@ import {
   TimelineTriggerType,
   type TimelineEvent,
 } from '@kbn/agent-builder-common/chat/timeline_events';
-import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import { AgentPromptType, type PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
 import { applyStepUpdates, stepUpdates } from '../step_state';
@@ -99,7 +100,7 @@ const promptResponse = (
   } as TimelineEvent);
 
 const responded = { type: 'responded', response: { message: 'ok' } };
-const reasoning = (text: string) => ({
+const reasoning = (text: string): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
   reasoning: text,
 });
@@ -293,7 +294,12 @@ describe('foldConversationTurns', () => {
   });
 
   it('exposes pending prompts for a paused turn', () => {
-    const prompt = { id: 'confirm', type: AgentPromptType.confirmation, title: 't', message: 'm' };
+    const prompt: PromptRequest = {
+      id: 'confirm',
+      type: AgentPromptType.confirmation,
+      title: 't',
+      message: 'm',
+    };
     const turns = foldConversationTurns([
       userMessage('u1'),
       started('s1', 'r1', 'u1'),
@@ -305,7 +311,12 @@ describe('foldConversationTurns', () => {
 });
 
 describe('getPendingTurn', () => {
-  const prompt = { id: 'confirm', type: AgentPromptType.confirmation, title: 't', message: 'm' };
+  const prompt: PromptRequest = {
+    id: 'confirm',
+    type: AgentPromptType.confirmation,
+    title: 't',
+    message: 'm',
+  };
 
   it('returns the last turn with its compat round when it awaits a prompt', () => {
     const conversation = createEmptyConversation({

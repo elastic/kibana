@@ -59,7 +59,7 @@ export const getResearchAgentPrompt = async (
       cycleLimit,
       imageResolver,
     },
-    compaction: resultTransformer ? { resultTransformer } : undefined,
+    compaction: { resultTransformer },
   });
 
   return [

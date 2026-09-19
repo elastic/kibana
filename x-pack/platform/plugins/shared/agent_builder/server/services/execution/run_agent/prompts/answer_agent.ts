@@ -53,7 +53,7 @@ export const getStructuredAnswerPrompt = async (
       handover,
       imageResolver,
     },
-    compaction: resultTransformer ? { resultTransformer } : undefined,
+    compaction: { resultTransformer },
   });
 
   return [

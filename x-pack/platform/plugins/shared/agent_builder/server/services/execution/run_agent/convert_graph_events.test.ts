@@ -15,7 +15,11 @@ import {
   ToolResultType,
   ToolType,
 } from '@kbn/agent-builder-common';
-import { AgentPromptRequestSourceType, AgentPromptType } from '@kbn/agent-builder-common/agents';
+import {
+  AgentPromptRequestSourceType,
+  AgentPromptType,
+  ExecutionStatus,
+} from '@kbn/agent-builder-common/agents';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
 import { steps } from './constants';
@@ -87,7 +91,7 @@ describe('convertGraphEvents', () => {
           results: [],
           progression: [],
           tool_call_group_id: 'g',
-          tool_origin: ToolOrigin.builtin,
+          tool_origin: ToolOrigin.internal,
           tool_type: ToolType.builtin,
         }),
         stepUpdates.appendToolCall({
@@ -133,7 +137,7 @@ describe('convertGraphEvents', () => {
       tool_id: 'my.tool',
       params: { q: 1 },
       tool_call_group_id: 'g',
-      tool_origin: ToolOrigin.builtin,
+      tool_origin: ToolOrigin.internal,
       tool_type: ToolType.builtin,
     });
     expect(events[3].data).toEqual({ tool_call_id: 'b1', tool_id: 'open', params: {} });
@@ -194,7 +198,7 @@ describe('convertGraphEvents', () => {
   it('emits background_agent_complete from checkBackgroundWork appends', async () => {
     const execution = {
       execution_id: 'x1',
-      status: 'completed' as const,
+      status: ExecutionStatus.completed,
       response: { message: 'done' },
     };
     const events = await collect([
