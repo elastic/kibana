@@ -32,6 +32,5 @@ export { generateThresholdQuery } from './threshold_generate_query';
 export {
   securityDetectionThresholdManifest,
   validateThresholdFields,
-  deriveThresholdRuleFields,
   securityDetectionThreshold,
 } from './threshold_definition';

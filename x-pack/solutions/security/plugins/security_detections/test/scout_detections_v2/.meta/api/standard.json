@@ -1,5 +1,5 @@
 {
-  "sha1": "94d2e8bb3fb6350fdc3b6be723201067ce34da2a",
+  "sha1": "12ae6a6414fd5126be608fdc8fc610879b6b8440",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -821,6 +821,71 @@
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
         "line": 180,
         "column": 7
+      }
+    },
+    {
+      "id": "96e78cfe9352b4f-6adf1cd69ecaf6e",
+      "title": "Detection Engine v2 — persistent-mode workaround create: query rule persists kind=alert, both strategies none, pending_count=0, no grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
+        "line": 70,
+        "column": 58
+      }
+    },
+    {
+      "id": "96e78cfe9352b4f-e97f452821d0df5",
+      "title": "Detection Engine v2 — persistent-mode workaround create: threshold rule persists kind=alert, both strategies none, pending_count=0, no grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
+        "line": 90,
+        "column": 15
+      }
+    },
+    {
+      "id": "96e78cfe9352b4f-9e623ba1509126b",
+      "title": "Detection Engine v2 — persistent-mode workaround patch: patching severity leaves the workaround fields intact",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
+        "line": 115,
+        "column": 15
+      }
+    },
+    {
+      "id": "96e78cfe9352b4f-f10d2ce386aeb6f",
+      "title": "Detection Engine v2 — persistent-mode workaround replace: PUT leaves the workaround fields correct after a full replace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
+        "line": 146,
+        "column": 17
+      }
+    },
+    {
+      "id": "96e78cfe9352b4f-bc5234a7068ed6f",
+      "title": "Detection Engine v2 — persistent-mode workaround trap: creating a rule with recovering_count while recovery_strategy is none is rejected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
+        "line": 190,
+        "column": 11
       }
     }
   ]
