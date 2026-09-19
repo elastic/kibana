@@ -235,6 +235,29 @@ export const WORKER_SCHEDULE_UNITS = ['m', 'h', 'd'] as const;
 
 export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
 
+/**
+ * Inference feature registry ids. Operators pick the model for each tier in Stack Management >
+ * Model Settings, and Worker `ai.agent` steps resolve through them with
+ * `connector-id-by-feature` instead of naming an endpoint themselves.
+ *
+ * The axis is the kind of call, not the Worker. One Worker can span several tiers — Attack
+ * Discovery generates and then investigates, three `workflow.execute` hops apart — and a step
+ * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
+ * `workflow.execute` inputs. A new Worker usually costs no new tier.
+ *
+ * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
+ * same fast model that gates an alert also enriches a threat report. Other Security features are
+ * expected to pin to these rather than register per-feature rows of their own.
+ */
+export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
+/** Low latency, high volume, lightweight judgment. */
+export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
+/** Deeper single-shot thinking on a self-contained task. */
+export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
+/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
+export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
+
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;
