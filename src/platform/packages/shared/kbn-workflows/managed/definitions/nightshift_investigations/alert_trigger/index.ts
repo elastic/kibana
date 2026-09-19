@@ -7,20 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DEDUCTIVE_INVESTIGATION_WORKFLOW_YAML from './deductive_investigation_workflow.yaml';
+import ALERT_TRIGGER_WORKFLOW_YAML from './alert_trigger_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
+export const NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW_ID =
+  'system-nightshift-investigation-alert-trigger';
 
-/** @deprecated Use {@link NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}. */
-export const DEDUCTIVE_INVESTIGATION_WORKFLOW_ID = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-
-export const DEDUCTIVE_INVESTIGATION_WORKFLOW = {
-  id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+/**
+ * Opt-in v1 rule action that starts a Nightshift investigation for each firing
+ * alert. `selectors: ['rule_action']` is what makes it appear in the rule-action
+ * picker; it does not auto-run on every alert in the space.
+ *
+ * `enablement: 'restorable'` so a noisy space can disable it without an uninstall.
+ */
+export const NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW = {
+  id: NIGHTSHIFT_INVESTIGATION_ALERT_TRIGGER_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,
-  yaml: DEDUCTIVE_INVESTIGATION_WORKFLOW_YAML,
+  visibility: {
+    selectors: ['rule_action'],
+  },
+  yaml: ALERT_TRIGGER_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
