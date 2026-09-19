@@ -44,6 +44,35 @@ describe('ConversationsService', () => {
     });
   });
 
+  it('posts events to the _add_events endpoint', async () => {
+    const event = {
+      type: 'text_note',
+      data: { text: 'this is a note' },
+    };
+    const responseBody = {
+      events: [
+        {
+          id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          created_at: '2026-09-14T10:00:00.000Z',
+          actor: { type: 'user', id: 'u_1', username: 'alice' },
+          ...event,
+        },
+      ],
+    };
+    const post = jest.fn().mockResolvedValue(responseBody);
+    const service = new ConversationsService({ http: { post } as never });
+
+    const result = await service.addEvents({
+      conversationId: 'conv-1',
+      events: [event],
+    });
+
+    expect(post).toHaveBeenCalledWith(`${publicApiPath}/conversations/conv-1/_add_events`, {
+      body: JSON.stringify({ events: [event] }),
+    });
+    expect(result).toEqual(responseBody);
+  });
+
   it('updates conversation access control', async () => {
     const put = jest.fn().mockResolvedValue({
       access_mode: ConversationAccessControlMode.Private,

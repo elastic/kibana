@@ -250,5 +250,7 @@ export {
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,
   isBuiltInConversationEventType,
+  isTimelineEvent,
   type ValidConversationEventType,
+  type ConversationAddEventInput,
 } from './timeline_events';
