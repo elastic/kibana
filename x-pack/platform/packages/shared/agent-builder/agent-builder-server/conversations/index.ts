@@ -9,4 +9,5 @@ export type {
   ConversationCreatePublicRequest,
   ConversationPublicClient,
   ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
 } from './types';

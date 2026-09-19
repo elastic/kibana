@@ -183,6 +183,7 @@ export type {
   ConversationPublicClient,
   ConversationCreatePublicRequest,
   ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
 } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

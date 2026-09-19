@@ -7,13 +7,21 @@
 
 import type {
   ConversationAccessControlInput,
+  ConversationEvent,
   ConversationListOptions,
   ConversationSearchOptions,
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
   ConversationListResult,
   MetadataFieldValue,
+  ConversationAddEventInput,
 } from '@kbn/agent-builder-common';
+
+/** Request for adding events to a conversation. */
+export interface ConversationAddEventsRequest {
+  conversationId: string;
+  events: ConversationAddEventInput[];
+}
 
 /**
  * Input for pre-creating an empty conversation without starting an execution.
@@ -85,4 +93,9 @@ export interface ConversationPublicClient {
    * Metadata writes must go through patchMetadata so they are validated against the template.
    */
   update(request: ConversationUpdatePublicRequest): Promise<ConversationWithPermissions>;
+  /**
+   * Append custom events to a conversation timeline. Requires converse access.
+   * Only custom event types are accepted; built-in timeline event types are rejected.
+   */
+  addEvents(request: ConversationAddEventsRequest): Promise<ConversationEvent[]>;
 }
