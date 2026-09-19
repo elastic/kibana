@@ -339,12 +339,14 @@ export class DetectionRulesClient {
    * `options.enabled` option so the rule starts disabled by default (v1's
    * contract) while the framework's default is enabled.
    *
-   * Two framework fields are the API's decision, not the caller's:
-   *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — the
-   *     converter sends these explicitly so stored detection rules are uniform
-   *     even if the framework default ever changes.
-   *   - No `grouping` — for threshold rules the framework derives it at write
-   *     time from `threshold.field`.
+   * Three framework fields are the API's decision, not the caller's:
+   *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — sent
+   *     explicitly so stored detection rules are uniform even if the framework
+   *     default ever changes.
+   *   - `state_transition: { pending_count: 0 }` — zero consecutive breaches
+   *     required, so the alert activates immediately on the first match.
+   *   - No `grouping` — detection rules do not use the framework's grouping
+   *     feature.
    *
    * Ref: rule-crud-api.md "Create a rule"
    */

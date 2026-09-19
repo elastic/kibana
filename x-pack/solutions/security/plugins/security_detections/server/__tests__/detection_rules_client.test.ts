@@ -92,7 +92,7 @@ function makeInScopeRuleResponse(overrides: Partial<RuleResponse> = {}): RuleRes
     created_by: 'elastic',
     updated_at: '2024-01-02T00:00:00.000Z',
     updated_by: 'elastic',
-    kind: 'signal',
+    kind: 'alert',
     schedule: { every: '5m' },
     metadata: {
       name: 'Test rule',
@@ -178,8 +178,8 @@ describe('DetectionRulesClient', () => {
       const [callArgs] = (frameworkClient.createRule as jest.Mock).mock.calls[0];
       // Default enabled = false.
       expect(callArgs.options?.enabled).toBe(false);
-      // Kind must be 'signal'.
-      expect(callArgs.data.kind).toBe('signal');
+      // Kind must be 'alert'.
+      expect(callArgs.data.kind).toBe('alert');
       // The builder_type must be the namespaced id.
       expect(callArgs.data.metadata.builder_type).toBe('security.detection.query');
       // builder_fields must contain the detection fields.
@@ -506,6 +506,26 @@ describe('DetectionRulesClient', () => {
       expect((updateArgs.data.metadata.builder_fields as Record<string, unknown>).max_signals).toBe(
         500
       );
+    });
+
+    it('does not send state_transition on a PATCH, leaving the stored value intact', async () => {
+      // toFrameworkPatch omits state_transition so the framework merge keeps
+      // the stored value unchanged.  This is the invariant that lets create and
+      // PUT set the lifecycle configuration once and PATCH never need to touch it.
+      const existingRule = makeInScopeRuleResponse();
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await client.patchRule('rule-id-1', { name: 'Patched name' });
+
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // state_transition must not appear in the PATCH payload — omission is
+      // what tells the framework merge to keep the stored value.
+      expect('state_transition' in updateArgs.data).toBe(false);
     });
 
     it('returns 400 when a patch field does not belong to the stored type', async () => {
