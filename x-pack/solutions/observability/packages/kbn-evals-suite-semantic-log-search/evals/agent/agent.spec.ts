@@ -15,7 +15,12 @@ import type {
 } from '@kbn/evals';
 import { createArmAgent, deleteAgent } from '../../src/agents';
 import { resolveCorpus } from '../../src/corpora';
-import { assertCorpusIsLabelled, auditCorpus } from '../../src/corpus_audit';
+import {
+  assertCorpusIsLabelled,
+  assertRerankCapability,
+  auditCorpus,
+  seedCorpusIfAbsent,
+} from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
 import { agentEvaluators } from '../../src/evaluators';
 import { ARMS } from '../../src/types';
@@ -51,7 +56,10 @@ evaluate.describe(
     const agentIdsByArm = new Map<Arm, string>();
 
     evaluate.beforeAll(async ({ esClient, fetch, log, connector }) => {
-      const audit = await auditCorpus({ esClient, corpus, log });
+      let audit = await auditCorpus({ esClient, corpus, log });
+      if (seedCorpusIfAbsent(audit, corpus, log)) {
+        audit = await auditCorpus({ esClient, corpus, log });
+      }
       assertCorpusIsLabelled(audit, corpus);
 
       for (const arm of [ARMS.keyword, ARMS.semantic] as const) {
@@ -125,8 +133,12 @@ evaluate.describe(
       await runArm({ arm: ARMS.keyword, executorClient, agentBuilderClient, evaluators });
     });
 
-    evaluate('semantic arm', async ({ executorClient, agentBuilderClient, evaluators }) => {
-      await runArm({ arm: ARMS.semantic, executorClient, agentBuilderClient, evaluators });
-    });
+    evaluate(
+      'semantic arm',
+      async ({ executorClient, agentBuilderClient, evaluators, esClient, log }) => {
+        await assertRerankCapability(esClient, log);
+        await runArm({ arm: ARMS.semantic, executorClient, agentBuilderClient, evaluators });
+      }
+    );
   }
 );

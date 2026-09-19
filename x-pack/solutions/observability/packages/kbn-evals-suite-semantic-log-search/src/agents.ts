@@ -41,8 +41,7 @@ export const createArmAgent = async ({
 }: CreateAgentParams): Promise<string> => {
   const id = agentIdFor(arm, connectorId);
 
-  const toolIds =
-    arm === 'keyword' ? [GET_LOGS_TOOL_ID] : [GET_LOGS_SEMANTIC_TOOL_ID];
+  const toolIds = arm === 'keyword' ? [GET_LOGS_TOOL_ID] : [GET_LOGS_SEMANTIC_TOOL_ID];
 
   const instructions = [
     'You are answering a question about application logs.',

@@ -121,13 +121,14 @@ describe('ground truth predicates', () => {
 
   describe('relevantLabels', () => {
     it('includes warnings at threshold 1 and excludes them at threshold 2', () => {
+      const grade2Count =
+        corpus.messageClasses.postgresPoolFailure.length +
+        corpus.messageClasses.networkConnectivityFailure.length +
+        corpus.messageClasses.kafkaBrokerFailure.length;
       expect(relevantLabels(connectionFailures, 1)).toHaveLength(
-        corpus.messageClasses.connectionFailure.length +
-          corpus.messageClasses.connectionWarning.length
+        grade2Count + corpus.messageClasses.connectionPoolWarning.length
       );
-      expect(relevantLabels(connectionFailures, 2)).toHaveLength(
-        corpus.messageClasses.connectionFailure.length
-      );
+      expect(relevantLabels(connectionFailures, 2)).toHaveLength(grade2Count);
     });
   });
 
@@ -135,7 +136,7 @@ describe('ground truth predicates', () => {
     it('returns only the labels the message carries', () => {
       expect(
         matchedLabels('ERROR unable to reach Kafka broker after 3 retries', [
-          ...corpus.messageClasses.connectionFailure,
+          ...corpus.messageClasses.kafkaBrokerFailure,
         ])
       ).toEqual(['unable to reach Kafka broker']);
     });

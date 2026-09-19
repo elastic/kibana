@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ILLEGAL_CHARACTERS } from '@kbn/data-view-validation';
 import {
   DEFAULT_MAX_PATTERNS,
   MAX_KQL_FILTER_LENGTH,
@@ -16,17 +15,29 @@ import {
 } from './constants';
 
 /**
- * ES|QL sources are not parameterizable: `esql.from(target)` interpolates the string verbatim,
- * so a target containing `|` or a space injects commands into the query. `ILLEGAL_CHARACTERS`
- * from `@kbn/data-view-validation` is the authoritative list of disallowed characters (includes
- * `\`, `/`, `?`, `"`, `<`, `>`, `|`, and space).
+ * `esql.from(target)` interpolates its argument verbatim: `Builder.expression.source.node`
+ * hardcodes `{ unquoted: true }` for string inputs, and `LeafPrinter.string` short-circuits all
+ * escaping on that flag. So `target` must be constrained to characters that cannot alter the
+ * shape of the FROM clause.
  *
- * Note: date-math index names such as `<logs-{now/d}>` are also rejected because they contain
- * `<`, `>`, and `/`. Kibana data views reject them for the same reason, and ES|QL `FROM` does
- * not accept them unquoted.
+ * Derived from the ES|QL lexer's `fragment UNQUOTED_SOURCE_PART : ~[:"=|,[\]/() \t\r\n]`, which
+ * is the authoritative definition of what stays inside a single source token. Every character
+ * below is either inside that class, or is one of the two structural characters we deliberately
+ * allow:
+ *   `,` separates sources (`FROM a,b` parses as two sources)
+ *   `:` introduces a cluster prefix or a `::data` / `::failures` selector
+ * Neither can start a new command — only `|` can, and `|` is excluded.
+ *
+ * Deliberately narrower than the grammar: `\ ? " < > #` and non-ASCII are all legal ES|QL source
+ * characters but illegal in Elasticsearch index names, so excluding them costs nothing.
+ *
+ * Known limitation: date-math index names (`<logs-{now/d}>`) are rejected. Kibana data views
+ * reject them too, and ES|QL `FROM` does not accept them unquoted.
+ *
+ * See schema.test.ts for a parser-pinned property test that asserts any target passing this
+ * rule cannot change the shape of the emitted FROM clause.
  */
-const isSafeIndexPattern = (target: string): boolean =>
-  !ILLEGAL_CHARACTERS.some((char) => target.includes(char));
+const INDEX_PATTERN = /^[a-zA-Z0-9_.,:*+-]+$/;
 
 /**
  * Runtime schema for the serializable subset of {@link SemanticLogSearchParams}.
@@ -36,9 +47,9 @@ const isSafeIndexPattern = (target: string): boolean =>
  * essential — zod's `.trim()` and `.default()` coercions only apply when you consume the output.
  */
 export const semanticLogSearchInputSchema = z.object({
-  target: z.string().trim().min(1).max(MAX_TARGET_LENGTH).refine(isSafeIndexPattern, {
+  target: z.string().trim().min(1).max(MAX_TARGET_LENGTH).regex(INDEX_PATTERN, {
     message:
-      'target must be a plain index pattern — characters \\ / ? " < > | and spaces are not allowed',
+      'target must be a plain index pattern — only alphanumeric characters, dots, underscores, hyphens, colons, commas, asterisks, and plus signs are allowed',
   }),
   nlQuery: z.string().trim().min(1).max(MAX_NL_QUERY_LENGTH),
   timeRange: z

@@ -112,6 +112,14 @@ describe('semantic log search service', () => {
     // injection in target — esql.from() does not quote; pipe injects ES|QL commands
     { target: 'logs | DROP message' },
     { target: 'logs\\sneaky' },
+    // whitespace bypass: the old denylist only blocked U+0020 (space); ES|QL also accepts \n, \r,
+    // \t as token separators, so these would produce valid ES|QL with zero parse errors under the
+    // old guard. The new allowlist rejects them at the character level.
+    { target: 'logs-*\nMETADATA\n_id' },
+    { target: 'logs-*\rMETADATA\r_id' },
+    { target: 'logs-*\tMETADATA\t_id' },
+    // backtick is the ES|QL identifier quote character; `logs-*` would parse as a quoted source
+    { target: '`logs-*`' },
     // over-length inputs
     { nlQuery: 'x'.repeat(MAX_NL_QUERY_LENGTH + 1) },
     { kqlFilter: 'x'.repeat(MAX_KQL_FILTER_LENGTH + 1) },
@@ -128,6 +136,40 @@ describe('semantic log search service', () => {
     expect(fieldCaps).not.toHaveBeenCalled();
     expect(inferenceGet).not.toHaveBeenCalled();
     expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    // single index patterns
+    'logs-*',
+    'my_index',
+    '.ds-logs-2024.01.01-000001',
+    'logs-generic-default',
+    'metrics-*-*',
+    '*',
+    'idx+1',
+    // comma-separated multi-index patterns
+    'logs-*,filebeat-*',
+    // cluster-prefixed remote patterns
+    'remote:logs-*',
+    'cluster-a:logs-*,cluster-b:logs-*',
+    // TSDB data / failures selectors
+    'logs-*::data',
+    // exclusion prefix
+    'logs-*,-logs-debug-*',
+  ])('accepts the legitimate target %s and forwards it to Elasticsearch', async (target) => {
+    const { esClient, esqlQuery } = createEsClient();
+
+    const result = await search(createParams(esClient, { target }), loggerMock.create());
+
+    // The schema accepts this target; ES|QL query runs (empty mock response → success)
+    expect(result.status).toBe('success');
+    expect(esqlQuery).toHaveBeenCalled();
+    const [{ query }] = esqlQuery.mock.calls[0];
+    // Each comma-separated part must appear in the emitted query. The composer adds a space
+    // after commas (`FROM a, b`) so checking the raw target verbatim is intentionally avoided.
+    for (const part of target.split(',')) {
+      expect(query).toContain(part.trim());
+    }
   });
 
   it('trims whitespace from target and applies maxPatterns default before ES|QL', async () => {

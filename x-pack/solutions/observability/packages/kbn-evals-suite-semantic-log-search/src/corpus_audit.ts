@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { spawnSync } from 'child_process';
+import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CorpusProfile } from './corpora';
 import { allLabels } from './corpora';
+
+/** The `.rerank-v1-elasticsearch` inference endpoint available in ES 9.3+. */
+const RERANK_ENDPOINT = '.rerank-v1-elasticsearch';
 
 export interface LabelAudit {
   label: string;
@@ -88,6 +93,74 @@ export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promi
   }
 
   return { labels, missing, totalDocuments: totals.count };
+};
+
+/**
+ * Seeds the corpus when `auditCorpus` finds no documents in the target index.
+ *
+ * Executes the corpus's `setupCommand` via `bash -c` from the Kibana repo root.
+ * Returns `true` when seeding was performed, `false` when the corpus was already
+ * present (no seeding needed).
+ *
+ * Propagates errors — the caller should fall through to `assertCorpusIsLabelled`
+ * so that a failed seed produces the same diagnostic as a missing corpus.
+ */
+export const seedCorpusIfAbsent = (
+  priorAudit: CorpusAudit,
+  corpus: CorpusProfile,
+  log: ToolingLog
+): boolean => {
+  if (priorAudit.totalDocuments > 0) {
+    return false;
+  }
+
+  log.info(`Corpus "${corpus.target}" is empty — seeding with:\n\n${corpus.setupCommand}\n`);
+
+  // Resolve the Kibana repo root relative to this file's compiled location.
+  // __dirname resolves to the compiled `target/` directory; walk up to the package root
+  // and then four levels to the repo root (pkg → packages → observability → solutions → x-pack → kibana).
+  const pkgRoot = path.resolve(__dirname, '..', '..', '..', '..', '..', '..', '..', '..');
+
+  const result = spawnSync('bash', ['-c', corpus.setupCommand], {
+    cwd: pkgRoot,
+    stdio: 'inherit',
+    timeout: 5 * 60 * 1000,
+  });
+
+  if (result.status !== 0) {
+    throw new Error(
+      `Corpus seeding failed (exit ${result.status ?? 'signal'}). ` +
+        `Run the command manually to diagnose:\n\n${corpus.setupCommand}\n`
+    );
+  }
+
+  log.info(`Corpus seeded successfully.`);
+  return true;
+};
+
+/**
+ * Asserts that the `.rerank-v1-elasticsearch` inference endpoint is available.
+ *
+ * The semantic arm relies on this endpoint for RERANK. Without it the service
+ * returns `{ status: 'unavailable', reason: 'inference_unavailable' }` and every
+ * metric silently reports zero — which is indistinguishable from a quality regression.
+ * Failing loudly here is better than confusing zeros in the results.
+ */
+export const assertRerankCapability = async (esClient: Client, log: ToolingLog): Promise<void> => {
+  try {
+    const response = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
+    if ((response.endpoints?.length ?? 0) === 0) {
+      throw new Error('no endpoints returned');
+    }
+    log.debug(`Rerank endpoint "${RERANK_ENDPOINT}" is available.`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Semantic arm requires the "${RERANK_ENDPOINT}" inference endpoint, which is ` +
+        `preconfigured in ES 9.3+. Endpoint check failed: ${message}.\n` +
+        `Ensure ML is enabled and the cluster is running ES 9.3 or later.`
+    );
+  }
 };
 
 /**

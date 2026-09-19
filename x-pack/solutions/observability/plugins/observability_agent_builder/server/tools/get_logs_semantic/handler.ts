@@ -67,10 +67,12 @@ export async function getLogsSemanticHandler({
   esClient,
   params,
   semanticLogSearch,
+  abortSignal,
 }: {
   esClient: ElasticsearchClient;
   params: GetLogsSemanticParams;
   semanticLogSearch?: SemanticLogSearchService;
+  abortSignal?: AbortSignal;
 }): Promise<GetLogsSemanticResult> {
   const { start, end, index, semanticFilter, kqlFilter, maxPatterns } = params;
 
@@ -95,6 +97,7 @@ export async function getLogsSemanticHandler({
     timeRange: { start: startMs, end: endMs },
     maxPatterns,
     kqlFilter,
+    abortSignal,
   });
 
   if (result.status === 'unavailable') {

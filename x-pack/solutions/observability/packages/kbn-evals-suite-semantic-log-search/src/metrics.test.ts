@@ -26,8 +26,10 @@ const pattern = (message: string, count = 1): RetrievedPattern => ({
   count,
 });
 
+// Use networkConnectivityFailure as the "relevant" fixture — it contains generic failure labels
+// that cover the connection_failures query at grade 2, independent of Postgres/Kafka specifics.
 const relevant = (index: number, count = 1) =>
-  pattern(corpus.messageClasses.connectionFailure[index], count);
+  pattern(corpus.messageClasses.networkConnectivityFailure[index], count);
 
 const trap = (index: number, count = 1) =>
   pattern(corpus.messageClasses.connectionHealthy[index], count);
@@ -45,7 +47,7 @@ describe('precisionAtK', () => {
   });
 
   it('excludes warnings at threshold 2 and includes them at threshold 1', () => {
-    const results = [pattern(corpus.messageClasses.connectionWarning[1])];
+    const results = [pattern(corpus.messageClasses.connectionPoolWarning[1])];
     expect(precisionAtK(results, connectionFailures, 1, 2)).toBe(0);
     expect(precisionAtK(results, connectionFailures, 1, 1)).toBe(1);
   });
@@ -78,14 +80,21 @@ describe('weightedPrecisionAtK', () => {
 describe('recallOfLabels', () => {
   it('measures distinct labels found anywhere in the results', () => {
     const results = [relevant(0), relevant(1)];
-    const expectedLabels = corpus.messageClasses.connectionFailure.length;
+    // Recall denominator = all grade-2 labels for connection_failures
+    const expectedLabels =
+      corpus.messageClasses.postgresPoolFailure.length +
+      corpus.messageClasses.networkConnectivityFailure.length +
+      corpus.messageClasses.kafkaBrokerFailure.length;
 
     expect(recallOfLabels(results, connectionFailures, 2)).toBeCloseTo(2 / expectedLabels);
   });
 
   it('does not count the same label twice', () => {
     const results = [relevant(0), relevant(0), relevant(0)];
-    const expectedLabels = corpus.messageClasses.connectionFailure.length;
+    const expectedLabels =
+      corpus.messageClasses.postgresPoolFailure.length +
+      corpus.messageClasses.networkConnectivityFailure.length +
+      corpus.messageClasses.kafkaBrokerFailure.length;
 
     expect(recallOfLabels(results, connectionFailures, 2)).toBeCloseTo(1 / expectedLabels);
   });

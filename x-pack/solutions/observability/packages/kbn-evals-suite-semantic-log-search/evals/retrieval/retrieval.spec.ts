@@ -7,7 +7,12 @@
 
 import { evaluate, tags } from '@kbn/evals';
 import { resolveCorpus } from '../../src/corpora';
-import { assertCorpusIsLabelled, auditCorpus } from '../../src/corpus_audit';
+import {
+  assertCorpusIsLabelled,
+  assertRerankCapability,
+  auditCorpus,
+  seedCorpusIfAbsent,
+} from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
 import { retrievalEvaluators } from '../../src/evaluators';
 import { toKeywordFilter } from '../../src/keyword_filter';
@@ -32,7 +37,10 @@ evaluate.describe(
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      const audit = await auditCorpus({ esClient, corpus, log });
+      let audit = await auditCorpus({ esClient, corpus, log });
+      if (seedCorpusIfAbsent(audit, corpus, log)) {
+        audit = await auditCorpus({ esClient, corpus, log });
+      }
       assertCorpusIsLabelled(audit, corpus);
     });
 
@@ -54,7 +62,8 @@ evaluate.describe(
       );
     });
 
-    evaluate('semantic arm', async ({ executorClient, fetch, log, connector }) => {
+    evaluate('semantic arm', async ({ executorClient, fetch, log, connector, esClient }) => {
+      await assertRerankCapability(esClient, log);
       await executorClient.runExperiment(
         {
           name: 'retrieval-semantic',

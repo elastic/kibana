@@ -121,7 +121,9 @@ export function createGetLogsSemanticTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (toolParams, { esClient }) => {
+    handler: async (toolParams, { esClient, request }) => {
+      const abortController = new AbortController();
+      const abortSubscription = request.events.aborted$.subscribe(() => abortController.abort());
       try {
         const [, pluginsStart] = await core.getStartServices();
         const logIndexPatterns = await getLogsIndices({ core, logger });
@@ -138,6 +140,7 @@ export function createGetLogsSemanticTool({
             maxPatterns: toolParams.maxPatterns,
           },
           semanticLogSearch,
+          abortSignal: abortController.signal,
         });
 
         return {
@@ -163,6 +166,8 @@ export function createGetLogsSemanticTool({
             },
           ],
         };
+      } finally {
+        abortSubscription.unsubscribe();
       }
     },
   };

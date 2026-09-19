@@ -33,7 +33,7 @@ if (result.status === 'success') {
 } else if (result.status === 'unavailable') {
   // result.reason: 'missing_fields' | 'inference_unavailable'
 } else {
-  // result.reason: 'timeout' | 'cancelled' | 'execution'
+  // result.reason: 'timeout' | 'cancelled' | 'execution' | 'invalid_params'
 }
 ```
 
@@ -43,7 +43,7 @@ if (result.status === 'success') {
 |---|---|---|
 | `'success'` | Patterns found (may be empty array) | `patterns: LogPattern[]` |
 | `'unavailable'` | Cluster lacks required capability | `reason: 'missing_fields' \| 'inference_unavailable'` |
-| `'error'` | Request failed or was rejected | `reason: 'timeout' \| 'cancelled' \| 'execution'` |
+| `'error'` | Request failed or was rejected | `reason: 'timeout' \| 'cancelled' \| 'execution' \| 'invalid_params'` |
 
 ### Capability checks
 
@@ -55,3 +55,11 @@ Before running the query the service performs two checks:
 ### Strategy
 
 The only implemented ranking path is ES|QL `CATEGORIZE` + `RERANK`. Pre-indexed strategies (`semantic_text`, `pattern_text`) and pattern expansion are not implemented.
+
+### Security invariants
+
+Two properties must never be regressed:
+
+1. **`target` is validated against an allowlist, never a denylist.** `esql.from(target)` interpolates its argument verbatim — the `@elastic/esql` library's `Builder.expression.source.node` hardcodes `{ unquoted: true }` for string inputs and `LeafPrinter.string` short-circuits all escaping on that flag. The allowlist in `schema.ts` is derived directly from the ES|QL lexer's `UNQUOTED_SOURCE_PART` grammar fragment and is covered by a parser-pinned property test in `schema.test.ts` that asserts anything the schema accepts cannot change the query's shape. A denylist would need to enumerate every whitespace and syntax character the ES|QL tokenizer recognises — `\n`, `\r`, `\t` are whitespace in ES|QL but not in standard index-name rules. Do not replace the allowlist with a denylist.
+
+2. **`nlQuery` and `kqlFilter` must remain parameterized through `esql.str()`.** They reach the query as `query.where\`KQL(${esql.str(kqlFilter)})\`` and `.pipe\`RERANK ${esql.str(nlQuery)} ON …\``. `esql.str()` produces a properly escaped triple-quoted ES|QL string literal; inlining the values directly into the query string would allow injection.

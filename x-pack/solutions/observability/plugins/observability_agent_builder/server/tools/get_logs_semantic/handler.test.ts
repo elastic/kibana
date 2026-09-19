@@ -67,6 +67,7 @@ describe('getLogsSemanticHandler', () => {
       timeRange: { start: expect.any(Number), end: expect.any(Number) },
       maxPatterns: 10,
       kqlFilter: undefined,
+      abortSignal: undefined,
     });
 
     expect(result).toEqual({
@@ -115,6 +116,23 @@ describe('getLogsSemanticHandler', () => {
         kqlFilter: 'service.name: checkout',
         maxPatterns: 25,
       })
+    );
+  });
+
+  it('forwards abortSignal to the service', async () => {
+    const search = jest.fn().mockResolvedValue({ status: 'success', patterns: [] });
+    const semanticLogSearch = { search } as SemanticLogSearchService;
+    const abortSignal = new AbortController().signal;
+
+    await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch,
+      abortSignal,
+    });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({ abortSignal })
     );
   });
 
