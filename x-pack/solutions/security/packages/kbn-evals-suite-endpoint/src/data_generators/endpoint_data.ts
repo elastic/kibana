@@ -481,12 +481,17 @@ export interface SeededScenario {
  * only ever answer `action_not_found`, so seeding one would look like coverage
  * while proving nothing.
  */
-export const requirePackagePolicyId = ({ packagePolicyId }: SeededScenario): string => {
+export const requirePackagePolicyId = ({
+  packagePolicyId,
+  agentPolicyId,
+}: SeededScenario): string => {
   if (!packagePolicyId) {
     throw new Error(
       'seedScenario() did not resolve an endpoint package policy id — a response action seeded without it is unreadable (fetchActionRequestById validates it via ensureInCurrentSpace)'
     );
   }
+
+  assertPackagePolicyId({ packagePolicyId, agentPolicyId });
 
   return packagePolicyId;
 };
@@ -496,12 +501,39 @@ export interface SeedResponseActionOptions {
   agentId: string;
   command: ResponseActionsApiCommandNames;
   status: 'pending' | 'successful' | 'failed';
-  /** Package policy id the action is attributed to — `SeededScenario.packagePolicyId`. */
-  integrationPolicyId: string;
+  /**
+   * PACKAGE (integration) policy id the action is attributed to —
+   * `SeededScenario.packagePolicyId`. NOT the agent policy id: the read
+   * validates this value with
+   * `ensureInCurrentSpace({ integrationPolicyIds, matchAll: false })`, so an
+   * agent policy id here makes the action permanently unreadable
+   * (`action_not_found`) while the document sits in the index.
+   */
+  packagePolicyId: string;
   /** Agent policy id the action is attributed to — `SeededScenario.agentPolicyId`. */
   agentPolicyId?: string;
   comment?: string;
 }
+
+/**
+ * Guards the package-policy-id contract at the point of use: seeding an action
+ * whose `agent.policy[].integrationPolicyId` names the *agent* policy (or any
+ * policy that does not exist) produces a document that can only ever answer
+ * `action_not_found`, which looks like coverage while proving nothing.
+ */
+export const assertPackagePolicyId = ({
+  packagePolicyId,
+  agentPolicyId,
+}: {
+  packagePolicyId: string;
+  agentPolicyId?: string;
+}): void => {
+  if (agentPolicyId && packagePolicyId === agentPolicyId) {
+    throw new Error(
+      'seedResponseAction() was given the agent policy id as the package policy id — the action would be unreadable (fetchActionRequestById validates `integrationPolicyId` via ensureInCurrentSpace). Pass SeededScenario.packagePolicyId.'
+    );
+  }
+};
 
 /**
  * Seeds one response-action request (+ Fleet + Endpoint ack response when
@@ -520,11 +552,13 @@ export async function seedResponseAction(
     agentId,
     command,
     status,
-    integrationPolicyId,
+    packagePolicyId,
     agentPolicyId = '',
     comment,
   }: SeedResponseActionOptions
 ): Promise<void> {
+  assertPackagePolicyId({ packagePolicyId, agentPolicyId });
+  const integrationPolicyId = packagePolicyId;
   const generator = new EndpointActionGenerator();
   const startedAt = new Date().toISOString();
 

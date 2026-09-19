@@ -346,6 +346,73 @@ describe('listEndpointsTool', () => {
       }
     });
 
+    it('walks a second page without repeating or losing endpoints', async () => {
+      // Forwarding `page` is not the same as paging: a tool that passed the
+      // parameter through but returned page 0's data would satisfy every
+      // assertion above. Walk the whole inventory and check the pages are
+      // disjoint and their union is complete.
+      const TOTAL = 90;
+      // 50 + 20 + 20 = TOTAL, so the walk covers the whole inventory.
+      const pageSizes = [50, 20, 20];
+      const pageOffsets = [0, 50, 70];
+      const pageOf = (page: number) =>
+        Array.from({ length: pageSizes[page] ?? 0 }, (_, i) => ({
+          metadata: {
+            host: { hostname: `host-${pageOffsets[page] + i}` },
+            agent: { id: `agent-${pageOffsets[page] + i}` },
+            Endpoint: { state: { isolation: false } },
+          },
+          last_checkin: '2024-06-01T12:00:00Z',
+          host_status: 'healthy',
+        }));
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn(async ({ page }: { page: number }) => ({
+          data: pageOf(page),
+          total: TOTAL,
+        })),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const hostNamesFor = async (page: number) => {
+          const result = await tool.handler({ page }, mockContext);
+          const data = assertStandardReturn(result)[0].data as {
+            endpoints: Array<{ hostName: string }>;
+            hasMore: boolean;
+          };
+
+          return { hostNames: data.endpoints.map((endpoint) => endpoint.hostName), data };
+        };
+
+        const first = await hostNamesFor(0);
+        const second = await hostNamesFor(1);
+        const last = await hostNamesFor(2);
+
+        expect(first.hostNames).toHaveLength(50);
+        expect(second.hostNames).toHaveLength(20);
+        expect(second.hostNames[0]).toBe('host-50');
+        expect(last.hostNames).toHaveLength(20);
+        expect(last.hostNames[0]).toBe('host-70');
+
+        const union = new Set([...first.hostNames, ...second.hostNames, ...last.hostNames]);
+        // 50 + 20 + 20: no repeats (disjoint pages) and no gaps.
+        expect(union.size).toBe(TOTAL);
+
+        expect(first.data.hasMore).toBe(true);
+        expect(second.data.hasMore).toBe(true);
+        expect(last.data.hasMore).toBe(false);
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
     it('reports hasMore false on the last page', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({

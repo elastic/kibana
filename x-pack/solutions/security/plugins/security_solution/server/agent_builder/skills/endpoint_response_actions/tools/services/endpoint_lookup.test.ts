@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEndpointLookupService } from './endpoint_lookup';
+import { createEndpointLookupService, LOOKUP_PAGE_SIZE } from './endpoint_lookup';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { HostStatus } from '../../../../../../common/endpoint/types';
@@ -59,7 +59,8 @@ describe('createEndpointLookupService', () => {
     expect(listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
         kuery: 'local_metadata.host.name: missing-host',
-        perPage: 10,
+        page: 1,
+        perPage: LOOKUP_PAGE_SIZE,
       })
     );
   });
@@ -285,6 +286,107 @@ describe('createEndpointLookupService', () => {
 
     expect(result.kind).toBe('found');
     expect(result).toHaveProperty('endpoint.agentId', 'visible-live');
+  });
+
+  describe('candidate paging', () => {
+    it('walks the next page when Fleet reports more matching agents than one page holds', async () => {
+      // A host with more enrollment records than one page must still be
+      // resolved from the FULL candidate set, not from page 1 alone.
+      const listAgents = jest.fn(async ({ page }: { page: number }) =>
+        page === 1
+          ? {
+              agents: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
+                id: `stale-${i}`,
+                status: 'uninstalled',
+                enrolled_at: '2026-07-01T00:00:00.000Z',
+              })),
+              total: LOOKUP_PAGE_SIZE + 1,
+            }
+          : {
+              agents: [
+                {
+                  id: 'live-last-page',
+                  status: 'online',
+                  packages: ['endpoint'],
+                  enrolled_at: '2026-07-17T00:00:00.000Z',
+                },
+              ],
+              total: LOOKUP_PAGE_SIZE + 1,
+            }
+      );
+
+      const { lookup } = buildService({ listAgents });
+
+      const result = await lookup.resolveByHostName('many-records-host');
+
+      expect(result).toHaveProperty('endpoint.agentId', 'live-last-page');
+      expect(listAgents).toHaveBeenCalledTimes(2);
+      expect(listAgents).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+    });
+
+    it('refuses to resolve when more agent records match than the lookup examined', async () => {
+      // Every page is full and Fleet reports far more records than the lookup
+      // will walk, so an unseen record could be another live machine. Reporting
+      // the one visible live agent as THE answer would be a guess.
+      const listAgents = jest.fn(async ({ page }: { page: number }) => ({
+        agents: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
+          id: `page-${page}-agent-${i}`,
+          status: 'online',
+        })),
+        total: 500,
+      }));
+
+      const { lookup } = buildService({ listAgents });
+
+      const result = await lookup.resolveByHostName('huge-history-host');
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          kind: 'ambiguous',
+          truncated: true,
+          totalCandidates: 500,
+        })
+      );
+      expect((result as { candidates: unknown[] }).candidates).toHaveLength(10);
+    });
+
+    it('treats an unreported total as a complete candidate set', async () => {
+      // No total means no evidence of further matches — the pre-paging
+      // behavior, kept so a backend that does not report totals still resolves.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'only-agent', status: 'online', packages: ['endpoint'] }],
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('plain-host');
+
+      expect(result).toHaveProperty('endpoint.agentId', 'only-agent');
+    });
+
+    it('refuses to resolve when the linked-project metadata page is truncated', async () => {
+      const { lookup, getHostMetadataList } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: Array.from({ length: LOOKUP_PAGE_SIZE }, (_, i) => ({
+            metadata: { agent: { id: `linked-${i}` } },
+            host_status: HostStatus.HEALTHY,
+          })),
+          total: 400,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('linked-host');
+
+      expect(result).toEqual(
+        expect.objectContaining({ kind: 'ambiguous', truncated: true, totalCandidates: 400 })
+      );
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 0, pageSize: LOOKUP_PAGE_SIZE }),
+        expect.anything()
+      );
+    });
   });
 
   describe('CPS fallback', () => {

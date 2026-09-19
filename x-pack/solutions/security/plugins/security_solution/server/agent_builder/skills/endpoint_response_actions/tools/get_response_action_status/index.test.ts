@@ -20,6 +20,7 @@ import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import { getResponseActionStatusTool } from '.';
+import { MAX_ACTION_HOSTS, MAX_AGENT_STATE_ENTRIES } from '../types';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -163,6 +164,46 @@ describe('getResponseActionStatusTool', () => {
     // Without the error reason the agent can report the failure but not why
     // it happened.
     expect(data.errors).toEqual(['Endpoint command failed: scan target not found']);
+  });
+
+  it('bounds the hosts and per-agent state of a fan-out action', async () => {
+    // A batch action carries one entry per targeted host; forwarding them raw
+    // injects thousands of records into the model context.
+    const hosts: Record<string, unknown> = {};
+    const agentState: Record<string, unknown> = {};
+    for (let i = 0; i < 120; i++) {
+      hosts[`agent-${i}`] = { name: `host-${i}` };
+      agentState[`agent-${i}`] = { isCompleted: true, wasSuccessful: true, wasCanceled: false };
+    }
+
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'isolate',
+      status: 'successful',
+      wasSuccessful: true,
+      isCompleted: true,
+      wasCanceled: false,
+      hosts,
+      agentState,
+      parameters: {},
+      outputs: {},
+      startedAt: '2026-07-13T14:10:00.000Z',
+      completedAt: '2026-07-13T14:12:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+
+    expect(Object.keys(data.hosts as object)).toHaveLength(MAX_ACTION_HOSTS);
+    expect(data.totalHosts).toBe(120);
+    expect(data.hostsTruncated).toBe(120 - MAX_ACTION_HOSTS);
+    expect(Object.keys(data.agentState as object)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
+    expect(data.agentsTruncated).toBe(120 - MAX_AGENT_STATE_ENTRIES);
   });
 
   it('returns ToolResultType.error for unexpected lookup failures', async () => {

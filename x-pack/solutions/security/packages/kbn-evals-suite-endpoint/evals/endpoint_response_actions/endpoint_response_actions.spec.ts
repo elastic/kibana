@@ -67,14 +67,14 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
     // documents have to name the package policy `seedScenario` created: the
     // read validates it with `ensureInCurrentSpace`, so an action naming an
     // unknown policy answers `action_not_found` no matter what was indexed.
-    const integrationPolicyId = requirePackagePolicyId(isolateHost);
+    const packagePolicyId = requirePackagePolicyId(isolateHost);
 
     await seedResponseAction(internalEsClient, {
       actionId: ACTION_ID_FOUND,
       agentId: 'eval-agent-era-isolate-001',
       command: 'isolate',
       status: 'successful',
-      integrationPolicyId,
+      packagePolicyId,
       agentPolicyId: isolateHost.agentPolicyId,
     });
     await seedResponseAction(internalEsClient, {
@@ -86,7 +86,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       command: 'scan',
       status: 'pending',
       comment: 'eval seed: malware scan',
-      integrationPolicyId,
+      packagePolicyId,
       agentPolicyId: isolateHost.agentPolicyId,
     });
 

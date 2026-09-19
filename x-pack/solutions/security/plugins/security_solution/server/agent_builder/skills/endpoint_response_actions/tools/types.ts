@@ -43,6 +43,24 @@ export const MAX_OUTPUT_ENTRIES_PER_AGENT = 20;
 export const MAX_OUTPUT_STRING_LENGTH = 2000;
 
 /**
+ * Bounds for the object-valued part of an output. `ActionResponseOutput.content`
+ * is an object (`{ canceled_by?, ...TOutputContent }`) whose `entries`, stdout
+ * and stderr live one level deeper than the flat shape, so bounding only
+ * top-level strings leaves the multi-MB payload unbounded. Nesting is walked to
+ * a fixed depth and any value beyond it is serialized and truncated.
+ */
+export const MAX_OUTPUT_DEPTH = 4;
+export const MAX_OUTPUT_OBJECT_KEYS = 50;
+
+/**
+ * Hosts and per-agent states reported for one action. A fan-out action carries
+ * one entry per targeted agent, so a batch isolate injects thousands of records
+ * into the model context unless they are bounded.
+ */
+export const MAX_ACTION_HOSTS = 50;
+export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -143,12 +161,80 @@ export function endpointNotFoundData(hostName: string): EndpointNotFoundResult {
 }
 
 /**
+ * Bounds one value of an output payload, whatever its shape.
+ *
+ * Returns the bounded value plus the paths that were truncated, so the model
+ * is told what it is not seeing rather than silently receiving a partial
+ * payload. Nested objects (`ActionResponseOutput.content`) and arrays are
+ * walked; anything deeper than `MAX_OUTPUT_DEPTH` is serialized and truncated
+ * as a string.
+ */
+function boundOutputValue(value: unknown, path: string, depth = 0): BoundedOutputValue {
+  if (typeof value === 'string') {
+    if (value.length > MAX_OUTPUT_STRING_LENGTH) {
+      return {
+        value: `${value.slice(0, MAX_OUTPUT_STRING_LENGTH)}… [truncated, ${
+          value.length - MAX_OUTPUT_STRING_LENGTH
+        } more characters]`,
+        truncatedPaths: [path],
+      };
+    }
+
+    return { value, truncatedPaths: [] };
+  }
+
+  if (Array.isArray(value)) {
+    const kept = value
+      .slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT)
+      .map((item, index) => boundOutputValue(item, `${path}[${index}]`, depth + 1));
+    const dropped = value.length - kept.length;
+
+    return {
+      value: [
+        ...kept.map((bounded) => bounded.value),
+        ...(dropped > 0 ? [`… [truncated, ${dropped} more items]`] : []),
+      ],
+      truncatedPaths: [
+        ...kept.flatMap((bounded) => bounded.truncatedPaths),
+        ...(dropped > 0 ? [path] : []),
+      ],
+    };
+  }
+
+  if (value && typeof value === 'object') {
+    if (depth >= MAX_OUTPUT_DEPTH) {
+      return boundOutputValue(JSON.stringify(value) ?? String(value), path, depth + 1);
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>);
+    const kept = entries
+      .slice(0, MAX_OUTPUT_OBJECT_KEYS)
+      .map(
+        ([key, entryValue]) =>
+          [key, boundOutputValue(entryValue, `${path}.${key}`, depth + 1)] as const
+      );
+
+    return {
+      value: Object.fromEntries(kept.map(([key, bounded]) => [key, bounded.value])),
+      truncatedPaths: [
+        ...kept.flatMap(([, bounded]) => bounded.truncatedPaths),
+        ...(entries.length > kept.length ? [path] : []),
+      ],
+    };
+  }
+
+  return { value, truncatedPaths: [] };
+}
+
+/**
  * Bounds an action's raw `outputs` payload into a model-safe summary.
  *
  * The raw payload is unbounded (`execute`/`runscript` stdout/stderr, one
  * `get-processes` entry per process), so it is summarized rather than
  * forwarded: per-agent entry counts and truncation flags are always reported,
- * and only a bounded sample of entries is included.
+ * and only a bounded sample of entries is included. Bounding is recursive —
+ * the real production shape nests the payload under `content`, so a
+ * top-level-only bound leaves it unbounded.
  */
 export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary | undefined {
   if (!outputs || typeof outputs !== 'object') {
@@ -163,24 +249,29 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
     const raw = byAgent[agentId];
     const record = (raw ?? {}) as Record<string, unknown>;
     const entries = Array.isArray(record.entries) ? (record.entries as unknown[]) : undefined;
-    const totalEntries = entries?.length ?? 0;
-    const keptEntries = entries ? entries.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT) : undefined;
 
     const truncatedFields: string[] = [];
     const bounded: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(record)) {
       if (key !== 'entries') {
-        if (typeof value === 'string' && value.length > MAX_OUTPUT_STRING_LENGTH) {
-          bounded[key] = `${value.slice(0, MAX_OUTPUT_STRING_LENGTH)}… [truncated, ${
-            value.length - MAX_OUTPUT_STRING_LENGTH
-          } more characters]`;
-          truncatedFields.push(key);
-        } else {
-          bounded[key] = value;
-        }
+        const boundedValue = boundOutputValue(value, key);
+        bounded[key] = boundedValue.value;
+        truncatedFields.push(...boundedValue.truncatedPaths);
       }
     }
+
+    // Each kept entry is bounded individually rather than by bounding the
+    // array: a marker element would change the shape callers already read,
+    // and the drop count is reported separately by `entriesTruncated`.
+    const keptEntries = entries?.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT).map((entry, index) => {
+      const boundedEntry = boundOutputValue(entry, `entries[${index}]`);
+      truncatedFields.push(...boundedEntry.truncatedPaths);
+
+      return boundedEntry.value;
+    });
+
+    const totalEntries = entries?.length ?? 0;
 
     return {
       agentId,
@@ -205,6 +296,65 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
       ? { agentsTruncated: agentIds.length - includedAgentIds.length }
       : {}),
   };
+}
+
+/**
+ * Bounds `ActionDetails.hosts` — one entry per targeted agent — into a record
+ * that keeps the tool's existing shape while reporting how many hosts were
+ * dropped.
+ */
+export function summarizeActionHosts(hosts: unknown): ActionHostsSummary | undefined {
+  if (!hosts || typeof hosts !== 'object') {
+    return undefined;
+  }
+
+  const byAgentId = Object.entries(hosts as Record<string, unknown>);
+  const kept = byAgentId.slice(0, MAX_ACTION_HOSTS);
+
+  return {
+    hosts: Object.fromEntries(kept),
+    totalHosts: byAgentId.length,
+    ...(byAgentId.length > kept.length ? { hostsTruncated: byAgentId.length - kept.length } : {}),
+  };
+}
+
+/**
+ * Bounds `ActionDetails.agentState` — one entry per targeted agent, which is
+ * what makes per-host completion visible for a fan-out action — and reports
+ * how many per-agent states were dropped.
+ */
+export function summarizeAgentState(agentState: unknown): AgentStateSummary | undefined {
+  if (!agentState || typeof agentState !== 'object') {
+    return undefined;
+  }
+
+  const byAgentId = Object.entries(agentState as Record<string, unknown>);
+  const kept = byAgentId.slice(0, MAX_AGENT_STATE_ENTRIES);
+
+  return {
+    agentState: Object.fromEntries(
+      kept.map(([agentId, state]) => [agentId, boundOutputValue(state, agentId).value])
+    ),
+    totalAgents: byAgentId.length,
+    ...(byAgentId.length > kept.length ? { agentsTruncated: byAgentId.length - kept.length } : {}),
+  };
+}
+
+interface BoundedOutputValue {
+  value: unknown;
+  truncatedPaths: string[];
+}
+
+export interface ActionHostsSummary {
+  hosts: Record<string, unknown>;
+  totalHosts: number;
+  hostsTruncated?: number;
+}
+
+export interface AgentStateSummary {
+  agentState: Record<string, unknown>;
+  totalAgents: number;
+  agentsTruncated?: number;
 }
 
 export interface ActionOutputAgentSummary {

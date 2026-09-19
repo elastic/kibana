@@ -200,7 +200,7 @@ describe('seedResponseAction integration policy', () => {
       agentId: scenario.agentId,
       command: 'isolate',
       status: 'successful',
-      integrationPolicyId: requirePackagePolicyId(seeded),
+      packagePolicyId: requirePackagePolicyId(seeded),
       agentPolicyId: seeded.agentPolicyId,
     });
 
@@ -233,7 +233,7 @@ describe('seedResponseAction integration policy', () => {
       agentId: scenario.agentId,
       command: 'isolate',
       status: 'successful',
-      integrationPolicyId: 'pkg-1',
+      packagePolicyId: 'pkg-1',
     });
 
     const writtenIndices = bulkCalls.flatMap(({ operations }) =>
@@ -251,5 +251,34 @@ describe('seedResponseAction integration policy', () => {
     expect(() => requirePackagePolicyId({})).toThrow(
       /did not resolve an endpoint package policy id/
     );
+  });
+
+  it('rejects the agent policy id passed in the package policy slot', async () => {
+    // The two ids are both "a policy id" and the read validates only the
+    // package one, so swapping them indexes an action that can only ever
+    // answer `action_not_found` — a silent failure that looks like coverage.
+    const { clients, bulkCalls } = createClients();
+
+    await expect(
+      seedResponseAction(clients.internalEsClient, {
+        actionId,
+        agentId: scenario.agentId,
+        command: 'isolate',
+        status: 'successful',
+        packagePolicyId: 'agent-policy-1',
+        agentPolicyId: 'agent-policy-1',
+      })
+    ).rejects.toThrow(/agent policy id as the package policy id/);
+
+    expect(bulkCalls).toHaveLength(0);
+  });
+
+  it('rejects the agent policy id before a scenario can hand it over as the package policy id', () => {
+    expect(() =>
+      requirePackagePolicyId({
+        packagePolicyId: 'agent-policy-1',
+        agentPolicyId: 'agent-policy-1',
+      })
+    ).toThrow(/agent policy id as the package policy id/);
   });
 });

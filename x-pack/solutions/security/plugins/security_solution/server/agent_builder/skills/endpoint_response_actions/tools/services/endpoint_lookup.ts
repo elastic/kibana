@@ -15,6 +15,23 @@ import type {
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { resolveAgentTypeFromPackages } from '../types';
 
+/**
+ * Agent records fetched per page while resolving a hostname. A host keeps one
+ * record per enrollment (reinstall, upgrade, re-enrollment), so several can
+ * share a hostname; the lookup walks pages instead of trusting one.
+ */
+export const LOOKUP_PAGE_SIZE = 25;
+
+/**
+ * Hard cap on pages walked per hostname (100 candidate records). A host with
+ * more records than this cannot be resolved by hostname alone — the lookup
+ * reports the truncation instead of answering from a partial set.
+ */
+export const MAX_LOOKUP_PAGES = 4;
+
+/** Ambiguity candidates returned to the model, newest/most-live first. */
+export const MAX_AMBIGUOUS_CANDIDATES = 10;
+
 export interface ResolvedEndpoint {
   agentId: string;
   agentType: ResponseActionAgentType;
@@ -34,14 +51,75 @@ export interface EndpointCandidate {
  * machines can legitimately share a hostname, so silently picking one would
  * report — or isolate — the wrong host. Callers must surface the ambiguity
  * and ask for an agent ID instead of guessing.
+ *
+ * `truncated` marks the case where more agent records match the hostname than
+ * the lookup examined, so even a single visible live candidate cannot be
+ * reported as the answer.
  */
 export type EndpointLookupResult =
   | { kind: 'found'; endpoint: ResolvedEndpoint }
   | { kind: 'not_found' }
-  | { kind: 'ambiguous'; candidates: EndpointCandidate[] };
+  | {
+      kind: 'ambiguous';
+      candidates: EndpointCandidate[];
+      /** Set when the candidate set is known to be incomplete. */
+      truncated?: true;
+      /** Total matching agent records, when the backend reported it. */
+      totalCandidates?: number;
+    };
 
 export interface EndpointLookupService {
   resolveByHostName(hostName: string): Promise<EndpointLookupResult>;
+}
+
+interface CandidatePage<T> {
+  items: T[];
+  total?: number;
+}
+
+/** Structural view of the Fleet agent fields this lookup reads. */
+interface FleetCandidate {
+  id: string;
+  /** Fleet reports this as optional. */
+  status?: string;
+  packages?: string[];
+  enrolled_at?: string;
+}
+
+/** Structural view of the metadata-index fields this lookup reads. */
+interface MetadataCandidate {
+  metadata?: { agent?: { id?: string } };
+  host_status?: string;
+}
+
+/**
+ * Walks pages until the backend reports it has handed over everything it
+ * matched, and reports whether the walk had to stop early. `total` is optional
+ * because a backend that does not report it gives no evidence of more results;
+ * an unknown total is treated as "nothing further", matching the pre-paging
+ * behavior.
+ */
+async function collectPages<T>(
+  fetchPage: (page: number) => Promise<CandidatePage<T>>
+): Promise<{ items: T[]; truncated: boolean; total?: number }> {
+  const items: T[] = [];
+  let total: number | undefined;
+
+  for (let page = 1; page <= MAX_LOOKUP_PAGES; page++) {
+    const { items: pageItems, total: pageTotal } = await fetchPage(page);
+    items.push(...pageItems);
+    total = pageTotal;
+
+    if (pageItems.length < LOOKUP_PAGE_SIZE) {
+      break;
+    }
+
+    if (pageTotal === undefined || items.length >= pageTotal) {
+      break;
+    }
+  }
+
+  return { items, truncated: total !== undefined && items.length < total, total };
 }
 
 /**
@@ -56,8 +134,8 @@ export interface EndpointLookupService {
  * - A host can have MULTIPLE agent records over its lifetime (reinstall,
  *   agent upgrade, re-enrollment after a broken install) — Fleet keeps prior
  *   (offline/uninstalled) enrollments around alongside the current one, all
- *   matching the same `local_metadata.host.name`. We fetch a small page and
- *   pick the best match (online first, most recently enrolled as tiebreak)
+ *   matching the same `local_metadata.host.name`. We walk every matching page
+ *   and pick the best match (online first, most recently enrolled as tiebreak)
  *   rather than trusting Fleet's default sort to always put the live agent
  *   first — otherwise isolate/unisolate/status tools can silently act on a
  *   dead agent while reporting success.
@@ -89,31 +167,32 @@ export function createEndpointLookupService(
     enrolledAt?: string;
   }
 
-  const listVisibleFleetCandidates = async (hostName: string): Promise<NormalizedCandidate[]> => {
-    const agents = await fleetServices.agent.listAgents({
-      showInactive: true,
-      kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
-      page: 1,
-      perPage: 10,
+  interface CandidateCollection {
+    candidates: NormalizedCandidate[];
+    truncated: boolean;
+    total?: number;
+  }
+
+  const listVisibleFleetCandidates = async (hostName: string): Promise<CandidateCollection> => {
+    const { items, truncated, total } = await collectPages<FleetCandidate>(async (page) => {
+      const response = await fleetServices.agent.listAgents({
+        showInactive: true,
+        kuery: `local_metadata.host.name: ${escapeKuery(hostName)}`,
+        page,
+        perPage: LOOKUP_PAGE_SIZE,
+      });
+
+      return { items: response?.agents ?? [], total: response?.total };
     });
 
-    if (!agents?.agents?.length) {
-      return [];
-    }
-
     const visible: NormalizedCandidate[] = [];
-    for (const candidate of agents.agents as Array<{
-      id: string;
-      status: string;
-      packages?: string[];
-      enrolled_at?: string;
-    }>) {
+    for (const candidate of items) {
       try {
         await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
         visible.push({
           agentId: candidate.id,
           isLive: candidate.status === 'online',
-          status: candidate.status,
+          status: candidate.status ?? 'unknown',
           packages: candidate.packages,
           enrolledAt: candidate.enrolled_at,
         });
@@ -127,7 +206,8 @@ export function createEndpointLookupService(
         }
       }
     }
-    return visible;
+
+    return { candidates: visible, truncated, total };
   };
 
   /**
@@ -139,22 +219,28 @@ export function createEndpointLookupService(
   const listScopedMetadataCandidates = async (
     hostName: string,
     scopedServices: ScopedEndpointServices
-  ): Promise<NormalizedCandidate[]> => {
+  ): Promise<CandidateCollection> => {
     if (!scopedServices.isCpsRead()) {
-      return [];
+      return { candidates: [], truncated: false };
     }
 
     const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
-    const { data } = await metadataService.getHostMetadataList(
-      {
-        page: 0,
-        pageSize: 10,
-        kuery: `united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
-      },
-      scopedServices
-    );
 
-    return (data ?? [])
+    const { items, truncated, total } = await collectPages<MetadataCandidate>(async (page) => {
+      const { data, total: pageTotal } = await metadataService.getHostMetadataList(
+        {
+          // The metadata service pages from 0, unlike Fleet's 1-based pages.
+          page: page - 1,
+          pageSize: LOOKUP_PAGE_SIZE,
+          kuery: `united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
+        },
+        scopedServices
+      );
+
+      return { items: data ?? [], total: pageTotal };
+    });
+
+    const candidates = items
       .map((entry) => ({
         agentId: entry.metadata?.agent?.id,
         // Metadata `host_status` is the HostStatus enum (`healthy`), not
@@ -163,22 +249,26 @@ export function createEndpointLookupService(
         status: entry.host_status as string,
       }))
       .filter((candidate): candidate is NormalizedCandidate => Boolean(candidate.agentId));
+
+    return { candidates, truncated, total };
   };
 
   return {
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
-      const [fleetCandidates, metadataCandidates] = await Promise.all([
+      const [fleet, metadata] = await Promise.all([
         listVisibleFleetCandidates(hostName),
-        scoped ? listScopedMetadataCandidates(hostName, scoped) : Promise.resolve([]),
+        scoped
+          ? listScopedMetadataCandidates(hostName, scoped)
+          : Promise.resolve<CandidateCollection>({ candidates: [], truncated: false }),
       ]);
 
       // Fleet is the authority when it has the record — prefer it (it carries
       // `packages`, needed for `agentType`) and only add metadata candidates
       // Fleet doesn't already know about, so a host isn't double-counted.
-      const fleetIds = new Set(fleetCandidates.map((c) => c.agentId));
+      const fleetIds = new Set(fleet.candidates.map((c) => c.agentId));
       const merged = [
-        ...fleetCandidates,
-        ...metadataCandidates.filter((c) => !fleetIds.has(c.agentId)),
+        ...fleet.candidates,
+        ...metadata.candidates.filter((c) => !fleetIds.has(c.agentId)),
       ];
 
       if (!merged.length) {
@@ -198,11 +288,24 @@ export function createEndpointLookupService(
       // same-named endpoint in a linked project — is different: picking either
       // one silently would report, or isolate, the wrong host, so surface the
       // ambiguity instead of guessing.
+      //
+      // An incomplete candidate set is treated the same way for the same
+      // reason: an unexamined record could be another live machine, so the
+      // lookup refuses to answer rather than resolving from a partial page.
       const live = sorted.filter((c) => c.isLive);
-      if (live.length > 1) {
+      const truncated = fleet.truncated || metadata.truncated;
+
+      if (truncated || live.length > 1) {
+        const toReport = truncated ? sorted : live;
+        const totalCandidates = truncated ? fleet.total ?? metadata.total : undefined;
+
         return {
           kind: 'ambiguous',
-          candidates: live.map((c) => ({ agentId: c.agentId, status: c.status })),
+          candidates: toReport
+            .slice(0, MAX_AMBIGUOUS_CANDIDATES)
+            .map((c) => ({ agentId: c.agentId, status: c.status })),
+          ...(truncated ? { truncated: true as const } : {}),
+          ...(totalCandidates === undefined ? {} : { totalCandidates }),
         };
       }
 

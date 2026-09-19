@@ -17,7 +17,9 @@ import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import {
   insufficientPrivilegesResult,
   responseActionErrorResult,
+  summarizeActionHosts,
   summarizeActionOutputs,
+  summarizeAgentState,
 } from '../types';
 
 const getResponseActionStatusSchema = z.object({
@@ -84,12 +86,20 @@ export const getResponseActionStatusTool = (
                 wasSuccessful: actionDetails.wasSuccessful,
                 isCompleted: actionDetails.isCompleted,
                 wasCanceled: actionDetails.wasCanceled,
-                hosts: actionDetails.hosts,
+                // Bounded: a fan-out action carries one entry per targeted
+                // host, so a batch isolate would otherwise inject thousands of
+                // host records into the model context. The total is reported
+                // alongside the bounded sample.
+                ...(summarizeActionHosts(actionDetails.hosts) ?? {}),
                 parameters: actionDetails.parameters,
                 // Bounded: raw `outputs` can carry multi-MB command output and
                 // one entry per process. Summarized so a single lookup cannot
                 // exhaust the conversation context.
                 outputs: summarizeActionOutputs(actionDetails.outputs),
+                // Per-agent completion. The aggregate `status`/`wasSuccessful`
+                // fields cannot say WHICH host of a fan-out finished, which is
+                // exactly what `agentState` carries. Bounded like `hosts`.
+                ...(summarizeAgentState(actionDetails.agentState) ?? {}),
                 // Documented on ActionDetails: the error reason(s) when
                 // `wasSuccessful` is false. Without this the agent can tell
                 // an analyst an action failed but never why.
