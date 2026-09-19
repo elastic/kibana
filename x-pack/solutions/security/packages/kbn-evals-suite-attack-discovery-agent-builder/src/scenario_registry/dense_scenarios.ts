@@ -452,12 +452,10 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
       const template = AD2_DENSE_BACKGROUND_TEMPLATES[templateIndex];
       const occurrence = round + 1;
       const host = occurrenceHost(template.host, occurrence);
-      const steps = template
-        .stepsFor({ occurrence, host })
-        .map((templateStep) => ({
-          ...templateStep,
-          ruleName: occurrenceRuleName(templateStep.ruleName, occurrence),
-        }));
+      const steps = template.stepsFor({ occurrence, host }).map((templateStep) => ({
+        ...templateStep,
+        ruleName: occurrenceRuleName(templateStep.ruleName, occurrence),
+      }));
 
       // Truncate at a chain boundary rather than emitting a partial chain.
       if (steps.length <= budget) {

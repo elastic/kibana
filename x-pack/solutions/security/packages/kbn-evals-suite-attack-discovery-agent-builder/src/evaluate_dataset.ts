@@ -220,9 +220,13 @@ const carriesRetrievalScope = (query: string | null, retrievalScope: string | nu
 
   const withoutComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 
-  return withoutComments
-    .split('|')
-    .some((segment) => segment.split(/\bWHERE\b/i).slice(1).join(' WHERE ').includes(retrievalScope));
+  return withoutComments.split('|').some((segment) =>
+    segment
+      .split(/\bWHERE\b/i)
+      .slice(1)
+      .join(' WHERE ')
+      .includes(retrievalScope)
+  );
 };
 
 /**

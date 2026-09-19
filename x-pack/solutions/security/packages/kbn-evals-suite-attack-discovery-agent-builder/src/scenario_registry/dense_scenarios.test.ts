@@ -340,8 +340,9 @@ describe('AD2 scenario registry (dense profile)', () => {
     const dense = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
     const scenarios = dense.scenarioKeys
       .map((key) => ({ key, scenario: getAd2Scenario(key, 'dense') }))
-      .filter((entry): entry is { key: string; scenario: Ad2ScenarioDefinition } =>
-        entry.scenario !== undefined
+      .filter(
+        (entry): entry is { key: string; scenario: Ad2ScenarioDefinition } =>
+          entry.scenario !== undefined
       );
 
     const frequencyByName = new Map<string, number>();
