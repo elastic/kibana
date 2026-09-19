@@ -414,20 +414,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       ...thresholdValues,
       alertConditions: [
         ...thresholdValues.alertConditions,
-        { id: generateId(), ...DEFAULT_ALERT_CONDITION },
+        { id: generateId(), ...DEFAULT_ALERT_CONDITION, metric: metricOptions[0] ?? '' },
       ],
     });
-  }, [thresholdValues, onThresholdValuesChange]);
+  }, [thresholdValues, onThresholdValuesChange, metricOptions]);
 
   const removeCondition = useCallback(
     (index: number) => {
       const next = thresholdValues.alertConditions.filter((_, i) => i !== index);
       onThresholdValuesChange({
         ...thresholdValues,
-        alertConditions: next.length ? next : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+        alertConditions: next.length
+          ? next
+          : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION, metric: metricOptions[0] ?? '' }],
       });
     },
-    [thresholdValues, onThresholdValuesChange]
+    [thresholdValues, onThresholdValuesChange, metricOptions]
   );
 
   return (
