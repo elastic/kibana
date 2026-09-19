@@ -83,8 +83,11 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const zIndex = useLayerZIndex();
   const container = useLayerPortal('devCommentsGuide', zIndex.panel);
   const messageId = useGeneratedHtmlId({ prefix: 'devCommentsGuideMessage' });
-  // Another page's DOM could match the anchors by accident.
-  const onPage = useCommentsState((state) => state.pageKey) === comment.route.pageKey;
+  // Another page's DOM could match the anchors by accident, as could this page's
+  // in another state while the host is still opening the comment's one.
+  const navigating = useCommentsState((state) => state.guide?.navigating ?? false);
+  const pageKey = useCommentsState((state) => state.pageKey);
+  const onPage = !navigating && pageKey === comment.route.pageKey;
   const [done, setDone] = useState<ReadonlySet<number>>(() => new Set());
   const [settled, setSettled] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
@@ -141,7 +144,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
     return null;
   }
 
-  const searching = !step && !settled;
+  const searching = navigating || (!step && !settled);
   const rect = stepElement?.getBoundingClientRect();
   const padding = parseInt(euiTheme.size.xs, 10);
 

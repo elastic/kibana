@@ -27,8 +27,8 @@ export const CommentsLayer = () => {
   const pending = useCommentsState((state) => state.pending);
   const overlayOpen = useCommentsState((state) => state.overlayOpen);
   const notice = useCommentsState((state) => state.notice);
-  const guided = useCommentsState((state) =>
-    state.guideId ? state.comments.find(({ id }) => id === state.guideId) ?? null : null
+  const guided = useCommentsState(({ guide, comments }) =>
+    guide ? comments.find(({ id }) => id === guide.id) ?? null : null
   );
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const CommentsLayer = () => {
         if (!state.pending.saving) {
           controller.cancelPending();
         }
-      } else if (state.guideId) {
+      } else if (state.guide) {
         controller.stopGuide();
       } else if (state.activeThreadId) {
         controller.openThread(null);

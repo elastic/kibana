@@ -321,11 +321,50 @@ describe('createCommentsController', () => {
       await controller.guideTo(elsewhere);
       expect(services.navigateToPath).toHaveBeenCalledWith('/app/two#/x');
       expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ guideId: 'far', pageKey: '/app/two' })
+        expect.objectContaining({ guide: { id: 'far', navigating: false }, pageKey: '/app/two' })
       );
 
       await services.navigateToPath('/app/three');
-      expect(controller.store.getState().guideId).toBeNull();
+      expect(controller.store.getState().guide).toBeNull();
+    });
+
+    it('is navigating until the host has opened the page, unless it is open already', async () => {
+      const { services } = createHost();
+      const controller = createCommentsController(services);
+      controller.start();
+      // Same page, other state: the page key does not tell the two apart.
+      const navigation = deferred<void>();
+      (services.navigateToPath as jest.Mock).mockReturnValueOnce(navigation.promise);
+      const otherState = createComment('other', {
+        route: { pageKey: '/app/one', path: '/app/one?x=2' },
+      });
+
+      const guiding = controller.guideTo(otherState);
+      expect(controller.store.getState().guide).toEqual({ id: 'other', navigating: true });
+      navigation.resolve();
+      await guiding;
+      expect(controller.store.getState().guide).toEqual({ id: 'other', navigating: false });
+
+      const here = createComment('here', { route: { pageKey: '/app/one', path: '/app/one?x=1' } });
+      void controller.guideTo(here);
+      expect(controller.store.getState().guide).toEqual({ id: 'here', navigating: false });
+      expect(services.navigateToPath).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not bring back a guide that was stopped while its page was opening', async () => {
+      const { services } = createHost();
+      const controller = createCommentsController(services);
+      controller.start();
+      const navigation = deferred<void>();
+      (services.navigateToPath as jest.Mock).mockReturnValueOnce(navigation.promise);
+
+      const guiding = controller.guideTo(
+        createComment('slow', { route: { pageKey: '/app/two', path: '/app/two' } })
+      );
+      controller.stopGuide();
+      navigation.resolve();
+      await guiding;
+      expect(controller.store.getState().guide).toBeNull();
     });
 
     it('rolls back and reports when the host will not or cannot open the page', async () => {
@@ -335,7 +374,7 @@ describe('createCommentsController', () => {
 
       (services.navigateToPath as jest.Mock).mockRejectedValueOnce(new Error('no such app'));
       await controller.guideTo(createComment('gone', { route: { pageKey: '/x', path: '/x' } }));
-      expect(controller.store.getState().guideId).toBeNull();
+      expect(controller.store.getState().guide).toBeNull();
       expect(controller.store.getState().notice).toEqual(
         expect.objectContaining({
           type: 'error',

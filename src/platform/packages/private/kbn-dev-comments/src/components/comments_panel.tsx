@@ -137,6 +137,21 @@ const PanelRow = ({
             hasShadow={false}
             onClick={onSelect}
             aria-expanded={expanded}
+            css={css`
+              /* A row of a list, not a card: it does not lift (shadow, and a border in dark mode) on hover or focus. */
+              &:hover,
+              &:focus {
+                box-shadow: none;
+                transform: none;
+                &::after {
+                  content: none;
+                }
+              }
+              &:hover,
+              &:focus-visible {
+                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+              }
+            `}
           >
             <AuthorMeta author={comment.author} at={comment.createdAt} />
             {!expanded && (

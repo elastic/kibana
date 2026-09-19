@@ -44,6 +44,13 @@ export interface CommentsNotice {
   message: string;
 }
 
+export interface GuideState {
+  /** The comment being guided to. */
+  id: string;
+  /** The host is still opening the comment's page; until it has, the guide does not look at the page. */
+  navigating: boolean;
+}
+
 export interface CommentsState {
   pageKey: string;
   /** Every comment, on every page; only the current page's get pins. */
@@ -59,7 +66,7 @@ export interface CommentsState {
   /** Pin that should take focus once it is rendered: its thread was opened without a pointer. */
   focusPinId: string | null;
   pending: PendingComment | null;
-  guideId: string | null;
+  guide: GuideState | null;
   /** An overlay opened from the layer (full-screen screenshot) is showing; the layer sits below its mask meanwhile. */
   overlayOpen: boolean;
   author: CommentAuthor | null;
@@ -141,7 +148,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     activeThreadId: null,
     focusPinId: null,
     pending: null,
-    guideId: null,
+    guide: null,
     overlayOpen: false,
     author: null,
     notice: null,
@@ -154,8 +161,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     ignoreSelectors,
     // Page clicks in comment mode place pins instead of acting, except while a guide runs.
     isRecording: () => {
-      const { active, guideId } = store.getState();
-      return !active || guideId !== null;
+      const { active, guide } = store.getState();
+      return !active || guide !== null;
     },
   });
 
@@ -265,19 +272,19 @@ export const createCommentsController = (services: CommentsHostServices): Commen
 
   const onLocationChange = () => {
     const pageKey = location.getPageKey();
-    const { pageKey: previous, guideId, comments } = store.getState();
+    const { pageKey: previous, guide, comments } = store.getState();
     if (pageKey === previous) {
       return;
     }
     // A guide survives the navigation it asked for (to the comment's page), nothing
     // else; a draft being saved is kept until the save settles, so that a failure
     // can hand it back with its text instead of losing it.
-    const guided = comments.find(({ id }) => id === guideId);
+    const guided = guide && comments.find(({ id }) => id === guide.id);
     store.setState((state) => ({
       pageKey,
       activeThreadId: null,
       focusPinId: null,
-      guideId: guided?.route.pageKey === pageKey ? guideId : null,
+      guide: guided?.route.pageKey === pageKey ? guide : null,
       ...droppingDraft(state),
     }));
     void load();
@@ -294,15 +301,9 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       pending: null,
       activeThreadId: null,
       focusPinId: null,
-      guideId: null,
+      guide: null,
       ...(active ? {} : { panelMinimized: false }),
     });
-  };
-
-  const endGuide = (guideId: string) => {
-    if (store.getState().guideId === guideId) {
-      store.setState({ guideId: null });
-    }
   };
 
   return {
@@ -466,19 +467,29 @@ export const createCommentsController = (services: CommentsHostServices): Commen
 
     async guideTo(comment) {
       const { id, route } = comment;
+      // The page is not looked at until the host has opened the comment's one: the
+      // current page may be the same one in another state, with a matching element.
+      const guide: GuideState = { id, navigating: route.path !== location.getPath() };
       store.setState((state) => ({
-        guideId: id,
+        guide,
         activeThreadId: null,
         focusPinId: null,
         ...droppingDraft(state),
       }));
-      if (route.path === location.getPath()) {
+      if (!guide.navigating) {
         return;
       }
+      // Meanwhile the guide may have been stopped, or started over.
+      const current = () => store.getState().guide === guide;
       try {
         await services.navigateToPath(route.path);
+        if (current()) {
+          store.setState({ guide: { id, navigating: false } });
+        }
       } catch (error) {
-        endGuide(id);
+        if (current()) {
+          store.setState({ guide: null });
+        }
         notify(
           'error',
           i18n.translate('devComments.notice.navigateFailed', {
@@ -490,13 +501,13 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     },
 
     stopGuide(found = false) {
-      const { guideId } = store.getState();
-      if (!guideId) {
+      const { guide } = store.getState();
+      if (!guide) {
         return;
       }
       store.setState({
-        guideId: null,
-        ...(found ? { activeThreadId: guideId, focusPinId: guideId } : {}),
+        guide: null,
+        ...(found ? { activeThreadId: guide.id, focusPinId: guide.id } : {}),
       });
     },
 

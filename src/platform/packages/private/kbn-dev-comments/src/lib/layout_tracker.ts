@@ -7,9 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LOCATOR_ATTRIBUTES } from './anchor';
+
 const LAYOUT_EVENTS = ['scroll', 'resize'] as const;
 const SETTLE_EVENTS = ['transitionend', 'animationend'] as const;
 const LAYOUT_ATTRIBUTES = ['class', 'style', 'hidden', 'aria-hidden', 'aria-expanded', 'open'];
+/**
+ * Mutations that can move an element or change which one an anchor resolves
+ * to: elements coming and going, attributes that show, hide or lay them out,
+ * and the attributes and text that locators are matched on, which an element
+ * may get after it was rendered.
+ */
+const MUTATIONS: MutationObserverInit = {
+  childList: true,
+  subtree: true,
+  characterData: true,
+  attributes: true,
+  attributeFilter: [...LAYOUT_ATTRIBUTES, ...LOCATOR_ATTRIBUTES],
+};
 
 export interface LayoutTracker {
   /** Listeners run at most once a frame, after the page scrolled, resized, mutated, or a watched element changed size. */
@@ -60,12 +75,7 @@ export const createLayoutTracker = (): LayoutTracker => {
     LAYOUT_EVENTS.forEach((type) => window.addEventListener(type, bump, true));
     SETTLE_EVENTS.forEach((type) => document.addEventListener(type, bump, true));
     mutationObserver = new MutationObserver(bump);
-    mutationObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: LAYOUT_ATTRIBUTES,
-    });
+    mutationObserver.observe(document.body, MUTATIONS);
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(onResize);
       watched.forEach((element) => resizeObserver?.observe(element));

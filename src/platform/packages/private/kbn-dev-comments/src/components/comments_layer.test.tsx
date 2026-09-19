@@ -280,6 +280,21 @@ describe('CommentsLayer', () => {
     expect(Number(panel.style.zIndex)).toBe(above);
   });
 
+  it('pins a comment once its element gets the id it is anchored by, with nothing added to the page', async () => {
+    // A control rendered as a placeholder and finalized in place changes no layout.
+    renderPage(`<button id="target">Target</button><button class="late">Late</button>`);
+    const late = createComment('late', { anchor: anchorById('late') });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([late]) });
+    act(() => controller.setActive(true));
+    await screen.findByTestId('devCommentsPanel');
+    expect(screen.queryByTestId('devCommentsPin-late')).toBeNull();
+
+    act(() => {
+      query('.late').id = 'late';
+    });
+    expect(await screen.findByTestId('devCommentsPin-late')).toBeInTheDocument();
+  });
+
   it('guides to the recorded control only, not to another one that took its place', async () => {
     // The comment is on something the "Show details" button disclosed; the guide
     // asks for that click. The button is stored by its structural path as well,
@@ -323,5 +338,41 @@ describe('CommentsLayer', () => {
       expect(screen.queryByTestId('devCommentsGuideHighlight')).not.toBeInTheDocument()
     );
     expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('Looking for the comment…');
+  });
+
+  it('waits for the host to open the comment page before looking for it, even on the same page in another state', async () => {
+    // The page key does not tell the two states apart, and the element is already there.
+    const { location, navigate } = createLocation('/page?state=1');
+    const navigation = deferred<void>();
+    const navigateToPath = jest.fn(async (path: string) => {
+      await navigation.promise;
+      navigate(path);
+    });
+    const guided = createComment('a', { route: { pageKey: '/page', path: '/page?state=2' } });
+    const controller = await renderLayer({
+      api: createInMemoryCommentsApi([guided]),
+      location,
+      navigateToPath,
+    });
+    act(() => controller.setActive(true));
+    let guiding!: Promise<void>;
+    act(() => {
+      guiding = controller.guideTo(guided);
+    });
+    await act(flush);
+
+    expect(navigateToPath).toHaveBeenCalledWith('/page?state=2');
+    expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('Looking for the comment…');
+    expect(controller.store.getState()).toEqual(
+      expect.objectContaining({ guide: { id: 'a', navigating: true }, activeThreadId: null })
+    );
+
+    await act(async () => {
+      navigation.resolve();
+      await guiding;
+    });
+    await waitFor(() => expect(controller.store.getState().activeThreadId).toBe('a'));
+    expect(controller.store.getState().guide).toBeNull();
+    expect(screen.queryByTestId('devCommentsGuide')).not.toBeInTheDocument();
   });
 });

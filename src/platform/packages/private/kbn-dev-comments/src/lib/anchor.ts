@@ -11,6 +11,8 @@ import { IGNORE_SELECTOR, NAME_MAX_LENGTH, SELECTOR_MAX_LENGTH } from '../consta
 import type { AnchorLocator, AnchorTarget, ElementAnchor } from '../types';
 
 const TEST_SUBJ_ATTR = 'data-test-subj';
+/** Attributes locators are made of (see `buildAnchor`); with text, what a change of can make an anchor resolve differently. */
+export const LOCATOR_ATTRIBUTES = ['id', TEST_SUBJ_ATTR, 'aria-label'];
 const TEXT_MAX_LENGTH = 80;
 const LABEL_MAX_LENGTH = 60;
 const FINGERPRINT_TEXT_LENGTH = 40;

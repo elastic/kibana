@@ -73,6 +73,34 @@ describe('createLayoutTracker', () => {
     expect(tracker.getTick()).toBe(1);
   });
 
+  it('notifies on changes to the attributes and text anchors resolve by, and to layout, but not on others', async () => {
+    const tracker = createLayoutTracker();
+    const listener = jest.fn();
+    const element = document.createElement('button');
+    element.textContent = 'Loading';
+    document.body.appendChild(element);
+    const unsubscribe = tracker.subscribe(listener);
+    await Promise.resolve();
+    flushFrame();
+
+    const notifications = async (change: () => void) => {
+      listener.mockClear();
+      change();
+      // Mutation records are delivered on a microtask.
+      await Promise.resolve();
+      flushFrame();
+      return listener.mock.calls.length;
+    };
+
+    expect(await notifications(() => element.setAttribute('id', 'late'))).toBe(1);
+    expect(await notifications(() => element.setAttribute('data-test-subj', 'late'))).toBe(1);
+    expect(await notifications(() => element.setAttribute('aria-label', 'Late'))).toBe(1);
+    expect(await notifications(() => (element.firstChild!.nodeValue = 'Late'))).toBe(1);
+    expect(await notifications(() => element.setAttribute('hidden', ''))).toBe(1);
+    expect(await notifications(() => element.setAttribute('title', 'Late'))).toBe(0);
+    unsubscribe();
+  });
+
   it('notifies when a watched element changes size, but not for the report that follows observing it', () => {
     const tracker = createLayoutTracker();
     const listener = jest.fn();
