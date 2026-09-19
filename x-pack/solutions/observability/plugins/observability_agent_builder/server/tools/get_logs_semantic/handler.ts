@@ -24,6 +24,8 @@ const WARNINGS = {
   cancelled: 'Semantic log search was cancelled. Do not retry automatically.',
   execution:
     'Semantic log search failed during execution. Do not retry automatically or fall back silently.',
+  invalidParams:
+    'Semantic log search rejected the request arguments. Correct them and retry once — check that the time range is not inverted and that the index is a plain index pattern (no spaces or | / \\ ? " < > characters).',
   serviceUnavailable: 'Semantic log search is not registered. Do not retry.',
   missingTarget: 'No log indices are available to search. Do not retry with this tool.',
   noPatterns:
@@ -107,6 +109,8 @@ export async function getLogsSemanticHandler({
         ? WARNINGS.timeout
         : result.reason === 'cancelled'
         ? WARNINGS.cancelled
+        : result.reason === 'invalid_params'
+        ? WARNINGS.invalidParams
         : WARNINGS.execution;
     return emptyResult(semanticFilter, warning);
   }

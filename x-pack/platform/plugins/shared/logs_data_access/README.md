@@ -17,16 +17,41 @@ Services are registered during plugin [start](./server/plugin.ts) phase and defi
 The `semanticLogSearch` service provides natural language search for log patterns:
 
 ```typescript
-const { patterns, strategy } = await logsDataAccess.services.semanticLogSearch.search({
+const result = await logsDataAccess.services.semanticLogSearch.search({
   esClient,
   target: 'logs-*',
   nlQuery: 'connection failures',
   timeRange: { start: Date.now() - 3600000, end: Date.now() },
+  // optional:
+  maxPatterns: 10,       // default 10, max 100
+  kqlFilter: 'host.name: "my-host"',
+  abortSignal: controller.signal,
 });
+
+if (result.status === 'success') {
+  // result.patterns: LogPattern[]
+} else if (result.status === 'unavailable') {
+  // result.reason: 'missing_fields' | 'inference_unavailable'
+} else {
+  // result.reason: 'timeout' | 'cancelled' | 'execution'
+}
 ```
 
-The implemented path is ES|QL `RERANK` + `CATEGORIZE`. If the cluster has no RERANK inference endpoint, `search` returns `{ patterns: [], unavailable: true }`.
+`search` returns a discriminated union on `status`:
 
-The pre-indexed rungs (`semantic_text` / `pattern_text`) and `expand` are not implemented. Detection of those mappings is still in `detectCapabilities`; the planned direction is to feed patterns from Knowledge Indicators in the AI Index rather than querying logs at request time.
+| `status` | When | Extra fields |
+|---|---|---|
+| `'success'` | Patterns found (may be empty array) | `patterns: LogPattern[]` |
+| `'unavailable'` | Cluster lacks required capability | `reason: 'missing_fields' \| 'inference_unavailable'` |
+| `'error'` | Request failed or was rejected | `reason: 'timeout' \| 'cancelled' \| 'execution'` |
 
-`strategy` names the ranking path that produced the result. It is a debug and eval signal, not something callers should branch on.
+### Capability checks
+
+Before running the query the service performs two checks:
+
+1. **`hasRequiredFields`** — verifies `message` and `@timestamp` exist on the target via field caps. Returns `{ status: 'unavailable', reason: 'missing_fields' }` when absent.
+2. **`detectRerankCapability`** — checks that the `.rerank-v1-elasticsearch` inference endpoint is available (preconfigured in ES 9.3+). Returns `{ status: 'unavailable', reason: 'inference_unavailable' }` when absent.
+
+### Strategy
+
+The only implemented ranking path is ES|QL `CATEGORIZE` + `RERANK`. Pre-indexed strategies (`semantic_text`, `pattern_text`) and pattern expansion are not implemented.

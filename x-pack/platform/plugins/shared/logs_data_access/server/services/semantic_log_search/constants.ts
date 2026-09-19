@@ -10,6 +10,22 @@ export const DEFAULT_MAX_PATTERNS = 10;
 /** Maximum number of patterns a caller may request. */
 export const MAX_PATTERNS = 100;
 
+/**
+ * Upper bounds for free-form string inputs. Intentionally generous — they are safety guards
+ * against pathological payloads (unbounded-string DoS), not business constraints.
+ * Mirror the values in observability_agent_builder/server/utils/schema_limits.ts; that file
+ * cannot be imported here because platform cannot depend on solutions.
+ */
+
+/** Index names and index patterns (may be comma-separated). */
+export const MAX_TARGET_LENGTH = 4096;
+
+/** Natural-language query strings. Matches the Elasticsearch keyword `ignore_above` default. */
+export const MAX_NL_QUERY_LENGTH = 1024;
+
+/** KQL filter expressions, which may chain several clauses. */
+export const MAX_KQL_FILTER_LENGTH = 4096;
+
 /** Patterns passed to RERANK. Each one is an inference call, so this is the cost knob. */
 export const DEFAULT_RANK_WINDOW = 500;
 

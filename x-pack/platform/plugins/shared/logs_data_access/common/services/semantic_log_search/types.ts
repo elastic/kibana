@@ -72,7 +72,7 @@ export type SemanticLogSearchResult =
     }
   | {
       status: 'error';
-      reason: 'timeout' | 'cancelled' | 'execution';
+      reason: 'timeout' | 'cancelled' | 'execution' | 'invalid_params';
     };
 
 /**

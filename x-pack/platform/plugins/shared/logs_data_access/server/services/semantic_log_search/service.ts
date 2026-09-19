@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type {
   SemanticLogSearchService,
@@ -13,38 +14,30 @@ import type {
 } from '../../../common/services/semantic_log_search/types';
 import type { RegisterServicesParams } from '../register_services';
 import { hasRequiredFields, detectRerankCapability } from './capabilities';
-import { DEFAULT_MAX_PATTERNS, MAX_PATTERNS } from './constants';
 import { searchWithEsqlRerank } from './strategies';
-
-const hasValidParams = ({
-  target,
-  nlQuery,
-  timeRange,
-  maxPatterns = DEFAULT_MAX_PATTERNS,
-}: SemanticLogSearchParams): boolean =>
-  target.trim().length > 0 &&
-  nlQuery.trim().length > 0 &&
-  Number.isFinite(timeRange.start) &&
-  Number.isFinite(timeRange.end) &&
-  timeRange.start < timeRange.end &&
-  Number.isInteger(maxPatterns) &&
-  maxPatterns >= 1 &&
-  maxPatterns <= MAX_PATTERNS;
+import { semanticLogSearchInputSchema } from './schema';
 
 /** Search for log patterns matching a natural language query. */
 export async function search(
   params: SemanticLogSearchParams,
   logger: Logger
 ): Promise<SemanticLogSearchResult> {
-  const { esClient, target } = params;
+  const { esClient, abortSignal } = params;
 
-  if (!hasValidParams(params)) {
-    logger.warn('Semantic log search rejected invalid parameters');
-    return { status: 'error', reason: 'execution' };
+  const validation = semanticLogSearchInputSchema.safeParse(params);
+  if (!validation.success) {
+    logger.warn(
+      `Semantic log search rejected invalid parameters: ${z.prettifyError(validation.error)}`
+    );
+    return { status: 'error', reason: 'invalid_params' };
   }
 
+  // Re-attach non-parseable fields. Use validation.data so that zod's .trim() and .default()
+  // coercions (e.g. trimmed target, applied maxPatterns default) take effect.
+  const input: SemanticLogSearchParams = { ...validation.data, esClient, abortSignal };
+
   try {
-    if (!(await hasRequiredFields(esClient, target))) {
+    if (!(await hasRequiredFields(esClient, input.target))) {
       return { status: 'unavailable', reason: 'missing_fields' };
     }
   } catch (error) {
@@ -58,7 +51,7 @@ export async function search(
     return { status: 'unavailable', reason: 'inference_unavailable' };
   }
 
-  return searchWithEsqlRerank(params, logger);
+  return searchWithEsqlRerank(input, logger);
 }
 
 /** Creates the runtime semantic log search service. */

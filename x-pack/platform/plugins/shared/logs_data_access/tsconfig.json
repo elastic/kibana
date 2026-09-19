@@ -26,6 +26,8 @@
     "@kbn/use-tracked-promise",
     "@kbn/core-application-browser",
     "@kbn/i18n-react",
-    "@kbn/storage-adapter"
+    "@kbn/storage-adapter",
+    "@kbn/zod",
+    "@kbn/data-view-validation"
   ]
 }

@@ -234,6 +234,7 @@ describe('getLogsSemanticHandler', () => {
     ['timeout', 'Narrow the time range or add a KQL filter before retrying once'],
     ['cancelled', 'Do not retry automatically'],
     ['execution', 'Do not retry automatically or fall back silently'],
+    ['invalid_params', 'Correct them and retry once'],
   ] as const)('maps %s errors to actionable warnings', async (reason, warning) => {
     const search = jest.fn().mockResolvedValue({ status: 'error', reason });
 

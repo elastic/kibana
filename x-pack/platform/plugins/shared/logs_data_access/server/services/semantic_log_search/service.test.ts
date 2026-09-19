@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SemanticLogSearchParams } from '../../../common/services/semantic_log_search/types';
 import { search } from './service';
+import { MAX_KQL_FILTER_LENGTH, MAX_NL_QUERY_LENGTH, MAX_PATTERNS, MAX_TARGET_LENGTH } from './constants';
 
 const createEsClient = ({
   fields = {
@@ -93,17 +94,28 @@ describe('semantic log search service', () => {
   });
 
   it.each([
+    // blank / whitespace-only strings
     { target: '' },
     { target: '   ' },
     { nlQuery: '' },
     { nlQuery: '   ' },
+    // non-finite / non-integer time values
     { timeRange: { start: Number.NaN, end: 1704153600000 } },
     { timeRange: { start: 1704067200000, end: Number.POSITIVE_INFINITY } },
+    // inverted and zero-width ranges
     { timeRange: { start: 1704153600000, end: 1704067200000 } },
     { timeRange: { start: 1704067200000, end: 1704067200000 } },
+    // out-of-range maxPatterns
     { maxPatterns: 0 },
-    { maxPatterns: 101 },
+    { maxPatterns: MAX_PATTERNS + 1 },
     { maxPatterns: 1.5 },
+    // injection in target — esql.from() does not quote; pipe injects ES|QL commands
+    { target: 'logs | DROP message' },
+    { target: 'logs\\sneaky' },
+    // over-length inputs
+    { nlQuery: 'x'.repeat(MAX_NL_QUERY_LENGTH + 1) },
+    { kqlFilter: 'x'.repeat(MAX_KQL_FILTER_LENGTH + 1) },
+    { target: 'x'.repeat(MAX_TARGET_LENGTH + 1) },
   ])('rejects invalid params before Elasticsearch work: %o', async (overrides) => {
     const { esClient, fieldCaps, inferenceGet, esqlQuery } = createEsClient();
 
@@ -112,9 +124,21 @@ describe('semantic log search service', () => {
       loggerMock.create()
     );
 
-    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(result).toEqual({ status: 'error', reason: 'invalid_params' });
     expect(fieldCaps).not.toHaveBeenCalled();
     expect(inferenceGet).not.toHaveBeenCalled();
     expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('trims whitespace from target and applies maxPatterns default before ES|QL', async () => {
+    const { esClient, esqlQuery } = createEsClient();
+
+    await search(createParams(esClient, { target: '  logs-*  ' }), loggerMock.create());
+
+    expect(esqlQuery).toHaveBeenCalled();
+    const [{ query }] = esqlQuery.mock.calls[0];
+    // trimmed target and default limit (10) must appear in the generated query
+    expect(query).toContain('FROM logs-*');
+    expect(query).toContain('LIMIT 10');
   });
 });
