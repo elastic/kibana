@@ -27,6 +27,7 @@ import {
   type EnhancedCaseData,
 } from './search_cases_helpers';
 import {
+  canRenderAttachments,
   emitCaseAttachment,
   emitCasesAttachment,
   injectAttachmentIds,
@@ -36,9 +37,9 @@ import { CASES_SOLUTION_CONTEXT_INSTRUCTION } from '../utils/tool_instructions';
 
 const emitSearchAttachments = async (
   cases: EnhancedCaseData[],
-  attachments: ToolHandlerContext['attachments']
+  { attachments, callContext }: Pick<ToolHandlerContext, 'attachments' | 'callContext'>
 ): Promise<string[]> => {
-  if (cases.length === 0) return [];
+  if (cases.length === 0 || !canRenderAttachments(callContext)) return [];
   if (cases.length === 1) {
     const id = await emitCaseAttachment(attachments, toCaseAttachmentData(cases[0], cases[0].url));
     return [id];
@@ -166,7 +167,9 @@ Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`. See \`mode\
 
 \`search\` mode returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
-Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
+Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`.
+
+Called from an Agent Builder conversation, the result also carries \`attachment_ids\` for the structured case attachment(s) — emit \`<render_attachment id="..." />\` for each ID and don't format markdown links to the case in your text. Called via MCP or the API, the result contains the case data only (each case includes its \`url\`) and no attachment IDs.`,
     schema: casesSchema,
     annotations: {
       title: 'Search Cases',
@@ -198,7 +201,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         page,
         perPage,
       },
-      { request, spaceId, logger, attachments }
+      { request, spaceId, logger, attachments, callContext }
     ) => {
       try {
         const [coreStart] = await coreSetup.getStartServices();
@@ -224,13 +227,13 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
               coreServices,
               logger
             );
-            const singleAttachmentId = await emitCaseAttachment(
+            const singleAttachmentIds = await emitSearchAttachments([caseData], {
               attachments,
-              toCaseAttachmentData(caseData, caseData.url)
-            );
+              callContext,
+            });
             return injectAttachmentIds(
               createResult([caseData], `Retrieved case: ${caseData.title}`),
-              [singleAttachmentId]
+              singleAttachmentIds
             );
           }
 
@@ -250,7 +253,10 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
             const bulkResult = await casesClient.cases.bulkGet({ ids });
 
             const enrichedCases = enhanceCases(bulkResult.cases, request, coreServices, logger);
-            const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
+            const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, {
+              attachments,
+              callContext,
+            });
             return injectAttachmentIds(
               createResult(
                 enrichedCases,
@@ -282,7 +288,10 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
               coreServices,
               logger
             );
-            const similarAttachmentIds = await emitSearchAttachments(enrichedSimilar, attachments);
+            const similarAttachmentIds = await emitSearchAttachments(enrichedSimilar, {
+              attachments,
+              callContext,
+            });
             return injectAttachmentIds(
               {
                 results: [
@@ -321,7 +330,10 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
             }
 
             const casesData = enhanceCases(cases, request, coreServices, logger);
-            const alertAttachmentIds = await emitSearchAttachments(casesData, attachments);
+            const alertAttachmentIds = await emitSearchAttachments(casesData, {
+              attachments,
+              callContext,
+            });
             return injectAttachmentIds(
               createResult(
                 casesData,
@@ -367,7 +379,10 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
 
             const findResult = await casesClient.cases.find(searchParams);
             const casesData = enhanceCases(findResult.cases, request, coreServices, logger);
-            const searchAttachmentIds = await emitSearchAttachments(casesData, attachments);
+            const searchAttachmentIds = await emitSearchAttachments(casesData, {
+              attachments,
+              callContext,
+            });
 
             const totalPages = Math.max(1, Math.ceil(findResult.total / requestedPerPage));
             const message =

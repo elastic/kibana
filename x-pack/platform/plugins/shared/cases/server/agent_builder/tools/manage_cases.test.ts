@@ -7,9 +7,78 @@
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { manageCasesTool } from './manage_cases';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
+import { invokeStepHandler } from '../utils/invoke_step';
+
+jest.mock('../utils/invoke_step', () => ({ invokeStepHandler: jest.fn() }));
+const invokeStepHandlerMock = invokeStepHandler as jest.MockedFunction<typeof invokeStepHandler>;
+
+const theCase = { id: 'case-1', title: 'Test Case', owner: 'securitySolution' };
+
+const buildMockAttachments = () => ({
+  add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+  get: jest.fn(),
+  delete: jest.fn(),
+  update: jest.fn(),
+  list: jest.fn(),
+});
+
+const buildToolContext = (
+  attachments: ReturnType<typeof buildMockAttachments>,
+  callSource: ToolHandlerContext['callContext']['callSource']
+): ToolHandlerContext =>
+  ({
+    request: httpServerMock.createKibanaRequest(),
+    spaceId: 'default',
+    logger: loggingSystemMock.createLogger(),
+    attachments,
+    callContext: { toolId: 'platform.core.cases.manage', toolCallId: 'call-1', callSource },
+  } as unknown as ToolHandlerContext);
+
+describe('manageCasesTool handler — attachment emission by caller', () => {
+  beforeEach(() => {
+    invokeStepHandlerMock.mockReset();
+    invokeStepHandlerMock.mockResolvedValue({
+      results: [{ type: 'other', data: { case: theCase } }],
+    });
+  });
+
+  it('emits a case attachment for an Agent Builder conversation call', async () => {
+    const attachments = buildMockAttachments();
+    const tool = manageCasesTool(jest.fn(), false);
+    const result = await tool.handler(
+      { mode: 'update', case_id: 'case-1', title: 'New title' } as never,
+      buildToolContext(attachments, 'agent')
+    );
+
+    expect(attachments.add).toHaveBeenCalledTimes(1);
+    const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
+    expect(results[0].data.attachment_ids).toEqual(['att-1']);
+  });
+
+  it.each(['mcp', 'user', 'unknown'] as const)(
+    'returns the case without emitting an attachment for %s callers',
+    async (callSource) => {
+      const attachments = buildMockAttachments();
+      const tool = manageCasesTool(jest.fn(), false);
+      const result = await tool.handler(
+        { mode: 'update', case_id: 'case-1', title: 'New title' } as never,
+        buildToolContext(attachments, callSource)
+      );
+
+      expect(invokeStepHandlerMock).toHaveBeenCalledTimes(1);
+      expect(attachments.add).not.toHaveBeenCalled();
+      const { results } = result as unknown as {
+        results: Array<{ data: Record<string, unknown> }>;
+      };
+      expect(results[0].data.case).toEqual(theCase);
+      expect(results[0].data.attachment_ids).toBeUndefined();
+    }
+  );
+});
 
 describe('manageCasesTool availability', () => {
   it('returns unavailable for es solution', async () => {
