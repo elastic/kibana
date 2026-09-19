@@ -92,7 +92,7 @@ interface AttacksActionTagsUpdatedParams extends AttacksActionBaseParams {
 }
 
 interface AttacksActionAddedToCaseParams extends AttacksActionBaseParams {
-  action: 'add_to_new_case' | 'add_to_existing_case';
+  action: 'add_to_case';
 }
 
 interface AttacksDetailsFlyoutOpenedParams {

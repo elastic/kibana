@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import React from 'react';
+import { act, renderHook } from '@testing-library/react';
+import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { useBulkAttackCaseItems } from './use_bulk_attack_case_items';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -18,47 +17,46 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
-jest.mock(
-  '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case',
-  () => ({
-    useAddToExistingCase: jest.fn(),
-  })
-);
 jest.mock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case', () => ({
-  useAddToNewCase: jest.fn(),
+  useAddToCase: jest.fn(),
 }));
 
 const { useKibana } = jest.requireMock('../../../../../common/lib/kibana') as {
   useKibana: jest.Mock;
 };
-const { useAddToExistingCase } = jest.requireMock(
-  '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case'
-) as { useAddToExistingCase: jest.Mock };
-const { useAddToNewCase } = jest.requireMock(
+const { useAddToCase } = jest.requireMock(
   '../../../../../attack_discovery/pages/results/take_action/use_add_to_case'
-) as { useAddToNewCase: jest.Mock };
+) as { useAddToCase: jest.Mock };
 
-let queryClient: QueryClient;
-
-function wrapper(props: { children: React.ReactNode }) {
-  return React.createElement(QueryClientProvider, { client: queryClient }, props.children);
-}
+const alertItems: TimelineItem[] = [
+  {
+    _id: 'attack-1',
+    data: [
+      { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1', 'alert-2'] },
+      { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: ['markdown 1'] },
+    ],
+    ecs: { _id: 'attack-1' },
+  },
+  {
+    _id: 'attack-2',
+    data: [
+      { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-2', 'alert-3'] },
+      { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: ['markdown 2'] },
+    ],
+    ecs: { _id: 'attack-2' },
+  },
+];
 
 describe('useBulkAttackCaseItems', () => {
-  const onAddToNewCase = jest.fn();
-  const onAddToExistingCase = jest.fn();
-  const reportEventMock = jest.fn();
+  const onAddToCase = jest.fn();
+  const reportEvent = jest.fn();
+  const title = 'Attack title';
 
   beforeEach(() => {
     jest.clearAllMocks();
-    reportEventMock.mockClear();
-    queryClient = new QueryClient();
-
     useKibana.mockReturnValue({
       services: {
-        telemetry: {
-          reportEvent: reportEventMock,
-        },
+        telemetry: { reportEvent },
         cases: {
           helpers: {
             canUseCases: jest.fn().mockReturnValue({
@@ -69,32 +67,36 @@ describe('useBulkAttackCaseItems', () => {
         },
       },
     });
-
-    useAddToNewCase.mockReturnValue({
+    useAddToCase.mockReturnValue({
       disabled: false,
-      onAddToNewCase,
-    });
-
-    useAddToExistingCase.mockReturnValue({
-      disabled: false,
-      onAddToExistingCase,
+      onAddToCase,
     });
   });
 
-  it('should return two case items when user has permissions', () => {
-    const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
-      wrapper,
-    });
+  it('returns one modal-backed case action and no panels', () => {
+    const { result } = renderHook(() => useBulkAttackCaseItems({ title }));
 
-    expect(result.current.items).toHaveLength(2);
+    expect(result.current.items).toEqual([
+      expect.objectContaining({
+        key: 'attack-add-to-case',
+        label: 'Add to case',
+        'data-test-subj': 'attack-add-to-case',
+        icon: 'briefcase',
+        onClick: expect.any(Function),
+      }),
+    ]);
+    expect(result.current.panels).toEqual([]);
+    expect(useAddToCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title,
+      })
+    );
   });
 
-  it('should return empty items when user lacks cases permissions', () => {
+  it('returns no case action without permissions', () => {
     useKibana.mockReturnValue({
       services: {
-        telemetry: {
-          reportEvent: reportEventMock,
-        },
+        telemetry: { reportEvent },
         cases: {
           helpers: {
             canUseCases: jest.fn().mockReturnValue({
@@ -106,164 +108,41 @@ describe('useBulkAttackCaseItems', () => {
       },
     });
 
-    const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
-      wrapper,
-    });
+    const { result } = renderHook(() => useBulkAttackCaseItems({ title }));
 
     expect(result.current.items).toEqual([]);
   });
 
-  it('should pass unique alert ids and markdown comments to onAddToNewCase', async () => {
+  it('opens the selector with unique alert ids and markdown comments', async () => {
     const closePopover = jest.fn();
-    const { result } = renderHook(
-      () => useBulkAttackCaseItems({ title: 'attack title', closePopover }),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook(() => useBulkAttackCaseItems({ closePopover, title }));
 
-    await result.current.items[1]?.onClick?.(
-      [
-        {
-          _id: 'attack-1',
-          data: [
-            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1', 'alert-2'] },
-            { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: ['markdown 1'] },
-          ],
-          ecs: { _id: 'attack-1' },
-        },
-        {
-          _id: 'attack-2',
-          data: [
-            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-2', 'alert-3'] },
-            { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: ['markdown 2'] },
-          ],
-          ecs: { _id: 'attack-2' },
-        },
-      ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
+    await act(async () => {
+      await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
+    });
 
-    expect(onAddToNewCase).toHaveBeenCalledWith({
+    expect(onAddToCase).toHaveBeenCalledWith({
       alertIds: ['alert-1', 'alert-2', 'alert-3'],
       markdownComments: ['markdown 1', 'markdown 2'],
     });
-    expect(closePopover).toHaveBeenCalledTimes(1);
+    expect(closePopover).toHaveBeenCalled();
   });
 
-  it('should report ActionAddedToCase event when adding to new case', async () => {
-    const { result } = renderHook(
-      () =>
-        useBulkAttackCaseItems({
-          title: 'attack title',
-          telemetrySource: 'attacks_page_group_take_action',
-        }),
-      {
-        wrapper,
-      }
+  it('reports the singular add-to-case telemetry action', async () => {
+    const { result } = renderHook(() =>
+      useBulkAttackCaseItems({
+        telemetrySource: 'attacks_page_group_take_action',
+        title,
+      })
     );
 
-    await result.current.items[1]?.onClick?.(
-      [
-        {
-          _id: 'attack-1',
-          data: [],
-          ecs: { _id: 'attack-1' },
-        },
-      ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
+    await act(async () => {
+      await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
+    });
 
-    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
       source: 'attacks_page_group_take_action',
-      action: 'add_to_new_case',
+      action: 'add_to_case',
     });
-  });
-
-  it('should pass unique alert ids and markdown comments to onAddToExistingCase', async () => {
-    const closePopover = jest.fn();
-    const { result } = renderHook(
-      () => useBulkAttackCaseItems({ title: 'attack title', closePopover }),
-      {
-        wrapper,
-      }
-    );
-
-    await result.current.items[0]?.onClick?.(
-      [
-        {
-          _id: 'attack-1',
-          data: [
-            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1'] },
-            { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: ['markdown 1'] },
-          ],
-          ecs: { _id: 'attack-1' },
-        },
-        {
-          _id: 'attack-2',
-          data: [
-            { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-2'] },
-            { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: ['markdown 2'] },
-          ],
-          ecs: { _id: 'attack-2' },
-        },
-      ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
-
-    expect(onAddToExistingCase).toHaveBeenCalledWith({
-      alertIds: ['alert-1', 'alert-2'],
-      markdownComments: ['markdown 1', 'markdown 2'],
-    });
-    expect(closePopover).toHaveBeenCalledTimes(1);
-  });
-
-  it('should report ActionAddedToCase event when adding to existing case', async () => {
-    const { result } = renderHook(
-      () =>
-        useBulkAttackCaseItems({
-          title: 'attack title',
-          telemetrySource: 'attacks_page_group_take_action',
-        }),
-      {
-        wrapper,
-      }
-    );
-
-    await result.current.items[0]?.onClick?.(
-      [
-        {
-          _id: 'attack-1',
-          data: [],
-          ecs: { _id: 'attack-1' },
-        },
-      ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
-
-    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
-      source: 'attacks_page_group_take_action',
-      action: 'add_to_existing_case',
-    });
-  });
-
-  it('should return empty panels', () => {
-    const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
-      wrapper,
-    });
-
-    expect(result.current.panels).toEqual([]);
   });
 });
