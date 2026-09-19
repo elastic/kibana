@@ -47,10 +47,12 @@ const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
     startDate: '2023-03-24',
     endDate: '2023-03-26',
     recurring: false,
-    scopedQuery: {
-      kql: 'kibana.alert.job_errors_results.job_id : * ',
-      filters: [],
-      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+    scope: {
+      alerting: {
+        kql: 'kibana.alert.job_errors_results.job_id : * ',
+        filters: [],
+        dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+      },
     },
   },
   maintenanceWindowId: 'fake_mw_id',
@@ -280,13 +282,13 @@ describe('CreateMaintenanceWindowForm', () => {
       await fillTitleAndSubmit();
 
       const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
-      await user.click(within(modal).getByRole('button', { name: 'Save without filters' }));
+      await user.click(within(modal).getByRole('button', { name: 'Save without scope' }));
 
       await waitFor(() => {
         expect(createMutate).toHaveBeenCalledTimes(1);
         expect(createMutate.mock.calls[0][0]).toMatchObject({
           title: 'My window',
-          scopedQuery: null,
+          scope: {},
         });
       });
       expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();

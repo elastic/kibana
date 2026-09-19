@@ -115,6 +115,7 @@ describe('createMaintenanceWindowRoute', () => {
         title: 'test-maintenance-window',
         enabled: false,
         scopedQuery: {
+          enabled: true,
           filters: [],
           kql: "_id: '1234'",
         },
@@ -144,6 +145,7 @@ describe('createMaintenanceWindowRoute', () => {
         },
         scope: {
           alerting: {
+            enabled: true,
             kql: "_id: '1234'",
             filters: [],
           },

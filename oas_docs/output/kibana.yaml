@@ -112188,21 +112188,40 @@ components:
       properties:
         alerting:
           additionalProperties: false
+          description: Scope configuration for alerting v1. When present, the maintenance window applies to alerting v1 alerts. An absent `alerting` key means this MW does not apply to alerting v1.
           type: object
           properties:
+            enabled:
+              description: Whether the maintenance window applies to alerting v1 alerts.
+              type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
                   description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be suppressed by the maintenance window.
+                  maxLength: 10000
                   type: string
               required:
                 - kql
-          required:
-            - query
-      required:
-        - alerting
+        alerting_v2:
+          additionalProperties: false
+          description: Scope configuration for alerting v2. When present, the maintenance window applies to alerting v2 episodes. An absent `alerting_v2` key means this MW does not apply to alerting v2.
+          type: object
+          properties:
+            enabled:
+              description: Whether the maintenance window applies to alerting v2 episodes.
+              type: boolean
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context (episode_id, episode_status, rule.*, data.*). Only matching episodes will be suppressed.
+                  maxLength: 4096
+                  type: string
+              required:
+                - kql
       title: maintenance_window_scope
       type: object
     Kibana_HTTP_APIs_managed_integration:

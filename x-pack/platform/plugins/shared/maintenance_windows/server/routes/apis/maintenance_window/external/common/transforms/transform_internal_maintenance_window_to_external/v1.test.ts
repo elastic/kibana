@@ -21,6 +21,7 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
         enabled: false,
         scope: {
           alerting: {
+            enabled: true,
             filters: [],
             kql: "_id: '1234'",
           },
@@ -73,6 +74,7 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
       },
       scope: {
         alerting: {
+          enabled: true,
           query: {
             kql: "_id: '1234'",
           },

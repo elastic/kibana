@@ -16,7 +16,13 @@ export interface AlertsFilterAttributes {
 }
 
 export interface AlertsFilterQueryAttributes {
-  kql: string;
-  filters: AlertsFilterAttributes[];
-  dsl: string;
+  enabled: boolean;
+  kql?: string;
+  filters?: AlertsFilterAttributes[];
+  dsl?: string;
+}
+
+export interface AlertingV2ScopeAttributes {
+  enabled: boolean;
+  kql?: string;
 }

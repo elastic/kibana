@@ -16,6 +16,8 @@ export interface ActiveMaintenanceWindow {
   events: ActiveMaintenanceWindowEvent[];
   scope?: {
     alerting?: unknown;
-    alertingV2?: { kql?: string };
+    // null = v2 selected, no filter (suppress all v2 episodes in window);
+    // object = v2 selected with KQL filter; undefined = v2 not selected.
+    alertingV2?: { enabled: boolean; kql?: string };
   };
 }

@@ -375,6 +375,7 @@ describe('MaintenanceWindowClient - update', () => {
       data: {
         scope: {
           alerting: {
+            enabled: true,
             kql: "_id: '1234'",
             filters: [
               {
@@ -409,7 +410,7 @@ describe('MaintenanceWindowClient - update', () => {
     ).toEqual(`_id: '1234'`);
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters[0]
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters![0]
     ).toEqual({
       $state: { store: 'appState' },
       meta: {
@@ -475,6 +476,7 @@ describe('MaintenanceWindowClient - update', () => {
         data: {
           scope: {
             alerting: {
+              enabled: true,
               kql: `kibana.alert.rule.name: ${kqlPattern}`,
               filters: [],
             },
@@ -545,18 +547,17 @@ describe('MaintenanceWindowClient - update', () => {
     await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
       data: {
-        scope: { alerting: null },
+        scope: { alerting: { enabled: true } },
       },
     });
 
-    expect((savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting)
-      .toMatchInlineSnapshot(`
-      Object {
-        "dsl": "",
-        "filters": Array [],
-        "kql": "",
-      }
-    `);
+    // scope.alerting.enabled=true with no kql means "v1 selected, no filter".
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting?.enabled
+    ).toBe(true);
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting?.kql
+    ).toBeUndefined();
   });
 
   it('should throw if updating a maintenance window with invalid scope', async () => {
@@ -577,6 +578,7 @@ describe('MaintenanceWindowClient - update', () => {
         data: {
           scope: {
             alerting: {
+              enabled: true,
               kql: 'invalid: ',
               filters: [],
             },
