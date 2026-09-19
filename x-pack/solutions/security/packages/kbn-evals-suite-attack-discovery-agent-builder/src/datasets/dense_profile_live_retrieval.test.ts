@@ -95,6 +95,24 @@ describe('dense profile live-retrieval dataset', () => {
     expect(taggedAlerts).toHaveLength(AD2_DENSE_TARGET_ALERTS);
   });
 
+  // `StrictTrajectory` scores `expectedPath.length / non-load-skill calls`, so
+  // the path itself decides what the metric rewards. A path of `[run]` scored a
+  // model that skipped retrieval and called `run` directly at 1.0, while a
+  // correct scoped retrieval (`get_default_esql_query -> execute_esql -> run`)
+  // scored 1/3 — the metric paid more for bypassing the retrieval this profile
+  // exists to measure than for performing it.
+  it('expects the retrieval tools in the trajectory, so bypassing retrieval cannot score higher', () => {
+    const path = example.output?.expectedToolPath ?? [];
+    expect(path).toEqual([
+      'security.attack-discovery.get_default_esql_query',
+      'platform.core.execute_esql',
+      'security.attack-discovery.run',
+    ]);
+    // The input path is what the dataset asserts; keep the two from drifting.
+    expect(example.input?.expectedToolPath).toEqual(path);
+    expect(path).not.toEqual(['security.attack-discovery.run']);
+  });
+
   // The Criteria evaluator hands `expected.criteria` straight to the LLM judge
   // (`attack_discovery_criteria_evaluator.ts`): an empty array returns N/A and
   // skips the check entirely, and a shortened array silently drops whatever

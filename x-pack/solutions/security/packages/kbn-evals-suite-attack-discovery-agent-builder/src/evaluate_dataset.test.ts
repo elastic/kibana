@@ -381,6 +381,70 @@ describe("the agent's own retrieval, read from the recorded steps", () => {
     ).toEqual([[95], [95], [95], [95], [95], [95], [95]]);
   });
 
+  // Two classes of unrestricted `WHERE` that still CONTAIN the marker, both
+  // reported by review: a negation selects everything except this run, and a
+  // tautological disjunct selects the whole index. Either one's rows are an
+  // unrelated population, so admitting them scores a complete retrieval of this
+  // fixture on rows that are not this fixture's.
+  it('does not accept a WHERE clause that negates the marker', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const negated = [
+      `FROM .alerts-security.alerts-default | WHERE tags != "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE tags <> "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE NOT tags == "${scope}"`,
+    ];
+
+    expect(
+      negated.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null, null]);
+
+    expect(
+      negated.map((query) =>
+        extractUnscopedAlertRetrievalRowCounts([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([[95], [95], [95]]);
+  });
+
+  it('does not accept a WHERE clause whose tautological disjunct keeps the whole index', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const tautologies = [
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR true`,
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR 1 == 1`,
+    ];
+
+    expect(
+      tautologies.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([null, null]);
+
+    expect(
+      tautologies.map((query) =>
+        extractUnscopedAlertRetrievalRowCounts([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([[95], [95]]);
+  });
+
+  // The other direction: the stricter check must not reject the shapes the
+  // recorded scoped queries actually use, including a marker branch inside an
+  // OR-chain and a positive marker beside a negated unrelated term.
+  it('still accepts a positive marker branch alongside other predicates', () => {
+    const scope = AD2_SCENARIO_SEED_LABEL;
+    const positive = [
+      `FROM .alerts-security.alerts-default | WHERE tags == "${scope}" OR tags == "other-run"`,
+      `FROM .alerts-security.alerts-default | WHERE tags != "unrelated" AND tags == "${scope}"`,
+      `FROM .alerts-security.alerts-default | WHERE QSTR("${scope}")`,
+    ];
+
+    expect(
+      positive.map((query) =>
+        extractAgentAlertRetrievalPopulation([recordedEsqlStep({ query, rows: 95 })], scope)
+      )
+    ).toEqual([95, 95, 95]);
+  });
+
   it('still accepts the marker when a WHERE clause restricts on it', () => {
     const scope = AD2_SCENARIO_SEED_LABEL;
     const filtering = [

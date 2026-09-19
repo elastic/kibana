@@ -133,6 +133,27 @@ const occurrenceRuleName = (base: string, occurrence: number): string =>
   occurrence === 1 ? base : `${base}-${occurrence}`;
 
 /**
+ * `inventory-agent` -> `inventory-agent-2`, ... — each occurrence's OWN process
+ * name, the same reason `occurrenceHost`, `occurrenceUser` and
+ * `occurrenceRuleName` are occurrence-local.
+ *
+ * Process-name FREQUENCY was the last field separating the sides after the
+ * rule-name fix: measured on the emitted dense plan, every clean process name
+ * appeared at most 4 times (one chain each; `powershell.exe` 4x, the rest 1-2x)
+ * while every background name appeared at least 6 times (`svchost.exe` 12x,
+ * `inventory-agent` 24x). `process.name` is exposed on the alert, so
+ * `GROUP BY process.name | WHERE COUNT(*) <= 5` recovered all 16 reference
+ * alerts and no background alert — the same answer key the rule-name fix
+ * removed, one field over. Suffixing each occurrence's names drops every
+ * background name to its own chain's step count (1-4, `inventory-agent` 4x
+ * within one occurrence), which OVERLAPS the clean side's 1-4 range on both
+ * ends, so no frequency threshold can separate the sides. Occurrence 1 keeps
+ * the template's literal name, so no existing fixture reference shifts.
+ */
+const occurrenceProcessName = (base: string | null, occurrence: number): string | null =>
+  base == null || occurrence === 1 ? base : `${base}-${occurrence}`;
+
+/**
  * Background chains: plausible, non-actionable, and NOT part of the four target
  * chains. Severity and risk score do not separate them from those chains either
  * — see `bg-vendor-update` below — so the population cannot be solved by
@@ -455,6 +476,7 @@ const buildBackgroundScenarios = (): Record<string, Ad2ScenarioDefinition> => {
       const steps = template.stepsFor({ occurrence, host }).map((templateStep) => ({
         ...templateStep,
         ruleName: occurrenceRuleName(templateStep.ruleName, occurrence),
+        processName: occurrenceProcessName(templateStep.processName, occurrence),
       }));
 
       // Truncate at a chain boundary rather than emitting a partial chain.

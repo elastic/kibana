@@ -330,6 +330,58 @@ describe('AD2 scenario registry (dense profile)', () => {
     }
   });
 
+  it('does not let process-name frequency separate target from noise', () => {
+    // Same invariant as rule-name frequency, one field over: `process.name` is
+    // exposed on the alert, and measured on the emitted dense plan every clean
+    // process name appeared at most 4 times while every background name
+    // appeared at least 6 (`svchost.exe` 12x, `inventory-agent` 24x) — so
+    // `GROUP BY process.name | WHERE COUNT(*) <= 5` recovered all 16 reference
+    // alerts and no background alert. Both sides must occupy the same frequency
+    // range, or frequency alone solves the population.
+    const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+    const cleanNames = new Set<string>();
+    const backgroundNames = new Set<string>();
+    const frequency = new Map<string, { clean: number; background: number }>();
+
+    const steps = listAd2ScenarioKeys('dense').flatMap((scenarioKey) => {
+      const scenario = getAd2Scenario(scenarioKey, 'dense');
+      if (!scenario) throw new Error(`Unknown dense scenario ${scenarioKey}`);
+      return scenario.steps
+        .filter((step) => step.processName != null)
+        .map((step) => ({
+          isBackground: scenarioKey.startsWith('bg-'),
+          processName: step.processName as string,
+        }));
+    });
+
+    for (const { isBackground, processName } of steps) {
+      (isBackground ? backgroundNames : cleanNames).add(processName);
+      const entry = frequency.get(processName) ?? { clean: 0, background: 0 };
+      entry[isBackground ? 'background' : 'clean'] += 1;
+      frequency.set(processName, entry);
+    }
+
+    expect(plan.alerts).toHaveLength(AD2_DENSE_TARGET_ALERTS);
+    expect(cleanNames.size).toBeGreaterThan(0);
+    expect(backgroundNames.size).toBeGreaterThan(0);
+
+    // The invariant that matters: no frequency threshold can separate the
+    // sides. Asserting non-overlap of the NAME sets is what fails when a
+    // background name is left unsuffixed and repeats across occurrences.
+    const shared = [...cleanNames].filter((name) => backgroundNames.has(name));
+    expect(shared).toEqual([]);
+
+    const cleanFrequencies = [...frequency.values()].filter((e) => e.clean > 0).map((e) => e.clean);
+    const backgroundFrequencies = [...frequency.values()]
+      .filter((e) => e.background > 0)
+      .map((e) => e.background);
+    // Both sides must reach into the same range, so no threshold on frequency
+    // alone splits them.
+    expect(Math.max(...cleanFrequencies)).toBeGreaterThanOrEqual(
+      Math.min(...backgroundFrequencies)
+    );
+  });
+
   it('does not let rule-name frequency separate target from noise', () => {
     // The last field that separated the sides: each clean/reference rule name
     // appeared exactly once (one chain each) while each background rule name

@@ -206,27 +206,69 @@ const readsAlertsIndex = (result: AgentEsqlResult): boolean =>
  * `WHERE` clause counts, and comments are stripped first so a marker mentioned
  * in a comment cannot pass either.
  *
- * This stays a text check rather than a predicate parse because the recorded
- * scoped queries spell the marker four different ways (`tags == "x"`,
+ * This stays a text check rather than a full predicate parse because the
+ * recorded scoped queries spell the marker four different ways (`tags == "x"`,
  * `tags LIKE "*x*"`, `QSTR("x")`, an OR-chain); all four put it inside a
- * `WHERE`, which is what the check requires. Residual limitation, stated
- * plainly: a `WHERE` that NEGATES the marker (`message != "<marker>"`) still
- * contains it in a restrictive clause and is accepted. Closing that needs a
- * real predicate evaluator, not a stricter regex.
+ * `WHERE`, which is what the check requires. It is not a bare substring test
+ * either: the marker must appear in a POSITIVE, RESTRICTIVE predicate, so two
+ * classes of unrestricted `WHERE` are rejected —
+ *
+ * - NEGATION: `WHERE tags != "<marker>"` contains the marker in a restrictive
+ *   clause but selects everything EXCEPT this run's documents.
+ * - TAUTOLOGY: `WHERE tags == "<marker>" OR true` selects the whole index.
+ *
+ * Both were accepted by the previous substring test, and both defeat the
+ * exact-population assertion this profile is built on: their rows are an
+ * unrelated population that then scored as a complete retrieval of this
+ * fixture.
+ *
+ * Residual limitation, stated plainly: this recognises the operator shapes the
+ * recorded queries and the reported payloads use, not ES|QL semantics. A
+ * marker reached through a function whose result is then negated, or a
+ * tautology spelled outside the recognised forms, still passes. Closing that
+ * needs a real predicate evaluator rather than a stricter text check.
  */
+const TAUTOLOGY_DISJUNCT = /^\s*(true|1\s*==?\s*1)\s*$/i;
+
+/** Whether the disjunct's marker literal sits behind a negation operator. */
+const isNegatedMarkerPredicate = (disjunct: string, marker: string): boolean => {
+  const markerIndex = disjunct.indexOf(marker);
+  if (markerIndex < 0) return false;
+
+  // `NOT tags == "<marker>"` — the negation leads the predicate, so it is not
+  // adjacent to the literal. Deliberately conservative: a disjunct that opens
+  // with NOT is treated as negated even if a later AND-branch is positive, and
+  // none of the recorded scoped shapes opens that way.
+  if (/^\s*NOT\b/i.test(disjunct)) return true;
+
+  // `tags != "<marker>"` / `tags <> "<marker>"` — the negation IS the operator
+  // immediately before the literal, modulo the opening quote and whitespace.
+  return /(!=|<>)\s*"?\s*$/.test(disjunct.slice(0, markerIndex));
+};
+
 const carriesRetrievalScope = (query: string | null, retrievalScope: string | null): boolean => {
   if (retrievalScope == null) return true;
   if (query == null) return false;
 
   const withoutComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 
-  return withoutComments.split('|').some((segment) =>
-    segment
+  return withoutComments.split('|').some((segment) => {
+    const whereBody = segment
       .split(/\bWHERE\b/i)
       .slice(1)
-      .join(' WHERE ')
-      .includes(retrievalScope)
-  );
+      .join(' WHERE ');
+    if (!whereBody.includes(retrievalScope)) return false;
+
+    // Split on ` OR ` only: a disjunct that is a literal tautology makes the
+    // whole predicate unrestricted no matter what the other branches say.
+    const disjuncts = whereBody.split(/\s+OR\s+/i);
+    if (disjuncts.some((disjunct) => TAUTOLOGY_DISJUNCT.test(disjunct))) return false;
+
+    return disjuncts.some(
+      (disjunct) =>
+        disjunct.includes(retrievalScope) && !isNegatedMarkerPredicate(disjunct, retrievalScope)
+    );
+  });
 };
 
 /**

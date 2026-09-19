@@ -40,14 +40,30 @@ export const buildDenseProfileLiveRetrievalExample = (
     question: `Run Attack Discovery by retrieving alerts with the marker ${runMarker} from the last 24 hours and return the validated discoveries.`,
     triageType: 'live-retrieval',
     expectedSkills: ['attack-discovery-generator'],
-    expectedToolPath: ['security.attack-discovery.run'],
+    // The retrieval tools are IN the path because this profile's whole point is
+    // the retrieval: `StrictTrajectory` scores
+    // `expectedPath.length / non-load-skill tool calls`, so a path holding only
+    // `run` scored a model that skipped retrieval and called `run` directly at
+    // 1.0 while scoring a correct scoped retrieval
+    // (`get_default_esql_query -> execute_esql -> run`) at 1/3 — the metric
+    // rewarded bypassing the behaviour under test. The golden live-retrieval
+    // example names the same three tools for the same reason.
+    expectedToolPath: [
+      'security.attack-discovery.get_default_esql_query',
+      'platform.core.execute_esql',
+      'security.attack-discovery.run',
+    ],
     // The scope the retrieval is counted under, not just the scope the question
     // asks for: a retrieval that does not carry the marker observes whatever the
     // shared index held, so its row count is not this fixture's population.
     retrievalScope: runMarker,
   },
   output: {
-    expectedToolPath: ['security.attack-discovery.run'],
+    expectedToolPath: [
+      'security.attack-discovery.get_default_esql_query',
+      'platform.core.execute_esql',
+      'security.attack-discovery.run',
+    ],
     expectedWorkflowStages: ['generation', 'validation'],
     // The model retrieves the whole seeded population (scoped by the marker in
     // `input.question`).
