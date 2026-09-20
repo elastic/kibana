@@ -19,7 +19,7 @@ import {
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useGetUrlParams } from '../../../hooks';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
-import { useMonitorFilters } from './use_monitor_filters';
+import { useMonitorFilters, useMonitorIdFilter } from './use_monitor_filters';
 
 const ALERT_STATUS_FIELD = 'kibana.alert.status';
 // See the matching `escapeKuery`-based clause in `use_overview_alerts_annotations.ts`
@@ -39,6 +39,10 @@ export function useOverviewAlertsCount({ from, to }: Props) {
   const { http } = useKibana<ClientPluginsStart>().services;
   const { locations, query: searchQuery } = useGetUrlParams();
   const alertsFilters = useMonitorFilters({ forAlerts: true });
+  // A `terms` query, same as the `alertsFilters` conversion below — see
+  // `useMonitorIdFilter` for why this can't just be another `UrlFilter` KQL
+  // clause the way the rest of `alertsFilters` is handled.
+  const monitorIdFilter = useMonitorIdFilter();
   // Spaces are a security boundary for alert data. `useKibanaSpace` reports
   // `loading: false` with `space: undefined` both before the first resolve
   // *and* if the lookup fails — checking `loading` alone would treat a failed
@@ -57,6 +61,7 @@ export function useOverviewAlertsCount({ from, to }: Props) {
         // recovery check), which can land outside the window a `kibana.alert.start`
         // inside it would still be counted for by the markers.
         { range: { 'kibana.alert.start': { gte: from, lte: to } } },
+        ...(monitorIdFilter ? [monitorIdFilter] : []),
         ...alertsFilters.map(
           (filter): estypes.QueryDslQueryContainer => ({
             terms: { [filter.field]: (filter.values ?? []).map(String) },
@@ -91,7 +96,15 @@ export function useOverviewAlertsCount({ from, to }: Props) {
       return fetchAlertsCount({ http, query, signal: abortCtrlRef.current.signal });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [http, from, to, JSON.stringify(alertsFilters), JSON.stringify(locations), searchQuery],
+    [
+      http,
+      from,
+      to,
+      JSON.stringify(alertsFilters),
+      JSON.stringify(monitorIdFilter),
+      JSON.stringify(locations),
+      searchQuery,
+    ],
     { loading: true }
   );
 

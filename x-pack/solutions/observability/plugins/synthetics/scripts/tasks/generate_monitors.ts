@@ -148,26 +148,34 @@ const request = async (method: string, path: string, data?: any) => {
 };
 
 const buildEsClient = () => {
-  try {
-    const config = readKibanaConfig();
-    const node = config.elasticsearch?.hosts;
-    if (node) {
-      const rawUser = config.elasticsearch?.username;
-      const esUsername = isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser;
-      const esPassword = config.elasticsearch?.password;
-      const verificationMode = config.elasticsearch?.ssl?.verificationMode;
-      return new Client({
-        node: Array.isArray(node) ? node[0] : node,
-        auth: esUsername && esPassword ? { username: esUsername, password: esPassword } : undefined,
-        tls: verificationMode === 'none' ? { rejectUnauthorized: false } : undefined,
-      });
+  const config = (() => {
+    try {
+      return readKibanaConfig();
+    } catch {
+      return {} as Record<string, any>;
     }
-  } catch {
-    // fall through
-  }
+  })();
+  const node =
+    process.env.ES_URL ??
+    config.elasticsearch?.hosts ??
+    config['elasticsearch.hosts'] ??
+    'http://localhost:9200';
+  const resolvedNode = Array.isArray(node) ? node[0] : node;
+  const rawUser =
+    process.env.ES_USERNAME ?? config.elasticsearch?.username ?? config['elasticsearch.username'];
+  const esUsername = isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser;
+  const esPassword =
+    process.env.ES_PASSWORD ??
+    config.elasticsearch?.password ??
+    config['elasticsearch.password'] ??
+    'changeme';
+  const verificationMode =
+    config.elasticsearch?.ssl?.verificationMode ?? config['elasticsearch.ssl.verificationMode'];
+  console.log(`  ES: ${resolvedNode}`);
   return new Client({
-    node: 'http://localhost:9200',
-    auth: { username: 'elastic', password: 'changeme' },
+    node: resolvedNode,
+    auth: { username: esUsername, password: esPassword },
+    tls: verificationMode === 'none' ? { rejectUnauthorized: false } : undefined,
   });
 };
 

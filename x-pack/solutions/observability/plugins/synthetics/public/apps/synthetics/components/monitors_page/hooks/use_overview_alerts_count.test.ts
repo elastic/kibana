@@ -28,11 +28,13 @@ const bucketsResponse = (buckets: Array<{ key: string; doc_count: number }>) => 
 describe('useOverviewAlertsCount', () => {
   const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
   const filtersSpy = jest.spyOn(filtersHook, 'useMonitorFilters');
+  const monitorIdFilterSpy = jest.spyOn(filtersHook, 'useMonitorIdFilter');
   const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
 
   beforeEach(() => {
     jest.clearAllMocks();
     filtersSpy.mockReturnValue([]);
+    monitorIdFilterSpy.mockReturnValue(undefined);
     paramSpy.mockReturnValue({} as any);
     spaceSpy.mockReturnValue({ loading: false, space: { id: 'default' } } as any);
     mockHttpPost.mockResolvedValue(bucketsResponse([]));
@@ -96,6 +98,24 @@ describe('useOverviewAlertsCount', () => {
         { terms: { 'kibana.space_ids': ['default'] } },
         { terms: { 'observer.geo.name': ['us-east'] } },
       ])
+    );
+  });
+
+  it('includes the statusFilter-scoped monitor.id terms query when present', async () => {
+    // A `terms` query, not a `UrlFilter`/KQL clause — see `useMonitorIdFilter`
+    // for why a status covering many monitors can't go through the same
+    // `alertsFilters`-to-KQL path as the other filters.
+    monitorIdFilterSpy.mockReturnValue({ terms: { 'monitor.id': ['id1', 'id2'] } });
+
+    renderHook(() => useOverviewAlertsCount(props));
+
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalled());
+
+    const [, requestArgs] = mockHttpPost.mock.calls[0];
+    const body = JSON.parse(requestArgs.body);
+
+    expect(body.query.bool.filter).toEqual(
+      expect.arrayContaining([{ terms: { 'monitor.id': ['id1', 'id2'] } }])
     );
   });
 

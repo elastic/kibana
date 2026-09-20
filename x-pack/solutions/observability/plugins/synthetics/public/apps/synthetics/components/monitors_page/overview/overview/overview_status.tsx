@@ -7,11 +7,13 @@
 
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiSpacer,
   EuiStat,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,10 +24,21 @@ import { clearOverviewStatusErrorAction } from '../../../../state/overview_statu
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks/use_url_params';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
+import { OverviewStatusDonut } from './overview_status_donut';
 
 function title(t?: number) {
   return t ?? '-';
 }
+
+const sliceColor = (
+  numberColor: string,
+  colors: { success: string; danger: string; warning: string; mediumShade: string }
+) => {
+  if (numberColor === 'success') return colors.success;
+  if (numberColor === 'danger') return colors.danger;
+  if (numberColor === 'warning') return colors.warning;
+  return colors.mediumShade;
+};
 
 export interface MonitorStatProps {
   dataTestSubj: string;
@@ -35,12 +48,27 @@ export interface MonitorStatProps {
   isClickable: boolean;
   onClickStat: () => void;
   tooltipContent?: string;
+  titleSize?: 's' | 'm';
 }
+
+export type OverviewStatusView = 'stats' | 'donut';
+
+const STATUS_VIEW_STORAGE_KEY = 'synthetics.overview.statusView';
+
+export const getStoredOverviewStatusView = (): OverviewStatusView => {
+  try {
+    return window.localStorage.getItem(STATUS_VIEW_STORAGE_KEY) === 'donut' ? 'donut' : 'stats';
+  } catch {
+    return 'stats';
+  }
+};
 
 const STATS_PER_ROW = 3;
 // Matches the "Pings over time" chart's height below, so the two panels read
 // as an even pair instead of this one collapsing tightly around its content.
 const STATS_AREA_HEIGHT = '180px';
+export const STATS_PANEL_MIN_WIDTH = 300;
+export const DONUT_PANEL_MIN_WIDTH = 400;
 
 export const MonitorStat = ({
   dataTestSubj,
@@ -50,29 +78,17 @@ export const MonitorStat = ({
   isClickable,
   onClickStat,
   tooltipContent,
+  titleSize = 'm',
 }: MonitorStatProps) => {
-  // Always the same flex structure (icon slot present but empty when there's
-  // no tooltip), so every stat's label sits at the same height/baseline —
-  // conditionally swapping between plain text and a flex-wrapped row shifted
-  // "Pending"/"Stale" (which have a tooltip) out of line with the rest.
-  const description = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>{statName}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {tooltipContent && <EuiIconTip type="question" content={tooltipContent} position="top" />}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   const statComponent = (
     <EuiStat
       css={{ textAlign: 'start' }}
       data-test-subj={dataTestSubj}
-      description={description}
+      description={statName}
       reverse
       title={statNo}
       titleColor={numberColor}
-      titleSize="m"
+      titleSize={titleSize}
     />
   );
   const stat = isClickable ? (
@@ -80,7 +96,11 @@ export const MonitorStat = ({
       color="text"
       data-test-subj={`${dataTestSubj}Btn`}
       onClick={onClickStat}
-      css={{ height: 'auto', blockSize: 'auto', '.euiButtonEmpty__content': { height: 'auto' } }}
+      // `contentProps` is `EuiButtonEmpty`'s own supported composition point
+      // for styling its internal content wrapper — not its private
+      // `.euiButtonEmpty__content` class name.
+      contentProps={{ css: { height: 'auto' } }}
+      css={{ height: 'auto', blockSize: 'auto' }}
     >
       {statComponent}
     </EuiButtonEmpty>
@@ -88,7 +108,20 @@ export const MonitorStat = ({
     statComponent
   );
 
-  return stat;
+  // The tooltip icon must stay outside the clickable button: nested inside
+  // it, a click/tap on the icon both bubbles up to change the status filter
+  // (often unmounting the tooltip mid-read) and is invalid nested-interactive
+  // markup for keyboard/screen-reader use.
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{stat}</EuiFlexItem>
+      {tooltipContent && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip type="question" content={tooltipContent} position="top" />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 };
 
 export function OverviewStatus({
@@ -96,18 +129,37 @@ export function OverviewStatus({
   hideTitle,
   areStatsClickable = false,
   extraStats = [],
+  onStatusViewChange,
 }: {
   titleAppend?: React.ReactNode;
   hideTitle?: boolean;
   areStatsClickable?: boolean;
   extraStats?: MonitorStatProps[];
+  onStatusViewChange?: (view: OverviewStatusView) => void;
 }) {
   const { statusFilter } = useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
   const { euiTheme } = useEuiTheme();
+  const [statusView, setStatusView] = useState<OverviewStatusView>(getStoredOverviewStatusView);
 
   const { status, error: statusError, loading } = useOverviewStatusState();
   const dispatch = useDispatch();
+
+  const onToggleStatusView = useCallback(() => {
+    setStatusView((current) => {
+      const next = current === 'donut' ? 'stats' : 'donut';
+      try {
+        window.localStorage.setItem(STATUS_VIEW_STORAGE_KEY, next);
+      } catch {
+        // Ignore quota / private-mode failures; the in-memory toggle still works.
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    onStatusViewChange?.(statusView);
+  }, [onStatusViewChange, statusView]);
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,
     down: status?.down,
@@ -271,35 +323,101 @@ export function OverviewStatus({
   // neighboring column's content width differs row to row.
   const numRows = Math.max(1, Math.ceil(allStats.length / STATS_PER_ROW));
   const columns = Math.ceil(allStats.length / numRows);
+  const isDonutView = statusView === 'donut';
+
+  const viewToggleLabel = isDonutView ? showStatsLabel : showDonutLabel;
+  const viewToggle = (
+    <EuiToolTip content={viewToggleLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="visPie"
+        color={isDonutView ? 'primary' : 'text'}
+        display={isDonutView ? 'fill' : 'empty'}
+        aria-pressed={isDonutView}
+        aria-label={viewToggleLabel}
+        data-test-subj="syntheticsOverviewStatusViewToggle"
+        onClick={onToggleStatusView}
+      />
+    </EuiToolTip>
+  );
 
   return (
     <EmbeddablePanelWrapper
       title={headingText}
       loading={loading}
-      titleAppend={titleAppend}
+      titleAppend={
+        titleAppend ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{viewToggle}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          viewToggle
+        )
+      }
       hideTitle={hideTitle}
+      panelCss={
+        isDonutView
+          ? {
+              paddingBottom: euiTheme.size.xs,
+            }
+          : undefined
+      }
     >
-      <EuiSpacer size="m" />
-      <div
-        css={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          justifyItems: 'start',
-          alignContent: 'space-around',
-          minHeight: STATS_AREA_HEIGHT,
-          paddingInlineStart: euiTheme.size.base,
-        }}
-      >
-        {allStats.map((props) => (
-          <MonitorStat {...props} key={props.dataTestSubj} />
-        ))}
-      </div>
+      {!isDonutView && <EuiSpacer size="m" />}
+      {isDonutView ? (
+        <div
+          css={{
+            width: '100%',
+            height: STATS_AREA_HEIGHT,
+            paddingInlineStart: euiTheme.size.s,
+          }}
+        >
+          <OverviewStatusDonut
+            slices={monitorStatData.map((stat) => ({
+              value: typeof stat.statNo === 'number' ? stat.statNo : 0,
+              label: stat.statName,
+              color: sliceColor(stat.numberColor, euiTheme.colors),
+              dataTestSubj: `${stat.dataTestSubj}Legend`,
+              isClickable: stat.isClickable,
+              onClick: stat.onClickStat,
+              tooltipContent: stat.tooltipContent,
+            }))}
+            total={monitorStatData.reduce(
+              (sum, stat) => sum + (typeof stat.statNo === 'number' ? stat.statNo : 0),
+              0
+            )}
+          />
+        </div>
+      ) : (
+        <div
+          css={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
+            justifyItems: 'start',
+            alignContent: 'space-around',
+            minHeight: STATS_AREA_HEIGHT,
+            paddingInlineStart: euiTheme.size.base,
+          }}
+        >
+          {allStats.map((props) => (
+            <MonitorStat {...props} key={props.dataTestSubj} />
+          ))}
+        </div>
+      )}
     </EmbeddablePanelWrapper>
   );
 }
 
 const headingText = i18n.translate('xpack.synthetics.overview.monitors.headingText', {
   defaultMessage: 'Monitors status',
+});
+
+const showDonutLabel = i18n.translate('xpack.synthetics.overview.status.view.donut', {
+  defaultMessage: 'Show status as donut chart',
+});
+
+const showStatsLabel = i18n.translate('xpack.synthetics.overview.status.view.stats', {
+  defaultMessage: 'Show status as stats',
 });
 
 const upDescription = i18n.translate('xpack.synthetics.overview.status.up.description', {

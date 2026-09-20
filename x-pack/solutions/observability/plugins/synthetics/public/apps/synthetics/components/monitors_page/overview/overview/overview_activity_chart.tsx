@@ -16,7 +16,7 @@ import { useUrlParams } from '../../../../hooks';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
 import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
-import { useMonitorFilters } from '../../hooks/use_monitor_filters';
+import { useMonitorFilters, useMonitorIdFilter } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
 import { useOverviewAlertsAnnotations } from '../../hooks/use_overview_alerts_annotations';
 import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
@@ -74,6 +74,16 @@ export const OverviewActivityChart = () => {
 
   const filters = useMonitorFilters({});
   const queryFilters = useMonitorQueryFilters();
+  // A `statusFilter` (or the schedules/AND-locations id-scoping) is expressed
+  // as DSL, not a `UrlFilter`/KQL clause — see `useMonitorIdFilter` — so it's
+  // merged into `dslFilters` (a `terms` query, unlike KQL's `field: (a or b or
+  // ...)`, doesn't add a boolean clause per matched monitor). This also
+  // reaches the alerts annotation layer, which doesn't ignore global filters.
+  const monitorIdFilter = useMonitorIdFilter();
+  const dslFilters = useMemo(
+    () => (monitorIdFilter ? [...(queryFilters ?? []), monitorIdFilter] : queryFilters),
+    [queryFilters, monitorIdFilter]
+  );
   const time = useMemo(() => ({ from, to }), [from, to]);
   const { dataTypesIndexPatterns, loading } = useOverviewDataViewIndexPatterns();
 
@@ -118,7 +128,7 @@ export const OverviewActivityChart = () => {
           customHeight={ACTIVITY_CHART_HEIGHT}
           legendIsVisible={true}
           legendPosition={Position.Right}
-          dslFilters={queryFilters}
+          dslFilters={dslFilters}
           dataTypesIndexPatterns={dataTypesIndexPatterns}
           annotationLayers={annotationLayers}
           onBrushEnd={onBrushEnd}

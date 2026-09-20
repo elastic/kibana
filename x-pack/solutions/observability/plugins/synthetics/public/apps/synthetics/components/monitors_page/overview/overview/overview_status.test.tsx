@@ -19,6 +19,7 @@ describe('OverviewStatus', () => {
   let updateUrlParamsMock: jest.Mock;
 
   beforeEach(() => {
+    window.localStorage.clear();
     useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
     useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
     updateUrlParamsMock = jest.fn();
@@ -76,5 +77,57 @@ describe('OverviewStatus', () => {
 
     expect(getByTestId('syntheticsOverviewUp')).toBeInTheDocument();
     expect(queryByTestId('syntheticsOverviewUpBtn')).not.toBeInTheDocument();
+  });
+
+  it('toggles between stats and donut views', () => {
+    const { getByTestId, queryByTestId } = render(<OverviewStatus areStatsClickable />);
+
+    expect(queryByTestId('syntheticsOverviewStatusDonut')).not.toBeInTheDocument();
+
+    fireEvent.click(getByTestId('syntheticsOverviewStatusViewToggle'));
+
+    expect(getByTestId('syntheticsOverviewStatusDonut')).toBeInTheDocument();
+    expect(queryByTestId('syntheticsOverviewUp')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsOverviewUpLegend')).toBeInTheDocument();
+    expect(getByTestId('syntheticsOverviewDownLegend')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('syntheticsOverviewStatusViewToggle'));
+
+    expect(queryByTestId('syntheticsOverviewStatusDonut')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsOverviewUp')).toBeInTheDocument();
+  });
+
+  it('keeps the Pending tooltip icon outside the clickable button', () => {
+    // Nested inside the button, a click/tap on the icon would both bubble up
+    // (changing the status filter) and be invalid nested-interactive markup
+    // for keyboard/screen-reader use.
+    jest.spyOn(overviewStatusHook, 'useOverviewStatusState').mockReturnValue({
+      status: { up: 2, down: 1, pending: 1, stale: 0, disabledCount: 0 } as any,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+      total: 0,
+    } as any);
+
+    const { getByTestId } = render(<OverviewStatus areStatsClickable />);
+
+    const pendingButton = getByTestId('xpack.uptime.synthetics.overview.status.pendingBtn');
+    expect(pendingButton.querySelector('button')).not.toBeInTheDocument();
+  });
+
+  it('filters from the donut legend without showing stats', () => {
+    const { getByTestId, queryByTestId } = render(<OverviewStatus areStatsClickable />);
+
+    fireEvent.click(getByTestId('syntheticsOverviewStatusViewToggle'));
+
+    expect(queryByTestId('syntheticsOverviewUp')).not.toBeInTheDocument();
+
+    fireEvent.click(getByTestId('syntheticsOverviewUpLegend'));
+
+    expect(updateUrlParamsMock).toHaveBeenCalledWith({
+      statusFilter: 'up',
+    });
   });
 });

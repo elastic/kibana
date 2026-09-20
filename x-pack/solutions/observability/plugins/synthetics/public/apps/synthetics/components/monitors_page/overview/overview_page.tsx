@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
@@ -29,7 +29,12 @@ import { useOverviewStatus } from '../hooks/use_overview_status';
 import { useSyncOverviewDateRange } from '../common/use_sync_overview_date_range';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
-import { OverviewStatus } from './overview/overview_status';
+import {
+  DONUT_PANEL_MIN_WIDTH,
+  getStoredOverviewStatusView,
+  OverviewStatus,
+  STATS_PANEL_MIN_WIDTH,
+} from './overview/overview_status';
 import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
@@ -61,6 +66,7 @@ export const OverviewPage: React.FC = () => {
 
   const view = useSelector(selectOverviewView);
   const activityStats = useOverviewActivityStats();
+  const [statusView, setStatusView] = useState(getStoredOverviewStatusView);
 
   const dispatch = useDispatch();
 
@@ -179,8 +185,17 @@ export const OverviewPage: React.FC = () => {
       {hasMonitors ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={false} css={{ minWidth: 300 }}>
-              <OverviewStatus extraStats={activityStats} areStatsClickable />
+            <EuiFlexItem
+              grow={false}
+              css={{
+                minWidth: statusView === 'donut' ? DONUT_PANEL_MIN_WIDTH : STATS_PANEL_MIN_WIDTH,
+              }}
+            >
+              <OverviewStatus
+                extraStats={activityStats}
+                areStatsClickable
+                onStatusViewChange={setStatusView}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={1} css={{ minWidth: 500 }}>
               <OverviewActivityChart />

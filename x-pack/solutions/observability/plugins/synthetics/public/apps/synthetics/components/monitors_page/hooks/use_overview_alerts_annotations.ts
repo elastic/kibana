@@ -30,15 +30,16 @@ const kqlValuesClause = (field: string, values: Array<string | number>): string 
 };
 
 // The search box's free-text query already scopes the ping/error series (via
-// `useMonitorQueryFilters`'s DSL `dslFilters`, which doesn't reach annotation
-// layers — they default to `ignoreGlobalFilters: true`) and the monitor grid,
-// but nothing scoped the alert markers to it. Alert docs don't carry the full
-// multi-field set `getQueryFilters` searches on the ping index (e.g. `hosts`,
-// `urls`), so this matches on `monitor.name` alone rather than risk a KQL
-// clause referencing a field that doesn't exist on this data view. Left
-// unquoted (with `escapeKuery`, not `escapeQuotes`) so the `*` wildcards
-// still work as substring matches — a quoted KQL literal treats `*` as a
-// literal character rather than a wildcard.
+// `useMonitorQueryFilters`'s DSL `dslFilters`), and although this layer now
+// also receives that same `dslFilters` (see `ignoreGlobalFilters: false`
+// below), its `query_string` clause searches ping-only fields (`hosts`,
+// `urls`, etc.) that don't exist on the alerts data view — a harmless no-op
+// there rather than a real scope. This clause is this layer's *own* free-text
+// scoping, matching on `monitor.name` alone since alert docs don't carry the
+// full multi-field set `getQueryFilters` searches. Left unquoted (with
+// `escapeKuery`, not `escapeQuotes`) so the `*` wildcards still work as
+// substring matches — a quoted KQL literal treats `*` as a literal character
+// rather than a wildcard.
 const kqlSearchClause = (query: string): string => `monitor.name: *${escapeKuery(query)}*`;
 
 /**
@@ -116,7 +117,21 @@ export function useOverviewAlertsAnnotations(): AnnotationLayerConfig[] | undefi
       extraFields: ['monitor.name', 'kibana.alert.reason', 'kibana.alert.duration.us'],
     };
 
-    return [{ dataView: alertsDataView, annotations: [annotation] }];
+    return [
+      {
+        dataView: alertsDataView,
+        annotations: [annotation],
+        // Lets the chart's `dslFilters` (notably the `statusFilter`'s
+        // `terms` clause on `monitor.id` — see `useMonitorIdFilter`) reach
+        // this layer too, instead of the default `ignoreGlobalFilters: true`.
+        // The free-text search clause also included there targets ping-only
+        // fields (`hosts`, `urls`, etc.) that don't exist on this data view;
+        // `query_string` treats an unmapped field as a non-match rather than
+        // erroring, so it's a harmless no-op here — this layer's own
+        // `kqlSearchClause` above already scopes free text for alerts.
+        ignoreGlobalFilters: false,
+      },
+    ];
   }, [alertsDataView, kqlClauses, euiTheme.colors.accent, spaceReady]);
 }
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
@@ -64,20 +65,19 @@ const idsForStatusFilter = (
   }
 };
 
-export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFilter[] => {
-  const { space } = useKibanaSpace();
-  const { locations, monitorTypes, tags, projects, schedules, statusFilter, useLogicalAndFor } =
-    useGetUrlParams();
+// The `monitor.id` scoping (status filter, or the schedules/AND-locations
+// branch's `allIds`) is deliberately kept out of `useMonitorFilters`'s
+// `UrlFilter[]` output and expressed as DSL here instead. `UrlFilter`s get
+// serialized to a KQL string (`urlFiltersToKueryString`, or this plugin's own
+// `kqlValuesClause`), and KQL's `field: ("a" or "b" or ...)` compiles to one
+// `bool.should` clause *per value* — for a status covering more monitors than
+// Elasticsearch's boolean-clause limit (commonly 1024), that errors instead of
+// rendering. A `terms` query has no such per-value clause cost.
+export const useMonitorIdFilter = (): estypes.QueryDslQueryContainer | undefined => {
+  const { locations, schedules, statusFilter, useLogicalAndFor } = useGetUrlParams();
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const allIds = overviewStatus?.allIds ?? [];
   const statusIds = idsForStatusFilter(overviewStatus, statusFilter);
-  // Applied in every branch below — omitting it here (as the schedules/AND-locations
-  // branch previously did) would leave a `monitor.id`-only filter, which for
-  // alerts is not itself a space boundary: the alerts-as-data index isn't
-  // guaranteed to scope by space just because a `monitor.id` value matches.
-  const spaceFilter: UrlFilter[] = space
-    ? [{ field: forAlerts ? 'kibana.space_ids' : 'meta.space_id', values: [space.id] }]
-    : [];
 
   // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
   // We need to rely on monitor.id also for locations, because each heartbeat data only contains one location
@@ -87,16 +87,37 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
     // schedule or (AND-ed) location filter is also active.
     const ids = statusIds ? allIds.filter((id) => statusIds.includes(id)) : allIds;
     // If ids is empty we return a fixed non-matching id just to not get any result.
-    return [
-      { field: 'monitor.id', values: ids.length ? ids : [NO_MATCHING_MONITOR_ID] },
-      ...spaceFilter,
-    ];
+    return { terms: { 'monitor.id': ids.length ? ids : [NO_MATCHING_MONITOR_ID] } };
+  }
+
+  if (statusIds) {
+    return { terms: { 'monitor.id': statusIds.length ? statusIds : [NO_MATCHING_MONITOR_ID] } };
+  }
+
+  return undefined;
+};
+
+export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFilter[] => {
+  const { space } = useKibanaSpace();
+  const { locations, monitorTypes, tags, projects, schedules, useLogicalAndFor } =
+    useGetUrlParams();
+  // Applied in every branch below — omitting it here (as the schedules/AND-locations
+  // branch previously did) would leave nothing else to scope by, which for
+  // alerts is not itself a space boundary: the alerts-as-data index isn't
+  // guaranteed to scope by space just because a `monitor.id` value matches.
+  const spaceFilter: UrlFilter[] = space
+    ? [{ field: forAlerts ? 'kibana.space_ids' : 'meta.space_id', values: [space.id] }]
+    : [];
+
+  // The schedules/AND-locations branch previously replaced every other filter
+  // with a `monitor.id`-only one (`allIds` already reflects those constraints
+  // server-side); that scoping now comes from `useMonitorIdFilter` instead, so
+  // this branch only has the space filter left to contribute.
+  if (!isEmpty(schedules) || (!isEmpty(locations) && useLogicalAndFor?.includes('locations'))) {
+    return spaceFilter;
   }
 
   return [
-    ...(statusIds
-      ? [{ field: 'monitor.id', values: statusIds.length ? statusIds : [NO_MATCHING_MONITOR_ID] }]
-      : []),
     ...(projects?.length ? [{ field: 'monitor.project.id', values: getValues(projects) }] : []),
     ...(monitorTypes?.length ? [{ field: 'monitor.type', values: getValues(monitorTypes) }] : []),
     ...createFiltersForField({
