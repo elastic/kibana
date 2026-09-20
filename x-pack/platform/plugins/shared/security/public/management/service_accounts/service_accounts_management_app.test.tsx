@@ -40,6 +40,7 @@ describe('serviceAccountsManagementApp', () => {
     });
 
     expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'Service accounts' }]);
+    expect(coreStartMock.security.serviceAccounts.canCreate).toHaveBeenCalledTimes(1);
     expect(element).toHaveTextContent('Service Accounts Page');
 
     unmount();

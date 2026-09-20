@@ -20,7 +20,7 @@ describe('ServiceAccountsEmptyPrompt', () => {
 
     renderWithI18n(
       <EuiProvider>
-        <ServiceAccountsEmptyPrompt onCreateAccount={onCreateAccount} />
+        <ServiceAccountsEmptyPrompt canCreate onCreateAccount={onCreateAccount} />
       </EuiProvider>
     );
 
@@ -32,5 +32,16 @@ describe('ServiceAccountsEmptyPrompt', () => {
     await user.click(screen.getByTestId('serviceAccountsEmptyPromptCreateButton'));
 
     expect(onCreateAccount).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer account creation without the save capability', () => {
+    renderWithI18n(
+      <EuiProvider>
+        <ServiceAccountsEmptyPrompt canCreate={false} onCreateAccount={jest.fn()} />
+      </EuiProvider>
+    );
+
+    expect(screen.getByRole('heading', { name: 'No service accounts available' })).toBeVisible();
+    expect(screen.queryByTestId('serviceAccountsEmptyPromptCreateButton')).not.toBeInTheDocument();
   });
 });

@@ -13,10 +13,12 @@ import { i18n } from '@kbn/i18n';
 import serviceAccountsEmptyIllustration from './assets/service_accounts_empty.svg';
 
 export interface ServiceAccountsEmptyPromptProps {
+  canCreate: boolean;
   onCreateAccount: () => void;
 }
 
 export const ServiceAccountsEmptyPrompt = ({
+  canCreate,
   onCreateAccount,
 }: ServiceAccountsEmptyPromptProps) => (
   <EuiEmptyPrompt
@@ -44,15 +46,17 @@ export const ServiceAccountsEmptyPrompt = ({
       </p>
     }
     actions={
-      <EuiButton
-        fill
-        onClick={onCreateAccount}
-        data-test-subj="serviceAccountsEmptyPromptCreateButton"
-      >
-        {i18n.translate('xpack.security.management.serviceAccounts.emptyPrompt.createButton', {
-          defaultMessage: 'Create account',
-        })}
-      </EuiButton>
+      canCreate ? (
+        <EuiButton
+          fill
+          onClick={onCreateAccount}
+          data-test-subj="serviceAccountsEmptyPromptCreateButton"
+        >
+          {i18n.translate('xpack.security.management.serviceAccounts.emptyPrompt.createButton', {
+            defaultMessage: 'Create account',
+          })}
+        </EuiButton>
+      ) : undefined
     }
   />
 );

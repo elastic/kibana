@@ -10,22 +10,39 @@ import { screen } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ServiceAccountsPage } from './service_accounts_page';
 
 describe('ServiceAccountsPage', () => {
-  it('starts account creation from the page action', async () => {
-    const onCreateAccount = jest.fn();
-
+  const renderPage = (canCreate: boolean, onCreateAccount = jest.fn()) => {
     renderWithI18n(
       <EuiProvider>
-        <ServiceAccountsPage onCreateAccount={onCreateAccount} />
+        <MockAppHeaderProvider>
+          <ServiceAccountsPage canCreate={canCreate} onCreateAccount={onCreateAccount} />
+        </MockAppHeaderProvider>
       </EuiProvider>
     );
 
-    await user.click(screen.getByTestId('serviceAccountsPageCreateButton'));
+    return onCreateAccount;
+  };
+
+  it('starts account creation from the page action', async () => {
+    const onCreateAccount = renderPage(true);
+
+    await user.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
     expect(onCreateAccount).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('serviceAccountsEmptyPromptCreateButton')).toBeVisible();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('hides create actions without the save capability', async () => {
+    renderPage(false);
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
+
+    expect(screen.queryByTestId('serviceAccountsPageCreateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceAccountsEmptyPromptCreateButton')).not.toBeInTheDocument();
   });
 });

@@ -44,6 +44,7 @@ export const serviceAccountsManagementApp = Object.freeze({
           getStartServices(),
           import('./service_accounts_page'),
         ]);
+        const canCreate = coreStart.security.serviceAccounts.canCreate();
 
         render(
           coreStart.rendering.addContext(
@@ -53,7 +54,10 @@ export const serviceAccountsManagementApp = Object.freeze({
               onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
               <Breadcrumb text={title} href="/">
-                <ServiceAccountsPage onCreateAccount={() => history.push('/create')} />
+                <ServiceAccountsPage
+                  canCreate={canCreate}
+                  onCreateAccount={() => history.push('/create')}
+                />
               </Breadcrumb>
             </Providers>
           ),

@@ -238,6 +238,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
               { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
+              { link: 'management:service_accounts', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
