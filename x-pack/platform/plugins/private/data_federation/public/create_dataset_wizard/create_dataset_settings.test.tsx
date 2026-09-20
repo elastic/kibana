@@ -216,11 +216,11 @@ describe('CreateDatasetAdditionalSettings', () => {
   });
 
   it('shows parquet common and advanced settings when parquet is selected', () => {
-    const { getByTestId } = renderAdditionalSettings('parquet');
+    const { getByTestId, queryByTestId } = renderAdditionalSettings('parquet');
 
-    expect(getByTestId('createDatasetWizardCommonSettings')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSharedCommonSettings')).toBeInTheDocument();
-    expect(getByTestId('createDatasetParquetCommonSettings')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetWizardCommonSettings')).toBeNull();
+    expect(queryByTestId('createDatasetSharedCommonSettings')).toBeNull();
+    expect(queryByTestId('createDatasetParquetCommonSettings')).toBeNull();
 
     expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();

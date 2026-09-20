@@ -140,23 +140,32 @@ export function CreateDatasetAdditionalSettings({
     ? FORMAT_ADVANCED_SETTING_COMPONENTS[format]
     : undefined;
 
+  // Common settings should only show if there are actual common settings for this format.
+  // When no format is selected, keep the sections visible so users know where settings live.
+  const hasCommonSettingsForFormat = format ? FORMAT_HAS_COMMON_SETTINGS[format] : true;
+  const showCommonSettings = format ? hasCommonSettingsForFormat : true;
+
   return (
     <>
-      <EuiAccordion
-        id="createDatasetWizardCommonSettings"
-        data-test-subj="createDatasetWizardCommonSettings"
-        buttonContent={
-          <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-            {createDatasetWizardStrings.commonSettingsSectionTitle}
-          </h4>
-        }
-        initialIsOpen={true}
-        paddingSize="m"
-      >
-        <SharedCommonSettings control={control} />
-        {FormatCommonSettingsComponent ? <FormatCommonSettingsComponent control={control} /> : null}
-      </EuiAccordion>
-      <EuiSpacer size="m" />
+      {showCommonSettings ? (
+        <EuiAccordion
+          id="createDatasetWizardCommonSettings"
+          data-test-subj="createDatasetWizardCommonSettings"
+          buttonContent={
+            <h4 style={{ margin: 0, fontWeight: 'bold' }}>
+              {createDatasetWizardStrings.commonSettingsSectionTitle}
+            </h4>
+          }
+          initialIsOpen={true}
+          paddingSize="m"
+        >
+          <SharedCommonSettings control={control} />
+          {FormatCommonSettingsComponent ? (
+            <FormatCommonSettingsComponent control={control} />
+          ) : null}
+        </EuiAccordion>
+      ) : null}
+      {showCommonSettings ? <EuiSpacer size="m" /> : null}
       <EuiAccordion
         id="createDatasetWizardAdvancedSettings"
         data-test-subj="createDatasetWizardAdvancedSettings"
@@ -165,7 +174,7 @@ export function CreateDatasetAdditionalSettings({
             {createDatasetWizardStrings.advancedSettingsSectionTitle}
           </h4>
         }
-        initialIsOpen={false}
+        initialIsOpen={format ? !hasCommonSettingsForFormat : false}
         paddingSize="m"
       >
         <SharedAdvancedSettings control={control} />
@@ -369,6 +378,14 @@ function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues>
 function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return null;
 }
+
+const FORMAT_HAS_COMMON_SETTINGS: Record<Exclude<DatasetFormatFormValue, ''>, boolean> = {
+  csv: true,
+  tsv: true,
+  ndjson: true,
+  parquet: false,
+  orc: false,
+};
 
 const FORMAT_COMMON_SETTING_COMPONENTS: Record<
   Exclude<DatasetFormatFormValue, ''>,
