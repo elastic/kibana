@@ -801,4 +801,74 @@ describe('WatchDetailPage', () => {
 
     expect(arrowFor(first.id, true)).toBeInTheDocument();
   });
+
+  it('drops an invalid trigger draft when navigating to another Watch that shares the Worker', async () => {
+    // `/watches/:watchId` keeps this page mounted across parameter-only navigation and each
+    // Worker section is keyed by `worker.id`, so a Worker on both Watches keeps its mounted
+    // ScheduleIntervalField. A draft flagged invalid on the first Watch must not follow the
+    // analyst to the second one and hold its Save button hostage.
+    // Attack Discovery is the only schedule-driven Worker, so it is the one with a trigger.
+    const shared = floorWorkers[1];
+    // Keep both Watches at the same member count. `isMultiWorker` switches WorkerSettingsPanel
+    // between its accordion and plain subtree, and that swap would remount the field on its own —
+    // masking whether the page actually clears the draft.
+    const onBothWatches = [
+      ...floorWorkers.map((worker) =>
+        worker.id === shared.id
+          ? { ...worker, watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID, SYSTEM_SECURITY_WATCH_HUNT_ID] }
+          : worker
+      ),
+      { ...huntWorker, watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID] },
+    ];
+    mockUseWorkers.mockReturnValue({
+      data: { workers: onBothWatches },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+
+    const history = createMemoryHistory({
+      initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
+    });
+    render(
+      <Router history={history}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </Router>
+    );
+
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
+    fireEvent.change(amount, { target: { value: '1.9' } });
+    fireEvent.blur(amount);
+
+    expect(amount).toBeInvalid();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    act(() => {
+      history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
+    });
+
+    // The destination Watch starts clean: the flagged amount is gone and Save is not held down
+    // by a draft the analyst abandoned on the previous Watch.
+    // The field is the same DOM node across this navigation (the section stays mounted), so this
+    // asserts the page cleared the draft rather than React having remounted the control.
+    const afterNav = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
+    expect(afterNav).toBe(amount);
+    expect(afterNav).not.toBeInvalid();
+    expect(screen.queryByTestId('alertZeroWatchSettingsInvalid')).not.toBeInTheDocument();
+  });
 });

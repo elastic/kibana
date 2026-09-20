@@ -137,6 +137,12 @@ export const WatchDetailPage: React.FC = () => {
 
   useEffect(() => {
     setCollapsedWorkerIds(new Set());
+    // A Worker on both Watches keeps its section mounted across parameter-only navigation, so an
+    // invalid trigger draft would otherwise follow the analyst and hold the next Watch's Save
+    // button down. Drop the flags and bump the reset key so those controls re-read their settings.
+    setInvalidTriggerWorkerIds(new Set());
+    setSaveBlockedByInvalidDraft(false);
+    setDraftResetKey((key) => key + 1);
   }, [watchId]);
 
   const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
