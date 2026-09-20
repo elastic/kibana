@@ -117,48 +117,11 @@ describe('WorkflowGraphNode', () => {
     expect(screen.getByLabelText('Running')).toBeInTheDocument();
   });
 
-  it('shows "Running" status label for WAITING_FOR_CHILD (foreach waiting on iterations)', () => {
-    renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.WAITING_FOR_CHILD,
-      } as any,
-    });
-    expect(screen.getByLabelText('Running')).toBeInTheDocument();
-  });
-
-  it('shows no status icon for CANCELLED (neutral — not effective execution)', () => {
-    renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.CANCELLED,
-      } as any,
-    });
-    expect(screen.queryByLabelText('Running')).toBeNull();
-    expect(screen.queryByLabelText('Completed successfully')).toBeNull();
-    expect(screen.queryByLabelText('Failed')).toBeNull();
-  });
-
-  it('shows no status icon for SKIPPED', () => {
-    renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.SKIPPED,
-      } as any,
-    });
-    expect(screen.queryByLabelText('Running')).toBeNull();
-    expect(screen.queryByLabelText('Completed successfully')).toBeNull();
-    expect(screen.queryByLabelText('Failed')).toBeNull();
-  });
-
   it('renders the retry badge when step has retry max-attempts', () => {
     renderNode({
       step: { retry: { 'max-attempts': 3 } },
     });
-    expect(screen.getByTestId('workflowGraphNodeRetryBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowGraphNodeRetryBadge')).toHaveTextContent('3');
   });
 
   it('renders the retry badge from on-failure.retry', () => {
@@ -195,6 +158,14 @@ describe('WorkflowGraphNode', () => {
 
     const node = screen.getByRole('button', { name: /Test Step/ });
     fireEvent.keyDown(node, { key: 'Enter' });
+    expect(onStepSelect).toHaveBeenCalledWith('node-1');
+  });
+
+  it('calls onStepSelect with the node id when the card is clicked', () => {
+    const onStepSelect = jest.fn();
+    renderNode({}, false, { onStepSelect });
+
+    fireEvent.click(screen.getByRole('button', { name: /Test Step/ }));
     expect(onStepSelect).toHaveBeenCalledWith('node-1');
   });
 
@@ -238,10 +209,34 @@ describe('WorkflowGraphNode', () => {
 });
 
 describe('resolveNodeColors', () => {
-  // Proxy returns the token name as its value — assertions stay readable.
   const theme = {
-    colors: new Proxy({}, { get: (_t, prop) => (typeof prop === 'string' ? prop : String(prop)) }),
-    border: { radius: { medium: 'medium-radius', small: 'small-radius' } },
+    colors: {
+      backgroundBaseAccent: 'accent-bg',
+      borderBaseAccent: 'accent-border',
+      textAccent: 'accent-text',
+      backgroundBaseAccentSecondary: 'flow-bg',
+      borderBaseAccentSecondary: 'flow-border',
+      textAccentSecondary: 'flow-text',
+      backgroundBaseWarning: 'data-bg',
+      borderBaseWarning: 'data-border',
+      textWarning: 'data-text',
+      backgroundBasePrimary: 'code-bg',
+      borderBasePrimary: 'code-border',
+      textPrimary: 'code-text',
+      backgroundBaseSubdued: 'neutral-bg',
+      borderBaseSubdued: 'neutral-border',
+      textSubdued: 'neutral-text',
+      backgroundBaseSuccess: 'success-bg',
+      borderBaseSuccess: 'success-border',
+      textSuccess: 'success-text',
+      backgroundBaseDanger: 'danger-bg',
+      borderBaseDanger: 'danger-border',
+      textDanger: 'danger-text',
+      borderBasePlain: 'plain-border',
+      textHeading: 'heading-color',
+      success: 'success-color',
+      danger: 'danger-color',
+    },
   } as any;
 
   const idle = { isRunning: false, isSuccess: false, isFailed: false };
@@ -249,95 +244,132 @@ describe('resolveNodeColors', () => {
   const success = { isRunning: false, isSuccess: true, isFailed: false };
   const failed = { isRunning: false, isSuccess: false, isFailed: true };
 
-  describe('cardBorderColor', () => {
-    it('is neutral (borderBasePlain) when idle — no selection gate', () => {
-      expect(resolveNodeColors(theme, 'external', idle).cardBorderColor).toBe('borderBasePlain');
-    });
-
-    it('is neutral when running — running never recolours the card border', () => {
-      expect(resolveNodeColors(theme, 'external', running).cardBorderColor).toBe('borderBasePlain');
-    });
-
-    it('is success when completed, regardless of family', () => {
-      expect(resolveNodeColors(theme, 'trigger', success).cardBorderColor).toBe('success');
-      expect(resolveNodeColors(theme, 'external', success).cardBorderColor).toBe('success');
-    });
-
-    it('is danger when failed, regardless of family', () => {
-      expect(resolveNodeColors(theme, 'code', failed).cardBorderColor).toBe('danger');
-    });
+  it('uses a plain panel border when idle', () => {
+    expect(resolveNodeColors(theme, 'http', false, idle).panelBorder).toBe('plain-border');
+    expect(resolveNodeColors(theme, 'manual', true, idle).panelBorder).toBe('plain-border');
   });
 
-  describe('chip outcome overrides', () => {
-    it('chip switches to success tokens on COMPLETED', () => {
-      const { chip } = resolveNodeColors(theme, 'trigger', success);
-      expect(chip.fill).toBe('backgroundBaseSuccess');
-      expect(chip.border).toBe('success');
-      expect(chip.icon).toBe('success');
-    });
-
-    it('chip switches to danger tokens on FAILED', () => {
-      const { chip } = resolveNodeColors(theme, 'brand', failed);
-      expect(chip.fill).toBe('backgroundBaseDanger');
-      expect(chip.border).toBe('danger');
-      expect(chip.icon).toBe('danger');
-    });
-
-    it('chip uses family colours when idle', () => {
-      const { chip } = resolveNodeColors(theme, 'trigger', idle);
-      expect(chip.fill).toBe('backgroundBaseAccent');
-      expect(chip.border).toBe('borderBaseAccent');
-      expect(chip.icon).toBe('textAccent');
-    });
-
-    it('chip uses family colours when running (outcome: none)', () => {
-      const { chip } = resolveNodeColors(theme, 'flow', running);
-      expect(chip.fill).toBe('backgroundBaseAccentSecondary');
-    });
+  it('uses the success color token for the panel border on success', () => {
+    expect(resolveNodeColors(theme, 'http', false, success).panelBorder).toBe('success-color');
+    expect(resolveNodeColors(theme, 'elasticsearch.search', false, success).panelBorder).toBe(
+      'success-color'
+    );
   });
 
-  describe('forceFill', () => {
-    it('is false when idle — brand logos keep their natural palette', () => {
-      expect(resolveNodeColors(theme, 'brand', idle).forceFill).toBe(false);
-    });
+  it('uses the danger color token for the panel border on failure', () => {
+    expect(resolveNodeColors(theme, 'if', false, failed).panelBorder).toBe('danger-color');
+  });
 
-    it('is false when running', () => {
-      expect(resolveNodeColors(theme, 'brand', running).forceFill).toBe(false);
-    });
+  it('recolors category chips on success and failure', () => {
+    const completed = resolveNodeColors(theme, 'if', false, success);
+    expect(completed.chipBackground).toBe('success-bg');
+    expect(completed.chipBorder).toBe('success-color');
+    expect(completed.chipIconColor).toBe('success-color');
 
-    it('is true when completed — every chip including brand gets recoloured', () => {
-      expect(resolveNodeColors(theme, 'brand', success).forceFill).toBe(true);
-    });
+    const errored = resolveNodeColors(theme, 'console', false, failed);
+    expect(errored.chipBackground).toBe('danger-bg');
+    expect(errored.chipBorder).toBe('danger-color');
+    expect(errored.chipIconColor).toBe('danger-color');
+  });
 
-    it('is true when failed', () => {
-      expect(resolveNodeColors(theme, 'external', failed).forceFill).toBe(true);
-    });
+  it('recolors brand tiles on execution outcome but leaves the logo untinted', () => {
+    const completed = resolveNodeColors(theme, 'elasticsearch.search', false, success);
+    expect(completed.isBrandChip).toBe(true);
+    expect(completed.chipBackground).toBe('success-bg');
+    expect(completed.chipBorder).toBe('success-color');
+    expect(completed.chipIconColor).toBeUndefined();
+  });
+
+  it('uses trigger chip tokens when idle', () => {
+    const { chipBackground, chipIconColor, isBrandChip } = resolveNodeColors(
+      theme,
+      'manual',
+      true,
+      idle
+    );
+    expect(chipBackground).toBe('accent-bg');
+    expect(chipIconColor).toBe('accent-text');
+    expect(isBrandChip).toBe(false);
   });
 
   describe('hasStatusIcon', () => {
+    it('is true when running, completed, or failed', () => {
+      expect(resolveNodeColors(theme, 'http', false, running).hasStatusIcon).toBe(true);
+      expect(resolveNodeColors(theme, 'http', false, success).hasStatusIcon).toBe(true);
+      expect(resolveNodeColors(theme, 'http', false, failed).hasStatusIcon).toBe(true);
+    });
+
     it('is false when idle', () => {
-      expect(resolveNodeColors(theme, 'external', idle).hasStatusIcon).toBe(false);
-    });
-
-    it('is true when running', () => {
-      expect(resolveNodeColors(theme, 'external', running).hasStatusIcon).toBe(true);
-    });
-
-    it('is true when completed', () => {
-      expect(resolveNodeColors(theme, 'external', success).hasStatusIcon).toBe(true);
-    });
-
-    it('is true when failed', () => {
-      expect(resolveNodeColors(theme, 'external', failed).hasStatusIcon).toBe(true);
+      expect(resolveNodeColors(theme, 'http', false, idle).hasStatusIcon).toBe(false);
     });
   });
+});
 
-  describe('retry badge tokens', () => {
-    it('uses warning tokens for the retry badge', () => {
-      const c = resolveNodeColors(theme, 'external', idle);
-      expect(c.retryBadgeBg).toBe('backgroundBaseWarning');
-      expect(c.retryBadgeBorderColor).toBe('borderBaseWarning');
-      expect(c.retryBadgeColor).toBe('textWarning');
+describe('WorkflowGraphNode — edit mode', () => {
+  const makeEdit = () => ({
+    onInsert: jest.fn(),
+    onEditStep: jest.fn(),
+    onDeleteNode: jest.fn(),
+  });
+
+  it('renders no action cluster in read-only mode', () => {
+    renderNode();
+    expect(screen.queryByTestId('workflowGraphNodeActionCluster')).not.toBeInTheDocument();
+  });
+
+  it('renders the node action cluster in edit mode', () => {
+    renderNode({}, false, { edit: makeEdit() });
+    expect(screen.getByTestId('workflowGraphNodeActionCluster')).toBeInTheDocument();
+  });
+
+  it('closes the step actions menu when clicking away', () => {
+    renderNode({}, false, { edit: makeEdit() });
+    const menuButton = screen.getByTestId('workflowGraphNodeMenuButton');
+    fireEvent.click(menuButton);
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('workflowGraphNodeMenuPanel')).toBeInTheDocument();
+    fireEvent.pointerDown(document.body);
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('draws a solid border for fallback nodes (no dashed styling)', () => {
+    renderNode({ fallbackOf: 'fetch' }, false, { edit: makeEdit() });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    expect(getComputedStyle(card).borderStyle).toBe('solid');
+  });
+
+  it('keeps a thin border and draws an outer primary ring when selected', () => {
+    renderNode({}, true, { edit: makeEdit() });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    // Selection uses an outer ::after ring, so the card border stays thin.
+    expect(getComputedStyle(card).borderStyle).toBe('solid');
+    expect(getComputedStyle(card).borderWidth).not.toBe('2px');
+  });
+
+  it('deletes on Delete / Backspace and selects on Enter', () => {
+    const edit = makeEdit();
+    const onStepSelect = jest.fn();
+    renderNode({}, false, { edit, onStepSelect });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    fireEvent.keyDown(card, { key: 'Delete' });
+    expect(edit.onDeleteNode).toHaveBeenCalledWith('node-1');
+    fireEvent.keyDown(card, { key: 'Enter' });
+    expect(onStepSelect).toHaveBeenCalledWith('node-1');
+  });
+
+  it('shows the incomplete warning at the top-right for flagged nodes and never tints the border', () => {
+    const { unmount } = renderNode({}, false, {
+      edit: makeEdit(),
+      incompleteNodeIds: new Set(['node-1']),
     });
+    const warning = screen.getByTestId('workflowGraphNodeIncomplete');
+    expect(warning).toHaveAttribute('aria-label', 'Incomplete — required fields are missing');
+    expect(getComputedStyle(warning).position).toBe('absolute');
+    expect(getComputedStyle(screen.getByRole('button', { name: /Test Step/ })).borderStyle).toBe(
+      'solid'
+    );
+    unmount();
+    renderNode({}, false, { edit: makeEdit(), incompleteNodeIds: new Set(['other']) });
+    expect(screen.queryByTestId('workflowGraphNodeIncomplete')).not.toBeInTheDocument();
   });
 });

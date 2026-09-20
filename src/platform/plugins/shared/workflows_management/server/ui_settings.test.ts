@@ -70,7 +70,7 @@ describe('Workflows Management UI Settings', () => {
       expect.objectContaining({
         [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: expect.objectContaining({
           name: 'Workflow Template Library',
-          value: false,
+          value: true,
           readonly: true,
           readonlyMode: 'ui',
           requiresPageReload: true,

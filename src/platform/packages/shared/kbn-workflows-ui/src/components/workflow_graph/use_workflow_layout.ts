@@ -58,6 +58,8 @@ interface UseWorkflowLayoutParams {
 interface UseWorkflowLayoutResult {
   nodes: Node[];
   edges: Edge[];
+  /** The graph transform the layout was computed from (for edit-mode overlays). */
+  transformed: TransformResult;
 }
 
 /**
@@ -181,7 +183,7 @@ export function useWorkflowLayout({
     }
     const mergeNodeIds = new Set<string>();
     for (const [target, sources] of incomingByTarget) {
-      if (sources.length > 1 && sources.some((s) => allBypassLaneIds.has(s))) {
+      if (sources.length > 1) {
         mergeNodeIds.add(target);
       }
     }
@@ -342,6 +344,9 @@ export function useWorkflowLayout({
         height: pos.height,
         targetPosition,
         sourcePosition,
+        // Without `nopan`, panOnDrag swallows clicks on the card so selection
+        // never reaches onNodeClick / the config panel.
+        className: 'nopan',
         data: {
           ...(n.data as Record<string, unknown>),
           stepExecution: exec,
@@ -401,6 +406,10 @@ export function useWorkflowLayout({
     const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds } = topologyMeta;
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
     const { traversedForkEdgeIds, traversedBypassIds } = branchTraversal;
+    // Sources that mount dual `step`/`error` handles (any outgoing failure edge).
+    const nodesWithFailureHandle = new Set(
+      allEdges.filter((e) => e.isFailure).map((e) => e.source)
+    );
 
     const getExec = (nodeId: string): WorkflowStepExecutionDto | undefined => {
       const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
@@ -414,7 +423,10 @@ export function useWorkflowLayout({
       // edges leaving an empty (bypass) lane inherit that lane's traversal;
       // everything else falls back to source-step completion.
       let traversed: boolean;
-      if (e.branchType) {
+      if (e.isFailure) {
+        // An error route only lights up when its fallback step actually ran.
+        traversed = getExec(e.target)?.status !== undefined;
+      } else if (e.branchType) {
         traversed = traversedForkEdgeIds.has(e.id);
       } else if (allBypassLaneIds.has(e.source)) {
         traversed = traversedBypassIds.has(e.source);
@@ -429,10 +441,20 @@ export function useWorkflowLayout({
             : undefined);
         traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
       }
+      let sourceHandle: string | undefined;
+      if (e.isFailure) {
+        sourceHandle = 'error';
+      } else if (e.branchType === 'then' || e.branchType === 'else') {
+        sourceHandle = e.branchType;
+      } else if (nodesWithFailureHandle.has(e.source)) {
+        // Owner mounts dual handles (`step` + `error`) once on-failure exists.
+        sourceHandle = 'step';
+      }
       return {
         id: e.id,
         source: e.source,
         target: e.target,
+        sourceHandle,
         type: 'workflowEdge',
         data: {
           label: e.label,
@@ -441,6 +463,7 @@ export function useWorkflowLayout({
           branchType: e.branchType,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
+          isFailure: e.isFailure,
         },
       };
     });
@@ -461,5 +484,5 @@ export function useWorkflowLayout({
     syntheticTriggerExecution,
   ]);
 
-  return { nodes: derivedNodes, edges: derivedEdges };
+  return { nodes: derivedNodes, edges: derivedEdges, transformed };
 }

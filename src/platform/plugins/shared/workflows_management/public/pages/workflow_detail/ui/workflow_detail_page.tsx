@@ -26,11 +26,11 @@ import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import {
+  seedCreateYaml,
   setActiveTab,
   setExecution,
   setIsTestModalOpen,
   setReplayExecutionId,
-  setYamlString,
 } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -102,6 +102,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     setActiveTab: setUrlTab,
     replayExecutionId,
     clearReplayExecutionId,
+    editorView,
   } = useWorkflowUrlState();
 
   useEffect(() => {
@@ -137,8 +138,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // `useWorkflowUrlState` drops `location.state`) and re-renders never
   // clobber in-progress edits or re-fire telemetry.
   const seededRef = useRef(false);
+  // Read at seed time only — must not be an effect dependency or Graph↔YAML
+  // toggles re-run this effect and reload the workflow (skeleton flash).
+  const editorViewRef = useRef(editorView);
+  editorViewRef.current = editorView;
 
-  // Load workflow when id changes
+  // Load workflow when id changes; seed create once.
   useEffect(() => {
     if (id) {
       seededRef.current = false;
@@ -156,8 +161,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // history entry, not the URL, so plain `/create` links and shared URLs
     // fall back to the default YAML.
     const { initialYaml } = location.state ?? {};
-    dispatch(setYamlString(initialYaml || workflowDefaultYaml));
-    telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+    dispatch(seedCreateYaml(initialYaml || workflowDefaultYaml));
+    telemetry.reportWorkflowCreateOpened({
+      editorType: editorViewRef.current === 'graph' ? 'visual' : 'yaml',
+    });
   }, [loadWorkflow, id, dispatch, telemetry, location.state]);
 
   // Sync activeTab from URL state to store

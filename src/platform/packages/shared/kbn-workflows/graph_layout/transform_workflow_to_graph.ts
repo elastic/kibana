@@ -19,7 +19,7 @@ import type {
   PreLayoutTriggerNode,
   Step,
 } from './types';
-import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE } from './types';
+import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE, getStepFallbackSteps } from './types';
 import { visitStepChildren } from './walk_step_tree';
 import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
@@ -84,7 +84,9 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
 function transformInternal(
   triggers: WorkflowYaml['triggers'],
   steps: Step[],
-  ids: IdAllocator
+  ids: IdAllocator,
+  /** Set when `steps` is a parent step's `on-failure.fallback` list. */
+  fallbackOf?: string
 ): InternalTransformResult {
   const nodes: PreLayoutNode[] = [];
   const bypassLaneNodes: PreLayoutBypassLaneNode[] = [];
@@ -144,7 +146,9 @@ function transformInternal(
     // Record the back-pointer from this node id to its source step.  Both
     // `step` and `foreachGroup` node kinds map to the same step name — the
     // foreachGroup container IS that step, just rendered differently.
-    nodeRefs[id] = { kind: 'step', stepName: step.name };
+    nodeRefs[id] = fallbackOf
+      ? { kind: 'step', stepName: step.name, fallbackOf }
+      : { kind: 'step', stepName: step.name };
 
     // Container step types (foreach, while) render as a group container node,
     // at any nesting depth. The container is a self-contained "folder": one
@@ -161,7 +165,7 @@ function transformInternal(
       const groupNode: PreLayoutForeachGroupNode = {
         id,
         type: 'foreachGroup',
-        data: { label: step.name, stepType: step.type, step },
+        data: { label: step.name, stepType: step.type, step, ...(fallbackOf && { fallbackOf }) },
         style: { ...DEFAULT_NODE_STYLE },
       };
       nodes.push(groupNode);
@@ -197,10 +201,33 @@ function transformInternal(
       const stepNode: PreLayoutStepNode = {
         id,
         type: 'step',
-        data: { label: step.name, stepType: step.type, step },
+        data: { label: step.name, stepType: step.type, step, ...(fallbackOf && { fallbackOf }) },
         style: { ...DEFAULT_NODE_STYLE },
       };
       nodes.push(stepNode);
+    }
+
+    // Error route: `on-failure.fallback` steps hang off the step as a dashed
+    // danger branch. They are leaves — the workflow resumes at the next
+    // sibling from the step itself, so they never join `exitIds`.
+    const fallbackSteps = getStepFallbackSteps(step);
+    if (fallbackSteps.length > 0) {
+      const inner = transformInternal([], fallbackSteps, ids, step.name);
+      Object.assign(nodeRefs, inner.nodeRefs);
+      nodes.push(...inner.nodes);
+      bypassLaneNodes.push(...inner.bypassLaneNodes);
+      edges.push(...inner.edges);
+      foreachGroups.push(...inner.foreachGroups);
+      const firstId = inner.nodes[0]?.id;
+      if (firstId) {
+        edges.push({
+          id: `${id}:${firstId}-failure`,
+          source: id,
+          target: firstId,
+          isFailure: true,
+          label: 'on failure',
+        });
+      }
     }
 
     if (step.type === 'if') {

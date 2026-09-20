@@ -10,7 +10,7 @@
 import { debounce } from 'lodash';
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux-toolkit-v1';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
+import { _clearComputedData, _setComputedDataInternal, seedCreateYaml, setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 import type { RootState } from '../types';
 
@@ -49,8 +49,8 @@ const workflowComputationMiddleware: Middleware =
   (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {
     const result = next(action);
 
-    // Only react to yamlString changes
-    if (setYamlString.match(action)) {
+    // React to yaml edits and create-session seeds (both update yamlString).
+    if (setYamlString.match(action) || seedCreateYaml.match(action)) {
       debouncedCompute.cancel();
 
       const yamlString = action.payload;

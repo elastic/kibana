@@ -56,10 +56,9 @@ jest.mock('@xyflow/react', () => {
 import { WorkflowGraphEdge } from './workflow_graph_edge';
 
 // ---------------------------------------------------------------------------
-// Constants that mirror the implementation's FORK_BUS_TRUNK / FORK_BUS_LABEL_OFFSET.
+// Constants that mirror the implementation's FORK_BUS_TRUNK.
 // ---------------------------------------------------------------------------
-const FORK_BUS_TRUNK = 20;
-const FORK_BUS_LABEL_OFFSET = 20;
+const FORK_BUS_TRUNK = 80;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -112,17 +111,6 @@ function getLabelY(): number {
   return parseFloat(match[1]);
 }
 
-function getLabelX(): number {
-  const containers = screen.getAllByTestId('edge-label-renderer');
-  const container = containers[containers.length - 1];
-  const labelDiv = container.querySelector<HTMLElement>('div[style*="translate"]');
-  if (!labelDiv) throw new Error('No label div with translate style found');
-  const style = labelDiv.getAttribute('style') ?? '';
-  const match = style.match(/translate\(-50%,\s*-50%\)\s*translate\(([\d.]+)px,/);
-  if (!match) throw new Error(`Could not parse labelX from style: "${style}"`);
-  return parseFloat(match[1]);
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -132,78 +120,37 @@ afterEach(() => {
 });
 
 describe('WorkflowGraphEdge — fork bus routing gate', () => {
-  describe('if/else branch labels (TB) — core regression for unbalanced if/else', () => {
-    /**
-     * Both branch edges share the same source (the `if` node).
-     * true branch → shallow target;  false branch → deep target.
-     *
-     * Pre-fix: labels land at path midpoints → different Y values.
-     * Post-fix: both edges use the bus fixed-offset anchor → same Y.
-     */
-    it('aligns true-branch and false-branch labels on the same Y row regardless of target depth', () => {
-      const sharedSource = { sourceX: 200, sourceY: 100, sourcePosition: Position.Bottom };
-
+  describe('if/else branch labels move to node ports', () => {
+    it('does not render mid-edge true/false pills (those sit under the ports)', () => {
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-then',
-          ...sharedSource,
+          sourceX: 200,
+          sourceY: 100,
+          sourcePosition: Position.Bottom,
           targetX: 100,
-          targetY: 220, // shallow target
+          targetY: 220,
           targetPosition: Position.Top,
           data: { branchType: 'then', label: 'true' },
         })
       );
-      const thenY = getLabelY();
+      expect(screen.queryByText('true')).not.toBeInTheDocument();
 
       cleanup();
 
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-else',
-          ...sharedSource,
+          sourceX: 200,
+          sourceY: 100,
+          sourcePosition: Position.Bottom,
           targetX: 300,
-          targetY: 380, // deep target — different depth, same source
+          targetY: 380,
           targetPosition: Position.Top,
           data: { branchType: 'else', label: 'false' },
         })
       );
-      const elseY = getLabelY();
-
-      // Labels must land on the same row (identical Y within 1px tolerance).
-      // This is the direct regression assertion for the bug.
-      expect(Math.abs(thenY - elseY)).toBeLessThanOrEqual(1);
-    });
-
-    it('aligns true-branch and false-branch labels in LR layout', () => {
-      const sharedSource = { sourceX: 100, sourceY: 200, sourcePosition: Position.Right };
-
-      renderSingleEdge(
-        makeEdgeProps({
-          id: 'e-then-lr',
-          ...sharedSource,
-          targetX: 320,
-          targetY: 100, // shallow
-          targetPosition: Position.Left,
-          data: { branchType: 'then', label: 'true' },
-        })
-      );
-      const thenX = getLabelX();
-
-      cleanup();
-
-      renderSingleEdge(
-        makeEdgeProps({
-          id: 'e-else-lr',
-          ...sharedSource,
-          targetX: 480,
-          targetY: 300, // deep
-          targetPosition: Position.Left,
-          data: { branchType: 'else', label: 'false' },
-        })
-      );
-      const elseX = getLabelX();
-
-      expect(Math.abs(thenX - elseX)).toBeLessThanOrEqual(1);
+      expect(screen.queryByText('false')).not.toBeInTheDocument();
     });
   });
 
@@ -243,10 +190,8 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
 
   describe('fallback guard — sub-trunk gap uses smooth-step', () => {
     it('falls back to smooth-step when the fork gap is below FORK_BUS_TRUNK (TB)', () => {
-      // Target is only 10px below source — less than FORK_BUS_TRUNK=20.
-      // The bus would be degenerate; smooth-step is correct.
-      // Our getSmoothStepPath mock returns midpoint Y = (100+110)/2 = 105.
-      // The bus would produce: sourceY + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET = 100 + 20 + 20 = 140.
+      // Target is only 10px below source — less than FORK_BUS_TRUNK=80.
+      // Use a switch label so a pill still renders for coordinate assertions.
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-small-gap',
@@ -254,15 +199,15 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           sourceY: 100,
           sourcePosition: Position.Bottom,
           targetX: 200,
-          targetY: 110, // gap = 10, below FORK_BUS_TRUNK (20)
+          targetY: 110, // gap = 10, below FORK_BUS_TRUNK (80)
           targetPosition: Position.Top,
-          data: { branchType: 'then', label: 'true' },
+          data: { branchType: 'switch', label: 'case' },
         })
       );
       const y = getLabelY();
 
       const expectedSmoothStepY = (100 + 110) / 2; // 105
-      const busY = 100 + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET; // 140
+      const busY = 100 + FORK_BUS_TRUNK; // 180
 
       // Should use smooth-step midpoint, not bus anchor.
       expect(y).toBeCloseTo(expectedSmoothStepY, 0);
@@ -298,13 +243,13 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
 describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
   // Coordinates from the offline layout probe of the real if_only topology:
   // placeholder at centerX=200, centerY=300; switch top at y=402.
-  // busY = targetY_top − MERGE_BUS_TRUNK = 402 − 20 = 382.
-  const MERGE_BUS_TRUNK = 20;
+  // busY = targetY_top − MERGE_BUS_TRUNK = 402 − 40 = 362.
+  const MERGE_BUS_TRUNK = 40;
 
   describe('TB — isMerge edge routes via merge bus', () => {
     it('routes an isMerge edge above gap threshold via merge bus, not smooth-step', () => {
-      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK(20).
-      // Merge bus busY = 402 − 20 = 382.  smooth-step midY = (300+402)/2 = 351.
+      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK(40).
+      // Merge bus busY = 402 − 40 = 362.  smooth-step midY = (300+402)/2 = 351.
       // The rendered path should NOT land at the smooth-step midpoint.
       renderSingleEdge(
         makeEdgeProps({
@@ -318,16 +263,16 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
           data: { isMerge: true }, // no branchType — this is the merge flag
         })
       );
-      // The path element should contain the busY (382), not the smooth-step midpoint (351).
+      // The path element should contain the busY (362), not the smooth-step midpoint (351).
       const path = document.querySelector('path.react-flow__edge-path');
       expect(path).not.toBeNull();
       const d = path?.getAttribute('d') ?? '';
-      expect(d).toContain('382');
+      expect(d).toContain(String(402 - MERGE_BUS_TRUNK));
       expect(d).not.toContain('351');
     });
 
     it('falls back to smooth-step when isMerge gap is below MERGE_BUS_TRUNK', () => {
-      // Gap = 10 < MERGE_BUS_TRUNK (20) → smooth-step.
+      // Gap = 10 < MERGE_BUS_TRUNK (40) → smooth-step.
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-small-merge',
@@ -375,7 +320,7 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
       const placeholderPath =
         document.querySelector('path.react-flow__edge-path')?.getAttribute('d') ?? '';
 
-      // Both paths must contain busY = 402 − 20 = 382
+      // Both paths must contain busY = 402 − 40 = 362
       const busY = 402 - MERGE_BUS_TRUNK;
       expect(byePath).toContain(String(busY));
       expect(placeholderPath).toContain(String(busY));
@@ -404,5 +349,32 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
       const path = document.querySelector('path.react-flow__edge-path');
       expect(path?.getAttribute('marker-end')).toMatch(/url\(#arrow-/);
     });
+  });
+});
+
+describe('WorkflowGraphEdge — branch label casing', () => {
+  it('still renders non-if branch labels (e.g. switch cases)', () => {
+    renderSingleEdge(
+      makeEdgeProps({
+        id: 'e-case-label',
+        data: { branchType: 'switch', label: 'caseA' },
+      })
+    );
+    expect(screen.getByText('caseA')).toBeInTheDocument();
+  });
+});
+
+describe('WorkflowGraphEdge — on-failure route', () => {
+  it('draws a solid danger connector (never dashed)', () => {
+    renderSingleEdge(
+      makeEdgeProps({
+        id: 'e-failure',
+        data: { isFailure: true, label: 'on failure' },
+      })
+    );
+    const path = document.querySelector('path.react-flow__edge-path') as SVGPathElement | null;
+    expect(path).not.toBeNull();
+    expect(path?.style.strokeDasharray).toBeFalsy();
+    expect(screen.getByTestId('workflowGraphEdgeFailureLabel')).toBeInTheDocument();
   });
 });

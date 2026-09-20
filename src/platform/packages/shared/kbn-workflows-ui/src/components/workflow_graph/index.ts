@@ -11,7 +11,14 @@ export {
   WorkflowGraphCanvasWithoutProvider,
   type WorkflowGraphCanvasProps,
 } from './workflow_graph_canvas';
-export type { RenderStepIcon } from './workflow_graph_actions_context';
+export type {
+  RenderStepIcon,
+  WorkflowGraphAnchorRect,
+  WorkflowGraphEditActions,
+  WorkflowGraphInsertionContext,
+  WorkflowStepInsertPath,
+} from './workflow_graph_actions_context';
+export type { PendingInsertVisual, PendingInsertStepContext } from './pending_insert';
 export { ReactFlowProvider } from '@xyflow/react';
 export {
   WorkflowDetailBottomBar,
@@ -25,3 +32,7 @@ export {
   type WorkflowVisualEditorFlyoutProps,
   type WorkflowVisualEditorFlyoutTarget,
 } from './workflow_visual_editor_flyout';
+export { aiIconTileCss } from './ai_icon_tile';
+export { stepSupportsErrorHandling } from './step_supports_error_handling';
+// Side-effect: sync-warm EUI icons used by accordion arrows / node menus.
+export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';

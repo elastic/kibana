@@ -351,12 +351,52 @@ describe('workflow layout pipeline', () => {
     expect(() => dagLayout(dagNodes, [], dagGroups)).toThrow(/cycle/i);
   });
 
+  it('TB if then-branch sits left of else (matches true→false port order)', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'console' }],
+            else: [{ name: 'no', type: 'console' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      }),
+      'TB'
+    );
+    const yes = findNode(result.nodes, 'yes');
+    const no = findNode(result.nodes, 'no');
+    expect(yes.x).toBeLessThan(no.x);
+  });
+
+  it('LR if then-branch sits above else (matches true→false port order)', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'console' }],
+            else: [{ name: 'no', type: 'console' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      }),
+      'LR'
+    );
+    const yes = findNode(result.nodes, 'yes');
+    const no = findNode(result.nodes, 'no');
+    expect(yes.y).toBeLessThan(no.y);
+  });
+
   it('constants match the hook: nodeSep is WORKFLOW_NODE_SEP and rankSep is WORKFLOW_RANK_SEP', () => {
     // Regression guard: if the constants drifted between the hook and the
     // pipeline, layout results would silently differ. The test just asserts
-    // the exported values have the expected numeric meaning (50 / 70) that
+    // the exported values have the expected numeric meaning (50 / 90) that
     // was hard-coded in the original use_workflow_layout.ts.
     expect(WORKFLOW_NODE_SEP).toBe(50);
-    expect(WORKFLOW_RANK_SEP).toBe(70);
+    expect(WORKFLOW_RANK_SEP).toBe(130);
   });
 });

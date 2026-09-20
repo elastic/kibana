@@ -373,7 +373,7 @@ export const WorkflowDetailHeader = React.memo(
           label: i18n.translate('workflows.unsavedChangesBadge', {
             defaultMessage: 'Unsaved changes',
           }),
-          color: 'primary',
+          color: 'warning',
           onClick: () => setHighlightDiff((state) => !state),
           onClickAriaLabel: highlightDiff
             ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {

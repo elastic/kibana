@@ -11,16 +11,24 @@ import type { IconType } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { HardcodedIcons } from './hardcoded_icons';
 
+/**
+ * Accepts both YAML trigger types (`manual`) and execution pseudo-step ids
+ * (`trigger_manual`) so the graph canvas and Actions menu share one map.
+ */
 export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
-  switch (triggerType) {
-    case 'trigger_manual':
+  const normalized = triggerType.startsWith('trigger_')
+    ? triggerType.slice('trigger_'.length)
+    : triggerType;
+
+  switch (normalized) {
+    case 'manual':
       return 'play';
-    case 'trigger_alert':
+    case 'alert':
       return 'warning';
-    case 'trigger_document':
-    case 'trigger_event':
+    case 'document':
+    case 'event':
       return 'document';
-    case 'trigger_scheduled':
+    case 'scheduled':
       return 'clock';
     default:
       return 'info';

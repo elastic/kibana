@@ -9,6 +9,7 @@
 
 import { createSelector } from 'redux-toolkit-v1';
 import type { RootState } from '../types';
+import { isStructurallyEmptyWorkflowYaml } from './utils/is_structurally_empty_workflow_yaml';
 
 // Selectors
 
@@ -28,10 +29,21 @@ export const selectWorkflowTags = createSelector(
   (workflow) => workflow?.tags ?? []
 );
 
-export const selectHasChanges = createSelector(
-  selectDetail,
-  (detail) => detail.yamlString !== detail.workflow?.yaml
-);
+/**
+ * Document dirtiness for leave-confirm + header badge.
+ * Saved workflows: YAML differs from last saved. Never-saved: differs from create
+ * baseline, except structurally empty (no triggers/steps) stays clean — visual
+ * add-then-delete drops keys and would otherwise false-positive vs the scaffold.
+ */
+export const selectHasChanges = createSelector(selectDetail, (detail) => {
+  if (detail.workflow?.yaml != null) {
+    return detail.yamlString !== detail.workflow.yaml;
+  }
+  if (detail.yamlString === detail.baselineYaml) {
+    return false;
+  }
+  return !isStructurallyEmptyWorkflowYaml(detail.yamlString);
+});
 
 export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
 

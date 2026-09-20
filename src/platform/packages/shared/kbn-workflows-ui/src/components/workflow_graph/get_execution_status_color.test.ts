@@ -14,7 +14,7 @@ import { getExecutionStatusVisual } from './get_execution_status_color';
 // Minimal mock theme — only the color tokens actually read by the function.
 const mockTheme = {
   colors: {
-    vis: { euiColorVisSuccess0: '#mock-success-vis' },
+    success: '#mock-success',
     backgroundBaseSuccess: '#mock-bg-success',
     danger: '#mock-danger',
     backgroundBaseDanger: '#mock-bg-danger',
@@ -85,6 +85,11 @@ describe('getExecutionStatusVisual', () => {
   it('returns empty icon for undefined (no execution yet)', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, undefined);
     expect(iconType).toBe('empty');
+  });
+
+  it('COMPLETED color matches the success token', () => {
+    const { color } = getExecutionStatusVisual(mockTheme, ExecutionStatus.COMPLETED);
+    expect(color).toBe(mockTheme.colors.success);
   });
 
   it('COMPLETED bg matches the success background token', () => {
