@@ -280,6 +280,92 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest(
+    'preserves the stored inline ID and filter references through GET and PUT',
+    async ({ apiClient, kbnClient }) => {
+      const id = createId('inline-id-round-trip');
+      const url = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
+      const headers = { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader };
+      const inlineDataView = { id: 'legacy-inline-id', title: 'logs-*' };
+      const filters = [
+        {
+          meta: { index: inlineDataView.id, type: FILTERS.PHRASE, key: 'service.name' },
+          query: { match_phrase: { 'service.name': 'checkout' } },
+        },
+        {
+          meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+          query: { exists: { field: 'bytes' } },
+        },
+      ];
+
+      // Seed a stored ID as CM would: the public API does not accept inline IDs.
+      await kbnClient.savedObjects.create<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+        overwrite: false,
+        attributes: {
+          title: 'Inline ID round trip',
+          description: '',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Main',
+              attributes: {
+                hideChart: false,
+                hideTable: false,
+                columns: [],
+                sort: [],
+                grid: {},
+                isTextBasedQuery: false,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: inlineDataView, filter: filters }),
+                },
+              },
+            },
+          ],
+        },
+        references: [],
+      });
+
+      const getResponse = await apiClient.get(url, { headers, responseType: 'json' });
+
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.data.tabs[0].data_source).toStrictEqual({
+        type: 'data_view_spec',
+        index_pattern: inlineDataView.title,
+      });
+      expect('data_view_id' in getResponse.body.data.tabs[0].filters[0]).toBe(false);
+      expect(getResponse.body.data.tabs[0].filters[1].data_view_id).toBe('foreign-data-view');
+
+      const putResponse = await apiClient.put(url, {
+        headers,
+        body: getResponse.body.data,
+        responseType: 'json',
+      });
+
+      expect(putResponse).toHaveStatusCode(200);
+      expect(putResponse.body.data).toStrictEqual(getResponse.body.data);
+
+      // The response hides the ID; check that the actual write kept it and its filters.
+      const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+      });
+      const storedSearchSource = injectReferences(
+        parseSearchSourceJSON(
+          storedSession.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ),
+        storedSession.references
+      );
+
+      expect(storedSearchSource.index).toStrictEqual(inlineDataView);
+      expect(storedSearchSource.filter).toMatchObject(filters);
+      expect(storedSession.references.map(({ id: referenceId }) => referenceId)).toStrictEqual([
+        'foreign-data-view',
+      ]);
+    }
+  );
+
+  apiTest(
     'preserves metrics tab state through a GET and PUT round trip',
     async ({ apiClient, kbnClient }) => {
       const id = createId('metrics-tab-state-round-trip');

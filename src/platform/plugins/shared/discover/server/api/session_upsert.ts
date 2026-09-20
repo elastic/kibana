@@ -15,6 +15,7 @@ import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiResponse } from './schema';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
+import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
 export const upsertDiscoverSession = async (
   requestContext: RequestHandlerContext,
@@ -26,10 +27,15 @@ export const upsertDiscoverSession = async (
 }> => {
   const { core } = await requestContext.resolve(['core']);
   const { attributes, references } = transformDiscoverSessionIn(data);
+  let existingAttributes: DiscoverSessionAttributes | undefined;
 
   // Check the exact ID; legacy URL aliases are resolved on read, not on write.
   try {
-    await core.savedObjects.client.get<DiscoverSessionAttributes>(SavedSearchType, id);
+    const result = await core.savedObjects.client.get<DiscoverSessionAttributes>(
+      SavedSearchType,
+      id
+    );
+    existingAttributes = result.attributes;
   } catch (error) {
     // Only a missing session indicates creation; propagate all other lookup errors.
     if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -40,12 +46,13 @@ export const upsertDiscoverSession = async (
     asCodeIdSchema.parse(id);
   }
 
+  const storedAttributes = assignStoredInlineDataViewIds(attributes, existingAttributes);
   const updateResponse = await core.savedObjects.client.update<DiscoverSessionAttributes>(
     SavedSearchType,
     id,
-    attributes,
+    storedAttributes,
     {
-      upsert: attributes,
+      upsert: storedAttributes,
       references,
       mergeAttributes: false,
     }
