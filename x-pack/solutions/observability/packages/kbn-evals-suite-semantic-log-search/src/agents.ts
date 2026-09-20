@@ -19,11 +19,23 @@ const agentIdFor = (arm: Arm, connectorId: string): string => {
   return `eval_semlogs_${arm}_${connectorHash}_${Date.now().toString(36)}`;
 };
 
+/**
+ * `baseline` uses the default agent, so it is never created here. Excluding it
+ * from the type prevents silently giving the baseline arm the semantic tool via
+ * an `else` branch.
+ */
+type NonBaselineArm = Exclude<Arm, 'baseline'>;
+
+const TOOL_IDS_BY_ARM: Record<NonBaselineArm, string[]> = {
+  keyword: [GET_LOGS_TOOL_ID],
+  semantic: [GET_LOGS_SEMANTIC_TOOL_ID],
+};
+
 interface CreateAgentParams {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
-  arm: Arm;
+  arm: NonBaselineArm;
 }
 
 /**
@@ -41,7 +53,7 @@ export const createArmAgent = async ({
 }: CreateAgentParams): Promise<string> => {
   const id = agentIdFor(arm, connectorId);
 
-  const toolIds = arm === 'keyword' ? [GET_LOGS_TOOL_ID] : [GET_LOGS_SEMANTIC_TOOL_ID];
+  const toolIds = TOOL_IDS_BY_ARM[arm];
 
   const instructions = [
     'You are answering a question about application logs.',

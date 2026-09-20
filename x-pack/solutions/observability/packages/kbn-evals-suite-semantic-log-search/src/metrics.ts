@@ -7,21 +7,35 @@
 
 import type { EvalQuery, RelevanceGrade } from './ground_truth';
 import { gradeOf, isTrap, matchedLabels, relevantLabels } from './ground_truth';
+import type { RetrievedPattern } from './types';
+
+// Re-export so consumers that imported RetrievedPattern from this module continue to work.
+export type { RetrievedPattern } from './types';
+
+// ─── Private helpers ────────────────────────────────────────────────────────
+
+/** Distinct labels from `expected` matched anywhere across all `patterns`. */
+const distinctMatchedLabels = (
+  patterns: readonly RetrievedPattern[],
+  expected: readonly string[]
+): Set<string> => new Set(patterns.flatMap(({ message }) => matchedLabels(message, expected)));
+
+// ─── Public functions ────────────────────────────────────────────────────────
 
 /**
- * One result as returned by the retrieval arm: a recurring log pattern, the
- * sample message that represents it, and how many documents it covers.
+ * Number of distinct relevant pattern matches within the top K.
+ *
+ * This is the raw count underlying both `precisionAtK` (which divides by K)
+ * and the precision evaluator's `hits` metadata. Keeping it separate avoids
+ * reconstructing the integer from the ratio via a round-trip through floats.
  */
-export interface RetrievedPattern {
-  /** The template text or, where `pattern_text` is mapped, its hash. */
-  pattern: string;
-  /** The representative message; this is what ground truth labels match against. */
-  message: string;
-  /** Number of documents sharing the pattern in the time window. */
-  count: number;
-  /** Reranker relevance score (logit). Only present for semantic strategies. */
-  relevanceScore?: number;
-}
+export const relevantAtK = (
+  patterns: readonly RetrievedPattern[],
+  query: EvalQuery,
+  k: number,
+  threshold: RelevanceGrade
+): number =>
+  patterns.slice(0, k).filter((candidate) => gradeOf(candidate.message, query) >= threshold).length;
 
 /**
  * Precision@K = relevant results in the top K, divided by K.
@@ -38,11 +52,7 @@ export const precisionAtK = (
   if (k <= 0) {
     return 0;
   }
-  const hits = patterns
-    .slice(0, k)
-    .filter((candidate) => gradeOf(candidate.message, query) >= threshold).length;
-
-  return hits / k;
+  return relevantAtK(patterns, query, k, threshold) / k;
 };
 
 /**
@@ -92,11 +102,7 @@ export const recallOfLabels = (
     return null;
   }
 
-  const found = new Set(
-    patterns.flatMap((candidate) => matchedLabels(candidate.message, expected))
-  );
-
-  return found.size / expected.length;
+  return distinctMatchedLabels(patterns, expected).size / expected.length;
 };
 
 /**
@@ -121,14 +127,7 @@ export const distinctRelevantMessagesAtK = (
   query: EvalQuery,
   k: number,
   threshold: RelevanceGrade
-): number => {
-  const expected = relevantLabels(query, threshold);
-  const found = new Set(
-    patterns.slice(0, k).flatMap((candidate) => matchedLabels(candidate.message, expected))
-  );
-
-  return found.size;
-};
+): number => distinctMatchedLabels(patterns.slice(0, k), relevantLabels(query, threshold)).size;
 
 /**
  * Top relevance score from the reranker.
@@ -138,10 +137,5 @@ export const distinctRelevantMessagesAtK = (
  * means the reranker ordered poorly; low recall with negative score means the relevant
  * patterns never reached the ranking window (candidate selection problem).
  */
-export const topRelevanceScore = (patterns: readonly RetrievedPattern[]): number | null => {
-  if (patterns.length === 0) {
-    return null;
-  }
-  const topScore = patterns[0]?.relevanceScore;
-  return topScore !== undefined ? topScore : null;
-};
+export const topRelevanceScore = (patterns: readonly RetrievedPattern[]): number | null =>
+  patterns[0]?.relevanceScore ?? null;

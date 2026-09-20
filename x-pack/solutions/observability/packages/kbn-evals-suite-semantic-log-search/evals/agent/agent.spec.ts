@@ -7,12 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { evaluate, tags } from '@kbn/evals';
-import type {
-  AgentBuilderClient,
-  DefaultEvaluators,
-  EvalsExecutorClient,
-  Evaluator,
-} from '@kbn/evals';
+import type { AgentBuilderClient, DefaultEvaluators, EvalsExecutorClient } from '@kbn/evals';
 import { createArmAgent, deleteAgent } from '../../src/agents';
 import { resolveCorpus } from '../../src/corpora';
 import {
@@ -23,13 +18,12 @@ import {
 } from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
 import { agentEvaluators } from '../../src/evaluators';
+import type { AgentEvaluator } from '../../src/evaluators';
 import { ARMS } from '../../src/types';
-import type { AgentTaskOutput, Arm, SemanticLogExample } from '../../src/types';
+import type { AgentTaskOutput, Arm } from '../../src/types';
 
 /** Resolved once at module load; all tests in this file use the same corpus. */
 const corpus = resolveCorpus();
-
-type AgentEvaluator = Evaluator<SemanticLogExample, AgentTaskOutput>;
 
 /**
  * Judged criteria are phrased so that they hold for every question in the set,

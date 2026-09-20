@@ -7,7 +7,21 @@
 
 import type { Example } from '@kbn/evals';
 import type { EvalQuery } from './ground_truth';
-import type { RetrievedPattern } from './metrics';
+
+/**
+ * One result as returned by the retrieval arm: a recurring log pattern, the
+ * sample message that represents it, and how many documents it covers.
+ */
+export interface RetrievedPattern {
+  /** The template text or, where `pattern_text` is mapped, its hash. */
+  pattern: string;
+  /** The representative message; this is what ground truth labels match against. */
+  message: string;
+  /** Number of documents sharing the pattern in the time window. */
+  count: number;
+  /** Reranker relevance score (logit). Only present for semantic strategies. */
+  relevanceScore?: number;
+}
 
 /**
  * The three arms compared. Every arm answers the same questions over the same

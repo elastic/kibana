@@ -11,6 +11,7 @@ import {
   distinctRelevantMessagesAtK,
   precisionAtK,
   recallOfLabels,
+  relevantAtK,
   topRelevanceScore,
   trapsAtK,
   weightedPrecisionAtK,
@@ -33,6 +34,32 @@ const relevant = (index: number, count = 1) =>
 
 const trap = (index: number, count = 1) =>
   pattern(corpus.messageClasses.connectionHealthy[index], count);
+
+describe('relevantAtK', () => {
+  it('returns the number of relevant patterns in the top K', () => {
+    const results = [relevant(0), trap(0), relevant(1)];
+    expect(relevantAtK(results, connectionFailures, 3, 2)).toBe(2);
+  });
+
+  it('counts only within the top K cutoff', () => {
+    const results = [trap(0), trap(1), relevant(0)];
+    expect(relevantAtK(results, connectionFailures, 2, 2)).toBe(0);
+    expect(relevantAtK(results, connectionFailures, 3, 2)).toBe(1);
+  });
+
+  it('returns 0 for a non-positive K', () => {
+    expect(relevantAtK([relevant(0)], connectionFailures, 0, 2)).toBe(0);
+  });
+
+  it('is consistent with precisionAtK (hits / k)', () => {
+    const results = [relevant(0), relevant(1), trap(0)];
+    const k = 3;
+    const threshold = 2;
+    expect(precisionAtK(results, connectionFailures, k, threshold)).toBeCloseTo(
+      relevantAtK(results, connectionFailures, k, threshold) / k
+    );
+  });
+});
 
 describe('precisionAtK', () => {
   it('divides by K even when fewer results are returned', () => {

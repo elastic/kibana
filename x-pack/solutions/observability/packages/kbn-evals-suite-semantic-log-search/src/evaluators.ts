@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Evaluator } from '@kbn/evals';
+import type { Direction, EvaluationResult, Evaluator } from '@kbn/evals';
 import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
 import type { CorpusProfile } from './corpora';
-import type { RelevanceGrade } from './ground_truth';
+import type { EvalQuery, RelevanceGrade } from './ground_truth';
 import { matchedLabels, relevantLabels } from './ground_truth';
 import {
   distinctRelevantMessagesAtK,
-  precisionAtK,
   recallOfLabels,
+  relevantAtK,
   topRelevanceScore,
   trapsAtK,
   weightedPrecisionAtK,
@@ -22,150 +22,141 @@ import type { AgentTaskOutput, RetrievalTaskOutput, SemanticLogExample } from '.
 
 /**
  * These evaluators are written here rather than assembled from
- * `createRagEvaluators` because that factory enumerates ground truth as document
- * ids, and ours is a predicate over message text. Feeding a predicate through it
- * would mean deriving the ground truth from the task output, which would make the
- * recall denominator depend on what the system returned.
+ * `createRagEvaluators` because that factory's design is incompatible with
+ * this suite's ground-truth model on three axes:
+ *
+ * 1. **The extractor cannot see the query.** `RetrievedDocsExtractor<T>` receives
+ *    only the task output. This suite's relevance is a predicate over *both* sides —
+ *    `gradeOf(message, query)` — which is not expressible in that signature.
+ * 2. **No document identity exists.** `GroundTruth` is keyed by `index` + `_id`.
+ *    The ES|QL `CATEGORIZE` + `RERANK` strategy returns log patterns, not documents,
+ *    and cannot produce `_id` / `_index` at all.
+ * 3. **Top-K slices a different list.** The shared factory slices the doc list; here
+ *    it is the pattern list, and `recallOfLabels` deliberately applies no K cutoff
+ *    because one pattern maps to 0..n labels.
  */
+
+// ─── Private helpers ────────────────────────────────────────────────────────
+
+export type RetrievalEvaluator = Evaluator<SemanticLogExample, RetrievalTaskOutput>;
+export type AgentEvaluator = Evaluator<SemanticLogExample, AgentTaskOutput>;
 
 interface RetrievalEvaluatorOptions {
   k?: number;
   threshold?: RelevanceGrade;
 }
 
-type RetrievalEvaluator = Evaluator<SemanticLogExample, RetrievalTaskOutput>;
-
-const unavailable = (reason: string) => ({
+const unavailable = (reason: string): EvaluationResult => ({
   score: null,
   label: 'unavailable',
   explanation: reason,
 });
 
-export const createPrecisionEvaluator = (
-  corpus: CorpusProfile,
-  { k = corpus.k, threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
+/**
+ * Factory for the five retrieval evaluators that share the same guard: if the
+ * example carries no ground truth, return `unavailable` before scoring.
+ */
+const gradedEvaluator = (
+  name: string,
+  direction: Direction,
+  score: (query: EvalQuery, output: RetrievalTaskOutput) => EvaluationResult
 ): RetrievalEvaluator => ({
-  name: `Precision@${k}`,
+  name,
   kind: 'CODE',
-  direction: 'maximize',
+  direction,
   evaluate: async ({ output, expected }) => {
     const query = expected?.query;
     if (!query) {
       return unavailable('No ground truth on the example');
     }
+    return score(query, output);
+  },
+});
 
-    const score = precisionAtK(output.patterns, query, k, threshold);
-    const hits = Math.round(score * k);
+// ─── Retrieval evaluators ────────────────────────────────────────────────────
 
+export const createPrecisionEvaluator = (
+  corpus: CorpusProfile,
+  { k = corpus.k, threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
+): RetrievalEvaluator =>
+  gradedEvaluator(`Precision@${k}`, 'maximize', (query, output) => {
+    const hits = relevantAtK(output.patterns, query, k, threshold);
+    const score = k <= 0 ? 0 : hits / k;
     return {
       score,
       explanation: `${hits} relevant of the top ${k}`,
       metadata: { hits, k, threshold, returned: output.patterns.length },
     };
-  },
-});
+  });
 
 export const createWeightedPrecisionEvaluator = (
   corpus: CorpusProfile,
   { k = corpus.k, threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
-): RetrievalEvaluator => ({
-  name: `Weighted Precision@${k}`,
-  kind: 'CODE',
-  direction: 'maximize',
-  evaluate: async ({ output, expected }) => {
-    const query = expected?.query;
-    if (!query) {
-      return unavailable('No ground truth on the example');
-    }
-
+): RetrievalEvaluator =>
+  gradedEvaluator(`Weighted Precision@${k}`, 'maximize', (query, output) => {
     const score = weightedPrecisionAtK(output.patterns, query, k, threshold);
     if (score === null) {
       return unavailable(`The top ${k} covers no documents`);
     }
-
     return {
       score,
       explanation: `${(score * 100).toFixed(1)}% of the documents behind the top ${k} are relevant`,
       metadata: { k, threshold },
     };
-  },
-});
+  });
 
 export const createRecallEvaluator = (
   corpus: CorpusProfile,
   { threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
-): RetrievalEvaluator => ({
-  name: 'Recall',
-  kind: 'CODE',
-  direction: 'maximize',
-  evaluate: async ({ output, expected }) => {
-    const query = expected?.query;
-    if (!query) {
-      return unavailable('No ground truth on the example');
-    }
-
+): RetrievalEvaluator =>
+  gradedEvaluator('Recall', 'maximize', (query, output) => {
     const score = recallOfLabels(output.patterns, query, threshold);
     if (score === null) {
       return unavailable('The question has no labels at this threshold');
     }
 
     const expectedLabels = relevantLabels(query, threshold).length;
+    // Use the raw count from distinctRelevantMessagesAtK (all patterns, no K cutoff)
+    // rather than reconstructing it from the ratio via Math.round(score * expectedLabels).
+    const found = distinctRelevantMessagesAtK(
+      output.patterns,
+      query,
+      output.patterns.length,
+      threshold
+    );
 
     return {
       score,
-      explanation: `${Math.round(
-        score * expectedLabels
-      )} of ${expectedLabels} labelled messages found`,
+      explanation: `${found} of ${expectedLabels} labelled messages found`,
       metadata: { expectedLabels, threshold },
     };
-  },
-});
+  });
 
 export const createTrapEvaluator = (
   corpus: CorpusProfile,
   { k = corpus.k }: RetrievalEvaluatorOptions = {}
-): RetrievalEvaluator => ({
-  name: `Hard Negatives@${k}`,
-  kind: 'CODE',
-  direction: 'minimize',
-  evaluate: async ({ output, expected }) => {
-    const query = expected?.query;
-    if (!query) {
-      return unavailable('No ground truth on the example');
-    }
-
+): RetrievalEvaluator =>
+  gradedEvaluator(`Hard Negatives@${k}`, 'minimize', (query, output) => {
     const traps = trapsAtK(output.patterns, query, k);
-
     return {
       score: traps,
       explanation: `${traps} lexical traps in the top ${k}`,
       metadata: { k },
     };
-  },
-});
+  });
 
 export const createDistinctMessagesEvaluator = (
   corpus: CorpusProfile,
   { k = corpus.k, threshold = corpus.relevanceThreshold }: RetrievalEvaluatorOptions = {}
-): RetrievalEvaluator => ({
-  name: `Distinct Relevant Messages@${k}`,
-  kind: 'CODE',
-  direction: 'maximize',
-  evaluate: async ({ output, expected }) => {
-    const query = expected?.query;
-    if (!query) {
-      return unavailable('No ground truth on the example');
-    }
-
+): RetrievalEvaluator =>
+  gradedEvaluator(`Distinct Relevant Messages@${k}`, 'maximize', (query, output) => {
     const distinct = distinctRelevantMessagesAtK(output.patterns, query, k, threshold);
-
     return {
       score: distinct,
       explanation: `${distinct} distinct relevant messages within the top ${k}`,
       metadata: { k, threshold },
     };
-  },
-});
+  });
 
 export const topRelevanceScoreEvaluator: RetrievalEvaluator = {
   name: 'Top Relevance Score',
@@ -198,7 +189,7 @@ export const retrievalEvaluators = (
   topRelevanceScoreEvaluator,
 ];
 
-type AgentEvaluator = Evaluator<SemanticLogExample, AgentTaskOutput>;
+// ─── Agent evaluators ────────────────────────────────────────────────────────
 
 const toolIdsFrom = (output: AgentTaskOutput): string[] =>
   output.steps.map((step) => step.tool_id).filter((toolId): toolId is string => Boolean(toolId));

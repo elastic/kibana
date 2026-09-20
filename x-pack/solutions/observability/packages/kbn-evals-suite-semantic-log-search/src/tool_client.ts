@@ -9,7 +9,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
 import type { CorpusProfile } from './corpora';
-import type { RetrievedPattern } from './metrics';
+import type { RetrievalTaskOutput, RetrievedPattern } from './types';
 
 /**
  * The slice of tool output this suite reads. Declared structurally rather
@@ -35,21 +35,21 @@ interface ToolExecuteResponse {
   results?: Array<{ type?: string; data?: unknown }>;
 }
 
-export interface GetLogsRun {
-  patterns: RetrievedPattern[];
-  totalCount: number;
-  /** Populated when the service could not run semantically and the tool fell back. */
-  warnings: string[];
-  error?: string;
-}
-
-export interface ExecuteRetrievalParams {
+interface BaseRetrievalParams {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
   corpus: CorpusProfile;
-  semanticFilter?: string;
   kqlFilter?: string;
+}
+
+export interface KeywordRetrievalParams extends BaseRetrievalParams {
+  kqlFilter?: string;
+}
+
+export interface SemanticRetrievalParams extends BaseRetrievalParams {
+  /** The natural-language query forwarded to the semantic retrieval tool. */
+  semanticFilter: string;
 }
 
 const toRetrievedPatterns = (items: PatternLike[]): RetrievedPattern[] =>
@@ -76,7 +76,7 @@ const executeTool = async ({
   toolId: string;
   toolParams: Record<string, unknown>;
   toPatterns: (data: ToolData) => RetrievedPattern[];
-}): Promise<GetLogsRun> => {
+}): Promise<RetrievalTaskOutput> => {
   const response = await fetch<ToolExecuteResponse>('/api/agent_builder/tools/_execute', {
     method: 'POST',
     version: '2023-10-31',
@@ -124,7 +124,7 @@ export const executeGetLogs = async ({
   connectorId,
   corpus,
   kqlFilter,
-}: ExecuteRetrievalParams): Promise<GetLogsRun> =>
+}: KeywordRetrievalParams): Promise<RetrievalTaskOutput> =>
   executeTool({
     fetch,
     log,
@@ -149,7 +149,7 @@ export const executeGetLogsSemantic = async ({
   corpus,
   semanticFilter,
   kqlFilter,
-}: ExecuteRetrievalParams): Promise<GetLogsRun> =>
+}: SemanticRetrievalParams): Promise<RetrievalTaskOutput> =>
   executeTool({
     fetch,
     log,
