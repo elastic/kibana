@@ -6,14 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiText } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -130,65 +124,67 @@ export function CreateDatasetWizardPage({
   );
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">
-      {/* Keep the wizard body width-restricted while the header above stays full-width */}
-      <EuiSpacer size="m" />
+    <>
+      <AppHeader
+        title={
+          initialDataSet
+            ? createDatasetWizardStrings.editPageTitle(initialDataSet.name)
+            : createDatasetWizardStrings.pageTitle
+        }
+        back={{
+          href: history.createHref({ pathname: DATASETS_PATH }),
+          label: createDatasetWizardStrings.backToListLabel,
+        }}
+        spacing="bleed"
+      />
 
-      <div data-test-subj="createDatasetWizard">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2>
-                {initialDataSet
-                  ? createDatasetWizardStrings.editPageTitle(initialDataSet.name)
-                  : createDatasetWizardStrings.pageTitle}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
+      <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">
+        {/* Keep the wizard body width-restricted while the header above stays full-width */}
+        <EuiSpacer size="m" />
 
-        <FormProvider {...methods}>
-          <FormWizard<DatasetWizardContent, DatasetWizardSection>
-            defaultValue={wizardContentFromFormValues(formDefaultValues)}
-            isEditing={isEditMode}
-            onSave={onSave}
-            isSaving={isSaving}
-            apiError={apiError}
-            texts={{
-              save: isEditMode
-                ? createDatasetWizardStrings.saveButton
-                : createDatasetWizardStrings.addButton,
-            }}
-          >
-            <FormWizardStep
-              id="dataset"
-              label={createDatasetWizardStrings.datasetStepLabel}
-              isRequired
+        <div data-test-subj="createDatasetWizard">
+          <FormProvider {...methods}>
+            <FormWizard<DatasetWizardContent, DatasetWizardSection>
+              defaultValue={wizardContentFromFormValues(formDefaultValues)}
+              isEditing={isEditMode}
+              onSave={onSave}
+              isSaving={isSaving}
+              apiError={apiError}
+              texts={{
+                save: isEditMode
+                  ? createDatasetWizardStrings.saveButton
+                  : createDatasetWizardStrings.addButton,
+              }}
             >
-              <div data-test-subj="createDatasetWizardContent">
-                <StepDataset
-                  dataSources={dataSources}
-                  existingDataSetNames={existingDataSetNames}
-                  loadDataSources={loadDataSources}
-                  isEditMode={isEditMode}
-                  datasetNameToEdit={datasetNameToEdit}
-                />
-              </div>
-            </FormWizardStep>
-            <FormWizardStep id="settings" label={createDatasetWizardStrings.additionalStepLabel}>
-              <div data-test-subj="createDatasetWizardContent">
-                <StepAdditional />
-              </div>
-            </FormWizardStep>
-            <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>
-              <div data-test-subj="createDatasetWizardContent">
-                <StepReview />
-              </div>
-            </FormWizardStep>
-          </FormWizard>
-        </FormProvider>
-      </div>
-    </EuiPageSection>
+              <FormWizardStep
+                id="dataset"
+                label={createDatasetWizardStrings.datasetStepLabel}
+                isRequired
+              >
+                <div data-test-subj="createDatasetWizardContent">
+                  <StepDataset
+                    dataSources={dataSources}
+                    existingDataSetNames={existingDataSetNames}
+                    loadDataSources={loadDataSources}
+                    isEditMode={isEditMode}
+                    datasetNameToEdit={datasetNameToEdit}
+                  />
+                </div>
+              </FormWizardStep>
+              <FormWizardStep id="settings" label={createDatasetWizardStrings.additionalStepLabel}>
+                <div data-test-subj="createDatasetWizardContent">
+                  <StepAdditional />
+                </div>
+              </FormWizardStep>
+              <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>
+                <div data-test-subj="createDatasetWizardContent">
+                  <StepReview />
+                </div>
+              </FormWizardStep>
+            </FormWizard>
+          </FormProvider>
+        </div>
+      </EuiPageSection>
+    </>
   );
 }

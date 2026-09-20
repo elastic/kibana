@@ -155,6 +155,8 @@ describe('Main', () => {
     });
 
     expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(queryByTestId('appHeaderTabs')).toBeNull();
+    expect(queryByTestId('appHeaderTitle')).toBeNull();
     expect(getByTestId('createDatasetWizard')).toHaveTextContent('create');
   });
 
@@ -171,7 +173,7 @@ describe('Main', () => {
       ],
     });
 
-    const { findByTestId } = render(
+    const { findByTestId, queryByTestId } = render(
       <EuiProvider>
         <MockAppHeaderProvider>
           <KibanaContextProvider services={services}>
@@ -184,6 +186,8 @@ describe('Main', () => {
     );
 
     expect(await findByTestId('createDatasetWizard')).toHaveTextContent('edit:logs-dataset');
+    expect(queryByTestId('appHeaderTabs')).toBeNull();
+    expect(queryByTestId('appHeaderTitle')).toBeNull();
   });
 
   it('redirects to the datasets tab when the edit route dataset is missing', async () => {

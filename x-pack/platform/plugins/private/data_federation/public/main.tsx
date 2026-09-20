@@ -55,18 +55,14 @@ export const Main: FunctionComponent = () => {
     useCallback(async () => await datasetsClient.get(), [datasetsClient])
   );
 
+  const isWizardPath = isDatasetWizardPath(pathname);
   const selectedTabId = useMemo<'datasets' | 'data_sources'>(() => {
     return pathname.startsWith(DATA_SOURCES_PATH) ? 'data_sources' : 'datasets';
   }, [pathname]);
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
 
   useEffect(() => {
-    if (
-      isDatasetWizardPath(pathname) ||
-      hasUserSelectedTab ||
-      !hasLoadedDataSources ||
-      !hasLoadedDataSets
-    ) {
+    if (isWizardPath || hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
       return;
     }
 
@@ -80,7 +76,7 @@ export const Main: FunctionComponent = () => {
     hasLoadedDataSources,
     hasUserSelectedTab,
     dataSources.length,
-    pathname,
+    isWizardPath,
     selectedTabId,
   ]);
 
@@ -114,32 +110,36 @@ export const Main: FunctionComponent = () => {
 
   return (
     <>
-      <AppHeader
-        title={mainTranslations.pageTitle}
-        badges={[{ label: mainTranslations.experimental }]}
-        tabs={tabs}
-        spacing="bleed"
-        docLink={dataFederationLinks.overview}
-        menu={{
-          items: [
-            {
-              id: 'quickstart',
-              label: mainTranslations.quickstartLink,
-              iconType: 'rocket',
-              href: dataFederationLinks.quickstart,
-              target: '_blank',
-              overflow: true,
-              order: 3,
-            },
-          ],
-        }}
-      />
-      <EuiSpacer size="l" />
+      {!isWizardPath && (
+        <>
+          <AppHeader
+            title={mainTranslations.pageTitle}
+            badges={[{ label: mainTranslations.experimental }]}
+            tabs={tabs}
+            spacing="bleed"
+            docLink={dataFederationLinks.overview}
+            menu={{
+              items: [
+                {
+                  id: 'quickstart',
+                  label: mainTranslations.quickstartLink,
+                  iconType: 'rocket',
+                  href: dataFederationLinks.quickstart,
+                  target: '_blank',
+                  overflow: true,
+                  order: 3,
+                },
+              ],
+            }}
+          />
+          <EuiSpacer size="l" />
 
-      <EuiText color="subdued" size="s">
-        <p>{mainTranslations.pageDescription}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
+          <EuiText color="subdued" size="s">
+            <p>{mainTranslations.pageDescription}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <Routes>
         <Route
