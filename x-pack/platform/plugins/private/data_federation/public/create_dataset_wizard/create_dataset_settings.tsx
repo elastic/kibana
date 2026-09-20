@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
@@ -32,8 +33,7 @@ import {
 } from './create_dataset_form_state';
 import { ErrorModeSelect } from './form_components/error_mode_select';
 import { FormatSelect } from './form_components/format_select';
-import { LateMaterializationSelect } from './form_components/late_materialization_select';
-import { OptimizedReaderSelect } from './form_components/optimized_reader_select';
+import { ParquetSettings } from './form_components/parquet_settings';
 
 // ---------------------------------------------------------------------------
 // Module-level option arrays — shared across components so each select
@@ -172,8 +172,10 @@ export function CreateDatasetAdditionalSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
-  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
-  const showParquetAdvanced = format === 'parquet';
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
+  const FormatAdvancedSettingsComponent = format
+    ? FORMAT_ADVANCED_SETTING_COMPONENTS[format]
+    : undefined;
 
   return (
     <>
@@ -190,9 +192,10 @@ export function CreateDatasetAdditionalSettings({
         <CommonOptionalSettings control={control} />
       </EuiAccordion>
       <EuiSpacer size="m" />
-      {showParquetAdvanced ? (
+      {FormatAdvancedSettingsComponent ? (
         <EuiAccordion
           id="createDatasetWizardAdvancedSettings"
+          data-test-subj="createDatasetWizardAdvancedSettings"
           buttonContent={
             <h4 style={{ margin: 0, fontWeight: 'bold' }}>
               {createDatasetWizardStrings.advancedSettingsSectionTitle}
@@ -201,7 +204,7 @@ export function CreateDatasetAdditionalSettings({
           initialIsOpen={false}
           paddingSize="m"
         >
-          <ParquetSettings control={control} />
+          <FormatAdvancedSettingsComponent control={control} />
         </EuiAccordion>
       ) : null}
     </>
@@ -646,28 +649,32 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
   );
 }
 
-function ParquetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsOptimizedReaderLabel}
-        helpText={helpTextDefault('true')}
-        fullWidth
-      >
-        <OptimizedReaderSelect control={control} />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsLateMaterializationLabel}
-        helpText={helpTextDefault('true')}
-        fullWidth
-      >
-        <LateMaterializationSelect control={control} />
-      </EuiFormRow>
-    </>
-  );
+function CsvAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetCsvAdvancedSettings" />;
 }
+
+function TsvAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetTsvAdvancedSettings" />;
+}
+
+function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetNdjsonAdvancedSettings" />;
+}
+
+function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetOrcAdvancedSettings" />;
+}
+
+const FORMAT_ADVANCED_SETTING_COMPONENTS: Record<
+  Exclude<DatasetFormatFormValue, ''>,
+  FunctionComponent<{ control: Control<CreateDatasetFormValues> }>
+> = {
+  csv: CsvAdvancedSettings,
+  tsv: TsvAdvancedSettings,
+  ndjson: NdjsonAdvancedSettings,
+  parquet: ParquetSettings,
+  orc: OrcAdvancedSettings,
+};
 
 // ---------------------------------------------------------------------------
 // NDJSON — remaining format fields

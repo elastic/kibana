@@ -11,8 +11,8 @@ import { fireEvent, render } from '@testing-library/react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CreateDatasetSettings } from './create_dataset_settings';
-import type { CreateDatasetFormValues } from './create_dataset_form_state';
+import { CreateDatasetAdditionalSettings, CreateDatasetSettings } from './create_dataset_settings';
+import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from './create_dataset_form_state';
 
 const docLinksMock = {
@@ -173,5 +173,67 @@ describe('CreateDatasetSettings', () => {
       expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
       expect(queryByTestId('createDatasetSettingsLateMaterialization')).toBeNull();
     });
+  });
+});
+
+const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
+  const Wrapper = () => {
+    const { control } = useForm<CreateDatasetFormValues>({
+      defaultValues: {
+        name: '',
+        description: '',
+        data_source: '',
+        resource: '',
+        settings: { ...emptyCreateDatasetSettingsFormValues(), format },
+      },
+    });
+
+    return (
+      <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <CreateDatasetAdditionalSettings control={control} />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+  };
+
+  return render(<Wrapper />);
+};
+
+describe('CreateDatasetAdditionalSettings', () => {
+  it('hides advanced settings when no format is selected', () => {
+    const { queryByTestId } = renderAdditionalSettings();
+    expect(queryByTestId('createDatasetWizardAdvancedSettings')).toBeNull();
+  });
+
+  it('shows parquet advanced settings when parquet is selected', () => {
+    const { getByTestId } = renderAdditionalSettings('parquet');
+
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetParquetAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeInTheDocument();
+  });
+
+  it('shows the csv advanced settings component when csv is selected', () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings('csv');
+
+    expect(getByTestId('createDatasetCsvAdvancedSettings')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
+  });
+
+  it('shows the tsv advanced settings component when tsv is selected', () => {
+    const { getByTestId } = renderAdditionalSettings('tsv');
+    expect(getByTestId('createDatasetTsvAdvancedSettings')).toBeInTheDocument();
+  });
+
+  it('shows the ndjson advanced settings component when ndjson is selected', () => {
+    const { getByTestId } = renderAdditionalSettings('ndjson');
+    expect(getByTestId('createDatasetNdjsonAdvancedSettings')).toBeInTheDocument();
+  });
+
+  it('shows the orc advanced settings component when orc is selected', () => {
+    const { getByTestId } = renderAdditionalSettings('orc');
+    expect(getByTestId('createDatasetOrcAdvancedSettings')).toBeInTheDocument();
   });
 });

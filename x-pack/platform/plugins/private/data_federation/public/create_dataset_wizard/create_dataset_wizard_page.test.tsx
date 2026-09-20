@@ -139,9 +139,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('backButton'));
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
-    ).toBeInTheDocument();
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
 
