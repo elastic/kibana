@@ -7,11 +7,12 @@
 
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { schema } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import type {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointRequestBody } from '@kbn/inference-common';
 
 import type { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
@@ -20,17 +21,19 @@ import { unflattenObject } from '../utils/unflatten_object';
 
 const inferenceEndpointSchema = schema.object({
   config: schema.object({
-    inferenceId: schema.string(),
-    provider: schema.string(),
-    taskType: schema.string(),
+    inferenceId: schema.string({ maxLength: 256 }),
+    provider: schema.string({ maxLength: 256 }),
+    taskType: schema.string({ maxLength: 256 }),
     providerConfig: schema.any(),
     taskTypeConfig: schema.maybe(schema.any()),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    headers: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 1024 }))
+    ),
   }),
   secrets: schema.object({
     providerSecrets: schema.any(),
   }),
-});
+}) as Type<InferenceEndpointRequestBody>;
 
 export const getInferenceServicesRoute = (
   router: IRouter<RequestHandlerContext>,
@@ -225,6 +228,7 @@ export const getInferenceServicesRoute = (
 
           const adaptiveAllocations = config?.providerConfig?.adaptive_allocations;
           const numAllocations = config?.providerConfig?.num_allocations;
+          const apiKey = secrets?.providerSecrets?.api_key;
 
           let allocationSettings = {};
           if (adaptiveAllocations) {
@@ -235,9 +239,7 @@ export const getInferenceServicesRoute = (
 
           const body = {
             service_settings: {
-              ...(secrets?.providerSecrets?.api_key && {
-                api_key: secrets.providerSecrets.api_key,
-              }),
+              ...(apiKey ? { api_key: apiKey } : {}),
               ...allocationSettings,
             },
             ...(Object.keys(taskSettingsWithHeaders).length
