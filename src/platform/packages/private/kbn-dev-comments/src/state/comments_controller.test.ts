@@ -8,7 +8,15 @@
  */
 
 import { DISPLAY_NAME_STORAGE_KEY } from '../constants';
-import { createComment, createLocation, deferred, flush, query, renderPage } from '../test_helpers';
+import {
+  createComment,
+  createLocation,
+  deferred,
+  flush,
+  mockCanvas,
+  query,
+  renderPage,
+} from '../test_helpers';
 import type { Comment, CommentsApi, CommentsHostServices } from '../types';
 import { createCommentsController } from './comments_controller';
 
@@ -238,45 +246,116 @@ describe('createCommentsController', () => {
       expect(controller.store.getState().active).toBe(false);
     });
 
-    it('hands a draft back when its save fails after the page changed, and then saves it for the page it was made on', async () => {
-      const { api, services } = createHost();
+    describe('with a screenshot', () => {
+      mockCanvas();
+
       const captureViewport = jest.fn(async () => {
         const canvas = document.createElement('canvas');
-        canvas.width = 0; // nothing to encode in jsdom; the capture is what is checked
+        canvas.width = 800;
+        canvas.height = 600;
         return canvas;
       });
-      const controller = createCommentsController({ ...services, captureViewport });
-      const create = deferred<Comment>();
-      api.create.mockReturnValueOnce(create.promise);
-      controller.start();
 
-      controller.setActive(true);
-      controller.pick(target(), { x: 5, y: 5 });
-      const saving = controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
-      await flush();
-      expect(captureViewport).toHaveBeenCalledTimes(1);
-      await services.navigateToPath('/app/two');
-      create.reject(new Error('offline'));
-      await saving;
+      beforeEach(() => {
+        captureViewport.mockClear();
+      });
 
-      expect(controller.store.getState()).toEqual(
-        expect.objectContaining({
-          pageKey: '/app/two',
-          pending: expect.objectContaining({ element: target(), saving: false }),
-          notice: { type: 'error', message: 'Could not save the comment: offline' },
-        })
-      );
+      it('hands a draft back when its save fails after the page changed, and then saves it for the page it was made on', async () => {
+        const { api, services } = createHost();
+        const controller = createCommentsController({ ...services, captureViewport });
+        const create = deferred<Comment>();
+        api.create.mockReturnValueOnce(create.promise);
+        controller.start();
 
-      // Saved again, the comment is made where its element was, without a screenshot of this page.
-      await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
-      expect(captureViewport).toHaveBeenCalledTimes(1);
-      expect(api.create).toHaveBeenLastCalledWith(
-        expect.objectContaining({ route: { pageKey: '/app/one', path: '/app/one?x=1' } })
-      );
-      expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ pending: null, activeThreadId: null })
-      );
-      expect(controller.store.getState().comments).toHaveLength(1);
+        controller.setActive(true);
+        controller.pick(target(), { x: 5, y: 5 });
+        const saving = controller.save('Hello', {
+          attachScreenshot: true,
+          displayName: 'Capybara',
+        });
+        await flush();
+        expect(captureViewport).toHaveBeenCalledTimes(1);
+        expect(api.create).toHaveBeenCalledWith(
+          expect.objectContaining({ snapshot: expect.objectContaining({ mimeType: 'image/jpeg' }) })
+        );
+        await services.navigateToPath('/app/two');
+        create.reject(new Error('offline'));
+        await saving;
+
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pageKey: '/app/two',
+            pending: expect.objectContaining({ element: target(), saving: false }),
+            notice: { type: 'error', message: 'Could not save the comment: offline' },
+          })
+        );
+
+        // A screenshot of this page would not show what the comment is about: asked for
+        // one, the save says so and waits; without, the comment is made where its element was.
+        await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
+        expect(captureViewport).toHaveBeenCalledTimes(1);
+        expect(api.create).toHaveBeenCalledTimes(1);
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pending: expect.objectContaining({ element: target(), saving: false }),
+            notice: {
+              type: 'error',
+              message:
+                'Could not take the screenshot: the page has changed since the comment was started. Turn off "Attach screenshot" to post without one.',
+            },
+          })
+        );
+
+        await controller.save('Hello', { attachScreenshot: false, displayName: 'Capybara' });
+        expect(api.create).toHaveBeenLastCalledWith(
+          expect.not.objectContaining({ snapshot: expect.anything() })
+        );
+        expect(api.create).toHaveBeenLastCalledWith(
+          expect.objectContaining({ route: { pageKey: '/app/one', path: '/app/one?x=1' } })
+        );
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({ pending: null, activeThreadId: null })
+        );
+        expect(controller.store.getState().comments).toHaveLength(1);
+      });
+
+      it('keeps the draft when the screenshot cannot be taken, saying why, rather than posting without it', async () => {
+        const { api, services } = createHost();
+        const controller = createCommentsController({ ...services, captureViewport });
+        controller.start();
+        controller.pick(target(), { x: 5, y: 5 });
+
+        captureViewport.mockRejectedValueOnce(new Error('Tainted canvases may not be exported'));
+        await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
+        expect(api.create).not.toHaveBeenCalled();
+        expect(controller.store.getState()).toEqual(
+          expect.objectContaining({
+            pending: expect.objectContaining({ element: target(), saving: false }),
+            notice: {
+              type: 'error',
+              message:
+                'Could not take the screenshot: Tainted canvases may not be exported. Turn off "Attach screenshot" to post without one.',
+            },
+          })
+        );
+
+        // The same for a capture that comes out empty.
+        const empty = document.createElement('canvas');
+        empty.width = 0;
+        captureViewport.mockResolvedValueOnce(empty);
+        await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
+        expect(api.create).not.toHaveBeenCalled();
+        expect(controller.store.getState().notice?.message).toBe(
+          'Could not take the screenshot: nothing was captured. Turn off "Attach screenshot" to post without one.'
+        );
+
+        // Browser navigation within the same page changes what a screenshot would show.
+        await services.navigateToPath('/app/one?x=2');
+        expect(controller.store.getState().pending).not.toBeNull();
+        await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
+        expect(api.create).not.toHaveBeenCalled();
+        expect(controller.store.getState().notice?.message).toContain('the page has changed');
+      });
     });
 
     it('opens the new comment with its pin focused, and reports failures while keeping the draft', async () => {

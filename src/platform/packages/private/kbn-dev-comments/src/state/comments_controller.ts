@@ -16,6 +16,7 @@ import type {
   Comment,
   CommentAuthor,
   CommentRoute,
+  CommentSnapshot,
   CommentsHostServices,
   CommentsUser,
   ElementAnchor,
@@ -96,7 +97,11 @@ export interface CommentsController {
   /** Starts (or moves) a comment on `element`; `hit` is the innermost element under the pointer, which the pin follows. Ignored while a draft is being saved. */
   pick(element: Element, point: { x: number; y: number }, hit?: Element): void;
   cancelPending(): void;
-  /** `displayName` signs this and future comments. Failures are reported as a notice. */
+  /**
+   * `displayName` signs this and future comments. Failures are reported as a notice
+   * and hand the draft back, including a screenshot that was asked for but could not
+   * be taken: the comment is then posted without one, or not at all, by choice.
+   */
   save(text: string, options: { attachScreenshot: boolean; displayName: string }): Promise<void>;
   reply(id: string, text: string, displayName: string): Promise<void>;
   setResolved(id: string, resolved: boolean): Promise<void>;
@@ -139,9 +144,33 @@ const storeDisplayName = (displayName: string) => {
 const droppingDraft = (state: CommentsState): Partial<CommentsState> =>
   state.pending?.saving ? {} : { pending: null };
 
+/** A screenshot that was asked for could not be taken; the comment is not saved without it. */
+class ScreenshotError extends Error {}
+
 export const createCommentsController = (services: CommentsHostServices): CommentsController => {
   const { api, location } = services;
   const ignoreSelectors = services.ignoreSelectors ?? [];
+
+  // The screenshot shows the page the comment is about, in the state it was picked
+  // in: not what the page became under a draft handed back by a failed save, or
+  // under browser navigation within the same page.
+  const takeScreenshot = async (
+    draft: PendingComment,
+    captureViewport: () => Promise<HTMLCanvasElement>
+  ): Promise<CommentSnapshot> => {
+    if (location.getPath() !== draft.route.path) {
+      throw new ScreenshotError(
+        i18n.translate('devComments.snapshot.pageChanged', {
+          defaultMessage: 'the page has changed since the comment was started',
+        })
+      );
+    }
+    try {
+      return await createSnapshot(captureViewport);
+    } catch (error) {
+      throw new ScreenshotError(errorMessage(error));
+    }
+  };
 
   const store = createStore<CommentsState>({
     pageKey: location.getPageKey(),
@@ -402,11 +431,9 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       updateDraft({ saving: true });
       try {
         const { captureViewport } = services;
-        // The screenshot shows the page the comment is about; a draft handed back by a
-        // failed save after the page changed is saved without one.
         const snapshot =
-          attachScreenshot && captureViewport && location.getPageKey() === draft.route.pageKey
-            ? await createSnapshot(captureViewport)
+          attachScreenshot && captureViewport
+            ? await takeScreenshot(draft, captureViewport)
             : undefined;
         const created = await api.create({ ...input, ...(snapshot ? { snapshot } : {}) });
         writes += 1;
@@ -422,10 +449,16 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       } catch (error) {
         notify(
           'error',
-          i18n.translate('devComments.notice.saveFailed', {
-            defaultMessage: 'Could not save the comment: {message}',
-            values: { message: errorMessage(error) },
-          })
+          error instanceof ScreenshotError
+            ? i18n.translate('devComments.notice.screenshotFailed', {
+                defaultMessage:
+                  'Could not take the screenshot: {message}. Turn off "Attach screenshot" to post without one.',
+                values: { message: error.message },
+              })
+            : i18n.translate('devComments.notice.saveFailed', {
+                defaultMessage: 'Could not save the comment: {message}',
+                values: { message: errorMessage(error) },
+              })
         );
         updateDraft({ saving: false });
       }

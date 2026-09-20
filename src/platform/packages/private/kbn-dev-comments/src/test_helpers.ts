@@ -46,6 +46,23 @@ export const mockLayout = () => {
   });
 };
 
+/**
+ * jsdom has no canvas. For the enclosing `describe`, drawing does nothing and
+ * encoding gives a tiny image, so that screenshots can be taken.
+ */
+export const mockCanvas = () => {
+  beforeAll(() => {
+    const context = { fillRect() {}, drawImage() {} } as unknown as CanvasRenderingContext2D;
+    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => context);
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'toDataURL')
+      .mockImplementation(() => 'data:image/jpeg;base64,AAAA');
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+};
+
 export const renderPage = (html: string) => {
   const parsed = new DOMParser().parseFromString(html, 'text/html');
   document.body.replaceChildren(...Array.from(parsed.body.childNodes));

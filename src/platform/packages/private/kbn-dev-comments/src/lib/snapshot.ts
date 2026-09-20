@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { SNAPSHOT_MAX_BYTES, SNAPSHOT_MAX_DIMENSION } from '../constants';
 import type { CommentSnapshot } from '../types';
 
@@ -45,33 +46,41 @@ const flatten = (
   return target;
 };
 
-/** Captures the viewport as a JPEG within the byte budget, lowering quality and then resolution as needed; undefined when the capture fails. */
+/**
+ * Captures the viewport as a JPEG within the byte budget, lowering quality and then
+ * resolution as needed. Throws when there is no screenshot to be had, with the reason
+ * in words for the person who asked for one: the capture itself can fail (capture
+ * libraries throw on cross-origin content) or come out empty, and a page can be too
+ * busy to fit the budget.
+ */
 export const createSnapshot = async (
   captureViewport: () => Promise<HTMLCanvasElement>
-): Promise<CommentSnapshot | undefined> => {
-  try {
-    const canvas = await captureViewport();
-    if (canvas.width === 0 || canvas.height === 0) {
-      return undefined;
-    }
-    const background = getEffectiveBackgroundColor(document.body);
-    // Large or high-density screens produce more pixels than the output needs.
-    const baseScale = Math.min(
-      1,
-      OUTPUT_MAX_WIDTH / canvas.width,
-      SNAPSHOT_MAX_DIMENSION / canvas.height
+): Promise<CommentSnapshot> => {
+  const canvas = await captureViewport();
+  if (canvas.width === 0 || canvas.height === 0) {
+    throw new Error(
+      i18n.translate('devComments.snapshot.empty', { defaultMessage: 'nothing was captured' })
     );
-    for (const scaleStep of SCALE_STEPS) {
-      const scaled = flatten(canvas, baseScale * scaleStep, background);
-      for (const quality of QUALITY_STEPS) {
-        const image = scaled.toDataURL('image/jpeg', quality).split(',')[1] ?? '';
-        if (image && (image.length * 3) / 4 <= SNAPSHOT_MAX_BYTES) {
-          return { mimeType: 'image/jpeg', width: scaled.width, height: scaled.height, image };
-        }
+  }
+  const background = getEffectiveBackgroundColor(document.body);
+  // Large or high-density screens produce more pixels than the output needs.
+  const baseScale = Math.min(
+    1,
+    OUTPUT_MAX_WIDTH / canvas.width,
+    SNAPSHOT_MAX_DIMENSION / canvas.height
+  );
+  for (const scaleStep of SCALE_STEPS) {
+    const scaled = flatten(canvas, baseScale * scaleStep, background);
+    for (const quality of QUALITY_STEPS) {
+      const image = scaled.toDataURL('image/jpeg', quality).split(',')[1] ?? '';
+      if (image && (image.length * 3) / 4 <= SNAPSHOT_MAX_BYTES) {
+        return { mimeType: 'image/jpeg', width: scaled.width, height: scaled.height, image };
       }
     }
-  } catch {
-    // capture libraries throw on cross-origin content; the comment is then saved without a screenshot
   }
-  return undefined;
+  throw new Error(
+    i18n.translate('devComments.snapshot.tooLarge', {
+      defaultMessage: 'The image is too large to store, even at the lowest quality',
+    })
+  );
 };

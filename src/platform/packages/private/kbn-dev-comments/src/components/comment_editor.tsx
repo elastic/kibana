@@ -20,6 +20,9 @@ const TEXT_MAX_HEIGHT = 250;
 /** The tooltip plugin is left out: it edits in a modal, which the layer's popovers sit above. */
 const uiPlugins = getDefaultEuiMarkdownUiPlugins({ exclude: ['tooltip'] });
 
+/** Marks the rendered preview, for the styles below to find the box it is in. */
+const PREVIEW_CLASS = 'devCommentsEditorPreview';
+
 export interface CommentEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -66,15 +69,18 @@ export const CommentEditor = ({
       readOnly={readOnly}
       placeholder={placeholder}
       aria-label={ariaLabel}
+      markdownFormatProps={{ className: PREVIEW_CLASS }}
       css={css`
-        /* EUI keeps the text, its drop zone and the preview at least 150px tall; the popovers have less room. */
-        .euiMarkdownEditorDropZone,
-        .euiMarkdownEditorTextArea,
-        .euiMarkdownEditorPreview {
+        /* EUI keeps the text, the box around it and the preview at least 150px tall; the popovers
+           have less room. Named by what they are, not by EUI's class names: the editor's one
+           textarea, the box it is in, and the box the preview (marked above) is in. */
+        textarea,
+        div:has(> textarea),
+        div:has(> .${PREVIEW_CLASS}) {
           min-block-size: ${TEXT_HEIGHT}px;
         }
         /* Without the footer, the text closes the box. */
-        .euiMarkdownEditorTextArea {
+        textarea {
           border-bottom: ${euiTheme.border.thin};
           border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
         }

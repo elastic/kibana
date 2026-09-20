@@ -18,7 +18,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import {
-  EuiAccordion,
+  EuiButtonEmpty,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -33,7 +33,7 @@ import {
   EuiToolTip,
   euiScrollBarStyles,
   getDefaultEuiMarkdownProcessingPlugins,
-  htmlIdGenerator,
+  useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -139,6 +139,83 @@ const ThreadSizeBadge = ({ comment }: { comment: Comment }) => {
         {count}
       </EuiBadge>
     </EuiToolTip>
+  );
+};
+
+const PageGroup = ({
+  pageKey,
+  count,
+  children,
+}: PropsWithChildren<{ pageKey: string; count: number }>) => {
+  const { euiTheme } = useEuiTheme();
+  const [open, setOpen] = useState(true);
+  const contentId = useGeneratedHtmlId({ prefix: 'devCommentsPanelPage' });
+
+  return (
+    <section
+      css={css`
+        padding-top: ${euiTheme.size.s};
+      `}
+      data-test-subj="devCommentsPanelPage"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        css={css`
+          position: sticky;
+          top: 0;
+          z-index: ${euiTheme.levels.header};
+          padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          border-radius: ${euiTheme.border.radius.medium};
+          background: ${euiTheme.colors.backgroundBasePrimary};
+          &:hover {
+            background: ${euiTheme.colors.backgroundLightPrimary};
+          }
+        `}
+      >
+        <EuiFlexItem
+          css={css`
+            /* The path is truncated; a flex item would otherwise refuse to shrink below it. */
+            min-width: 0;
+          `}
+        >
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            flush="left"
+            iconType={open ? 'chevronSingleDown' : 'chevronSingleRight'}
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            aria-controls={contentId}
+            title={pageKey}
+            contentProps={{
+              css: css`
+                justify-content: flex-start;
+              `,
+            }}
+            textProps={{
+              css: css`
+                font-family: ${euiTheme.font.familyCode};
+                font-weight: ${euiTheme.font.weight.bold};
+              `,
+            }}
+          >
+            {pageKey}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CountBadge
+            count={count}
+            label={i18n.translate('devComments.panel.pageCount', {
+              defaultMessage: '{count, plural, one {# comment} other {# comments}} on this page.',
+              values: { count },
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <div id={contentId}>{open && children}</div>
+    </section>
   );
 };
 
@@ -353,7 +430,6 @@ export const CommentsPanel = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const groups = useMemo(() => groupByPage(comments, pageKey), [comments, pageKey]);
-  const [pageAccordionId] = useState(() => htmlIdGenerator('devCommentsPanelPage'));
   // Anchors are only looked up on their own page: another page's DOM could match them by accident.
   const resolvedAnchors = useResolvedAnchors();
 
@@ -505,64 +581,7 @@ export const CommentsPanel = () => {
               </EuiText>
             )}
             {groups.map((group) => (
-              <EuiAccordion
-                key={group.pageKey}
-                id={pageAccordionId(group.pageKey)}
-                initialIsOpen
-                paddingSize="none"
-                // The page's path is truncated in the header; flex items would otherwise refuse to shrink below it.
-                buttonProps={{
-                  css: css`
-                    min-width: 0;
-                    .euiAccordion__buttonContent {
-                      min-width: 0;
-                    }
-                  `,
-                }}
-                buttonContent={
-                  <EuiTitle size="xxs">
-                    <span
-                      title={group.pageKey}
-                      css={css`
-                        display: block;
-                        font-family: ${euiTheme.font.familyCode};
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      `}
-                    >
-                      {group.pageKey}
-                    </span>
-                  </EuiTitle>
-                }
-                extraAction={
-                  <CountBadge
-                    count={group.comments.length}
-                    label={i18n.translate('devComments.panel.pageCount', {
-                      defaultMessage:
-                        '{count, plural, one {# comment} other {# comments}} on this page.',
-                      values: { count: group.comments.length },
-                    })}
-                  />
-                }
-                css={css`
-                  padding-top: ${euiTheme.size.s};
-                  .euiAccordion__triggerWrapper {
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
-                    /* A bar in primary's ground, deeper under the pointer: something to click. Opaque, it
-                       also covers the rows scrolling under it. */
-                    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-                    border-radius: ${euiTheme.border.radius.medium};
-                    background: ${euiTheme.colors.backgroundBasePrimary};
-                    &:hover {
-                      background: ${euiTheme.colors.backgroundLightPrimary};
-                    }
-                  }
-                `}
-                data-test-subj="devCommentsPanelPage"
-              >
+              <PageGroup key={group.pageKey} pageKey={group.pageKey} count={group.comments.length}>
                 {group.comments.map((comment) => {
                   const element = resolvedAnchors.get(comment.id)?.element ?? null;
                   return (
@@ -578,7 +597,7 @@ export const CommentsPanel = () => {
                     />
                   );
                 })}
-              </EuiAccordion>
+              </PageGroup>
             ))}
           </div>
         </>

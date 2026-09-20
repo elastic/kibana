@@ -79,7 +79,7 @@ describe('CommentsLayer', () => {
     expect(document.activeElement).toBe(target());
   });
 
-  it('lists comments by page, the current page first, in accordions that are open but can be closed', async () => {
+  it('lists comments by page, the current page first, in groups that are open but can be closed', async () => {
     const elsewhere = createComment('far', {
       route: { pageKey: '/app/two', path: '/app/two' },
       anchor: anchorById('missing'),
@@ -97,8 +97,10 @@ describe('CommentsLayer', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
     fireEvent.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(within(current).getByTestId('devCommentsPanelItem-a').closest('[inert]')).not.toBeNull();
-    expect(within(other).getByTestId('devCommentsPanelItem-far').closest('[inert]')).toBeNull();
+    expect(within(current).queryByTestId('devCommentsPanelItem-a')).toBeNull();
+    expect(within(other).getByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
+    fireEvent.click(trigger);
+    expect(within(current).getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
   });
 
   it('shows when a comment was written the way the host does, or as the local time without it', async () => {

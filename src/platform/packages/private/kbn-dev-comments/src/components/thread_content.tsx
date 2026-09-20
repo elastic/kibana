@@ -21,6 +21,7 @@ import {
   EuiFlexItem,
   EuiMarkdownFormat,
   EuiSpacer,
+  EuiPanel,
   EuiToolTip,
   euiScrollBarStyles,
   useEuiTheme,
@@ -36,18 +37,8 @@ import { SnapshotImage, useSnapshot } from './snapshot_image';
 export interface ThreadContentProps {
   comment: Comment;
   onClose?: () => void;
-  /**
-   * As a row of the panel, in its flow: the comments and the reply form, with no
-   * actions of their own. Otherwise the thread fills a popover: actions on top,
-   * the comments scrolling in between, the form below.
-   */
   inline?: boolean;
-  /** Actions in the header of the first comment, after its own; see `RootComment`. */
   rootActions?: ReactNode;
-  /**
-   * Folds the thread to its first comment, with this in place of the comment's
-   * text and without the replies and the reply form: a panel row's preview.
-   */
   folded?: ReactNode;
 }
 
@@ -61,10 +52,6 @@ const CommentBody = ({ text }: { text: string }) => (
   </EuiMarkdownFormat>
 );
 
-/**
- * When something happened: as the host shows it (e.g. "5 minutes ago"), else the
- * local time. The local time is the tooltip, unless something else has one.
- */
 const TimeLabel = ({ at, tooltip = true }: { at: string; tooltip?: boolean }) => {
   const { RelativeTime } = useComments().services;
   // Rendered again every half minute, so that the host's relative time keeps up.
@@ -162,34 +149,75 @@ export const RefreshButton = ({
   );
 };
 
-/*
- * A comment's header is on two lines: the author with the actions to the right,
- * then what happened and when. EUI would put its actions slot beside every line,
- * narrowing them all, so the actions go with the name instead, and the time with
- * the event rather than in EUI's timestamp slot.
- */
-
-/** The first line of a comment's header. */
-const HeaderLine = ({ name, actions }: { name: string; actions: ReactNode }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-    <EuiFlexItem>{name}</EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {actions}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-/** The second line of a comment's header: "commented 5 minutes ago". */
-const EventLabel = ({ label, at }: { label: string; at: string }) => (
-  <>
-    {label}{' '}
-    <time dateTime={at}>
-      <TimeLabel at={at} />
-    </time>
-  </>
-);
+const CommentCard = ({
+  name,
+  actions,
+  label,
+  at,
+  resolved = false,
+  children,
+}: PropsWithChildren<{
+  name: string;
+  actions: ReactNode;
+  /** What happened: "commented", "replied". */
+  label: string;
+  at: string;
+  resolved?: boolean;
+}>) => {
+  const { euiTheme } = useEuiTheme();
+  const borderColor = resolved
+    ? euiTheme.colors.borderBaseSuccess
+    : euiTheme.colors.borderBaseSubdued;
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+      css={css`
+        border-color: ${borderColor};
+        overflow: hidden;
+      `}
+    >
+      <EuiPanel
+        color={resolved ? 'success' : 'highlighted'}
+        paddingSize="s"
+        borderRadius="none"
+        hasShadow={false}
+        css={css`
+          border-bottom: ${euiTheme.border.width.thin} solid ${borderColor};
+        `}
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+          >
+            {name}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {actions}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <div>
+          {label}{' '}
+          <time dateTime={at}>
+            <TimeLabel at={at} />
+          </time>
+        </div>
+      </EuiPanel>
+      <div
+        css={css`
+          padding: ${euiTheme.size.s};
+        `}
+      >
+        {children}
+      </div>
+    </EuiPanel>
+  );
+};
 
 /**
  * The first comment of a thread as an item of its timeline, with `children` in
@@ -202,28 +230,23 @@ export const RootComment = ({
   children,
 }: PropsWithChildren<{ comment: Comment; actions?: ReactNode }>) => (
   <EuiComment
-    username={
-      <HeaderLine
-        name={comment.author.displayName}
-        actions={
-          <>
-            <CopyButton text={comment.text} />
-            {actions}
-          </>
-        }
-      />
-    }
+    username={comment.author.displayName}
     timelineAvatar={<EuiAvatar name={comment.author.displayName} />}
-    event={
-      <EventLabel
-        label={i18n.translate('devComments.thread.commented', { defaultMessage: 'commented' })}
-        at={comment.createdAt}
-      />
-    }
-    // Resolved shows as the header's color; the resolve button and the thread's badge say so too.
-    eventColor={comment.resolved ? 'success' : undefined}
   >
-    {children}
+    <CommentCard
+      name={comment.author.displayName}
+      actions={
+        <>
+          <CopyButton text={comment.text} />
+          {actions}
+        </>
+      }
+      label={i18n.translate('devComments.thread.commented', { defaultMessage: 'commented' })}
+      at={comment.createdAt}
+      resolved={comment.resolved}
+    >
+      {children}
+    </CommentCard>
   </EuiComment>
 );
 
@@ -262,7 +285,7 @@ export const ThreadContent = ({
     }
   };
 
-  // What the author saw, below the comment's text.
+  // The screenshot, below the comment's text.
   const context = comment.snapshot && (
     <>
       <EuiButtonEmpty
@@ -334,12 +357,6 @@ export const ThreadContent = ({
         defaultMessage: 'Comment thread',
       })}
       gutterSize="m"
-      css={css`
-        /* The first line of a header (see \`HeaderLine\`) takes the whole width, which puts the event on a second one. */
-        .euiCommentEvent__headerUsername {
-          flex-basis: 100%;
-        }
-      `}
     >
       <RootComment comment={comment} actions={rootActions}>
         {folded ?? (
@@ -358,21 +375,17 @@ export const ThreadContent = ({
         comment.replies.map((item) => (
           <EuiComment
             key={item.id}
-            username={
-              <HeaderLine
-                name={item.author.displayName}
-                actions={<CopyButton text={item.text} />}
-              />
-            }
+            username={item.author.displayName}
             timelineAvatar={<EuiAvatar name={item.author.displayName} />}
-            event={
-              <EventLabel
-                label={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
-                at={item.createdAt}
-              />
-            }
           >
-            <CommentBody text={item.text} />
+            <CommentCard
+              name={item.author.displayName}
+              actions={<CopyButton text={item.text} />}
+              label={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
+              at={item.createdAt}
+            >
+              <CommentBody text={item.text} />
+            </CommentCard>
           </EuiComment>
         ))}
     </EuiCommentList>
