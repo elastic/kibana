@@ -313,8 +313,8 @@ describe('LensEditConfigurationFlyout', () => {
       state: {
         ...lensAttributes.state,
         datasourceStates: {
-          formBased: mockFormBasedStateChanged,
-          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+          textBased: mockTextBasedStateChanged,
         },
       },
     } as unknown as TypedLensSerializedState['attributes'];
@@ -326,13 +326,13 @@ describe('LensEditConfigurationFlyout', () => {
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
 
     expect(updatePanelStateSpy).toHaveBeenCalledWith(
-      mockFormBasedStateChanged,
+      mockTextBasedStateChanged,
       expect.anything(),
       undefined,
-      'formBased',
+      'textBased',
       {
-        formBased: { isLoading: false, state: mockFormBasedStateChanged },
-        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedState },
+        textBased: { isLoading: false, state: mockTextBasedStateChanged },
       }
     );
   });
@@ -386,13 +386,22 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { formBased: mockFormBasedState, textBased: mockTextBasedState },
+        adHocDataViews: {},
+        internalReferences: [],
+        // the empty formBased state is dropped so consumers don't misdetect the
+        // chart's datasource from serialized attributes
+        datasourceStates: { textBased: mockTextBasedState },
         visualization: {},
         filters: [],
       },
       filters: [],
       query: { esql: 'from index1 | limit 10' },
-      references: [],
+      // references from non-adhoc data views are kept even in ES|QL mode so that
+      // form-based layers (reference lines, query annotations) keep their data view
+      references: [
+        { type: 'index-pattern', id: 'mockip', name: 'mockip' },
+        { type: 'index-pattern', id: 'mockip', name: 'mockip' },
+      ],
     });
   });
 
@@ -452,6 +461,61 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
+  // Suggestions are single-layer: applying one drops the other layers
+  // (annotations, reference lines), so the panel is hidden for multi-layer
+  // ES|QL charts edited via layer tabs.
+  it('should not display the suggestions for a multi-layer ES|QL chart', async () => {
+    const getLayerIdsMock = jest.mocked(visualizationMap.testVis.getLayerIds);
+    getLayerIdsMock.mockReturnValue(['layer1', 'layer2']);
+    try {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' },
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: mockFormBasedState },
+            textBased: { isLoading: false, state: { layers: {} } },
+          },
+          activeDatasourceId: 'textBased',
+        }
+      );
+      expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
+      expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
+    } finally {
+      getLayerIdsMock.mockImplementation(() => ['layer1']);
+    }
+  });
+
+  // Hidden layers (e.g. the metric trendline) do not render as tabs and must
+  // not hide the suggestions panel.
+  it('should display the suggestions for an ES|QL chart with an extra hidden layer', async () => {
+    const getLayerIdsMock = jest.mocked(visualizationMap.testVis.getLayerIds);
+    const getConfigurationMock = jest.mocked(visualizationMap.testVis.getConfiguration);
+    const originalGetConfiguration = getConfigurationMock.getMockImplementation();
+    getLayerIdsMock.mockReturnValue(['layer1', 'trendline']);
+    getConfigurationMock.mockImplementation((props) => ({
+      ...originalGetConfiguration!(props),
+      hidden: props.layerId === 'trendline',
+    }));
+    try {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' },
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: mockFormBasedState },
+            textBased: { isLoading: false, state: { layers: {} } },
+          },
+          activeDatasourceId: 'textBased',
+        }
+      );
+      expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+    } finally {
+      getLayerIdsMock.mockImplementation(() => ['layer1']);
+      getConfigurationMock.mockImplementation(originalGetConfiguration!);
+    }
+  });
+
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
     await renderConfigFlyout(
       { hideTextBasedEditor: false, attributes: esqlLensAttributes },
@@ -481,6 +545,32 @@ describe('LensEditConfigurationFlyout', () => {
     newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
     expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
+  });
+
+  it('enables apply when a secondary form-based datasource changes on an ES|QL panel', async () => {
+    const multiDatasourceAttributes = {
+      ...esqlLensAttributes,
+      state: {
+        ...esqlLensAttributes.state,
+        datasourceStates: {
+          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+        },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    await renderConfigFlyout({ attributes: multiDatasourceAttributes }, undefined, {
+      datasourceStates: {
+        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedStateChanged },
+      },
+      activeDatasourceId: 'textBased',
+    });
+
+    expect(screen.getByRole('button', { name: /apply and close/i })).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {

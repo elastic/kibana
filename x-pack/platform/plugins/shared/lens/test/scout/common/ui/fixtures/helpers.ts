@@ -57,12 +57,13 @@ export async function createAdHocDataViewFromLens(page: ScoutPage, name: string)
  */
 export async function addDataLayer(
   page: ScoutPage,
-  seriesType: 'bar' | 'line' = 'line'
+  seriesType: 'bar' | 'line' = 'line',
+  layerIndex = 1
 ): Promise<void> {
   await page.testSubj.click('lnsLayerAddButton');
   await page.testSubj.click('lnsLayerAddButton-data');
   await page.testSubj.click(`lnsXY_seriesType-${seriesType}`);
-  await page.testSubj.locator('lns-layerPanel-1').waitFor({ state: 'visible' });
+  await page.testSubj.locator(`lns-layerPanel-${layerIndex}`).waitFor({ state: 'visible' });
 }
 
 /**
@@ -533,8 +534,9 @@ export async function convertToEsqlViaModal({
   // Click on the "Conver to ES|QL" button in the in-line editor
   await lens.workspace.convertToEsqlButton.click();
 
-  // Click on the confirmation button in the modal
+  // Conversion is chart-level, so the modal summarizes the result without layer selection.
   const modal = lens.workspace.convertToEsqlModal;
+  await expect(modal.getByRole('checkbox')).toHaveCount(0);
   await lens.workspace.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 

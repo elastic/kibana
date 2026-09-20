@@ -107,6 +107,8 @@ interface AddLayerButtonProps<T> {
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   isInlineEditing?: boolean;
+  /** Hides annotation library options (used for ES|QL charts where library groups are data-view-based) */
+  hideAnnotationLibrary?: boolean;
 }
 
 interface VisualizationStateFromContextChangeProps<T = unknown> {
@@ -316,7 +318,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     state: T,
     setState: StateSetter<T>,
     registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
-    isSaveable?: boolean
+    isSaveable?: boolean,
+    framePublicAPI?: Pick<FramePublicAPI, 'datasourceLayers'>
   ) => LayerAction[];
 
   /**
