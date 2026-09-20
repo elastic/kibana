@@ -7,7 +7,8 @@
 
 import { schema as configSchema, ValidationError } from '@kbn/config-schema';
 import { RouteValidationError } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import { isZod, z } from '@kbn/zod';
+import { editMonitorRequestBody } from './monitor_cruds/monitor_request_body';
 import {
   asRouteSchema,
   jsonArrayFromString,
@@ -15,6 +16,7 @@ import {
   minLengthMessage,
   queryNumber,
   routeId,
+  wrapZodRequestValidation,
 } from './zod_query';
 
 const factory = {
@@ -119,5 +121,41 @@ describe('asRouteSchema', () => {
     expect(new ValidationError(result.error, 'request body').message).toBe(
       '[request body.monitors]: array size is [501], but cannot be greater than [500]'
     );
+  });
+
+  it('unwraps nested union errors to Invalid value supplied to type', () => {
+    const schema = asRouteSchema(editMonitorRequestBody);
+    const result = schema({ type: 'invalid-data-steam', name: 'x' }, factory);
+    if (!('error' in result) || !result.error) {
+      throw new Error('expected validation error');
+    }
+    expect(new ValidationError(result.error, 'request body').message).toBe(
+      '[request body.type]: Invalid value "invalid-data-steam" supplied to "type"'
+    );
+  });
+});
+
+describe('wrapZodRequestValidation', () => {
+  it('wraps Zod request parts and leaves functions alone', () => {
+    const alreadyWrapped = asRouteSchema(z.object({ id: routeId }));
+    const wrapped = wrapZodRequestValidation({
+      request: {
+        params: z.object({ id: routeId }),
+        query: alreadyWrapped,
+        body: z.object({ name: z.string() }),
+      },
+    });
+    expect(isZod(wrapped.request.params)).toBe(false);
+    expect(wrapped.request.query).toBe(alreadyWrapped);
+    expect(isZod(wrapped.request.body)).toBe(false);
+    expect(typeof wrapped.request.body).toBe('function');
+  });
+
+  it('wraps internal validate: { body, query, params }', () => {
+    const wrapped = wrapZodRequestValidation({
+      body: z.object({ ids: z.array(routeId) }),
+    });
+    expect(isZod(wrapped.body)).toBe(false);
+    expect(typeof wrapped.body).toBe('function');
   });
 });

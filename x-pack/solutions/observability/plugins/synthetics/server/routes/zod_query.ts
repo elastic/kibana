@@ -6,8 +6,9 @@
  */
 
 import type { RouteValidationFunction } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import { isZod, z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
+import { flattenZodIssues, formatZodIssue } from '../../common/runtime_types/zod/format_errors';
 
 export const MAX_ROUTE_ID_LENGTH = 1024;
 export const MAX_ROUTE_STRING_LENGTH = 4096;
@@ -92,6 +93,7 @@ export const jsonArrayFromString = <T extends z.ZodType>(
 /**
  * Pass the failing path into `badRequest` so core prefixes `[request body.x]:`
  * the way config-schema did. Raw `schema.parse()` otherwise 400s with Zod JSON.
+ * Generic Zod copy is rewritten through `formatZodIssue` (io-ts `Invalid value`).
  */
 export const asRouteSchema = <T extends z.ZodType>(
   schema: T
@@ -101,12 +103,43 @@ export const asRouteSchema = <T extends z.ZodType>(
     if (result.success) {
       return ok(result.data);
     }
-    const issue = result.error.issues[0];
+    const issue = flattenZodIssues(result.error.issues)[0];
     return badRequest(
-      issue?.message ?? 'Invalid input',
+      issue ? formatZodIssue(issue, { input }) : 'Invalid input',
       (issue?.path ?? []).map((segment) => String(segment))
     );
   };
   (fn as RouteValidationFunction<z.infer<T>> & { _sourceSchema: unknown })._sourceSchema = schema;
   return fn;
+};
+
+const REQUEST_KEYS = ['params', 'query', 'body'] as const;
+
+function wrapRequestParts<T extends Record<string, unknown>>(parts: T): T {
+  const next = { ...parts };
+  for (const key of REQUEST_KEYS) {
+    const schema = next[key];
+    if (isZod(schema)) {
+      (next as Record<string, unknown>)[key] = asRouteSchema(schema);
+    }
+  }
+  return next;
+}
+
+/**
+ * Core `schema.parse()` dumps Zod JSON. Wrap every Zod request schema so 400s
+ * go through `asRouteSchema`. Already-wrapped functions are left alone.
+ */
+export const wrapZodRequestValidation = <T>(validation: T): T => {
+  if (validation == null || typeof validation !== 'object') {
+    return validation;
+  }
+  const record = validation as T & { request?: Record<string, unknown> };
+  if (record.request && typeof record.request === 'object') {
+    return {
+      ...record,
+      request: wrapRequestParts(record.request),
+    };
+  }
+  return wrapRequestParts(record as Record<string, unknown>) as T;
 };
