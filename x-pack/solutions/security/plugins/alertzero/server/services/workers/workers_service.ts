@@ -267,10 +267,12 @@ export class WorkersService {
 
       if (isAlertTriageWorker && patch.enabled) {
         // Attach-then-enable: a failed bulk edit leaves the Worker off, not enabled-but-unattached.
-        await this.attachAlertTriageWorkerToAllRules(request).catch((err: Error) => {
-          this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
-          throw err;
-        });
+        await this.attachAlertTriageWorkerToAllRules(request, status.workflowId).catch(
+          (err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+            throw err;
+          }
+        );
       }
 
       await management.updateWorkflow(
@@ -282,9 +284,11 @@ export class WorkersService {
 
       if (isAlertTriageWorker && !patch.enabled) {
         // Detach after disabling; don't let a partial detach fail the disable.
-        await this.detachAlertTriageWorkerFromAllRules(request).catch((err: Error) => {
-          this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
-        });
+        await this.detachAlertTriageWorkerFromAllRules(request, status.workflowId).catch(
+          (err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
+          }
+        );
       }
     }
 
@@ -359,13 +363,13 @@ export class WorkersService {
     return null;
   }
 
-  private async attachAlertTriageWorkerToAllRules(request: KibanaRequest): Promise<void> {
+  private async attachAlertTriageWorkerToAllRules(
+    request: KibanaRequest,
+    installedWorkflowId: string
+  ): Promise<void> {
     const { getAttachmentService } = this.alertTriageOpts;
     if (!getAttachmentService) return;
-    const service = await getAttachmentService(
-      request,
-      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
-    );
+    const service = await getAttachmentService(request, installedWorkflowId);
     const selection = await service.getRuleAttachmentSelection({
       search: '',
       attachmentFilter: 'not_attached',
@@ -377,13 +381,13 @@ export class WorkersService {
     });
   }
 
-  private async detachAlertTriageWorkerFromAllRules(request: KibanaRequest): Promise<void> {
+  private async detachAlertTriageWorkerFromAllRules(
+    request: KibanaRequest,
+    installedWorkflowId: string
+  ): Promise<void> {
     const { getAttachmentService } = this.alertTriageOpts;
     if (!getAttachmentService) return;
-    const service = await getAttachmentService(
-      request,
-      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
-    );
+    const service = await getAttachmentService(request, installedWorkflowId);
     const selection = await service.getRuleAttachmentSelection({
       search: '',
       attachmentFilter: 'attached',

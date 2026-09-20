@@ -621,23 +621,28 @@ describe('WorkersService', () => {
       attachment: ReturnType<typeof makeAttachmentService> | null,
       alertTriageWorkerEnabled = true,
       isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
-    ) =>
-      new WorkersService(
+    ) => {
+      const getAttachmentServiceMock = attachment
+        ? (jest.fn(async () => attachment) as any)
+        : undefined;
+      const service = new WorkersService(
         harness.management,
         Promise.resolve(harness.managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         {},
         {
           alertTriageWorkerEnabled,
-          getAttachmentService: attachment ? (jest.fn(async () => attachment) as any) : undefined,
+          getAttachmentService: getAttachmentServiceMock,
           isAlertAnalysisRuntimeEnabled,
         }
       );
+      return { service, getAttachmentServiceMock };
+    };
 
     it('flag off: enable does not attach rules to any detection rule', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
-      const service = makeService(harness, attachment, false);
+      const { service } = makeService(harness, attachment, false);
 
       await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -649,7 +654,7 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
       const attachment = makeAttachmentService();
-      const service = makeService(harness, attachment);
+      const { service } = makeService(harness, attachment);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -665,7 +670,7 @@ describe('WorkersService', () => {
     // is undefined, but the runtime config guard must still block the enable.
     it('runtime config off: rejects even when attachment service is absent', async () => {
       const harness = createPersistentHarness();
-      const service = makeService(harness, undefined, true, async () => false);
+      const { service } = makeService(harness, undefined, true, async () => false);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -684,7 +689,7 @@ describe('WorkersService', () => {
     it('runtime config off: rejects even though the workflow itself is enabled', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
-      const service = makeService(harness, attachment, true, async () => false);
+      const { service } = makeService(harness, attachment, true, async () => false);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -701,7 +706,7 @@ describe('WorkersService', () => {
     it('runtime config unreadable: falls through to the remaining checks', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
-      const service = makeService(harness, attachment, true, async () => {
+      const { service } = makeService(harness, attachment, true, async () => {
         throw new Error('uiSettings unavailable');
       });
 
@@ -710,14 +715,17 @@ describe('WorkersService', () => {
       );
     });
 
-    it('attach-then-enable: attaches rules and enables Worker when preflight passes', async () => {
+    it('attach-then-enable: passes installed workflow ID (with space suffix) to the attachment service', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
-      const service = makeService(harness, attachment);
+      const { service, getAttachmentServiceMock } = makeService(harness, attachment);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
       expect(result.outcome).toBe('updated');
+      // The attachment service must receive the installed workflow ID (base ID + space suffix),
+      // not the bare registration constant — the workflow executor looks up by exact ID.
+      expect(getAttachmentServiceMock).toHaveBeenCalledWith(request, `${TRIAGE}-${SPACE}`);
       expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
         attachRuleIds: ['rule-1', 'rule-2'],
         detachRuleIds: [],
@@ -734,7 +742,7 @@ describe('WorkersService', () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService();
       attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('bulk edit failed'));
-      const service = makeService(harness, attachment);
+      const { service } = makeService(harness, attachment);
 
       await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
         'bulk edit failed'
@@ -745,7 +753,7 @@ describe('WorkersService', () => {
     it('disable: detaches all attached rules after disabling the Worker', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
-      const service = makeService(harness, attachment);
+      const { service } = makeService(harness, attachment);
       await service.update(TRIAGE, { enabled: true }, SPACE, request);
       attachment.updateRuleAttachments.mockClear();
       attachment.getRuleAttachmentSelection.mockClear();
@@ -766,7 +774,7 @@ describe('WorkersService', () => {
     it('idempotent enable: skips attachment when all rules are already attached', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: [] });
-      const service = makeService(harness, attachment);
+      const { service } = makeService(harness, attachment);
 
       const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
 
@@ -781,7 +789,7 @@ describe('WorkersService', () => {
     it('detach error does not fail the disable operation', async () => {
       const harness = createPersistentHarness();
       const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
-      const service = makeService(harness, attachment);
+      const { service } = makeService(harness, attachment);
       await service.update(TRIAGE, { enabled: true }, SPACE, request);
       attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('network error'));
 
