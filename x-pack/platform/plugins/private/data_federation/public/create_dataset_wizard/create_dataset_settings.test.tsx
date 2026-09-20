@@ -269,9 +269,5 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
   });
 
-  it('shows the orc advanced settings component when orc is selected', () => {
-    const { getByTestId } = renderAdditionalSettings('orc');
-    expect(getByTestId('createDatasetOrcCommonSettings')).toBeInTheDocument();
-    expect(getByTestId('createDatasetOrcAdvancedSettings')).toBeInTheDocument();
-  });
+  // ORC is intentionally disabled in the format selection UI.
 });

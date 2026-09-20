@@ -89,19 +89,19 @@ const FORMAT_OPTIONS = [
     }),
     'data-test-subj': 'createDatasetSettingsFormatOption-parquet',
   },
-  {
-    value: 'orc',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatOrc,
-      testSubj: 'createDatasetSettingsFormatInput-orc',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatOrc,
-      description: createDatasetWizardStrings.settingsFormatOrcDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-orc',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-orc',
-  },
+  // {
+  //   value: 'orc',
+  //   inputDisplay: formatOptionSelectedDisplay({
+  //     title: createDatasetWizardStrings.settingsFormatOrc,
+  //     testSubj: 'createDatasetSettingsFormatInput-orc',
+  //   }),
+  //   dropdownDisplay: formatOptionDisplay({
+  //     title: createDatasetWizardStrings.settingsFormatOrc,
+  //     description: createDatasetWizardStrings.settingsFormatOrcDescription,
+  //     testSubj: 'createDatasetSettingsFormatDropdown-orc',
+  //   }),
+  //   'data-test-subj': 'createDatasetSettingsFormatOption-orc',
+  // },
 ] satisfies Array<EuiSuperSelectOption<DatasetFormatFormValue>>;
 
 export function FormatSelect({
