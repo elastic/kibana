@@ -12,10 +12,15 @@ import type {
   SemanticLogSearchParams,
   SemanticLogSearchResult,
 } from '../../../common/services/semantic_log_search/types';
+import {
+  ERROR_REASON,
+  UNAVAILABLE_REASON,
+} from '../../../common/services/semantic_log_search/constants';
 import type { RegisterServicesParams } from '../register_services';
 import { hasRequiredFields, detectRerankCapability } from './capabilities';
 import { searchWithEsqlRerank } from './strategies';
 import { semanticLogSearchInputSchema } from './schema';
+import { errorResult, unavailableResult, toFailureResult, SEARCH_PHASE } from './results';
 
 /** Search for log patterns matching a natural language query. */
 export async function search(
@@ -29,7 +34,7 @@ export async function search(
     logger.warn(
       `Semantic log search rejected invalid parameters: ${z.prettifyError(validation.error)}`
     );
-    return { status: 'error', reason: 'invalid_params' };
+    return errorResult(ERROR_REASON.INVALID_PARAMS);
   }
 
   // Re-attach non-parseable fields. Use validation.data so that zod's .trim() and .default()
@@ -38,15 +43,17 @@ export async function search(
 
   try {
     if (!(await hasRequiredFields(esClient, input.target))) {
-      return { status: 'unavailable', reason: 'missing_fields' };
+      return unavailableResult(UNAVAILABLE_REASON.MISSING_FIELDS);
     }
     if (!(await detectRerankCapability(esClient))) {
-      return { status: 'unavailable', reason: 'inference_unavailable' };
+      return unavailableResult(UNAVAILABLE_REASON.INFERENCE_UNAVAILABLE);
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    logger.warn(`Semantic log search capability check failed: ${message}`);
-    return { status: 'error', reason: 'execution' };
+    return toFailureResult(error, {
+      logger,
+      target: input.target,
+      phase: SEARCH_PHASE.CAPABILITIES,
+    });
   }
 
   return searchWithEsqlRerank(input, logger);

@@ -107,6 +107,21 @@ describe('semantic log search service', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('capability check'));
   });
 
+  it('returns cancelled when the capability check is aborted by the caller', async () => {
+    // Previously every capability-check failure returned `execution`; aborts are now
+    // correctly classified as `cancelled` and logged at debug rather than warn.
+    const logger = loggerMock.create();
+    const { esClient, fieldCaps } = createEsClient();
+    const abortError = Object.assign(new Error('aborted'), { name: 'AbortError' });
+    fieldCaps.mockRejectedValue(abortError);
+
+    const result = await search(createParams(esClient), logger);
+
+    expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cancelled'));
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it.each([
     // blank / whitespace-only strings
     { target: '' },
@@ -188,15 +203,15 @@ describe('semantic log search service', () => {
     }
   });
 
-  it('trims whitespace from target and applies maxPatterns default before ES|QL', async () => {
+  it('trims whitespace from target before forwarding to the ES|QL strategy', async () => {
     const { esClient, esqlQuery } = createEsClient();
 
     await search(createParams(esClient, { target: '  logs-*  ' }), loggerMock.create());
 
     expect(esqlQuery).toHaveBeenCalled();
     const [{ query }] = esqlQuery.mock.calls[0];
-    // trimmed target and default limit (10) must appear in the generated query
+    // The trimmed target must appear in the count probe (first ES|QL call). maxPatterns is now
+    // applied in JavaScript after the inference rerank rather than as an ES|QL LIMIT clause.
     expect(query).toContain('FROM logs-*');
-    expect(query).toContain('LIMIT 10');
   });
 });

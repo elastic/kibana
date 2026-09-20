@@ -128,7 +128,12 @@ describe('capabilities', () => {
 
     it('propagates a 403 authorization error rather than reporting the endpoint as absent', async () => {
       const forbiddenError = new errors.ResponseError({
-        body: { error: { type: 'security_exception', reason: 'action [cluster:monitor/xpack/inference/get] is unauthorized' } },
+        body: {
+          error: {
+            type: 'security_exception',
+            reason: 'action [cluster:monitor/xpack/inference/get] is unauthorized',
+          },
+        },
         statusCode: 403,
         headers: {},
         meta: {} as any,

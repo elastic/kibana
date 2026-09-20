@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { LogPattern, SemanticLogSearchService } from '@kbn/logs-data-access-plugin/server';
+import type {
+  ErrorReason,
+  LogPattern,
+  SemanticLogSearchService,
+  UnavailableReason,
+} from '@kbn/logs-data-access-plugin/server';
 import { parseDatemath } from '../../utils/time';
 
 const MAX_FIELD_VALUE_LENGTH = 500;
@@ -33,11 +38,29 @@ const WARNINGS = {
     'Semantic log search failed during execution. Do not retry automatically or fall back silently.',
   invalidParams:
     'Semantic log search rejected the request arguments. Correct them and retry once — check that the time range is not inverted and that the index is a plain index pattern (letters, digits, and . _ - : , * + only).',
+  scopeTooLarge:
+    'Semantic log search could not complete over this scope. Narrow the time range or add a KQL filter, then retry once.',
   serviceUnavailable: 'Semantic log search is not registered. Do not retry.',
   missingTarget: 'No log indices are available to search. Do not retry with this tool.',
   noPatterns:
     'No log patterns were found in this time range. You may retry once with a different time range or KQL scope.',
 } as const;
+
+// Exhaustive maps from result reason → warning text. TypeScript checks that every member of the
+// union has an entry: if a new reason is added to `SemanticLogSearchResult` without a mapping
+// here, the Record type annotation causes a compile-time error on the missing key.
+const UNAVAILABLE_REASON_WARNINGS: Record<UnavailableReason, string> = {
+  missing_fields: WARNINGS.missingFields,
+  inference_unavailable: WARNINGS.inferenceUnavailable,
+};
+
+const ERROR_REASON_WARNINGS: Record<ErrorReason, string> = {
+  timeout: WARNINGS.timeout,
+  cancelled: WARNINGS.cancelled,
+  execution: WARNINGS.execution,
+  invalid_params: WARNINGS.invalidParams,
+  scope_too_large: WARNINGS.scopeTooLarge,
+};
 
 interface GetLogsSemanticParams {
   start: string;
@@ -108,21 +131,11 @@ export async function getLogsSemanticHandler({
   });
 
   if (result.status === 'unavailable') {
-    const warning =
-      result.reason === 'missing_fields' ? WARNINGS.missingFields : WARNINGS.inferenceUnavailable;
-    return emptyResult(semanticFilter, warning);
+    return emptyResult(semanticFilter, UNAVAILABLE_REASON_WARNINGS[result.reason]);
   }
 
   if (result.status === 'error') {
-    const warning =
-      result.reason === 'timeout'
-        ? WARNINGS.timeout
-        : result.reason === 'cancelled'
-        ? WARNINGS.cancelled
-        : result.reason === 'invalid_params'
-        ? WARNINGS.invalidParams
-        : WARNINGS.execution;
-    return emptyResult(semanticFilter, warning);
+    return emptyResult(semanticFilter, ERROR_REASON_WARNINGS[result.reason]);
   }
 
   const patterns = result.patterns.map(toPattern);

@@ -28,6 +28,7 @@
     "@kbn/i18n-react",
     "@kbn/storage-adapter",
     "@kbn/zod",
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/ml-random-sampler-utils"
   ]
 }

@@ -6,22 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { UnavailableReason, ErrorReason } from './constants';
 
-/**
- * A log pattern represents a group of log messages that share a common template.
- *
- * The field names follow the convention established by `get_log_groups`:
- * - `pattern`: the template text (e.g. "Connection refused to * after * retries")
- * - `count`: number of documents matching this pattern in the time window
- * - `firstSeen` / `lastSeen`: ISO timestamps bounding the pattern's occurrences
- * - `sample`: a representative document with `_id`, `_index`, `@timestamp`
- */
+/** A log pattern: a group of log messages sharing a common template. */
 export interface LogPattern {
   /** The categorized field, e.g. 'message' */
   field: string;
   /** The template text, also serves as the handle for expand */
   pattern: string;
-  /** Number of documents matching this pattern in the time window */
+  /** Estimated document count. May slightly exceed corpus size when sampling is active; treat as order-of-magnitude. */
   count: number;
   /** ISO timestamp of the first occurrence */
   firstSeen: string;
@@ -62,36 +55,12 @@ export interface SemanticLogSearchParams {
 }
 
 export type SemanticLogSearchResult =
-  | {
-      status: 'success';
-      patterns: LogPattern[];
-    }
-  | {
-      status: 'unavailable';
-      reason: 'missing_fields' | 'inference_unavailable';
-    }
-  | {
-      status: 'error';
-      reason: 'timeout' | 'cancelled' | 'execution' | 'invalid_params';
-    };
+  | { status: 'success'; patterns: LogPattern[] }
+  | { status: 'unavailable'; reason: UnavailableReason }
+  | { status: 'error'; reason: ErrorReason };
 
-/**
- * Service for semantic log search.
- *
- * The M1 search path is RERANK + CATEGORIZE.
- *
- * The service returns log patterns ranked by semantic relevance to the query,
- * with counts and time bounds for each pattern.
- */
+/** Service for semantic log search using CATEGORIZE + inference RERANK. */
 export interface SemanticLogSearchService {
-  /**
-   * Search for log patterns matching a natural language query.
-   *
-   * Returns patterns ranked by semantic relevance, each with:
-   * - `pattern`: the template text
-   * - `count`: prevalence in the time window
-   * - `firstSeen` / `lastSeen`: time bounds
-   * - `sample`: a representative document
-   */
+  /** Search for log patterns matching a natural language query. */
   search(params: SemanticLogSearchParams): Promise<SemanticLogSearchResult>;
 }

@@ -22,6 +22,12 @@ export type {
   TimeRange,
 } from '../common/services/semantic_log_search/types';
 
+export type {
+  SearchStatus,
+  UnavailableReason,
+  ErrorReason,
+} from '../common/services/semantic_log_search/constants';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { LogsDataAccessPlugin } = await import('./plugin');
   return new LogsDataAccessPlugin(initializerContext);
