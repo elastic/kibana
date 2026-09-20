@@ -1011,6 +1011,40 @@ export function initRoutes(
     }
   );
 
+  // Mints an ephemeral UIAM token for Kibana's own identity (`authc.systemIdentity`), the
+  // credential Kibana presents to cross-region Elastic services such as the Nightshift Relay.
+  router.post(
+    {
+      path: '/test_endpoints/uiam/system_identity/_token',
+      validate: false,
+      security: {
+        authc: { enabled: false, reason: "Test endpoint exercising Kibana's own UIAM identity" },
+        authz: { enabled: false, reason: "Test endpoint exercising Kibana's own UIAM identity" },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        // The system identity lives on the security plugin's contract, not on Core's.
+        const [, { security }] = await core.getStartServices();
+
+        if (!security.authc.systemIdentity) {
+          return response.badRequest({
+            body: { message: 'UIAM system identity is not available' },
+          });
+        }
+
+        const token = await security.authc.systemIdentity.createEphemeralToken();
+        return response.ok({ body: { token } });
+      } catch (err) {
+        logger.error(`Failed to create a system identity token: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
   // UIAM API Key Grant Route
   router.post(
     {
