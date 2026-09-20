@@ -407,7 +407,12 @@ export interface PlacedAnchor extends ResolvedAnchor {
   exposed: boolean;
 }
 
-export const placeAnchor = (anchor: ElementAnchor, resolved: ResolvedAnchor): PlacedAnchor => {
+/** With `exposed` given, the element is not hit-tested: for when the layer itself has the page covered. */
+export const placeAnchor = (
+  anchor: ElementAnchor,
+  resolved: ResolvedAnchor,
+  { exposed }: { exposed?: boolean } = {}
+): PlacedAnchor => {
   const point = getAnchorPoint(anchor, resolved.element);
-  return { ...resolved, point, exposed: isExposed(resolved.element, point) };
+  return { ...resolved, point, exposed: exposed ?? isExposed(resolved.element, point) };
 };

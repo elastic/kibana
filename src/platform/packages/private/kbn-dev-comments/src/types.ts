@@ -50,6 +50,11 @@ export interface CommentSnapshot {
   image?: string;
 }
 
+/** A screenshot as taken and stored: always with its image, which only reads leave out. */
+export interface NewSnapshot extends CommentSnapshot {
+  image: string;
+}
+
 export interface CommentAuthor {
   username: string;
   displayName: string;
@@ -97,7 +102,9 @@ export interface Comment {
   snapshot?: CommentSnapshot;
 }
 
-export type NewComment = Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>;
+export type NewComment = Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'snapshot'> & {
+  snapshot?: NewSnapshot;
+};
 
 export interface CommentPatch {
   resolved?: boolean;

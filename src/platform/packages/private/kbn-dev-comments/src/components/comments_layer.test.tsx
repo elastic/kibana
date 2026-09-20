@@ -369,6 +369,44 @@ describe('CommentsLayer', () => {
     expect(Number(panel.style.zIndex)).toBe(above);
   });
 
+  it('keeps the pins, and the thread the screenshot is shown from, while the full-screen mask covers the page', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    act(() => controller.openThread('a'));
+    await screen.findByRole('dialog', { name: 'Comment thread' });
+
+    // The mask EUI draws over the whole page, which is not marked as the layer's.
+    const mask = parse(`<div data-rect="0,0,2000,2000"></div>`);
+    act(() => {
+      controller.setOverlayOpen(true);
+      document.body.append(mask);
+    });
+    // Two frames: the layout tick the mask sets off, and the render after it.
+    await act(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
+    expect(screen.getByTestId('devCommentsPin-a')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Comment thread' })).toBeInTheDocument();
+
+    // Closed, the mask gone with it, everything is as before; had the mask stayed, it would count.
+    act(() => {
+      controller.setOverlayOpen(false);
+      mask.remove();
+    });
+    await act(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
+    expect(screen.getByTestId('devCommentsPin-a')).toBeInTheDocument();
+    act(() => document.body.append(mask));
+    await waitFor(() => expect(screen.queryByTestId('devCommentsPin-a')).toBeNull());
+  });
+
   it('pins a comment once its element gets the id it is anchored by, with nothing added to the page', async () => {
     // A control rendered as a placeholder and finalized in place changes no layout.
     renderPage(`<button id="target">Target</button><button class="late">Late</button>`);

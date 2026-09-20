@@ -64,11 +64,12 @@ const anchorSchema = schema.object({
   ),
 });
 
-const snapshotSchema = schema.object({
+/** A screenshot as created: with its image, which only reads leave out (see `NewSnapshot`). Comments are never deleted, so one without could never be shown. */
+const newSnapshotSchema = schema.object({
   mimeType: schema.literal('image/jpeg'),
   width: schema.number({ min: 1, max: 10_000 }),
   height: schema.number({ min: 1, max: 10_000 }),
-  image: schema.maybe(schema.string({ maxLength: Math.ceil((300_000 * 4) / 3) + 4 })), // Base64 expands the byte budget by 4/3 plus padding.
+  image: schema.string({ minLength: 1, maxLength: Math.ceil((300_000 * 4) / 3) + 4 }), // Base64 expands the byte budget by 4/3 plus padding.
 });
 
 const replySchema = schema.object({
@@ -93,7 +94,7 @@ export const newCommentSchema = schema.object({
   trail: schema.arrayOf(schema.object({ anchor: anchorSchema, label: nameSchema }), {
     maxSize: 25,
   }),
-  snapshot: schema.maybe(snapshotSchema),
+  snapshot: schema.maybe(newSnapshotSchema),
 });
 
 export const commentPatchSchema = schema.object({

@@ -490,5 +490,26 @@ describe('createCommentsController', () => {
         })
       );
     });
+
+    it('says nothing of a failed navigation once the guide was stopped or another one started', async () => {
+      const { services } = createHost();
+      const controller = createCommentsController(services);
+      controller.start();
+      const navigation = deferred<void>();
+      (services.navigateToPath as jest.Mock).mockReturnValueOnce(navigation.promise);
+
+      const guiding = controller.guideTo(
+        createComment('slow', { route: { pageKey: '/app/two', path: '/app/two' } })
+      );
+      // Started over on a comment of this page, whose guide is under way.
+      const here = createComment('here', { route: { pageKey: '/app/one', path: '/app/one' } });
+      void controller.guideTo(here);
+      navigation.reject(new Error('no such app'));
+      await guiding;
+
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ guide: { id: 'here', navigating: false }, notice: null })
+      );
+    });
   });
 });

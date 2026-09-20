@@ -45,6 +45,17 @@ describe('newCommentSchema', () => {
     expect(() => newCommentSchema.validate(withRoute(path))).toThrow();
   });
 
+  it('takes a screenshot with its image only: a comment is kept for good, and one without could never be shown', () => {
+    const snapshot = { mimeType: 'image/jpeg', width: 800, height: 600 };
+    expect(() =>
+      newCommentSchema.validate({ ...valid, snapshot: { ...snapshot, image: 'AAAA' } })
+    ).not.toThrow();
+    expect(() => newCommentSchema.validate({ ...valid, snapshot })).toThrow(/image/);
+    expect(() =>
+      newCommentSchema.validate({ ...valid, snapshot: { ...snapshot, image: '' } })
+    ).toThrow(/image/);
+  });
+
   it('rejects timestamps Elasticsearch would not store', () => {
     const reply = valid.replies[0];
     expect(() =>

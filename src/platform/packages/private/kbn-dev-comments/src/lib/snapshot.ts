@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SNAPSHOT_MAX_BYTES, SNAPSHOT_MAX_DIMENSION } from '../constants';
-import type { CommentSnapshot } from '../types';
+import type { NewSnapshot } from '../types';
 
 /** Wide enough to read UI text in the full-screen view, small enough to fit the byte budget at a decent quality. */
 const OUTPUT_MAX_WIDTH = 1600;
@@ -55,7 +55,7 @@ const flatten = (
  */
 export const createSnapshot = async (
   captureViewport: () => Promise<HTMLCanvasElement>
-): Promise<CommentSnapshot> => {
+): Promise<NewSnapshot> => {
   const canvas = await captureViewport();
   if (canvas.width === 0 || canvas.height === 0) {
     throw new Error(

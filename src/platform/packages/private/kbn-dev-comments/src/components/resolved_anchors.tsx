@@ -17,7 +17,7 @@ import React, {
 } from 'react';
 import { placeAnchor, type PlacedAnchor } from '../lib/anchor';
 import { createAnchorResolver } from '../lib/anchor_resolver';
-import { usePageComments } from './comments_context';
+import { useCommentsState, usePageComments } from './comments_context';
 import { layoutTracker, useLayoutTick } from './hooks';
 
 export type ResolvedAnchors = ReadonlyMap<string, PlacedAnchor | null>;
@@ -40,10 +40,14 @@ export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
   const [, retry] = useReducer((retries: number) => retries + 1, 0);
 
   const { resolved, retryAt } = resolver.resolve(comments, { tick, now: Date.now() });
+  // A screenshot shown full screen from a thread covers the page, the layer and the
+  // thread's pin alike; were what it covers looked at, the pin would go, and the
+  // thread and the screenshot with it. The layer sits under the mask meanwhile.
+  const overlayOpen = useCommentsState((state) => state.overlayOpen);
   const placed = new Map<string, PlacedAnchor | null>(
     comments.map(({ id, anchor }) => {
       const match = resolved.get(id);
-      return [id, match ? placeAnchor(anchor, match) : null];
+      return [id, match ? placeAnchor(anchor, match, overlayOpen ? { exposed: true } : {}) : null];
     })
   );
 

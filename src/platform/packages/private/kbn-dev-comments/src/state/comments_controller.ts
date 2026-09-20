@@ -16,11 +16,11 @@ import type {
   Comment,
   CommentAuthor,
   CommentRoute,
-  CommentSnapshot,
   CommentsHostServices,
   CommentsUser,
   ElementAnchor,
   NewComment,
+  NewSnapshot,
   TrailStep,
 } from '../types';
 import { createStore, type Store } from './store';
@@ -157,7 +157,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
   const takeScreenshot = async (
     draft: PendingComment,
     captureViewport: () => Promise<HTMLCanvasElement>
-  ): Promise<CommentSnapshot> => {
+  ): Promise<NewSnapshot> => {
     if (location.getPath() !== draft.route.path) {
       throw new ScreenshotError(
         i18n.translate('devComments.snapshot.pageChanged', {
@@ -523,7 +523,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       if (!guide.navigating) {
         return;
       }
-      // Meanwhile the guide may have been stopped, or started over.
+      // Meanwhile the guide may have been stopped, or started over: then neither
+      // the outcome nor, failing, the news of it is this guide's to give any more.
       const current = () => store.getState().guide === guide;
       try {
         await services.navigateToPath(route.path);
@@ -531,9 +532,10 @@ export const createCommentsController = (services: CommentsHostServices): Commen
           store.setState({ guide: { id, navigating: false } });
         }
       } catch (error) {
-        if (current()) {
-          store.setState({ guide: null });
+        if (!current()) {
+          return;
         }
+        store.setState({ guide: null });
         notify(
           'error',
           i18n.translate('devComments.notice.navigateFailed', {

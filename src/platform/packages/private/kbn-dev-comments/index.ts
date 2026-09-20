@@ -25,5 +25,6 @@ export type {
   CommentsUser,
   ElementAnchor,
   NewComment,
+  NewSnapshot,
   TrailStep,
 } from './src/types';
