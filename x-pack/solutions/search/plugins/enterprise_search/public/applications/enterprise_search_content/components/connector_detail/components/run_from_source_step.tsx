@@ -176,7 +176,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
                 exampleFile: (
                   <EuiLink
                     data-test-subj="enterpriseSearchRunFromSourceStepExampleFileLink"
-                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
+                    href="https://github.com/elastic/connectors/blob/main/app/connectors_service/config.yml.example"
                     target="_blank"
                     external
                   >
