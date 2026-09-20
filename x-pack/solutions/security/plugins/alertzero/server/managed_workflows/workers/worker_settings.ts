@@ -58,10 +58,9 @@ const toTemplateValues = (
  * defaulted or merged in, and a document from an older development shape fails here so the
  * Worker projects as unavailable until that state is reset.
  *
- * The one exception is the autonomy level: a Worker that narrows its declaration leaves documents
- * holding a level it no longer offers, which is not a version change and so has nothing to migrate
- * on. Those read as the closest level the Worker still offers that is no more autonomous (see
- * `projectStoredAutonomyLevel`); the next save persists the projection.
+ * The one exception is the autonomy level: a stored level the Worker no longer offers is projected
+ * onto what it does offer (see `projectStoredAutonomyLevel`) rather than failing the read; the next
+ * save persists the projection.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
