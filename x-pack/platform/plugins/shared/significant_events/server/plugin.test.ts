@@ -10,7 +10,6 @@ import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quo
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import { eventsDataStream } from './lib/significant_events/events';
-import { memoriesDataStream, memoryHistoryDataStream } from './memory_and_investigation/lib/memory';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
@@ -65,13 +64,7 @@ describe('SignificantEventsPlugin setup', () => {
 
     expect(
       core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
-    ).toEqual([
-      detectionsDataStream,
-      eventsDataStream,
-      knowledgeIndicatorsDataStream,
-      memoriesDataStream,
-      memoryHistoryDataStream,
-    ]);
+    ).toEqual([detectionsDataStream, eventsDataStream, knowledgeIndicatorsDataStream]);
   });
 
   it('registers a callback without accessing start services', () => {
