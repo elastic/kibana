@@ -14,11 +14,11 @@ import {
   seedCorpusIfAbsent,
 } from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
-import { retrievalEvaluators } from '../../src/evaluators';
-import { toKeywordFilter } from '../../src/keyword_filter';
-import { executeGetLogs, executeGetLogsSemantic } from '../../src/tool_client';
+import { retrievalEvaluators } from '../../src/retrieval/evaluators';
+import { toKeywordFilter } from '../../src/retrieval/keyword_filter';
+import { executeGetLogs, executeGetLogsSemantic } from '../../src/retrieval/tool_client';
+import type { RetrievalTaskOutput } from '../../src/retrieval/types';
 import { ARMS } from '../../src/types';
-import type { RetrievalTaskOutput } from '../../src/types';
 
 /** Resolved once at module load; all tests in this file use the same corpus. */
 const corpus = resolveCorpus();

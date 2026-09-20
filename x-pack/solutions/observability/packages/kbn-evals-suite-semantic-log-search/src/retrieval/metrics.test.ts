@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CORPORA } from './corpora';
-import type { RetrievedPattern } from './metrics';
+import { CORPORA } from '../corpora';
+import type { RetrievedPattern } from './types';
 import {
   distinctRelevantMessagesAtK,
   precisionAtK,

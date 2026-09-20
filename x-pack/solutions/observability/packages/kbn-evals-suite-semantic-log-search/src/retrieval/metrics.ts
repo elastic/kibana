@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { EvalQuery, RelevanceGrade } from './ground_truth';
-import { gradeOf, isTrap, matchedLabels, relevantLabels } from './ground_truth';
+import type { EvalQuery, RelevanceGrade } from '../ground_truth';
+import { gradeOf, isTrap, matchedLabels, relevantLabels } from '../ground_truth';
 import type { RetrievedPattern } from './types';
-
-// Re-export so consumers that imported RetrievedPattern from this module continue to work.
-export type { RetrievedPattern } from './types';
 
 // ─── Private helpers ────────────────────────────────────────────────────────
 

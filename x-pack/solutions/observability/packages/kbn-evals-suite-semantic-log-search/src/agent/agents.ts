@@ -8,8 +8,8 @@
 import { createHash } from 'crypto';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
-import type { Arm } from './types';
+import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from '../constants';
+import type { Arm } from '../types';
 
 const AGENTS_API_PATH = '/api/agent_builder/agents';
 

@@ -7,8 +7,8 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
-import type { CorpusProfile } from './corpora';
+import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from '../constants';
+import type { CorpusProfile } from '../corpora';
 import type { RetrievalTaskOutput, RetrievedPattern } from './types';
 
 /**

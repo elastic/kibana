@@ -8,7 +8,10 @@
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { evaluate, tags } from '@kbn/evals';
 import type { AgentBuilderClient, DefaultEvaluators, EvalsExecutorClient } from '@kbn/evals';
-import { createArmAgent, deleteAgent } from '../../src/agents';
+import { createArmAgent, deleteAgent } from '../../src/agent/agents';
+import { agentEvaluators } from '../../src/agent/evaluators';
+import type { AgentEvaluator } from '../../src/agent/evaluators';
+import type { AgentTaskOutput } from '../../src/agent/types';
 import { resolveCorpus } from '../../src/corpora';
 import {
   assertCorpusIsLabelled,
@@ -17,10 +20,8 @@ import {
   seedCorpusIfAbsent,
 } from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
-import { agentEvaluators } from '../../src/evaluators';
-import type { AgentEvaluator } from '../../src/evaluators';
 import { ARMS } from '../../src/types';
-import type { AgentTaskOutput, Arm } from '../../src/types';
+import type { Arm } from '../../src/types';
 
 /** Resolved once at module load; all tests in this file use the same corpus. */
 const corpus = resolveCorpus();
