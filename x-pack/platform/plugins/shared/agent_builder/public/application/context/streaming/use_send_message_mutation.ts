@@ -225,9 +225,8 @@ export const useSendMessageMutation = ({
           isAborted: () => isStreamCancelled(handle),
         }).catch(() => {});
 
-        if (!isStreamCancelled(handle)) {
-          vars.resetAttachments?.();
-        }
+        // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
+        vars.resetAttachments?.();
         clearActiveStream(vars.conversationId);
         await releaseLocalContent({
           refetch: streamActions.refetchConversation,

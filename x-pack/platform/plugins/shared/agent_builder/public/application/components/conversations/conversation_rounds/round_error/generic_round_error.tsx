@@ -19,7 +19,12 @@ const getErrorDetails = (error: unknown): string => {
   const lines = [error.message];
   let cause: unknown = error.cause;
   while (cause instanceof Error) {
-    lines.push(`Caused by: ${cause.name}: ${cause.message}`);
+    lines.push(
+      i18n.translate('xpack.agentBuilder.round.error.generic.causedBy', {
+        defaultMessage: 'Caused by: {name}: {message}',
+        values: { name: cause.name, message: cause.message },
+      })
+    );
     cause = cause.cause;
   }
   return lines.join('\n');
