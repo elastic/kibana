@@ -10,14 +10,17 @@ import { css } from '@emotion/react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import * as i18n from '../settings_translations';
 
-/** Schedule units offered by the "Every N unit" trigger control. */
-const UNIT_OPTIONS = [
-  { value: 'm', text: i18n.SCHEDULE_UNIT_MINUTES },
-  { value: 'h', text: i18n.SCHEDULE_UNIT_HOURS },
-  { value: 'd', text: i18n.SCHEDULE_UNIT_DAYS },
-] as const;
+/**
+ * Unit labels for the "Every N unit" select, pluralized against the amount the reader can see, so
+ * the expanded control agrees with the header band's cadence badge on a one-unit interval.
+ */
+const unitOptionsFor = (amount: number) => [
+  { value: 'm' as const, text: i18n.scheduleUnitMinutes(amount) },
+  { value: 'h' as const, text: i18n.scheduleUnitHours(amount) },
+  { value: 'd' as const, text: i18n.scheduleUnitDays(amount) },
+];
 
-type ScheduleUnit = (typeof UNIT_OPTIONS)[number]['value'];
+type ScheduleUnit = ReturnType<typeof unitOptionsFor>[number]['value'];
 
 const parseInterval = (interval: string | undefined): { amount: number; unit: ScheduleUnit } => {
   const match = /^(\d+)([mhd])$/.exec(interval ?? '');
@@ -162,7 +165,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
         `}
       >
         <EuiSelect
-          options={UNIT_OPTIONS.map(({ value, text }) => ({ value, text }))}
+          options={unitOptionsFor(Number(amountValue))}
           value={unit}
           compressed
           fullWidth

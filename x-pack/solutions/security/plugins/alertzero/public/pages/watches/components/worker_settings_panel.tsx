@@ -186,6 +186,17 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{triggerLabel}</EuiBadge>
           </EuiFlexItem>
+          {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}
+          {error ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="danger"
+                data-test-subj={`alertZeroWorkerHeaderSaveError-${worker.id}`}
+              >
+                {settingsI18n.WORKER_SETTINGS_SAVE_ERROR}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         {description ? (
           <EuiText size="s" color="subdued" css={bandContentStyles.description}>

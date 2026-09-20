@@ -679,20 +679,23 @@ export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Autonomy level' }
 );
 
-export const SCHEDULE_UNIT_DAYS = i18n.translate(
-  'xpack.alertzero.watches.settings.trigger.unit.days',
-  { defaultMessage: 'days' }
-);
+export const scheduleUnitDays = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.days', {
+    defaultMessage: '{amount, plural, one {day} other {days}}',
+    values: { amount },
+  });
 
-export const SCHEDULE_UNIT_HOURS = i18n.translate(
-  'xpack.alertzero.watches.settings.trigger.unit.hours',
-  { defaultMessage: 'hours' }
-);
+export const scheduleUnitHours = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.hours', {
+    defaultMessage: '{amount, plural, one {hour} other {hours}}',
+    values: { amount },
+  });
 
-export const SCHEDULE_UNIT_MINUTES = i18n.translate(
-  'xpack.alertzero.watches.settings.trigger.unit.minutes',
-  { defaultMessage: 'minutes' }
-);
+export const scheduleUnitMinutes = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.minutes', {
+    defaultMessage: '{amount, plural, one {minute} other {minutes}}',
+    values: { amount },
+  });
 
 export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.trigger.amountAriaLabel',

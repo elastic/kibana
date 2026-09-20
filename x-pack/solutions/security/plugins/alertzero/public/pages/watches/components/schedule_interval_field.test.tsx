@@ -120,4 +120,44 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
     expect(amount).not.toBeInvalid();
     expect(onValidityChange).toHaveBeenLastCalledWith(true);
   });
+
+  it('reads the unit options as singular when the amount is one', () => {
+    // The collapsed header band pluralizes its cadence badge, so a unit-only plural here would
+    // have the same Worker read "Every 1 hour" collapsed and "Every 1 hours" expanded.
+    render(
+      <ScheduleIntervalField
+        workerId={WORKER_ID}
+        current="1h"
+        onChange={jest.fn()}
+        onValidityChange={jest.fn()}
+        resetKey={0}
+      />
+    );
+
+    const unit = screen.getByTestId(`alertZeroTriggerUnit-${WORKER_ID}`);
+    expect(Array.from(unit.querySelectorAll('option')).map((o) => o.textContent)).toEqual([
+      'minute',
+      'hour',
+      'day',
+    ]);
+  });
+
+  it('reads the unit options as plural when the amount is not one', () => {
+    render(
+      <ScheduleIntervalField
+        workerId={WORKER_ID}
+        current="2h"
+        onChange={jest.fn()}
+        onValidityChange={jest.fn()}
+        resetKey={0}
+      />
+    );
+
+    const unit = screen.getByTestId(`alertZeroTriggerUnit-${WORKER_ID}`);
+    expect(Array.from(unit.querySelectorAll('option')).map((o) => o.textContent)).toEqual([
+      'minutes',
+      'hours',
+      'days',
+    ]);
+  });
 });

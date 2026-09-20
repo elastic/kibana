@@ -935,4 +935,47 @@ describe('WatchDetailPage', () => {
     expect(afterNav).toHaveValue(24);
     expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
   });
+
+  it('surfaces a failed save on the collapsed Worker header', async () => {
+    // A failed PATCH renders its message inside the accordion body, so a Worker the analyst
+    // collapsed before saving would report nothing at all — the draft stays unsaved silently.
+    const shared = floorWorkers[1];
+    mockUseWorkers.mockReturnValue({
+      data: { workers: floorWorkers },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+
+    render(
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
+    fireEvent.change(amount, { target: { value: '48' } });
+    fireEvent.blur(amount);
+
+    // Collapse the edited Worker before saving, so its body is out of view.
+    fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${shared.id}`));
+
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+
+    // The header band carries the failure, so the collapsed panel still reports it.
+    expect(
+      await screen.findByTestId(`alertZeroWorkerHeaderSaveError-${shared.id}`)
+    ).toBeInTheDocument();
+  });
 });
