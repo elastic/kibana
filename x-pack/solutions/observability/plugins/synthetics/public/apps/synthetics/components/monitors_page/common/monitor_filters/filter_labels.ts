@@ -42,3 +42,48 @@ export const STATUS_LABEL = i18n.translate(
     defaultMessage: `Status`,
   }
 );
+
+export const STATUS_CODE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.filter.statusCodeLabel',
+  {
+    defaultMessage: 'Status code',
+  }
+);
+
+export const STATUS_UP_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.up', {
+  defaultMessage: 'Up',
+});
+
+export const STATUS_DOWN_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.down', {
+  defaultMessage: 'Down',
+});
+
+export const STATUS_DISABLED_LABEL = i18n.translate(
+  'xpack.synthetics.overview.status.filters.disabled',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
+
+export const STATUS_PENDING_LABEL = i18n.translate(
+  'xpack.synthetics.overview.status.filters.pending',
+  {
+    defaultMessage: 'Pending',
+  }
+);
+
+export const STATUS_STALE_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.stale', {
+  defaultMessage: 'Stale',
+});
+
+const STATUS_FILTER_LABELS: Record<string, string> = {
+  up: STATUS_UP_LABEL,
+  down: STATUS_DOWN_LABEL,
+  disabled: STATUS_DISABLED_LABEL,
+  pending: STATUS_PENDING_LABEL,
+  stale: STATUS_STALE_LABEL,
+};
+
+export const getStatusFilterLabel = (statusFilter: string): string =>
+  STATUS_FILTER_LABELS[statusFilter] ??
+  statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1);

@@ -6,12 +6,14 @@
  */
 
 import type { SyntheticsUrlParams } from '../url_params';
+import type { SyntheticsMonitorFilterField } from './filter_fields';
 import { getMonitorFilterFields } from './filter_fields';
 
 const ACTIVE_MONITOR_FILTER_URL_KEYS = [
   ...getMonitorFilterFields(),
   'query',
   'statusFilter',
+  'statusCodes',
   'configIds',
 ] as const;
 
@@ -21,6 +23,12 @@ const MONITOR_FILTER_URL_KEYS_TO_CLEAR = [...ACTIVE_MONITOR_FILTER_URL_KEYS, 'pa
 
 type ActiveMonitorFilterUrlKey = (typeof ACTIVE_MONITOR_FILTER_URL_KEYS)[number];
 
+export interface MonitorFilterActivityOptions {
+  excludeFields?: ReadonlyArray<SyntheticsMonitorFilterField>;
+  includeStatusFilter?: boolean;
+  includeStatusCodes?: boolean;
+}
+
 const isActiveFilterValue = (value: SyntheticsUrlParams[ActiveMonitorFilterUrlKey]): boolean => {
   if (Array.isArray(value)) {
     return value.length > 0;
@@ -28,8 +36,28 @@ const isActiveFilterValue = (value: SyntheticsUrlParams[ActiveMonitorFilterUrlKe
   return Boolean(value);
 };
 
-export const hasActiveMonitorFilters = (params: SyntheticsUrlParams): boolean =>
-  ACTIVE_MONITOR_FILTER_URL_KEYS.some((key) => isActiveFilterValue(params[key]));
+export const hasActiveMonitorFilters = (
+  params: SyntheticsUrlParams,
+  options: MonitorFilterActivityOptions = {}
+): boolean => {
+  const excluded = new Set(options.excludeFields ?? []);
+  const includeStatusFilter = options.includeStatusFilter ?? true;
+  const includeStatusCodes = options.includeStatusCodes ?? false;
+
+  const keys: ActiveMonitorFilterUrlKey[] = [
+    ...getMonitorFilterFields().filter((field) => !excluded.has(field)),
+    'query',
+    'configIds',
+  ];
+  if (includeStatusFilter) {
+    keys.push('statusFilter');
+  }
+  if (includeStatusCodes) {
+    keys.push('statusCodes');
+  }
+
+  return keys.some((key) => isActiveFilterValue(params[key]));
+};
 
 export const getClearedMonitorFilterParams = (): Partial<
   Record<keyof SyntheticsUrlParams, string>

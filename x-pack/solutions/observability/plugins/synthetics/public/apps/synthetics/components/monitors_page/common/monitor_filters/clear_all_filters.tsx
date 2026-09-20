@@ -9,16 +9,18 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
+import type { MonitorFilterActivityOptions } from '../../../../utils/filters/clear_monitor_filter_params';
 import {
   getClearedMonitorFilterParams,
   hasActiveMonitorFilters,
 } from '../../../../utils/filters/clear_monitor_filter_params';
+import { notifyMonitorFiltersCleared } from './monitor_filters_cleared';
 
-export function ClearAllFilters() {
+export function ClearAllFilters(options: MonitorFilterActivityOptions = {}) {
   const urlParams = useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
 
-  if (!hasActiveMonitorFilters(urlParams)) {
+  if (!hasActiveMonitorFilters(urlParams, options)) {
     return null;
   }
 
@@ -28,7 +30,10 @@ export function ClearAllFilters() {
         data-test-subj="syntheticsClearAllFiltersButton"
         iconType="cross"
         size="s"
-        onClick={() => updateUrlParams(getClearedMonitorFilterParams())}
+        onClick={() => {
+          notifyMonitorFiltersCleared();
+          updateUrlParams(getClearedMonitorFilterParams());
+        }}
         aria-label={CLEAR_ALL_FILTERS_ARIA_LABEL}
       >
         {CLEAR_ALL_FILTERS_LABEL}

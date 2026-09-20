@@ -424,7 +424,7 @@ export class SyntheticsAppPage {
     await this.page.getByLabel(`expands filter group for ${filterLabel} filter`).click();
     const option = this.page.testSubj
       .locator('o11yFieldValueSelectionSelectable')
-      .locator(`li[title="${optionText}"]`);
+      .getByRole('option', { name: optionText });
     await option.waitFor({ state: 'visible' });
     const wasChecked = (await option.getAttribute('aria-checked')) === 'true';
     await option.click();
@@ -436,6 +436,10 @@ export class SyntheticsAppPage {
       .and(this.page.locator(':enabled'));
     await applyButton.waitFor({ state: 'visible' });
     await applyButton.click();
+  }
+
+  async clearAllFilters() {
+    await this.page.testSubj.click('syntheticsClearAllFiltersButton');
   }
 
   async deleteMonitorFromEditPage() {

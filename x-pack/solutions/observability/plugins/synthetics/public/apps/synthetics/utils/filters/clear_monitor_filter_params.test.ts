@@ -32,6 +32,26 @@ describe('clear monitor filter params', () => {
     expect(hasActiveMonitorFilters(getSupportedUrlParams({ statusFilter: 'down' }))).toBe(true);
   });
 
+  it('is active for status codes only when that key is in scope', () => {
+    const params = getSupportedUrlParams({ statusCodes: JSON.stringify(['500']) });
+
+    expect(hasActiveMonitorFilters(params)).toBe(false);
+    expect(hasActiveMonitorFilters(params, { includeStatusCodes: true })).toBe(true);
+  });
+
+  it('ignores excluded fields and out-of-scope status filters', () => {
+    expect(
+      hasActiveMonitorFilters(getSupportedUrlParams({ schedules: JSON.stringify(['3']) }), {
+        excludeFields: ['schedules'],
+      })
+    ).toBe(false);
+    expect(
+      hasActiveMonitorFilters(getSupportedUrlParams({ statusFilter: 'down' }), {
+        includeStatusFilter: false,
+      })
+    ).toBe(false);
+  });
+
   it('ignores date range, view, and pagination-only', () => {
     expect(
       hasActiveMonitorFilters(
@@ -52,6 +72,7 @@ describe('clear monitor filter params', () => {
       expect.objectContaining({
         query: undefined,
         statusFilter: undefined,
+        statusCodes: undefined,
         tags: undefined,
         locations: undefined,
         monitorTypes: undefined,

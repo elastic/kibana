@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux-v7';
 import { isLogicalAndField } from '../../../../../../../common/constants';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
+import type { MonitorFilterActivityOptions } from '../../../../utils/filters/clear_monitor_filter_params';
 import { hasActiveMonitorFilters } from '../../../../utils/filters/clear_monitor_filter_params';
 import type {
   SyntheticsMonitorFilterChangeHandler,
@@ -27,22 +28,33 @@ import {
   LOCATION_LABEL,
   PROJECT_LABEL,
   SCHEDULE_LABEL,
+  STATUS_CODE_LABEL,
   STATUS_LABEL,
   TAGS_LABEL,
   TYPE_LABEL,
+  getStatusFilterLabel,
 } from './filter_labels';
 
 export function SelectedFilterPills({
   handleFilterChange,
   excludeFields,
+  includeStatusFilter = true,
+  includeStatusCodes = false,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
   excludeFields?: ReadonlyArray<SyntheticsMonitorFilterField>;
+  includeStatusFilter?: boolean;
+  includeStatusCodes?: boolean;
 }) {
   const urlParams = useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
   const { locations } = useSelector(selectServiceLocationsState);
   const excluded = new Set(excludeFields ?? []);
+  const activityOptions: MonitorFilterActivityOptions = {
+    excludeFields,
+    includeStatusFilter,
+    includeStatusCodes,
+  };
 
   const pillFields: Array<{ field: SyntheticsMonitorFilterField; label: string }> = [
     { field: 'monitorTypes', label: TYPE_LABEL },
@@ -60,19 +72,21 @@ export function SelectedFilterPills({
       continue;
     }
 
-    const selectedLabels = getSyntheticsFilterDisplayValues(
-      valueToLabelWithEmptyCount(urlParams[field]),
-      field,
-      locations
-    ).map(({ label }) => label);
+    const rawValues = valueToLabelWithEmptyCount(urlParams[field]);
+    const selectedLabels = getSyntheticsFilterDisplayValues(rawValues, field, locations).map(
+      ({ label }) => label
+    );
 
-    for (const value of selectedLabels) {
+    selectedLabels.forEach((displayLabel, index) => {
+      const urlValue = rawValues[index]?.label ?? displayLabel;
       pills.push({
-        key: `${field}-${value}`,
-        text: selectedPillText(filterLabel, value),
-        ariaLabel: removePillAriaLabel(filterLabel, value),
+        key: `${field}-${urlValue}`,
+        text: selectedPillText(filterLabel, displayLabel),
+        ariaLabel: removePillAriaLabel(filterLabel, displayLabel),
         onRemove: () => {
-          const remaining = selectedLabels.filter((label) => label !== value);
+          const remaining = rawValues
+            .map((value) => value.label)
+            .filter((value) => value !== urlValue);
           handleFilterChange(
             field,
             remaining.length > 0 ? remaining : undefined,
@@ -84,11 +98,11 @@ export function SelectedFilterPills({
           );
         },
       });
-    }
+    });
   }
 
-  if (urlParams.statusFilter) {
-    const statusValue = formatStatusFilter(urlParams.statusFilter);
+  if (includeStatusFilter && urlParams.statusFilter) {
+    const statusValue = getStatusFilterLabel(urlParams.statusFilter);
     pills.push({
       key: `statusFilter-${urlParams.statusFilter}`,
       text: selectedPillText(STATUS_LABEL, statusValue),
@@ -97,7 +111,23 @@ export function SelectedFilterPills({
     });
   }
 
-  if (pills.length === 0 && !hasActiveMonitorFilters(urlParams)) {
+  if (includeStatusCodes) {
+    for (const code of urlParams.statusCodes ?? []) {
+      pills.push({
+        key: `statusCodes-${code}`,
+        text: selectedPillText(STATUS_CODE_LABEL, code),
+        ariaLabel: removePillAriaLabel(STATUS_CODE_LABEL, code),
+        onRemove: () => {
+          const remaining = (urlParams.statusCodes ?? []).filter((value) => value !== code);
+          updateUrlParams({
+            statusCodes: remaining.length > 0 ? JSON.stringify(remaining) : undefined,
+          });
+        },
+      });
+    }
+  }
+
+  if (pills.length === 0 && !hasActiveMonitorFilters(urlParams, activityOptions)) {
     return null;
   }
 
@@ -124,14 +154,10 @@ export function SelectedFilterPills({
             </EuiBadgeGroup>
           </EuiFlexItem>
         ) : null}
-        <ClearAllFilters />
+        <ClearAllFilters {...activityOptions} />
       </EuiFlexGroup>
     </>
   );
-}
-
-function formatStatusFilter(statusFilter: string): string {
-  return statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1);
 }
 
 function selectedPillText(filterLabel: string, value: string): string {

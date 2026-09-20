@@ -90,7 +90,7 @@ test.describe(
         await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
         await expect(page.getByText('1-1')).toBeVisible();
 
-        await pageObjects.syntheticsApp.selectFilterOption('Frequency', 'Every 5 minutes');
+        await pageObjects.syntheticsApp.clearAllFilters();
         await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
         await expect(page.getByText('1-3')).toBeVisible();
       });

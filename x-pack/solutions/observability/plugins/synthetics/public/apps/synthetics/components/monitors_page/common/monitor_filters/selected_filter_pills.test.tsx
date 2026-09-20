@@ -71,7 +71,7 @@ describe('SelectedFilterPills', () => {
 
     fireEvent.click(getByRole('button', { name: 'Remove Type filter HTTP' }));
 
-    expect(handleFilterChange).toHaveBeenCalledWith('monitorTypes', ['TCP'], false);
+    expect(handleFilterChange).toHaveBeenCalledWith('monitorTypes', ['tcp'], false);
   });
 
   it('clears the last remaining value for a field', () => {
@@ -84,7 +84,7 @@ describe('SelectedFilterPills', () => {
     expect(handleFilterChange).toHaveBeenCalledWith('tags', undefined, false);
   });
 
-  it('omits excluded fields', () => {
+  it('hides the row when the only selected field is excluded', () => {
     useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ schedules: ['3'] }));
 
     const { queryByText } = render(
@@ -92,5 +92,51 @@ describe('SelectedFilterPills', () => {
     );
 
     expect(queryByText(/Frequency:/)).toBeNull();
+    expect(queryByText('Clear all filters')).toBeNull();
+  });
+
+  it('hides status and remote pills that do not apply on management', () => {
+    useGetUrlParamsSpy.mockReturnValue(
+      mockUrlParams({
+        statusFilter: 'down',
+        remoteNames: ['remote-ccs'],
+      })
+    );
+
+    const { queryByText } = render(
+      <SelectedFilterPills
+        handleFilterChange={handleFilterChange}
+        excludeFields={['remoteNames']}
+        includeStatusFilter={false}
+      />
+    );
+
+    expect(queryByText(/Status:/)).toBeNull();
+    expect(queryByText(/Remote cluster:/)).toBeNull();
+    expect(queryByText('Clear all filters')).toBeNull();
+  });
+
+  it('shows status-code pills when enabled and omits inapplicable status', () => {
+    useGetUrlParamsSpy.mockReturnValue(
+      mockUrlParams({
+        statusFilter: 'down',
+        statusCodes: ['500'],
+        remoteNames: ['remote-ccs'],
+      })
+    );
+
+    const { getByText, queryByText } = render(
+      <SelectedFilterPills
+        handleFilterChange={handleFilterChange}
+        excludeFields={['schedules', 'remoteNames']}
+        includeStatusFilter={false}
+        includeStatusCodes
+      />
+    );
+
+    expect(getByText('Status code: 500')).toBeInTheDocument();
+    expect(queryByText(/Status:/)).toBeNull();
+    expect(queryByText(/Remote cluster:/)).toBeNull();
+    expect(getByText('Clear all filters')).toBeInTheDocument();
   });
 });

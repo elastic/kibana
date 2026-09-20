@@ -106,7 +106,9 @@ export const ErrorsTab = () => {
         </EuiFlexGroup>
         <SelectedFilterPills
           handleFilterChange={handleFilterChange}
-          excludeFields={['schedules']}
+          excludeFields={['schedules', 'remoteNames']}
+          includeStatusFilter={false}
+          includeStatusCodes
         />
         <EuiSpacer size="m" />
         {apiError && (

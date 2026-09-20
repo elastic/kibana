@@ -28,7 +28,11 @@ export const ListFilters = function ({
           <FilterGroup handleFilterChange={handleFilterChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <SelectedFilterPills handleFilterChange={handleFilterChange} />
+      <SelectedFilterPills
+        handleFilterChange={handleFilterChange}
+        excludeFields={['remoteNames']}
+        includeStatusFilter={false}
+      />
     </>
   );
 };
