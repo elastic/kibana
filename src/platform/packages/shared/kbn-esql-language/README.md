@@ -52,18 +52,18 @@ Much of the functionality of this package is demonstrated in the demo UI. You
 can run it in Storybook, using the following command:
 
 ```bash
-yarn storybook esql_ast_inspector
+pnpm storybook esql_ast_inspector
 ```
 
 Alternatively, you can start Kibana with _Example Plugins_ enabled, using:
 
 ```bash
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 Then navigate to the _ES|QL AST Inspector_ plugin in the Kibana UI.
 
 ## Keeping ES|QL AST library up to date
 
-In general when operating on changes here use the `yarn kbn watch` in a terminal
+In general when operating on changes here use the `pnpm kbn watch` in a terminal
 window to make sure changes are correctly compiled.
