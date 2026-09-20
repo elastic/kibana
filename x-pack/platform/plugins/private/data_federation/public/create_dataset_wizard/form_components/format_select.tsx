@@ -36,7 +36,7 @@ const formatOptionSelectedDisplay = ({ title, testSubj }: { title: string; testS
   </div>
 );
 
-const FORMAT_OPTIONS = [
+const FORMAT_OPTIONS: Array<EuiSuperSelectOption<DatasetFormatFormValue>> = [
   {
     value: 'csv',
     inputDisplay: formatOptionSelectedDisplay({
@@ -89,20 +89,22 @@ const FORMAT_OPTIONS = [
     }),
     'data-test-subj': 'createDatasetSettingsFormatOption-parquet',
   },
-  // {
-  //   value: 'orc',
-  //   inputDisplay: formatOptionSelectedDisplay({
-  //     title: createDatasetWizardStrings.settingsFormatOrc,
-  //     testSubj: 'createDatasetSettingsFormatInput-orc',
-  //   }),
-  //   dropdownDisplay: formatOptionDisplay({
-  //     title: createDatasetWizardStrings.settingsFormatOrc,
-  //     description: createDatasetWizardStrings.settingsFormatOrcDescription,
-  //     testSubj: 'createDatasetSettingsFormatDropdown-orc',
-  //   }),
-  //   'data-test-subj': 'createDatasetSettingsFormatOption-orc',
-  // },
-] satisfies Array<EuiSuperSelectOption<DatasetFormatFormValue>>;
+  /* ORC is currently disabled but will be supported in the future.
+  {
+    value: 'orc',
+    inputDisplay: formatOptionSelectedDisplay({
+      title: createDatasetWizardStrings.settingsFormatOrc,
+      testSubj: 'createDatasetSettingsFormatInput-orc',
+    }),
+    dropdownDisplay: formatOptionDisplay({
+      title: createDatasetWizardStrings.settingsFormatOrc,
+      description: createDatasetWizardStrings.settingsFormatOrcDescription,
+      testSubj: 'createDatasetSettingsFormatDropdown-orc',
+    }),
+    'data-test-subj': 'createDatasetSettingsFormatOption-orc',
+  },
+  */
+];
 
 export function FormatSelect({
   value,
