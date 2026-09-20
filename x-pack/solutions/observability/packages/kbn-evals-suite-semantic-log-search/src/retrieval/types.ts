@@ -14,10 +14,30 @@ export interface RetrievedPattern {
   pattern: string;
   /** The representative message; this is what ground truth labels match against. */
   message: string;
-  /** Number of documents sharing the pattern in the time window. */
+  /**
+   * Number of documents sharing the pattern in **the query time window**.
+   * Strategies MUST honour this contract. A strategy that returns a lifetime or
+   * rolling counter inflates `weightedPrecisionAtK` and violates the invariant
+   * checked by `countSanityEvaluator`.
+   */
   count: number;
   /** Reranker relevance score (logit). Only present for semantic strategies. */
   relevanceScore?: number;
+  /**
+   * Stable dictionary entry identifier. Only populated by indexed strategies (M2).
+   * Runtime `CATEGORIZE` strategies leave this undefined.
+   */
+  patternId?: string;
+  /**
+   * ISO timestamp of the earliest occurrence. Only populated by indexed strategies
+   * that maintain a persistent dictionary with time bounds.
+   */
+  firstSeen?: string;
+  /**
+   * ISO timestamp of the latest occurrence. Only populated by indexed strategies
+   * that maintain a persistent dictionary with time bounds.
+   */
+  lastSeen?: string;
 }
 
 /** Output of the retrieval arm: ranked patterns, with no model in the loop. */
@@ -26,4 +46,6 @@ export interface RetrievalTaskOutput {
   totalCount: number;
   warnings: string[];
   error?: string;
+  /** Wall-clock time from fetch start to parsed result, in milliseconds. */
+  latencyMs: number;
 }

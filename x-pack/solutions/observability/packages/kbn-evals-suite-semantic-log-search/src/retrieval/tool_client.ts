@@ -77,6 +77,7 @@ const executeTool = async ({
   toolParams: Record<string, unknown>;
   toPatterns: (data: ToolData) => RetrievedPattern[];
 }): Promise<RetrievalTaskOutput> => {
+  const fetchStart = Date.now();
   const response = await fetch<ToolExecuteResponse>('/api/agent_builder/tools/_execute', {
     method: 'POST',
     version: '2023-10-31',
@@ -91,27 +92,42 @@ const executeTool = async ({
       },
     }),
   });
+  const latencyMs = Date.now() - fetchStart;
 
   const results = response.results ?? [];
   const errorResult = results.find((result) => result.type === 'error');
 
   if (errorResult) {
     const message = (errorResult.data as { message?: string } | undefined)?.message ?? 'unknown';
-    log.error(`${toolId} returned an error: ${message}`);
-    return { patterns: [], totalCount: 0, warnings: [], error: message };
+    // Throw rather than returning a zero-scoring result. A broken run must
+    // invalidate the experiment, not silently compete with valid runs.
+    throw new Error(`${toolId} returned an error: ${message}`);
   }
 
   const data = (results[0]?.data ?? {}) as ToolData;
   const warnings = data.warnings ?? [];
+  const totalCount = data.totalCount ?? 0;
 
   if (warnings.length > 0) {
     log.warning(`${toolId} warnings: ${warnings.join('; ')}`);
   }
 
+  const patterns = toPatterns(data);
+
+  // Guard against field-name drift: if the tool reported matching documents but
+  // we parsed zero patterns, the response format has likely changed.
+  if (patterns.length === 0 && totalCount > 0) {
+    throw new Error(
+      `${toolId} reported ${totalCount} matching documents but returned no parseable patterns ` +
+        `— the tool response format may have changed (looked for data.patterns / data.categories).`
+    );
+  }
+
   return {
-    patterns: toPatterns(data),
-    totalCount: data.totalCount ?? 0,
+    patterns,
+    totalCount,
     warnings,
+    latencyMs,
   };
 };
 

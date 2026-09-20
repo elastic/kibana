@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { spawnSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CorpusProfile } from './corpora';
 import { allLabels } from './corpora';
+import { executeGetLogsSemantic } from './retrieval/tool_client';
 
-/** The `.rerank-v1-elasticsearch` inference endpoint available in ES 9.3+. */
+/** The RERANK inference endpoint preconfigured in ES 9.3+; checked for run manifest only. */
 const RERANK_ENDPOINT = '.rerank-v1-elasticsearch';
 
 export interface LabelAudit {
@@ -139,28 +141,119 @@ export const seedCorpusIfAbsent = (
 };
 
 /**
- * Asserts that the `.rerank-v1-elasticsearch` inference endpoint is available.
+ * Asserts that the semantic log search service can serve requests on this cluster.
  *
- * The semantic arm relies on this endpoint for RERANK. Without it the service
- * returns `{ status: 'unavailable', reason: 'inference_unavailable' }` and every
- * metric silently reports zero — which is indistinguishable from a quality regression.
- * Failing loudly here is better than confusing zeros in the results.
+ * Executes the semantic tool with a probe query and fails loudly if the service
+ * returns `unavailable` (empty result + warnings). This is strategy-agnostic: it
+ * asks "can you serve this?" rather than checking for a specific ES endpoint, so it
+ * works on both RERANK clusters (M1) and AI-index clusters (M2).
+ *
+ * Must run after `assertCorpusIsLabelled` so the corpus is known to have data.
+ * Ambiguous empty results (no patterns, no warnings) are logged but do not fail,
+ * because a very specific probe question may genuinely match nothing.
  */
-export const assertRerankCapability = async (esClient: Client, log: ToolingLog): Promise<void> => {
+export const assertSemanticSearchAvailable = async ({
+  fetch,
+  connectorId,
+  corpus,
+  log,
+}: {
+  fetch: HttpHandler;
+  connectorId: string;
+  corpus: CorpusProfile;
+  log: ToolingLog;
+}): Promise<void> => {
+  const probeQuery = corpus.queries.find((q) => q.kind === 'semantic') ?? corpus.queries[0];
+
+  let result;
   try {
-    const response = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
-    if ((response.endpoints?.length ?? 0) === 0) {
-      throw new Error('no endpoints returned');
-    }
-    log.debug(`Rerank endpoint "${RERANK_ENDPOINT}" is available.`);
+    result = await executeGetLogsSemantic({
+      fetch,
+      log,
+      connectorId,
+      corpus,
+      semanticFilter: probeQuery.question,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Semantic arm requires the "${RERANK_ENDPOINT}" inference endpoint, which is ` +
-        `preconfigured in ES 9.3+. Endpoint check failed: ${message}.\n` +
-        `Ensure ML is enabled and the cluster is running ES 9.3 or later.`
+      `Semantic arm pre-flight failed — the service threw an error on a probe query:\n${message}\n` +
+        `Ensure the cluster has the required capabilities for semantic log search.`
     );
   }
+
+  if (result.warnings.length > 0 && result.patterns.length === 0) {
+    throw new Error(
+      `Semantic log search is unavailable on this cluster. Service warnings:\n` +
+        result.warnings.map((w) => `  - ${w}`).join('\n') +
+        `\n\nEnsure the cluster has the required capabilities for semantic log search.`
+    );
+  }
+
+  log.debug(
+    `Semantic arm pre-flight passed (${result.patterns.length} patterns, ` +
+      `${result.latencyMs}ms, ${result.warnings.length} warnings).`
+  );
+};
+
+/**
+ * Emits a one-time run manifest so two results from different clusters are
+ * attributable without ambiguity.
+ *
+ * Records: corpus identity, query window, document count from the audit, ES
+ * version, whether the RERANK endpoint is available (provenance, not a gate),
+ * and the git commit. The RERANK check here is purely informational — it does not
+ * fail the run; `assertSemanticSearchAvailable` is the availability gate.
+ */
+export const logRunManifest = async ({
+  esClient,
+  corpus,
+  audit,
+  log,
+}: {
+  esClient: Client;
+  corpus: CorpusProfile;
+  audit: CorpusAudit;
+  log: ToolingLog;
+}): Promise<void> => {
+  let esVersion = 'unknown';
+  try {
+    const info = await esClient.info();
+    esVersion = info.version.number;
+  } catch {
+    // non-fatal
+  }
+
+  let hasRerank = false;
+  try {
+    const r = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
+    hasRerank = (r.endpoints?.length ?? 0) > 0;
+  } catch {
+    // absent or unauthorized — treat as unavailable
+  }
+
+  let commit = process.env.BUILDKITE_COMMIT ?? process.env.GIT_COMMIT ?? 'unknown';
+  if (commit === 'unknown') {
+    try {
+      commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    } catch {
+      // not in a git repo or git not available
+    }
+  }
+
+  log.info(
+    [
+      'Run manifest:',
+      `  corpus:    ${corpus.id}`,
+      `  target:    ${corpus.target}`,
+      `  window:    ${corpus.timeRange.start} → ${corpus.timeRange.end}`,
+      `  documents: ${audit.totalDocuments}`,
+      `  labels:    ${audit.labels.length - audit.missing.length}/${audit.labels.length} present`,
+      `  rerank:    ${hasRerank ? `available (${RERANK_ENDPOINT})` : 'absent'}`,
+      `  es:        ${esVersion}`,
+      `  commit:    ${commit}`,
+    ].join('\n')
+  );
 };
 
 /**

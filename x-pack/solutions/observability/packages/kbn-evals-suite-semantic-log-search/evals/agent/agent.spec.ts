@@ -15,8 +15,9 @@ import type { AgentTaskOutput } from '../../src/agent/types';
 import { resolveCorpus } from '../../src/corpora';
 import {
   assertCorpusIsLabelled,
-  assertRerankCapability,
+  assertSemanticSearchAvailable,
   auditCorpus,
+  logRunManifest,
   seedCorpusIfAbsent,
 } from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
@@ -56,6 +57,7 @@ evaluate.describe(
         audit = await auditCorpus({ esClient, corpus, log });
       }
       assertCorpusIsLabelled(audit, corpus);
+      await logRunManifest({ esClient, corpus, audit, log });
 
       for (const arm of [ARMS.keyword, ARMS.semantic] as const) {
         agentIdsByArm.set(
@@ -130,8 +132,8 @@ evaluate.describe(
 
     evaluate(
       'semantic arm',
-      async ({ executorClient, agentBuilderClient, evaluators, esClient, log }) => {
-        await assertRerankCapability(esClient, log);
+      async ({ executorClient, agentBuilderClient, evaluators, fetch, connector, log }) => {
+        await assertSemanticSearchAvailable({ fetch, connectorId: connector.id, corpus, log });
         await runArm({ arm: ARMS.semantic, executorClient, agentBuilderClient, evaluators });
       }
     );

@@ -177,6 +177,60 @@ export const topRelevanceScoreEvaluator: RetrievalEvaluator = {
   },
 };
 
+/**
+ * Records end-to-end retrieval latency in milliseconds.
+ *
+ * This is the decisive measurement for M2 (indexed dictionary vs runtime
+ * CATEGORIZE+RERANK): the retrieval layer is where the cost moves, not the agent
+ * layer where LLM latency dominates. Minimize.
+ */
+export const retrievalLatencyEvaluator: RetrievalEvaluator = {
+  name: 'Retrieval Latency',
+  kind: 'CODE',
+  direction: 'minimize',
+  evaluate: async ({ output }) => ({
+    score: output.latencyMs,
+    explanation: `${output.latencyMs}ms fetch-to-parsed`,
+    metadata: { latencyMs: output.latencyMs },
+  }),
+};
+
+/**
+ * Asserts that the sum of pattern document counts does not exceed the corpus
+ * document count for the query window.
+ *
+ * `weightedPrecisionAtK` assumes `count` means "documents in the query window".
+ * A strategy that returns a lifetime or rolling counter violates this and inflates
+ * the metric silently. Bind the corpus `totalDocuments` from `auditCorpus` via
+ * closure in `beforeAll`:
+ *
+ * ```ts
+ * const countSanity = countSanityEvaluator(audit.totalDocuments);
+ * await executorClient.runExperiment({ ... }, [...retrievalEvaluators(corpus), countSanity]);
+ * ```
+ */
+export const countSanityEvaluator = (totalDocuments: number): RetrievalEvaluator => ({
+  name: 'Count Sanity',
+  kind: 'CODE',
+  direction: 'minimize',
+  evaluate: async ({ output }) => {
+    if (output.totalCount > totalDocuments) {
+      return {
+        score: 1,
+        explanation:
+          `totalCount (${output.totalCount}) exceeds corpus documents (${totalDocuments}) ` +
+          `— the strategy may be returning lifetime counters, not window counts`,
+        metadata: { totalCount: output.totalCount, totalDocuments },
+      };
+    }
+    return {
+      score: 0,
+      explanation: `totalCount (${output.totalCount}) within corpus (${totalDocuments} docs)`,
+      metadata: { totalCount: output.totalCount, totalDocuments },
+    };
+  },
+});
+
 export const retrievalEvaluators = (
   corpus: CorpusProfile,
   options: RetrievalEvaluatorOptions = {}
@@ -187,4 +241,5 @@ export const retrievalEvaluators = (
   createTrapEvaluator(corpus, options),
   createDistinctMessagesEvaluator(corpus, options),
   topRelevanceScoreEvaluator,
+  retrievalLatencyEvaluator,
 ];
