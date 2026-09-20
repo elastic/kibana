@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { z } from '@kbn/zod/v4';
+import { WATCH_AUTONOMY_LEVELS } from '../../constants';
 import type { WatchAutonomyLevel, WorkerSettingsWrite } from '../schemas';
 import { WorkerScheduleInterval, WorkerSettings } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -38,6 +39,39 @@ export const getDefaultAutonomyLevel = (
   declaration.allowedAutonomyLevels.includes('manual')
     ? 'manual'
     : declaration.allowedAutonomyLevels[0];
+
+const isWatchAutonomyLevel = (value: unknown): value is WatchAutonomyLevel =>
+  typeof value === 'string' && (WATCH_AUTONOMY_LEVELS as readonly string[]).includes(value);
+
+/**
+ * Projects a stored autonomy level onto the levels the Worker still offers.
+ *
+ * A Worker that narrows its declaration — dropping `supervised` because rule changes always pass a
+ * review gate, say — leaves every document written under the wider set holding a level the
+ * complete schema now rejects. That is not a settings-version change, so there is no version to
+ * migrate on, and refusing to read the document would strand the Worker as unavailable with no way
+ * back through the UI. Reads therefore land on the most autonomous level the Worker does offer that
+ * is no more autonomous than what was stored; a declaration offering nothing at or below the stored
+ * level (no `manual`) lands on the least autonomous level it does offer. Anything outside the shared
+ * scale is passed through untouched so validation still reports it.
+ *
+ * Writes stay strict: `buildCompleteWorkerSettingsSchema` still rejects a level the declaration
+ * does not offer, and a save re-serialises the projected level, so the document heals on next write.
+ */
+export const projectStoredAutonomyLevel = (
+  declaration: WorkerSettingsDeclaration,
+  stored: unknown
+): unknown => {
+  if (!isWatchAutonomyLevel(stored) || declaration.allowedAutonomyLevels.includes(stored)) {
+    return stored;
+  }
+  const storedIndex = WATCH_AUTONOMY_LEVELS.indexOf(stored);
+  return (
+    [...declaration.allowedAutonomyLevels]
+      .filter((level) => WATCH_AUTONOMY_LEVELS.indexOf(level) <= storedIndex)
+      .pop() ?? declaration.allowedAutonomyLevels[0]
+  );
+};
 
 export const buildDefaultWorkerSettings = (
   declaration: WorkerSettingsDeclaration

@@ -20,6 +20,7 @@ import {
   buildDefaultWorkerSettings,
   diffWorkerSettings,
   formatWorkerSettingsIssues,
+  projectStoredAutonomyLevel,
 } from './contract';
 import {
   WORKER_SETTINGS_DECLARATIONS,
@@ -170,6 +171,42 @@ describe('allowed autonomy levels', () => {
         scheduleInterval: '24h',
       })
     ).toContain('autonomy');
+  });
+});
+
+describe('projectStoredAutonomyLevel', () => {
+  const ruleTuning: WorkerSettingsDeclaration = {
+    workerId: 'test-worker',
+    allowedAutonomyLevels: ['manual', 'assisted'],
+  };
+  const attackDiscovery: WorkerSettingsDeclaration = {
+    workerId: 'test-worker',
+    allowedAutonomyLevels: ['manual', 'supervised'],
+  };
+
+  it('keeps a stored level the Worker still offers', () => {
+    expect(projectStoredAutonomyLevel(ruleTuning, 'assisted')).toBe('assisted');
+    expect(projectStoredAutonomyLevel(attackDiscovery, 'supervised')).toBe('supervised');
+  });
+
+  it('reads a level the Worker dropped as the most autonomous level it still offers', () => {
+    // The narrowing in this PR: Rule Tuning has no unattended level, Attack Discovery no assisted.
+    expect(projectStoredAutonomyLevel(ruleTuning, 'supervised')).toBe('assisted');
+    expect(projectStoredAutonomyLevel(attackDiscovery, 'assisted')).toBe('manual');
+  });
+
+  it('falls back to the least autonomous level offered when nothing sits at or below', () => {
+    const supervisedOnly: WorkerSettingsDeclaration = {
+      workerId: 'test-worker',
+      allowedAutonomyLevels: ['supervised'],
+    };
+    expect(projectStoredAutonomyLevel(supervisedOnly, 'assisted')).toBe('supervised');
+  });
+
+  it('passes values outside the shared scale through, so validation still reports them', () => {
+    expect(projectStoredAutonomyLevel(ruleTuning, 'yolo')).toBe('yolo');
+    expect(projectStoredAutonomyLevel(ruleTuning, undefined)).toBeUndefined();
+    expect(projectStoredAutonomyLevel(ruleTuning, 3)).toBe(3);
   });
 });
 
