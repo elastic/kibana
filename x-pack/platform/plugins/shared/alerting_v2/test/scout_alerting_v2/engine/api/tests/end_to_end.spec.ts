@@ -172,7 +172,8 @@ apiTest.describe(
         });
 
         // 3) Director must annotate the recovery as `inactive` before the
-        //    dispatcher can fire on it (`state_transition: { recovering: { count: //    0 } }` from the builder default skips the `recovering` step).
+        //    dispatcher can fire on it (`state_transition: { recovering: { count: 0 } }`
+        //    from the builder default skips the `recovering` step).
         await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
           episodeStatus: 'inactive',
         });
