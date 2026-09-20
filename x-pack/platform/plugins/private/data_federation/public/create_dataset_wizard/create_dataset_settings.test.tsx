@@ -146,12 +146,11 @@ describe('CreateDatasetSettings', () => {
   });
 
   describe('NDJSON format', () => {
-    it('shows schema_sample_size and datetime_format when NDJSON is selected', () => {
+    it('shows datetime_format when NDJSON is selected', () => {
       const { getByTestId } = renderSettings();
 
       selectFormat(getByTestId, 'ndjson');
 
-      expect(getByTestId('createDatasetSettingsSchemaSampleSize')).toBeVisible();
       expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeVisible();
     });
 
@@ -262,10 +261,12 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsSkipRows')).toBeInTheDocument();
   });
 
-  it('shows the ndjson advanced settings component when ndjson is selected', () => {
-    const { getByTestId } = renderAdditionalSettings('ndjson');
+  it('shows ndjson common settings and no ndjson advanced settings when ndjson is selected', () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings('ndjson');
     expect(getByTestId('createDatasetNdjsonCommonSettings')).toBeInTheDocument();
-    expect(getByTestId('createDatasetNdjsonAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetNdjsonAdvancedSettings')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
   });
 
   it('shows the orc advanced settings component when orc is selected', () => {

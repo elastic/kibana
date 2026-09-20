@@ -21,7 +21,7 @@ import {
 import { CsvTsvAdvancedSettings } from './form_components/csv_tsv_advanced_settings';
 import { CsvTsvCommonSettings } from './form_components/csv_tsv_common_settings';
 import { FormatSelect } from './form_components/format_select';
-import { NdjsonAdvancedSettings } from './form_components/ndjson_advanced_settings';
+import { NdjsonCommonSettings } from './form_components/ndjson_common_settings';
 import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
 import { ParquetCommonSettings } from './form_components/parquet_common_settings';
 import { PartitionDetectionSelect } from './form_components/partition_detection_select';
@@ -188,10 +188,13 @@ function CoreFormatSettings({
   control: Control<CreateDatasetFormValues>;
   format: DatasetFormatFormValue;
 }) {
-  if (format !== 'csv' && format !== 'tsv') {
-    return null;
+  if (format === 'csv' || format === 'tsv') {
+    return <CsvTsvCoreSettings control={control} />;
   }
-  return <CsvTsvCoreSettings control={control} />;
+  if (format === 'ndjson') {
+    return <NdjsonCommonSettings control={control} />;
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -294,9 +297,6 @@ function FormatAdvancedSettings({
   if (format === 'csv' || format === 'tsv') {
     return <CsvTsvAdvancedSettings control={control} />;
   }
-  if (format === 'ndjson') {
-    return <NdjsonAdvancedSettings control={control} />;
-  }
   if (format === 'parquet') {
     return <ParquetAdvancedSettings control={control} />;
   }
@@ -358,16 +358,16 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
   );
 }
 
-function NdjsonCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetNdjsonCommonSettings" />;
-}
-
 function OrcCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return <div data-test-subj="createDatasetOrcCommonSettings" />;
 }
 
 function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return <div data-test-subj="createDatasetOrcAdvancedSettings" />;
+}
+
+function NdjsonAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return null;
 }
 
 const FORMAT_COMMON_SETTING_COMPONENTS: Record<
