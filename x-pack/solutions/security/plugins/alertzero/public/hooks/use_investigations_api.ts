@@ -6,29 +6,16 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
   ALERTZERO_INVESTIGATIONS_URL,
   buildInvestigationUrl,
 } from '@kbn/alertzero-common';
-import type {
-  GetInvestigationResponse,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
-} from '@kbn/alertzero-common';
+import type { GetInvestigationResponse, ListInvestigationsResponse } from '@kbn/alertzero-common';
+import type { ListProposalsResponse } from '@kbn/agentic-investigations-plugin/common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
-
-const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
-  if (failureCount >= 3) {
-    return false;
-  }
-  if (isHttpFetchError(error)) {
-    return !error.response?.status || error.response.status >= 500;
-  }
-  return true;
-};
 
 // TODO: update the API schemas as well for renaming investigations to conversations and remove the ListInvestigationsResponse type
 export const useInvestigations = () => {
@@ -68,11 +55,11 @@ export const useInvestigationProposals = (investigationId: string | undefined) =
 
   return useQuery({
     queryKey: queryKeys.investigations.proposals(investigationId),
-    queryFn: async (): Promise<ListInvestigationProposalsResponse> => {
+    queryFn: async (): Promise<ListProposalsResponse> => {
       if (!investigationId) {
         throw new Error('investigation id is required');
       }
-      return services.http!.get<ListInvestigationProposalsResponse>(
+      return services.http!.get<ListProposalsResponse>(
         `${buildInvestigationUrl(investigationId)}/proposals`,
         {
           version: API_VERSIONS.internal.v1,
