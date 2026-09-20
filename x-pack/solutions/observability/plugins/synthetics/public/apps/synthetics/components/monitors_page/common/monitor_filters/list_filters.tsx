@@ -32,6 +32,7 @@ export const ListFilters = function ({
         handleFilterChange={handleFilterChange}
         excludeFields={['remoteNames']}
         includeStatusFilter={false}
+        includeConfigIds
       />
     </>
   );

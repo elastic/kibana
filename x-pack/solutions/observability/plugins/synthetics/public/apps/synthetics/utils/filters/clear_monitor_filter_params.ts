@@ -27,6 +27,7 @@ export interface MonitorFilterActivityOptions {
   excludeFields?: ReadonlyArray<SyntheticsMonitorFilterField>;
   includeStatusFilter?: boolean;
   includeStatusCodes?: boolean;
+  includeConfigIds?: boolean;
 }
 
 const isActiveFilterValue = (value: SyntheticsUrlParams[ActiveMonitorFilterUrlKey]): boolean => {
@@ -43,17 +44,20 @@ export const hasActiveMonitorFilters = (
   const excluded = new Set(options.excludeFields ?? []);
   const includeStatusFilter = options.includeStatusFilter ?? true;
   const includeStatusCodes = options.includeStatusCodes ?? false;
+  const includeConfigIds = options.includeConfigIds ?? false;
 
   const keys: ActiveMonitorFilterUrlKey[] = [
     ...getMonitorFilterFields().filter((field) => !excluded.has(field)),
     'query',
-    'configIds',
   ];
   if (includeStatusFilter) {
     keys.push('statusFilter');
   }
   if (includeStatusCodes) {
     keys.push('statusCodes');
+  }
+  if (includeConfigIds) {
+    keys.push('configIds');
   }
 
   return keys.some((key) => isActiveFilterValue(params[key]));

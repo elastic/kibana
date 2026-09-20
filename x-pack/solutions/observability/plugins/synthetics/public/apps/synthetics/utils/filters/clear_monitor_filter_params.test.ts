@@ -39,6 +39,13 @@ describe('clear monitor filter params', () => {
     expect(hasActiveMonitorFilters(params, { includeStatusCodes: true })).toBe(true);
   });
 
+  it('is active for config ids only when that key is in scope', () => {
+    const params = getSupportedUrlParams({ configIds: JSON.stringify(['mon-1']) });
+
+    expect(hasActiveMonitorFilters(params)).toBe(false);
+    expect(hasActiveMonitorFilters(params, { includeConfigIds: true })).toBe(true);
+  });
+
   it('ignores excluded fields and out-of-scope status filters', () => {
     expect(
       hasActiveMonitorFilters(getSupportedUrlParams({ schedules: JSON.stringify(['3']) }), {

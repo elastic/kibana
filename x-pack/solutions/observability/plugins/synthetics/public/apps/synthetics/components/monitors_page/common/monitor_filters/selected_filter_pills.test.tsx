@@ -139,4 +139,22 @@ describe('SelectedFilterPills', () => {
     expect(queryByText(/Remote cluster:/)).toBeNull();
     expect(getByText('Clear all filters')).toBeInTheDocument();
   });
+
+  it('hides the row for a carried configIds URL on overview', () => {
+    useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ configIds: ['mon-1'] }));
+
+    const { queryByText } = render(<SelectedFilterPills handleFilterChange={handleFilterChange} />);
+
+    expect(queryByText('Clear all filters')).toBeNull();
+  });
+
+  it('shows clear-all for configIds on management', () => {
+    useGetUrlParamsSpy.mockReturnValue(mockUrlParams({ configIds: ['mon-1'] }));
+
+    const { getByText } = render(
+      <SelectedFilterPills handleFilterChange={handleFilterChange} includeConfigIds />
+    );
+
+    expect(getByText('Clear all filters')).toBeInTheDocument();
+  });
 });

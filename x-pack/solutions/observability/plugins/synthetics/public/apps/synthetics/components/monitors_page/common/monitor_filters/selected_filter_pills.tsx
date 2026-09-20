@@ -40,11 +40,13 @@ export function SelectedFilterPills({
   excludeFields,
   includeStatusFilter = true,
   includeStatusCodes = false,
+  includeConfigIds = false,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
   excludeFields?: ReadonlyArray<SyntheticsMonitorFilterField>;
   includeStatusFilter?: boolean;
   includeStatusCodes?: boolean;
+  includeConfigIds?: boolean;
 }) {
   const urlParams = useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
@@ -54,6 +56,7 @@ export function SelectedFilterPills({
     excludeFields,
     includeStatusFilter,
     includeStatusCodes,
+    includeConfigIds,
   };
 
   const pillFields: Array<{ field: SyntheticsMonitorFilterField; label: string }> = [
