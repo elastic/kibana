@@ -7,33 +7,23 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import {
-  EuiAccordion,
-  EuiCode,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiAccordion, EuiFieldText, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import {
-  validateMaxErrorRatio,
-  validateMaxErrors,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
 import { CsvTsvAdvancedSettings } from './form_components/csv_tsv_advanced_settings';
-import { ErrorModeSelect } from './form_components/error_mode_select';
 import { FormatSelect } from './form_components/format_select';
 import { NdjsonAdvancedSettings } from './form_components/ndjson_advanced_settings';
 import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
+import { ParquetCommonSettings } from './form_components/parquet_common_settings';
+import { SharedCommonSettings } from './form_components/shared_common_settings';
 
 // ---------------------------------------------------------------------------
 // Module-level option arrays — shared across components so each select
@@ -78,12 +68,6 @@ const HIVE_PARTITIONING_OPTIONS = [
   { value: 'true', text: createDatasetWizardStrings.settingsHivePartitioningEnabled },
   { value: 'false', text: createDatasetWizardStrings.settingsHivePartitioningDisabled },
 ];
-
-const helpTextDefault = (valueLabel: string) => (
-  <EuiText size="xs" color="subdued">
-    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
 
 // ---------------------------------------------------------------------------
 // Top-level export
@@ -167,6 +151,9 @@ export function CreateDatasetAdditionalSettings({
   control: Control<CreateDatasetFormValues>;
 }) {
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
+  const FormatCommonSettingsComponent = format
+    ? FORMAT_COMMON_SETTING_COMPONENTS[format]
+    : undefined;
   const FormatAdvancedSettingsComponent = format
     ? FORMAT_ADVANCED_SETTING_COMPONENTS[format]
     : undefined;
@@ -175,6 +162,7 @@ export function CreateDatasetAdditionalSettings({
     <>
       <EuiAccordion
         id="createDatasetWizardCommonSettings"
+        data-test-subj="createDatasetWizardCommonSettings"
         buttonContent={
           <h4 style={{ margin: 0, fontWeight: 'bold' }}>
             {createDatasetWizardStrings.commonSettingsSectionTitle}
@@ -183,9 +171,10 @@ export function CreateDatasetAdditionalSettings({
         initialIsOpen={true}
         paddingSize="m"
       >
-        <CommonOptionalSettings control={control} />
+        <SharedCommonSettings control={control} />
+        {FormatCommonSettingsComponent ? <FormatCommonSettingsComponent control={control} /> : null}
       </EuiAccordion>
-      <EuiSpacer size="m" />
+      {FormatAdvancedSettingsComponent ? <EuiSpacer size="m" /> : null}
       {FormatAdvancedSettingsComponent ? (
         <EuiAccordion
           id="createDatasetWizardAdvancedSettings"
@@ -201,79 +190,6 @@ export function CreateDatasetAdditionalSettings({
           <FormatAdvancedSettingsComponent control={control} />
         </EuiAccordion>
       ) : null}
-    </>
-  );
-}
-
-function CommonOptionalSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
-  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
-    name: 'settings.max_errors',
-    control,
-    rules: { validate: validateMaxErrors },
-  });
-  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
-    name: 'settings.max_error_ratio',
-    control,
-    rules: { validate: validateMaxErrorRatio },
-  });
-
-  return (
-    <>
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsErrorModeLabel}
-        helpText={helpTextDefault('fail_fast')}
-        fullWidth
-      >
-        <ErrorModeSelect
-          value={errorModeField.value}
-          onChange={errorModeField.onChange}
-          onBlur={errorModeField.onBlur}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxErrorsLabel}
-        helpText={helpTextDefault(createDatasetWizardStrings.unbounded)}
-        fullWidth
-        isInvalid={Boolean(maxErrorsState.error)}
-        error={maxErrorsState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxErrors"
-          fullWidth
-          min={0}
-          step={1}
-          placeholder={createDatasetWizardStrings.settingsMaxErrorsPlaceholder}
-          isInvalid={Boolean(maxErrorsState.error)}
-          value={maxErrorsField.value}
-          onChange={(e) => maxErrorsField.onChange(e.target.value)}
-          name={maxErrorsField.name}
-          inputRef={maxErrorsField.ref}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
-        helpText={helpTextDefault('0.0')}
-        fullWidth
-        isInvalid={Boolean(maxErrorRatioState.error)}
-        error={maxErrorRatioState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxErrorRatio"
-          fullWidth
-          min={0}
-          max={1}
-          step={0.01}
-          placeholder={createDatasetWizardStrings.settingsMaxErrorRatioPlaceholder}
-          isInvalid={Boolean(maxErrorRatioState.error)}
-          value={maxErrorRatioField.value}
-          onChange={(e) => maxErrorRatioField.onChange(e.target.value)}
-          name={maxErrorRatioField.name}
-          inputRef={maxErrorRatioField.ref}
-        />
-      </EuiFormRow>
     </>
   );
 }
@@ -459,9 +375,36 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
   );
 }
 
+function CsvCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetCsvCommonSettings" />;
+}
+
+function TsvCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetTsvCommonSettings" />;
+}
+
+function NdjsonCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetNdjsonCommonSettings" />;
+}
+
+function OrcCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
+  return <div data-test-subj="createDatasetOrcCommonSettings" />;
+}
+
 function OrcAdvancedSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return <div data-test-subj="createDatasetOrcAdvancedSettings" />;
 }
+
+const FORMAT_COMMON_SETTING_COMPONENTS: Record<
+  Exclude<DatasetFormatFormValue, ''>,
+  FunctionComponent<{ control: Control<CreateDatasetFormValues> }>
+> = {
+  csv: CsvCommonSettings,
+  tsv: TsvCommonSettings,
+  ndjson: NdjsonCommonSettings,
+  parquet: ParquetCommonSettings,
+  orc: OrcCommonSettings,
+};
 
 const FORMAT_ADVANCED_SETTING_COMPONENTS: Record<
   Exclude<DatasetFormatFormValue, ''>,
