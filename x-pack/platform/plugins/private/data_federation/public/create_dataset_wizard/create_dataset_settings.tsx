@@ -36,8 +36,8 @@ import {
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
-import { LateMaterializationSelect } from './late_materialization_select';
-import { OptimizedReaderSelect } from './optimized_reader_select';
+import { LateMaterializationSelect } from './form_components/late_materialization_select';
+import { OptimizedReaderSelect } from './form_components/optimized_reader_select';
 
 // ---------------------------------------------------------------------------
 // Module-level option arrays — shared across components so each select

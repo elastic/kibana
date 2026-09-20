@@ -13,7 +13,7 @@ import { useController } from 'react-hook-form';
 import type { DataSource } from '../../common';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
-import { DataSourceSelect } from './data_source_select';
+import { DataSourceSelect } from './form_components/data_source_select';
 import { validateDatasetName } from './validators';
 
 const trimRequired =
