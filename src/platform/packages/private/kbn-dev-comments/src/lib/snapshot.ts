@@ -59,7 +59,7 @@ export const createSnapshot = async (
   const canvas = await captureViewport();
   if (canvas.width === 0 || canvas.height === 0) {
     throw new Error(
-      i18n.translate('devComments.snapshot.empty', { defaultMessage: 'nothing was captured' })
+      i18n.translate('devComments.snapshot.empty', { defaultMessage: 'No screenshot was captured' })
     );
   }
   const background = getEffectiveBackgroundColor(document.body);
@@ -80,7 +80,7 @@ export const createSnapshot = async (
   }
   throw new Error(
     i18n.translate('devComments.snapshot.tooLarge', {
-      defaultMessage: 'The image is too large to store, even at the lowest quality',
+      defaultMessage: 'The screenshot is too large to store, even at the lowest quality',
     })
   );
 };

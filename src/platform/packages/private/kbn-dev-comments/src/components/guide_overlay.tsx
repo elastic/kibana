@@ -199,7 +199,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
             <EuiText size="s" id={messageId} role="status">
               {step
                 ? i18n.translate('devComments.guide.clickStep', {
-                    defaultMessage: 'Click “{label}” to get to the comment.',
+                    defaultMessage: 'Click “{label}” to get to the comment',
                     values: { label: step.label },
                   })
                 : searching
@@ -223,7 +223,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
               {step || searching
                 ? i18n.translate('devComments.guide.cancel', { defaultMessage: 'Cancel' })
                 : i18n.translate('devComments.guide.backToComments', {
-                    defaultMessage: 'Back to comments',
+                    defaultMessage: 'Return to comments',
                   })}
             </EuiButtonEmpty>
           </EuiFlexItem>

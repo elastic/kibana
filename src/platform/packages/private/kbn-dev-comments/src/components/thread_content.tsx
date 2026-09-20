@@ -71,8 +71,8 @@ export const ResolveButton = ({ comment }: { comment: Comment }) => {
   const controller = useComments();
   const busy = useThreadBusy(comment.id);
   const label = comment.resolved
-    ? i18n.translate('devComments.thread.unresolve', { defaultMessage: 'Unresolve this thread.' })
-    : i18n.translate('devComments.thread.resolve', { defaultMessage: 'Resolve this thread.' });
+    ? i18n.translate('devComments.thread.unresolve', { defaultMessage: 'Unresolve this thread' })
+    : i18n.translate('devComments.thread.resolve', { defaultMessage: 'Resolve this thread' });
 
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
@@ -91,12 +91,14 @@ export const ResolveButton = ({ comment }: { comment: Comment }) => {
 
 /** Copies the text of a comment (as written, in Markdown), nothing else. */
 const CopyButton = ({ text }: { text: string }) => {
-  const label = i18n.translate('devComments.thread.copy', { defaultMessage: 'Copy this comment.' });
+  const label = i18n.translate('devComments.thread.copy', { defaultMessage: 'Copy this comment' });
   return (
     <EuiCopy
       textToCopy={text}
       beforeMessage={label}
-      afterMessage={i18n.translate('devComments.thread.copied', { defaultMessage: 'Copied.' })}
+      afterMessage={i18n.translate('devComments.thread.copied', {
+        defaultMessage: 'Comment copied',
+      })}
       tooltipProps={{ disableScreenReaderOutput: true }}
     >
       {(copy) => (
@@ -138,7 +140,7 @@ export const RefreshButton = ({
       >
         {loadedAt ? (
           <>
-            {i18n.translate('devComments.refresh.updated', { defaultMessage: 'Updated' })}{' '}
+            {i18n.translate('devComments.refresh.updated', { defaultMessage: 'Updated' })}
             <TimeLabel at={loadedAt} tooltip={false} />
           </>
         ) : (
@@ -162,6 +164,7 @@ const CommentCard = ({
   /** What happened: "commented", "replied". */
   label: string;
   at: string;
+  /** The thread is resolved, which every comment of it shows as its header's color. */
   resolved?: boolean;
 }>) => {
   const { euiTheme } = useEuiTheme();
@@ -190,7 +193,7 @@ const CommentCard = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem
             css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
+              font-weight: ${euiTheme.font.weight.bold};
             `}
           >
             {name}
@@ -326,7 +329,7 @@ export const ThreadContent = ({
       <EuiFlexItem grow={false}>
         <RefreshButton
           label={i18n.translate('devComments.thread.refresh', {
-            defaultMessage: 'Refresh this thread.',
+            defaultMessage: 'Refresh this thread',
           })}
           data-test-subj="devCommentsThreadRefresh"
         />
@@ -383,6 +386,7 @@ export const ThreadContent = ({
               actions={<CopyButton text={item.text} />}
               label={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
               at={item.createdAt}
+              resolved={comment.resolved}
             >
               <CommentBody text={item.text} />
             </CommentCard>

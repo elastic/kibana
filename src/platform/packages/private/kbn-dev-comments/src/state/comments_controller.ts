@@ -161,7 +161,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     if (location.getPath() !== draft.route.path) {
       throw new ScreenshotError(
         i18n.translate('devComments.snapshot.pageChanged', {
-          defaultMessage: 'the page has changed since the comment was started',
+          defaultMessage: 'The page has changed since the comment was started',
         })
       );
     }
@@ -258,7 +258,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         notify(
           'error',
           i18n.translate('devComments.notice.loadFailed', {
-            defaultMessage: 'Could not load comments: {message}',
+            defaultMessage: 'Could not load comments - {message}',
             values: { message },
           })
         );
@@ -452,7 +452,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
           error instanceof ScreenshotError
             ? i18n.translate('devComments.notice.screenshotFailed', {
                 defaultMessage:
-                  'Could not take the screenshot: {message}. Turn off "Attach screenshot" to post without one.',
+                  'Could not take the screenshot - {message}. Turn off "Attach screenshot" to post without one.',
                 values: { message: error.message },
               })
             : i18n.translate('devComments.notice.saveFailed', {
@@ -485,7 +485,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         () => api.update(id, { resolved }),
         (message) =>
           i18n.translate('devComments.notice.resolveFailed', {
-            defaultMessage: 'Could not update the comment: {message}',
+            defaultMessage: 'Could not update the comment - {message}',
             values: { message },
           })
       );
@@ -537,7 +537,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         notify(
           'error',
           i18n.translate('devComments.notice.navigateFailed', {
-            defaultMessage: 'Could not open the page of the comment: {message}',
+            defaultMessage: 'Could not open the page of the comment - {message}',
             values: { message: errorMessage(error) },
           })
         );

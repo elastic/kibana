@@ -141,7 +141,7 @@ describe('CommentsLayer', () => {
     expect(within(goneRow).queryByTestId('devCommentsReplyInput')).toBeNull();
     expect(within(goneRow).getByRole('button', { name: /Where did it go/ })).toBeInTheDocument();
 
-    // The element is on the page: Enter opens the thread at its pin.
+    // The element is on the page: Enter opens the thread at its pin, the toggle in the row.
     const seededRow = screen.getByTestId('devCommentsPanelItem-a');
     // Focus leaves the toggle, whose tooltip reacts to that.
     act(() =>
@@ -153,6 +153,8 @@ describe('CommentsLayer', () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByTestId('devCommentsPin-a'))
     );
+    fireEvent.click(within(seededRow).getByTestId('devCommentsPanelToggle'));
+    expect(within(seededRow).getByTestId('devCommentsReplyInput')).toBeInTheDocument();
   });
 
   it('renders comments as Markdown, leaving out the HTML and unsafe links anyone could have stored', async () => {

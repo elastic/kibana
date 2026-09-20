@@ -125,7 +125,7 @@ const CountBadge = ({
 const ThreadSizeBadge = ({ comment }: { comment: Comment }) => {
   const count = threadSize(comment);
   const label = i18n.translate('devComments.panel.threadSize', {
-    defaultMessage: '{count, plural, one {# comment} other {# comments}} in this thread.',
+    defaultMessage: '{count, plural, one {# comment} other {# comments}} in this thread',
     values: { count },
   });
   return (
@@ -208,7 +208,7 @@ const PageGroup = ({
           <CountBadge
             count={count}
             label={i18n.translate('devComments.panel.pageCount', {
-              defaultMessage: '{count, plural, one {# comment} other {# comments}} on this page.',
+              defaultMessage: '{count, plural, one {# comment} other {# comments}} on this page',
               values: { count },
             })}
           />
@@ -226,17 +226,21 @@ const PanelRow = ({
   active,
   list,
   onSelect,
+  onToggle,
   onGuide,
 }: {
   comment: Comment;
   onScreen: boolean;
-  /** The thread is shown inline below the row (its element is not on screen). */
+  /** The thread is shown in the row, below the comment. */
   expanded: boolean;
   /** The row's thread is the one currently open from a pin. */
   active: boolean;
   /** The scrolling list the row is in. */
   list: RefObject<HTMLDivElement>;
+  /** The comment was picked: its thread opens at its pin when the element is on screen, in the row otherwise. */
   onSelect: () => void;
+  /** Shows the thread in the row, or hides it. */
+  onToggle: () => void;
   onGuide: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -278,10 +282,10 @@ const PanelRow = ({
   }, [expanded]);
 
   const openLabel = i18n.translate('devComments.panel.visible', {
-    defaultMessage: 'Visible on this page. Click to open.',
+    defaultMessage: 'Visible - click to open',
   });
   const guideLabel = i18n.translate('devComments.panel.notVisible', {
-    defaultMessage: 'Not visible. Click to navigate.',
+    defaultMessage: 'Not visible - click to navigate',
   });
   const toggleLabel = expanded
     ? i18n.translate('devComments.panel.collapseThread', {
@@ -306,30 +310,28 @@ const PanelRow = ({
           />
         </EuiToolTip>
       ) : (
-        <>
-          <EuiToolTip content={guideLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="external"
-              size="xs"
-              onClick={onGuide}
-              aria-label={guideLabel}
-              data-test-subj="devCommentsPanelGuide"
-            />
-          </EuiToolTip>
-          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType={expanded ? 'minimize' : 'maximize'}
-              color="text"
-              size="xs"
-              buttonRef={toggleRef}
-              onClick={onSelect}
-              aria-expanded={expanded}
-              aria-label={toggleLabel}
-              data-test-subj="devCommentsPanelToggle"
-            />
-          </EuiToolTip>
-        </>
+        <EuiToolTip content={guideLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="external"
+            size="xs"
+            onClick={onGuide}
+            aria-label={guideLabel}
+            data-test-subj="devCommentsPanelGuide"
+          />
+        </EuiToolTip>
       )}
+      <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={expanded ? 'minimize' : 'maximize'}
+          color="text"
+          size="xs"
+          buttonRef={toggleRef}
+          onClick={onToggle}
+          aria-expanded={expanded}
+          aria-label={toggleLabel}
+          data-test-subj="devCommentsPanelToggle"
+        />
+      </EuiToolTip>
     </>
   );
 
@@ -356,6 +358,7 @@ const PanelRow = ({
               element="button"
               type="button"
               paddingSize="none"
+              borderRadius="none"
               color="transparent"
               hasShadow={false}
               onClick={onSelect}
@@ -437,9 +440,12 @@ export const CommentsPanel = () => {
     return null;
   }
 
+  const toggle = (comment: Comment) =>
+    setExpandedId((current) => (current === comment.id ? null : comment.id));
+
   const select = (comment: Comment, element: Element | null) => {
     if (!element) {
-      setExpandedId((current) => (current === comment.id ? null : comment.id));
+      toggle(comment);
       return;
     }
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
@@ -481,7 +487,7 @@ export const CommentsPanel = () => {
             <CountBadge
               count={comments.length}
               label={i18n.translate('devComments.panel.count', {
-                defaultMessage: '{count, plural, one {# comment} other {# comments}} total.',
+                defaultMessage: '{count, plural, one {# comment} other {# comments}} total',
                 values: { count: comments.length },
               })}
               data-test-subj="devCommentsPanelCount"
@@ -492,7 +498,7 @@ export const CommentsPanel = () => {
           <EuiFlexItem grow={false}>
             <RefreshButton
               label={i18n.translate('devComments.panel.refresh', {
-                defaultMessage: 'Refresh comments.',
+                defaultMessage: 'Refresh comments',
               })}
               data-test-subj="devCommentsPanelRefresh"
             />
@@ -589,10 +595,11 @@ export const CommentsPanel = () => {
                       key={comment.id}
                       comment={comment}
                       onScreen={element !== null}
-                      expanded={expandedId === comment.id && element === null}
+                      expanded={expandedId === comment.id}
                       active={activeThreadId === comment.id}
                       list={listRef}
                       onSelect={() => select(comment, element)}
+                      onToggle={() => toggle(comment)}
                       onGuide={() => void controller.guideTo(comment)}
                     />
                   );

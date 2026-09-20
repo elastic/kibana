@@ -73,7 +73,7 @@ export const SnapshotImage = ({
     return (
       <EuiText size="xs" color="subdued">
         {i18n.translate('devComments.snapshot.unavailable', {
-          defaultMessage: 'The screenshot could not be loaded.',
+          defaultMessage: 'The screenshot could not be loaded',
         })}
       </EuiText>
     );
