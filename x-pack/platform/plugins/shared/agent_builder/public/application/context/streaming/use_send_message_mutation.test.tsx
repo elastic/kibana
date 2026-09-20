@@ -153,6 +153,38 @@ describe('useSendMessageMutation', () => {
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
   });
 
+  it('keeps the live events when nobody is looking at the conversation before the run starts', async () => {
+    const { source, result, conversationStreamService, observer } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    // The user switches conversation before the first event arrives.
+    observer.unsubscribe();
+
+    act(() => {
+      source.next(started as ChatEvent);
+      source.next({
+        type: ChatEventType.messageChunk,
+        data: { message_id: 'm', text_chunk: 'Hi' },
+      } as ChatEvent);
+    });
+
+    // Coming back finds the run's events, not an empty stream.
+    let seen: unknown[] = [];
+    const back = conversationStreamService
+      .getActiveStream$(conversationId)
+      .subscribe((events) => (seen = events));
+    expect(seen).toHaveLength(2);
+    back.unsubscribe();
+
+    act(() => {
+      source.next(terminated as ChatEvent);
+      source.complete();
+    });
+    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
+  });
+
   it('ends a stream that errors like a completed one: refetch, then release', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
