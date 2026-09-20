@@ -11,6 +11,7 @@ import type {
   MatchActionPoliciesForRuleResponse,
   MatchedActionPolicy,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
@@ -22,6 +23,8 @@ export interface UseMatchedActionPoliciesResult {
   error: Error | null;
   items: MatchedActionPolicy[];
   total: number;
+  evaluatedCount: number;
+  isTruncated: boolean;
 }
 
 export const useMatchedActionPolicies = ({
@@ -34,7 +37,7 @@ export const useMatchedActionPolicies = ({
     queryKey: ['matchedActionPolicies', tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesForRuleResponse>(
-        '/api/alerting/v2/action_policies/_match_for_rule',
+        `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`,
         { method: 'POST', body: JSON.stringify(body) }
       ),
     keepPreviousData: true,
@@ -46,5 +49,7 @@ export const useMatchedActionPolicies = ({
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
     total: data?.total ?? 0,
+    evaluatedCount: data?.evaluated_count ?? 0,
+    isTruncated: data?.is_truncated ?? false,
   };
 };

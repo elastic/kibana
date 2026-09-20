@@ -295,8 +295,8 @@ describe('pull_request pipeline generation', () => {
     expect(mockAreChangesSkippable).not.toHaveBeenCalled();
   });
 
-  it('emits storybooks when yarn.lock changes', async () => {
-    const changes = [{ filename: 'yarn.lock' }];
+  it('emits storybooks when pnpm-lock.yaml changes', async () => {
+    const changes = [{ filename: 'pnpm-lock.yaml' }];
     mockGetPrChangesCached.mockResolvedValue(changes);
     mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
       realDoAnyChangesMatch(paths, scopedChanges ?? changes)

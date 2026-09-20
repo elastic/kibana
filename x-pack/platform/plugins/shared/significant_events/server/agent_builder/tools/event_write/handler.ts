@@ -30,6 +30,7 @@ import {
   mergeSignalsLatestPerRule,
   preserveStableNarrative,
 } from './episode_context';
+import { getCalibratedSeverity, type EventsWriteSource } from './severity_calibration_guard';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -464,9 +465,11 @@ const applyBulkResults = (
 export async function eventsWriteBulkHandler({
   eventClient,
   inputs,
+  source,
 }: {
   eventClient: EventClient;
   inputs: EventsWriteInput[];
+  source?: EventsWriteSource;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
 
@@ -484,7 +487,20 @@ export async function eventsWriteBulkHandler({
     eventClient,
     toWrite
   );
-  const remaining = toWrite.filter((candidate) => {
+  const calibrated = toWrite.map((candidate) => ({
+    ...candidate,
+    input: {
+      ...candidate.input,
+      severity: getCalibratedSeverity({
+        source,
+        latestEvent: latestByEventId.get(candidate.eventId),
+        proposedSeverity: candidate.input.severity,
+        proposedStatus: candidate.input.status,
+        proposedSignals: candidate.input.signals,
+      }),
+    },
+  }));
+  const remaining = calibrated.filter((candidate) => {
     if (
       candidate.mode === 'snapshot' &&
       shouldSkipAsNoOp(
