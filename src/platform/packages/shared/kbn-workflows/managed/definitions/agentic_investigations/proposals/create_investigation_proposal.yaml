@@ -245,7 +245,25 @@ steps:
       - name: settle_expired
         type: if
         condition: '${{ variables.has_deadline == true and variables.remaining_seconds <= 0 }}'
+        on-failure:
+          # record_expiry throws ConflictError when a revision supersedes the
+          # carried id between the top-of-loop adoption and this write. Retry
+          # re-runs the block's children, so re-resolve first: the write lands
+          # on the new live head and the variable the workflow-level fallback
+          # reads moves with it. Any non-conflict error is left alone.
+          retry:
+            max-attempts: 2
+            condition: "${{ error.type == 'ConflictError' }}"
         steps:
+          - name: resolve_live_head_on_expiry_conflict
+            type: proposals.getLatestRevision
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+          - name: adopt_live_head_on_expiry_conflict
+            type: data.set
+            with:
+              current_proposal_id: '{{ steps.resolve_live_head_on_expiry_conflict.output.proposalId }}'
+              action_input: '${{ steps.resolve_live_head_on_expiry_conflict.output.actionInput }}'
           - name: record_expiry
             type: proposals.updateProposal
             with:
@@ -262,7 +280,23 @@ steps:
       - name: settle_exhausted
         type: if
         condition: '${{ variables.attempts_left <= 0 }}'
+        on-failure:
+          # Same TOCTOU as settle_expired: a revision between iterations leaves
+          # the carried id superseded, record_exhaustion throws ConflictError,
+          # and retry re-runs this block so the write lands on the live head.
+          retry:
+            max-attempts: 2
+            condition: "${{ error.type == 'ConflictError' }}"
         steps:
+          - name: resolve_live_head_on_exhaustion_conflict
+            type: proposals.getLatestRevision
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+          - name: adopt_live_head_on_exhaustion_conflict
+            type: data.set
+            with:
+              current_proposal_id: '{{ steps.resolve_live_head_on_exhaustion_conflict.output.proposalId }}'
+              action_input: '${{ steps.resolve_live_head_on_exhaustion_conflict.output.actionInput }}'
           - name: record_exhaustion
             type: proposals.updateProposal
             with:

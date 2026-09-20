@@ -261,9 +261,15 @@ describe('create-investigation-proposal workflow', () => {
       // integration tests: the gate's handler settles an unanswered proposal
       // as `expired`, and the action's keeps a failed action inside the loop
       // so it can be cloned and re-offered. Pinned, not removed.
+      // The two settle blocks use the same engine-honoured-but-schema-unmodelled
+      // key on `if` steps: their `on-failure.retry` re-resolves the live head
+      // before rewriting when a revision wins the TOCTOU race against
+      // `record_expiry`/`record_exhaustion`. Same #19315 gap, pinned likewise.
       expect(unmodelled.sort()).toEqual([
         'await_decision (waitForApproval): on-failure',
         'execute_action (workflow.execute): on-failure',
+        'settle_exhausted (if): on-failure',
+        'settle_expired (if): on-failure',
       ]);
     });
   });
@@ -582,6 +588,55 @@ describe('create-investigation-proposal workflow', () => {
         'approve_with_action',
       ]) {
         expect(body.indexOf(write)).toBeGreaterThan(adoptIndex);
+      }
+    });
+
+    it('settles onto the live head when a revision wins the race to record_expiry', () => {
+      // TOCTOU: the top-of-loop adoption resolves the head, but a revision can
+      // still supersede it before `record_expiry` writes. The write then throws
+      // ConflictError; the retry re-runs the block's children, so a re-resolve
+      // placed first lands the write on the new head instead of failing the run
+      // and stranding the live revision pending.
+      const block = findStep(workflow.steps, 'settle_expired');
+      const retry = block?.['on-failure']?.retry;
+      expect(retry?.['max-attempts']).toBeGreaterThanOrEqual(2);
+      expect(String(retry?.condition)).toContain('ConflictError');
+      const names = (block?.steps ?? []).map(({ name }) => name);
+      expect(names.indexOf('resolve_live_head_on_expiry_conflict')).toBeGreaterThanOrEqual(0);
+      expect(names.indexOf('resolve_live_head_on_expiry_conflict')).toBeLessThan(
+        names.indexOf('record_expiry')
+      );
+      const adopt = findStep(workflow.steps, 'adopt_live_head_on_expiry_conflict');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_on_expiry_conflict.output.proposalId'
+      );
+      const write = findStep(workflow.steps, 'record_expiry');
+      expect(String(write?.with?.proposalId)).toContain('variables.current_proposal_id');
+    });
+
+    it('settles onto the live head when a revision wins the race to record_exhaustion', () => {
+      const block = findStep(workflow.steps, 'settle_exhausted');
+      const retry = block?.['on-failure']?.retry;
+      expect(retry?.['max-attempts']).toBeGreaterThanOrEqual(2);
+      expect(String(retry?.condition)).toContain('ConflictError');
+      const names = (block?.steps ?? []).map(({ name }) => name);
+      expect(names.indexOf('resolve_live_head_on_exhaustion_conflict')).toBeGreaterThanOrEqual(0);
+      expect(names.indexOf('resolve_live_head_on_exhaustion_conflict')).toBeLessThan(
+        names.indexOf('record_exhaustion')
+      );
+      const adopt = findStep(workflow.steps, 'adopt_live_head_on_exhaustion_conflict');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_on_exhaustion_conflict.output.proposalId'
+      );
+    });
+
+    it('does not retry a non-conflict settle failure', () => {
+      // Only a ConflictError means "the head moved under us"; a transport or
+      // service fault wants the workflow-level fallback, not a blind rewrite.
+      for (const name of ['settle_expired', 'settle_exhausted']) {
+        const retry = findStep(workflow.steps, name)?.['on-failure']?.retry;
+        expect(String(retry?.condition)).toContain('ConflictError');
+        expect(String(retry?.condition)).not.toContain('ApiError');
       }
     });
   });
