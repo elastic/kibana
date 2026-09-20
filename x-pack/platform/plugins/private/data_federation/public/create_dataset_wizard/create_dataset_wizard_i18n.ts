@@ -26,6 +26,30 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Additional settings',
     }
   ),
+  commonSettingsSectionTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
+    {
+      defaultMessage: 'Common settings (optional)',
+    }
+  ),
+  advancedSettingsSectionTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.advancedSettingsSectionTitle',
+    {
+      defaultMessage: 'Advanced settings (optional)',
+    }
+  ),
+  byDefaultSuffix: i18n.translate('xpack.dataFederation.createDatasetWizard.byDefaultSuffix', {
+    defaultMessage: 'by default.',
+  }),
+  unbounded: i18n.translate('xpack.dataFederation.createDatasetWizard.unbounded', {
+    defaultMessage: 'unbounded',
+  }),
+  trueLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.trueLabel', {
+    defaultMessage: 'True',
+  }),
+  falseLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.falseLabel', {
+    defaultMessage: 'False',
+  }),
   reviewStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.reviewStepLabel', {
     defaultMessage: 'Review',
   }),
@@ -170,7 +194,7 @@ export const createDatasetWizardStrings = {
   settingsErrorModePlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsErrorModePlaceholder',
     {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select error mode',
     }
   ),
 
@@ -208,6 +232,12 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Maximum number of row errors before failing.',
     }
   ),
+  settingsMaxErrorsPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsMaxErrorsPlaceholder',
+    {
+      defaultMessage: 'Enter a number of errors',
+    }
+  ),
 
   settingsMaxErrorRatioLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioLabel',
@@ -220,6 +250,12 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioHelp',
     {
       defaultMessage: 'Maximum ratio of row errors before failing (0 to 1).',
+    }
+  ),
+  settingsMaxErrorRatioPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioPlaceholder',
+    {
+      defaultMessage: 'Enter a ratio between 0 and 1',
     }
   ),
 
@@ -374,6 +410,31 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsHivePartitioningDisabled',
     {
       defaultMessage: 'Disabled',
+    }
+  ),
+
+  settingsOptimizedReaderLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsOptimizedReaderLabel',
+    {
+      defaultMessage: 'Optimized reader',
+    }
+  ),
+  settingsOptimizedReaderPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsOptimizedReaderPlaceholder',
+    {
+      defaultMessage: 'Select optimized reader',
+    }
+  ),
+  settingsLateMaterializationLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsLateMaterializationLabel',
+    {
+      defaultMessage: 'Late materialization',
+    }
+  ),
+  settingsLateMaterializationPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsLateMaterializationPlaceholder',
+    {
+      defaultMessage: 'Select late materialization',
     }
   ),
 
@@ -593,9 +654,5 @@ export const createDatasetWizardStrings = {
 
   learnMore: i18n.translate('xpack.dataFederation.createDatasetForm.learnMore', {
     defaultMessage: 'Learn more',
-  }),
-
-  settingsLearnMore: i18n.translate('xpack.dataFederation.createDatasetForm.settingsLearnMore', {
-    defaultMessage: 'Learn more about dataset settings',
   }),
 };

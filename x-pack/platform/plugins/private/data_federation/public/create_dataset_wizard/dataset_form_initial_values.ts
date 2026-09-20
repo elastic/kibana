@@ -61,6 +61,8 @@ const settingsToFormValues = (
     schema_resolution: (s.schema_resolution ?? '') as DatasetSchemaResolutionFormValue,
     partition_path: s.partition_path ?? '',
     hive_partitioning: boolToFormValue(s.hive_partitioning),
+    optimized_reader: boolToFormValue(s.optimized_reader),
+    late_materialization: boolToFormValue(s.late_materialization),
     // CSV/TSV + NDJSON
     schema_sample_size: s.schema_sample_size !== undefined ? String(s.schema_sample_size) : '',
     // CSV/TSV core
@@ -81,8 +83,7 @@ const settingsToFormValues = (
     error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,
     max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',
     max_error_ratio: s.max_error_ratio !== undefined ? String(s.max_error_ratio) : '',
-    // API-only fields (segment_size, optimized_reader, late_materialization) are not in the
-    // form; they're passed through by the API as-is and not shown in the edit UI.
+    // API-only fields (segment_size) are not in the form.
   };
 };
 

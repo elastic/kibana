@@ -24,6 +24,9 @@ export interface CreateDatasetSettingsFormValues {
   schema_resolution: DatasetSchemaResolutionFormValue;
   partition_path: string;
   hive_partitioning: DatasetBooleanFormValue;
+  // Parquet advanced
+  optimized_reader: DatasetBooleanFormValue;
+  late_materialization: DatasetBooleanFormValue;
   // CSV/TSV + NDJSON
   schema_sample_size: string;
   // CSV/TSV core
@@ -60,6 +63,8 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   schema_resolution: '',
   partition_path: '',
   hive_partitioning: '',
+  optimized_reader: '',
+  late_materialization: '',
   schema_sample_size: '',
   delimiter: '',
   mode: '',
@@ -158,9 +163,16 @@ export const buildDatasetSettingsFromFormValues = (
   const hivePartitioning = parseBooleanFormValue(settings.hive_partitioning);
   if (hivePartitioning !== undefined) applied.hive_partitioning = hivePartitioning;
 
+  if (settings.error_mode) applied.error_mode = settings.error_mode;
+  const maxErrors = parseNonNegativeInteger(settings.max_errors);
+  if (maxErrors !== undefined) applied.max_errors = maxErrors;
+  const maxErrorRatio = parseRatio(settings.max_error_ratio);
+  if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';
   const isNdjson = format === 'ndjson';
+  const isParquet = format === 'parquet';
 
   if (isCsvTsv) {
     if (settings.delimiter) applied.delimiter = settings.delimiter;
@@ -176,16 +188,15 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.comment) applied.comment = settings.comment;
     if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
     if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
-    if (settings.error_mode) applied.error_mode = settings.error_mode;
-
-    const maxErrors = parseNonNegativeInteger(settings.max_errors);
-    if (maxErrors !== undefined) applied.max_errors = maxErrors;
-
-    const maxErrorRatio = parseRatio(settings.max_error_ratio);
-    if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
-
     const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
     if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
+  }
+
+  if (isParquet) {
+    const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
+    if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
+    const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
+    if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
   }
 
   if (isCsvTsv || isNdjson) {

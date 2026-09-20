@@ -7,19 +7,18 @@
 
 import React from 'react';
 import {
+  EuiAccordion,
+  EuiCode,
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
-  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { DataFederationKibanaServices } from '../types';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import {
   validateMaxErrorRatio,
@@ -36,6 +35,18 @@ import {
 // Module-level option arrays — shared across components so each select
 // renders consistently wherever it appears.
 // ---------------------------------------------------------------------------
+
+const OPTIMIZED_READER_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsOptimizedReaderPlaceholder },
+  { value: 'true', text: createDatasetWizardStrings.trueLabel },
+  { value: 'false', text: createDatasetWizardStrings.falseLabel },
+];
+
+const LATE_MATERIALIZATION_OPTIONS = [
+  { value: '', text: createDatasetWizardStrings.settingsLateMaterializationPlaceholder },
+  { value: 'true', text: createDatasetWizardStrings.trueLabel },
+  { value: 'false', text: createDatasetWizardStrings.falseLabel },
+];
 
 const FORMAT_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsFormatPlaceholder },
@@ -97,6 +108,12 @@ const HIVE_PARTITIONING_OPTIONS = [
   { value: 'true', text: createDatasetWizardStrings.settingsHivePartitioningEnabled },
   { value: 'false', text: createDatasetWizardStrings.settingsHivePartitioningDisabled },
 ];
+
+const helpTextDefault = (valueLabel: string) => (
+  <EuiText size="xs" color="subdued">
+    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
+  </EuiText>
+);
 
 // ---------------------------------------------------------------------------
 // Top-level export
@@ -164,24 +181,6 @@ export function CreateDatasetPartitionDetectionField({
   );
 }
 
-function DatasetSettingsHelpLink() {
-  const {
-    services: { docLinks },
-  } = useKibana<DataFederationKibanaServices>();
-
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
-        <EuiLink href={docLinks.links.dataFederation.datasetSettings} target="_blank">
-          {createDatasetWizardStrings.settingsLearnMore}
-        </EuiLink>
-      </EuiText>
-      <EuiSpacer size="s" />
-    </>
-  );
-}
-
 export function CreateDatasetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
 
@@ -190,7 +189,6 @@ export function CreateDatasetSettings({ control }: { control: Control<CreateData
       <EuiSpacer size="m" />
       <CreateDatasetFormatField control={control} />
       <CoreFormatSettings control={control} format={format} />
-      <DatasetSettingsHelpLink />
       <UniversalAdvancedSettings control={control} />
       <FormatAdvancedSettings control={control} format={format} />
     </>
@@ -204,13 +202,115 @@ export function CreateDatasetAdditionalSettings({
   control: Control<CreateDatasetFormValues>;
 }) {
   const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+  const showParquetAdvanced = format === 'parquet';
 
   return (
     <>
-      <CoreFormatSettings control={control} format={format} />
-      <DatasetSettingsHelpLink />
-      <RemainingUniversalSettings control={control} />
-      <FormatAdvancedSettings control={control} format={format} />
+      <EuiAccordion
+        id="createDatasetWizardCommonSettings"
+        buttonContent={
+          <h4 style={{ margin: 0, fontWeight: 'bold' }}>
+            {createDatasetWizardStrings.commonSettingsSectionTitle}
+          </h4>
+        }
+        initialIsOpen={true}
+        paddingSize="m"
+      >
+        <CommonOptionalSettings control={control} />
+      </EuiAccordion>
+      <EuiSpacer size="m" />
+      {showParquetAdvanced ? (
+        <EuiAccordion
+          id="createDatasetWizardAdvancedSettings"
+          buttonContent={
+            <h4 style={{ margin: 0, fontWeight: 'bold' }}>
+              {createDatasetWizardStrings.advancedSettingsSectionTitle}
+            </h4>
+          }
+          initialIsOpen={false}
+          paddingSize="m"
+        >
+          <ParquetSettings control={control} />
+        </EuiAccordion>
+      ) : null}
+    </>
+  );
+}
+
+function CommonOptionalSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
+  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
+    name: 'settings.max_errors',
+    control,
+    rules: { validate: validateMaxErrors },
+  });
+  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
+    name: 'settings.max_error_ratio',
+    control,
+    rules: { validate: validateMaxErrorRatio },
+  });
+
+  return (
+    <>
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsErrorModeLabel}
+        helpText={helpTextDefault('fail_fast')}
+        fullWidth
+      >
+        <EuiSelect
+          options={ERROR_MODE_OPTIONS}
+          data-test-subj="createDatasetSettingsErrorMode"
+          fullWidth
+          aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
+          value={errorModeField.value}
+          onChange={(e) => errorModeField.onChange(e.target.value)}
+          name={errorModeField.name}
+          inputRef={errorModeField.ref}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsMaxErrorsLabel}
+        helpText={helpTextDefault(createDatasetWizardStrings.unbounded)}
+        fullWidth
+        isInvalid={Boolean(maxErrorsState.error)}
+        error={maxErrorsState.error?.message}
+      >
+        <EuiFieldNumber
+          data-test-subj="createDatasetSettingsMaxErrors"
+          fullWidth
+          min={0}
+          step={1}
+          placeholder={createDatasetWizardStrings.settingsMaxErrorsPlaceholder}
+          isInvalid={Boolean(maxErrorsState.error)}
+          value={maxErrorsField.value}
+          onChange={(e) => maxErrorsField.onChange(e.target.value)}
+          name={maxErrorsField.name}
+          inputRef={maxErrorsField.ref}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
+        helpText={helpTextDefault('0.0')}
+        fullWidth
+        isInvalid={Boolean(maxErrorRatioState.error)}
+        error={maxErrorRatioState.error?.message}
+      >
+        <EuiFieldNumber
+          data-test-subj="createDatasetSettingsMaxErrorRatio"
+          fullWidth
+          min={0}
+          max={1}
+          step={0.01}
+          placeholder={createDatasetWizardStrings.settingsMaxErrorRatioPlaceholder}
+          isInvalid={Boolean(maxErrorRatioState.error)}
+          value={maxErrorRatioField.value}
+          onChange={(e) => maxErrorRatioField.onChange(e.target.value)}
+          name={maxErrorRatioField.name}
+          inputRef={maxErrorRatioField.ref}
+        />
+      </EuiFormRow>
     </>
   );
 }
@@ -335,6 +435,9 @@ function FormatAdvancedSettings({
   if (format === 'ndjson') {
     return <NdjsonSettings control={control} />;
   }
+  if (format === 'parquet') {
+    return <ParquetSettings control={control} />;
+  }
   // parquet, orc, and unselected: no per-format advanced fields
   return null;
 }
@@ -421,17 +524,6 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
     name: 'settings.max_field_size',
     control,
     rules: { validate: validateMaxFieldSize },
-  });
-  const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
-  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
-    name: 'settings.max_errors',
-    control,
-    rules: { validate: validateMaxErrors },
-  });
-  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
-    name: 'settings.max_error_ratio',
-    control,
-    rules: { validate: validateMaxErrorRatio },
   });
 
   return (
@@ -584,55 +676,56 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
           inputRef={maxFieldSizeField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetWizardStrings.settingsErrorModeLabel} fullWidth>
+    </>
+  );
+}
+
+function ParquetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const { field: optimizedReaderField } = useController({
+    name: 'settings.optimized_reader',
+    control,
+  });
+  const { field: lateMaterializationField } = useController({
+    name: 'settings.late_materialization',
+    control,
+  });
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsOptimizedReaderLabel}
+        helpText={helpTextDefault('true')}
+        fullWidth
+      >
         <EuiSelect
-          options={ERROR_MODE_OPTIONS}
-          data-test-subj="createDatasetSettingsErrorMode"
+          options={OPTIMIZED_READER_OPTIONS}
+          data-test-subj="createDatasetSettingsOptimizedReader"
           fullWidth
-          aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
-          value={errorModeField.value}
-          onChange={(e) => errorModeField.onChange(e.target.value)}
-          name={errorModeField.name}
-          inputRef={errorModeField.ref}
+          aria-label={createDatasetWizardStrings.settingsOptimizedReaderLabel}
+          value={optimizedReaderField.value}
+          onChange={(e) => optimizedReaderField.onChange(e.target.value as DatasetBooleanFormValue)}
+          name={optimizedReaderField.name}
+          inputRef={optimizedReaderField.ref}
         />
       </EuiFormRow>
+
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxErrorsLabel}
-        helpText={createDatasetWizardStrings.settingsMaxErrorsHelp}
+        label={createDatasetWizardStrings.settingsLateMaterializationLabel}
+        helpText={helpTextDefault('true')}
         fullWidth
-        isInvalid={Boolean(maxErrorsState.error)}
-        error={maxErrorsState.error?.message}
       >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxErrors"
+        <EuiSelect
+          options={LATE_MATERIALIZATION_OPTIONS}
+          data-test-subj="createDatasetSettingsLateMaterialization"
           fullWidth
-          min={0}
-          step={1}
-          isInvalid={Boolean(maxErrorsState.error)}
-          value={maxErrorsField.value}
-          onChange={(e) => maxErrorsField.onChange(e.target.value)}
-          name={maxErrorsField.name}
-          inputRef={maxErrorsField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
-        helpText={createDatasetWizardStrings.settingsMaxErrorRatioHelp}
-        fullWidth
-        isInvalid={Boolean(maxErrorRatioState.error)}
-        error={maxErrorRatioState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxErrorRatio"
-          fullWidth
-          min={0}
-          max={1}
-          step={0.01}
-          isInvalid={Boolean(maxErrorRatioState.error)}
-          value={maxErrorRatioField.value}
-          onChange={(e) => maxErrorRatioField.onChange(e.target.value)}
-          name={maxErrorRatioField.name}
-          inputRef={maxErrorRatioField.ref}
+          aria-label={createDatasetWizardStrings.settingsLateMaterializationLabel}
+          value={lateMaterializationField.value}
+          onChange={(e) =>
+            lateMaterializationField.onChange(e.target.value as DatasetBooleanFormValue)
+          }
+          name={lateMaterializationField.name}
+          inputRef={lateMaterializationField.ref}
         />
       </EuiFormRow>
     </>
