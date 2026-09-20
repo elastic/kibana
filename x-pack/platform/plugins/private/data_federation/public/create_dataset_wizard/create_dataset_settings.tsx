@@ -18,15 +18,15 @@ import {
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
-import { CsvTsvAdvancedSettings } from './form_components/csv_tsv_advanced_settings';
-import { CsvTsvCommonSettings } from './form_components/csv_tsv_common_settings';
-import { FormatSelect } from './form_components/format_select';
-import { NdjsonCommonSettings } from './form_components/ndjson_common_settings';
-import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
-import { ParquetCommonSettings } from './form_components/parquet_common_settings';
-import { PartitionDetectionSelect } from './form_components/partition_detection_select';
-import { SharedAdvancedSettings } from './form_components/shared_advanced_settings';
-import { SharedCommonSettings } from './form_components/shared_common_settings';
+import { CsvTsvAdvancedSettings } from './components/csv_tsv_advanced_settings';
+import { CsvTsvCommonSettings } from './components/csv_tsv_common_settings';
+import { FormatSelect } from './components/format_select';
+import { NdjsonCommonSettings } from './components/ndjson_common_settings';
+import { ParquetAdvancedSettings } from './components/parquet_advanced_settings';
+import { ParquetCommonSettings } from './components/parquet_common_settings';
+import { PartitionDetectionSelect } from './components/partition_detection_select';
+import { SharedAdvancedSettings } from './components/shared_advanced_settings';
+import { SharedCommonSettings } from './components/shared_common_settings';
 
 // ---------------------------------------------------------------------------
 // Module-level option arrays — shared across components so each select
