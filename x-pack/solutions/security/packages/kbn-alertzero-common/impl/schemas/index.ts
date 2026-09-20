@@ -51,6 +51,11 @@ export {
 } from './components/detection_watch_settings.gen';
 
 export {
+  ContinuousThreatHuntWorkerExtras,
+  HuntAgentId,
+} from './components/hunt_watch_settings.gen';
+
+export {
   TemplateId,
   RecommendedAction,
   ProposalStatus,

@@ -28,7 +28,13 @@ export const buildCompleteWorkerSettingsSchema = (
     shape.scheduleInterval = WorkerScheduleInterval;
   }
   if (declaration.extras) {
-    shape.extras = declaration.extras.schema;
+    // No `defaultValue` means the Worker's extras are opt-in: the key may be absent entirely, both
+    // for a fresh install and for a document stored before the Worker declared any extras. An
+    // `extras` object that is present is still validated in full.
+    shape.extras =
+      declaration.extras.defaultValue === undefined
+        ? declaration.extras.schema.optional()
+        : declaration.extras.schema;
   }
   return z.object(shape).strict().pipe(WorkerSettings);
 };
@@ -76,7 +82,9 @@ export const buildDefaultWorkerSettings = (
   ...(declaration.scheduleInterval
     ? { scheduleInterval: declaration.scheduleInterval.defaultValue }
     : {}),
-  ...(declaration.extras ? { extras: declaration.extras.defaultValue } : {}),
+  ...(declaration.extras?.defaultValue === undefined
+    ? {}
+    : { extras: declaration.extras.defaultValue }),
 });
 
 /**

@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Hunt Watch Worker-specific settings
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    HuntAgentId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      description: >-
+        Agent Builder agent the Continuous Threat Hunt Worker runs with. Max length matches Agent
+        Builder's agentIdMaxLength, as for the alert analysis workflow's agent setting.
+
+    ContinuousThreatHuntWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Continuous Threat Hunt Worker, owned by Hunt
+        Watch. Sent whole on write. Every field is optional and the object itself may be omitted:
+        the Worker declares no default extras, so a Worker that has never had an agent picked
+        stores no `extras` key at all and runs the workflow's own default agent.
+      properties:
+        agentId:
+          $ref: '#/components/schemas/HuntAgentId'

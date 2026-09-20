@@ -121,6 +121,8 @@ export {
   WatchWorkerAttachment,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
+  ContinuousThreatHuntWorkerExtras,
+  HuntAgentId,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,

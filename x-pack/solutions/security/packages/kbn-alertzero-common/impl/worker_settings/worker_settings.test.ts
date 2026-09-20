@@ -226,6 +226,60 @@ describe('projectStoredAutonomyLevel', () => {
   });
 });
 
+describe('optional extras (no declared defaultValue)', () => {
+  // The opt-in shape: a Worker declares an extras schema but no default, so nothing is written
+  // until a user picks something, and documents stored before the Worker had extras still read.
+  const optionalExtras: WorkerSettingsDeclaration<{ agentId?: string }> = {
+    workerId: 'test-worker',
+    allowedAutonomyLevels: ['manual'],
+    extras: { schema: z.object({ agentId: z.string().min(1).max(64).optional() }).strict() },
+  };
+  const requiredExtras: WorkerSettingsDeclaration<{ analysisWindowDays: number }> = {
+    workerId: 'test-worker',
+    allowedAutonomyLevels: ['manual'],
+    extras: {
+      schema: z.object({ analysisWindowDays: z.number() }).strict(),
+      defaultValue: { analysisWindowDays: 14 },
+    },
+  };
+
+  it('writes no extras key on a fresh install', () => {
+    expect(buildDefaultWorkerSettings(optionalExtras)).not.toHaveProperty('extras');
+  });
+
+  it('reads a document that has no extras key at all', () => {
+    const schema = buildCompleteWorkerSettingsSchema(optionalExtras);
+
+    expect(schema.safeParse({ workerId: 'test-worker', autonomy: 'manual' }).success).toBe(true);
+  });
+
+  it('still validates an extras object that is present', () => {
+    const schema = buildCompleteWorkerSettingsSchema(optionalExtras);
+
+    expect(
+      schema.safeParse({ workerId: 'test-worker', autonomy: 'manual', extras: { agentId: 'a' } })
+        .success
+    ).toBe(true);
+    // Empty string and unknown keys are rejected exactly as they would be for required extras.
+    expect(
+      schema.safeParse({ workerId: 'test-worker', autonomy: 'manual', extras: { agentId: '' } })
+        .success
+    ).toBe(false);
+    expect(
+      schema.safeParse({ workerId: 'test-worker', autonomy: 'manual', extras: { nope: 1 } }).success
+    ).toBe(false);
+  });
+
+  // Regression guard: making extras optional for opt-in Workers must not loosen the Workers that
+  // declare a default. Rule Tuning's stored documents always carry extras and must keep having to.
+  it('keeps extras required for a declaration that has a defaultValue', () => {
+    const schema = buildCompleteWorkerSettingsSchema(requiredExtras);
+
+    expect(schema.safeParse({ workerId: 'test-worker', autonomy: 'manual' }).success).toBe(false);
+    expect(buildDefaultWorkerSettings(requiredExtras).extras).toEqual({ analysisWindowDays: 14 });
+  });
+});
+
 describe('applyWorkerSettingsWrite and diffWorkerSettings', () => {
   const saved = createDefaultWorkerSettings(RULE_TUNING);
 

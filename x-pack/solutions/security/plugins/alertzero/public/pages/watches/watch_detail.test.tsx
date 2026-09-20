@@ -10,6 +10,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { createMemoryHistory } from 'history';
 import {
   SYSTEM_SECURITY_WATCH_HUNT_ID,
@@ -150,6 +152,21 @@ const detectionWorkers: Worker[] = [
   }),
 ];
 
+/**
+ * The real app wraps the page in `KibanaContextProvider` + `QueryClientProvider` (see
+ * `application.tsx`). Watch-owned settings components use `useKibana()` and `useQuery`, so the
+ * harness provides the same context rather than testing a tree the app never renders.
+ */
+const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <KibanaContextProvider services={{ agentBuilder: { agents: { list: jest.fn() } } }}>
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      {children}
+    </QueryClientProvider>
+  </KibanaContextProvider>
+);
+
 const renderWatch = (watchId: string, workers: Worker[]) => {
   mockUseWatch.mockReturnValue({
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
@@ -168,11 +185,13 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
   mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
   render(
-    <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
-      <Route path="/watches/:watchId">
-        <WatchDetailPage />
-      </Route>
-    </MemoryRouter>
+    <TestProviders>
+      <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    </TestProviders>
   );
 
   return { mutate, mutateAsync };
@@ -381,11 +400,13 @@ describe('WatchDetailPage', () => {
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
     render(
-      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </MemoryRouter>
+      <TestProviders>
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      </TestProviders>
     );
 
     expect(screen.getByTestId('alertZeroWatchWorkersLoadError')).toBeInTheDocument();
@@ -752,11 +773,13 @@ describe('WatchDetailPage', () => {
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
     render(
-      <Router history={history}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </Router>
+      <TestProviders>
+        <Router history={history}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </Router>
+      </TestProviders>
     );
 
     const [first] = floorWorkers;
