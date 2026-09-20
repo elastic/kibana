@@ -10,27 +10,30 @@ import { useQuery } from '@kbn/react-query';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-const HUNT_AGENTS_QUERY_KEY = ['alertZero', 'huntWorkerAgents'] as const;
+const WORKER_AGENTS_QUERY_KEY = ['alertZero', 'workerAgents'] as const;
 
-export interface HuntAgentOption {
+export interface WorkerAgentOption {
   id: string;
   name: string;
 }
 
 /**
- * Lists the Agent Builder agents selectable as the Continuous Threat Hunt Worker's agent. Only the
- * default agent and user-created (custom) agents are returned; platform built-in agents
- * (`readonly`) are excluded because they are not meant to be picked here.
+ * Lists the Agent Builder agents selectable as a Worker's agent. Only the default agent and
+ * user-created (custom) agents are returned; platform built-in agents (`readonly`) are excluded
+ * because they are not meant to be picked here.
+ *
+ * Worker-agnostic: the set of selectable agents does not depend on which Worker is asking, so
+ * every Watch team's agent control shares this one query and its cache.
  */
-export const useHuntAgents = (
+export const useWorkerAgents = (
   enabled: boolean
-): { agents: HuntAgentOption[]; isLoading: boolean } => {
+): { agents: WorkerAgentOption[]; isLoading: boolean } => {
   const {
     services: { agentBuilder },
   } = useKibana<{ agentBuilder?: AgentBuilderPluginStart }>();
 
   const { data, isLoading } = useQuery({
-    queryKey: HUNT_AGENTS_QUERY_KEY,
+    queryKey: WORKER_AGENTS_QUERY_KEY,
     enabled: enabled && Boolean(agentBuilder),
     queryFn: async () => {
       const allAgents = (await agentBuilder?.agents.list()) ?? [];

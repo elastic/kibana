@@ -552,11 +552,13 @@ describe('WatchDetailPage', () => {
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
     // A fresh element each time, or React bails out of re-rendering an identical element.
     const tree = () => (
-      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </MemoryRouter>
+      <TestProviders>
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      </TestProviders>
     );
     const { rerender } = render(tree());
 

@@ -9,10 +9,15 @@
 
 import { parse } from 'yaml';
 
+import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW } from './detection_rule_tuning';
 import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
 import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
+import {
+  ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW,
+  ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,
+} from './rule_workflows';
 import { renderCommonWorkerYaml, renderScheduledWorkerYaml } from './worker_template_values';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -282,5 +287,22 @@ describe('Worker agent id propagation', () => {
         })
       );
     });
+  });
+});
+
+describe('managed workflow versions for the agent chain', () => {
+  /**
+   * The parent is a `yamlTemplate` definition, so its registry hash is computed over the template
+   * *function's* source -- editing `detection_rule_tuning.yaml` leaves that hash untouched and
+   * drift detection blind. The declared `version` is therefore the only signal that upgrades an
+   * already-installed Worker, and it has to move whenever the chain's YAML changes.
+   */
+  it('keeps the chain parent ahead of the version that shipped without agent propagation', () => {
+    expect(ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW.version).toBeGreaterThan(6);
+  });
+
+  it('bumps every sub-workflow that carries the agent down the chain', () => {
+    expect(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version).toBeGreaterThan(25);
+    expect(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version).toBeGreaterThan(21);
   });
 });

@@ -23,12 +23,19 @@ export const AnalysisWindowDays = lazySchema(() => z.number().int().min(1).max(3
 export type AnalysisWindowDays = z.infer<typeof AnalysisWindowDays>;
 
 /**
- * Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch. Sent whole on write; a replacement missing a field is rejected.
+ * Agent Builder agent the Rule Tuning Worker runs with. Carried through the tuning sweep to the per-rule review, so every rule diagnosed in a run uses it. Max length matches Agent Builder's agentIdMaxLength.
+ */
+export const RuleTuningAgentId = lazySchema(() => z.string().min(1).max(64));
+export type RuleTuningAgentId = z.infer<typeof RuleTuningAgentId>;
+
+/**
+ * Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch. Sent whole on write; a replacement missing a required field is rejected. `agentId` is optional: a Worker that has never had an agent picked omits it and the workflow runs the agent it already used.
  */
 export const RuleTuningWorkerExtras = lazySchema(() =>
   z
     .object({
       analysisWindowDays: AnalysisWindowDays,
+      agentId: RuleTuningAgentId.optional(),
     })
     .strict()
 );

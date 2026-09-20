@@ -117,4 +117,16 @@ describe('HuntSettings', () => {
 
     expect(await screen.findByTestId('alertZeroHuntAgentSelector')).toBeInTheDocument();
   });
+
+  it('drops the agent key when the user selects the default agent back', async () => {
+    const { onExtrasChange } = renderSettings({
+      settings: { ...huntWorker.settings, extras: { agentId: CUSTOM_AGENT_ID } },
+    });
+
+    fireEvent.click(await screen.findByTestId('alertZeroHuntAgentSelector'));
+    fireEvent.click(await screen.findByText('Default agent'));
+
+    await waitFor(() => expect(onExtrasChange).toHaveBeenCalledWith({}));
+    expect(onExtrasChange.mock.calls[0][0]).not.toHaveProperty('agentId');
+  });
 });

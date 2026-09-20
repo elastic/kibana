@@ -13,6 +13,7 @@ import {
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { AnalysisWindowDaysField } from './analysis_window_days_field';
+import { WorkerAgentIdField } from '../agent/worker_agent_id_field';
 import * as i18n from './translations';
 import type { WorkerCustomSettingsComponent } from '../types';
 
@@ -44,6 +45,25 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
         current={extras.analysisWindowDays}
         isDisabled={isDisabled}
         onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
+      />
+      <EuiSpacer size="m" />
+      <EuiTitle size="xxs">
+        <h3>{i18n.RULE_TUNING_AGENT_SECTION_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <WorkerAgentIdField
+        current={extras.agentId}
+        isDisabled={isDisabled}
+        onChange={(agentId) => {
+          // Drop the key rather than storing `undefined`: absent is what keeps the workflow on its
+          // own default agent, and an explicit undefined would serialize into the settings payload.
+          const { agentId: _dropped, ...rest } = extras;
+          onExtrasChange(agentId === undefined ? rest : { ...rest, agentId });
+        }}
+        label={i18n.RULE_TUNING_AGENT_LABEL}
+        helpText={i18n.RULE_TUNING_AGENT_HELP}
+        ariaLabel={i18n.RULE_TUNING_AGENT_ARIA_LABEL}
+        dataTestSubj="alertZeroRuleTuningAgent"
       />
     </>
   );

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ContinuousThreatHuntWorkerExtras, type WorkerSettings } from '@kbn/alertzero-common';
-import { HuntAgentIdField } from './hunt_agent_id_field';
+import { WorkerAgentIdField } from '../agent/worker_agent_id_field';
 import * as i18n from './translations';
 import type { WorkerCustomSettingsComponent } from '../types';
 
@@ -41,10 +41,19 @@ export const HuntSettings: WorkerCustomSettingsComponent = ({
         <h3>{i18n.HUNT_AGENT_SECTION_TITLE}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <HuntAgentIdField
+      <WorkerAgentIdField
         current={extras.agentId}
         isDisabled={isDisabled}
-        onChange={(agentId) => onExtrasChange({ ...extras, agentId })}
+        onChange={(agentId) => {
+          // Drop the key rather than storing `undefined`: absent is what keeps the workflow on its
+          // own default agent, and an explicit undefined would serialize into the settings payload.
+          const { agentId: _dropped, ...rest } = extras;
+          onExtrasChange(agentId === undefined ? rest : { ...rest, agentId });
+        }}
+        label={i18n.HUNT_AGENT_LABEL}
+        helpText={i18n.HUNT_AGENT_HELP}
+        ariaLabel={i18n.HUNT_AGENT_ARIA_LABEL}
+        dataTestSubj="alertZeroHuntAgent"
       />
     </>
   );

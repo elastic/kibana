@@ -14,14 +14,27 @@ components:
         How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's
         analysis_window_days input.
 
+    RuleTuningAgentId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      description: >-
+        Agent Builder agent the Rule Tuning Worker runs with. Carried through the tuning sweep to
+        the per-rule review, so every rule diagnosed in a run uses it. Max length matches Agent
+        Builder's agentIdMaxLength.
+
     RuleTuningWorkerExtras:
       type: object
       additionalProperties: false
       description: >-
         Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch.
-        Sent whole on write; a replacement missing a field is rejected.
+        Sent whole on write; a replacement missing a required field is rejected. `agentId` is
+        optional: a Worker that has never had an agent picked omits it and the workflow runs the
+        agent it already used.
       required:
         - analysisWindowDays
       properties:
         analysisWindowDays:
           $ref: '#/components/schemas/AnalysisWindowDays'
+        agentId:
+          $ref: '#/components/schemas/RuleTuningAgentId'
