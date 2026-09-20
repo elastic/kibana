@@ -108,7 +108,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleEventsGenerated',
-    schemaHash: '809265f7f0af6bdd32df0498a0f756a17220587024df2fe25eb69b0060b38fe1',
+    schemaHash: 'c88c0616eebb07a89f0225f4d1f52045eb886c4e14de6598b480389d4cf2d19d',
   },
   {
     id: 'alerting.ruleExecutionFailed',
