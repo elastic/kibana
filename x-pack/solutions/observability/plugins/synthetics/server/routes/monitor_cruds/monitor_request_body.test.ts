@@ -202,7 +202,13 @@ describe('editMonitorRequestBody', () => {
   });
 
   it('rejects an unknown monitor type when type is present', () => {
-    expect(editMonitorRequestBody.safeParse({ type: 'not-a-monitor-type' }).success).toBe(false);
+    const result = editMonitorRequestBody.safeParse({ type: 'not-a-monitor-type' });
+    expect(result.success).toBe(false);
+    if (result.success) {
+      return;
+    }
+    expect(result.error.issues.some((issue) => issue.path.join('.') === 'type')).toBe(true);
+    expect(result.error.issues.some((issue) => issue.code === 'invalid_union')).toBe(false);
   });
 
   it('rejects cross-type fields when type is present', () => {

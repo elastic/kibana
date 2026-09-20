@@ -14,6 +14,7 @@ import { NameSpaceString } from '../../../common/runtime_types/zod/common';
 import {
   FormMonitorTypeCodec,
   ModeCodec,
+  MonitorTypeCodec,
   ScheduleUnitCodec,
   SourceTypeCodec,
 } from '../../../common/runtime_types/zod/monitor_configs';
@@ -178,7 +179,7 @@ export const createMonitorRequestBody = z.discriminatedUnion('type', [
   bodyForType(MonitorTypeEnum.API),
 ]);
 
-const untypedEditShape = Object.fromEntries(
+const editPatchShape = Object.fromEntries(
   [
     ...new Set(
       Object.values(MonitorTypeEnum).flatMap((type) => allowedKeysForType(type as MonitorTypeEnum))
@@ -186,8 +187,28 @@ const untypedEditShape = Object.fromEntries(
   ].map((key) => [key, fieldFor(key)])
 );
 
-/** Typed body when `type` is sent; otherwise a partial of the union of all type keys. */
-export const editMonitorRequestBody = z.union([
-  createMonitorRequestBody,
-  z.strictObject(untypedEditShape),
-]);
+/**
+ * One object so edit is not `z.union(discriminatedUnion, patch-without-type)`.
+ * `type` optional for `{ enabled: false }` patches; when present, only that
+ * type's keys are allowed. Invalid `type` is an enum 400, not nested invalid_union.
+ */
+export const editMonitorRequestBody = z
+  .strictObject({
+    type: MonitorTypeCodec.optional(),
+    ...editPatchShape,
+  })
+  .superRefine((value, ctx) => {
+    if (value.type === undefined) {
+      return;
+    }
+    const allowed = new Set(allowedKeysForType(value.type));
+    for (const key of Object.keys(value)) {
+      if (key !== 'type' && !allowed.has(key)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `Unrecognized key: "${key}"`,
+        });
+      }
+    }
+  });
