@@ -27,7 +27,6 @@ jest.mock('./datasets_table', () => ({
         <div data-test-subj="mockFilterValue">{String(props.dataSourceFilter ?? '')}</div>
         <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
-        <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
         <button
           data-test-subj="mockSelectFirst"
           onClick={() => (props.onSelectionChange as any)([filteredItems[0]])}
@@ -51,42 +50,6 @@ jest.mock('./datasets_table', () => ({
       </div>
     );
   },
-}));
-
-jest.mock('./create_dataset_flyout', () => ({
-  CreateDatasetFlyout: (props: {
-    onClose: () => void;
-    onSave: (dataSet: unknown, previousId?: string) => Promise<string | null>;
-  }) => (
-    <div data-test-subj="mockCreateDatasetFlyout">
-      <button data-test-subj="mockFlyoutClose" onClick={props.onClose} />
-      <button
-        data-test-subj="mockFlyoutSave"
-        onClick={() =>
-          void props.onSave({
-            name: 'my-dataset',
-            data_source: 'ds1',
-            resource: 'bucket/*',
-            description: '',
-          })
-        }
-      />
-      <button
-        data-test-subj="mockFlyoutSaveRename"
-        onClick={() =>
-          void props.onSave(
-            {
-              name: 'renamed-dataset',
-              data_source: 'ds1',
-              resource: 'bucket/*',
-              description: '',
-            },
-            'previous-dataset'
-          )
-        }
-      />
-    </div>
-  ),
 }));
 
 jest.mock('./confirm_delete_data_set_modal', () => ({
@@ -204,50 +167,6 @@ describe('DatasetsTabContent', () => {
     expect(document.querySelector('[data-test-subj="mockCreateDisabled"]')?.textContent).toBe(
       'true'
     );
-  });
-
-  it('reloads after flyout save', async () => {
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-    const addMock = jest.fn().mockResolvedValue(undefined);
-
-    await renderComponent({
-      dataSources: [createDataSource('ds1')],
-      dataSets: [],
-      datasetsClient: { add: addMock, delete: jest.fn() },
-      loadDataSets,
-    });
-
-    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
-    expect(document.querySelector('[data-test-subj="mockCreateDatasetFlyout"]')).not.toBeNull();
-
-    fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
-
-    await waitFor(() => {
-      expect(addMock).toHaveBeenCalledTimes(1);
-      expect(loadDataSets).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('on rename, saves new then deletes previous id and reloads', async () => {
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-    const addMock = jest.fn().mockResolvedValue(undefined);
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
-
-    await renderComponent({
-      dataSources: [createDataSource('ds1')],
-      dataSets: [],
-      datasetsClient: { add: addMock, delete: deleteMock },
-      loadDataSets,
-    });
-
-    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
-    fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSaveRename"]') as Element);
-
-    await waitFor(() => {
-      expect(addMock).toHaveBeenCalledTimes(1);
-      expect(deleteMock).toHaveBeenCalledWith('previous-dataset');
-      expect(loadDataSets).toHaveBeenCalledTimes(1);
-    });
   });
 
   it('confirms single delete via client and reloads', async () => {

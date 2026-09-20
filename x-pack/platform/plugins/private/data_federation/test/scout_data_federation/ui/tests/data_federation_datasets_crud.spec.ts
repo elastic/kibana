@@ -59,7 +59,6 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
           type: 's3',
           description: 'Scout dataset CRUD source',
           settings: {
-            region: 'us-east-1',
             access_key: 'AKIAIOSFODNN7EXAMPLE',
             secret_key: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
           },

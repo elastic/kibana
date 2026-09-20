@@ -63,6 +63,7 @@ export interface DatasetSettingsFile {
   format?: 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 
   // Universal
+  file_exclusions?: string[];
   partition_detection?: 'auto' | 'hive' | 'none';
   schema_resolution?: 'first_file_wins' | 'strict' | 'union_by_name';
   partition_path?: string;
@@ -75,15 +76,17 @@ export interface DatasetSettingsFile {
   delimiter?: string;
   mode?: 'quoted' | 'escaped' | 'plain';
   header_row?: boolean;
-
-  // CSV/TSV — advanced
+  skip_rows?: number;
+  datetime_format?: string;
   null_value?: string;
   encoding?: string;
+
+  // CSV/TSV — advanced
   quote?: string;
   escape?: string;
   comment?: string;
   column_prefix?: string;
-  datetime_format?: string;
+  trim_spaces?: boolean;
   multi_value_syntax?: 'none' | 'brackets';
   max_field_size?: number;
 

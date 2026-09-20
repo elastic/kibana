@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-doc-links-browser'
   - '@kbn/ui-callout'
+  - '@kbn/es-ui-shared-plugin'
 tags:
   - plugin
   - prod
