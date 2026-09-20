@@ -63,6 +63,11 @@ const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId'])
   JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
 
 describe('CreateDatasetSettings', () => {
+  const selectFormat = (getByTestId: ReturnType<typeof render>['getByTestId'], format: string) => {
+    fireEvent.click(getByTestId('createDatasetSettingsFormat'));
+    fireEvent.click(getByTestId(`createDatasetSettingsFormatOption-${format}`));
+  };
+
   it('shows the format select', () => {
     const { getByTestId } = renderSettings();
     expect(getByTestId('createDatasetSettingsFormat')).toBeVisible();
@@ -78,9 +83,7 @@ describe('CreateDatasetSettings', () => {
   it('updates format in form state', () => {
     const { getByTestId } = renderSettings();
 
-    fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-      target: { value: 'parquet' },
-    });
+    selectFormat(getByTestId, 'parquet');
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
   });
@@ -115,9 +118,7 @@ describe('CreateDatasetSettings', () => {
     it('shows delimiter, mode, and header_row at the top level (core)', () => {
       const { getByTestId } = renderSettings();
 
-      fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-        target: { value: 'csv' },
-      });
+      selectFormat(getByTestId, 'csv');
 
       expect(getByTestId('createDatasetSettingsDelimiter')).toBeVisible();
       expect(getByTestId('createDatasetSettingsMode')).toBeVisible();
@@ -127,9 +128,7 @@ describe('CreateDatasetSettings', () => {
     it('shows CSV advanced fields when CSV is selected', () => {
       const { getByTestId } = renderSettings();
 
-      fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-        target: { value: 'csv' },
-      });
+      selectFormat(getByTestId, 'csv');
 
       expect(getByTestId('createDatasetSettingsSchemaSampleSize')).toBeVisible();
       expect(getByTestId('createDatasetSettingsMaxErrors')).toBeVisible();
@@ -139,9 +138,7 @@ describe('CreateDatasetSettings', () => {
     it('updates a CSV core field in form state', () => {
       const { getByTestId } = renderSettings();
 
-      fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-        target: { value: 'csv' },
-      });
+      selectFormat(getByTestId, 'csv');
       fireEvent.change(getByTestId('createDatasetSettingsDelimiter'), {
         target: { value: '|' },
       });
@@ -154,20 +151,15 @@ describe('CreateDatasetSettings', () => {
     it('shows schema_sample_size and datetime_format when NDJSON is selected', () => {
       const { getByTestId } = renderSettings();
 
-      fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-        target: { value: 'ndjson' },
-      });
+      selectFormat(getByTestId, 'ndjson');
 
       expect(getByTestId('createDatasetSettingsSchemaSampleSize')).toBeVisible();
       expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeVisible();
     });
 
     it('does not show segment_size (API-only)', () => {
-      const { queryByTestId } = renderSettings();
-
-      fireEvent.change(queryByTestId('createDatasetSettingsFormat')!, {
-        target: { value: 'ndjson' },
-      });
+      const { queryByTestId, getByTestId } = renderSettings();
+      selectFormat(getByTestId, 'ndjson');
 
       expect(queryByTestId('createDatasetSettingsSegmentSize')).toBeNull();
     });
@@ -175,11 +167,8 @@ describe('CreateDatasetSettings', () => {
 
   describe('Parquet format', () => {
     it('shows no format-specific fields for parquet (all API-only)', () => {
-      const { queryByTestId } = renderSettings();
-
-      fireEvent.change(queryByTestId('createDatasetSettingsFormat')!, {
-        target: { value: 'parquet' },
-      });
+      const { queryByTestId, getByTestId } = renderSettings();
+      selectFormat(getByTestId, 'parquet');
 
       expect(queryByTestId('createDatasetSettingsOptimizedReader')).toBeNull();
       expect(queryByTestId('createDatasetSettingsLateMaterialization')).toBeNull();

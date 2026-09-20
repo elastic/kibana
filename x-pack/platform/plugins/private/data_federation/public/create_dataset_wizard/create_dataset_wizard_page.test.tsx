@@ -34,6 +34,11 @@ const docLinksMock = {
 };
 
 describe('CreateDatasetWizardPage', () => {
+  const selectFormat = (getByTestId: ReturnType<typeof render>['getByTestId'], format: string) => {
+    fireEvent.click(getByTestId('createDatasetSettingsFormat'));
+    fireEvent.click(getByTestId(`createDatasetSettingsFormatOption-${format}`));
+  };
+
   const dataSources: DataSource[] = [
     { name: 'source-1', type: 's3', description: '', settings: {} },
   ];
@@ -107,9 +112,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetResource'), {
       target: { value: 'bucket/*' },
     });
-    fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-      target: { value: 'csv' },
-    });
+    selectFormat(getByTestId, 'csv');
     fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
       target: { value: 'hive' },
     });
@@ -177,9 +180,7 @@ describe('CreateDatasetWizardPage', () => {
     expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
 
-    fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
-      target: { value: 'parquet' },
-    });
+    selectFormat(getByTestId, 'parquet');
     fireEvent.click(getByTestId('nextButton'));
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))

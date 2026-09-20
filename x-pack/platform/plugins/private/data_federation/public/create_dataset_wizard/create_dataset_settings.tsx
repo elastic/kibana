@@ -12,10 +12,12 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
+  EuiSuperSelect,
   EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -48,14 +50,98 @@ const LATE_MATERIALIZATION_OPTIONS = [
   { value: 'false', text: createDatasetWizardStrings.falseLabel },
 ];
 
+const formatOptionDisplay = ({
+  title,
+  description,
+  testSubj,
+}: {
+  title: string;
+  description: string;
+  testSubj: string;
+}) => (
+  <div data-test-subj={testSubj}>
+    <EuiText size="s">
+      <strong>{title}</strong>
+    </EuiText>
+    <EuiText size="s" color="subdued">
+      {description}
+    </EuiText>
+  </div>
+);
+
+const formatOptionSelectedDisplay = ({ title, testSubj }: { title: string; testSubj: string }) => (
+  <div data-test-subj={testSubj}>
+    <EuiText size="s">{title}</EuiText>
+  </div>
+);
+
 const FORMAT_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsFormatPlaceholder },
-  { value: 'csv', text: createDatasetWizardStrings.settingsFormatCsv },
-  { value: 'tsv', text: createDatasetWizardStrings.settingsFormatTsv },
-  { value: 'ndjson', text: createDatasetWizardStrings.settingsFormatNdjson },
-  { value: 'parquet', text: createDatasetWizardStrings.settingsFormatParquet },
-  // { value: 'orc', text: createDatasetWizardStrings.settingsFormatOrc },
-];
+  {
+    value: 'csv',
+    inputDisplay: formatOptionSelectedDisplay({
+      title: createDatasetWizardStrings.settingsFormatCsv,
+      testSubj: 'createDatasetSettingsFormatInput-csv',
+    }),
+    dropdownDisplay: formatOptionDisplay({
+      title: createDatasetWizardStrings.settingsFormatCsv,
+      description: createDatasetWizardStrings.settingsFormatCsvDescription,
+      testSubj: 'createDatasetSettingsFormatDropdown-csv',
+    }),
+    'data-test-subj': 'createDatasetSettingsFormatOption-csv',
+  },
+  {
+    value: 'tsv',
+    inputDisplay: formatOptionSelectedDisplay({
+      title: createDatasetWizardStrings.settingsFormatTsv,
+      testSubj: 'createDatasetSettingsFormatInput-tsv',
+    }),
+    dropdownDisplay: formatOptionDisplay({
+      title: createDatasetWizardStrings.settingsFormatTsv,
+      description: createDatasetWizardStrings.settingsFormatTsvDescription,
+      testSubj: 'createDatasetSettingsFormatDropdown-tsv',
+    }),
+    'data-test-subj': 'createDatasetSettingsFormatOption-tsv',
+  },
+  {
+    value: 'ndjson',
+    inputDisplay: formatOptionSelectedDisplay({
+      title: createDatasetWizardStrings.settingsFormatNdjson,
+      testSubj: 'createDatasetSettingsFormatInput-ndjson',
+    }),
+    dropdownDisplay: formatOptionDisplay({
+      title: createDatasetWizardStrings.settingsFormatNdjson,
+      description: createDatasetWizardStrings.settingsFormatNdjsonDescription,
+      testSubj: 'createDatasetSettingsFormatDropdown-ndjson',
+    }),
+    'data-test-subj': 'createDatasetSettingsFormatOption-ndjson',
+  },
+  {
+    value: 'parquet',
+    inputDisplay: formatOptionSelectedDisplay({
+      title: createDatasetWizardStrings.settingsFormatParquet,
+      testSubj: 'createDatasetSettingsFormatInput-parquet',
+    }),
+    dropdownDisplay: formatOptionDisplay({
+      title: createDatasetWizardStrings.settingsFormatParquet,
+      description: createDatasetWizardStrings.settingsFormatParquetDescription,
+      testSubj: 'createDatasetSettingsFormatDropdown-parquet',
+    }),
+    'data-test-subj': 'createDatasetSettingsFormatOption-parquet',
+  },
+  {
+    value: 'orc',
+    inputDisplay: formatOptionSelectedDisplay({
+      title: createDatasetWizardStrings.settingsFormatOrc,
+      testSubj: 'createDatasetSettingsFormatInput-orc',
+    }),
+    dropdownDisplay: formatOptionDisplay({
+      title: createDatasetWizardStrings.settingsFormatOrc,
+      description: createDatasetWizardStrings.settingsFormatOrcDescription,
+      testSubj: 'createDatasetSettingsFormatDropdown-orc',
+    }),
+    'data-test-subj': 'createDatasetSettingsFormatOption-orc',
+  },
+] satisfies Array<EuiSuperSelectOption<DatasetFormatFormValue>>;
 
 const SCHEMA_RESOLUTION_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsSchemaResolutionPlaceholder },
@@ -140,15 +226,15 @@ export function CreateDatasetFormatField({
       isInvalid={Boolean(formatFieldState.error)}
       error={formatFieldState.error?.message}
     >
-      <EuiSelect
+      <EuiSuperSelect
         options={FORMAT_OPTIONS}
         data-test-subj="createDatasetSettingsFormat"
         fullWidth
         aria-label={createDatasetWizardStrings.settingsFormatLabel}
-        value={formatField.value}
-        onChange={(e) => formatField.onChange(e.target.value)}
-        name={formatField.name}
-        inputRef={formatField.ref}
+        valueOfSelected={formatField.value || undefined}
+        onChange={(value) => formatField.onChange(value)}
+        onBlur={formatField.onBlur}
+        placeholder={createDatasetWizardStrings.settingsFormatPlaceholder}
         isInvalid={Boolean(formatFieldState.error)}
       />
     </EuiFormRow>

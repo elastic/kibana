@@ -164,10 +164,22 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Parquet',
     }
   ),
+  settingsFormatParquetDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFormatParquetDescription',
+    {
+      defaultMessage: 'Columnar storage format optimized for analytics.',
+    }
+  ),
 
   settingsFormatCsv: i18n.translate('xpack.dataFederation.createDatasetForm.settingsFormatCsv', {
     defaultMessage: 'CSV',
   }),
+  settingsFormatCsvDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFormatCsvDescription',
+    {
+      defaultMessage: 'Comma-separated values with a header row.',
+    }
+  ),
 
   settingsFormatNdjson: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatNdjson',
@@ -175,14 +187,32 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'NDJSON',
     }
   ),
+  settingsFormatNdjsonDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFormatNdjsonDescription',
+    {
+      defaultMessage: 'Newline-delimited JSON objects, one per line.',
+    }
+  ),
 
   settingsFormatTsv: i18n.translate('xpack.dataFederation.createDatasetForm.settingsFormatTsv', {
     defaultMessage: 'TSV',
   }),
+  settingsFormatTsvDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFormatTsvDescription',
+    {
+      defaultMessage: 'Tab-separated values with a header row.',
+    }
+  ),
 
   settingsFormatOrc: i18n.translate('xpack.dataFederation.createDatasetForm.settingsFormatOrc', {
     defaultMessage: 'ORC',
   }),
+  settingsFormatOrcDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFormatOrcDescription',
+    {
+      defaultMessage: 'Optimized Row Columnar format for Hive workloads.',
+    }
+  ),
 
   settingsErrorModeLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsErrorModeLabel',
