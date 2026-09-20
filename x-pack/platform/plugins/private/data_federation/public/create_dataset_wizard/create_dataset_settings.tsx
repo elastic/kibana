@@ -8,19 +8,14 @@
 import React from 'react';
 import {
   EuiAccordion,
-  EuiBadge,
   EuiCode,
   EuiFieldNumber,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiSuperSelect,
   EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -32,10 +27,11 @@ import {
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
-  type DatasetErrorModeFormValue,
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
+import { ErrorModeSelect } from './form_components/error_mode_select';
+import { FormatSelect } from './form_components/format_select';
 import { LateMaterializationSelect } from './form_components/late_materialization_select';
 import { OptimizedReaderSelect } from './form_components/optimized_reader_select';
 
@@ -43,140 +39,6 @@ import { OptimizedReaderSelect } from './form_components/optimized_reader_select
 // Module-level option arrays — shared across components so each select
 // renders consistently wherever it appears.
 // ---------------------------------------------------------------------------
-
-const errorModeDropdownDisplay = ({
-  title,
-  description,
-  isDefault,
-  testSubj,
-}: {
-  title: string;
-  description: string;
-  isDefault: boolean;
-  testSubj: string;
-}) => (
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-    gutterSize="m"
-    css={{ width: '100%' }}
-  >
-    <EuiFlexItem grow={true}>
-      <div data-test-subj={testSubj}>
-        <EuiText size="s">
-          <strong>{title}</strong>
-        </EuiText>
-        <EuiText size="s" color="subdued">
-          {description}
-        </EuiText>
-      </div>
-    </EuiFlexItem>
-    {isDefault ? (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
-      </EuiFlexItem>
-    ) : null}
-  </EuiFlexGroup>
-);
-
-const errorModeSelectedDisplay = ({ title, testSubj }: { title: string; testSubj: string }) => (
-  <div data-test-subj={testSubj}>
-    <EuiText size="s">{title}</EuiText>
-  </div>
-);
-
-const formatOptionDisplay = ({
-  title,
-  description,
-  testSubj,
-}: {
-  title: string;
-  description: string;
-  testSubj: string;
-}) => (
-  <div data-test-subj={testSubj}>
-    <EuiText size="s">
-      <strong>{title}</strong>
-    </EuiText>
-    <EuiText size="s" color="subdued">
-      {description}
-    </EuiText>
-  </div>
-);
-
-const formatOptionSelectedDisplay = ({ title, testSubj }: { title: string; testSubj: string }) => (
-  <div data-test-subj={testSubj}>
-    <EuiText size="s">{title}</EuiText>
-  </div>
-);
-
-const FORMAT_OPTIONS = [
-  {
-    value: 'csv',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatCsv,
-      testSubj: 'createDatasetSettingsFormatInput-csv',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatCsv,
-      description: createDatasetWizardStrings.settingsFormatCsvDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-csv',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-csv',
-  },
-  {
-    value: 'tsv',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatTsv,
-      testSubj: 'createDatasetSettingsFormatInput-tsv',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatTsv,
-      description: createDatasetWizardStrings.settingsFormatTsvDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-tsv',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-tsv',
-  },
-  {
-    value: 'ndjson',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatNdjson,
-      testSubj: 'createDatasetSettingsFormatInput-ndjson',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatNdjson,
-      description: createDatasetWizardStrings.settingsFormatNdjsonDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-ndjson',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-ndjson',
-  },
-  {
-    value: 'parquet',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatParquet,
-      testSubj: 'createDatasetSettingsFormatInput-parquet',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatParquet,
-      description: createDatasetWizardStrings.settingsFormatParquetDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-parquet',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-parquet',
-  },
-  {
-    value: 'orc',
-    inputDisplay: formatOptionSelectedDisplay({
-      title: createDatasetWizardStrings.settingsFormatOrc,
-      testSubj: 'createDatasetSettingsFormatInput-orc',
-    }),
-    dropdownDisplay: formatOptionDisplay({
-      title: createDatasetWizardStrings.settingsFormatOrc,
-      description: createDatasetWizardStrings.settingsFormatOrcDescription,
-      testSubj: 'createDatasetSettingsFormatDropdown-orc',
-    }),
-    'data-test-subj': 'createDatasetSettingsFormatOption-orc',
-  },
-] satisfies Array<EuiSuperSelectOption<DatasetFormatFormValue>>;
 
 const SCHEMA_RESOLUTION_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsSchemaResolutionPlaceholder },
@@ -197,51 +59,6 @@ const PARTITION_DETECTION_OPTIONS = [
   { value: 'hive', text: createDatasetWizardStrings.settingsPartitionDetectionHive },
   { value: 'none', text: createDatasetWizardStrings.settingsPartitionDetectionNone },
 ];
-
-const ERROR_MODE_OPTIONS = [
-  {
-    value: 'fail_fast',
-    inputDisplay: errorModeSelectedDisplay({
-      title: createDatasetWizardStrings.settingsErrorModeFailFast,
-      testSubj: 'createDatasetSettingsErrorModeInput-fail_fast',
-    }),
-    dropdownDisplay: errorModeDropdownDisplay({
-      title: createDatasetWizardStrings.settingsErrorModeFailFast,
-      description: createDatasetWizardStrings.settingsErrorModeFailFastDescription,
-      isDefault: true,
-      testSubj: 'createDatasetSettingsErrorModeDropdown-fail_fast',
-    }),
-    'data-test-subj': 'createDatasetSettingsErrorModeOption-fail_fast',
-  },
-  {
-    value: 'skip_row',
-    inputDisplay: errorModeSelectedDisplay({
-      title: createDatasetWizardStrings.settingsErrorModeSkipRow,
-      testSubj: 'createDatasetSettingsErrorModeInput-skip_row',
-    }),
-    dropdownDisplay: errorModeDropdownDisplay({
-      title: createDatasetWizardStrings.settingsErrorModeSkipRow,
-      description: createDatasetWizardStrings.settingsErrorModeSkipRowDescription,
-      isDefault: false,
-      testSubj: 'createDatasetSettingsErrorModeDropdown-skip_row',
-    }),
-    'data-test-subj': 'createDatasetSettingsErrorModeOption-skip_row',
-  },
-  {
-    value: 'null_field',
-    inputDisplay: errorModeSelectedDisplay({
-      title: createDatasetWizardStrings.settingsErrorModeNullField,
-      testSubj: 'createDatasetSettingsErrorModeInput-null_field',
-    }),
-    dropdownDisplay: errorModeDropdownDisplay({
-      title: createDatasetWizardStrings.settingsErrorModeNullField,
-      description: createDatasetWizardStrings.settingsErrorModeNullFieldDescription,
-      isDefault: false,
-      testSubj: 'createDatasetSettingsErrorModeDropdown-null_field',
-    }),
-    'data-test-subj': 'createDatasetSettingsErrorModeOption-null_field',
-  },
-] satisfies Array<EuiSuperSelectOption<DatasetErrorModeFormValue>>;
 
 const MODE_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
@@ -299,15 +116,10 @@ export function CreateDatasetFormatField({
       isInvalid={Boolean(formatFieldState.error)}
       error={formatFieldState.error?.message}
     >
-      <EuiSuperSelect
-        options={FORMAT_OPTIONS}
-        data-test-subj="createDatasetSettingsFormat"
-        fullWidth
-        aria-label={createDatasetWizardStrings.settingsFormatLabel}
-        valueOfSelected={formatField.value || undefined}
-        onChange={(value) => formatField.onChange(value)}
+      <FormatSelect
+        value={formatField.value}
+        onChange={formatField.onChange}
         onBlur={formatField.onBlur}
-        placeholder={createDatasetWizardStrings.settingsFormatPlaceholder}
         isInvalid={Boolean(formatFieldState.error)}
       />
     </EuiFormRow>
@@ -416,15 +228,10 @@ function CommonOptionalSettings({ control }: { control: Control<CreateDatasetFor
         helpText={helpTextDefault('fail_fast')}
         fullWidth
       >
-        <EuiSuperSelect
-          options={ERROR_MODE_OPTIONS}
-          data-test-subj="createDatasetSettingsErrorMode"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
-          valueOfSelected={errorModeField.value || undefined}
-          onChange={(value) => errorModeField.onChange(value)}
+        <ErrorModeSelect
+          value={errorModeField.value}
+          onChange={errorModeField.onChange}
           onBlur={errorModeField.onBlur}
-          placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
         />
       </EuiFormRow>
 
