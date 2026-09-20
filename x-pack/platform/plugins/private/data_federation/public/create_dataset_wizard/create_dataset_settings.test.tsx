@@ -201,15 +201,18 @@ const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
 };
 
 describe('CreateDatasetAdditionalSettings', () => {
-  it('shows shared common settings and hides advanced settings when no format is selected', () => {
+  it('shows shared common and advanced settings when no format is selected', () => {
     const { getByTestId, queryByTestId } = renderAdditionalSettings();
 
     expect(getByTestId('createDatasetWizardCommonSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedCommonSettings')).toBeInTheDocument();
+
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
-    expect(queryByTestId('createDatasetWizardAdvancedSettings')).toBeNull();
+    expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });
 
   it('shows parquet common and advanced settings when parquet is selected', () => {
@@ -218,11 +221,12 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetWizardCommonSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedCommonSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetParquetCommonSettings')).toBeInTheDocument();
+
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
-
-    expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetParquetAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeInTheDocument();
@@ -234,9 +238,10 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSharedCommonSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetCsvCommonSettings')).toBeInTheDocument();
     expect(queryByTestId('createDatasetParquetCommonSettings')).toBeNull();
-    expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
 
     expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsNullValue')).toBeInTheDocument();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });

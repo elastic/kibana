@@ -23,6 +23,7 @@ import { FormatSelect } from './form_components/format_select';
 import { NdjsonAdvancedSettings } from './form_components/ndjson_advanced_settings';
 import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
 import { ParquetCommonSettings } from './form_components/parquet_common_settings';
+import { SharedAdvancedSettings } from './form_components/shared_advanced_settings';
 import { SharedCommonSettings } from './form_components/shared_common_settings';
 
 // ---------------------------------------------------------------------------
@@ -174,22 +175,23 @@ export function CreateDatasetAdditionalSettings({
         <SharedCommonSettings control={control} />
         {FormatCommonSettingsComponent ? <FormatCommonSettingsComponent control={control} /> : null}
       </EuiAccordion>
-      {FormatAdvancedSettingsComponent ? <EuiSpacer size="m" /> : null}
-      {FormatAdvancedSettingsComponent ? (
-        <EuiAccordion
-          id="createDatasetWizardAdvancedSettings"
-          data-test-subj="createDatasetWizardAdvancedSettings"
-          buttonContent={
-            <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-              {createDatasetWizardStrings.advancedSettingsSectionTitle}
-            </h4>
-          }
-          initialIsOpen={false}
-          paddingSize="m"
-        >
+      <EuiSpacer size="m" />
+      <EuiAccordion
+        id="createDatasetWizardAdvancedSettings"
+        data-test-subj="createDatasetWizardAdvancedSettings"
+        buttonContent={
+          <h4 style={{ margin: 0, fontWeight: 'bold' }}>
+            {createDatasetWizardStrings.advancedSettingsSectionTitle}
+          </h4>
+        }
+        initialIsOpen={false}
+        paddingSize="m"
+      >
+        <SharedAdvancedSettings control={control} />
+        {FormatAdvancedSettingsComponent ? (
           <FormatAdvancedSettingsComponent control={control} />
-        </EuiAccordion>
-      ) : null}
+        ) : null}
+      </EuiAccordion>
     </>
   );
 }
