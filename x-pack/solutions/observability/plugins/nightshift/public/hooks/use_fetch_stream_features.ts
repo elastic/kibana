@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
@@ -84,8 +85,10 @@ const fetchStreamFeatures = async (
  */
 export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesResult => {
   const {
+    application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
   const uniqueStreamNames = [...new Set(streamNames)].sort();
 
   const { data, isInitialLoading, isFetching, isError, refetch } = useQuery<
@@ -93,7 +96,7 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
     Error
   >({
     queryKey: ['nightshift.streamFeatures', uniqueStreamNames],
-    enabled: uniqueStreamNames.length > 0,
+    enabled: canShow && uniqueStreamNames.length > 0,
     queryFn: async ({ signal }) =>
       collectStreamFeatures(
         uniqueStreamNames,

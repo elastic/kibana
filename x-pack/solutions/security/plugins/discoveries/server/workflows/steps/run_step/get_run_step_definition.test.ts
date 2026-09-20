@@ -287,11 +287,52 @@ describe('getRunStepDefinition', () => {
       await stepDefinition.handler(contextWithoutConnectorId as never);
 
       expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith({
+        featureId: undefined,
         inference: undefined,
         logger: mockLogger,
         request: { headers: {} },
+        searchInferenceEndpoints: undefined,
         uiSettingsClient: mockUiSettingsClient,
       });
+    });
+
+    it('forwards feature_id so the step can name its tier instead of an endpoint', async () => {
+      const contextWithFeatureId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          feature_id: 'alertzero_reasoning',
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithFeatureId as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'alertzero_reasoning' })
+      );
+    });
+
+    // `connector_id` stays the top of the resolution order, so a caller that names
+    // an endpoint outright is never overridden by a tier.
+    it('does not resolve a tier when connector_id and feature_id are both provided', async () => {
+      const contextWithBoth = {
+        ...syncMockContext,
+        input: {
+          ...syncMockContext.input,
+          feature_id: 'alertzero_reasoning',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithBoth as never);
+
+      expect(mockResolveDefaultConnectorId).not.toHaveBeenCalled();
     });
 
     it('uses the resolved default connector id for connector details when connector_id is omitted', async () => {
@@ -484,6 +525,101 @@ describe('getRunStepDefinition', () => {
       await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
 
       expect((await handled).output?.status).toBe('completed');
+    });
+  });
+
+  // The discoveries dominate this step's output. A caller that reads them back
+  // from the index instead can opt out, keeping the output small enough to
+  // survive the engine's step-output eviction.
+  describe('include_attack_discoveries', () => {
+    beforeEach(() => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+    });
+
+    it('returns the discoveries when the input is omitted', async () => {
+      const result = await getStepDefinition().handler(syncMockContext as never);
+
+      expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
+    });
+
+    it('omits the key entirely when false, rather than nulling it', async () => {
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output).not.toHaveProperty('attack_discoveries');
+    });
+
+    it('still returns the execution_uuid the discoveries can be queried by', async () => {
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output?.execution_uuid).toBe(mockSuccessOutcome.generationResult.executionUuid);
+    });
+
+    it('still reports the discovery count when false', async () => {
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output?.discovery_count).toBe(
+        mockSuccessOutcome.validationResult.generatedCount
+      );
+    });
+
+    it('omits the key on the validation-failed path too', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue({ outcome: 'no_alerts' });
+
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output).not.toHaveProperty('attack_discoveries');
+    });
+  });
+
+  // The engine aborts the step's signal when the step (or the enclosing parallel
+  // branch) times out. Without this probe the awaited pipeline keeps making
+  // inference calls after the step has already been marked failed.
+  describe('cancellation', () => {
+    const getShouldStopExecution = (): (() => boolean) =>
+      mockExecuteGenerationWorkflow.mock.calls[0][0].shouldStopExecution;
+
+    it('forwards a stop probe to the pipeline', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+
+      await getStepDefinition().handler(syncMockContext as never);
+
+      expect(typeof getShouldStopExecution()).toBe('function');
+    });
+
+    it('reports false while the step is running', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+
+      await getStepDefinition().handler({
+        ...syncMockContext,
+        abortSignal: new AbortController().signal,
+      } as never);
+
+      expect(getShouldStopExecution()()).toBe(false);
+    });
+
+    it('reports true once the step is aborted', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+      const controller = new AbortController();
+
+      await getStepDefinition().handler({
+        ...syncMockContext,
+        abortSignal: controller.signal,
+      } as never);
+      controller.abort();
+
+      expect(getShouldStopExecution()()).toBe(true);
     });
   });
 
