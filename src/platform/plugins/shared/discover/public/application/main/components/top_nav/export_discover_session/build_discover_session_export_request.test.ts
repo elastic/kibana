@@ -8,6 +8,11 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { buildCustomFilter, FilterStateStore } from '@kbn/es-query';
+import { map } from 'rxjs';
+import { sanitizeDiscoverSession } from '../../../../../../server/api/session_sanitize';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, type TabState } from '../../../state_management/redux';
@@ -80,6 +85,65 @@ describe('buildDiscoverSessionExportRequest', () => {
     );
     expect(result).not.toHaveProperty('id');
     expect(result).not.toHaveProperty('meta');
+  });
+
+  it('preserves match_phrase options when exporting a UI-created DSL filter', async () => {
+    const services = createDiscoverServicesMock();
+    const filterManager = new FilterManager(services.uiSettings);
+    services.filterManager = filterManager;
+    services.data.query.filterManager = filterManager;
+    services.data.query.state$ = filterManager.getUpdates$().pipe(
+      map(() => ({
+        state: { filters: filterManager.getFilters() },
+        changes: { filters: true, appFilters: true, globalFilters: true },
+      }))
+    );
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock],
+    });
+    const query = {
+      match_phrase: { message: { query: 'connection refused', slop: 2 } },
+    };
+
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    await toolkit.initializeSingleTab({ tabId });
+
+    try {
+      // Let the FilterManager classify the DSL, just like the filter editor does.
+      filterManager.setFilters([
+        buildCustomFilter(
+          dataViewMock.id ?? dataViewMock.getIndexPattern(),
+          query,
+          false,
+          false,
+          null,
+          FilterStateStore.APP_STATE
+        ),
+      ]);
+
+      expect(toolkit.getCurrentTab().appState.filters?.[0].query).toEqual(query);
+
+      const request = buildDiscoverSessionExportRequest({
+        getState: toolkit.internalState.getState,
+        runtimeStateManager: toolkit.runtimeStateManager,
+        services,
+        includeCurrentTimeSettings: false,
+        title: 'Session with a phrase DSL filter',
+      });
+      const searchSource = parseSearchSourceJSON(
+        request.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      expect(searchSource.filter?.[0].query).toEqual(query);
+
+      const result = sanitizeDiscoverSession(request);
+      expect(result.data.tabs[0]).toMatchObject({
+        filters: [{ type: 'dsl', dsl: { query } }],
+      });
+    } finally {
+      toolkit.internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+    }
   });
 
   it('excludes current time settings when disabled', async () => {

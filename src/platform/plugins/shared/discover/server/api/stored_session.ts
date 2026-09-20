@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import {
   SavedObjectsErrorHelpers,
   isSavedObjectErrorResult,
@@ -119,4 +120,25 @@ export const deleteStoredDiscoverSession = async (
   await core.savedObjects.client.delete(SavedSearchType, id);
 
   return savedObject;
+};
+
+/** Creates or replaces stored state using the exact ID, without resolving aliases. */
+export const upsertStoredDiscoverSession = async (
+  requestContext: RequestHandlerContext,
+  id: string,
+  document: StoredDiscoverSession
+): Promise<{
+  savedObject: SavedObject<DiscoverSessionAttributes>;
+  operation: 'create' | 'update';
+}> => {
+  const existing = await getStoredDiscoverSession(requestContext, id);
+
+  if (!existing) {
+    asCodeIdSchema.parse(id);
+    const savedObject = await createStoredDiscoverSession(requestContext, document, id);
+    return { savedObject, operation: 'create' };
+  }
+
+  const savedObject = await updateStoredDiscoverSession(requestContext, id, document);
+  return { savedObject, operation: 'update' };
 };

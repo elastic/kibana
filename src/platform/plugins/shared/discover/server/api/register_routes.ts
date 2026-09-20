@@ -15,6 +15,7 @@ import { registerGetRoute } from './register_get_route';
 import { registerUpsertRoute } from './register_upsert_route';
 import { registerSearchRoute } from './register_search_route';
 import { registerSanitizeRoute } from './register_sanitize_route';
+import { registerInternalRoutes } from './register_internal_routes';
 
 export const registerRoutes = (
   http: HttpServiceSetup,
@@ -30,4 +31,5 @@ export const registerRoutes = (
   registerSearchRoute(versioned, logger, usageCounter);
   registerDeleteRoute(versioned, userActivity, logger, usageCounter);
   registerSanitizeRoute(versioned, logger);
+  registerInternalRoutes(versioned, userActivity, logger);
 };

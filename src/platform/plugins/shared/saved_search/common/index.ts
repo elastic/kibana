@@ -9,7 +9,14 @@
 
 export { getSavedSearchFullPathUrl } from './saved_searches_url';
 export { extractTabs } from './service/extract_tabs';
-export type { StoredDiscoverSession } from './service/discover_session_serialization';
+export {
+  serializeDiscoverSession,
+  deserializeDiscoverSession,
+} from './service/discover_session_serialization';
+export type {
+  StoredDiscoverSession,
+  DiscoverSessionTagging,
+} from './service/discover_session_serialization';
 
 export type {
   DiscoverGridSettings,

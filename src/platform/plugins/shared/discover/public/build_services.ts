@@ -218,10 +218,12 @@ export const buildServices = ({
 }): DiscoverServices => {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
+  const savedObjectsTagging = plugins.savedObjectsTaggingOss?.getTaggingApi();
   const sessionService = createSessionService({
     apiClient: createDiscoverSessionClient(core.http),
     legacyClient: plugins.savedSearch,
     useHttpApi: USE_DISCOVER_SESSION_HTTP_API,
+    tagging: savedObjectsTagging?.ui,
   });
 
   return {
@@ -282,7 +284,7 @@ export const buildServices = ({
     singleDocLocator,
     expressions: plugins.expressions,
     charts: plugins.charts,
-    savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsTagging,
     savedObjectsManagement: plugins.savedObjectsManagement,
     savedSearch: plugins.savedSearch,
     unifiedSearch: plugins.unifiedSearch,

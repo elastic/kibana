@@ -8,8 +8,9 @@
  */
 
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { isEqual, isObject, omit } from 'lodash';
+import { cloneDeep, isEqual, isObject, omit } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
 import { canImportVisContext } from '@kbn/unified-histogram';
@@ -240,7 +241,23 @@ const TAB_COMPARATORS: TabComparators = {
   isTextBasedQuery: NOOP_COMPARATOR,
   // usesAdHocDataView is derived from the data view itself and can be ignored
   usesAdHocDataView: NOOP_COMPARATOR,
-  serializedSearchSource: searchSourceComparator,
+  serializedSearchSource: (searchSourceA, searchSourceB) => {
+    if (isEqual(searchSourceA.filter, searchSourceB.filter)) {
+      return searchSourceComparator(searchSourceA, searchSourceB);
+    }
+
+    // Compare filters as FilterManager sees them, using copies so stored filters stay untouched.
+    return searchSourceComparator(
+      {
+        ...searchSourceA,
+        filter: mapAndFlattenFilters(cloneDeep(searchSourceA.filter ?? [])),
+      },
+      {
+        ...searchSourceB,
+        filter: mapAndFlattenFilters(cloneDeep(searchSourceB.filter ?? [])),
+      }
+    );
+  },
   // By default, viewMode: undefined is equivalent to documents view
   // So they should be treated as same
   viewMode: fieldComparator('viewMode', VIEW_MODE.DOCUMENT_LEVEL),

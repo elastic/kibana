@@ -27,19 +27,27 @@ export interface StoredDiscoverSession {
   references: SavedObjectReference[];
 }
 
-/** Converts session tabs to stored attributes, extracting their search source references. */
-export const serializeDiscoverSession = (
-  session: Pick<DiscoverSession, 'title' | 'description' | 'tabs'>
-): StoredDiscoverSession => {
-  const references: SavedObjectReference[] = [];
+export interface DiscoverSessionTagging {
+  updateTagsReferences: (
+    references: SavedObjectReference[],
+    tags: string[]
+  ) => SavedObjectReference[];
+  getTagIdsFromReferences: (references: SavedObjectReference[]) => string[];
+}
 
+/** Serializes a Discover session into stored attributes and references without changing its IDs. */
+export const serializeDiscoverSession = (
+  session: Pick<DiscoverSession, 'title' | 'description' | 'tabs' | 'tags'>,
+  tagging?: Pick<DiscoverSessionTagging, 'updateTagsReferences'>
+): StoredDiscoverSession => {
+  const tabReferences: SavedObjectReference[] = [];
   const tabs: DiscoverSessionAttributes['tabs'] = session.tabs.map((tab) => {
     const [serializedSearchSource, searchSourceReferences] = extractReferences(
       tab.serializedSearchSource,
       { refNamePrefix: `tab_${tab.id}` }
     );
 
-    references.push(...searchSourceReferences);
+    tabReferences.push(...searchSourceReferences);
 
     return {
       id: tab.id,
@@ -83,7 +91,9 @@ export const serializeDiscoverSession = (
       description: session.description,
       tabs,
     },
-    references,
+    references: tagging
+      ? tagging.updateTagsReferences(tabReferences, session.tags ?? [])
+      : tabReferences,
   };
 };
 
@@ -94,14 +104,11 @@ export interface StoredDiscoverSessionObject extends StoredDiscoverSession {
   sharingSavedObjectProps?: DiscoverSession['sharingSavedObjectProps'];
 }
 
-/** Restores a Discover session from stored attributes; callers add tags from the references. */
-export const deserializeDiscoverSession = ({
-  id,
-  attributes,
-  references,
-  managed,
-  sharingSavedObjectProps,
-}: StoredDiscoverSessionObject): DiscoverSession => ({
+/** Restores a Discover session from stored attributes, references and resolution metadata. */
+export const deserializeDiscoverSession = (
+  { id, attributes, references, managed, sharingSavedObjectProps }: StoredDiscoverSessionObject,
+  tagging?: Pick<DiscoverSessionTagging, 'getTagIdsFromReferences'>
+): DiscoverSession => ({
   id,
   title: attributes.title,
   description: attributes.description,
@@ -139,6 +146,7 @@ export const deserializeDiscoverSession = ({
     tabTypeState: tab.attributes.tabTypeState,
   })),
   managed: Boolean(managed),
+  ...(tagging && { tags: tagging.getTagIdsFromReferences(references) }),
   references,
   sharingSavedObjectProps,
 });

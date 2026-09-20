@@ -7,45 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { buildPath, isHttpFetchError } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType, type DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
-  DISCOVER_SESSION_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
-import type { DiscoverSessionApiResponse, DiscoverSessionGetResponse } from '../../server';
-import type { deserializeEsqlControls } from '../../common/session/control_panels';
+import type {
+  DiscoverSessionInternalData,
+  DiscoverSessionInternalResponse,
+  DiscoverSessionInternalGetResponse,
+} from '../../server';
 
 export const DISCOVER_SESSION_HTTP_ERROR_NAME = 'DiscoverSessionHttpError';
 
 export interface DiscoverSessionClient {
-  create: (data: DiscoverSessionClientRequestData) => Promise<DiscoverSessionApiResponse>;
+  create: (data: DiscoverSessionInternalData) => Promise<DiscoverSessionInternalResponse>;
   get: (id: string) => Promise<DiscoverSessionClientGetResult>;
   upsert: (
     id: string,
-    data: DiscoverSessionClientRequestData
-  ) => Promise<DiscoverSessionApiResponse>;
+    data: DiscoverSessionInternalData
+  ) => Promise<DiscoverSessionInternalResponse>;
 }
-
-export type DiscoverSessionClientRequestData = Omit<DiscoverSessionApiDataInput, 'tabs'> & {
-  tabs: DiscoverSessionClientRequestTab[];
-};
-
-export type DiscoverSessionClientRequestTab<Tab = DiscoverSessionApiDataInput['tabs'][number]> = {
-  [Key in keyof Tab]: Key extends 'control_panels'
-    ? ReturnType<typeof deserializeEsqlControls>
-    : Tab[Key];
-};
 
 export type DiscoverSessionResolveMetadata = Pick<
   NonNullable<DiscoverSession['sharingSavedObjectProps']>,
   'outcome' | 'aliasTargetId' | 'aliasPurpose'
 >;
 
-export type DiscoverSessionClientGetResult = DiscoverSessionGetResponse & {
+export type DiscoverSessionClientGetResult = DiscoverSessionInternalGetResponse & {
   resolve: DiscoverSessionResolveMetadata;
 };
 
@@ -53,7 +45,7 @@ export type DiscoverSessionClientGetResult = DiscoverSessionGetResponse & {
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
     requestWithReadableError(() =>
-      http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
+      http.post<DiscoverSessionInternalResponse>(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
         version: DISCOVER_SESSION_API_VERSION,
         body: JSON.stringify(data),
       })
@@ -62,7 +54,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
   get: (id) =>
     requestWithReadableError(
       async () => {
-        const { body, response } = await http.get<DiscoverSessionGetResponse>(
+        const { body, response } = await http.get<DiscoverSessionInternalGetResponse>(
           buildDiscoverSessionPath(id),
           {
             version: DISCOVER_SESSION_API_VERSION,
@@ -84,7 +76,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 
   upsert: (id, data) =>
     requestWithReadableError(() =>
-      http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
+      http.put<DiscoverSessionInternalResponse>(buildDiscoverSessionPath(id), {
         version: DISCOVER_SESSION_API_VERSION,
         body: JSON.stringify(data),
       })
@@ -94,7 +86,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 
 /** Builds the path for one Discover session. */
 const buildDiscoverSessionPath = (id: string) =>
-  buildPath(`${DISCOVER_SESSION_API_BASE_PATH}/{id}`, { id });
+  buildPath(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/{id}`, { id });
 
 /** Preserves server error details while allowing callers to handle missing sessions separately. */
 const requestWithReadableError = async <T>(

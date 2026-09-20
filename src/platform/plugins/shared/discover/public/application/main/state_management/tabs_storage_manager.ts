@@ -92,12 +92,6 @@ export interface TabsStorageManager {
     persistedDiscoverSession?: DiscoverSession;
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
-    /** Prepares the returned session before mapping its tabs, using local tabs from the same session. */
-    prepareSession?: (
-      session: DiscoverSession,
-      localTabs: TabState[],
-      selectedTabId: string | undefined
-    ) => DiscoverSession;
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
   };
@@ -425,7 +419,6 @@ export const createTabsStorageManager = ({
     persistedDiscoverSession,
     shouldClearAllTabs,
     defaultTabState,
-    prepareSession,
   }) => {
     const tabsStateFromURL = getTabsStateFromURL();
     const selectedTabId = enabled
@@ -453,15 +446,7 @@ export const createTabsStorageManager = ({
       toTabState(tab, defaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
-    let updatedDiscoverSession = persistedDiscoverSession;
-
-    // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
-    // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
-    if (persistedDiscoverSession && prepareSession) {
-      const localTabs =
-        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
-      updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
-    }
+    const updatedDiscoverSession = persistedDiscoverSession;
 
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })

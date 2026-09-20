@@ -8,7 +8,9 @@
  */
 
 import {
-  VIEW_MODE,
+  serializeDiscoverSession,
+  deserializeDiscoverSession,
+  type DiscoverSessionTagging,
   type DiscoverSession,
   type DiscoverSessionTab,
 } from '@kbn/saved-search-plugin/common';
@@ -16,11 +18,19 @@ import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public'
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
-import { FilterStateStore } from '@kbn/es-query';
+import {
+  DataGridDensity,
+  UnifiedHistogramSuggestionType,
+  VIEW_MODE,
+} from '@kbn/discover-session-constants';
+import type { CombinedFilter } from '@kbn/es-query';
+import { BooleanRelation, FILTERS, FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type { DiscoverSessionApiTab, DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiResponse } from '../../server';
+import type { DiscoverSessionInternalResponse } from '../../server';
+import {
+  discoverSessionInternalDataSchema,
+  discoverSessionInternalResponseSchema,
+} from '../../server/api/internal_schema';
 import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
 import { createSessionService } from './session_service';
 
@@ -34,29 +44,25 @@ const runtimeTab: DiscoverSessionTab = {
   hideTable: false,
   isTextBasedQuery: false,
   usesAdHocDataView: false,
+  viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+  density: DataGridDensity.NORMAL,
+  documentsDisplayMode: 'json',
+  jsonModeSettings: { hideNulls: true, wrapLines: false, defaultRenderedNodes: 20 },
   serializedSearchSource: { index: 'logs-data-view' },
 };
 
-const apiData: DiscoverSessionApiData = {
-  title: 'Session',
-  description: '',
-  tabs: [
-    {
-      id: 'logs-tab',
-      label: 'Logs',
-      type: DiscoverTabType.Default,
-      sort: [],
-      column_order: [],
-      filters: [],
-      data_source: { type: 'data_view_reference', ref_id: 'logs-data-view' },
-      view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-      hide_chart: false,
-      hide_table: false,
-    },
+const apiData = serializeDiscoverSession({ title: 'Session', description: '', tabs: [runtimeTab] });
+
+const tagging: DiscoverSessionTagging = {
+  getTagIdsFromReferences: (references) =>
+    references.filter(({ type }) => type === 'tag').map(({ id }) => id),
+  updateTagsReferences: (references, tags) => [
+    ...references.filter(({ type }) => type !== 'tag'),
+    ...tags.map((id) => ({ type: 'tag', id, name: `tag-ref-${id}` })),
   ],
 };
 
-const apiResponse: DiscoverSessionApiResponse = {
+const apiResponse: DiscoverSessionInternalResponse = {
   id: 'session-id',
   data: apiData,
   meta: { managed: false },
@@ -143,9 +149,8 @@ describe('Discover session service', () => {
       const beforeSave = cloneDeep(submittedSession);
       const apiClient = createApiClient();
       const legacyClient = savedSearchPluginMock.createStartContract();
-      // The API omits pin markers, inline IDs, the live fingerprint, and control order numbers.
-      // Saving must keep those local values without rebuilding the tabs from this response.
-      const saveResponse: DiscoverSessionApiResponse = {
+      // Save keeps the submitted tabs even when the response has different metadata.
+      const saveResponse: DiscoverSessionInternalResponse = {
         id: savedId,
         data,
         meta: { managed: true },
@@ -156,6 +161,7 @@ describe('Discover session service', () => {
         apiClient,
         legacyClient,
         useHttpApi: true,
+        tagging,
       });
 
       const savedSession = await sessionService.save(submittedSession, { copyOnSave });
@@ -168,8 +174,9 @@ describe('Discover session service', () => {
         ...beforeSave,
         id: savedId,
         managed: true,
-        references: [{ id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' }],
+        references: data.references,
       });
+      expect(savedSession?.tabs).toBe(submittedSession.tabs);
       expect(submittedSession).toStrictEqual(beforeSave);
       expect(apiClient.get).not.toHaveBeenCalled();
     }
@@ -190,7 +197,7 @@ describe('Discover session service', () => {
     expect(apiClient.upsert).not.toHaveBeenCalled();
     expect(apiClient.get).not.toHaveBeenCalled();
     expect(savedSession?.id).toBe(apiResponse.id);
-    expect(savedSession?.tabs).toStrictEqual(newSession.tabs);
+    expect(savedSession?.tabs).toBe(newSession.tabs);
     expect(newSession).not.toHaveProperty('id');
   });
 
@@ -217,6 +224,63 @@ describe('Discover session service', () => {
     expect(apiClient.create).not.toHaveBeenCalled();
     expect(loaded).toEqual({ session: persistedSession, warnings: [] });
     expect(savedSession).toBe(persistedSession);
+  });
+
+  it('preserves the stored session through CM to HTTP to CM, including shared and distinct IDs', async () => {
+    const { submittedSession } = createSaveFixture();
+    submittedSession.tabs.push({
+      ...submittedSession.tabs[0],
+      id: 'duplicate',
+      label: 'Duplicate',
+    });
+    const stored = serializeDiscoverSession(submittedSession, tagging);
+    const resolve = { outcome: 'exactMatch' } as const;
+    const cmLoaded = deserializeDiscoverSession(
+      {
+        id: 'session-id',
+        ...stored,
+        managed: false,
+        sharingSavedObjectProps: resolve,
+      },
+      tagging
+    );
+    const apiClient = createApiClient();
+    const response = discoverSessionInternalResponseSchema.validate(
+      JSON.parse(JSON.stringify({ id: cmLoaded.id, data: stored, meta: { managed: false } }))
+    );
+    expect(response.data).toEqual(stored);
+    apiClient.get.mockResolvedValue({ ...response, resolve });
+    apiClient.upsert.mockImplementation(async (id, data) => ({
+      id,
+      data: discoverSessionInternalDataSchema.validate(JSON.parse(JSON.stringify(data))),
+      meta: { managed: false },
+    }));
+    const service = createSessionService({
+      apiClient,
+      legacyClient: savedSearchPluginMock.createStartContract(),
+      useHttpApi: true,
+      tagging,
+    });
+
+    const { session: httpLoaded, warnings } = await service.get(cmLoaded.id);
+    expect(httpLoaded).toEqual(cmLoaded);
+    expect(httpLoaded.tabs).toEqual(submittedSession.tabs);
+    expect(warnings).toEqual([]);
+    await service.save(httpLoaded, {});
+
+    const { data: written }: DiscoverSessionInternalResponse = await apiClient.upsert.mock
+      .results[0].value;
+    const cmReloaded = deserializeDiscoverSession(
+      {
+        ...written,
+        id: cmLoaded.id,
+        managed: false,
+        sharingSavedObjectProps: resolve,
+      },
+      tagging
+    );
+    expect(written).toEqual(stored);
+    expect(cmReloaded).toEqual(cmLoaded);
   });
 });
 
@@ -248,8 +312,29 @@ const createSaveFixture = () => {
     tags: ['tag-1'],
     tabs: [
       // Identical specs may have different IDs after editing. Saving must keep both IDs.
-      ...['inline-a', 'inline-b'].map(
-        (id): DiscoverSessionTab => ({
+      ...['inline-a', 'inline-b'].map((id): DiscoverSessionTab => {
+        const combinedFilter: CombinedFilter = {
+          meta: {
+            index: `runtime-${id}`,
+            type: FILTERS.COMBINED,
+            relation: BooleanRelation.OR,
+            params: [
+              {
+                meta: { index: `runtime-${id}`, type: FILTERS.CUSTOM },
+                query: {
+                  match_phrase: { message: { query: 'connection refused', slop: 2 } },
+                },
+              },
+              {
+                meta: { index: 'other-view', negate: true },
+                query: { exists: { field: 'message' } },
+              },
+            ],
+          },
+          $state: { store: FilterStateStore.GLOBAL_STATE },
+        };
+
+        return {
           ...runtimeTab,
           id,
           label: id,
@@ -267,16 +352,10 @@ const createSaveFixture = () => {
               allowHidden: false,
               managed: false,
             },
-            filter: [
-              {
-                meta: { index: `runtime-${id}` },
-                query: { match_all: {} },
-                $state: { store: FilterStateStore.GLOBAL_STATE },
-              },
-            ],
+            filter: [combinedFilter, { meta: {}, query: { match_all: {} } }],
           },
-        })
-      ),
+        };
+      }),
       {
         ...runtimeTab,
         id: 'esql',
@@ -315,54 +394,7 @@ const createSaveFixture = () => {
     ],
   };
 
-  const data: DiscoverSessionApiData = {
-    ...apiData,
-    tags: ['tag-1'],
-    tabs: [
-      ...['inline-a', 'inline-b'].map(
-        (id): DiscoverSessionApiTab => ({
-          id,
-          label: id,
-          type: DiscoverTabType.Default,
-          sort: [],
-          column_order: [],
-          filters: [{ type: 'dsl', dsl: { query: { match_all: {} } } }],
-          data_source: {
-            type: 'data_view_spec',
-            index_pattern: 'logs-*',
-            time_field: '@timestamp',
-            allow_hidden_indices: false,
-            field_filters: ['secret.*'],
-          },
-          view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-          hide_chart: false,
-          hide_table: false,
-        })
-      ),
-      {
-        id: 'esql',
-        label: 'ES|QL',
-        sort: [],
-        column_order: [],
-        type: DiscoverTabType.Default,
-        data_source: { type: 'esql', query: 'FROM logs-*' },
-        hide_chart: false,
-        hide_table: false,
-        breakdown_field: 'host.name',
-        vis_context: {
-          suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
-          attributes: chartAttributes,
-        },
-        control_panels: ['first', 'last'].map((id) => ({
-          id,
-          type: ESQL_CONTROL,
-          width: 'medium',
-          grow: true,
-          config: { ...controlConfig, variable_name: id },
-        })),
-      },
-    ],
-  };
+  const data = serializeDiscoverSession(submittedSession, tagging);
 
   return { submittedSession, data };
 };

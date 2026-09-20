@@ -263,6 +263,9 @@ describe('saveDiscoverSession', () => {
       ).rejects.toHaveProperty('message', saveError.message);
 
       expect(apiClient[method]).toHaveBeenCalledTimes(1);
+      const requestData =
+        method === 'create' ? apiClient.create.mock.calls[0][0] : apiClient.upsert.mock.calls[0][1];
+      expect(requestData.attributes.tabs[0].attributes.columns).toEqual(['message']);
       expect(apiClient.get).not.toHaveBeenCalled();
       expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
       expect(toolkit.getCurrentTab().id).toBe(tabId);

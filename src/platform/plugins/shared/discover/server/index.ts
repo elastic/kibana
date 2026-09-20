@@ -48,6 +48,11 @@ export type {
   DiscoverSessionGetResponse,
 } from './api/schema';
 export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
+export type {
+  DiscoverSessionInternalData,
+  DiscoverSessionInternalResponse,
+  DiscoverSessionInternalGetResponse,
+} from './api/internal_schema';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

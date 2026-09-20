@@ -51,7 +51,6 @@ import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -458,12 +457,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       persistedDiscoverSession,
       shouldClearAllTabs,
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-      prepareSession: (session, localTabs, selectedTabId) =>
-        assignSessionDataViewIds(session, localTabs, {
-          tabId: selectedTabId ?? session.tabs[0]?.id,
-          dataViewSpec: initialTabState?.dataViewSpec,
-        }),
     });
 
     // Hand the location state over to the tab initialization before updating the URL below, which
@@ -481,7 +474,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
     return {
       userId,
       spaceId,
-      // The prepared session, so the fulfilled reducer keeps the same baseline setTabs stored.
+      // Keep the same session baseline setTabs stored.
       persistedDiscoverSession: initialTabsState.updatedDiscoverSession,
     };
   }

@@ -11,7 +11,11 @@ import React from 'react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { DiscoverTabType } from '@kbn/discover-session-constants';
+import {
+  serializeDiscoverSession,
+  deserializeDiscoverSession,
+} from '@kbn/saved-search-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import {
   ControlGroupRenderer,
   type ControlGroupRendererApi,
@@ -24,7 +28,7 @@ import {
   registerEmbeddablePublicDefinition,
   type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
-import type { DiscoverSessionApiResponse } from '../../server';
+import type { DiscoverSessionInternalResponse } from '../../server';
 import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../__mocks__/test_provider';
 import { useESQLVariables } from '../application/main/components/top_nav/use_esql_variables';
@@ -34,7 +38,6 @@ import {
 } from '../application/main/state_management/redux';
 import type { DiscoverSessionClient } from './api_client';
 import { createSessionService } from './session_service';
-import { fromDiscoverSessionApiResponse } from './session_conversions';
 
 describe('control order after saving a Discover session', () => {
   beforeAll(() => {
@@ -54,49 +57,51 @@ describe('control order after saving a Discover session', () => {
         { type: ESQL_CONTROL, width: 'medium', grow: true, ...controlConfig, order },
       ])
     );
-    const savedResponse: DiscoverSessionApiResponse = {
+    const initialSession = createDiscoverSessionMock({
       id: 'session-id',
-      meta: { managed: false },
-      data: {
-        title: 'Controls',
-        description: '',
-        tags: [],
-        tabs: [
-          {
-            id: 'tab-id',
-            label: 'ES|QL',
-            type: DiscoverTabType.Default,
-            data_source: { type: 'esql', query: 'FROM logs-*' },
-            sort: [],
-            column_order: [],
-            hide_chart: true,
-            hide_table: false,
-            chart_interval: 'auto',
-            breakdown_field: '',
-            control_panels: ['first', 'last'].map((id) => ({
-              id,
-              type: ESQL_CONTROL,
-              width: 'medium',
-              grow: true,
-              config: controlConfig,
-            })),
-          },
-        ],
-      },
-    };
-    const initialSession = fromDiscoverSessionApiResponse(savedResponse);
-    initialSession.tabs[0].controlGroupJson = JSON.stringify(controls);
+      title: 'Controls',
+      description: '',
+      tags: [],
+      tabs: [
+        {
+          id: 'tab-id',
+          label: 'ES|QL',
+          serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+          sort: [],
+          columns: [],
+          grid: {},
+          isTextBasedQuery: true,
+          hideChart: true,
+          hideTable: false,
+          chartInterval: 'auto',
+          breakdownField: '',
+          controlGroupJson: JSON.stringify(controls),
+        },
+      ],
+    });
     await toolkit.initializeTabs({ persistedDiscoverSession: initialSession });
     await toolkit.initializeSingleTab({ tabId: 'tab-id' });
 
     const apiClient: jest.Mocked<DiscoverSessionClient> = {
       get: jest.fn(),
       create: jest.fn(),
-      upsert: jest.fn().mockResolvedValue(savedResponse),
+      upsert: jest.fn(
+        async (id, data): Promise<DiscoverSessionInternalResponse> => ({
+          id,
+          data,
+          meta: { managed: false },
+        })
+      ),
     };
     const legacySave = jest
       .spyOn(services.savedSearch, 'saveDiscoverSession')
-      .mockImplementation(async (session) => ({ ...session, id: 'session-id', managed: false }));
+      .mockImplementation(async (session) =>
+        deserializeDiscoverSession({
+          ...serializeDiscoverSession(session),
+          id: 'session-id',
+          managed: false,
+        })
+      );
     const sessionService = createSessionService({
       apiClient,
       legacyClient: services.savedSearch,
@@ -165,14 +170,20 @@ describe('control order after saving a Discover session', () => {
       expect(apiClient.upsert).toHaveBeenCalledWith(
         'session-id',
         expect.objectContaining({
-          tabs: [
-            expect.objectContaining({
-              id: 'tab-id',
-              control_panels: savedResponse.data.tabs[0].control_panels,
-            }),
-          ],
+          attributes: expect.objectContaining({
+            tabs: [
+              expect.objectContaining({
+                id: 'tab-id',
+                attributes: expect.objectContaining({ controlGroupJson: expect.any(String) }),
+              }),
+            ],
+          }),
         })
       );
+      const savedControls = JSON.parse(
+        apiClient.upsert.mock.calls[0][1].attributes.tabs[0].attributes.controlGroupJson ?? '{}'
+      );
+      expect(savedControls).toEqual({ first: controls.first, last: controls.last });
       expect(legacySave).not.toHaveBeenCalled();
     } else {
       expect(legacySave).toHaveBeenCalledTimes(1);
