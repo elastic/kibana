@@ -871,4 +871,68 @@ describe('WatchDetailPage', () => {
     expect(afterNav).not.toBeInvalid();
     expect(screen.queryByTestId('alertZeroWatchSettingsInvalid')).not.toBeInTheDocument();
   });
+  it('drops a valid unsaved edit when navigating to another Watch that shares the Worker', async () => {
+    // `useWatchSettingsDraft` stores overlays by `worker.id` and the hook is not remounted when
+    // only the route parameter changes, so a valid edit made on one Watch would otherwise stay
+    // dirty on the next one — where its Save action could persist a change the analyst made
+    // somewhere else entirely.
+    const shared = floorWorkers[1];
+    const onBothWatches = [
+      ...floorWorkers.map((worker) =>
+        worker.id === shared.id
+          ? { ...worker, watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID, SYSTEM_SECURITY_WATCH_HUNT_ID] }
+          : worker
+      ),
+      { ...huntWorker, watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID] },
+    ];
+    mockUseWorkers.mockReturnValue({
+      data: { workers: onBothWatches },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+
+    const history = createMemoryHistory({
+      initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
+    });
+    render(
+      <Router history={history}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </Router>
+    );
+
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
+    fireEvent.change(amount, { target: { value: '48' } });
+    fireEvent.blur(amount);
+
+    // The edit is valid, so Save is live rather than held down by an invalid draft.
+    expect(amount).not.toBeInvalid();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    act(() => {
+      history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
+    });
+
+    // The destination Watch starts clean: Save is disabled because nothing on it is dirty, and
+    // the shared Worker shows its stored value rather than the abandoned edit.
+    const afterNav = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
+    expect(afterNav).toBe(amount);
+    expect(afterNav).toHaveValue(24);
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+  });
 });
