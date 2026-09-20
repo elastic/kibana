@@ -217,6 +217,28 @@ steps:
         with:
           remaining_seconds: '${{ variables.expires_epoch | minus: variables.now_epoch }}'
 
+      # The iteration's first writes are `settle_expired` and `settle_exhausted`
+      # below, and both land on the carried id. A revision appended between
+      # iterations moves the chain head, so without this the loop settles a row
+      # the service refuses -- the run fails and the live revision stays pending.
+      # The gate branch adopts again after its park, because a revision can also
+      # land while the gate is waiting.
+      - name: adopt_live_head_each_iteration_branch
+        type: if
+        condition: '${{ variables.current_proposal_id != blank }}'
+        steps:
+          - name: resolve_live_head_each_iteration
+            type: proposals.getLatestRevision
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+          - name: adopt_live_head_each_iteration
+            type: data.set
+            with:
+              current_proposal_id: '{{ steps.resolve_live_head_each_iteration.output.proposalId }}'
+              # The revision's own input, for the same reason the post-gate
+              # adoption takes it: an approval applies to the parameters the
+              # analyst actually saw.
+              action_input: '${{ steps.resolve_live_head_each_iteration.output.actionInput }}'
       # Conditions below use a single `and` or a single comparison on purpose.
       # Liquid has no operator precedence and no parentheses, so a mixed
       # `and`/`or` expression binds in a way that does not match how it reads.

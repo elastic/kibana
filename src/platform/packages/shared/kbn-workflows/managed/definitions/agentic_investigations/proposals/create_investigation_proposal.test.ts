@@ -547,6 +547,27 @@ describe('create-investigation-proposal workflow', () => {
       expect(adoptIndex).toBeLessThan(autoSteps.indexOf('resolve_auto'));
     });
 
+    it('adopts the live head before the first write of an iteration, not only after the gate', () => {
+      // `settle_expired` and `settle_exhausted` are the iteration's earliest
+      // writes. A revision appended between iterations moves the chain head, so
+      // resolving only inside `gate_branch` leaves those two settling a row the
+      // service now refuses -- the run fails and the live revision stays pending.
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const adoptIndex = body.indexOf('adopt_live_head_each_iteration_branch');
+      expect(adoptIndex).toBeGreaterThanOrEqual(0);
+      for (const write of ['settle_expired', 'settle_exhausted']) {
+        expect(body.indexOf(write)).toBeGreaterThan(adoptIndex);
+      }
+    });
+    it('resolves the chain head from the carried id when adopting each iteration', () => {
+      const resolve = findStep(workflow.steps, 'resolve_live_head_each_iteration');
+      const adopt = findStep(workflow.steps, 'adopt_live_head_each_iteration');
+      expect(resolve?.type).toBe('proposals.getLatestRevision');
+      expect(String(resolve?.with?.proposalId)).toContain('variables.current_proposal_id');
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.resolve_live_head_each_iteration.output.proposalId'
+      );
+    });
     it('adopts before every write after the gate, so each lands on the current revision', () => {
       // Ordering is the whole point: adopting after a write would leave that
       // write on a row the service now refuses to settle.
