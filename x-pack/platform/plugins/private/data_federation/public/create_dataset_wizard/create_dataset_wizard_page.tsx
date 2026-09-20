@@ -25,6 +25,7 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
 import { StepAdditional } from './step_additional';
 import { StepDataset } from './step_dataset';
+import { StepMapping } from './step_mapping';
 import { StepReview } from './step_review';
 import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
@@ -174,6 +175,11 @@ export function CreateDatasetWizardPage({
               <FormWizardStep id="settings" label={createDatasetWizardStrings.additionalStepLabel}>
                 <div data-test-subj="createDatasetWizardContent">
                   <StepAdditional />
+                </div>
+              </FormWizardStep>
+              <FormWizardStep id="mapping" label={createDatasetWizardStrings.mappingStepLabel}>
+                <div data-test-subj="createDatasetWizardContent">
+                  <StepMapping />
                 </div>
               </FormWizardStep>
               <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>

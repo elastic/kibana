@@ -28,6 +28,7 @@ export class DataFederationPage {
 
   readonly createDatasetWizard;
   readonly createDatasetWizardAdvancedStep;
+  readonly createDatasetWizardMappingStep;
   readonly createDatasetWizardReviewStep;
   readonly wizardNextButton;
 
@@ -63,6 +64,7 @@ export class DataFederationPage {
 
     this.createDatasetWizard = page.testSubj.locator('createDatasetWizard');
     this.createDatasetWizardAdvancedStep = page.testSubj.locator('createDatasetWizardAdvancedStep');
+    this.createDatasetWizardMappingStep = page.testSubj.locator('createDatasetWizardMappingStep');
     this.createDatasetWizardReviewStep = page.testSubj.locator('createDatasetWizardReviewStep');
     this.wizardNextButton = page.testSubj.locator('nextButton');
     this.createDataSetDataSource = page.testSubj.locator('createDatasetDataSource');
@@ -166,6 +168,8 @@ export class DataFederationPage {
     await this.wizardNextButton.click();
     await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
+    await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
     await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
     await this.createDatasetWizard.waitFor({ state: 'hidden' });
@@ -185,6 +189,8 @@ export class DataFederationPage {
     await this.createDataSetResource.fill(resource);
     await this.wizardNextButton.click();
     await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
     await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();

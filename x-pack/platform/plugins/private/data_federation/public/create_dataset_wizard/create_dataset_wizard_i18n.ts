@@ -29,6 +29,9 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Additional settings',
     }
   ),
+  mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
+    defaultMessage: 'Mapping',
+  }),
   commonSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
     {

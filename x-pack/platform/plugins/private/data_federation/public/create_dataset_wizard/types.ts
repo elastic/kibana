@@ -21,4 +21,4 @@ export interface DatasetWizardContent {
   settings: CreateDatasetSettingsFormValues;
 }
 
-export type DatasetWizardSection = keyof DatasetWizardContent | 'review';
+export type DatasetWizardSection = keyof DatasetWizardContent | 'mapping' | 'review';

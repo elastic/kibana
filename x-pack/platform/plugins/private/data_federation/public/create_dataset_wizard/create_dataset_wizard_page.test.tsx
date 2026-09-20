@@ -135,10 +135,12 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('backButton'));
     expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
     ).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
@@ -239,6 +241,8 @@ describe('CreateDatasetWizardPage', () => {
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
 
@@ -298,6 +302,8 @@ describe('CreateDatasetWizardPage', () => {
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
+    fireEvent.click(getByTestId('nextButton'));
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
