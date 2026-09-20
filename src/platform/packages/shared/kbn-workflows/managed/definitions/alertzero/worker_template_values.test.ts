@@ -48,9 +48,27 @@ const flattenSteps = (steps: WorkflowStep[] = []): WorkflowStep[] =>
 const parseSteps = (yaml: string): WorkflowStep[] =>
   flattenSteps((parse(yaml) as { steps?: WorkflowStep[] }).steps);
 
+/**
+ * Every step type that binds an Agent Builder agent, and the key each one uses.
+ * `ai.agent` takes a hyphenated top-level config key; `ai.conversation.create`
+ * takes a snake_case `with:` input. Both must carry the Worker's agent, so both
+ * belong here -- filtering to `ai.agent` alone is what let the conversation
+ * steps drift unbound.
+ */
+const AGENT_BINDING_STEP_TYPES = ['ai.agent', 'ai.conversation.create'] as const;
+
+const agentBindingOf = (step: WorkflowStep): string | undefined =>
+  step.type === 'ai.agent' ? step['agent-id'] : step.with?.agent_id;
+
 /** Steps that actually dispatch to an agent, i.e. the ones `agent-id` governs. */
 const agentSteps = (yaml: string): WorkflowStep[] =>
   parseSteps(yaml).filter((step) => step.type === 'ai.agent');
+
+/** Every agent-binding step, regardless of which key spelling the type uses. */
+const agentBindingSteps = (yaml: string): WorkflowStep[] =>
+  parseSteps(yaml).filter((step) =>
+    (AGENT_BINDING_STEP_TYPES as readonly string[]).includes(step.type ?? '')
+  );
 
 /**
  * Every hand-off to another workflow: the edges of a Worker's chain. Async
@@ -458,7 +476,9 @@ describe('managed workflow versions for the agent chain', () => {
 
   it('bumps every sub-workflow that carries the agent down the chain', () => {
     expect(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version).toBeGreaterThan(25);
-    expect(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version).toBeGreaterThan(21);
+    // 22 shipped the diagnose step bound but left `create_investigation` on the
+    // default agent, so binding it has to reinstall again.
+    expect(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version).toBeGreaterThan(22);
   });
 
   it('keeps the Attack Discovery Worker ahead of its pre-propagation version', () => {
@@ -468,5 +488,58 @@ describe('managed workflow versions for the agent chain', () => {
   it('bumps every Attack Discovery sub-workflow that carries the agent down the chain', () => {
     expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBeGreaterThan(3);
     expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBeGreaterThan(2);
+  });
+});
+
+/**
+ * A chain is only as good as its least-wired step. Both propagation bugs found so far were
+ * the same shape: one step in a chain binds the Worker's agent and a sibling silently runs
+ * the default. Enumerating every agent-binding step in every Worker chain is what catches
+ * that, rather than asserting on the steps we happened to remember.
+ */
+describe('every agent-binding step in a Worker chain binds the Worker agent', () => {
+  const CHAIN_WORKFLOWS: Array<[name: string, yaml: string]> = [
+    ['floor_alert_triage.yaml', FLOOR_ALERT_TRIAGE_YAML],
+    ['floor_attack_discovery.yaml', FLOOR_ATTACK_DISCOVERY_YAML],
+    ['attack_discovery_runner.yaml', ATTACK_DISCOVERY_RUNNER_YAML],
+    ['attack_discovery_review.yaml', ATTACK_DISCOVERY_REVIEW_YAML],
+    ['detection_rule_tuning.yaml', DETECTION_RULE_TUNING_YAML],
+    ['rule_tuning_worker.yaml', RULE_TUNING_WORKER_YAML],
+    ['rule_tuning_review.yaml', RULE_TUNING_REVIEW_YAML],
+  ];
+
+  it.each(CHAIN_WORKFLOWS)('%s leaves no agent-binding step unbound', (_name, yaml) => {
+    const unbound = agentBindingSteps(yaml)
+      .filter((step) => agentBindingOf(step) === undefined)
+      .map((step) => `${step.name ?? '(unnamed)'} [${step.type}]`);
+
+    expect(unbound).toEqual([]);
+  });
+
+  it('covers both agent-binding step types, so neither spelling can drift unnoticed', () => {
+    // Without this, the suite above could pass simply because one of the two step
+    // types stopped appearing in any chain.
+    const typesSeen = new Set(
+      CHAIN_WORKFLOWS.flatMap(([, yaml]) => agentBindingSteps(yaml).map((step) => step.type))
+    );
+
+    expect([...typesSeen].sort()).toEqual([...AGENT_BINDING_STEP_TYPES].sort());
+  });
+
+  it('carries the picked agent into the conversation the Rule Tuning review opens', () => {
+    // The investigation is where an analyst picks the work up, so it has to open
+    // against the Worker's agent rather than the default.
+    const rendered = renderCommonWorkerYaml(RULE_TUNING_REVIEW_YAML, {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      agentId: AGENT,
+    });
+
+    const conversation = agentBindingSteps(rendered).find(
+      (step) => step.type === 'ai.conversation.create'
+    );
+
+    expect(conversation).toBeDefined();
+    expect(agentBindingOf(conversation!)).toBe("{{ inputs.agent_id | default: '' }}");
   });
 });

@@ -153,6 +153,10 @@ steps:
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
     with:
+      # Same Worker agent that diagnoses below, so the investigation opens against the
+      # agent that will work it. Unset renders blank, which the step normalizes back to
+      # the default Elastic AI agent.
+      agent_id: "{{ inputs.agent_id | default: '' }}"
       title: "Rule tuning: {{ steps.fetch_rule.output.name }}"
       access_control:
         access_mode: public
