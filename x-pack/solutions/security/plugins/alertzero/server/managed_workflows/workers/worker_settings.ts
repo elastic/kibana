@@ -40,18 +40,27 @@ const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
 /**
  * Template values mirror the settings API: shared fields flat (with the legacy `autonomyLevel`
  * key the YAML templates read), Worker-specific fields nested under `extras`.
+ *
+ * `agentId` is lifted out of `extras` to the top level because it is generic: the YAML
+ * templates read one placeholder regardless of which Worker declared the setting, so no
+ * Worker id is branched on here. A Worker that declares no agent contributes no key, which
+ * is what keeps the rendered YAML unchanged for every existing Worker.
  */
 const toTemplateValues = (
   workerId: RegisteredWorkerId,
   settings: WorkerSettings
-): ManagedWorkflowTemplateValues => ({
-  settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
-  autonomyLevel: settings.autonomy,
-  ...(settings.scheduleInterval === undefined
-    ? {}
-    : { scheduleInterval: settings.scheduleInterval }),
-  ...(settings.extras === undefined ? {} : { extras: settings.extras }),
-});
+): ManagedWorkflowTemplateValues => {
+  const agentId = (settings.extras as { agentId?: string } | undefined)?.agentId;
+  return {
+    settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
+    autonomyLevel: settings.autonomy,
+    ...(settings.scheduleInterval === undefined
+      ? {}
+      : { scheduleInterval: settings.scheduleInterval }),
+    ...(settings.extras === undefined ? {} : { extras: settings.extras }),
+    ...(agentId === undefined ? {} : { agentId }),
+  };
+};
 
 /**
  * Reads persisted template values back as stored — nothing defaulted or merged, so an older
@@ -63,7 +72,17 @@ const parseWorkerValues = (
   raw: Record<string, unknown>
 ): WorkerSettings => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
+  // `agentId` is a DERIVED mirror of `extras.agentId` written by `toTemplateValues` for the
+  // YAML placeholder. `extras` remains the authoritative copy, so the mirror is dropped here
+  // rather than parsed — otherwise the round-trip would reject it as an unsupported field.
+  const {
+    settingsVersion,
+    autonomyLevel,
+    scheduleInterval,
+    extras,
+    agentId: _derivedAgentId,
+    ...unsupported
+  } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`

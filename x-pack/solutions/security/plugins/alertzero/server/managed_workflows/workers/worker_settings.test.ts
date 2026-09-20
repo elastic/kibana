@@ -412,6 +412,9 @@ describe('Continuous Threat Hunt agent (opt-in extras)', () => {
       })
     ).toEqual({
       values: {
+        // Mirrored to the top level for the generic `__WORKER_AGENT_ID__` placeholder;
+        // `extras` stays the authoritative copy.
+        agentId: 'my-custom-agent',
         settingsVersion: 1,
         autonomyLevel: 'manual',
         extras: { agentId: 'my-custom-agent' },
