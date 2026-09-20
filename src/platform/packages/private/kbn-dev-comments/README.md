@@ -10,7 +10,7 @@ import { CommentsButton, type CommentsHostServices } from '@kbn/dev-comments';
 const services: CommentsHostServices = {
   api,            // where comments are stored
   location,       // the current page
-  navigateToPath, // opens a page for "Take me there"
+  navigateToPath, // opens the page of a comment being navigated to
   getCurrentUser, // who is commenting
   captureViewport,// optional: screenshots
   ignoreSelectors,// optional: host UI to leave alone
@@ -26,7 +26,7 @@ const services: CommentsHostServices = {
 
 - Click an element to comment on it. Pins mark the page's comments; the panel lists all of them, grouped by page.
 - Comments are Markdown. They can be replied to and resolved, never deleted.
-- A comment whose element is not on screen has a "Take me there" button: it opens the comment's page and highlights the author's clicks one at a time until the element appears.
+- A comment whose element is not on screen has a navigate action in the panel: it opens the comment's page and highlights the author's clicks one at a time until the element appears.
 
 ## Keyboard
 
@@ -34,7 +34,7 @@ const services: CommentsHostServices = {
 | --- | --- |
 | `⌘⇧K` / `Ctrl+Shift+K` | Toggle comment mode |
 | `Tab`, `Enter` / `Space` | In comment mode: move through the page, comment on the focused element |
-| `Esc` | Discard the draft, stop "Take me there", close the thread, leave comment mode |
+| `Esc` | Discard the draft, stop navigating to a comment, close the thread, leave comment mode |
 | `⌘↵` / `Ctrl+Enter` | Submit a comment or reply |
 
 Stories: `src/__stories__/comments.stories.tsx`.

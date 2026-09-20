@@ -99,7 +99,7 @@ export interface TrailRecorder {
   steps(): TrailStep[];
 }
 
-/** Passively records which disclosure controls are clicked on the current page, so "Take me there" can ask a reader to repeat them. */
+/** Passively records which disclosure controls are clicked on the current page, so a guide to a comment can ask a reader to repeat them. */
 export const createTrailRecorder = ({
   location,
   ignoreSelectors,

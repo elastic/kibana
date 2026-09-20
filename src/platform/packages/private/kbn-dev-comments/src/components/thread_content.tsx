@@ -7,28 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type KeyboardEvent } from 'react';
+import React, { useState, type KeyboardEvent, type PropsWithChildren, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAvatar,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComment,
   EuiCommentList,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownFormat,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
   EuiToolTip,
   euiScrollBarStyles,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Comment, CommentAuthor } from '../types';
+import type { Comment } from '../types';
 import { CommentEditor } from './comment_editor';
 import { useComments, useCommentsState } from './comments_context';
 import { DisplayNameField, useDisplayName } from './display_name_field';
@@ -38,45 +36,46 @@ import { SnapshotImage, useSnapshot } from './snapshot_image';
 export interface ThreadContentProps {
   comment: Comment;
   onClose?: () => void;
-  /** Offered when the commented element is not on screen: guides the reader to it. */
-  onGuide?: () => void;
   /**
-   * Below a panel row, which shows the comment itself: only its context, replies
-   * and the reply form, in the flow of the panel. Otherwise the thread fills a
-   * popover: actions on top, the comments scrolling in between, the form below.
+   * As a row of the panel, in its flow: the comments and the reply form, with no
+   * actions of their own. Otherwise the thread fills a popover: actions on top,
+   * the comments scrolling in between, the form below.
    */
   inline?: boolean;
+  /** Actions in the header of the first comment, after its own; see `RootComment`. */
+  rootActions?: ReactNode;
+  /**
+   * Folds the thread to its first comment, with this in place of the comment's
+   * text and without the replies and the reply form: a panel row's preview.
+   */
+  folded?: ReactNode;
 }
 
 const bodyStyles = css`
   word-break: break-word;
 `;
 
-export const CommentBody = ({ text }: { text: string }) => (
+const CommentBody = ({ text }: { text: string }) => (
   <EuiMarkdownFormat textSize="s" css={bodyStyles}>
     {text}
   </EuiMarkdownFormat>
 );
 
-/** When something was written: as the host shows it (e.g. "5 minutes ago"), else the local time, which is the tooltip either way. */
-const TimeLabel = ({ at }: { at: string }) => {
+/**
+ * When something happened: as the host shows it (e.g. "5 minutes ago"), else the
+ * local time. The local time is the tooltip, unless something else has one.
+ */
+const TimeLabel = ({ at, tooltip = true }: { at: string; tooltip?: boolean }) => {
   const { RelativeTime } = useComments().services;
   // Rendered again every half minute, so that the host's relative time keeps up.
   useNow();
   const local = new Date(at).toLocaleString();
-  return <span title={local}>{RelativeTime ? <RelativeTime value={at} /> : local}</span>;
+  return (
+    <span title={tooltip ? local : undefined}>
+      {RelativeTime ? <RelativeTime value={at} /> : local}
+    </span>
+  );
 };
-
-export const AuthorMeta = ({ author, at }: { author: CommentAuthor; at: string }) => (
-  <EuiText size="xs">
-    <strong>{author.displayName}</strong>{' '}
-    <EuiTextColor color="subdued">
-      <time dateTime={at}>
-        <TimeLabel at={at} />
-      </time>
-    </EuiTextColor>
-  </EuiText>
-);
 
 /** Whether a reply or resolve request is in flight for the comment; kept in the store so remounts cannot forget it. */
 const useThreadBusy = (id: string): boolean => useCommentsState((state) => state.busyIds.has(id));
@@ -85,14 +84,14 @@ export const ResolveButton = ({ comment }: { comment: Comment }) => {
   const controller = useComments();
   const busy = useThreadBusy(comment.id);
   const label = comment.resolved
-    ? i18n.translate('devComments.thread.reopen', { defaultMessage: 'Reopen this thread.' })
+    ? i18n.translate('devComments.thread.unresolve', { defaultMessage: 'Unresolve this thread.' })
     : i18n.translate('devComments.thread.resolve', { defaultMessage: 'Resolve this thread.' });
 
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon
-        iconType={comment.resolved ? 'refresh' : 'check'}
-        color={comment.resolved ? 'text' : 'success'}
+        iconType={comment.resolved ? 'undo' : 'check'}
+        color={comment.resolved ? 'danger' : 'success'}
         size="xs"
         isDisabled={busy}
         onClick={() => void controller.setResolved(comment.id, !comment.resolved)}
@@ -103,11 +102,137 @@ export const ResolveButton = ({ comment }: { comment: Comment }) => {
   );
 };
 
+/** Copies the text of a comment (as written, in Markdown), nothing else. */
+const CopyButton = ({ text }: { text: string }) => {
+  const label = i18n.translate('devComments.thread.copy', { defaultMessage: 'Copy this comment.' });
+  return (
+    <EuiCopy
+      textToCopy={text}
+      beforeMessage={label}
+      afterMessage={i18n.translate('devComments.thread.copied', { defaultMessage: 'Copied.' })}
+      tooltipProps={{ disableScreenReaderOutput: true }}
+    >
+      {(copy) => (
+        <EuiButtonIcon
+          iconType="copy"
+          color="text"
+          size="xs"
+          onClick={copy}
+          aria-label={label}
+          data-test-subj="devCommentsCopy"
+        />
+      )}
+    </EuiCopy>
+  );
+};
+
+/** When the comments were last fetched, and a way to fetch them again; drafts are kept. */
+export const RefreshButton = ({
+  label,
+  'data-test-subj': dataTestSubj,
+}: {
+  /** What the button fetches again, as its tooltip. */
+  label: string;
+  'data-test-subj': string;
+}) => {
+  const controller = useComments();
+  const loadedAt = useCommentsState((state) => state.loadedAt);
+  const loading = useCommentsState((state) => state.loading);
+  return (
+    <EuiToolTip content={label}>
+      <EuiButtonEmpty
+        size="xs"
+        color="text"
+        iconType="refresh"
+        flush="left"
+        isLoading={loading}
+        onClick={() => void controller.reload()}
+        data-test-subj={dataTestSubj}
+      >
+        {loadedAt ? (
+          <>
+            {i18n.translate('devComments.refresh.updated', { defaultMessage: 'Updated' })}{' '}
+            <TimeLabel at={loadedAt} tooltip={false} />
+          </>
+        ) : (
+          i18n.translate('devComments.refresh.refresh', { defaultMessage: 'Refresh' })
+        )}
+      </EuiButtonEmpty>
+    </EuiToolTip>
+  );
+};
+
+/*
+ * A comment's header is on two lines: the author with the actions to the right,
+ * then what happened and when. EUI would put its actions slot beside every line,
+ * narrowing them all, so the actions go with the name instead, and the time with
+ * the event rather than in EUI's timestamp slot.
+ */
+
+/** The first line of a comment's header. */
+const HeaderLine = ({ name, actions }: { name: string; actions: ReactNode }) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexItem>{name}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        {actions}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+/** The second line of a comment's header: "commented 5 minutes ago". */
+const EventLabel = ({ label, at }: { label: string; at: string }) => (
+  <>
+    {label}{' '}
+    <time dateTime={at}>
+      <TimeLabel at={at} />
+    </time>
+  </>
+);
+
+/**
+ * The first comment of a thread as an item of its timeline, with `children` in
+ * place of its text. The panel shows it folded, its text a preview, and opened;
+ * its header is the same either way, only the body changes.
+ */
+export const RootComment = ({
+  comment,
+  actions,
+  children,
+}: PropsWithChildren<{ comment: Comment; actions?: ReactNode }>) => (
+  <EuiComment
+    username={
+      <HeaderLine
+        name={comment.author.displayName}
+        actions={
+          <>
+            <CopyButton text={comment.text} />
+            {actions}
+          </>
+        }
+      />
+    }
+    timelineAvatar={<EuiAvatar name={comment.author.displayName} />}
+    event={
+      <EventLabel
+        label={i18n.translate('devComments.thread.commented', { defaultMessage: 'commented' })}
+        at={comment.createdAt}
+      />
+    }
+    // Resolved shows as the header's color; the resolve button and the thread's badge say so too.
+    eventColor={comment.resolved ? 'success' : undefined}
+  >
+    {children}
+  </EuiComment>
+);
+
 export const ThreadContent = ({
   comment,
   onClose,
-  onGuide,
   inline = false,
+  rootActions,
+  folded,
 }: ThreadContentProps) => {
   const controller = useComments();
   const euiThemeContext = useEuiTheme();
@@ -137,48 +262,26 @@ export const ThreadContent = ({
     }
   };
 
-  // Ways back to what the author saw: below the comment's text, or on their own
-  // when the container shows the comment already.
-  const context = (comment.snapshot || onGuide) && (
+  // What the author saw, below the comment's text.
+  const context = comment.snapshot && (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        {onGuide && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="external"
-              flush="left"
-              onClick={onGuide}
-              data-test-subj="devCommentsGuide"
-            >
-              {i18n.translate('devComments.thread.takeMeThere', {
-                defaultMessage: 'Take me there',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        {comment.snapshot && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="image"
-              flush="left"
-              isLoading={snapshot.loading}
-              onClick={() => setScreenshotOpen((open) => !open)}
-              data-test-subj="devCommentsShowSnapshot"
-            >
-              {screenshotOpen
-                ? i18n.translate('devComments.thread.hideScreenshot', {
-                    defaultMessage: 'Hide screenshot',
-                  })
-                : i18n.translate('devComments.thread.showScreenshot', {
-                    defaultMessage: 'Show screenshot',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      {comment.snapshot && screenshotOpen && (
+      <EuiButtonEmpty
+        size="xs"
+        iconType="image"
+        flush="left"
+        isLoading={snapshot.loading}
+        onClick={() => setScreenshotOpen((open) => !open)}
+        data-test-subj="devCommentsShowSnapshot"
+      >
+        {screenshotOpen
+          ? i18n.translate('devComments.thread.hideScreenshot', {
+              defaultMessage: 'Hide screenshot',
+            })
+          : i18n.translate('devComments.thread.showScreenshot', {
+              defaultMessage: 'Show screenshot',
+            })}
+      </EuiButtonEmpty>
+      {screenshotOpen && (
         <>
           <EuiSpacer size="xs" />
           <SnapshotImage comment={comment} snapshot={comment.snapshot} state={snapshot} />
@@ -187,12 +290,9 @@ export const ThreadContent = ({
     </>
   );
 
-  const hasTimeline = !inline || comment.replies.length > 0;
-
   const actions = !inline && (
     <EuiFlexGroup
       gutterSize="xs"
-      justifyContent="flexEnd"
       alignItems="center"
       responsive={false}
       css={css`
@@ -200,6 +300,15 @@ export const ThreadContent = ({
         padding-bottom: ${euiTheme.size.xs};
       `}
     >
+      <EuiFlexItem grow={false}>
+        <RefreshButton
+          label={i18n.translate('devComments.thread.refresh', {
+            defaultMessage: 'Refresh this thread.',
+          })}
+          data-test-subj="devCommentsThreadRefresh"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <ResolveButton comment={comment} />
       </EuiFlexItem>
@@ -219,55 +328,53 @@ export const ThreadContent = ({
     </EuiFlexGroup>
   );
 
-  const timeline = hasTimeline && (
+  const timeline = (
     <EuiCommentList
       aria-label={i18n.translate('devComments.thread.label', {
         defaultMessage: 'Comment thread',
       })}
       gutterSize="m"
+      css={css`
+        /* The first line of a header (see \`HeaderLine\`) takes the whole width, which puts the event on a second one. */
+        .euiCommentEvent__headerUsername {
+          flex-basis: 100%;
+        }
+      `}
     >
-      {!inline && (
-        <EuiComment
-          username={comment.author.displayName}
-          timelineAvatar={<EuiAvatar name={comment.author.displayName} />}
-          event={
-            <>
-              {i18n.translate('devComments.thread.commented', { defaultMessage: 'commented' })}
-              {comment.resolved && (
-                <>
-                  {' '}
-                  <EuiBadge color="success" iconType="check">
-                    {i18n.translate('devComments.thread.resolvedBadge', {
-                      defaultMessage: 'Resolved',
-                    })}
-                  </EuiBadge>
-                </>
-              )}
-            </>
-          }
-          eventColor={comment.resolved ? 'success' : undefined}
-          timestamp={<TimeLabel at={comment.createdAt} />}
-        >
-          <CommentBody text={comment.text} />
-          {context && (
-            <>
-              <EuiSpacer size="xs" />
-              {context}
-            </>
-          )}
-        </EuiComment>
-      )}
-      {comment.replies.map((item) => (
-        <EuiComment
-          key={item.id}
-          username={item.author.displayName}
-          timelineAvatar={<EuiAvatar name={item.author.displayName} />}
-          event={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
-          timestamp={<TimeLabel at={item.createdAt} />}
-        >
-          <CommentBody text={item.text} />
-        </EuiComment>
-      ))}
+      <RootComment comment={comment} actions={rootActions}>
+        {folded ?? (
+          <>
+            <CommentBody text={comment.text} />
+            {context && (
+              <>
+                <EuiSpacer size="xs" />
+                {context}
+              </>
+            )}
+          </>
+        )}
+      </RootComment>
+      {!folded &&
+        comment.replies.map((item) => (
+          <EuiComment
+            key={item.id}
+            username={
+              <HeaderLine
+                name={item.author.displayName}
+                actions={<CopyButton text={item.text} />}
+              />
+            }
+            timelineAvatar={<EuiAvatar name={item.author.displayName} />}
+            event={
+              <EventLabel
+                label={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
+                at={item.createdAt}
+              />
+            }
+          >
+            <CommentBody text={item.text} />
+          </EuiComment>
+        ))}
     </EuiCommentList>
   );
 
@@ -282,19 +389,11 @@ export const ThreadContent = ({
               min-height: 0;
             `
       }
-      data-test-subj="devCommentsThread"
+      data-test-subj={folded ? undefined : 'devCommentsThread'}
     >
       {actions}
       {inline ? (
-        <>
-          {context && (
-            <>
-              {context}
-              <EuiSpacer size="s" />
-            </>
-          )}
-          {timeline}
-        </>
+        timeline
       ) : (
         <div
           css={css`
@@ -309,50 +408,52 @@ export const ThreadContent = ({
           {timeline}
         </div>
       )}
-      <div
-        css={css`
-          flex: none;
-          padding-top: ${hasTimeline ? euiTheme.size.m : 0};
-        `}
-        data-test-subj="devCommentsReplyForm"
-      >
-        <CommentEditor
-          value={reply}
-          readOnly={busy}
-          onChange={(value) => controller.setDraft(comment.id, value)}
-          onSubmit={submitReply}
-          placeholder={i18n.translate('devComments.thread.replyPlaceholder', {
-            defaultMessage: 'Reply…',
-          })}
-          aria-label={i18n.translate('devComments.thread.replyLabel', {
-            defaultMessage: 'Reply',
-          })}
-          data-test-subj="devCommentsReplyInput"
-        />
-        <EuiSpacer size="s" />
-        <DisplayNameField
-          value={displayName}
-          onChange={setDisplayName}
-          onKeyDown={onReplyKeyDown}
-          readOnly={busy}
-        />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              isDisabled={!canReply}
-              isLoading={busy}
-              onClick={submitReply}
-              data-test-subj="devCommentsReplySubmit"
-            >
-              {i18n.translate('devComments.thread.replyButton', { defaultMessage: 'Reply' })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      {!folded && (
+        <div
+          css={css`
+            flex: none;
+            padding-top: ${euiTheme.size.m};
+          `}
+          data-test-subj="devCommentsReplyForm"
+        >
+          <CommentEditor
+            value={reply}
+            readOnly={busy}
+            onChange={(value) => controller.setDraft(comment.id, value)}
+            onSubmit={submitReply}
+            placeholder={i18n.translate('devComments.thread.replyPlaceholder', {
+              defaultMessage: 'Reply…',
+            })}
+            aria-label={i18n.translate('devComments.thread.replyLabel', {
+              defaultMessage: 'Reply',
+            })}
+            data-test-subj="devCommentsReplyInput"
+          />
+          <EuiSpacer size="s" />
+          <DisplayNameField
+            value={displayName}
+            onChange={setDisplayName}
+            onKeyDown={onReplyKeyDown}
+            readOnly={busy}
+          />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                fill
+                isDisabled={!canReply}
+                isLoading={busy}
+                onClick={submitReply}
+                data-test-subj="devCommentsReplySubmit"
+              >
+                {i18n.translate('devComments.thread.replyButton', { defaultMessage: 'Reply' })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      )}
     </div>
   );
 };

@@ -105,19 +105,31 @@ describe('createCommentsController', () => {
       controller.start();
       await flush();
       expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ loaded: false, loadError: 'boom', comments: [] })
+        expect.objectContaining({
+          loaded: false,
+          loading: false,
+          loadedAt: null,
+          loadError: 'boom',
+          comments: [],
+        })
       );
 
       const retry = deferred<Comment[]>();
       api.list.mockReturnValueOnce(retry.promise);
       const reloading = controller.reload();
       expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ loaded: false, loadError: null })
+        expect.objectContaining({ loaded: false, loading: true, loadError: null })
       );
       retry.resolve([createComment('a')]);
       await reloading;
       expect(controller.store.getState()).toEqual(
-        expect.objectContaining({ loaded: true, loadError: null, comments: [createComment('a')] })
+        expect.objectContaining({
+          loaded: true,
+          loading: false,
+          loadedAt: expect.any(String),
+          loadError: null,
+          comments: [createComment('a')],
+        })
       );
 
       api.list.mockRejectedValueOnce(new Error('offline'));
@@ -129,6 +141,23 @@ describe('createCommentsController', () => {
           loadError: 'offline',
           comments: [createComment('a')],
         })
+      );
+    });
+
+    it('fetches again on request, keeping the comment and the reply being written', async () => {
+      const { api, services } = createHost();
+      const controller = createCommentsController(services);
+      controller.start();
+      await flush();
+      controller.setActive(true);
+      controller.pick(target(), { x: 1, y: 1 });
+      controller.setDraft('a', 'Draft');
+      const { pending } = controller.store.getState();
+
+      await controller.reload();
+      expect(api.list).toHaveBeenCalledTimes(2);
+      expect(controller.store.getState()).toEqual(
+        expect.objectContaining({ pending, drafts: { a: 'Draft' }, active: true })
       );
     });
 

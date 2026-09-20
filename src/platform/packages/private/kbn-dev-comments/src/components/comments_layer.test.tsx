@@ -122,22 +122,31 @@ describe('CommentsLayer', () => {
     const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, gone]) });
     act(() => controller.setActive(true));
     const goneRow = await screen.findByTestId('devCommentsPanelItem-gone');
-    const goneToggle = within(goneRow).getByRole('button', { name: /Where did it go/ });
+    const preview = within(goneRow).getByRole('button', { name: /Where did it go/ });
 
-    // The element is not on the page: Enter shows the thread below the row, Space hides it again.
-    goneToggle.focus();
+    // The element is not on the page: Enter on the preview opens the thread in the
+    // row, the text taking the preview's place and focus moving to the toggle that
+    // closes it; Space there closes it, bringing the preview back.
+    preview.focus();
     await user.keyboard('{Enter}');
-    expect(goneToggle).toHaveAttribute('aria-expanded', 'true');
-    expect(within(goneRow).getByTestId('devCommentsThread')).toBeInTheDocument();
+    expect(preview).not.toBeInTheDocument();
+    expect(within(goneRow).getByTestId('devCommentsReplyInput')).toBeInTheDocument();
+    const toggle = within(goneRow).getByTestId('devCommentsPanelToggle');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(document.activeElement).toBe(toggle);
     await user.keyboard(' ');
-    expect(goneToggle).toHaveAttribute('aria-expanded', 'false');
-    expect(within(goneRow).queryByTestId('devCommentsThread')).toBeNull();
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(within(goneRow).queryByTestId('devCommentsReplyInput')).toBeNull();
+    expect(within(goneRow).getByRole('button', { name: /Where did it go/ })).toBeInTheDocument();
 
     // The element is on the page: Enter opens the thread at its pin.
     const seededRow = screen.getByTestId('devCommentsPanelItem-a');
-    within(seededRow)
-      .getByRole('button', { name: /Comment a/ })
-      .focus();
+    // Focus leaves the toggle, whose tooltip reacts to that.
+    act(() =>
+      within(seededRow)
+        .getByRole('button', { name: /Comment a/ })
+        .focus()
+    );
     await user.keyboard('{Enter}');
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByTestId('devCommentsPin-a'))
@@ -154,16 +163,16 @@ describe('CommentsLayer', () => {
     act(() => controller.setActive(true));
     const row = await screen.findByTestId('devCommentsPanelItem-gone');
 
-    // Collapsed, the row (a button) previews the rendered text with links as text only.
-    const toggle = within(row).getByRole('button', { name: /Use EuiButtonEmpty here/ });
-    expect(within(toggle).getByText('EuiButtonEmpty').tagName).toBe('CODE');
-    expect(within(toggle).queryByRole('link')).toBeNull();
-    expect(toggle).toHaveTextContent('see the issue.');
-    expect(toggle.querySelector('img')).toBeNull();
+    // Folded, the row previews the rendered text in a button, with links as text only.
+    const preview = within(row).getByRole('button', { name: /Use EuiButtonEmpty here/ });
+    expect(within(preview).getByText('EuiButtonEmpty').tagName).toBe('CODE');
+    expect(within(preview).queryByRole('link')).toBeNull();
+    expect(preview).toHaveTextContent('see the issue.');
+    expect(preview.querySelector('img')).toBeNull();
 
-    // Expanded, the rendered body with its links follows the header.
-    fireEvent.click(toggle);
-    expect(toggle).not.toHaveTextContent('EuiButtonEmpty');
+    // Opened, the rendered text with its links takes the preview's place.
+    fireEvent.click(preview);
+    expect(preview).not.toBeInTheDocument();
     expect(within(row).getByText('EuiButtonEmpty').tagName).toBe('CODE');
     expect(within(row).getByRole('link', { name: 'the issue' })).toHaveAttribute(
       'href',
@@ -196,6 +205,57 @@ describe('CommentsLayer', () => {
     expect(screen.getByText(/No comments yet/)).toBeInTheDocument();
     expect(screen.getByTestId('devCommentsPanelCount')).toHaveTextContent('0');
     expect(list).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows when the comments were fetched, and fetches them again on request without dropping a reply being written', async () => {
+    const api = createInMemoryCommentsApi([seeded]);
+    const list = jest.spyOn(api, 'list');
+    const controller = await renderLayer({
+      api,
+      RelativeTime: ({ value }) => <>{`at ${value}`}</>,
+    });
+    act(() => controller.setActive(true));
+    const { loadedAt } = controller.store.getState();
+    expect(await screen.findByTestId('devCommentsPanelRefresh')).toHaveTextContent(
+      `Updated at ${loadedAt}`
+    );
+
+    act(() => controller.openThread('a'));
+    const thread = await screen.findByTestId('devCommentsThread');
+    expect(within(thread).getByTestId('devCommentsThreadRefresh')).toHaveTextContent(
+      `Updated at ${loadedAt}`
+    );
+    fireEvent.change(editorText('devCommentsReplyInput'), { target: { value: 'Draft' } });
+
+    fireEvent.click(within(thread).getByTestId('devCommentsThreadRefresh'));
+    await act(flush);
+    expect(list).toHaveBeenCalledTimes(2);
+    expect(controller.store.getState().loading).toBe(false);
+    expect(within(thread).getByTestId('devCommentsThreadRefresh')).toHaveTextContent(
+      `Updated at ${controller.store.getState().loadedAt}`
+    );
+    expect(editorText('devCommentsReplyInput')).toHaveValue('Draft');
+  });
+
+  it('copies the text of a comment, and nothing else, to the clipboard', async () => {
+    const copied: string[] = [];
+    // jsdom has no clipboard; EUI copies through a selection and this command.
+    document.execCommand = jest.fn(() => {
+      copied.push(String(window.getSelection()));
+      return true;
+    });
+    try {
+      const controller = await renderLayer();
+      act(() => controller.setActive(true));
+      act(() => controller.openThread('a'));
+      const thread = await screen.findByTestId('devCommentsThread');
+      fireEvent.click(within(thread).getByTestId('devCommentsCopy'));
+      // The "Copied." tooltip changes the popover's content, which EUI then repositions.
+      await act(flush);
+      expect(copied).toEqual([seeded.text]);
+    } finally {
+      delete (document as Partial<Document>).execCommand;
+    }
   });
 
   it('keeps a draft that is being saved when Escape is pressed, and discards one that is not', async () => {

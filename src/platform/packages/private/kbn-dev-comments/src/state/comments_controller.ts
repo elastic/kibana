@@ -57,6 +57,10 @@ export interface CommentsState {
   comments: Comment[];
   /** The list has been fetched at least once; before that, `comments` is not known to be empty. */
   loaded: boolean;
+  /** A fetch of the list is in flight. */
+  loading: boolean;
+  /** When the list was last fetched (ISO): what every comment shown is as of. */
+  loadedAt: string | null;
   /** Why the list could not be fetched the last time, until it is fetched again. */
   loadError: string | null;
   /** Comment mode: the page is not interactable and a click on it starts a comment. */
@@ -83,6 +87,7 @@ export interface CommentsController {
   ignoreSelectors: readonly string[];
   start(): void;
   dispose(): void;
+  /** Fetches the comments again; drafts and the open thread are kept. */
   reload(): Promise<void>;
   /** Leaving comment mode drops any comment being written; while one is being saved, the mode cannot be changed. */
   setActive(active: boolean): void;
@@ -142,6 +147,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     pageKey: location.getPageKey(),
     comments: [],
     loaded: false,
+    loading: false,
+    loadedAt: null,
     loadError: null,
     active: false,
     panelMinimized: false,
@@ -196,12 +203,11 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       return { busyIds: next };
     });
 
+  // Fetches the list; nothing else (drafts, the open thread) is touched, so a refresh is safe at any time.
   const load = async (): Promise<void> => {
     const sequence = ++loadSequence;
     const writesBefore = writes;
-    if (store.getState().loadError) {
-      store.setState({ loadError: null });
-    }
+    store.setState({ loading: true, loadError: null });
     try {
       const comments = await api.list();
       if (!started || sequence !== loadSequence) {
@@ -210,11 +216,16 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       if (writes !== writesBefore) {
         return load();
       }
-      store.setState({ comments, loaded: true });
+      store.setState({
+        comments,
+        loaded: true,
+        loading: false,
+        loadedAt: new Date().toISOString(),
+      });
     } catch (error) {
       if (started && sequence === loadSequence) {
         const message = errorMessage(error);
-        store.setState({ loadError: message });
+        store.setState({ loading: false, loadError: message });
         notify(
           'error',
           i18n.translate('devComments.notice.loadFailed', {

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
+  type RefObject,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import {
@@ -16,7 +23,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiNotificationBadge,
@@ -37,7 +43,7 @@ import { useComments, useCommentsState } from './comments_context';
 import { useLayerPortal, useLayerZIndex } from './hooks';
 import { threadSize } from './pins_layer';
 import { useResolvedAnchors } from './resolved_anchors';
-import { AuthorMeta, CommentBody, ResolveButton, ThreadContent } from './thread_content';
+import { RefreshButton, ResolveButton, ThreadContent } from './thread_content';
 
 const previewStyles = css`
   display: -webkit-box;
@@ -141,6 +147,7 @@ const PanelRow = ({
   onScreen,
   expanded,
   active,
+  list,
   onSelect,
   onGuide,
 }: {
@@ -150,117 +157,155 @@ const PanelRow = ({
   expanded: boolean;
   /** The row's thread is the one currently open from a pin. */
   active: boolean;
+  /** The scrolling list the row is in. */
+  list: RefObject<HTMLDivElement>;
   onSelect: () => void;
   onGuide: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const rowRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
+  // Brings the row into view by scrolling the list, and only the list: `scrollIntoView`
+  // would also scroll the page under the panel when the list cannot scroll far enough.
+  // Expanded, the row goes to the top (below the page's sticky header), once its thread
+  // has laid out; the row of the thread open from a pin only comes into view.
   useEffect(() => {
-    if (expanded || active) {
-      rowRef.current?.scrollIntoView({ block: expanded ? 'start' : 'nearest' });
+    if (!expanded && !active) {
+      return;
     }
-  }, [expanded, active]);
+    const frame = requestAnimationFrame(() => {
+      const row = rowRef.current;
+      const scroller = list.current;
+      if (!row || !scroller) {
+        return;
+      }
+      const headerHeight = parseFloat(euiTheme.size.xl);
+      const top =
+        row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+      const bottom = top + row.offsetHeight;
+      if (expanded || top - headerHeight < scroller.scrollTop) {
+        scroller.scrollTop = top - headerHeight;
+      } else if (bottom > scroller.scrollTop + scroller.clientHeight) {
+        scroller.scrollTop = bottom - scroller.clientHeight;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [expanded, active, list, euiTheme.size.xl]);
 
+  // Opened from the preview, which the text then replaces, focus moves on to the toggle that closes the thread.
+  useEffect(() => {
+    if (expanded && (document.activeElement === null || document.activeElement === document.body)) {
+      toggleRef.current?.focus({ preventScroll: true });
+    }
+  }, [expanded]);
+
+  const openLabel = i18n.translate('devComments.panel.visible', {
+    defaultMessage: 'Visible on this page. Click to open.',
+  });
   const guideLabel = i18n.translate('devComments.panel.notVisible', {
     defaultMessage: 'Not visible. Click to navigate.',
   });
+  const toggleLabel = expanded
+    ? i18n.translate('devComments.panel.collapseThread', {
+        defaultMessage: 'Collapse this thread',
+      })
+    : i18n.translate('devComments.panel.expandThread', {
+        defaultMessage: 'Expand this thread',
+      });
+
+  const actions = (
+    <>
+      <ResolveButton comment={comment} />
+      <ThreadSizeBadge comment={comment} />
+      {onScreen ? (
+        <EuiToolTip content={openLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="eye"
+            size="xs"
+            onClick={onSelect}
+            aria-label={openLabel}
+            data-test-subj="devCommentsPanelOpen"
+          />
+        </EuiToolTip>
+      ) : (
+        <>
+          <EuiToolTip content={guideLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="external"
+              size="xs"
+              onClick={onGuide}
+              aria-label={guideLabel}
+              data-test-subj="devCommentsPanelGuide"
+            />
+          </EuiToolTip>
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={expanded ? 'minimize' : 'maximize'}
+              color="text"
+              size="xs"
+              buttonRef={toggleRef}
+              onClick={onSelect}
+              aria-expanded={expanded}
+              aria-label={toggleLabel}
+              data-test-subj="devCommentsPanelToggle"
+            />
+          </EuiToolTip>
+        </>
+      )}
+    </>
+  );
 
   return (
     <div
       ref={rowRef}
       css={css`
+        padding: ${euiTheme.size.s} ${euiTheme.size.xs};
         border-bottom: ${euiTheme.border.thin};
-        padding: ${euiTheme.size.xs} 0;
-        /* Scrolled to, the row lands below the page's sticky header. */
-        scroll-margin-top: ${euiTheme.size.xl};
+        /* The open thread is marked by a bar along its edge, a small gap from the avatars. The
+           bar has its room on every row, so nothing moves when it shows. */
+        border-left: ${euiTheme.border.width.thick} solid transparent;
+        ${expanded && `border-left-color: ${euiTheme.colors.primary};`}
       `}
       data-test-subj={`devCommentsPanelItem-${comment.id}`}
     >
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem>
-          <EuiPanel
-            element="button"
-            type="button"
-            paddingSize="s"
-            color="transparent"
-            hasShadow={false}
-            onClick={onSelect}
-            aria-expanded={expanded}
-            css={css`
-              /* A row of a list, not a card: it does not lift (shadow, and a border in dark mode) on hover or focus. */
-              &:hover,
-              &:focus {
-                box-shadow: none;
-                transform: none;
-                &::after {
-                  content: none;
-                }
-              }
-              &:hover,
-              &:focus-visible {
-                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-              }
-            `}
-          >
-            <AuthorMeta author={comment.author} at={comment.createdAt} />
-            {!expanded && (
-              <>
-                <EuiSpacer size="xs" />
-                <CommentPreview text={comment.text} />
-              </>
-            )}
-          </EuiPanel>
-          {expanded && (
-            <div
+      <ThreadContent
+        comment={comment}
+        inline
+        rootActions={actions}
+        folded={
+          expanded ? undefined : (
+            <EuiPanel
+              element="button"
+              type="button"
+              paddingSize="none"
+              color="transparent"
+              hasShadow={false}
+              onClick={onSelect}
+              aria-expanded={onScreen ? undefined : false}
               css={css`
-                padding: 0 ${euiTheme.size.s};
+                text-align: left;
+                /* Text in a row, not a card: it does not lift (shadow, and a border in dark mode) on hover or focus. */
+                &:hover,
+                &:focus {
+                  box-shadow: none;
+                  transform: none;
+                  &::after {
+                    content: none;
+                  }
+                }
+                &:hover,
+                &:focus-visible {
+                  background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+                }
               `}
+              data-test-subj="devCommentsPanelPreview"
             >
-              <CommentBody text={comment.text} />
-            </div>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            align-items: center;
-            gap: ${euiTheme.size.xs};
-            padding-top: ${euiTheme.size.s};
-          `}
-        >
-          <ResolveButton comment={comment} />
-          <ThreadSizeBadge comment={comment} />
-          {onScreen ? (
-            <EuiIconTip
-              type="eye"
-              color="primary"
-              content={i18n.translate('devComments.panel.visible', {
-                defaultMessage: 'Visible on this page.',
-              })}
-            />
-          ) : (
-            <EuiToolTip content={guideLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="external"
-                size="xs"
-                onClick={onGuide}
-                aria-label={guideLabel}
-                data-test-subj="devCommentsPanelGuide"
-              />
-            </EuiToolTip>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {expanded && (
-        <div
-          css={css`
-            padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.s};
-          `}
-        >
-          <ThreadContent comment={comment} inline onGuide={onGuide} />
-        </div>
-      )}
+              <CommentPreview text={comment.text} />
+            </EuiPanel>
+          )
+        }
+      />
     </div>
   );
 };
@@ -306,6 +351,7 @@ export const CommentsPanel = () => {
   const minimized = useCommentsState((state) => state.panelMinimized);
   // Threads shown inline are those whose element is not on screen; a thread open from a pin never is.
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const groups = useMemo(() => groupByPage(comments, pageKey), [comments, pageKey]);
   const [pageAccordionId] = useState(() => htmlIdGenerator('devCommentsPanelPage'));
   // Anchors are only looked up on their own page: another page's DOM could match them by accident.
@@ -366,6 +412,16 @@ export const CommentsPanel = () => {
             />
           )}
         </EuiFlexItem>
+        {!minimized && (
+          <EuiFlexItem grow={false}>
+            <RefreshButton
+              label={i18n.translate('devComments.panel.refresh', {
+                defaultMessage: 'Refresh comments.',
+              })}
+              data-test-subj="devCommentsPanelRefresh"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <HeaderButton
             iconType={minimized ? 'maximize' : 'minimize'}
@@ -393,6 +449,7 @@ export const CommentsPanel = () => {
         <>
           <EuiSpacer size="s" />
           <div
+            ref={listRef}
             css={css`
               ${euiScrollBarStyles(euiThemeContext)}
               overflow: auto;
@@ -494,7 +551,14 @@ export const CommentsPanel = () => {
                     position: sticky;
                     top: 0;
                     z-index: 1;
-                    background: ${euiTheme.colors.backgroundBasePlain};
+                    /* A bar in primary's ground, deeper under the pointer: something to click. Opaque, it
+                       also covers the rows scrolling under it. */
+                    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    background: ${euiTheme.colors.backgroundBasePrimary};
+                    &:hover {
+                      background: ${euiTheme.colors.backgroundLightPrimary};
+                    }
                   }
                 `}
                 data-test-subj="devCommentsPanelPage"
@@ -508,6 +572,7 @@ export const CommentsPanel = () => {
                       onScreen={element !== null}
                       expanded={expandedId === comment.id && element === null}
                       active={activeThreadId === comment.id}
+                      list={listRef}
                       onSelect={() => select(comment, element)}
                       onGuide={() => void controller.guideTo(comment)}
                     />

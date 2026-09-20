@@ -71,13 +71,13 @@ export interface CommentRoute {
   pageKey: string;
   /**
    * Path, search and hash at the moment of commenting, relative to the host's
-   * origin and base path so it stays valid across deployments; "Take me there"
-   * starts by opening it. Always starts with a single `/`.
+   * origin and base path so it stays valid across deployments; the guide to the
+   * comment starts by opening it. Always starts with a single `/`.
    */
   path: string;
 }
 
-/** A click the author made on the page before commenting; "Take me there" asks the reader to repeat it. */
+/** A click the author made on the page before commenting; the guide to the comment asks the reader to repeat it. */
 export interface TrailStep {
   anchor: ElementAnchor;
   label: string;
