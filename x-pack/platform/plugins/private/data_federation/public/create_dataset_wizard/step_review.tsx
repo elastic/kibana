@@ -106,7 +106,7 @@ export function StepReview() {
       <EuiSpacer size="l" />
 
       <ReviewSection
-        title={createDatasetWizardStrings.advancedStepLabel}
+        title={createDatasetWizardStrings.additionalStepLabel}
         stepId="settings"
         onEdit={navigateToStep}
       >

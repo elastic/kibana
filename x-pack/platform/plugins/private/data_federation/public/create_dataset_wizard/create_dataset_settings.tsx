@@ -197,8 +197,8 @@ export function CreateDatasetSettings({ control }: { control: Control<CreateData
   );
 }
 
-/** Advanced settings without format or partition detection — used by the create-dataset wizard. */
-export function CreateDatasetAdvancedSettings({
+/** Additional settings without format or partition detection — used by the create-dataset wizard. */
+export function CreateDatasetAdditionalSettings({
   control,
 }: {
   control: Control<CreateDatasetFormValues>;

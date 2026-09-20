@@ -115,19 +115,25 @@ describe('CreateDatasetWizardPage', () => {
     });
 
     fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
     expect(queryByTestId('createDatasetSettingsFormat')).toBeNull();
     expect(queryByTestId('createDatasetSettingsPartitionDetection')).toBeNull();
 
     fireEvent.click(getByTestId('backButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('backButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
 
@@ -168,14 +174,16 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('nextButton'));
-    expect(queryByTestId('createDatasetWizardAdvancedStep')).toBeNull();
+    expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDatasetSettingsFormat'), {
       target: { value: 'parquet' },
     });
     fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
   });
 
   it('prefills the wizard in edit mode and saves updates', async () => {
@@ -221,7 +229,9 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'bucket/updated/*' },
     });
     fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
@@ -277,7 +287,9 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'renamed-dataset' },
     });
     fireEvent.click(getByTestId('nextButton'));
-    expect(await waitFor(() => getByTestId('createDatasetWizardAdvancedStep'))).toBeInTheDocument();
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));

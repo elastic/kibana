@@ -20,9 +20,12 @@ export const createDatasetWizardStrings = {
   datasetStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.datasetStepLabel', {
     defaultMessage: 'Define dataset',
   }),
-  advancedStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.advancedStepLabel', {
-    defaultMessage: 'Advanced settings',
-  }),
+  additionalStepLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.advancedStepLabel',
+    {
+      defaultMessage: 'Additional settings',
+    }
+  ),
   reviewStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.reviewStepLabel', {
     defaultMessage: 'Review',
   }),

@@ -29,7 +29,7 @@ import {
 } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
-import { StepAdvanced } from './step_advanced';
+import { StepAdditional } from './step_additional';
 import { StepDataset } from './step_dataset';
 import { StepReview } from './step_review';
 import type { DatasetWizardContent, DatasetWizardSection } from './types';
@@ -176,9 +176,9 @@ export function CreateDatasetWizardPage({
                 />
               </div>
             </FormWizardStep>
-            <FormWizardStep id="settings" label={createDatasetWizardStrings.advancedStepLabel}>
+            <FormWizardStep id="settings" label={createDatasetWizardStrings.additionalStepLabel}>
               <div data-test-subj="createDatasetWizardContent">
-                <StepAdvanced />
+                <StepAdditional />
               </div>
             </FormWizardStep>
             <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>

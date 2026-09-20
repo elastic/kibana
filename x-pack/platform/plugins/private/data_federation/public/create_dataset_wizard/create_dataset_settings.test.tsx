@@ -68,10 +68,10 @@ describe('CreateDatasetSettings', () => {
     expect(getByTestId('createDatasetSettingsFormat')).toBeVisible();
   });
 
-  it('shows advanced settings without a hide/show toggle', () => {
+  it('shows additional settings without a hide/show toggle', () => {
     const { getByTestId, queryByTestId } = renderSettings();
 
-    expect(queryByTestId('createDatasetAdvancedSettingsToggle')).toBeNull();
+    expect(queryByTestId('createDatasetAdditionalSettingsToggle')).toBeNull();
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeVisible();
   });
 
