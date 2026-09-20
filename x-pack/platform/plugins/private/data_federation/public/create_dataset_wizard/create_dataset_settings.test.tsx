@@ -215,16 +215,18 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeInTheDocument();
   });
 
-  it('shows the csv advanced settings component when csv is selected', () => {
+  it('shows csv/tsv advanced settings when csv is selected', () => {
     const { getByTestId, queryByTestId } = renderAdditionalSettings('csv');
 
-    expect(getByTestId('createDatasetCsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsNullValue')).toBeInTheDocument();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });
 
-  it('shows the tsv advanced settings component when tsv is selected', () => {
+  it('shows csv/tsv advanced settings when tsv is selected', () => {
     const { getByTestId } = renderAdditionalSettings('tsv');
-    expect(getByTestId('createDatasetTsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsNullValue')).toBeInTheDocument();
   });
 
   it('shows the ndjson advanced settings component when ndjson is selected', () => {

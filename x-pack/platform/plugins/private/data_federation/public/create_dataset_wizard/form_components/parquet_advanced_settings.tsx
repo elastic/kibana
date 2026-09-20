@@ -20,7 +20,11 @@ const helpTextDefault = (valueLabel: string) => (
   </EuiText>
 );
 
-export function ParquetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+export function ParquetAdvancedSettings({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
   return (
     <div data-test-subj="createDatasetParquetAdvancedSettings">
       <EuiSpacer size="m" />
