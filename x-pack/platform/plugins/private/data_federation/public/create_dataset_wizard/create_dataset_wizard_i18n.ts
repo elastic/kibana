@@ -50,6 +50,12 @@ export const createDatasetWizardStrings = {
   falseLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.falseLabel', {
     defaultMessage: 'False',
   }),
+  enabledLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.enabledLabel', {
+    defaultMessage: 'Enabled',
+  }),
+  disabledLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.disabledLabel', {
+    defaultMessage: 'Disabled',
+  }),
   reviewStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.reviewStepLabel', {
     defaultMessage: 'Review',
   }),

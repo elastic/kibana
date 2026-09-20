@@ -43,16 +43,64 @@ import {
 // ---------------------------------------------------------------------------
 
 const OPTIMIZED_READER_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsOptimizedReaderPlaceholder },
-  { value: 'true', text: createDatasetWizardStrings.trueLabel },
-  { value: 'false', text: createDatasetWizardStrings.falseLabel },
-];
+  {
+    value: 'true',
+    inputDisplay: <EuiText size="s">{createDatasetWizardStrings.enabledLabel}</EuiText>,
+    dropdownDisplay: (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem grow={true}>
+          <EuiText size="s">{createDatasetWizardStrings.enabledLabel}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    'data-test-subj': 'createDatasetSettingsOptimizedReaderOption-true',
+  },
+  {
+    value: 'false',
+    inputDisplay: <EuiText size="s">{createDatasetWizardStrings.disabledLabel}</EuiText>,
+    dropdownDisplay: (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem grow={true}>
+          <EuiText size="s">{createDatasetWizardStrings.disabledLabel}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    'data-test-subj': 'createDatasetSettingsOptimizedReaderOption-false',
+  },
+] satisfies Array<EuiSuperSelectOption<DatasetBooleanFormValue>>;
 
 const LATE_MATERIALIZATION_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsLateMaterializationPlaceholder },
-  { value: 'true', text: createDatasetWizardStrings.trueLabel },
-  { value: 'false', text: createDatasetWizardStrings.falseLabel },
-];
+  {
+    value: 'true',
+    inputDisplay: <EuiText size="s">{createDatasetWizardStrings.enabledLabel}</EuiText>,
+    dropdownDisplay: (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem grow={true}>
+          <EuiText size="s">{createDatasetWizardStrings.enabledLabel}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    'data-test-subj': 'createDatasetSettingsLateMaterializationOption-true',
+  },
+  {
+    value: 'false',
+    inputDisplay: <EuiText size="s">{createDatasetWizardStrings.disabledLabel}</EuiText>,
+    dropdownDisplay: (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem grow={true}>
+          <EuiText size="s">{createDatasetWizardStrings.disabledLabel}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    'data-test-subj': 'createDatasetSettingsLateMaterializationOption-false',
+  },
+] satisfies Array<EuiSuperSelectOption<DatasetBooleanFormValue>>;
 
 const errorModeDropdownDisplay = ({
   title,
@@ -867,15 +915,15 @@ function ParquetSettings({ control }: { control: Control<CreateDatasetFormValues
         helpText={helpTextDefault('true')}
         fullWidth
       >
-        <EuiSelect
+        <EuiSuperSelect
           options={OPTIMIZED_READER_OPTIONS}
           data-test-subj="createDatasetSettingsOptimizedReader"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsOptimizedReaderLabel}
-          value={optimizedReaderField.value}
-          onChange={(e) => optimizedReaderField.onChange(e.target.value as DatasetBooleanFormValue)}
-          name={optimizedReaderField.name}
-          inputRef={optimizedReaderField.ref}
+          valueOfSelected={optimizedReaderField.value || undefined}
+          onChange={(value) => optimizedReaderField.onChange(value)}
+          onBlur={optimizedReaderField.onBlur}
+          placeholder={createDatasetWizardStrings.settingsOptimizedReaderPlaceholder}
         />
       </EuiFormRow>
 
@@ -884,17 +932,15 @@ function ParquetSettings({ control }: { control: Control<CreateDatasetFormValues
         helpText={helpTextDefault('true')}
         fullWidth
       >
-        <EuiSelect
+        <EuiSuperSelect
           options={LATE_MATERIALIZATION_OPTIONS}
           data-test-subj="createDatasetSettingsLateMaterialization"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsLateMaterializationLabel}
-          value={lateMaterializationField.value}
-          onChange={(e) =>
-            lateMaterializationField.onChange(e.target.value as DatasetBooleanFormValue)
-          }
-          name={lateMaterializationField.name}
-          inputRef={lateMaterializationField.ref}
+          valueOfSelected={lateMaterializationField.value || undefined}
+          onChange={(value) => lateMaterializationField.onChange(value)}
+          onBlur={lateMaterializationField.onBlur}
+          placeholder={createDatasetWizardStrings.settingsLateMaterializationPlaceholder}
         />
       </EuiFormRow>
     </>
