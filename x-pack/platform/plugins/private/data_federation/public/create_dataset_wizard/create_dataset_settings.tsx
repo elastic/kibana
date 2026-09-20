@@ -8,9 +8,12 @@
 import React from 'react';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiCode,
   EuiFieldNumber,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
   EuiSelect,
@@ -29,6 +32,7 @@ import {
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
+  type DatasetErrorModeFormValue,
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
@@ -49,6 +53,47 @@ const LATE_MATERIALIZATION_OPTIONS = [
   { value: 'true', text: createDatasetWizardStrings.trueLabel },
   { value: 'false', text: createDatasetWizardStrings.falseLabel },
 ];
+
+const errorModeDropdownDisplay = ({
+  title,
+  description,
+  isDefault,
+  testSubj,
+}: {
+  title: string;
+  description: string;
+  isDefault: boolean;
+  testSubj: string;
+}) => (
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+    gutterSize="m"
+    css={{ width: '100%' }}
+  >
+    <EuiFlexItem grow={true}>
+      <div data-test-subj={testSubj}>
+        <EuiText size="s">
+          <strong>{title}</strong>
+        </EuiText>
+        <EuiText size="s" color="subdued">
+          {description}
+        </EuiText>
+      </div>
+    </EuiFlexItem>
+    {isDefault ? (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
+      </EuiFlexItem>
+    ) : null}
+  </EuiFlexGroup>
+);
+
+const errorModeSelectedDisplay = ({ title, testSubj }: { title: string; testSubj: string }) => (
+  <div data-test-subj={testSubj}>
+    <EuiText size="s">{title}</EuiText>
+  </div>
+);
 
 const formatOptionDisplay = ({
   title,
@@ -164,11 +209,49 @@ const PARTITION_DETECTION_OPTIONS = [
 ];
 
 const ERROR_MODE_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsErrorModePlaceholder },
-  { value: 'fail_fast', text: createDatasetWizardStrings.settingsErrorModeFailFast },
-  { value: 'skip_row', text: createDatasetWizardStrings.settingsErrorModeSkipRow },
-  { value: 'null_field', text: createDatasetWizardStrings.settingsErrorModeNullField },
-];
+  {
+    value: 'fail_fast',
+    inputDisplay: errorModeSelectedDisplay({
+      title: createDatasetWizardStrings.settingsErrorModeFailFast,
+      testSubj: 'createDatasetSettingsErrorModeInput-fail_fast',
+    }),
+    dropdownDisplay: errorModeDropdownDisplay({
+      title: createDatasetWizardStrings.settingsErrorModeFailFast,
+      description: createDatasetWizardStrings.settingsErrorModeFailFastDescription,
+      isDefault: true,
+      testSubj: 'createDatasetSettingsErrorModeDropdown-fail_fast',
+    }),
+    'data-test-subj': 'createDatasetSettingsErrorModeOption-fail_fast',
+  },
+  {
+    value: 'skip_row',
+    inputDisplay: errorModeSelectedDisplay({
+      title: createDatasetWizardStrings.settingsErrorModeSkipRow,
+      testSubj: 'createDatasetSettingsErrorModeInput-skip_row',
+    }),
+    dropdownDisplay: errorModeDropdownDisplay({
+      title: createDatasetWizardStrings.settingsErrorModeSkipRow,
+      description: createDatasetWizardStrings.settingsErrorModeSkipRowDescription,
+      isDefault: false,
+      testSubj: 'createDatasetSettingsErrorModeDropdown-skip_row',
+    }),
+    'data-test-subj': 'createDatasetSettingsErrorModeOption-skip_row',
+  },
+  {
+    value: 'null_field',
+    inputDisplay: errorModeSelectedDisplay({
+      title: createDatasetWizardStrings.settingsErrorModeNullField,
+      testSubj: 'createDatasetSettingsErrorModeInput-null_field',
+    }),
+    dropdownDisplay: errorModeDropdownDisplay({
+      title: createDatasetWizardStrings.settingsErrorModeNullField,
+      description: createDatasetWizardStrings.settingsErrorModeNullFieldDescription,
+      isDefault: false,
+      testSubj: 'createDatasetSettingsErrorModeDropdown-null_field',
+    }),
+    'data-test-subj': 'createDatasetSettingsErrorModeOption-null_field',
+  },
+] satisfies Array<EuiSuperSelectOption<DatasetErrorModeFormValue>>;
 
 const MODE_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
@@ -343,15 +426,15 @@ function CommonOptionalSettings({ control }: { control: Control<CreateDatasetFor
         helpText={helpTextDefault('fail_fast')}
         fullWidth
       >
-        <EuiSelect
+        <EuiSuperSelect
           options={ERROR_MODE_OPTIONS}
           data-test-subj="createDatasetSettingsErrorMode"
           fullWidth
           aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
-          value={errorModeField.value}
-          onChange={(e) => errorModeField.onChange(e.target.value)}
-          name={errorModeField.name}
-          inputRef={errorModeField.ref}
+          valueOfSelected={errorModeField.value || undefined}
+          onChange={(value) => errorModeField.onChange(value)}
+          onBlur={errorModeField.onBlur}
+          placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
         />
       </EuiFormRow>
 

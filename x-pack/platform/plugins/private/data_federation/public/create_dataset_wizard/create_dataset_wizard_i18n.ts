@@ -234,11 +234,23 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Fail fast',
     }
   ),
+  settingsErrorModeFailFastDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsErrorModeFailFastDescription',
+    {
+      defaultMessage: 'Stop reading as soon as an error is encountered.',
+    }
+  ),
 
   settingsErrorModeSkipRow: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsErrorModeSkipRow',
     {
       defaultMessage: 'Skip row',
+    }
+  ),
+  settingsErrorModeSkipRowDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsErrorModeSkipRowDescription',
+    {
+      defaultMessage: 'Skip rows that cannot be parsed.',
     }
   ),
 
@@ -248,6 +260,16 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Null field',
     }
   ),
+  settingsErrorModeNullFieldDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsErrorModeNullFieldDescription',
+    {
+      defaultMessage: 'Set invalid fields to null and continue reading.',
+    }
+  ),
+
+  defaultBadgeLabel: i18n.translate('xpack.dataFederation.createDatasetForm.defaultBadgeLabel', {
+    defaultMessage: 'Default',
+  }),
 
   settingsMaxErrorsLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorsLabel',
