@@ -86,7 +86,12 @@ apiTest.describe(
           body: { path: OAUTH_SELF_CALL_TARGET },
         });
 
-        expect(selfCall.statusCode).toBe(external.statusCode);
+        expect(external).toHaveStatusCode(401);
+        expect(external.body).toMatchObject({
+          jsonrpc: '2.0',
+          error: { message: 'Unauthorized' },
+        });
+        expect(selfCall).toHaveStatusCode(401);
       }
     );
   }
