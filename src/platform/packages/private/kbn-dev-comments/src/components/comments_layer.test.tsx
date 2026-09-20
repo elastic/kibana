@@ -28,6 +28,7 @@ import {
   createHostServices,
   createLocation,
   deferred,
+  editorText,
   flush,
   mockLayout,
   query,
@@ -153,11 +154,16 @@ describe('CommentsLayer', () => {
     act(() => controller.setActive(true));
     const row = await screen.findByTestId('devCommentsPanelItem-gone');
 
-    // Collapsed, the row previews the text as written; expanded, the rendered body follows the header.
-    const toggle = within(row).getByRole('button', { name: /Use `EuiButtonEmpty` here/ });
+    // Collapsed, the row (a button) previews the rendered text with links as text only.
+    const toggle = within(row).getByRole('button', { name: /Use EuiButtonEmpty here/ });
+    expect(within(toggle).getByText('EuiButtonEmpty').tagName).toBe('CODE');
+    expect(within(toggle).queryByRole('link')).toBeNull();
+    expect(toggle).toHaveTextContent('see the issue.');
+    expect(toggle.querySelector('img')).toBeNull();
+
+    // Expanded, the rendered body with its links follows the header.
     fireEvent.click(toggle);
     expect(toggle).not.toHaveTextContent('EuiButtonEmpty');
-
     expect(within(row).getByText('EuiButtonEmpty').tagName).toBe('CODE');
     expect(within(row).getByRole('link', { name: 'the issue' })).toHaveAttribute(
       'href',
@@ -228,9 +234,8 @@ describe('CommentsLayer', () => {
     });
     act(() => controller.setActive(true));
     act(() => controller.pick(target(), { x: 20, y: 20 }));
-    fireEvent.change(await screen.findByTestId('devCommentsComposerInput'), {
-      target: { value: 'Kept' },
-    });
+    await screen.findByTestId('devCommentsComposerInput');
+    fireEvent.change(editorText('devCommentsComposerInput'), { target: { value: 'Kept' } });
     fireEvent.click(screen.getByTestId('devCommentsComposerSubmit'));
     await waitFor(() => expect(controller.store.getState().pending?.saving).toBe(true));
 
@@ -239,7 +244,21 @@ describe('CommentsLayer', () => {
     await act(flush);
 
     expect(controller.store.getState().pending?.saving).toBe(false);
-    expect(screen.getByTestId('devCommentsComposerInput')).toHaveValue('Kept');
+    expect(editorText('devCommentsComposerInput')).toHaveValue('Kept');
+  });
+
+  it('posts a reply written in the editor with Cmd+Enter, and clears the draft', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    act(() => controller.openThread('a'));
+    const thread = await screen.findByTestId('devCommentsThread');
+
+    fireEvent.change(editorText('devCommentsReplyInput'), { target: { value: 'Posted' } });
+    expect(controller.store.getState().drafts).toEqual({ a: 'Posted' });
+    fireEvent.keyDown(editorText('devCommentsReplyInput'), { key: 'Enter', metaKey: true });
+    await within(thread).findByText('Posted');
+    expect(controller.store.getState().drafts).toEqual({});
+    expect(editorText('devCommentsReplyInput')).toHaveValue('');
   });
 
   it('keeps clicks on pins and threads from the page, which closes popovers on clicks outside of them', async () => {
@@ -255,7 +274,8 @@ describe('CommentsLayer', () => {
 
     fireEvent.mouseUp(pin);
     fireEvent.click(pin);
-    fireEvent.mouseUp(await screen.findByTestId('devCommentsReplyInput'));
+    await screen.findByTestId('devCommentsReplyInput');
+    fireEvent.mouseUp(editorText('devCommentsReplyInput'));
     expect(outsideClick).not.toHaveBeenCalled();
 
     fireEvent.mouseUp(query('#hostButton'));

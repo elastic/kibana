@@ -59,6 +59,10 @@ export const query = <E extends Element = HTMLElement>(selector: string): E => {
   return element;
 };
 
+/** The text of the comment editor (`CommentEditor`) with the given test subject. */
+export const editorText = (testSubj: string): HTMLTextAreaElement =>
+  query<HTMLTextAreaElement>(`[data-test-subj="${testSubj}"] textarea`);
+
 /** Lets settled promises and zero-delay timers run; wrap in `act` where React renders. */
 export const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 

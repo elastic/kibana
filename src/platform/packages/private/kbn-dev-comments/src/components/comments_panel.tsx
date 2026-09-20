@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import {
@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -25,6 +26,7 @@ import {
   EuiTitle,
   EuiToolTip,
   euiScrollBarStyles,
+  getDefaultEuiMarkdownProcessingPlugins,
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
@@ -37,7 +39,6 @@ import { threadSize } from './pins_layer';
 import { useResolvedAnchors } from './resolved_anchors';
 import { AuthorMeta, CommentBody, ResolveButton, ThreadContent } from './thread_content';
 
-/** The first lines of a comment as written; its Markdown is rendered once the row is expanded. */
 const previewStyles = css`
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -45,6 +46,25 @@ const previewStyles = css`
   overflow: hidden;
   word-break: break-word;
 `;
+
+const PreviewLink = ({ children }: PropsWithChildren) => <>{children}</>;
+
+const previewProcessingPlugins = (() => {
+  const plugins = getDefaultEuiMarkdownProcessingPlugins();
+  plugins[1][1].components.a = PreviewLink;
+  return plugins;
+})();
+
+/** The first lines of a comment, rendered. Links are text only: the preview sits in the row's button, which can hold no other control. */
+const CommentPreview = ({ text }: { text: string }) => (
+  <EuiMarkdownFormat
+    textSize="s"
+    processingPluginList={previewProcessingPlugins}
+    css={previewStyles}
+  >
+    {text}
+  </EuiMarkdownFormat>
+);
 
 interface PageGroup {
   pageKey: string;
@@ -66,10 +86,40 @@ const groupByPage = (comments: Comment[], currentPageKey: string): PageGroup[] =
   });
 };
 
+/** A count of comments with what it counts in a tooltip, which the badge can be focused to show. */
+const CountBadge = ({
+  count,
+  label,
+  'data-test-subj': dataTestSubj,
+}: {
+  count: number;
+  label: string;
+  'data-test-subj'?: string;
+}) => (
+  <EuiToolTip
+    content={label}
+    disableScreenReaderOutput
+    anchorProps={{
+      css: css`
+        align-self: flex-start;
+      `,
+    }}
+  >
+    <EuiNotificationBadge
+      color="subdued"
+      aria-label={label}
+      tabIndex={0}
+      data-test-subj={dataTestSubj}
+    >
+      {count}
+    </EuiNotificationBadge>
+  </EuiToolTip>
+);
+
 const ThreadSizeBadge = ({ comment }: { comment: Comment }) => {
   const count = threadSize(comment);
   const label = i18n.translate('devComments.panel.threadSize', {
-    defaultMessage: '{count, plural, one {# message} other {# messages}}',
+    defaultMessage: '{count, plural, one {# comment} other {# comments}} in this thread.',
     values: { count },
   });
   return (
@@ -157,9 +207,7 @@ const PanelRow = ({
             {!expanded && (
               <>
                 <EuiSpacer size="xs" />
-                <EuiText size="s" css={previewStyles}>
-                  {comment.text}
-                </EuiText>
+                <CommentPreview text={comment.text} />
               </>
             )}
           </EuiPanel>
@@ -308,19 +356,14 @@ export const CommentsPanel = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           {loaded && (
-            <EuiNotificationBadge
-              color="subdued"
-              aria-label={i18n.translate('devComments.panel.count', {
-                defaultMessage: '{count, plural, one {# comment} other {# comments}}',
+            <CountBadge
+              count={comments.length}
+              label={i18n.translate('devComments.panel.count', {
+                defaultMessage: '{count, plural, one {# comment} other {# comments}} total.',
                 values: { count: comments.length },
               })}
-              css={css`
-                align-self: flex-start;
-              `}
               data-test-subj="devCommentsPanelCount"
-            >
-              {comments.length}
-            </EuiNotificationBadge>
+            />
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -436,16 +479,14 @@ export const CommentsPanel = () => {
                   </EuiTitle>
                 }
                 extraAction={
-                  <EuiNotificationBadge
-                    color="subdued"
-                    aria-label={i18n.translate('devComments.panel.pageCount', {
+                  <CountBadge
+                    count={group.comments.length}
+                    label={i18n.translate('devComments.panel.pageCount', {
                       defaultMessage:
-                        '{count, plural, one {# comment} other {# comments}} on this page',
+                        '{count, plural, one {# comment} other {# comments}} on this page.',
                       values: { count: group.comments.length },
                     })}
-                  >
-                    {group.comments.length}
-                  </EuiNotificationBadge>
+                  />
                 }
                 css={css`
                   padding-top: ${euiTheme.size.s};

@@ -22,15 +22,14 @@ import {
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTextColor,
   EuiToolTip,
   euiScrollBarStyles,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { COMMENT_MAX_LENGTH } from '../constants';
 import type { Comment, CommentAuthor } from '../types';
+import { CommentEditor } from './comment_editor';
 import { useComments, useCommentsState } from './comments_context';
 import { DisplayNameField, useDisplayName } from './display_name_field';
 import { useNow } from './hooks';
@@ -86,8 +85,8 @@ export const ResolveButton = ({ comment }: { comment: Comment }) => {
   const controller = useComments();
   const busy = useThreadBusy(comment.id);
   const label = comment.resolved
-    ? i18n.translate('devComments.thread.reopen', { defaultMessage: 'Reopen' })
-    : i18n.translate('devComments.thread.resolve', { defaultMessage: 'Resolve' });
+    ? i18n.translate('devComments.thread.reopen', { defaultMessage: 'Reopen this thread.' })
+    : i18n.translate('devComments.thread.resolve', { defaultMessage: 'Resolve this thread.' });
 
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
@@ -131,7 +130,7 @@ export const ThreadContent = ({
     }
   };
 
-  const onReplyKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+  const onReplyKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault();
       submitReply();
@@ -147,7 +146,7 @@ export const ThreadContent = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
-              iconType="waypoint"
+              iconType="external"
               flush="left"
               onClick={onGuide}
               data-test-subj="devCommentsGuide"
@@ -317,15 +316,11 @@ export const ThreadContent = ({
         `}
         data-test-subj="devCommentsReplyForm"
       >
-        <EuiTextArea
-          compressed
-          rows={2}
-          fullWidth
+        <CommentEditor
           value={reply}
-          maxLength={COMMENT_MAX_LENGTH}
           readOnly={busy}
-          onChange={(event) => controller.setDraft(comment.id, event.target.value)}
-          onKeyDown={onReplyKeyDown}
+          onChange={(value) => controller.setDraft(comment.id, value)}
+          onSubmit={submitReply}
           placeholder={i18n.translate('devComments.thread.replyPlaceholder', {
             defaultMessage: 'Reply…',
           })}

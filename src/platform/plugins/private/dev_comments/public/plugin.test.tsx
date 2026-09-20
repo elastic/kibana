@@ -102,7 +102,8 @@ describe('DevCommentsPlugin', () => {
 
     fireEvent.click(screen.getByTestId('devCommentsButton'));
     fireEvent.keyDown(query('#target'), { key: 'Enter' });
-    fireEvent.change(await screen.findByTestId('devCommentsComposerInput'), {
+    await screen.findByTestId('devCommentsComposerInput');
+    fireEvent.change(query('[data-test-subj="devCommentsComposerInput"] textarea'), {
       target: { value: 'Needs a label' },
     });
     // No screenshot: jsdom cannot render one.

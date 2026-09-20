@@ -11,7 +11,14 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createInMemoryCommentsApi } from '../lib/in_memory_api';
-import { createHostServices, flush, mockLayout, query, renderPage } from '../test_helpers';
+import {
+  createHostServices,
+  editorText,
+  flush,
+  mockLayout,
+  query,
+  renderPage,
+} from '../test_helpers';
 import { CommentsButton } from './comments_button';
 
 describe('CommentsButton', () => {
@@ -42,7 +49,8 @@ describe('CommentsButton', () => {
     fireEvent.click(query('#open'));
     fireEvent.click(screen.getByTestId('devCommentsButton'));
     fireEvent.keyDown(query('#target'), { key: 'Enter' });
-    fireEvent.change(await screen.findByTestId('devCommentsComposerInput'), {
+    await screen.findByTestId('devCommentsComposerInput');
+    fireEvent.change(editorText('devCommentsComposerInput'), {
       target: { value: 'Needs a label' },
     });
     fireEvent.click(screen.getByTestId('devCommentsComposerSubmit'));

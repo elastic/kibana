@@ -18,12 +18,11 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
-  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { COMMENT_MAX_LENGTH } from '../constants';
 import { getAnchorPoint } from '../lib/anchor';
 import type { PendingComment } from '../state/comments_controller';
+import { CommentEditor } from './comment_editor';
 import { useComments } from './comments_context';
 import { DisplayNameField, useDisplayName } from './display_name_field';
 import { PinMarker } from './pin_marker';
@@ -68,7 +67,7 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
     }
   };
 
-  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+  const onNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault();
       save();
@@ -112,17 +111,14 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
           panelRef={panelRef}
           repositionOnScroll
           zIndex={zIndex.popover}
-          initialFocus="[data-test-subj='devCommentsComposerInput']"
+          initialFocus="[data-test-subj='devCommentsComposerInput'] textarea"
         >
           <PopoverBody data-test-subj="devCommentsComposer">
-            <EuiTextArea
-              fullWidth
-              rows={3}
+            <CommentEditor
               value={text}
-              maxLength={COMMENT_MAX_LENGTH}
               readOnly={saving}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={onKeyDown}
+              onChange={setText}
+              onSubmit={save}
               placeholder={i18n.translate('devComments.composer.placeholder', {
                 defaultMessage: 'Leave a comment…',
               })}
@@ -135,7 +131,7 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
             <DisplayNameField
               value={displayName}
               onChange={setDisplayName}
-              onKeyDown={onKeyDown}
+              onKeyDown={onNameKeyDown}
               readOnly={saving}
             />
             <EuiSpacer size="s" />
