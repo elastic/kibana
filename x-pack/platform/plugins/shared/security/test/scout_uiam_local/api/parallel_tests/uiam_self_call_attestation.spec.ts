@@ -6,7 +6,7 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
-import { Agent } from 'undici';
+import { Agent, fetch } from 'undici';
 
 import {
   createSAMLResponse,
@@ -66,7 +66,7 @@ apiTest.describe(
         const [_, { accessToken }] = await userSessionCookieFactory();
         const grantResponse = await grantUiamApiKey(accessToken);
         expect(grantResponse.status).toBe(200);
-        const internalUiamApiKey = await grantResponse.json();
+        const internalUiamApiKey = grantResponse.body;
 
         try {
           const response = await apiClient.post('test_endpoints/self_client/fake_request', {
@@ -111,20 +111,27 @@ apiTest.describe(
   }
 );
 
-const grantUiamApiKey = async (accessToken: string) =>
-  await fetch(`${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/api-keys/_grant`, {
-    method: 'POST',
-    headers: {
-      'User-Agent': 'Kibana-Scout/1.0 (IntegrationTest; Security; build/2025.12.30)',
-      'Content-Type': 'application/json',
-      [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({
-      description: 'test key',
-      internal: true,
-      role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-    }),
-    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
-  });
+const grantUiamApiKey = async (accessToken: string) => {
+  const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+  try {
+    const response = await fetch(`${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/api-keys/_grant`, {
+      method: 'POST',
+      headers: {
+        'User-Agent': 'Kibana-Scout/1.0 (IntegrationTest; Security; build/2025.12.30)',
+        'Content-Type': 'application/json',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        description: 'test key',
+        internal: true,
+        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+      }),
+      dispatcher,
+    });
+    const body = (await response.json()) as { id: string; key: string };
+    return { status: response.status, body };
+  } finally {
+    await dispatcher.close();
+  }
+};
