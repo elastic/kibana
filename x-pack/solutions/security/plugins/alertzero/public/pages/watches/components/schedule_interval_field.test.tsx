@@ -65,4 +65,59 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
     expect(amount).toHaveValue(1.9);
     expect(amount).toBeInvalid();
   });
+
+  it('keeps an invalid amount on screen through blur and reports validity to the page', () => {
+    const onValidityChange = jest.fn();
+    render(
+      <ScheduleIntervalField
+        workerId={WORKER_ID}
+        current="1h"
+        onChange={onChange}
+        onValidityChange={onValidityChange}
+      />
+    );
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+
+    fireEvent.change(amount, { target: { value: '1.9' } });
+    expect(onValidityChange).toHaveBeenLastCalledWith(false);
+
+    // Blurring used to drop the draft, snapping the field back to 1h and hiding the problem from
+    // the page's Save gate.
+    fireEvent.blur(amount);
+
+    expect(amount).toHaveValue(1.9);
+    expect(amount).toBeInvalid();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onValidityChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('clears the flagged draft when the page bumps resetKey on Discard', () => {
+    const onValidityChange = jest.fn();
+    const { rerender } = render(
+      <ScheduleIntervalField
+        workerId={WORKER_ID}
+        current="1h"
+        onChange={onChange}
+        onValidityChange={onValidityChange}
+        resetKey={0}
+      />
+    );
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    fireEvent.change(amount, { target: { value: '1.9' } });
+    expect(onValidityChange).toHaveBeenLastCalledWith(false);
+
+    rerender(
+      <ScheduleIntervalField
+        workerId={WORKER_ID}
+        current="1h"
+        onChange={onChange}
+        onValidityChange={onValidityChange}
+        resetKey={1}
+      />
+    );
+
+    expect(amount).toHaveValue(1);
+    expect(amount).not.toBeInvalid();
+    expect(onValidityChange).toHaveBeenLastCalledWith(true);
+  });
 });

@@ -635,6 +635,87 @@ describe('WatchDetailPage', () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
+  it('blocks Save and explains why while a trigger amount is invalid, even with other valid edits', async () => {
+    // The reviewer's scenario: an invalid cadence lives only in the field's local draft, so the
+    // page's settings state still holds the last valid one. Without a page-level signal, Save
+    // would persist that stale cadence while an invalid value is on screen.
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const window = within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays');
+    const interval = within(ruleTuning).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    // A valid edit elsewhere makes the page dirty, so Save would otherwise be live.
+    fireEvent.change(window, { target: { value: '7' } });
+    expect(save).toBeEnabled();
+
+    fireEvent.change(interval, { target: { value: '1.9' } });
+
+    expect(save).toBeDisabled();
+    // The invalid amount survives blur instead of snapping back and hiding the problem.
+    fireEvent.blur(interval);
+    expect(interval).toHaveValue(1.9);
+    expect(interval).toBeInvalid();
+
+    // Save is gated, so the analyst cannot persist the stale 2h behind the flagged field.
+    expect(save).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsInvalid')).toBeInTheDocument();
+
+    fireEvent.click(save);
+
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('clears an invalid trigger amount on Discard and frees Save again', () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const interval = within(ruleTuning).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+
+    fireEvent.change(interval, { target: { value: '0' } });
+    // An invalid amount is not part of the draft, so Discard is the only way out of it.
+    const discard = screen.getByTestId('alertZeroWatchSettingsDiscard');
+    expect(discard).toBeEnabled();
+
+    fireEvent.click(discard);
+
+    expect(interval).toHaveValue(2);
+    expect(interval).not.toBeInvalid();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('re-enables Save once the invalid trigger amount is corrected in place', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const interval = within(ruleTuning).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(interval, { target: { value: '1.9' } });
+    expect(save).toBeDisabled();
+
+    fireEvent.change(interval, { target: { value: '6' } });
+
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { scheduleInterval: '6h' }, settingsRevision: null },
+    });
+  });
+
   it('sends the whole extras object under settings when the analysis window is saved', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');

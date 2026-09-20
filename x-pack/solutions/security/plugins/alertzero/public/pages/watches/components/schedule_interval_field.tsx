@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import * as i18n from '../settings_translations';
@@ -32,6 +32,18 @@ interface ScheduleIntervalFieldProps {
   current: string;
   isDisabled?: boolean;
   onChange: (interval: string) => void;
+  /**
+   * Reports whether the control currently holds an uncommittable amount. The draft never reaches
+   * the page's settings state, so without this the page would still see the last valid cadence
+   * and let Save persist it while the analyst is looking at an invalid field.
+   */
+  onValidityChange?: (isValid: boolean) => void;
+  /**
+   * Changes when the page discards its draft. An invalid amount now survives blur, so it also has
+   * to be cleared on Discard — otherwise the flagged value stays on screen with nothing left to
+   * discard and keeps Save blocked.
+   */
+  resetKey?: number;
 }
 
 /**
@@ -45,6 +57,8 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   current,
   isDisabled,
   onChange,
+  onValidityChange,
+  resetKey,
 }) => {
   const { amount, unit } = useMemo(() => parseInterval(current), [current]);
   const [amountDraft, setAmountDraft] = useState<string | null>(null);
@@ -67,6 +81,27 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   const amountValue = amountDraft ?? String(amount);
   const amountInvalid =
     amountDraft != null && (!/^\d+$/.test(amountDraft) || Number(amountDraft) < 1);
+
+  useEffect(() => {
+    onValidityChange?.(!amountInvalid);
+  }, [amountInvalid, onValidityChange]);
+
+  // Discard clears the flagged draft; skipped on mount so it does not fight the initial value.
+  const isFirstResetRef = useRef(true);
+  useEffect(() => {
+    if (isFirstResetRef.current) {
+      isFirstResetRef.current = false;
+      return;
+    }
+    setAmountDraft(null);
+  }, [resetKey]);
+
+  // Report the control valid again if it unmounts while flagged (e.g. the Worker's trigger row
+  // stops rendering), so a removed control cannot leave the page's Save permanently blocked.
+  // Held in a ref so this runs on real unmount only, not whenever the parent passes a new callback.
+  const onValidityChangeRef = useRef(onValidityChange);
+  onValidityChangeRef.current = onValidityChange;
+  useEffect(() => () => onValidityChangeRef.current?.(true), []);
 
   return (
     <EuiFlexGroup
@@ -109,7 +144,14 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
               commit(next, unit, raw);
             }
           }}
-          onBlur={() => setAmountDraft(null)}
+          onBlur={() => {
+            // Only drop the draft once it is committable. Clearing an invalid draft here would
+            // snap the field back to the persisted cadence and hide the problem, which is how an
+            // invalid entry used to slip past Save.
+            if (!amountInvalid) {
+              setAmountDraft(null);
+            }
+          }}
         />
       </EuiFlexItem>
       <EuiFlexItem

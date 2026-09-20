@@ -50,6 +50,10 @@ interface WorkerSettingsPanelProps {
   isSaving: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
+  /** Raised when this Worker's trigger control holds an amount that cannot be committed. */
+  onTriggerValidityChange?: (isValid: boolean) => void;
+  /** Bumped by the page on Discard so controls holding a flagged draft clear it. */
+  draftResetKey?: number;
 }
 
 /**
@@ -73,6 +77,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   isSaving,
   onEnabledChange,
   onSettingsChange,
+  onTriggerValidityChange,
+  draftResetKey,
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
   const name = workerName(worker.id, worker.name);
@@ -241,6 +247,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             current={settings.scheduleInterval}
             isDisabled={controlsDisabled}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
+            onValidityChange={onTriggerValidityChange}
+            resetKey={draftResetKey}
           />
         </SettingRow>
       ) : null}

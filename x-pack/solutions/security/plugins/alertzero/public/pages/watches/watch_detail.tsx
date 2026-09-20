@@ -50,8 +50,38 @@ export const WatchDetailPage: React.FC = () => {
   const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
     useWatchSettingsDraft(members);
   const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
+  // Workers whose trigger control holds an amount it cannot commit. That draft never reaches the
+  // settings state, so the page has to hear about it directly or Save would persist the last
+  // valid cadence while an invalid one is on screen.
+  const [invalidTriggerWorkerIds, setInvalidTriggerWorkerIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  // Bumped on Discard so trigger controls drop a flagged draft that no longer has anything behind it.
+  const [draftResetKey, setDraftResetKey] = useState(0);
+  const hasInvalidDraft = invalidTriggerWorkerIds.size > 0;
+
+  const handleTriggerValidityChange = useCallback((workerId: string, isValid: boolean) => {
+    setInvalidTriggerWorkerIds((current) => {
+      if (isValid === !current.has(workerId)) {
+        return current;
+      }
+      const next = new Set(current);
+      if (isValid) {
+        next.delete(workerId);
+      } else {
+        next.add(workerId);
+      }
+      return next;
+    });
+  }, []);
 
   const onSave = useCallback(async () => {
+    // An invalid trigger draft is not in the settings state, so `save()` cannot see it. Block here
+    // and surface the page-level message instead of persisting the stale cadence behind it.
+    if (hasInvalidDraft) {
+      setSaveBlockedByInvalidDraft(true);
+      return;
+    }
     try {
       await save();
       setSaveBlockedByInvalidDraft(false);
@@ -62,11 +92,13 @@ export const WatchDetailPage: React.FC = () => {
       }
       throw saveError;
     }
-  }, [save]);
+  }, [save, hasInvalidDraft]);
 
   const onDiscard = useCallback(() => {
     discard();
     setSaveBlockedByInvalidDraft(false);
+    setInvalidTriggerWorkerIds(new Set());
+    setDraftResetKey((key) => key + 1);
   }, [discard]);
 
   const isMultiWorker = members.length > 1;
@@ -77,11 +109,11 @@ export const WatchDetailPage: React.FC = () => {
       label: settingsI18n.SAVE_WATCH_SETTINGS,
       iconType: 'save' as const,
       isLoading: isSaving,
-      disableButton: !isDirty || isSaving || Boolean(workersError),
+      disableButton: !isDirty || isSaving || Boolean(workersError) || hasInvalidDraft,
       testId: 'alertZeroWatchSettingsSave',
       run: onSave,
     }),
-    [isSaving, isDirty, workersError, onSave]
+    [isSaving, isDirty, workersError, hasInvalidDraft, onSave]
   );
 
   const headerItems = useMemo(
@@ -90,12 +122,13 @@ export const WatchDetailPage: React.FC = () => {
         id: 'alertZeroWatchSettingsDiscard',
         label: settingsI18n.DISCARD_WATCH_SETTINGS,
         iconType: 'cross' as const,
-        disableButton: !isDirty || isSaving,
+        // A flagged trigger amount is not part of the draft, so it can be the only thing to undo.
+        disableButton: (!isDirty && !hasInvalidDraft) || isSaving,
         testId: 'alertZeroWatchSettingsDiscard',
         run: onDiscard,
       },
     ],
-    [isDirty, isSaving, onDiscard]
+    [isDirty, isSaving, hasInvalidDraft, onDiscard]
   );
   // Track which Workers the reader has collapsed (default: all expanded). `/watches/:watchId`
   // keeps this page mounted across parameter-only navigation, so the initializer runs only on
@@ -215,6 +248,10 @@ export const WatchDetailPage: React.FC = () => {
                 isSaving={isSaving}
                 onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
                 onSettingsChange={(patch) => updateSettings(worker, patch)}
+                onTriggerValidityChange={(isValid) =>
+                  handleTriggerValidityChange(worker.id, isValid)
+                }
+                draftResetKey={draftResetKey}
               />
             </section>
           );
@@ -231,7 +268,7 @@ export const WatchDetailPage: React.FC = () => {
       headerItems={headerItems}
     >
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-        {saveBlockedByInvalidDraft ? (
+        {saveBlockedByInvalidDraft || hasInvalidDraft ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
               <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
