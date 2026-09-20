@@ -266,7 +266,6 @@ interface InternalUnifiedDataTableProps {
   isSortEnabled?: boolean;
   /**
    * Display mode of the grid.
-   * When 'print', pagination, toolbar controls, column actions, resizing, and row controls are hidden.
    * @default 'default'
    */
   displayMode?: DisplayMode;
