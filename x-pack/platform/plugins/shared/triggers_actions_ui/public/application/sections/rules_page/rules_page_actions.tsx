@@ -23,6 +23,7 @@ export interface RulesPageActions {
   openCreateRuleModal: () => void;
   openSettingsFlyout: () => void;
   navigateToCreateRuleForm: (ruleTypeId: string) => void;
+  navigateToCreateRuleFromTemplateForm: (templateId: string) => void;
   navigateToEditRuleForm: (ruleId: string) => void;
 }
 
@@ -91,9 +92,16 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
       openCreateRuleModal,
       openSettingsFlyout,
       navigateToCreateRuleForm,
+      navigateToCreateRuleFromTemplateForm,
       navigateToEditRuleForm,
     }),
-    [openCreateRuleModal, openSettingsFlyout, navigateToCreateRuleForm, navigateToEditRuleForm]
+    [
+      openCreateRuleModal,
+      openSettingsFlyout,
+      navigateToCreateRuleForm,
+      navigateToCreateRuleFromTemplateForm,
+      navigateToEditRuleForm,
+    ]
   );
 
   return (

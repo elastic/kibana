@@ -19,7 +19,7 @@ export const matchActionPoliciesForRuleBodySchema = z
           .max(100)
           .optional()
           .describe(
-            'Tags of the rule you want to check. Used to find policies whose `matcher.tags` include at least one of these values.'
+            'Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with policies that apply to every rule.'
           ),
       })
       .strict()
@@ -33,14 +33,14 @@ export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesF
 export const matchedActionPolicyCategorySchema = z
   .enum(['catch-all', 'tags'])
   .describe(
-    "The reason this policy applies to the rule. `catch-all` means the policy sets neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule carries at least one tag listed in the policy's `matcher.tags`."
+    "The reason this policy applies to the rule. `catch-all` means the policy has neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule has at least one tag listed in the policy's `matcher.tags`."
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;
 
 export const matchedActionPolicySchema = z
   .object({
-    actionPolicy: actionPolicyResponseSchema.describe('The matched action policy.'),
+    action_policy: actionPolicyResponseSchema.describe('The matched action policy.'),
     category: matchedActionPolicyCategorySchema,
   })
   .describe('An action policy that matches a rule, along with the reason it matched.')
@@ -57,6 +57,18 @@ export const matchActionPoliciesForRuleResponseSchema = z
       .min(0)
       .describe(
         'Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.'
+      ),
+    evaluated_count: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Number of action policies evaluated for a match, including policies that did not match.'
+      ),
+    is_truncated: z
+      .boolean()
+      .describe(
+        'Whether total exceeds evaluated_count, meaning the match results may be incomplete.'
       ),
   })
   .describe('Action policies that match a given rule, grouped by match category.')

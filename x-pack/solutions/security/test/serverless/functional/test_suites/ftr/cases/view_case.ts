@@ -34,8 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // Failing: See https://github.com/elastic/kibana/issues/287822
-  describe.skip('Case View', function () {
+  describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
