@@ -123,6 +123,8 @@ export {
   RuleTuningWorkerExtras,
   ContinuousThreatHuntWorkerExtras,
   HuntAgentId,
+  AttackDiscoveryAgentId,
+  AttackDiscoveryWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,

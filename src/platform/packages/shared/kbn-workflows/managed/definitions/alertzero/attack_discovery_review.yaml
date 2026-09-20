@@ -53,6 +53,14 @@ triggers:
             Worker autonomy level, which decides how a true-positive or
             inconclusive verdict is promoted: `manual` requires an analyst gate,
             the others promote without one. Defaults to `manual`.
+        agent_id:
+          type: string
+          default: ""
+          maxLength: 256
+          description: >-
+            Agent picked on the dispatching Worker. Empty keeps the investigation
+            this review opens on the default Elastic AI agent, which is what ran
+            here before.
         stub_verdict:
           type: string
           enum:
@@ -153,6 +161,9 @@ steps:
   - name: open_investigation
     type: ai.conversation.create
     with:
+      # The Worker's picked agent, when it set one. Unset renders blank, which the
+      # step normalizes back to the default Elastic AI agent — what ran here before.
+      agent_id: "{{ inputs.agent_id | default: '' }}"
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
       title: "{{ inputs.title }}"
       template_id: investigation

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createAgentNotFoundError,
+  createBadRequestError,
+} from '@kbn/agent-builder-common';
 import { createConversationStepDefinition } from './create_conversation';
 import {
   createStepHandlerContext,
@@ -108,6 +112,54 @@ describe('createConversationStepDefinition', () => {
         metadata: { severity: 'high', services: ['checkout'] },
       },
     });
+  });
+
+  // A Worker that never had an agent picked forwards the input as an empty string
+  // through the workflow chain rather than dropping the key, and the underlying
+  // client defaults on nullish only -- so a blank has to be normalized away here or
+  // it reaches agent resolution as a real id and fails the run.
+  it('treats a blank agent as unset so the default agent is used', async () => {
+    const { conv, agents, definition } = buildDefinition({
+      create: jest.fn().mockResolvedValue(createdConversation),
+    });
+
+    const result = await definition.handler(
+      createStepHandlerContext({ input: { title: 'New conversation', agent_id: '   ' } })
+    );
+
+    // Resolution falls through to Agent Builder's own default, exactly as it did
+    // before any agent could be picked on a Worker.
+    expect(agents.get).toHaveBeenCalledWith(agentBuilderDefaultAgentId, { access: 'use' });
+    expect(conv.create).toHaveBeenCalledWith(
+      expect.objectContaining({ agent_id: agentBuilderDefaultAgentId, title: 'New conversation' })
+    );
+    expect(result).toEqual({
+      output: {
+        conversation_id: 'conv-1',
+        agent_id: 'elastic-default-agent',
+        metadata: {},
+      },
+    });
+  });
+
+  it('still honours a picked agent, trimming incidental whitespace', async () => {
+    const { conv, agents, definition } = buildDefinition({
+      create: jest.fn().mockResolvedValue({
+        ...createdConversation,
+        agent_id: 'significant-events.investigation',
+      }),
+    });
+
+    await definition.handler(
+      createStepHandlerContext({
+        input: { title: 'New conversation', agent_id: ' significant-events.investigation ' },
+      })
+    );
+
+    expect(agents.get).toHaveBeenCalledWith('significant-events.investigation', { access: 'use' });
+    expect(conv.create).toHaveBeenCalledWith(
+      expect.objectContaining({ agent_id: 'significant-events.investigation' })
+    );
   });
 
   it('returns an error when the agent cannot be resolved', async () => {

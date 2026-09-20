@@ -12,6 +12,7 @@ import {
   type CreateConversationStepInput,
 } from '../../../common/workflows/steps/create_conversation';
 import { createConversationPublicClient } from '../../services/conversation/conversation_public_client';
+import { normalizeOptionalStringParam } from '../../../common/normalize_optional_string_param';
 import type { ConversationStepDeps } from '../registry';
 
 export const createConversationStepDefinition = ({
@@ -32,7 +33,10 @@ export const createConversationStepDefinition = ({
         const input = context.input as CreateConversationStepInput;
 
         const conversation = await publicClient.create({
-          agentId: input.agent_id,
+          // A forwarded-but-unset agent renders as a blank string through the
+          // workflow chain, and the client's `agentId ?? default` only catches
+          // null/undefined — blank would reach the registry and fail the lookup.
+          agentId: normalizeOptionalStringParam(input.agent_id),
           id: input.conversation_id,
           title: input.title,
           accessControl: input.access_control,

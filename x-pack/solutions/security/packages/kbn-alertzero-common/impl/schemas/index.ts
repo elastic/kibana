@@ -56,6 +56,11 @@ export {
 } from './components/hunt_watch_settings.gen';
 
 export {
+  AttackDiscoveryAgentId,
+  AttackDiscoveryWorkerExtras,
+} from './components/floor_watch_settings.gen';
+
+export {
   TemplateId,
   RecommendedAction,
   ProposalStatus,

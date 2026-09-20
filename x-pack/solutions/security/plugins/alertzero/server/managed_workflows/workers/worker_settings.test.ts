@@ -444,19 +444,81 @@ describe('Continuous Threat Hunt agent (opt-in extras)', () => {
     ).toContain('agentId');
   });
 
-  // Scope guard: the agent setting belongs to Hunt alone, so no other Worker may accept it.
-  it.each(SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== HUNT_WORKER_ID))(
-    '%s rejects an agentId patch',
-    (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
+  // Scope guard: only Workers that declare the agent setting may accept it. A Worker gets the
+  // picker by declaring `agentId` in its own extras schema, never by the propagation code
+  // special-casing it, so this list is the complete set of opted-in Workers.
+  it.each(
+    SYSTEM_SECURITY_WORKER_IDS.filter(
+      (id) => !([HUNT_WORKER_ID, RULE_TUNING_WORKER_ID, AD_WORKER_ID] as string[]).includes(id)
+    )
+  )('%s rejects an agentId patch', (workerId) => {
+    const registration = createWorkerSettingsRegistration(workerId);
 
+    expectInvalid(
+      registration.applyPatch(registration.createDefaultValues(), {
+        extras: { agentId: 'my-custom-agent' } as never,
+      })
+    );
+  });
+});
+
+describe('Attack Discovery agent (opt-in extras)', () => {
+  // Same opt-in shape as Hunt: installing the setting must not change what an Attack Discovery
+  // Worker already in the field stores.
+  it('writes no extras on a fresh install', () => {
+    const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+    expect(registration.createDefaultValues()).toEqual({
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '24h',
+    });
+  });
+
+  it('reads back a document stored with no extras, unchanged', () => {
+    const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+    const projected = registration.toSettings({
+      settingsVersion: 1,
+      autonomyLevel: 'supervised',
+      scheduleInterval: '24h',
+    });
+
+    expect(projected).toEqual({
+      workerId: AD_WORKER_ID,
+      autonomy: 'supervised',
+      scheduleInterval: '24h',
+    });
+    expect('extras' in projected).toBe(false);
+  });
+
+  it('mirrors a picked agent to the top level for the generic placeholder', () => {
+    const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+    expect(
+      registration.applyPatch(registration.createDefaultValues(), {
+        extras: { agentId: 'my-custom-agent' },
+      })
+    ).toEqual({
+      values: {
+        agentId: 'my-custom-agent',
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '24h',
+        extras: { agentId: 'my-custom-agent' },
+      },
+    });
+  });
+
+  it('rejects an empty agent id', () => {
+    const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+    expect(
       expectInvalid(
-        registration.applyPatch(registration.createDefaultValues(), {
-          extras: { agentId: 'my-custom-agent' } as never,
-        })
-      );
-    }
-  );
+        registration.applyPatch(registration.createDefaultValues(), { extras: { agentId: '' } })
+      )
+    ).toContain('agentId');
+  });
 });
 
 describe('WorkerScheduleInterval API schema', () => {

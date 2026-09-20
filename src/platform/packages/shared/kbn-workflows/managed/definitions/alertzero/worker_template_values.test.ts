@@ -9,9 +9,17 @@
 
 import { parse } from 'yaml';
 
+import ATTACK_DISCOVERY_REVIEW_YAML from './attack_discovery_review.yaml';
+import ATTACK_DISCOVERY_RUNNER_YAML from './attack_discovery_runner.yaml';
+import {
+  ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
+} from './attack_discovery_workflows';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW } from './detection_rule_tuning';
 import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
+import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW } from './floor_attack_discovery';
+import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
 import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
 import {
@@ -25,7 +33,7 @@ interface WorkflowStep {
   name?: string;
   type?: string;
   'agent-id'?: string;
-  with?: { 'workflow-id'?: string; inputs?: Record<string, unknown> };
+  with?: { 'workflow-id'?: string; inputs?: Record<string, unknown>; agent_id?: string };
   steps?: WorkflowStep[];
   branches?: Array<{ steps?: WorkflowStep[] }>;
 }
@@ -204,6 +212,153 @@ describe('Worker agent id propagation', () => {
     });
   });
 
+  describe('through the Attack Discovery chain', () => {
+    // Attack Discovery is the chain the product treats as the reference case:
+    //   floor_attack_discovery (the Worker)
+    //     -> attack_discovery_runner   (generation + fan-out)
+    //       -> attack_discovery_review (one per discovery, async)
+    //         -> `open_investigation`  (the ai.conversation.create step that runs)
+    // Its leaf is a conversation step rather than an ai.agent step, so the agent has
+    // to survive hand-offs AND land on a different step type than Rule Tuning's.
+    const agentIdInputOf = (step: WorkflowStep) => step.with?.inputs?.agent_id;
+
+    /** The AD leaf: opening an investigation binds it to an agent. */
+    const conversationSteps = (yaml: string): WorkflowStep[] =>
+      parseSteps(yaml).filter((step) => step.type === 'ai.conversation.create');
+
+    const scheduledAd = (agentId?: string) => ({
+      settingsVersion: 1,
+      autonomyLevel: 'manual' as const,
+      scheduleInterval: '24h',
+      ...(agentId === undefined ? {} : { agentId }),
+    });
+
+    it('defines the agent const the chain reads, so the reference resolves', () => {
+      const rendered = renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, scheduledAd(AGENT));
+      const consts = (parse(rendered) as { consts?: { worker_settings?: Record<string, unknown> } })
+        .consts;
+
+      expect(consts?.worker_settings?.agentId).toBe(AGENT);
+    });
+
+    it('omits the agent const entirely when the Worker has none', () => {
+      const rendered = renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, scheduledAd());
+      const consts = (parse(rendered) as { consts?: { worker_settings?: Record<string, unknown> } })
+        .consts;
+
+      expect(consts?.worker_settings).not.toHaveProperty('agentId');
+    });
+
+    // END-TO-END: install-time render + the real runtime Liquid engine, hop by hop.
+    // Liquid is non-strict on variables, so a broken reference yields "" instead of
+    // throwing -- the silent loss this walks the whole chain to rule out.
+    const runChain = async (agentId?: string) => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const render = async (yaml: string, context: Record<string, unknown>) =>
+        await engine.parseAndRender(yaml, context);
+
+      // Values are rendered one at a time, the way the engine resolves a step's
+      // `with.inputs`. Rendering the whole object as JSON would escape the quotes in
+      // references like `foreach.item["kibana.alert.uuid"]` and fail to tokenize.
+      const renderInputs = async (
+        inputs: Record<string, unknown> = {},
+        context: Record<string, unknown>
+      ): Promise<Record<string, unknown>> =>
+        Object.fromEntries(
+          await Promise.all(
+            Object.entries(inputs).map(async ([key, value]) => [
+              key,
+              typeof value === 'string' ? await render(value, context) : value,
+            ])
+          )
+        );
+
+      // Hop 0: install-time render, before any Liquid context exists.
+      const workerYaml = renderScheduledWorkerYaml(
+        FLOOR_ATTACK_DISCOVERY_YAML,
+        scheduledAd(agentId)
+      );
+      const consts = (parse(workerYaml) as { consts?: Record<string, unknown> }).consts ?? {};
+
+      // Hop 1: Worker -> runner.
+      const toRunner = childInvocations(workerYaml)[0];
+      const runnerInputs = await renderInputs(toRunner.with?.inputs, { consts });
+
+      // Hop 2: runner -> review, inside the per-discovery fan-out.
+      const toReview = childInvocations(ATTACK_DISCOVERY_RUNNER_YAML).filter(
+        (step) => step.with?.['workflow-id'] === 'system-security-attack-discovery-review'
+      )[0];
+      const reviewInputs = await renderInputs(toReview.with?.inputs, { inputs: runnerInputs });
+
+      // Hop 3: the leaf conversation step that actually binds an agent.
+      const openInvestigation = conversationSteps(ATTACK_DISCOVERY_REVIEW_YAML)[0];
+      const resolvedAgentId = await render(String(openInvestigation.with?.agent_id ?? ''), {
+        inputs: reviewInputs,
+      });
+
+      return { runnerInputs, reviewInputs, resolvedAgentId };
+    };
+
+    it('carries the picked agent through every hop to the step that opens the investigation', async () => {
+      const { runnerInputs, reviewInputs, resolvedAgentId } = await runChain(AGENT);
+
+      expect(runnerInputs.agent_id).toBe(AGENT);
+      expect(reviewInputs.agent_id).toBe(AGENT);
+      expect(resolvedAgentId).toBe(AGENT);
+    });
+
+    it('resolves to no agent at all when the Worker picked none', async () => {
+      const { runnerInputs, reviewInputs, resolvedAgentId } = await runChain();
+
+      // Absent, not the literal "__WORKER_AGENT_ID__" and not a stray default: the
+      // step normalizes blank back to the default agent it used before this feature.
+      expect(runnerInputs.agent_id).toBe('');
+      expect(reviewInputs.agent_id).toBe('');
+      expect(resolvedAgentId).toBe('');
+    });
+
+    it('sends the agent from the Worker into the runner it dispatches', () => {
+      const rendered = renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, scheduledAd(AGENT));
+      const handOffs = childInvocations(rendered);
+
+      expect(handOffs.length).toBeGreaterThan(0);
+      expect(handOffs.map(agentIdInputOf)).toEqual(
+        handOffs.map(() => "{{ consts.worker_settings.agentId | default: '' }}")
+      );
+    });
+
+    it('keeps forwarding the agent at every deeper hand-off', () => {
+      // A hop that accepts the agent and drops it on the way out fails here.
+      const handOffs = childInvocations(ATTACK_DISCOVERY_RUNNER_YAML).filter(
+        (step) => step.with?.['workflow-id'] === 'system-security-attack-discovery-review'
+      );
+
+      expect(handOffs.length).toBeGreaterThan(0);
+      expect(handOffs.map(agentIdInputOf)).toEqual(
+        handOffs.map(() => "{{ inputs.agent_id | default: '' }}")
+      );
+    });
+
+    it('reaches the step at the end of the chain that binds the agent', () => {
+      const steps = conversationSteps(ATTACK_DISCOVERY_REVIEW_YAML);
+
+      expect(steps.length).toBeGreaterThan(0);
+      expect(steps.map((step) => step.with?.agent_id)).toEqual(
+        steps.map(() => "{{ inputs.agent_id | default: '' }}")
+      );
+    });
+
+    it('declares the agent input on every workflow in the chain that is handed one', () => {
+      const declaresAgentInput = (yaml: string) =>
+        (
+          parse(yaml) as { triggers?: Array<{ inputs?: { properties?: Record<string, unknown> } }> }
+        ).triggers?.some((trigger) => trigger.inputs?.properties?.agent_id !== undefined) ?? false;
+
+      expect(declaresAgentInput(ATTACK_DISCOVERY_RUNNER_YAML)).toBe(true);
+      expect(declaresAgentInput(ATTACK_DISCOVERY_REVIEW_YAML)).toBe(true);
+    });
+  });
+
   describe('when the Worker has an agent', () => {
     it('sends every agent step to the picked agent', () => {
       const rendered = renderScheduledWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, scheduled(AGENT));
@@ -304,5 +459,14 @@ describe('managed workflow versions for the agent chain', () => {
   it('bumps every sub-workflow that carries the agent down the chain', () => {
     expect(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version).toBeGreaterThan(25);
     expect(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version).toBeGreaterThan(21);
+  });
+
+  it('keeps the Attack Discovery Worker ahead of its pre-propagation version', () => {
+    expect(ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.version).toBeGreaterThan(3);
+  });
+
+  it('bumps every Attack Discovery sub-workflow that carries the agent down the chain', () => {
+    expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBeGreaterThan(3);
+    expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBeGreaterThan(2);
   });
 });

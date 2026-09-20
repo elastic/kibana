@@ -33,7 +33,10 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  // Bumped for the forwarded `agent_id` input: `yamlTemplate`/`yaml` changes are
+  // invisible to the managed-definition hash, so without this an existing install
+  // keeps the old YAML and the review never receives the Worker's picked agent.
+  version: 4,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -42,7 +45,8 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  // Bumped for the `agent_id` input consumed by `open_investigation`.
+  version: 3,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

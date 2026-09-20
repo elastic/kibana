@@ -32,6 +32,7 @@ consts:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    agentId: "__WORKER_AGENT_ID__"
 steps:
   # Synchronous on purpose: #19276 requires that when generation fails after its
   # built-in retries, this worker run remains failed and hands off nothing.
@@ -55,4 +56,7 @@ steps:
         autonomy: "${{ consts.worker_settings.autonomy }}"
         settings_version: "${{ consts.worker_settings.settingsVersion }}"
         schedule_interval: "${{ consts.worker_settings.scheduleInterval }}"
+        # The Worker's picked agent, when it set one. Absent const renders blank, and
+        # every hop below treats blank as "use the agent the step already resolved".
+        agent_id: "{{ consts.worker_settings.agentId | default: '' }}"
         parent_run_id: "{{ execution.id }}"

@@ -8,10 +8,12 @@
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
 import { getWorkerCustomSettingsComponent } from './registry';
+import { AttackDiscoverySettings } from './attack_discovery/attack_discovery_settings';
 import { HuntSettings } from './hunt/hunt_settings';
 
 describe('getWorkerCustomSettingsComponent', () => {
@@ -39,6 +41,23 @@ describe('getWorkerCustomSettingsComponent', () => {
     expect(
       getWorkerCustomSettingsComponent(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)
     ).toBeUndefined();
+  });
+
+  it('returns the Attack Discovery settings component for the Attack Discovery Worker', () => {
+    expect(getWorkerCustomSettingsComponent(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)).toBe(
+      AttackDiscoverySettings
+    );
+  });
+
+  it('gives no Worker other than Attack Discovery the Attack Discovery picker', () => {
+    const otherWorkerIds = SYSTEM_SECURITY_WORKER_IDS.filter(
+      (workerId) => workerId !== SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID
+    );
+
+    expect(otherWorkerIds.length).toBeGreaterThan(0);
+    for (const workerId of otherWorkerIds) {
+      expect(getWorkerCustomSettingsComponent(workerId)).not.toBe(AttackDiscoverySettings);
+    }
   });
 
   it('still returns the Rule Tuning component for the Rule Tuning Worker', () => {

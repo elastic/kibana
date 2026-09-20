@@ -56,6 +56,14 @@ triggers:
             Worker autonomy level, passed through to each review so a true-positive
             or inconclusive verdict knows whether it needs an analyst gate.
             Defaults to `manual`.
+        agent_id:
+          type: string
+          default: ""
+          maxLength: 256
+          description: >-
+            Agent picked on the dispatching Worker, forwarded to each review so the
+            investigation it opens belongs to that agent. Empty keeps every review on
+            the agent it already resolved (the default Elastic AI agent).
         settings_version:
           type: integer
           minimum: 1
@@ -241,6 +249,7 @@ steps:
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's autonomy enum.
                 autonomy: "${{ inputs.autonomy }}"
+                agent_id: "{{ inputs.agent_id | default: '' }}"
                 parent_run_id: "{{ execution.id }}"
 
       - name: batch_failed
