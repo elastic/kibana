@@ -48,6 +48,7 @@ import {
   deriveInternalCallerAttestation,
   ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
+  isExternalUiamCredential,
   markExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
@@ -547,6 +548,23 @@ describe('self client UIAM auth header augmenter', () => {
     const outboundHeaders = new Headers({ authorization: 'Bearer essu_external' });
 
     expect(augmenter(request, outboundHeaders)).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest a real request authenticated with a user-created UIAM API key', async () => {
+    const uiam = getUiamMock();
+    uiam.isExternalApiKey.mockReturnValueOnce(true);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_external' },
+    });
+    const outboundHeaders = new Headers({ authorization: 'ApiKey essu_external' });
+
+    expect(request.isFakeRequest).toBe(false);
+    expect(isExternalUiamCredential(request)).toBe(false);
+    expect(augmenter(request, outboundHeaders)).toBeUndefined();
+    expect(uiam.isExternalApiKey).toHaveBeenCalledWith(request);
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 

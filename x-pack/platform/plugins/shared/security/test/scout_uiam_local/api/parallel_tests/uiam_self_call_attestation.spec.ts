@@ -68,16 +68,28 @@ apiTest.describe(
         expect(grantResponse.status).toBe(200);
         const internalUiamApiKey = await grantResponse.json();
 
-        const response = await apiClient.post('test_endpoints/self_client/fake_request', {
-          headers: { ...COMMON_UNSAFE_HEADERS },
-          responseType: 'json',
-          body: { apiKey: internalUiamApiKey.key },
-        });
+        try {
+          const response = await apiClient.post('test_endpoints/self_client/fake_request', {
+            headers: { ...COMMON_UNSAFE_HEADERS },
+            responseType: 'json',
+            body: { apiKey: internalUiamApiKey.key },
+          });
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(
-          expect.objectContaining({ username: internalUiamApiKey.id })
-        );
+          expect(response).toHaveStatusCode(200);
+          expect(response.body).toStrictEqual(
+            expect.objectContaining({ username: internalUiamApiKey.id })
+          );
+        } finally {
+          await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
+            headers: { ...COMMON_UNSAFE_HEADERS },
+            responseType: 'json',
+            body: {
+              id: internalUiamApiKey.id,
+              authcScheme: 'ApiKey',
+              credential: internalUiamApiKey.key,
+            },
+          });
+        }
       }
     );
 

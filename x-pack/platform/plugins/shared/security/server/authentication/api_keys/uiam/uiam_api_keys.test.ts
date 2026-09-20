@@ -529,6 +529,32 @@ describe('UiamAPIKeys', () => {
     });
   });
 
+  describe('isExternalApiKey()', () => {
+    it('returns true for a user-created UIAM API key', () => {
+      authenticatedWithApiKey(false);
+      const request = httpServerMock.createKibanaRequest();
+
+      expect(uiamApiKeys.isExternalApiKey(request)).toBe(true);
+      expect(mockGetCurrentUser).toHaveBeenCalledWith(request);
+    });
+
+    it('returns false for an internally minted UIAM API key', () => {
+      authenticatedWithApiKey(true);
+
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns false for a session user', () => {
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns false when there is no current user', () => {
+      mockGetCurrentUser.mockReturnValue(null);
+
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+  });
+
   describe('getAuthorizationHeader()', () => {
     it('extracts authorization header from request', () => {
       const request = httpServerMock.createKibanaRequest({

@@ -622,7 +622,7 @@ export class Server {
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
         }
-        if (isExternalUiamCredential(request)) {
+        if (isExternalUiamCredential(request) || uiam.isExternalApiKey(request)) {
           return undefined;
         }
 

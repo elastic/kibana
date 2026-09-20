@@ -39,6 +39,7 @@ describe('convertSecurityApi', () => {
             convert: jest.fn(),
             getInternalCallerAttestationHeaders: jest.fn(),
             isOwnClientAuthentication: jest.fn(),
+            isExternalApiKey: jest.fn(),
           },
         },
       },

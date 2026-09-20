@@ -414,6 +414,15 @@ describe('buildSecurityApi', () => {
           'kibana-shared-secret'
         );
       });
+
+      it('should properly delegate isExternalApiKey to the service', () => {
+        jest.mocked(authc.apiKeys.uiam!.isExternalApiKey).mockReturnValue(true);
+        const request = httpServerMock.createKibanaRequest();
+
+        expect(api.authc.apiKeys.uiam!.isExternalApiKey(request)).toBe(true);
+        expect(authc.apiKeys.uiam!.isExternalApiKey).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.isExternalApiKey).toHaveBeenCalledWith(request);
+      });
     });
 
     describe('when uiam is disabled', () => {

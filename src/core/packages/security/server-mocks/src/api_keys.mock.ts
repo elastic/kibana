@@ -28,6 +28,7 @@ export const apiKeysMock = {
         convert: jest.fn(),
         getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({}),
         isOwnClientAuthentication: jest.fn().mockReturnValue(false),
+        isExternalApiKey: jest.fn().mockReturnValue(false),
       },
     }),
 };
