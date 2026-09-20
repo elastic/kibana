@@ -92,6 +92,7 @@ describe('detection rule workflows', () => {
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
       expect(calls[0].with?.inputs).toEqual({
         autonomy_level: '{{ consts.worker_settings.autonomy }}',
+        agent_id: "{{ consts.worker_settings.agentId | default: '' }}",
         analysis_window_days: 14,
       });
     });

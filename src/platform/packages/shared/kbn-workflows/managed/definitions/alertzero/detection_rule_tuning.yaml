@@ -19,6 +19,7 @@ consts:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    agentId: "__WORKER_AGENT_ID__"
     extras:
       analysisWindowDays: __WORKER_ANALYSIS_WINDOW_DAYS__
 steps:
@@ -32,4 +33,7 @@ steps:
       workflow-id: system-security-rule-tuning-worker
       inputs:
         autonomy_level: "{{ consts.worker_settings.autonomy }}"
+        # Absent const when no agent is picked; Liquid renders that to "" and every
+        # hop below treats blank as "use the agent this step already resolved".
+        agent_id: "{{ consts.worker_settings.agentId | default: '' }}"
         analysis_window_days: __WORKER_ANALYSIS_WINDOW_DAYS__

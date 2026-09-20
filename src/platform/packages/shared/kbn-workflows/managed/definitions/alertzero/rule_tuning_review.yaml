@@ -64,6 +64,12 @@ triggers:
           type: integer
           minimum: 0
           description: All false positives in the window, reviewed or not.
+        agent_id:
+          type: string
+          default: ""
+          description: >-
+            Agent picked on the dispatching Worker. Empty keeps this review on the
+            agent resolved from its own connector feature.
         autonomy_level:
           type: string
           enum: [manual, assisted]
@@ -250,6 +256,11 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
+    # The Worker's picked agent, when it set one. An unset `agent_id` renders blank,
+    # and the step resolves a blank `agent-id` to the default agent (`agentId ||
+    # agentBuilderDefaultAgentId`), which is what ran here before. `agent-id` selects
+    # the agent; `connector-id-by-feature` below independently selects the LLM.
+    agent-id: "{{ inputs.agent_id | default: '' }}"
     # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_agentic
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
