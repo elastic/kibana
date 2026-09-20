@@ -721,6 +721,13 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'The character used to quote fields.',
   }),
 
+  settingsQuoteInvalid: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsQuoteInvalid',
+    {
+      defaultMessage: 'Must be a single character.',
+    }
+  ),
+
   settingsEscapeLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEscapeLabel',
     {
@@ -731,6 +738,13 @@ export const createDatasetWizardStrings = {
   settingsEscapeHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsEscapeHelp', {
     defaultMessage: 'The character used to escape special characters.',
   }),
+
+  settingsEscapeInvalid: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEscapeInvalid',
+    {
+      defaultMessage: 'Must be a single character.',
+    }
+  ),
 
   settingsCommentLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsCommentLabel',
@@ -756,9 +770,20 @@ export const createDatasetWizardStrings = {
   settingsColumnPrefixHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsColumnPrefixHelp',
     {
-      defaultMessage: 'Prefix for generated column names when no header row is present.',
+      defaultMessage: 'Prefix for generated column names. Only applies when header_row is false.',
     }
   ),
+
+  settingsTrimSpacesLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesLabel',
+    {
+      defaultMessage: 'Trim spaces',
+    }
+  ),
+
+  settingsTrimSpacesHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp', {
+    defaultMessage: 'Removes surrounding whitespace from field values.',
+  }),
 
   settingsDatetimeFormatLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatLabel',

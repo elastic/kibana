@@ -250,6 +250,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsTrimSpaces')).toBeInTheDocument();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });
 

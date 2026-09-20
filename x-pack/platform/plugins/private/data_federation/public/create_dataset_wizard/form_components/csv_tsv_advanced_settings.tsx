@@ -8,13 +8,19 @@
 import React from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
+  DEFAULT_COLUMN_PREFIX,
+  DEFAULT_CSV_ESCAPE,
+  DEFAULT_CSV_QUOTE,
   validateMaxFieldSize,
+  validateEscapeCharacter,
+  validateQuoteCharacter,
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
+  type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
 
 const MULTI_VALUE_SYNTAX_OPTIONS = [
@@ -23,16 +29,31 @@ const MULTI_VALUE_SYNTAX_OPTIONS = [
   { value: 'brackets', text: createDatasetWizardStrings.settingsMultiValueSyntaxBrackets },
 ];
 
+const TRIM_SPACES_OPTIONS = [
+  { value: 'false', text: createDatasetWizardStrings.falseLabel },
+  { value: 'true', text: createDatasetWizardStrings.trueLabel },
+];
+
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
   const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
     name: 'settings.schema_sample_size',
     control,
     rules: { validate: validateSchemaSampleSize },
   });
-  const { field: quoteField } = useController({ name: 'settings.quote', control });
-  const { field: escapeField } = useController({ name: 'settings.escape', control });
+  const { field: quoteField, fieldState: quoteState } = useController({
+    name: 'settings.quote',
+    control,
+    rules: { validate: validateQuoteCharacter },
+  });
+  const { field: escapeField, fieldState: escapeState } = useController({
+    name: 'settings.escape',
+    control,
+    rules: { validate: validateEscapeCharacter },
+  });
   const { field: commentField } = useController({ name: 'settings.comment', control });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
+  const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });
   const { field: multiValueSyntaxField } = useController({
     name: 'settings.multi_value_syntax',
     control,
@@ -42,6 +63,20 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
     control,
     rules: { validate: validateMaxFieldSize },
   });
+
+  React.useEffect(() => {
+    if (format === 'csv') {
+      if (!quoteField.value) quoteField.onChange(DEFAULT_CSV_QUOTE);
+      if (!escapeField.value) escapeField.onChange(DEFAULT_CSV_ESCAPE);
+    }
+    if (format === 'tsv') {
+      if (quoteField.value === DEFAULT_CSV_QUOTE) quoteField.onChange('');
+      if (escapeField.value === DEFAULT_CSV_ESCAPE) escapeField.onChange('');
+    }
+    if ((format === 'csv' || format === 'tsv') && !columnPrefixField.value) {
+      columnPrefixField.onChange(DEFAULT_COLUMN_PREFIX);
+    }
+  }, [columnPrefixField, escapeField, format, quoteField]);
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
@@ -68,10 +103,14 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={createDatasetWizardStrings.settingsQuoteLabel}
         helpText={createDatasetWizardStrings.settingsQuoteHelp}
         fullWidth
+        isInvalid={Boolean(quoteState.error)}
+        error={quoteState.error?.message}
       >
         <EuiFieldText
           data-test-subj="createDatasetSettingsQuote"
           fullWidth
+          maxLength={1}
+          isInvalid={Boolean(quoteState.error)}
           value={quoteField.value}
           onChange={(e) => quoteField.onChange(e.target.value)}
           name={quoteField.name}
@@ -82,10 +121,14 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={createDatasetWizardStrings.settingsEscapeLabel}
         helpText={createDatasetWizardStrings.settingsEscapeHelp}
         fullWidth
+        isInvalid={Boolean(escapeState.error)}
+        error={escapeState.error?.message}
       >
         <EuiFieldText
           data-test-subj="createDatasetSettingsEscape"
           fullWidth
+          maxLength={1}
+          isInvalid={Boolean(escapeState.error)}
           value={escapeField.value}
           onChange={(e) => escapeField.onChange(e.target.value)}
           name={escapeField.name}
@@ -118,6 +161,22 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           onChange={(e) => columnPrefixField.onChange(e.target.value)}
           name={columnPrefixField.name}
           inputRef={columnPrefixField.ref}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+        helpText={createDatasetWizardStrings.settingsTrimSpacesHelp}
+        fullWidth
+      >
+        <EuiSelect
+          options={TRIM_SPACES_OPTIONS}
+          data-test-subj="createDatasetSettingsTrimSpaces"
+          fullWidth
+          aria-label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+          value={trimSpacesField.value ? 'true' : 'false'}
+          onChange={(e) => trimSpacesField.onChange(e.target.value === 'true')}
+          name={trimSpacesField.name}
+          inputRef={trimSpacesField.ref}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel} fullWidth>

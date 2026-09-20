@@ -67,10 +67,11 @@ export const datasetSchema = schema.object({
       max_errors: schema.maybe(schema.number({ min: 0 })),
       max_error_ratio: schema.maybe(schema.number({ min: 0, max: 1 })),
       // CSV/TSV advanced
-      quote: optionalString,
-      escape: optionalString,
+      quote: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
+      escape: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
       comment: optionalString,
       column_prefix: optionalString,
+      trim_spaces: schema.maybe(schema.boolean()),
       multi_value_syntax: schema.maybe(
         schema.oneOf([schema.literal('none'), schema.literal('brackets')])
       ),

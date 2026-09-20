@@ -39,7 +39,8 @@ describe('create_dataset_form_state', () => {
         quote: '',
         escape: '',
         comment: '',
-        column_prefix: '',
+        column_prefix: 'col',
+        trim_spaces: false,
         multi_value_syntax: '',
         max_field_size: '',
       });
@@ -180,6 +181,45 @@ describe('create_dataset_form_state', () => {
           ...empty(),
           format: 'csv',
           datetime_format: 'ISO-8601',
+        })
+      ).toEqual({ format: 'csv' });
+    });
+
+    it('omits default CSV quote and escape characters', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          quote: '"',
+          escape: '\\',
+        })
+      ).toEqual({ format: 'csv' });
+    });
+
+    it('includes non-default CSV quote and escape characters', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          quote: "'",
+          escape: '"',
+        })
+      ).toEqual({ format: 'csv', quote: "'", escape: '"' });
+    });
+
+    it('includes trim_spaces when enabled', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          trim_spaces: true,
+        })
+      ).toEqual({ format: 'csv', trim_spaces: true });
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          trim_spaces: false,
         })
       ).toEqual({ format: 'csv' });
     });

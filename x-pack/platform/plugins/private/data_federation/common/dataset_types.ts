@@ -47,6 +47,7 @@ export interface DatasetSettingsFile {
   escape?: string;
   comment?: string;
   column_prefix?: string;
+  trim_spaces?: boolean;
   multi_value_syntax?: 'none' | 'brackets';
   max_field_size?: number;
 

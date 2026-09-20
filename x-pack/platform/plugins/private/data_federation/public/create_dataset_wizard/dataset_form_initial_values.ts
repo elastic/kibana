@@ -12,6 +12,7 @@ import type {
 } from '../../common/dataset_types';
 import {
   emptyCreateDatasetSettingsFormValues,
+  DEFAULT_COLUMN_PREFIX,
   DEFAULT_ENCODING,
   DEFAULT_FILE_EXCLUSIONS,
   type CreateDatasetFormValues,
@@ -76,10 +77,11 @@ const settingsToFormValues = (
     datetime_format: s.datetime_format ?? '',
     null_value: s.null_value ?? '',
     encoding: s.encoding ?? DEFAULT_ENCODING,
+    column_prefix: s.column_prefix ?? DEFAULT_COLUMN_PREFIX,
     quote: s.quote ?? '',
     escape: s.escape ?? '',
     comment: s.comment ?? '',
-    column_prefix: s.column_prefix ?? '',
+    trim_spaces: s.trim_spaces ?? false,
     multi_value_syntax: (s.multi_value_syntax ?? '') as DatasetMultiValueSyntaxFormValue,
     max_field_size: s.max_field_size !== undefined ? String(s.max_field_size) : '',
     // CSV/TSV error handling

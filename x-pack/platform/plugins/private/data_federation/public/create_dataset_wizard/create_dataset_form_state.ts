@@ -26,6 +26,9 @@ export const DEFAULT_FILE_EXCLUSIONS = [
 
 export const DEFAULT_ENCODING = 'UTF-8';
 export const DEFAULT_DATETIME_FORMAT = 'ISO-8601';
+export const DEFAULT_COLUMN_PREFIX = 'col';
+export const DEFAULT_CSV_QUOTE = '"';
+export const DEFAULT_CSV_ESCAPE = '\\';
 
 export interface CreateDatasetSettingsFormValues {
   format: DatasetFormatFormValue;
@@ -53,6 +56,7 @@ export interface CreateDatasetSettingsFormValues {
   escape: string;
   comment: string;
   column_prefix: string;
+  trim_spaces: boolean;
   multi_value_syntax: DatasetMultiValueSyntaxFormValue;
   max_field_size: string;
   // CSV/TSV error handling
@@ -89,7 +93,8 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   quote: '',
   escape: '',
   comment: '',
-  column_prefix: '',
+  column_prefix: DEFAULT_COLUMN_PREFIX,
+  trim_spaces: false,
   multi_value_syntax: '',
   max_field_size: '',
   error_mode: '',
@@ -171,12 +176,24 @@ export const validateSkipRows = (value: string): true | string => {
   return true;
 };
 
+const validateSingleCharacter = (value: string, errorMessage: string): true | string => {
+  if (!value) return true;
+  if (value.length !== 1) return errorMessage;
+  return true;
+};
+
 export const validateMaxFieldSize = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
   if (parsed === undefined) return createDatasetWizardStrings.settingsMaxFieldSizeInvalid;
   return true;
 };
+
+export const validateQuoteCharacter = (value: string): true | string =>
+  validateSingleCharacter(value, createDatasetWizardStrings.settingsQuoteInvalid);
+
+export const validateEscapeCharacter = (value: string): true | string =>
+  validateSingleCharacter(value, createDatasetWizardStrings.settingsEscapeInvalid);
 
 /**
  * Maps form values to settings for the API payload.
@@ -230,10 +247,22 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.encoding && settings.encoding !== DEFAULT_ENCODING) {
       applied.encoding = settings.encoding;
     }
-    if (settings.quote) applied.quote = settings.quote;
-    if (settings.escape) applied.escape = settings.escape;
+    if (format === 'csv') {
+      if (settings.quote && settings.quote !== DEFAULT_CSV_QUOTE) {
+        applied.quote = settings.quote;
+      }
+      if (settings.escape && settings.escape !== DEFAULT_CSV_ESCAPE) {
+        applied.escape = settings.escape;
+      }
+    } else {
+      if (settings.quote) applied.quote = settings.quote;
+      if (settings.escape) applied.escape = settings.escape;
+    }
     if (settings.comment) applied.comment = settings.comment;
-    if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
+    if (settings.column_prefix && settings.column_prefix !== DEFAULT_COLUMN_PREFIX) {
+      applied.column_prefix = settings.column_prefix;
+    }
+    if (settings.trim_spaces) applied.trim_spaces = true;
     if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
     const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
     if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
