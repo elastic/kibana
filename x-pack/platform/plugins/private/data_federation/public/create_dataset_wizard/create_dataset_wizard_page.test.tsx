@@ -20,6 +20,18 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 const docLinksMock = {
   links: {
+    elasticsearch: {
+      mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
+      mappingKeyword:
+        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword',
+      mappingBoolean:
+        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/boolean',
+      mappingIp: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ip',
+      mappingDate: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date',
+      mappingUnsignedLong:
+        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/unsigned-long',
+      mappingNumber: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/number',
+    },
     dataFederation: {
       overview: '',
       quickstart: '',

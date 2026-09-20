@@ -15,6 +15,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
+import { buildDatasetMappings } from '../components/mapping_editor';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import {
@@ -90,12 +91,14 @@ export function CreateDatasetWizardPage({
     try {
       const desc = values.description?.trim();
       const settings = buildDatasetSettingsFromFormValues(values.settings);
+      const mappings = buildDatasetMappings(values.mappings);
       const payload: DataSetWithName = {
         name: values.name.trim(),
         data_source: values.data_source.trim(),
         resource: values.resource.trim(),
         ...(desc ? { description: desc } : {}),
         ...(settings ? { settings } : {}),
+        ...(mappings ? { mappings } : {}),
       };
       await datasetsClient.add(payload);
 

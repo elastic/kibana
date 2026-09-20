@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -23,11 +22,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
-import { MappingJsonPreview } from './mapping_json_preview';
-import { MappingEditorHeader } from './mapping_editor_header';
 import { emptyMappingEditorValue, getTypeInfoByValue } from './constants';
-import { DynamicFieldsToggle } from './dynamic_fields_toggle';
-import { MappingEditorSectionHeader } from './mapping_editor_section_header';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
 
 export { validateMappingEditorValue };
@@ -63,11 +58,6 @@ export interface MappingEditorProps {
   value: MappingEditorValue;
   onChange: (next: SetStateAction<MappingEditorValue>) => void;
   docLinks: DocLinksStart;
-  /**
-   * When true, shows a JSON preview matching the docs.
-   * Defaults to true because the output is typically copy/pasted.
-   */
-  showJsonPreview?: boolean;
 }
 
 export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings | undefined => {
@@ -100,12 +90,7 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
   };
 };
 
-export const MappingEditor: FC<MappingEditorProps> = ({
-  value,
-  onChange,
-  docLinks,
-  showJsonPreview = true,
-}) => {
+export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, docLinks }) => {
   const { euiTheme } = useEuiTheme();
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
@@ -170,12 +155,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     },
     [onChange]
   );
-
-  const mappings = useMemo(() => buildDatasetMappings(value), [value]);
-  const previewJson = useMemo(() => {
-    if (!mappings) return '';
-    return JSON.stringify({ mappings }, null, 2);
-  }, [mappings]);
 
   const draftFieldErrors = useMemo(() => {
     if (!draftValidationAttempted) return {};
@@ -257,7 +236,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
 
   return (
     <EuiPanel paddingSize="m" hasBorder data-test-subj="dataFederationMappingEditor">
-      <MappingEditorSectionHeader />
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
@@ -283,16 +261,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           <EuiSpacer size="m" />
         </>
       ) : null}
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <DynamicFieldsToggle
-            checked={value.dynamic}
-            onChange={(nextChecked) => onChange((prev) => ({ ...prev, dynamic: nextChecked }))}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <MappingEditorHeader />
       <EuiSpacer size="s" />
       {value.fields.length === 0 ? (
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
@@ -329,17 +297,17 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               return (
                 <EuiFlexItem key={f.id}>
                   <div
-                    css={css`
-                      background: ${isEditing
+                    style={{
+                      backgroundColor: isEditing
                         ? euiTheme.colors.backgroundBaseSubdued
-                        : euiTheme.colors.backgroundBasePlain};
-                      padding: ${euiTheme.size.s};
-                      border-top: 0;
-                      border-left: 0;
-                      border-right: 0;
-                      border-bottom: ${euiTheme.border.thin};
-                      border-radius: 0;
-                    `}
+                        : euiTheme.colors.backgroundBasePlain,
+                      padding: euiTheme.size.s,
+                      borderTop: '0',
+                      borderLeft: '0',
+                      borderRight: '0',
+                      borderBottom: euiTheme.border.thin,
+                      borderRadius: 0,
+                    }}
                   >
                     <EuiFlexGroup gutterSize="m" alignItems={isEditing ? 'flexStart' : 'center'}>
                       {isEditing ? (
@@ -401,8 +369,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           </EuiFlexGroup>
         </>
       )}
-      // todo remove
-      {showJsonPreview ? <MappingJsonPreview json={previewJson} /> : null}
     </EuiPanel>
   );
 };

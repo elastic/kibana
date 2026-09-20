@@ -8,6 +8,7 @@
 import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import type { MappingEditorValue } from '../components/mapping_editor';
 
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
@@ -71,6 +72,7 @@ export interface CreateDatasetFormValues {
   data_source: string;
   resource: string;
   settings: CreateDatasetSettingsFormValues;
+  mappings: MappingEditorValue;
 }
 
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
