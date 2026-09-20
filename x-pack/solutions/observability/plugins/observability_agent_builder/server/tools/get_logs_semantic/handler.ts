@@ -14,6 +14,13 @@ const MAX_SAMPLE_ARRAY_ITEMS = 20;
 const MAX_SAMPLE_OBJECT_FIELDS = 50;
 const MAX_SAMPLE_DEPTH = 3;
 
+// Maximum `pattern` length for tool output. Anchored to the Elasticsearch keyword `ignore_above`
+// default (1024 — https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ignore-above),
+// matching `MAX_NL_QUERY_LENGTH` in the service.
+// `pattern` is a query handle: with `operator: AND`, truncating trailing tokens silently widens
+// the match. The "expand" feature must read the untruncated value from the service, not from here.
+const MAX_PATTERN_LENGTH = 1024;
+
 const WARNINGS = {
   missingFields:
     'Semantic log search is unavailable because the target does not expose the required message and @timestamp fields. Do not retry with the same target.',
@@ -25,7 +32,7 @@ const WARNINGS = {
   execution:
     'Semantic log search failed during execution. Do not retry automatically or fall back silently.',
   invalidParams:
-    'Semantic log search rejected the request arguments. Correct them and retry once — check that the time range is not inverted and that the index is a plain index pattern (no spaces or | / \\ ? " < > characters).',
+    'Semantic log search rejected the request arguments. Correct them and retry once — check that the time range is not inverted and that the index is a plain index pattern (letters, digits, and . _ - : , * + only).',
   serviceUnavailable: 'Semantic log search is not registered. Do not retry.',
   missingTarget: 'No log indices are available to search. Do not retry with this tool.',
   noPatterns:
@@ -79,7 +86,7 @@ export async function getLogsSemanticHandler({
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end, { roundUp: true });
   if (!startMs || !endMs) {
-    throw new Error(`Invalid date range: start="${start}", end="${end}"`);
+    throw new Error('Invalid date range provided.');
   }
 
   if (index.trim().length === 0) {
@@ -129,9 +136,12 @@ export async function getLogsSemanticHandler({
   };
 }
 
+const truncateString = (value: string, maxLength: number): string =>
+  value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+
 function sanitizeSampleValue(value: unknown, depth: number = 0): unknown {
   if (typeof value === 'string' && value.length > MAX_FIELD_VALUE_LENGTH) {
-    return value.slice(0, MAX_FIELD_VALUE_LENGTH) + '...';
+    return truncateString(value, MAX_FIELD_VALUE_LENGTH);
   }
   if (value === null || typeof value !== 'object') {
     return value;
@@ -154,7 +164,7 @@ function sanitizeSampleValue(value: unknown, depth: number = 0): unknown {
 function toPattern(pattern: LogPattern): GetLogsSemanticResult['patterns'][number] {
   const { _id, _index, ...rest } = pattern.sample ?? {};
   return {
-    pattern: pattern.pattern,
+    pattern: truncateString(pattern.pattern, MAX_PATTERN_LENGTH),
     count: pattern.count,
     firstSeen: pattern.firstSeen,
     lastSeen: pattern.lastSeen,

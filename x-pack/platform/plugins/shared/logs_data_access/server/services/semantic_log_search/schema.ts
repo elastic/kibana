@@ -8,43 +8,27 @@
 import { z } from '@kbn/zod/v4';
 import {
   DEFAULT_MAX_PATTERNS,
+  MAX_EPOCH_MS,
   MAX_KQL_FILTER_LENGTH,
   MAX_NL_QUERY_LENGTH,
   MAX_PATTERNS,
   MAX_TARGET_LENGTH,
 } from './constants';
 
-/**
- * `esql.from(target)` interpolates its argument verbatim: `Builder.expression.source.node`
- * hardcodes `{ unquoted: true }` for string inputs, and `LeafPrinter.string` short-circuits all
- * escaping on that flag. So `target` must be constrained to characters that cannot alter the
- * shape of the FROM clause.
- *
- * Derived from the ES|QL lexer's `fragment UNQUOTED_SOURCE_PART : ~[:"=|,[\]/() \t\r\n]`, which
- * is the authoritative definition of what stays inside a single source token. Every character
- * below is either inside that class, or is one of the two structural characters we deliberately
- * allow:
- *   `,` separates sources (`FROM a,b` parses as two sources)
- *   `:` introduces a cluster prefix or a `::data` / `::failures` selector
- * Neither can start a new command — only `|` can, and `|` is excluded.
- *
- * Deliberately narrower than the grammar: `\ ? " < > #` and non-ASCII are all legal ES|QL source
- * characters but illegal in Elasticsearch index names, so excluding them costs nothing.
- *
- * Known limitation: date-math index names (`<logs-{now/d}>`) are rejected. Kibana data views
- * reject them too, and ES|QL `FROM` does not accept them unquoted.
- *
- * See schema.test.ts for a parser-pinned property test that asserts any target passing this
- * rule cannot change the shape of the emitted FROM clause.
- */
+// `esql.from()` interpolates its argument unquoted, so `target` must be restricted to characters
+// that cannot alter the shape of the FROM clause. Derived from the ES|QL lexer's
+// `UNQUOTED_SOURCE_PART` fragment, and deliberately narrower — `,` and `:` are kept for
+// multi-target and cluster-prefixed patterns; `|` is excluded as the command separator; `/`,
+// `\ ? " < > #` and non-ASCII are legal there but invalid in Elasticsearch index names.
+// https://github.com/elastic/elasticsearch/blob/67ee2d4c668d04a9b99960773c269530fcd739c5/x-pack/plugin/esql/src/main/antlr/lexer/From.g4#L33-L36
 const INDEX_PATTERN = /^[a-zA-Z0-9_.,:*+-]+$/;
 
 /**
  * Runtime schema for the serializable subset of {@link SemanticLogSearchParams}.
  *
  * `esClient` and `abortSignal` are not parseable and must be re-attached by the caller after
- * validating with this schema. Using `validation.data` (not just `validation.success`) is
- * essential — zod's `.trim()` and `.default()` coercions only apply when you consume the output.
+ * validating with this schema. Consume `validation.data`, not just check `validation.success` —
+ * zod's `.trim()` and `.default()` coercions only apply to the parsed output, not the raw input.
  */
 export const semanticLogSearchInputSchema = z.object({
   target: z.string().trim().min(1).max(MAX_TARGET_LENGTH).regex(INDEX_PATTERN, {
@@ -54,8 +38,8 @@ export const semanticLogSearchInputSchema = z.object({
   nlQuery: z.string().trim().min(1).max(MAX_NL_QUERY_LENGTH),
   timeRange: z
     .object({
-      start: z.number().int(),
-      end: z.number().int(),
+      start: z.number().int().min(-MAX_EPOCH_MS).max(MAX_EPOCH_MS),
+      end: z.number().int().min(-MAX_EPOCH_MS).max(MAX_EPOCH_MS),
     })
     .refine(({ start, end }) => start < end, {
       message: 'timeRange.start must be before timeRange.end',

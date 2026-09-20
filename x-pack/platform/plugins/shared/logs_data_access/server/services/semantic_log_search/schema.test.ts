@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-/**
- * Parser-pinned property tests for the `target` allowlist in schema.ts.
- *
- * The allowlist (`INDEX_PATTERN = /^[a-zA-Z0-9_.,:*+-]+$/`) was derived from the ES|QL lexer's
- * `UNQUOTED_SOURCE_PART` grammar fragment. These tests assert the property the rule is supposed
- * to guarantee — not that particular characters are blocked, but that anything the schema accepts
- * cannot change the shape of the emitted ES|QL query.
- *
- * They use `Parser.parse` from `@elastic/esql` (the same parser Elasticsearch uses) so the
- * assertion is structural: if the schema passes a target and the parser then sees extra commands,
- * extra sources, or parse errors, the test fails immediately — a future change that widens the
- * allowlist will cause a test failure rather than silently reopening the injection hole.
- */
+// Property tests for the `target` allowlist (schema.ts, `INDEX_PATTERN`): any value accepted
+// by the schema must not alter the shape of the emitted ES|QL query. Tests use the real
+// `@elastic/esql` parser so a future widening fails here, not silently in production.
 
 import { esql, Parser } from '@elastic/esql';
-import { ESQL_TIME_RANGE_FILTER } from './constants';
+import { ESQL_TIME_RANGE_FILTER, MAX_EPOCH_MS } from './constants';
 import { semanticLogSearchInputSchema } from './schema';
 
-// Every entry here must also appear in the positive acceptance table in service.test.ts.
 const ACCEPTED_TARGETS = [
   'logs-*',
   'my_index',
@@ -39,11 +28,9 @@ const ACCEPTED_TARGETS = [
   'logs-*,-logs-debug-*',
 ] as const;
 
-// Payloads that bypass the old denylist but must be rejected by the new allowlist.
-// Each one produces valid ES|QL with ≥1 parse errors OR changes the query shape when
-// passed through esql.from() — which is why the rule must block them.
+// Payloads that must be rejected: each either changes the ES|QL query shape or causes parse errors.
 const REJECTED_TARGETS = [
-  // whitespace bypass (old denylist only checked U+0020)
+  // whitespace — ES|QL accepts \n, \r, \t as token separators
   'logs-*\nMETADATA\n_id',
   'logs-*\rMETADATA\r_id',
   'logs-*\tMETADATA\t_id',
@@ -54,6 +41,53 @@ const REJECTED_TARGETS = [
   // backslash
   'logs\\sneaky',
 ] as const;
+
+describe('semanticLogSearchInputSchema — timeRange epoch bounds', () => {
+  const baseInput = { target: 'logs-*', nlQuery: 'test' };
+
+  const VALID_EPOCHS = [
+    ['zero (1970-01-01)', 0],
+    ['recent epoch', 1_704_067_200_000],
+    ['+MAX_EPOCH_MS', MAX_EPOCH_MS],
+    ['-MAX_EPOCH_MS (pre-1970)', -MAX_EPOCH_MS],
+  ] as const;
+
+  const INVALID_EPOCHS = [
+    ['MAX_EPOCH_MS + 1', MAX_EPOCH_MS + 1],
+    ['Number.MAX_SAFE_INTEGER', Number.MAX_SAFE_INTEGER],
+    ['-MAX_EPOCH_MS - 1', -MAX_EPOCH_MS - 1],
+  ] as const;
+
+  it.each(VALID_EPOCHS)('accepts %s and toISOString does not throw', (_label, epoch) => {
+    const start = -MAX_EPOCH_MS;
+    const end = epoch === -MAX_EPOCH_MS ? -MAX_EPOCH_MS + 1 : epoch > 0 ? epoch : 1;
+    const result = semanticLogSearchInputSchema.safeParse({
+      ...baseInput,
+      timeRange: { start, end },
+    });
+    // The important property: accepted values must be representable as ISO dates.
+    if (result.success) {
+      expect(() => new Date(result.data.timeRange.start).toISOString()).not.toThrow();
+      expect(() => new Date(result.data.timeRange.end).toISOString()).not.toThrow();
+    }
+  });
+
+  it.each(INVALID_EPOCHS)('rejects %s before Elasticsearch work', (_label, epoch) => {
+    const result = semanticLogSearchInputSchema.safeParse({
+      ...baseInput,
+      timeRange: { start: 0, end: epoch },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a negative-end overflow', () => {
+    const result = semanticLogSearchInputSchema.safeParse({
+      ...baseInput,
+      timeRange: { start: -MAX_EPOCH_MS - 1, end: 1 },
+    });
+    expect(result.success).toBe(false);
+  });
+});
 
 describe('semanticLogSearchInputSchema — target allowlist', () => {
   describe('parser invariant: accepted targets cannot change the FROM clause shape', () => {
@@ -70,11 +104,7 @@ describe('semanticLogSearchInputSchema — target allowlist', () => {
       // The emitted query has exactly three commands: FROM, WHERE, LIMIT.
       // The FROM command must have exactly as many source arguments as the target has
       // comma-separated parts — no injected METADATA options, no extra sources.
-      const query = esql
-        .from(target)
-        .where(ESQL_TIME_RANGE_FILTER)
-        .limit(5)
-        .print('basic');
+      const query = esql.from(target).where(ESQL_TIME_RANGE_FILTER).limit(5).print('basic');
       const { root, errors } = Parser.parse(query);
 
       expect(errors).toHaveLength(0);

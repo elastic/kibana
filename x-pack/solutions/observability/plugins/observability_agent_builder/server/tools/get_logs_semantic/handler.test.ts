@@ -131,9 +131,60 @@ describe('getLogsSemanticHandler', () => {
       abortSignal,
     });
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({ abortSignal })
-    );
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ abortSignal }));
+  });
+
+  it('truncates a pattern longer than 1024 chars', async () => {
+    const longPattern = 'token '.repeat(200); // 1200 chars
+    const search = jest.fn().mockResolvedValue({
+      status: 'success',
+      patterns: [
+        {
+          field: 'message',
+          pattern: longPattern,
+          count: 1,
+          firstSeen: '2024-01-01T00:00:00.000Z',
+          lastSeen: '2024-01-01T00:00:00.000Z',
+          sample: { message: 'a log line' },
+        },
+      ],
+    });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.patterns[0].pattern).toHaveLength(1027); // 1024 + '...'
+    expect(result.patterns[0].pattern.endsWith('...')).toBe(true);
+  });
+
+  it('does not truncate a pattern within the 1024-char bound', async () => {
+    // A real categorize_text bucket key length from:
+    // x-pack/solutions/security/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts
+    const realisticPattern = 'A'.repeat(417);
+    const search = jest.fn().mockResolvedValue({
+      status: 'success',
+      patterns: [
+        {
+          field: 'message',
+          pattern: realisticPattern,
+          count: 1,
+          firstSeen: '2024-01-01T00:00:00.000Z',
+          lastSeen: '2024-01-01T00:00:00.000Z',
+          sample: { message: 'a log line' },
+        },
+      ],
+    });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.patterns[0].pattern).toBe(realisticPattern);
   });
 
   it('truncates long sample field values', async () => {

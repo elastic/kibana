@@ -7,15 +7,20 @@
 
 export const DEFAULT_MAX_PATTERNS = 10;
 
+/**
+ * ECMA-262 maximum time value: `new Date(v).toISOString()` throws `RangeError` beyond it
+ * (https://tc39.es/ecma262/#sec-time-values-and-time-range). `z.number().int()` alone would admit
+ * up to `Number.MAX_SAFE_INTEGER`, and `searchWithEsqlRerank` converts epochs to ISO strings
+ * before its try block, so an unbounded value escapes the `SemanticLogSearchResult` contract.
+ */
+export const MAX_EPOCH_MS = 8_640_000_000_000_000;
+
 /** Maximum number of patterns a caller may request. */
 export const MAX_PATTERNS = 100;
 
-/**
- * Upper bounds for free-form string inputs. Intentionally generous — they are safety guards
- * against pathological payloads (unbounded-string DoS), not business constraints.
- * Mirror the values in observability_agent_builder/server/utils/schema_limits.ts; that file
- * cannot be imported here because platform cannot depend on solutions.
- */
+// Upper bounds for free-form string inputs: safety guards against unbounded-string DoS,
+// not business constraints. Mirrors observability_agent_builder/server/utils/schema_limits.ts;
+// that file cannot be imported here because platform cannot depend on solutions.
 
 /** Index names and index patterns (may be comma-separated). */
 export const MAX_TARGET_LENGTH = 4096;

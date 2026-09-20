@@ -62,7 +62,7 @@ export async function getLogsHandler({
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end, { roundUp: true });
   if (!startMs || !endMs) {
-    throw new Error(`Invalid date range: start="${start}", end="${end}"`);
+    throw new Error('Invalid date range provided.');
   }
 
   const searchClient = getTypedSearch(esClient);

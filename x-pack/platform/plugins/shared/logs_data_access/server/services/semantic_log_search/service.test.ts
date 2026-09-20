@@ -7,9 +7,16 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { errors } from '@elastic/elasticsearch';
 import type { SemanticLogSearchParams } from '../../../common/services/semantic_log_search/types';
 import { search } from './service';
-import { MAX_KQL_FILTER_LENGTH, MAX_NL_QUERY_LENGTH, MAX_PATTERNS, MAX_TARGET_LENGTH } from './constants';
+import {
+  MAX_EPOCH_MS,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_NL_QUERY_LENGTH,
+  MAX_PATTERNS,
+  MAX_TARGET_LENGTH,
+} from './constants';
 
 const createEsClient = ({
   fields = {
@@ -22,9 +29,16 @@ const createEsClient = ({
   rerankAvailable?: boolean;
 } = {}) => {
   const fieldCaps = jest.fn().mockResolvedValue({ fields });
+  const notFoundError = new errors.ResponseError({
+    body: { error: { type: 'resource_not_found_exception' } },
+    statusCode: 404,
+    headers: {},
+    meta: {} as any,
+    warnings: [],
+  });
   const inferenceGet = rerankAvailable
     ? jest.fn().mockResolvedValue({ endpoints: [{ inference_id: '.rerank-v1-elasticsearch' }] })
-    : jest.fn().mockRejectedValue(new Error('not found'));
+    : jest.fn().mockRejectedValue(notFoundError);
   const esqlQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
 
   return {
@@ -90,7 +104,7 @@ describe('semantic log search service', () => {
     const result = await search(createParams(esClient), logger);
 
     expect(result).toEqual({ status: 'error', reason: 'execution' });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('field capability check'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('capability check'));
   });
 
   it.each([
@@ -112,9 +126,7 @@ describe('semantic log search service', () => {
     // injection in target — esql.from() does not quote; pipe injects ES|QL commands
     { target: 'logs | DROP message' },
     { target: 'logs\\sneaky' },
-    // whitespace bypass: the old denylist only blocked U+0020 (space); ES|QL also accepts \n, \r,
-    // \t as token separators, so these would produce valid ES|QL with zero parse errors under the
-    // old guard. The new allowlist rejects them at the character level.
+    // whitespace — ES|QL accepts \n, \r, \t as token separators
     { target: 'logs-*\nMETADATA\n_id' },
     { target: 'logs-*\rMETADATA\r_id' },
     { target: 'logs-*\tMETADATA\t_id' },
@@ -124,6 +136,10 @@ describe('semantic log search service', () => {
     { nlQuery: 'x'.repeat(MAX_NL_QUERY_LENGTH + 1) },
     { kqlFilter: 'x'.repeat(MAX_KQL_FILTER_LENGTH + 1) },
     { target: 'x'.repeat(MAX_TARGET_LENGTH + 1) },
+    // epoch overflow: MAX_EPOCH_MS is the ECMA-262 limit; MAX_SAFE_INTEGER exceeds it
+    { timeRange: { start: 0, end: MAX_EPOCH_MS + 1 } },
+    { timeRange: { start: 0, end: Number.MAX_SAFE_INTEGER } },
+    { timeRange: { start: -MAX_EPOCH_MS - 1, end: 1 } },
   ])('rejects invalid params before Elasticsearch work: %o', async (overrides) => {
     const { esClient, fieldCaps, inferenceGet, esqlQuery } = createEsClient();
 

@@ -40,15 +40,13 @@ export async function search(
     if (!(await hasRequiredFields(esClient, input.target))) {
       return { status: 'unavailable', reason: 'missing_fields' };
     }
+    if (!(await detectRerankCapability(esClient))) {
+      return { status: 'unavailable', reason: 'inference_unavailable' };
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logger.warn(`Semantic log search field capability check failed: ${message}`);
+    logger.warn(`Semantic log search capability check failed: ${message}`);
     return { status: 'error', reason: 'execution' };
-  }
-
-  const hasRerank = await detectRerankCapability(esClient);
-  if (!hasRerank) {
-    return { status: 'unavailable', reason: 'inference_unavailable' };
   }
 
   return searchWithEsqlRerank(input, logger);

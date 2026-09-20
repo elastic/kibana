@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
+import { isRequestAbortedError } from '@kbn/es-errors';
 import type {
   LogPattern,
   SemanticLogSearchParams,
@@ -36,12 +37,14 @@ const createCellReader = (response: ESQLSearchResponse) => {
   };
 };
 
-/** Timestamps arrive as ISO strings or epoch millis. */
+// Wire values are `unknown`; an unusable timestamp yields `undefined` so the caller skips the row
+// rather than throwing `RangeError` out of the exported `parseEsqlPatternResponse`.
 const toIsoString = (value: unknown): string | undefined => {
-  if (value === null || value === undefined) {
+  if (typeof value !== 'string' && typeof value !== 'number') {
     return undefined;
   }
-  return new Date(value as string | number).toISOString();
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
 /**
@@ -100,24 +103,16 @@ export function parseEsqlPatternResponse(
   });
 }
 
-const isCancellationError = (error: unknown, abortSignal?: AbortSignal): boolean =>
-  abortSignal?.aborted === true ||
+// Tests the error type, not the signal: any unrelated failure surfacing after an abort
+// (mapping error, 403) would otherwise be misclassified as `cancelled`.
+const isCancellationError = (error: unknown): boolean =>
+  isRequestAbortedError(error) ||
   (error instanceof Error && (error.name === 'AbortError' || error.name === 'RequestAbortedError'));
 
 const isTimeoutError = (error: unknown): boolean =>
   error instanceof Error && error.name === 'TimeoutError';
 
-/**
- * Execute semantic search using ES|QL RERANK + CATEGORIZE.
- *
- * This is the implemented search path. The pre-indexed rungs
- * (semantic_text / pattern_text) are stubbed.
- *
- * Flow:
- * 1. CATEGORIZE extracts patterns from log messages
- * 2. Sort by count and limit to rank window (focus on prevalent patterns)
- * 3. RERANK scores patterns by semantic relevance to the query using both pattern and sample
- */
+/** Searches for log patterns matching a natural-language query using ES|QL CATEGORIZE + RERANK. */
 export async function searchWithEsqlRerank(
   params: SemanticLogSearchParams,
   logger: Logger
@@ -149,10 +144,8 @@ export async function searchWithEsqlRerank(
   //    so identical queries produce identical rankings).
   //
   // 3. Sort by count DESC and keep the top N (the rank window). RERANK is an inference call per
-  //    candidate, so not all patterns can reach it. Prevalence is orthogonal to relevance
-  //    (a routine health check beats a rare error), but lexical scoring regresses paraphrase
-  //    queries (a score on "db errors" gives zero to `postgres: FATAL connection limit exceeded`).
-  //    The real fix is embeddings at selection time (semantic_text).
+  //    candidate, so not all patterns can reach it. Prevalence is a proxy for relevance — a
+  //    routine health check is more likely to reach RERANK than a rare but critical error.
   //
   // 4. RERANK scores the windowed patterns by semantic relevance. It operates on both pattern
   //    (the template) and sample (a concrete message): the template loses specifics, the sample
@@ -188,16 +181,14 @@ export async function searchWithEsqlRerank(
     const patterns = parseEsqlPatternResponse(response as ESQLSearchResponse, 'message');
 
     // TODO: derive a "nothing relevant matched" signal from the top _score and surface it as a
-    // tool warning. Needs a calibrated floor first: observed +3.46 when the right pattern
-    // reached the window, -5.65 and -6.12 when it did not, on `.rerank-v1-elasticsearch`.
-    // Three data points is not a threshold; measure with the eval suite first.
+    // tool warning. Needs a calibrated threshold; measure with the eval suite before shipping.
 
     return {
       status: 'success',
       patterns,
     };
   } catch (error) {
-    if (isCancellationError(error, abortSignal)) {
+    if (isCancellationError(error)) {
       logger.debug(`ES|QL RERANK query cancelled for target "${target}"`);
       return { status: 'error', reason: 'cancelled' };
     }

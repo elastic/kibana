@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { hasRequiredFields, detectRerankCapability } from './capabilities';
 
 describe('capabilities', () => {
@@ -106,16 +107,40 @@ describe('capabilities', () => {
       });
     });
 
-    it('returns false when rerank endpoint does not exist', async () => {
+    it('returns false when the rerank endpoint does not exist (genuine 404)', async () => {
+      const notFoundError = new errors.ResponseError({
+        body: { error: { type: 'resource_not_found_exception' } },
+        statusCode: 404,
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      });
       const mockEsClient = {
         inference: {
-          get: jest.fn().mockRejectedValue(new Error('Not found')),
+          get: jest.fn().mockRejectedValue(notFoundError),
         },
       } as unknown as ElasticsearchClient;
 
       const result = await detectRerankCapability(mockEsClient);
 
       expect(result).toBe(false);
+    });
+
+    it('propagates a 403 authorization error rather than reporting the endpoint as absent', async () => {
+      const forbiddenError = new errors.ResponseError({
+        body: { error: { type: 'security_exception', reason: 'action [cluster:monitor/xpack/inference/get] is unauthorized' } },
+        statusCode: 403,
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      });
+      const mockEsClient = {
+        inference: {
+          get: jest.fn().mockRejectedValue(forbiddenError),
+        },
+      } as unknown as ElasticsearchClient;
+
+      await expect(detectRerankCapability(mockEsClient)).rejects.toThrow();
     });
 
     it('returns false when endpoints array is empty', async () => {

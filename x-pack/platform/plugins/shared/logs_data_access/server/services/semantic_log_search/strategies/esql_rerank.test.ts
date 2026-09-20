@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
+import { errors } from '@elastic/elasticsearch';
 import type { SemanticLogSearchParams } from '../../../../common/services/semantic_log_search/types';
 import { parseEsqlPatternResponse, searchWithEsqlRerank } from './esql_rerank';
 
@@ -152,7 +153,7 @@ describe('searchWithEsqlRerank', () => {
     expect(result).toEqual({ status: 'error', reason: 'timeout' });
   });
 
-  it('returns cancelled and forwards the abort signal', async () => {
+  it('returns cancelled via name-check fallback (AbortError by name)', async () => {
     const abortController = new AbortController();
     const abortError = new Error('request aborted');
     abortError.name = 'RequestAbortedError';
@@ -174,6 +175,47 @@ describe('searchWithEsqlRerank', () => {
       expect.objectContaining({ signal: abortController.signal })
     );
     expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+  });
+
+  it('returns cancelled via isRequestAbortedError for a real RequestAbortedError', async () => {
+    const realAbortError = new errors.RequestAbortedError('request aborted');
+    const query = jest.fn().mockRejectedValue(realAbortError);
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+      },
+      loggerMock.create()
+    );
+
+    expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+  });
+
+  it('returns execution (not cancelled) when the signal is aborted but the error is unrelated', async () => {
+    // An aborted signal plus a non-abort error must still be classified as 'execution', not
+    // 'cancelled': isCancellationError tests the error type, not the signal state.
+    const abortController = new AbortController();
+    abortController.abort();
+    const mappingError = new Error('mapper_parsing_exception');
+    const query = jest.fn().mockRejectedValue(mappingError);
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+        abortSignal: abortController.signal,
+      },
+      loggerMock.create()
+    );
+
+    expect(result).toEqual({ status: 'error', reason: 'execution' });
   });
 });
 
@@ -340,6 +382,33 @@ describe('esql rerank helpers', () => {
 
       expect(patterns).toHaveLength(1);
       expect(patterns[0]).not.toHaveProperty('relevanceScore');
+    });
+
+    it('skips rows with non-string / non-number timestamp values without throwing', () => {
+      // `toIsoString` narrows the `unknown` wire value before constructing `Date`; an unusable
+      // value returns undefined and skips the row rather than throwing RangeError.
+      const response: ESQLSearchResponse = {
+        columns: [
+          { name: 'pattern', type: 'keyword' },
+          { name: 'count', type: 'long' },
+          { name: 'first_seen', type: 'date' },
+          { name: 'last_seen', type: 'date' },
+        ],
+        values: [
+          ['Valid pattern', 5, 1704067200000, 1704153600000],
+          ['Bad timestamp row', 3, { not: 'a timestamp' }, 1704153600000],
+          ['Another valid', 2, 1704067200000, 1704153600000],
+        ],
+      };
+
+      let patterns: ReturnType<typeof parseEsqlPatternResponse>;
+      expect(() => {
+        patterns = parseEsqlPatternResponse(response);
+      }).not.toThrow();
+      // The row with an object timestamp is skipped; the two valid rows remain.
+      expect(patterns!).toHaveLength(2);
+      expect(patterns![0].pattern).toBe('Valid pattern');
+      expect(patterns![1].pattern).toBe('Another valid');
     });
   });
 });

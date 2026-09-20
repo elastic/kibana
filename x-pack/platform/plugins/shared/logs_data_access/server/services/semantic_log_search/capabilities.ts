@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import { REQUIRED_FIELDS } from './constants';
 
 /**
@@ -32,19 +33,18 @@ export async function hasRequiredFields(
 /** The default rerank inference endpoint available in ES 9.3+ */
 const RERANK_ENDPOINT = '.rerank-v1-elasticsearch';
 
-/**
- * Detect if the cluster has RERANK capability.
- *
- * Checks if the default rerank endpoint (.rerank-v1-elasticsearch) is available.
- * This endpoint is preconfigured in ES 9.3+ and enables runtime semantic ranking
- * via ES|QL RERANK command.
- */
+/** Returns true when the default RERANK inference endpoint is available (preconfigured in ES 9.3+). */
 export async function detectRerankCapability(esClient: ElasticsearchClient): Promise<boolean> {
   try {
     const response = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
     return (response.endpoints?.length ?? 0) > 0;
-  } catch {
-    // Endpoint doesn't exist or inference API not available
-    return false;
+  } catch (error) {
+    // Only a genuine 404 means the endpoint is absent. Authorization (403) and transport (503)
+    // failures must propagate so callers do not misreport them as a missing cluster feature —
+    // the same principle as `hasRequiredFields` above.
+    if (isNotFoundError(error)) {
+      return false;
+    }
+    throw error;
   }
 }
