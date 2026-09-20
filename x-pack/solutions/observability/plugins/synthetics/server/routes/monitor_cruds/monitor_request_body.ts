@@ -39,16 +39,26 @@ type BoundedJson =
   | BoundedJson[]
   | { [key: string]: BoundedJson };
 
-const boundedJson: z.ZodType<BoundedJson> = z.lazy(() =>
-  z.union([
-    z.string().max(MAX_PARAM_VALUE_LENGTH),
-    z.number().min(Number.MIN_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER),
-    z.boolean(),
-    z.null(),
-    z.array(boundedJson).max(MAX_MONITOR_FANOUT_SIZE),
-    z.record(z.string().max(MAX_ROUTE_STRING_LENGTH), boundedJson),
-  ])
-);
+const boundedJson: z.ZodType<BoundedJson> = z
+  .lazy(() =>
+    z.union([
+      z.string().max(MAX_PARAM_VALUE_LENGTH),
+      z.number().min(Number.MIN_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER),
+      z.boolean(),
+      z.null(),
+      z.array(boundedJson).max(MAX_MONITOR_FANOUT_SIZE),
+      z.record(z.string().max(MAX_ROUTE_STRING_LENGTH), boundedJson),
+    ])
+  )
+  .meta({ id: 'syntheticsJsonValue' });
+
+const MONITOR_OAS_IDS: Record<MonitorTypeEnum, string> = {
+  [MonitorTypeEnum.HTTP]: 'httpMonitorFields',
+  [MonitorTypeEnum.TCP]: 'tcpMonitorFields',
+  [MonitorTypeEnum.ICMP]: 'icmpMonitorFields',
+  [MonitorTypeEnum.BROWSER]: 'browserMonitorFields',
+  [MonitorTypeEnum.API]: 'apiMonitorFields',
+};
 
 const locationInput = z.union([
   z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
@@ -165,19 +175,27 @@ const allowedKeysForType = (type: MonitorTypeEnum): string[] => {
 
 const bodyForType = (type: MonitorTypeEnum) => {
   const shape = Object.fromEntries(allowedKeysForType(type).map((key) => [key, fieldFor(key)]));
-  return z.strictObject({
-    type: z.literal(type),
-    ...shape,
-  });
+  return z
+    .strictObject({
+      type: z.literal(type),
+      ...shape,
+    })
+    .meta({ id: MONITOR_OAS_IDS[type] });
 };
 
-export const createMonitorRequestBody = z.discriminatedUnion('type', [
-  bodyForType(MonitorTypeEnum.HTTP),
-  bodyForType(MonitorTypeEnum.TCP),
-  bodyForType(MonitorTypeEnum.ICMP),
-  bodyForType(MonitorTypeEnum.BROWSER),
-  bodyForType(MonitorTypeEnum.API),
-]);
+export const createMonitorRequestBody = z
+  .discriminatedUnion('type', [
+    bodyForType(MonitorTypeEnum.HTTP),
+    bodyForType(MonitorTypeEnum.TCP),
+    bodyForType(MonitorTypeEnum.ICMP),
+    bodyForType(MonitorTypeEnum.BROWSER),
+    bodyForType(MonitorTypeEnum.API),
+  ])
+  .meta({
+    id: 'createMonitorRequest',
+    description:
+      'Create a synthetics monitor. Required and default fields vary by type (HTTP, TCP, ICMP, browser, or API).',
+  });
 
 const editPatchShape = Object.fromEntries(
   [
@@ -211,4 +229,9 @@ export const editMonitorRequestBody = z
         });
       }
     }
+  })
+  .meta({
+    id: 'editMonitorRequest',
+    description:
+      'Partial monitor update. type is optional; when present, only fields for that monitor type are allowed.',
   });

@@ -42,7 +42,8 @@ const stringOrArray = z
     z.string().max(MAX_FILTER_ITEM_LENGTH),
     z.array(z.string().max(MAX_FILTER_ITEM_LENGTH)).max(MAX_FILTER_ARRAY_SIZE),
   ])
-  .optional();
+  .optional()
+  .describe('A string or an array of strings.');
 
 const CommonQuerySchema = {
   query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
@@ -66,7 +67,8 @@ const CommonQuerySchema = {
       z.string().max(MAX_FILTER_ITEM_LENGTH),
       z.array(z.enum(useLogicalAndFields)).max(MAX_FILTER_ARRAY_SIZE),
     ])
-    .optional(),
+    .optional()
+    .describe('Apply logical AND for `tags` and/or `locations`. Accepts a string or an array.'),
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
   // status to the window instead of the default "current status" look-back.
