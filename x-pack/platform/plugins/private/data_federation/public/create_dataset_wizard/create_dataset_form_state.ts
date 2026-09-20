@@ -17,9 +17,17 @@ export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'none';
 export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
 export type DatasetBooleanFormValue = '' | 'true' | 'false';
 
+export const DEFAULT_FILE_EXCLUSIONS = [
+  '**/_*',
+  '**/.*',
+  '**/_temporary/**',
+  '**/_delta_log/**',
+] as const;
+
 export interface CreateDatasetSettingsFormValues {
   format: DatasetFormatFormValue;
   // Universal
+  file_exclusions: string[];
   partition_detection: DatasetPartitionDetectionFormValue;
   schema_resolution: DatasetSchemaResolutionFormValue;
   partition_path: string;
@@ -59,6 +67,7 @@ export interface CreateDatasetFormValues {
 
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
   format: '',
+  file_exclusions: [...DEFAULT_FILE_EXCLUSIONS],
   partition_detection: '',
   schema_resolution: '',
   partition_path: '',
@@ -113,6 +122,10 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
   return undefined;
 };
 
+const fileExclusionsEqualDefault = (value: readonly string[]): boolean =>
+  value.length === DEFAULT_FILE_EXCLUSIONS.length &&
+  DEFAULT_FILE_EXCLUSIONS.every((pattern, index) => value[index] === pattern);
+
 export const validateSchemaSampleSize = (value: string): true | string => {
   const parsed = parseOptionalPositiveInteger(value);
   if (value?.trim() && parsed === undefined) {
@@ -157,6 +170,12 @@ export const buildDatasetSettingsFromFormValues = (
   if (settings.format) applied.format = settings.format;
 
   // Universal — applies under every format
+  if (
+    settings.file_exclusions.length > 0 &&
+    !fileExclusionsEqualDefault(settings.file_exclusions)
+  ) {
+    applied.file_exclusions = settings.file_exclusions;
+  }
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;
   if (settings.schema_resolution) applied.schema_resolution = settings.schema_resolution;
   if (settings.partition_path) applied.partition_path = settings.partition_path;

@@ -23,6 +23,7 @@ import { FormatSelect } from './form_components/format_select';
 import { NdjsonAdvancedSettings } from './form_components/ndjson_advanced_settings';
 import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
 import { ParquetCommonSettings } from './form_components/parquet_common_settings';
+import { PartitionDetectionSelect } from './form_components/partition_detection_select';
 import { SharedAdvancedSettings } from './form_components/shared_advanced_settings';
 import { SharedCommonSettings } from './form_components/shared_common_settings';
 
@@ -42,13 +43,6 @@ const SCHEMA_RESOLUTION_OPTIONS = [
     value: 'union_by_name',
     text: createDatasetWizardStrings.settingsSchemaResolutionUnionByName,
   },
-];
-
-const PARTITION_DETECTION_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsPartitionDetectionPlaceholder },
-  { value: 'auto', text: createDatasetWizardStrings.settingsPartitionDetectionAuto },
-  { value: 'hive', text: createDatasetWizardStrings.settingsPartitionDetectionHive },
-  { value: 'none', text: createDatasetWizardStrings.settingsPartitionDetectionNone },
 ];
 
 const MODE_OPTIONS = [
@@ -110,23 +104,9 @@ export function CreateDatasetPartitionDetectionField({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
-  const { field: partitionDetectionField } = useController({
-    name: 'settings.partition_detection',
-    control,
-  });
-
   return (
     <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
-      <EuiSelect
-        options={PARTITION_DETECTION_OPTIONS}
-        data-test-subj="createDatasetSettingsPartitionDetection"
-        fullWidth
-        aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
-        value={partitionDetectionField.value}
-        onChange={(e) => partitionDetectionField.onChange(e.target.value)}
-        name={partitionDetectionField.name}
-        inputRef={partitionDetectionField.ref}
-      />
+      <PartitionDetectionSelect control={control} />
     </EuiFormRow>
   );
 }

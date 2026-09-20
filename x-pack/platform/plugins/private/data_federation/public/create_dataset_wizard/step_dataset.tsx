@@ -13,10 +13,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import type { DataSource } from '../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
-import {
-  CreateDatasetFormatField,
-  CreateDatasetPartitionDetectionField,
-} from './create_dataset_settings';
+import { CreateDatasetFormatField } from './create_dataset_settings';
 import type { DatasetWizardContent } from './types';
 
 export function StepDataset({
@@ -57,7 +54,6 @@ export function StepDataset({
           data_source: values.data_source,
           resource: values.resource,
           format: values.settings.format,
-          partition_detection: values.settings.partition_detection,
         };
       },
     });
@@ -75,7 +71,6 @@ export function StepDataset({
       />
       <EuiSpacer size="m" />
       <CreateDatasetFormatField control={control} />
-      <CreateDatasetPartitionDetectionField control={control} />
     </div>
   );
 }

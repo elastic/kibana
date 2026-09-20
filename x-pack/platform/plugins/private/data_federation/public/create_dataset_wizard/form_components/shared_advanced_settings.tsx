@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCode, EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { EuiCode, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
+  DEFAULT_FILE_EXCLUSIONS,
   validateMaxErrorRatio,
   validateMaxErrors,
   type CreateDatasetFormValues,
 } from '../create_dataset_form_state';
 import { ErrorModeSelect } from './error_mode_select';
+import { FileExclusionsSelect } from './file_exclusions_select';
+import { PartitionDetectionSelect } from './partition_detection_select';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
@@ -24,7 +27,24 @@ const helpTextDefault = (valueLabel: string) => (
   </EuiText>
 );
 
+const fileExclusionsDefaultHelp = (
+  <EuiText size="xs" color="subdued">
+    {createDatasetWizardStrings.settingsFileExclusionsHelp}{' '}
+    {DEFAULT_FILE_EXCLUSIONS.map((pattern, index) => (
+      <Fragment key={pattern}>
+        {index > 0 ? ', ' : null}
+        <EuiCode>{pattern}</EuiCode>
+      </Fragment>
+    ))}{' '}
+    {createDatasetWizardStrings.byDefaultSuffix}
+  </EuiText>
+);
+
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const { field: partitionPathField } = useController({
+    name: 'settings.partition_path',
+    control,
+  });
   const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
   const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
     name: 'settings.max_errors',
@@ -39,6 +59,33 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
 
   return (
     <div data-test-subj="createDatasetSharedAdvancedSettings">
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsFileExclusionsLabel}
+        helpText={fileExclusionsDefaultHelp}
+        fullWidth
+      >
+        <FileExclusionsSelect control={control} />
+      </EuiFormRow>
+
+      <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
+        <PartitionDetectionSelect control={control} />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsPartitionPathLabel}
+        helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
+        fullWidth
+      >
+        <EuiFieldText
+          data-test-subj="createDatasetSettingsPartitionPath"
+          fullWidth
+          value={partitionPathField.value}
+          onChange={(e) => partitionPathField.onChange(e.target.value)}
+          name={partitionPathField.name}
+          inputRef={partitionPathField.ref}
+        />
+      </EuiFormRow>
+
       <EuiFormRow
         label={createDatasetWizardStrings.settingsErrorModeLabel}
         helpText={helpTextDefault('fail_fast')}

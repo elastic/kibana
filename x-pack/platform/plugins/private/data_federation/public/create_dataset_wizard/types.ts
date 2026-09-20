@@ -13,7 +13,6 @@ export interface DatasetWizardDatasetStep {
   data_source: string;
   resource: string;
   format: string;
-  partition_detection: string;
 }
 
 export interface DatasetWizardContent {

@@ -7,6 +7,7 @@
 
 import {
   buildDatasetSettingsFromFormValues,
+  DEFAULT_FILE_EXCLUSIONS,
   emptyCreateDatasetSettingsFormValues,
 } from './create_dataset_form_state';
 
@@ -17,10 +18,13 @@ describe('create_dataset_form_state', () => {
     it('returns empty-string defaults for all fields', () => {
       expect(empty()).toEqual({
         format: '',
+        file_exclusions: [...DEFAULT_FILE_EXCLUSIONS],
         partition_detection: '',
         schema_resolution: '',
         partition_path: '',
         hive_partitioning: '',
+        optimized_reader: '',
+        late_materialization: '',
         schema_sample_size: '',
         delimiter: '',
         mode: '',
@@ -64,6 +68,16 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ partition_path: '/year={year}/' });
     });
 
+    it('omits default file_exclusions and includes custom values', () => {
+      expect(buildDatasetSettingsFromFormValues(empty())).toBeUndefined();
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          file_exclusions: ['**/tmp/**'],
+        })
+      ).toEqual({ file_exclusions: ['**/tmp/**'] });
+    });
+
     it('converts hive_partitioning boolean form values correctly', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'false' })
@@ -79,7 +93,7 @@ describe('create_dataset_form_state', () => {
     it('ignores format-specific fields when no format is selected', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })
-      ).toBeUndefined();
+      ).toEqual({ error_mode: 'skip_row' });
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })
       ).toBeUndefined();
@@ -147,7 +161,6 @@ describe('create_dataset_form_state', () => {
     });
 
     it('excludes CSV-only fields when format is parquet', () => {
-      // parquet has no format-specific fields in the form (API-only)
       const result = buildDatasetSettingsFromFormValues({
         ...empty(),
         format: 'parquet',
@@ -159,7 +172,7 @@ describe('create_dataset_form_state', () => {
         max_errors: '5',
         schema_sample_size: '100',
       });
-      expect(result).toEqual({ format: 'parquet' });
+      expect(result).toEqual({ format: 'parquet', error_mode: 'skip_row', max_errors: 5 });
     });
 
     it('excludes CSV-only fields when format is ndjson', () => {

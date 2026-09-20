@@ -24,6 +24,7 @@ export interface DatasetSettingsFile {
   format?: 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 
   // Universal
+  file_exclusions?: string[];
   partition_detection?: 'auto' | 'hive' | 'none';
   schema_resolution?: 'first_file_wins' | 'strict' | 'union_by_name';
   partition_path?: string;

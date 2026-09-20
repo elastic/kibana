@@ -24,6 +24,12 @@ describe('dataset_form_initial_values', () => {
     expect(values.settings.partition_detection).toBe('');
     expect(values.settings.schema_resolution).toBe('');
     expect(values.settings.partition_path).toBe('');
+    expect(values.settings.file_exclusions).toEqual([
+      '**/_*',
+      '**/.*',
+      '**/_temporary/**',
+      '**/_delta_log/**',
+    ]);
     expect(values.settings.hive_partitioning).toBe('');
     expect(values.settings.schema_sample_size).toBe('');
     expect(values.settings.delimiter).toBe('');
@@ -99,6 +105,7 @@ describe('dataset_form_initial_values', () => {
         schema_resolution: 'union_by_name',
         partition_path: '/year={year}/',
         hive_partitioning: false,
+        file_exclusions: ['**/tmp/**'],
       },
     };
 
@@ -106,5 +113,6 @@ describe('dataset_form_initial_values', () => {
     expect(result.settings.schema_resolution).toBe('union_by_name');
     expect(result.settings.partition_path).toBe('/year={year}/');
     expect(result.settings.hive_partitioning).toBe('false');
+    expect(result.settings.file_exclusions).toEqual(['**/tmp/**']);
   });
 });

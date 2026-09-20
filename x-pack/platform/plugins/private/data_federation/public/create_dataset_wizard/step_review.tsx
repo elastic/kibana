@@ -94,12 +94,6 @@ export function StepReview() {
           <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewFormat">
             {displayValue(values.settings.format)}
           </EuiDescriptionListDescription>
-          <EuiDescriptionListTitle>
-            {createDatasetWizardStrings.settingsPartitionDetectionLabel}
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionDetection">
-            {displayValue(values.settings.partition_detection)}
-          </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </ReviewSection>
 
@@ -111,6 +105,20 @@ export function StepReview() {
         onEdit={navigateToStep}
       >
         <EuiDescriptionList textStyle="reverse" compressed>
+          <EuiDescriptionListTitle>
+            {createDatasetWizardStrings.settingsFileExclusionsLabel}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewFileExclusions">
+            {values.settings.file_exclusions.length
+              ? values.settings.file_exclusions.join(', ')
+              : createDatasetWizardStrings.notSet}
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>
+            {createDatasetWizardStrings.settingsPartitionDetectionLabel}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="createDatasetWizardReviewPartitionDetection">
+            {displayValue(values.settings.partition_detection)}
+          </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>
             {createDatasetWizardStrings.settingsSchemaResolutionLabel}
           </EuiDescriptionListTitle>

@@ -209,6 +209,9 @@ describe('CreateDatasetAdditionalSettings', () => {
 
     expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsFileExclusions')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();

@@ -29,6 +29,9 @@ export const datasetSchema = schema.object({
         ])
       ),
       // Universal
+      file_exclusions: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 256 })
+      ),
       partition_detection: schema.maybe(
         schema.oneOf([schema.literal('auto'), schema.literal('hive'), schema.literal('none')])
       ),

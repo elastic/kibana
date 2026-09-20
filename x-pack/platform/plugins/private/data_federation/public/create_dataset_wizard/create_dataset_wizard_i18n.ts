@@ -358,6 +358,27 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsFileExclusionsLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFileExclusionsLabel',
+    {
+      defaultMessage: 'File exclusions',
+    }
+  ),
+
+  settingsFileExclusionsHelp: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFileExclusionsHelp',
+    {
+      defaultMessage: 'Glob patterns for files to ignore when scanning the resource.',
+    }
+  ),
+
+  settingsFileExclusionsPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsFileExclusionsPlaceholder',
+    {
+      defaultMessage: 'Add a glob pattern',
+    }
+  ),
+
   settingsPartitionDetectionLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionLabel',
     {

@@ -38,7 +38,6 @@ const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWi
     data_source: values.data_source,
     resource: values.resource,
     format: values.settings.format,
-    partition_detection: values.settings.partition_detection,
   },
   settings: values.settings,
 });

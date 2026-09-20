@@ -116,16 +116,18 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'bucket/*' },
     });
     selectFormat(getByTestId, 'csv');
-    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
-      target: { value: 'hive' },
-    });
 
     fireEvent.click(getByTestId('nextButton'));
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
     expect(queryByTestId('createDatasetSettingsFormat')).toBeNull();
-    expect(queryByTestId('createDatasetSettingsPartitionDetection')).toBeNull();
+    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsFileExclusions')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
+    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
+      target: { value: 'hive' },
+    });
 
     fireEvent.click(getByTestId('backButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
@@ -177,7 +179,7 @@ describe('CreateDatasetWizardPage', () => {
     });
 
     expect(getByTestId('createDatasetSettingsFormat')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetSettingsPartitionDetection')).toBeNull();
 
     fireEvent.click(getByTestId('nextButton'));
     expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
