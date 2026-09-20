@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { IGNORE_ATTR } from '../constants';
 import { mockLayout, query, renderPage } from '../test_helpers';
+import type { ElementAnchor } from '../types';
 import {
   buildAnchor,
   buildCssPath,
   getAnchorPoint,
+  isExposed,
   looksGenerated,
+  placeAnchor,
   promoteToCommentable,
   resolveAnchor,
 } from './anchor';
@@ -237,6 +241,60 @@ describe('anchor', () => {
       );
 
       expect(getAnchorPoint(anchor, bySubj('chart'))).toEqual({ x: 510, y: 225 });
+    });
+  });
+
+  describe('exposure', () => {
+    const point = { x: 50, y: 50 };
+
+    it('takes the element for shown when it, its content or an ancestor is what is drawn at the point', () => {
+      renderPage(`
+        <section data-rect="0,0,200,200">
+          <button id="target" data-rect="0,0,100,100"><span id="label" data-rect="40,40,20,20">Go</span></button>
+        </section>
+      `);
+      expect(isExposed(query('#label'), point)).toBe(true);
+      expect(isExposed(query('#target'), point)).toBe(true);
+
+      // Nothing of the button is drawn at the point any more; its section is.
+      query('#target').setAttribute('data-rect', '0,0,0,0');
+      query('#label').setAttribute('data-rect', '0,0,0,0');
+      expect(isExposed(query('#target'), point)).toBe(true);
+    });
+
+    it('does not when something else is, unless that is the layer itself or the point is off screen', () => {
+      renderPage(`
+        <button id="target" data-rect="0,0,100,100">Go</button>
+        <div id="mask" data-rect="0,0,2000,2000"></div>
+      `);
+      expect(isExposed(query('#target'), point)).toBe(false);
+      expect(isExposed(query('#target'), { x: -50, y: 50 })).toBe(true);
+
+      query('#mask').setAttribute(IGNORE_ATTR, 'true');
+      expect(isExposed(query('#target'), point)).toBe(true);
+    });
+
+    it('places an anchor at its pin, exposed while the element shows there', () => {
+      renderPage(`
+        <button id="target" data-rect="0,0,100,100">Go</button>
+        <div id="dialog" data-rect="60,0,400,400"></div>
+      `);
+      const anchor: ElementAnchor = {
+        locators: [{ type: 'id', value: 'target' }],
+        relativeX: 0.25,
+        relativeY: 0.5,
+      };
+      const resolved = { element: query('#target'), exact: true };
+      expect(placeAnchor(anchor, resolved)).toEqual({
+        ...resolved,
+        point: { x: 25, y: 50 },
+        exposed: true,
+      });
+      expect(placeAnchor({ ...anchor, relativeX: 0.75 }, resolved)).toEqual({
+        ...resolved,
+        point: { x: 75, y: 50 },
+        exposed: false,
+      });
     });
   });
 });

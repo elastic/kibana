@@ -92,7 +92,7 @@ describe('createCommentsController', () => {
       await flush();
       expect(controller.store.getState().notice).toEqual({
         type: 'error',
-        message: 'Could not load comments: boom',
+        message: 'Could not load comments - boom',
       });
       expect(api.list).toHaveBeenCalledTimes(1);
 
@@ -301,7 +301,7 @@ describe('createCommentsController', () => {
             notice: {
               type: 'error',
               message:
-                'Could not take the screenshot: the page has changed since the comment was started. Turn off "Attach screenshot" to post without one.',
+                'Could not take the screenshot - The page has changed since the comment was started. Turn off "Attach screenshot" to post without one.',
             },
           })
         );
@@ -334,7 +334,7 @@ describe('createCommentsController', () => {
             notice: {
               type: 'error',
               message:
-                'Could not take the screenshot: Tainted canvases may not be exported. Turn off "Attach screenshot" to post without one.',
+                'Could not take the screenshot - Tainted canvases may not be exported. Turn off "Attach screenshot" to post without one.',
             },
           })
         );
@@ -346,7 +346,7 @@ describe('createCommentsController', () => {
         await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
         expect(api.create).not.toHaveBeenCalled();
         expect(controller.store.getState().notice?.message).toBe(
-          'Could not take the screenshot: nothing was captured. Turn off "Attach screenshot" to post without one.'
+          'Could not take the screenshot - No screenshot was captured. Turn off "Attach screenshot" to post without one.'
         );
 
         // Browser navigation within the same page changes what a screenshot would show.
@@ -354,7 +354,7 @@ describe('createCommentsController', () => {
         expect(controller.store.getState().pending).not.toBeNull();
         await controller.save('Hello', { attachScreenshot: true, displayName: 'Capybara' });
         expect(api.create).not.toHaveBeenCalled();
-        expect(controller.store.getState().notice?.message).toContain('the page has changed');
+        expect(controller.store.getState().notice?.message).toContain('The page has changed');
       });
     });
 
@@ -486,7 +486,7 @@ describe('createCommentsController', () => {
       expect(controller.store.getState().notice).toEqual(
         expect.objectContaining({
           type: 'error',
-          message: 'Could not open the page of the comment: no such app',
+          message: 'Could not open the page of the comment - no such app',
         })
       );
     });

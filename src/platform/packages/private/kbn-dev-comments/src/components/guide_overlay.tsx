@@ -30,8 +30,8 @@ import { useComments, useCommentsState } from './comments_context';
 import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
 import { useResolvedAnchor } from './resolved_anchors';
 
-/** Time the page gets to render, on arrival and after each step, before the guide reports the comment as lost. */
-const SETTLE_MS = 4000;
+/** Time the page gets to render, on arrival and after each step, before the guide reports the comment as lost or covered. */
+export const SETTLE_MS = 4000;
 
 interface GuideStep {
   index: number;
@@ -76,7 +76,7 @@ const pulse = keyframes`
   }
 `;
 
-/** Highlights the author's clicks one at a time, most recent first, until the commented element appears, then opens the comment. */
+/** Highlights the author's clicks one at a time, most recent first, until the commented element shows, then opens the comment. */
 export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const controller = useComments();
   const { euiTheme } = useEuiTheme();
@@ -91,10 +91,12 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const [done, setDone] = useState<ReadonlySet<number>>(() => new Set());
   const [settled, setSettled] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
-  const resolved = useResolvedAnchor(comment.id);
+  const placed = useResolvedAnchor(comment.id);
   useLayoutTick();
 
-  const target = onPage ? resolved?.element ?? null : null;
+  // The element, once on the page, and once it shows: a dialog or menu over it has to go first.
+  const found = onPage ? placed : null;
+  const target = found?.exposed ? found.element : null;
   const step = onPage && !target ? findStep(comment, done, controller.ignoreSelectors) : null;
   const stepElement = step?.element ?? null;
   const stepRef = useRef(step);
@@ -108,9 +110,14 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
     return () => clearTimeout(timer);
   }, [onPage, done]);
 
+  // Into view as soon as it is found, which is out from under a bar it may have scrolled beneath.
+  const foundElement = found?.element ?? null;
+  useEffect(() => {
+    foundElement?.scrollIntoView({ block: 'center', inline: 'nearest' });
+  }, [foundElement]);
+
   useEffect(() => {
     if (target) {
-      target.scrollIntoView({ block: 'center', inline: 'nearest' });
       controller.stopGuide(true);
     }
   }, [target, controller]);
@@ -145,6 +152,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   }
 
   const searching = navigating || (!step && !settled);
+  const covered = !searching && !step && found !== null;
   const rect = stepElement?.getBoundingClientRect();
   const padding = parseInt(euiTheme.size.xs, 10);
 
@@ -189,7 +197,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
               <EuiLoadingSpinner size="m" />
             ) : (
               <EuiIcon
-                type={step ? 'waypoint' : 'warning'}
+                type={step ? 'waypoint' : covered ? 'eyeSlash' : 'warning'}
                 color={step ? 'primary' : 'warning'}
                 aria-hidden={true}
               />
@@ -206,6 +214,11 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
                 ? i18n.translate('devComments.guide.searching', {
                     defaultMessage: 'Looking for the comment…',
                   })
+                : covered
+                ? i18n.translate('devComments.guide.covered', {
+                    defaultMessage:
+                      'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.',
+                  })
                 : i18n.translate('devComments.guide.lost', {
                     defaultMessage:
                       'The commented element cannot be found: the UI may have changed since the comment was made.',
@@ -220,7 +233,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
               onClick={() => controller.stopGuide()}
               data-test-subj="devCommentsGuideStop"
             >
-              {step || searching
+              {step || searching || covered
                 ? i18n.translate('devComments.guide.cancel', { defaultMessage: 'Cancel' })
                 : i18n.translate('devComments.guide.backToComments', {
                     defaultMessage: 'Return to comments',

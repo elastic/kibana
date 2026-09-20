@@ -113,6 +113,30 @@ export const isVisible = (element: Element): boolean => {
   return (width > 0 || height > 0) && getComputedStyle(element).visibility !== 'hidden';
 };
 
+/** Viewport coordinates. */
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export const isOnScreen = ({ x, y }: Point): boolean =>
+  x >= 0 && y >= 0 && x <= window.innerWidth && y <= window.innerHeight;
+
+/**
+ * Whether `element` is what shows at `point`, a spot within it: not a dialog,
+ * menu or bar drawn over it there, which would be drawn over a pin at the spot
+ * too. The layer's own UI does not count. An ancestor found there is taken for
+ * the element, which may leave pointer events to it or, wrapped onto another
+ * line, not reach the spot. Off screen there is nothing to test; the element passes.
+ */
+export const isExposed = (element: Element, point: Point): boolean => {
+  if (!isOnScreen(point)) {
+    return true;
+  }
+  const hit = document.elementsFromPoint(point.x, point.y).find((over) => !isIgnored(over));
+  return hit === undefined || hit.contains(element) || element.contains(hit);
+};
+
 export const isActionable = (element: Element): boolean => {
   if (
     !isVisible(element) ||
@@ -122,13 +146,7 @@ export const isActionable = (element: Element): boolean => {
     return false;
   }
   const rect = element.getBoundingClientRect();
-  const x = rect.left + rect.width / 2;
-  const y = rect.top + rect.height / 2;
-  if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) {
-    return true;
-  }
-  const hit = document.elementFromPoint(x, y);
-  return hit === null || element.contains(hit) || isIgnored(hit);
+  return isExposed(element, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
 };
 
 const isTooLarge = (element: Element): boolean => {
@@ -267,24 +285,20 @@ const queryLocator = (locator: AnchorLocator): Element[] => {
 
 export interface BuildAnchorOptions {
   /** Viewport coordinates of the click; the pin is placed at the same relative offset. */
-  point?: { x: number; y: number };
+  point?: Point;
   /** Innermost element under the pointer; recorded as the pin's target when it lies inside `element`. */
   hit?: Element;
 }
 
 const relativePosition = (
   rect: DOMRect,
-  point?: { x: number; y: number }
+  point?: Point
 ): Pick<ElementAnchor, 'relativeX' | 'relativeY'> => ({
   relativeX: point && rect.width > 0 ? clamp01((point.x - rect.left) / rect.width) : 0.5,
   relativeY: point && rect.height > 0 ? clamp01((point.y - rect.top) / rect.height) : 0.5,
 });
 
-const buildTarget = (
-  element: Element,
-  hit: Element,
-  point?: { x: number; y: number }
-): AnchorTarget | undefined => {
+const buildTarget = (element: Element, hit: Element, point?: Point): AnchorTarget | undefined => {
   if (hit === element || !element.contains(hit)) {
     return undefined;
   }
@@ -371,10 +385,7 @@ export const resolveAnchor = (anchor: ElementAnchor): ResolvedAnchor | null => {
 };
 
 /** Viewport position of an anchor's pin: inside its target when that still resolves with the same content, otherwise proportional in the element. */
-export const getAnchorPoint = (
-  anchor: ElementAnchor,
-  element: Element
-): { x: number; y: number } => {
+export const getAnchorPoint = (anchor: ElementAnchor, element: Element): Point => {
   const { target } = anchor;
   const targetElement = target
     ? walkPath(element, target.path)
@@ -384,4 +395,19 @@ export const getAnchorPoint = (
   const { relativeX, relativeY } = targetElement && target ? target : anchor;
   const rect = (targetElement ?? element).getBoundingClientRect();
   return { x: rect.left + rect.width * relativeX, y: rect.top + rect.height * relativeY };
+};
+
+/** A resolved anchor as it is shown: where its pin goes, and whether the element shows there. */
+export interface PlacedAnchor extends ResolvedAnchor {
+  point: Point;
+  /**
+   * The element is what shows at the pin (see `isExposed`). Under a dialog,
+   * menu or bar it is on the page but out of sight, and so is its pin.
+   */
+  exposed: boolean;
+}
+
+export const placeAnchor = (anchor: ElementAnchor, resolved: ResolvedAnchor): PlacedAnchor => {
+  const point = getAnchorPoint(anchor, resolved.element);
+  return { ...resolved, point, exposed: isExposed(resolved.element, point) };
 };

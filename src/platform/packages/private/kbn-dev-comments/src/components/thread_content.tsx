@@ -140,7 +140,7 @@ export const RefreshButton = ({
       >
         {loadedAt ? (
           <>
-            {i18n.translate('devComments.refresh.updated', { defaultMessage: 'Updated' })}
+            {i18n.translate('devComments.refresh.updated', { defaultMessage: 'Updated' })}{' '}
             <TimeLabel at={loadedAt} tooltip={false} />
           </>
         ) : (

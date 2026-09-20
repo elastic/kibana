@@ -221,7 +221,7 @@ const PageGroup = ({
 
 const PanelRow = ({
   comment,
-  onScreen,
+  visible,
   expanded,
   active,
   list,
@@ -230,14 +230,15 @@ const PanelRow = ({
   onGuide,
 }: {
   comment: Comment;
-  onScreen: boolean;
+  /** The element shows on the page, with the pin the thread opens at; not under a dialog or menu, and not off the page. */
+  visible: boolean;
   /** The thread is shown in the row, below the comment. */
   expanded: boolean;
   /** The row's thread is the one currently open from a pin. */
   active: boolean;
   /** The scrolling list the row is in. */
   list: RefObject<HTMLDivElement>;
-  /** The comment was picked: its thread opens at its pin when the element is on screen, in the row otherwise. */
+  /** The comment was picked: its thread opens at its pin when the element is visible, in the row otherwise. */
   onSelect: () => void;
   /** Shows the thread in the row, or hides it. */
   onToggle: () => void;
@@ -299,7 +300,7 @@ const PanelRow = ({
     <>
       <ResolveButton comment={comment} />
       <ThreadSizeBadge comment={comment} />
-      {onScreen ? (
+      {visible ? (
         <EuiToolTip content={openLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="eye"
@@ -362,7 +363,7 @@ const PanelRow = ({
               color="transparent"
               hasShadow={false}
               onClick={onSelect}
-              aria-expanded={onScreen ? undefined : false}
+              aria-expanded={visible ? undefined : false}
               css={css`
                 text-align: left;
                 /* Text in a row, not a card: it does not lift (shadow, and a border in dark mode) on hover or focus. */
@@ -589,12 +590,13 @@ export const CommentsPanel = () => {
             {groups.map((group) => (
               <PageGroup key={group.pageKey} pageKey={group.pageKey} count={group.comments.length}>
                 {group.comments.map((comment) => {
-                  const element = resolvedAnchors.get(comment.id)?.element ?? null;
+                  const placed = resolvedAnchors.get(comment.id);
+                  const element = placed?.exposed ? placed.element : null;
                   return (
                     <PanelRow
                       key={comment.id}
                       comment={comment}
-                      onScreen={element !== null}
+                      visible={element !== null}
                       expanded={expandedId === comment.id}
                       active={activeThreadId === comment.id}
                       list={listRef}

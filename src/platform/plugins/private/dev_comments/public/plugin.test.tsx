@@ -45,8 +45,9 @@ describe('DevCommentsPlugin', () => {
   const page = document.createElement('div');
 
   beforeAll(() => {
-    // jsdom has no layout; every element gets a box so anchors resolve and pins are on screen.
+    // jsdom has no layout; every element gets a box, with nothing drawn over it, so anchors resolve and pins show.
     Element.prototype.scrollIntoView = jest.fn();
+    Document.prototype.elementsFromPoint = () => [];
     jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
       x: 10,
       y: 10,

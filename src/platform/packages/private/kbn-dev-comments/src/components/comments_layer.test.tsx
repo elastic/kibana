@@ -37,10 +37,15 @@ import {
 import type { Comment, CommentsHostServices } from '../types';
 import { CommentsProvider } from './comments_context';
 import { CommentsLayer } from './comments_layer';
+import { SETTLE_MS } from './guide_overlay';
 
 const seeded = createComment('a');
 
 const escape = () => fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+/** The element of a piece of HTML, to add to the page as it is (`renderPage` would take the layer's containers away). */
+const parse = (html: string): Element =>
+  new DOMParser().parseFromString(html, 'text/html').body.firstElementChild!;
 
 describe('CommentsLayer', () => {
   mockLayout();
@@ -379,6 +384,55 @@ describe('CommentsLayer', () => {
     expect(await screen.findByTestId('devCommentsPin-late')).toBeInTheDocument();
   });
 
+  it('takes the pin of an element covered by a dialog down with it, and the panel then offers to navigate', async () => {
+    const inDialog = createComment('ok', { anchor: anchorById('ok') });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, inDialog]) });
+    act(() => controller.setActive(true));
+    expect(await screen.findByTestId('devCommentsPin-a')).toBeInTheDocument();
+    const row = screen.getByTestId('devCommentsPanelItem-a');
+    expect(within(row).getByTestId('devCommentsPanelOpen')).toBeInTheDocument();
+
+    // The dialog is drawn over the whole page, its button on it.
+    const dialog = parse(
+      `<div id="dialog" data-rect="0,0,2000,2000"><button id="ok" data-rect="100,100,80,20">OK</button></div>`
+    );
+    act(() => document.body.append(dialog));
+    await waitFor(() => expect(screen.queryByTestId('devCommentsPin-a')).toBeNull());
+    expect(await screen.findByTestId('devCommentsPin-ok')).toBeInTheDocument();
+    expect(within(row).queryByTestId('devCommentsPanelOpen')).toBeNull();
+    expect(within(row).getByTestId('devCommentsPanelGuide')).toBeInTheDocument();
+
+    act(() => dialog.remove());
+    expect(await screen.findByTestId('devCommentsPin-a')).toBeInTheDocument();
+    expect(within(row).getByTestId('devCommentsPanelOpen')).toBeInTheDocument();
+  });
+
+  it('guides to a covered element by waiting for what covers it to be closed', async () => {
+    const dialog = parse(`<div id="dialog" data-rect="0,0,2000,2000"></div>`);
+    document.body.append(dialog);
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    // Timers are faked before the guide starts, so that its settle time can be passed.
+    jest.useFakeTimers();
+    try {
+      await act(() => controller.guideTo(seeded));
+      expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('Looking for the comment…');
+      act(() => jest.advanceTimersByTime(SETTLE_MS));
+      expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent(
+        'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.'
+      );
+      expect(screen.getByTestId('devCommentsGuideStop')).toHaveTextContent('Cancel');
+      expect(controller.store.getState().activeThreadId).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+
+    act(() => dialog.remove());
+    await waitFor(() => expect(controller.store.getState().activeThreadId).toBe('a'));
+    expect(screen.queryByTestId('devCommentsGuide')).not.toBeInTheDocument();
+    expect(screen.getByTestId('devCommentsPin-a')).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('guides to the recorded control only, not to another one that took its place', async () => {
     // The comment is on something the "Show details" button disclosed; the guide
     // asks for that click. The button is stored by its structural path as well,
@@ -411,7 +465,7 @@ describe('CommentsLayer', () => {
 
     expect(await screen.findByTestId('devCommentsGuideHighlight')).toBeInTheDocument();
     expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent(
-      'Click “Show details” to get to the comment.'
+      'Click “Show details” to get to the comment'
     );
 
     act(() => {

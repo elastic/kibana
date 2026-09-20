@@ -25,10 +25,20 @@ const rectOf = (element: Element): DOMRect => {
   return { x, y, width, height, left: x, top: y, right: x + width, bottom: y + height } as DOMRect;
 };
 
+const contains = (rect: DOMRect, x: number, y: number): boolean =>
+  rect.width > 0 &&
+  rect.height > 0 &&
+  x >= rect.left &&
+  x < rect.right &&
+  y >= rect.top &&
+  y < rect.bottom;
+
 /**
  * jsdom has no layout. For the enclosing `describe`, gives every element a box
  * (see `rectOf`), so that anchors resolve and pins are on screen, a
- * `scrollIntoView`, and hit testing that finds nothing covering any element.
+ * `scrollIntoView`, and hit testing: elements with a `data-rect` are drawn in
+ * document order, later ones on top, and the others are not drawn at all, so
+ * that nothing covers an element unless a test puts a box over it.
  * Elements are hidden with `data-rect="0,0,0,0"`.
  */
 export const mockLayout = () => {
@@ -39,7 +49,11 @@ export const mockLayout = () => {
         return rectOf(this);
       });
     Element.prototype.scrollIntoView = jest.fn();
-    Document.prototype.elementFromPoint = () => null;
+    Document.prototype.elementsFromPoint = (x, y) =>
+      Array.from(document.body.querySelectorAll('[data-rect]'))
+        .filter((element) => contains(rectOf(element), x, y))
+        .reverse();
+    Document.prototype.elementFromPoint = (x, y) => document.elementsFromPoint(x, y)[0] ?? null;
   });
   afterAll(() => {
     jest.restoreAllMocks();
