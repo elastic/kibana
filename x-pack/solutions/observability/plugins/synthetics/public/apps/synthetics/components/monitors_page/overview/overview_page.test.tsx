@@ -94,6 +94,10 @@ jest.mock('../common/monitor_filters/filter_group', () => ({
   FilterGroup: () => null,
 }));
 
+jest.mock('../common/monitor_filters/selected_filter_pills', () => ({
+  SelectedFilterPills: () => null,
+}));
+
 jest.mock('../common/search_field', () => ({
   SearchField: () => null,
 }));
