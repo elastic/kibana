@@ -22,11 +22,7 @@ export {
   type PersistExecutionInterruptionParams,
 } from './conversations';
 export { convertErrors, toClientError } from './convert_errors';
-export {
-  serializeExecutionError,
-  deserializeExecutionError,
-  getHttpStatusFromError,
-} from './serialize_execution_error';
+export { serializeExecutionError, getHttpStatusFromError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';
 export { executionStartedEvents$ } from './execution_started';
 export {

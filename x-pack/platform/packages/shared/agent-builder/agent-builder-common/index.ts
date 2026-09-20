@@ -88,6 +88,7 @@ export {
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createAgentBuilderError,
+  deserializeExecutionError,
   createInternalError,
   createForbiddenError,
   createToolNotFoundError,

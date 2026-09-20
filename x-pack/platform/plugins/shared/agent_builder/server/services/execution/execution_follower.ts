@@ -10,6 +10,7 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   createInternalError,
   createRequestAbortedError,
+  deserializeExecutionError,
   isExecutionAbortedEvent,
   isExecutionTerminalEvent,
   isRequestAbortedError,
@@ -17,7 +18,6 @@ import {
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
-import { deserializeExecutionError } from './utils/serialize_execution_error';
 import {
   FOLLOW_ABORT_DRAIN_TIMEOUT_MS,
   FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS,
