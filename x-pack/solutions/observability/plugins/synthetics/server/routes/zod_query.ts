@@ -41,9 +41,6 @@ export const queryNumberFrom = (min?: number, max?: number) =>
   );
 
 export const queryNumber = queryNumberFrom();
-
-/** `schema.any()` equivalent. Field codecs run in-handler after name/url aliases. */
-export const monitorRequestBody = z.any();
 export const queryBoolean = z.preprocess(
   (value) => (typeof value === 'string' ? value.toLowerCase() : value),
   BooleanFromString

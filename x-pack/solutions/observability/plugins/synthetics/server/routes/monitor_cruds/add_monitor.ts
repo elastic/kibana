@@ -7,7 +7,8 @@
 import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { queryBoolean, optionalRouteId, monitorRequestBody } from '../zod_query';
+import { queryBoolean, optionalRouteId } from '../zod_query';
+import { createMonitorRequestBody } from './monitor_request_body';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -38,7 +39,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   validation: {
     request: {
-      body: monitorRequestBody,
+      body: createMonitorRequestBody,
       query: z.strictObject({
         id: optionalRouteId,
         preserve_namespace: queryBoolean.optional(),

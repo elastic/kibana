@@ -9,7 +9,8 @@ import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
-import { queryBoolean, routeId, monitorRequestBody } from '../zod_query';
+import { queryBoolean, routeId } from '../zod_query';
+import { editMonitorRequestBody } from './monitor_request_body';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
 import {
@@ -59,7 +60,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       query: z.strictObject({
         internal: queryBoolean.optional().default(false),
       }),
-      body: monitorRequestBody,
+      body: editMonitorRequestBody,
     },
   },
   handler: async (routeContext): Promise<any> => {

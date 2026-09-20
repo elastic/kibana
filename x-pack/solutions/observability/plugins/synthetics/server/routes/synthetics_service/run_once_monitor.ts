@@ -6,7 +6,8 @@
  */
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { routeId, monitorRequestBody } from '../zod_query';
+import { routeId } from '../zod_query';
+import { createMonitorRequestBody } from '../monitor_cruds/monitor_request_body';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -19,7 +20,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   method: 'POST',
   path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
-    body: monitorRequestBody,
+    body: createMonitorRequestBody,
     params: z.strictObject({
       monitorId: routeId,
     }),
