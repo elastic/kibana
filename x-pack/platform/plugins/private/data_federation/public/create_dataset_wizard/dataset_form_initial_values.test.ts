@@ -34,6 +34,8 @@ describe('dataset_form_initial_values', () => {
     expect(values.settings.schema_sample_size).toBe('');
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
+    expect(values.settings.skip_rows).toBe('');
+    expect(values.settings.encoding).toBe('UTF-8');
   });
 
   it('maps list-table item and defaults description to empty string', () => {
@@ -86,6 +88,7 @@ describe('dataset_form_initial_values', () => {
         max_errors: 10,
         max_error_ratio: 0.1,
         max_field_size: 0,
+        skip_rows: 12,
       },
     };
 
@@ -94,6 +97,7 @@ describe('dataset_form_initial_values', () => {
     expect(result.settings.max_errors).toBe('10');
     expect(result.settings.max_error_ratio).toBe('0.1');
     expect(result.settings.max_field_size).toBe('0');
+    expect(result.settings.skip_rows).toBe('12');
   });
 
   it('maps new universal settings', () => {

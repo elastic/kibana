@@ -19,6 +19,7 @@ import {
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
 import { CsvTsvAdvancedSettings } from './form_components/csv_tsv_advanced_settings';
+import { CsvTsvCommonSettings } from './form_components/csv_tsv_common_settings';
 import { FormatSelect } from './form_components/format_select';
 import { NdjsonAdvancedSettings } from './form_components/ndjson_advanced_settings';
 import { ParquetAdvancedSettings } from './form_components/parquet_advanced_settings';
@@ -357,14 +358,6 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
   );
 }
 
-function CsvCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetCsvCommonSettings" />;
-}
-
-function TsvCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
-  return <div data-test-subj="createDatasetTsvCommonSettings" />;
-}
-
 function NdjsonCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return <div data-test-subj="createDatasetNdjsonCommonSettings" />;
 }
@@ -381,8 +374,8 @@ const FORMAT_COMMON_SETTING_COMPONENTS: Record<
   Exclude<DatasetFormatFormValue, ''>,
   FunctionComponent<{ control: Control<CreateDatasetFormValues> }>
 > = {
-  csv: CsvCommonSettings,
-  tsv: TsvCommonSettings,
+  csv: CsvTsvCommonSettings,
+  tsv: CsvTsvCommonSettings,
   ndjson: NdjsonCommonSettings,
   parquet: ParquetCommonSettings,
   orc: OrcCommonSettings,

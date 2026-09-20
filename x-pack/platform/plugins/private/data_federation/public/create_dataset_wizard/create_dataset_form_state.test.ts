@@ -29,8 +29,10 @@ describe('create_dataset_form_state', () => {
         delimiter: '',
         mode: '',
         header_row: '',
+        skip_rows: '',
+        datetime_format: '',
         null_value: '',
-        encoding: '',
+        encoding: 'UTF-8',
         error_mode: '',
         max_errors: '',
         max_error_ratio: '',
@@ -38,7 +40,6 @@ describe('create_dataset_form_state', () => {
         escape: '',
         comment: '',
         column_prefix: '',
-        datetime_format: '',
         multi_value_syntax: '',
         max_field_size: '',
       });
@@ -91,9 +92,9 @@ describe('create_dataset_form_state', () => {
     });
 
     it('ignores format-specific fields when no format is selected', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })
-      ).toEqual({ error_mode: 'skip_row' });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toEqual({
+        error_mode: 'skip_row',
+      });
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })
       ).toBeUndefined();
@@ -147,6 +148,40 @@ describe('create_dataset_form_state', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_error_ratio: '0.5' })
       ).toEqual({ format: 'csv', max_error_ratio: 0.5 });
+    });
+
+    it('includes skip_rows for csv when in range', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', skip_rows: '0' })
+      ).toEqual({ format: 'csv', skip_rows: 0 });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', skip_rows: '1000' })
+      ).toEqual({ format: 'csv', skip_rows: 1000 });
+    });
+
+    it('omits skip_rows when out of range', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', skip_rows: '1001' })
+      ).toEqual({ format: 'csv' });
+    });
+
+    it('omits default UTF-8 encoding and includes other encodings', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', encoding: 'UTF-8' })
+      ).toEqual({ format: 'csv' });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', encoding: 'UTF-16' })
+      ).toEqual({ format: 'csv', encoding: 'UTF-16' });
+    });
+
+    it('omits default ISO-8601 datetime_format', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          datetime_format: 'ISO-8601',
+        })
+      ).toEqual({ format: 'csv' });
     });
 
     it('includes format and CSV fields together', () => {

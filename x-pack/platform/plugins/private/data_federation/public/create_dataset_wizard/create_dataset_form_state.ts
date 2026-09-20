@@ -24,6 +24,9 @@ export const DEFAULT_FILE_EXCLUSIONS = [
   '**/_delta_log/**',
 ] as const;
 
+export const DEFAULT_ENCODING = 'UTF-8';
+export const DEFAULT_DATETIME_FORMAT = 'ISO-8601';
+
 export interface CreateDatasetSettingsFormValues {
   format: DatasetFormatFormValue;
   // Universal
@@ -41,14 +44,15 @@ export interface CreateDatasetSettingsFormValues {
   delimiter: string;
   mode: DatasetModeFormValue;
   header_row: DatasetBooleanFormValue;
-  // CSV/TSV advanced
+  skip_rows: string;
+  datetime_format: string;
   null_value: string;
   encoding: string;
+  // CSV/TSV advanced
   quote: string;
   escape: string;
   comment: string;
   column_prefix: string;
-  datetime_format: string;
   multi_value_syntax: DatasetMultiValueSyntaxFormValue;
   max_field_size: string;
   // CSV/TSV error handling
@@ -78,13 +82,14 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   delimiter: '',
   mode: '',
   header_row: '',
+  skip_rows: '',
+  datetime_format: '',
   null_value: '',
-  encoding: '',
+  encoding: DEFAULT_ENCODING,
   quote: '',
   escape: '',
   comment: '',
   column_prefix: '',
-  datetime_format: '',
   multi_value_syntax: '',
   max_field_size: '',
   error_mode: '',
@@ -148,6 +153,24 @@ export const validateMaxErrorRatio = (value: string): true | string => {
   return true;
 };
 
+const parseSkipRows = (value: string): number | undefined => {
+  const parsed = parseNonNegativeInteger(value);
+  if (parsed === undefined || parsed > 1000) return undefined;
+  return parsed;
+};
+
+export const validateDelimiter = (value: string): true | string => {
+  if (!value) return true;
+  if (value.length !== 1) return createDatasetWizardStrings.settingsDelimiterInvalid;
+  return true;
+};
+
+export const validateSkipRows = (value: string): true | string => {
+  if (!value?.trim()) return true;
+  if (parseSkipRows(value) === undefined) return createDatasetWizardStrings.settingsSkipRowsInvalid;
+  return true;
+};
+
 export const validateMaxFieldSize = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
@@ -200,8 +223,13 @@ export const buildDatasetSettingsFromFormValues = (
     const headerRow = parseBooleanFormValue(settings.header_row);
     if (headerRow !== undefined) applied.header_row = headerRow;
 
+    const skipRows = parseSkipRows(settings.skip_rows);
+    if (skipRows !== undefined) applied.skip_rows = skipRows;
+
     if (settings.null_value) applied.null_value = settings.null_value;
-    if (settings.encoding) applied.encoding = settings.encoding;
+    if (settings.encoding && settings.encoding !== DEFAULT_ENCODING) {
+      applied.encoding = settings.encoding;
+    }
     if (settings.quote) applied.quote = settings.quote;
     if (settings.escape) applied.escape = settings.escape;
     if (settings.comment) applied.comment = settings.comment;
@@ -222,7 +250,9 @@ export const buildDatasetSettingsFromFormValues = (
     const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
     if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
 
-    if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
+    if (settings.datetime_format && settings.datetime_format !== DEFAULT_DATETIME_FORMAT) {
+      applied.datetime_format = settings.datetime_format;
+    }
   }
 
   return Object.keys(applied).length > 0 ? applied : undefined;

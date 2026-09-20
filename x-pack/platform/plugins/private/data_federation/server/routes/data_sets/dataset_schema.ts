@@ -47,11 +47,13 @@ export const datasetSchema = schema.object({
       // CSV/TSV + NDJSON
       schema_sample_size: schema.maybe(schema.number({ min: 1 })),
       // CSV/TSV commonly changed
-      delimiter: optionalString,
+      delimiter: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
       mode: schema.maybe(
         schema.oneOf([schema.literal('quoted'), schema.literal('escaped'), schema.literal('plain')])
       ),
       header_row: schema.maybe(schema.boolean()),
+      skip_rows: schema.maybe(schema.number({ min: 0, max: 1000 })),
+      datetime_format: optionalString,
       null_value: optionalString,
       encoding: optionalString,
       // CSV/TSV error handling
@@ -69,7 +71,6 @@ export const datasetSchema = schema.object({
       escape: optionalString,
       comment: optionalString,
       column_prefix: optionalString,
-      datetime_format: optionalString,
       multi_value_syntax: schema.maybe(
         schema.oneOf([schema.literal('none'), schema.literal('brackets')])
       ),

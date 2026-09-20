@@ -50,6 +50,9 @@ export const createDatasetWizardStrings = {
   unbounded: i18n.translate('xpack.dataFederation.createDatasetWizard.unbounded', {
     defaultMessage: 'unbounded',
   }),
+  emptyString: i18n.translate('xpack.dataFederation.createDatasetWizard.emptyString', {
+    defaultMessage: 'empty string',
+  }),
   trueLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.trueLabel', {
     defaultMessage: 'True',
   }),
@@ -533,7 +536,14 @@ export const createDatasetWizardStrings = {
   settingsDelimiterHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDelimiterHelp',
     {
-      defaultMessage: 'The character that separates fields.',
+      defaultMessage: 'The single character that separates fields.',
+    }
+  ),
+
+  settingsDelimiterInvalid: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterInvalid',
+    {
+      defaultMessage: 'Must be a single character.',
     }
   ),
 
@@ -591,6 +601,27 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsSkipRowsLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSkipRowsLabel',
+    {
+      defaultMessage: 'Skip rows',
+    }
+  ),
+
+  settingsSkipRowsHelp: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSkipRowsHelp',
+    {
+      defaultMessage: 'Number of rows to skip at the start of the file.',
+    }
+  ),
+
+  settingsSkipRowsInvalid: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSkipRowsInvalid',
+    {
+      defaultMessage: 'Must be an integer between 0 and 1000.',
+    }
+  ),
+
   settingsNullValueLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsNullValueLabel',
     {
@@ -616,6 +647,69 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsEncodingHelp',
     {
       defaultMessage: 'Character encoding of the file.',
+    }
+  ),
+
+  settingsEncodingPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingPlaceholder',
+    {
+      defaultMessage: 'Select encoding',
+    }
+  ),
+
+  settingsEncodingUtf8: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingUtf8',
+    {
+      defaultMessage: 'UTF-8',
+    }
+  ),
+
+  settingsEncodingUtf16: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingUtf16',
+    {
+      defaultMessage: 'UTF-16',
+    }
+  ),
+
+  settingsEncodingIso88591: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingIso88591',
+    {
+      defaultMessage: 'ISO-8859-1',
+    }
+  ),
+
+  settingsEncodingUsAscii: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingUsAscii',
+    {
+      defaultMessage: 'US-ASCII',
+    }
+  ),
+
+  settingsEncodingWindows1252: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingWindows1252',
+    {
+      defaultMessage: 'windows-1252',
+    }
+  ),
+
+  settingsEncodingCustom: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingCustom',
+    {
+      defaultMessage: 'Custom',
+    }
+  ),
+
+  settingsEncodingCustomLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingCustomLabel',
+    {
+      defaultMessage: 'Custom encoding',
+    }
+  ),
+
+  settingsEncodingCustomPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingCustomPlaceholder',
+    {
+      defaultMessage: 'Enter an encoding',
     }
   ),
 
@@ -677,6 +771,13 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatHelp',
     {
       defaultMessage: 'Pattern used to parse date and time values.',
+    }
+  ),
+
+  settingsDatetimeFormatPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatPlaceholder',
+    {
+      defaultMessage: 'ISO-8601',
     }
   ),
 

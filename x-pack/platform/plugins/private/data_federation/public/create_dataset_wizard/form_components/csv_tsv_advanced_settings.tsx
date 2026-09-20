@@ -24,8 +24,6 @@ const MULTI_VALUE_SYNTAX_OPTIONS = [
 ];
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: nullValueField } = useController({ name: 'settings.null_value', control });
-  const { field: encodingField } = useController({ name: 'settings.encoding', control });
   const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
     name: 'settings.schema_sample_size',
     control,
@@ -35,10 +33,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
   const { field: escapeField } = useController({ name: 'settings.escape', control });
   const { field: commentField } = useController({ name: 'settings.comment', control });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
-  });
   const { field: multiValueSyntaxField } = useController({
     name: 'settings.multi_value_syntax',
     control,
@@ -51,34 +45,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsNullValueLabel}
-        helpText={createDatasetWizardStrings.settingsNullValueHelp}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsNullValue"
-          fullWidth
-          value={nullValueField.value}
-          onChange={(e) => nullValueField.onChange(e.target.value)}
-          name={nullValueField.name}
-          inputRef={nullValueField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsEncodingLabel}
-        helpText={createDatasetWizardStrings.settingsEncodingHelp}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsEncoding"
-          fullWidth
-          value={encodingField.value}
-          onChange={(e) => encodingField.onChange(e.target.value)}
-          name={encodingField.name}
-          inputRef={encodingField.ref}
-        />
-      </EuiFormRow>
       <EuiFormRow
         label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
         helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
@@ -152,20 +118,6 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           onChange={(e) => columnPrefixField.onChange(e.target.value)}
           name={columnPrefixField.name}
           inputRef={columnPrefixField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
-        helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDatetimeFormat"
-          fullWidth
-          value={datetimeFormatField.value}
-          onChange={(e) => datetimeFormatField.onChange(e.target.value)}
-          name={datetimeFormatField.name}
-          inputRef={datetimeFormatField.ref}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsMultiValueSyntaxLabel} fullWidth>
