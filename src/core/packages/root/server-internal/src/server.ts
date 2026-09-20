@@ -60,6 +60,12 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  isExternalUiamCredential,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
@@ -606,6 +612,37 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientAuthHeaderAugmenter((request, outboundHeaders) => {
+        const authorization = outboundHeaders.get('authorization');
+        const credential = authorization
+          ? HTTPAuthorizationHeader.parseFromValue(authorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+        if (isExternalUiamCredential(request)) {
+          return undefined;
+        }
+
+        const inboundClientSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
+        let inboundSecrets: string[] = [];
+        if (typeof inboundClientSecret === 'string') {
+          inboundSecrets = [inboundClientSecret];
+        } else if (Array.isArray(inboundClientSecret)) {
+          inboundSecrets = inboundClientSecret;
+        }
+        const hasUpstreamSecret = inboundSecrets.some(
+          (entry) => entry.length > 0 && !uiam.isOwnClientAuthentication(entry)
+        );
+        if (hasUpstreamSecret) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential);
+      });
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,

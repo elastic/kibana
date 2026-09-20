@@ -507,6 +507,28 @@ describe('UiamAPIKeys', () => {
     });
   });
 
+  describe('isOwnClientAuthentication()', () => {
+    beforeEach(() => {
+      mockUiam.getClientAuthentication.mockReturnValue({
+        scheme: 'SharedSecret',
+        value: 'kibana-shared-secret',
+      });
+    });
+
+    it("returns true for Kibana's own shared secret", () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('kibana-shared-secret')).toBe(true);
+      expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith();
+    });
+
+    it('returns false for an upstream relay secret', () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('upstream-secret')).toBe(false);
+    });
+
+    it('returns false when the presented value has a different length', () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('short')).toBe(false);
+    });
+  });
+
   describe('getAuthorizationHeader()', () => {
     it('extracts authorization header from request', () => {
       const request = httpServerMock.createKibanaRequest({
