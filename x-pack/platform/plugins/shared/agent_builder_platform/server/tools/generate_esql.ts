@@ -110,7 +110,7 @@ export const generateEsqlTool = ({
         nlQuery,
         index,
         additionalContext: context,
-        executeQuery,
+        execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
