@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, take } from 'rxjs';
+import { BehaviorSubject, skip, take } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 import { esqlNotificationAction } from './esql_notification_action';
@@ -48,7 +48,7 @@ describe('esql notification action', () => {
 
   it('getCompatibilityChangesSubject emits when esql$ changes', (done) => {
     const subject = esqlNotificationAction.getCompatibilityChangesSubject!({ embeddable: api });
-    subject?.pipe(take(1)).subscribe(() => done());
+    subject?.pipe(skip(1), take(1)).subscribe(() => done());
     esqlSubject.next([{ esql: 'FROM logs' }]);
   });
 
