@@ -65,7 +65,6 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
         rule={rule}
         canWrite={canWrite}
         isToggleLoading={isToggling}
-        ownFocus={false}
         session="start"
         onClose={onClose}
         onEdit={onEdit}
