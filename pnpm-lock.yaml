@@ -20,6 +20,8 @@ overrides:
   '@babel/runtime': 7.29.7
   '@babel/traverse': 7.29.8
   '@babel/types': 7.29.8
+  '@elastic/eui-theme-borealis': file:./eui_theme_borealis_8.0.0_main_pre_release_001.tgz
+  '@elastic/eui-theme-common': file:./eui_theme_common_10.0.0_main_pre_release_001.tgz
   '@emotion/sheet': npm:@elastic/emotion-sheet@1.4.1
   '@hapi/mimos>mime-db': 1.53.0
   '@hello-pangea/dnd': 18.0.1
@@ -195,17 +197,17 @@ importers:
         specifier: 4.25.0
         version: 4.25.0
       '@elastic/eui':
-        specifier: 122.0.0-snapshot.1789662740511
-        version: 122.0.0-snapshot.1789662740511(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: file:./eui_122.1.0_main_pre_release_001.tgz
+        version: file:eui_122.1.0_main_pre_release_001.tgz(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@elastic/eui-theme-common@file:eui_theme_common_10.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
         specifier: 1.1.0
         version: 1.1.0
       '@elastic/eui-theme-borealis':
-        specifier: 8.0.0-snapshot.1789662740511
-        version: 8.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz
+        version: file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/eui-theme-common':
-        specifier: 10.0.0-snapshot.1789662740511
-        version: 10.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: file:eui_theme_common_10.0.0_main_pre_release_001.tgz
+        version: file:eui_theme_common_10.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -10795,22 +10797,26 @@ packages:
       '@playwright/test':
         optional: true
 
-  '@elastic/eui-theme-borealis@8.0.0-snapshot.1789662740511':
-    resolution: {integrity: sha512-JXcNeasiBOpwYIoopc6ReC2Ba+lY0XE5Oz9i7DjAhmtjnLiWdl+Xh5OZ2UyNw9kc2wo/LxO4lSCvlwbwNk1BlQ==}
+  '@elastic/eui-theme-borealis@file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz':
+    resolution: {integrity: sha512-gwmNWfRcYKmEHWbhJOmmtsTTXOZC60lbpvpjvoKF3uXxYxm4xuaXgnoDpAiKTL6KnV9GEODplEV0aDJ+J0FaWQ==, tarball: file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz}
+    version: 8.0.0
 
-  '@elastic/eui-theme-common@10.0.0-snapshot.1789662740511':
-    resolution: {integrity: sha512-ggRVLIXhGdAT/VHqFP/zJ0dZLXBjYJ2FsSd62zYHpaNyL+BtlwvmNp7vH6i9Ob2JeC3XiqXk9PAcsILuXFL5UQ==}
+  '@elastic/eui-theme-common@file:eui_theme_common_10.0.0_main_pre_release_001.tgz':
+    resolution: {integrity: sha512-ZMPpewU2zmMCPvPPZQuOxPrAvkiUYEokRoBfw/YXqj3YjX8MLKNtmaFWqvHV5KMhdCCJ4oQeXPOIYsnzlhduNg==, tarball: file:eui_theme_common_10.0.0_main_pre_release_001.tgz}
+    version: 10.0.0
     peerDependencies:
       '@emotion/react': 11.x
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@122.0.0-snapshot.1789662740511':
-    resolution: {integrity: sha512-ZXY0ScfPMfnQVVDP1//f65ZHpI+DlXNIne/tdgapICbKjYF4WMRb49YI3JEnEIS5j5/bwwWg7E7o7Bz59Kqn/A==}
+  '@elastic/eui@file:eui_122.1.0_main_pre_release_001.tgz':
+    resolution: {integrity: sha512-vVm4ealKw8kwT848zhymYB5VsIverecV7Kwroi/Q4MnV9smU/oe0Y28QJ5hvGjy/srb5VEuFItE/7MG/t/2IUg==, tarball: file:eui_122.1.0_main_pre_release_001.tgz}
+    version: 122.0.0
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
-      '@elastic/eui-theme-borealis': 8.0.0-snapshot.1789662740511
+      '@elastic/eui-theme-borealis': 8.0.0
+      '@elastic/eui-theme-common': 10.0.0
       '@emotion/css': 11.x
       '@emotion/react': 11.x
       '@types/react': 18.2.79
@@ -27789,16 +27795,16 @@ snapshots:
     optionalDependencies:
       '@playwright/test': 1.62.1
 
-  '@elastic/eui-theme-borealis@8.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@elastic/eui-theme-borealis@file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@elastic/eui-theme-common': 10.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common': file:eui_theme_common_10.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       chroma-js: 2.4.2
     transitivePeerDependencies:
       - '@emotion/react'
       - react
       - react-dom
 
-  '@elastic/eui-theme-common@10.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@elastic/eui-theme-common@file:eui_theme_common_10.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@emotion/react': 11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2)
       '@types/lodash': 4.17.20
@@ -27807,11 +27813,11 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@122.0.0-snapshot.1789662740511(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@file:eui_122.1.0_main_pre_release_001.tgz(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@elastic/eui-theme-common@file:eui_theme_common_10.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.31.0)
-      '@elastic/eui-theme-borealis': 8.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@elastic/eui-theme-common': 10.0.0-snapshot.1789662740511(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-borealis': file:eui_theme_borealis_8.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common': file:eui_theme_common_10.0.0_main_pre_release_001.tgz(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/prismjs-esql': 4.25.0
       '@emotion/css': 11.13.5(supports-color@10.2.2)
       '@emotion/react': 11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2)
