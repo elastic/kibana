@@ -216,4 +216,80 @@ describe('formatQuerySchedule', () => {
       expect(format('FREQ=MONTHLY;INTERVAL=0')).toBe('3600s');
     });
   });
+
+  // A `BYDAY` list changes the cadence at non-weekly frequencies, so dropping
+  // it made the column assert falsehoods: `FREQ=DAILY;BYDAY=MO` read "Daily"
+  // and `FREQ=MONTHLY;BYDAY=MO` read "Every month", though both run weekly.
+  // RFC 5545 §3.3.10 Notes 1-2 and `@kbn/rrule`'s `getDerivedFrequency` agree
+  // these expand to a weekly rule.
+  describe('BYDAY at non-weekly frequencies', () => {
+    const anchorDate = '2024-01-01T00:00:00.000Z';
+    const format = (rrule: string) =>
+      formatQuerySchedule({
+        schedule_type: 'rrule',
+        interval: 3600,
+        rrule_schedule: { rrule, start_date: anchorDate },
+      });
+    // An rrule-mode row with no stored interval, so an unrenderable rule shows
+    // "Unknown" rather than falling back to interval text.
+    const formatWithoutInterval = (rrule: string) =>
+      formatQuerySchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: { rrule, start_date: anchorDate },
+      });
+
+    it('should render a daily rule with BYDAY as weekly, not "Daily"', () => {
+      expect(format('FREQ=DAILY;BYDAY=MO')).toBe('Every week on Mon');
+      expect(format('FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR')).toBe(
+        'Every week on Mon, Tue, Wed, Thu, Fri'
+      );
+    });
+
+    it('should keep the weekday list Sunday-first for a daily rule with BYDAY', () => {
+      expect(format('FREQ=DAILY;BYDAY=WE,SU,MO')).toBe('Every week on Sun, Mon, Wed');
+    });
+
+    it('should carry INTERVAL through a daily rule with BYDAY', () => {
+      expect(format('FREQ=DAILY;INTERVAL=2;BYDAY=MO')).toBe('Every 2 weeks on Mon');
+    });
+
+    it('should render a monthly rule with BYDAY as weekly, not "Every month"', () => {
+      expect(format('FREQ=MONTHLY;BYDAY=MO')).toBe('Every week on Mon');
+      expect(format('FREQ=MONTHLY;INTERVAL=3;BYDAY=MO,FR')).toBe('Every 3 weeks on Mon, Fri');
+    });
+
+    // Note 1: with BYMONTHDAY present, BYDAY *limits* rather than expands
+    // ("the 1st, but only when it is a Monday"). Neither the monthly nor the
+    // weekly label is faithful.
+    it('should render "Unknown" for a monthly rule with both BYDAY and BYMONTHDAY', () => {
+      expect(formatWithoutInterval('FREQ=MONTHLY;BYDAY=MO;BYMONTHDAY=1')).toBe('Unknown');
+    });
+
+    // Note 2: BYDAY at yearly cadence limits or expands depending on the other
+    // parts, and every yearly label would silently drop the weekday.
+    it('should render "Unknown" for a yearly rule carrying BYDAY', () => {
+      expect(formatWithoutInterval('FREQ=YEARLY;BYDAY=MO')).toBe('Unknown');
+      expect(formatWithoutInterval('FREQ=YEARLY;BYMONTH=3;BYDAY=MO')).toBe('Unknown');
+    });
+
+    // The limit-mode rules above still prefer a stored interval over "Unknown",
+    // matching how every other unrenderable rule behaves.
+    it('should prefer a stored interval over "Unknown" for limit-mode rules', () => {
+      expect(format('FREQ=MONTHLY;BYDAY=MO;BYMONTHDAY=1')).toBe('3600s');
+      expect(format('FREQ=YEARLY;BYDAY=MO')).toBe('3600s');
+    });
+
+    // Ordinal tokens are routed to `_unknown` by the parser, so `byweekday` is
+    // empty and the plain monthly label remains correct.
+    it('should keep the monthly label when BYDAY carries an ordinal token', () => {
+      expect(format('FREQ=MONTHLY;BYDAY=+2MO')).toBe('Every month');
+    });
+
+    // Unchanged behaviour: without BYDAY these frequencies keep their labels.
+    it('should leave rules without BYDAY unchanged', () => {
+      expect(format('FREQ=DAILY')).toBe('Daily');
+      expect(format('FREQ=MONTHLY')).toBe('Every month');
+      expect(format('FREQ=YEARLY;BYMONTH=3')).toBe('Every year in Mar');
+    });
+  });
 });

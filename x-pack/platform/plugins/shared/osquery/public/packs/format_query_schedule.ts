@@ -226,6 +226,13 @@ const formatWeekly = (interval: number, weekdays: string[]): string => {
  *   when the rule carries no `BYDAY`)
  * - `FREQ=MONTHLY` → `"Every N month(s)"`, or `"... on day {days}"` when the
  *   rule carries a positive `BYMONTHDAY` list
+ *
+ * A `BYDAY` list changes the cadence at non-weekly frequencies, so it is not
+ * dropped: per RFC 5545 §3.3.10 (Notes 1 and 2) and `@kbn/rrule`'s
+ * `getDerivedFrequency`, `FREQ=DAILY;BYDAY=…` and `FREQ=MONTHLY;BYDAY=…`
+ * (without `BYMONTHDAY`) both recur *weekly*, so they render as the weekly
+ * form. Where `BYDAY` acts as a limit instead — monthly or yearly alongside a
+ * day-of-month — no short label is faithful, so the result is `"Unknown"`.
  * - `FREQ=YEARLY` → `"Every N year(s)"`, or `"... in {months}"` / `"... in
  *   {months} on day {days}"` when the rule carries `BYMONTH`
  * - `FREQ=HOURLY` / `MINUTELY` → `"Hourly"` / `"Every minute"`, or
@@ -251,6 +258,20 @@ export const formatQuerySchedule = (schedule: EffectiveSchedule): string => {
       // An absent or non-positive INTERVAL means 1 per RFC 5545.
       const interval = fields.interval && fields.interval > 0 ? fields.interval : 1;
 
+      // Sunday-first weekday labels for a rule carrying `BYDAY`, or undefined
+      // when it carries none. `undefined` (rather than an empty array) is what
+      // lets each frequency below distinguish "no weekday constraint" from
+      // "a weekday constraint I must not drop". Ordinal tokens (`+2MO`) never
+      // reach here — the parser routes them to `_unknown`.
+      const selectedWeekdays = (fields.byweekday ?? [])
+        .map((day) => WEEKDAY_TO_TOKEN[day])
+        .filter((token): token is WeekdayStr => token !== undefined);
+      const weekdayQualifier = selectedWeekdays.length
+        ? WEEKDAY_DISPLAY_ORDER.filter((token) => selectedWeekdays.includes(token)).map(
+            (token) => WEEKDAY_SHORT_LABEL[token]
+          )
+        : undefined;
+
       switch (fields.freq) {
         case Frequency.MINUTELY:
           return interval === 1 ? MINUTELY_TEXT : formatEveryNMinutes(interval);
@@ -259,21 +280,37 @@ export const formatQuerySchedule = (schedule: EffectiveSchedule): string => {
           return interval === 1 ? HOURLY_TEXT : formatEveryNHours(interval);
 
         case Frequency.DAILY:
-          return interval === 1 ? DAILY_TEXT : formatEveryNDays(interval);
+          // `BYDAY` at daily cadence limits the rule to those weekdays, and
+          // `@kbn/rrule` derives it to WEEKLY (see `getDerivedFrequency`), so
+          // "Daily" would be a falsehood for e.g. `FREQ=DAILY;BYDAY=MO`.
+          return weekdayQualifier
+            ? formatWeekly(interval, weekdayQualifier)
+            : interval === 1
+            ? DAILY_TEXT
+            : formatEveryNDays(interval);
 
-        case Frequency.WEEKLY: {
-          const selected = (fields.byweekday ?? [])
-            .map((day) => WEEKDAY_TO_TOKEN[day])
-            .filter((token): token is WeekdayStr => token !== undefined);
-          const weekdays = WEEKDAY_DISPLAY_ORDER.filter((token) => selected.includes(token)).map(
-            (token) => WEEKDAY_SHORT_LABEL[token]
-          );
-
-          return formatWeekly(interval, weekdays);
-        }
+        case Frequency.WEEKLY:
+          return formatWeekly(interval, weekdayQualifier ?? []);
 
         case Frequency.MONTHLY: {
           const monthdays = formatMonthDays(fields.bymonthday ?? []);
+
+          // RFC 5545 §3.3.10 Note 1: `BYDAY` at monthly cadence *limits* when
+          // `BYMONTHDAY` is present, and otherwise expands to a weekly rule —
+          // which is exactly what `@kbn/rrule` does. Rendering "Every month"
+          // for `FREQ=MONTHLY;BYDAY=MO` claims a monthly cadence for a rule
+          // that runs every Monday.
+          if (weekdayQualifier) {
+            if (monthdays === undefined) {
+              return formatWeekly(interval, weekdayQualifier);
+            }
+
+            // A limit-mode rule ("the 1st, but only if it is a Monday") has no
+            // honest short rendering. Break to the shared fall-through so it
+            // behaves like every other unrenderable rule: the stored interval
+            // when there is one, otherwise "Unknown".
+            break;
+          }
 
           return monthdays === undefined
             ? formatEveryNMonths(interval)
@@ -281,6 +318,14 @@ export const formatQuerySchedule = (schedule: EffectiveSchedule): string => {
         }
 
         case Frequency.YEARLY: {
+          // Note 2 makes `BYDAY` a limit here whenever `BYMONTHDAY` is present
+          // and an expansion otherwise. Either way the yearly labels below
+          // would drop the weekday constraint, so decline to guess and use the
+          // shared fall-through (stored interval, else "Unknown").
+          if (weekdayQualifier) {
+            break;
+          }
+
           const months = [...(fields.bymonth ?? [])]
             .sort((a, b) => a - b)
             .map((month) => MONTH_SHORT_LABEL[month])
