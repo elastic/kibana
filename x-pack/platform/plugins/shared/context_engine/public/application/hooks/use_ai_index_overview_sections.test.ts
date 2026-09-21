@@ -33,6 +33,7 @@ const baseIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -95,7 +96,7 @@ describe('useAiIndexOverviewSections', () => {
 
   it('shows signals when signal groups exist even without automations', () => {
     mockUseSignalGroups.mockReturnValue({
-      groups: [{ tag: 'missing-context', count: 2 }],
+      groups: [{ tag: 'coverage_gap', count: 2 }],
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),

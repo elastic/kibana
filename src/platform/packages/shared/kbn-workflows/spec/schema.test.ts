@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
   DataSetStepSchema,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DurationSchema,
+  DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH,
+  DynamicTimeoutSchema,
   ElasticsearchStepSchema,
   EventTimestampSchema,
   IfStepSchema,
@@ -24,6 +28,7 @@ import {
   PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
+  TimeoutPropSchema,
   WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
@@ -38,6 +43,7 @@ import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import { MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 import { getShape } from '../common/utils/zod';
 
 describe('WorkflowSchemaForAutocomplete', () => {
@@ -1259,5 +1265,83 @@ describe('`if` condition on step schemas', () => {
 
     expect(IfStepSchema.safeParse({ ...ifStep, condition: atLimit }).success).toBe(true);
     expect(IfStepSchema.safeParse({ ...ifStep, condition: overLimit }).success).toBe(false);
+  });
+});
+
+describe('DurationSchema', () => {
+  it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms'])(
+    'accepts %s',
+    (duration) => {
+      expect(DurationSchema.safeParse(duration).success).toBe(true);
+    }
+  );
+
+  it.each(['', 'soon', '1m1h', '5h 30m', '1.5s'])('rejects %s', (duration) => {
+    expect(DurationSchema.safeParse(duration).success).toBe(false);
+  });
+
+  it('rejects a duration longer than MAX_DURATION_LENGTH', () => {
+    const atLimit = `${'1'.repeat(MAX_DURATION_LENGTH - 1)}s`;
+    const overLimit = `${'1'.repeat(MAX_DURATION_LENGTH)}s`;
+    expect(DurationSchema.safeParse(atLimit).success).toBe(true);
+    expect(DurationSchema.safeParse(overLimit).success).toBe(false);
+  });
+});
+
+describe('dynamic timeout schema', () => {
+  const approval = { name: 's', type: 'waitForApproval' as const };
+  const input = { name: 's', type: 'waitForInput' as const };
+  const templated = "{{ inputs.expiresIn | default: '72h' }}";
+
+  it('accepts a duration or a Liquid template on waitForApproval and waitForInput', () => {
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: '72h' }).success).toBe(true);
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: templated }).success).toBe(
+      true
+    );
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: '30s' }).success).toBe(true);
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: templated }).success).toBe(true);
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: '1h30m' }).success).toBe(
+      true
+    );
+  });
+
+  it('rejects a non-duration, non-template timeout on HITL steps', () => {
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: 'soon' }).success).toBe(
+      false
+    );
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: '{{ unterminated' }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a Liquid timeout longer than DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH', () => {
+    const atLimit = `{{${'x'.repeat(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH - 4)}}}`;
+    const overLimit = `{{${'x'.repeat(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH - 3)}}}`;
+    expect(atLimit).toHaveLength(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH);
+    expect(overLimit).toHaveLength(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH + 1);
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: atLimit }).success).toBe(
+      true
+    );
+    expect(WaitForApprovalStepSchema.safeParse({ ...approval, timeout: overLimit }).success).toBe(
+      false
+    );
+    expect(WaitForInputStepSchema.safeParse({ ...input, timeout: overLimit }).success).toBe(false);
+  });
+
+  it('does not accept templates on connector TimeoutPropSchema', () => {
+    expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
+    expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
+    expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);
+  });
+
+  it('emits duration and Liquid patterns in JSON Schema for Monaco', () => {
+    const jsonSchema = z.toJSONSchema(DynamicTimeoutSchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    });
+    const encoded = JSON.stringify(jsonSchema);
+    expect(encoded).toMatch(/"anyOf"|"oneOf"/);
+    expect(encoded).toContain('\\d+w');
+    expect(encoded).toContain('{{');
   });
 });

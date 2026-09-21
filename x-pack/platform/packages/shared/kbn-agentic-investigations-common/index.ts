@@ -20,16 +20,35 @@ export { type ConversationsActionsGroupProps } from './src/components/conversati
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
 
 export {
-  ConversationDetailsFlyout,
-  type ConversationDetailsFlyoutProps,
-} from './src/components/details/details_flyout';
+  ConversationDetailsFlyoutHeader,
+  type ConversationDetailsFlyoutHeaderProps,
+} from './src/components/details/flyout_header';
+export {
+  ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
+} from './src/components/details/flyout_footer';
+export {
+  InvestigationHeaderBlocks,
+  type InvestigationHeaderBlocksProps,
+} from './src/components/details/header_blocks';
+export {
+  AttachmentsTab,
+  type AttachmentsTabProps,
+  OverviewTab,
+  TimelineTab,
+} from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export { TimelineEventList } from './src/components/timeline/timeline_event_list';
 
-export { useOpenInChat } from './src/hooks/use_open_in_chat';
+export {
+  registerAgenticInvestigationTemplateUI,
+  type RegisterAgenticInvestigationTemplateUIOptions,
+  getInvestigationTabIds,
+} from './src/template_ui/register';
+export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
-export { getEmptyValue, getActionButtonIconProps } from './src/components/helpers';
+export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
 
 export type { Investigation, RecommendedAction, TimelineEvent } from './src/types/investigation';
 export {
@@ -40,19 +59,26 @@ export {
 
 export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
 
-export {
-  BaseActionModal,
-  type BaseActionModalProps,
-  type ActionModalPrimaryAction,
-} from './src/components/modals/base_action_modal';
-export {
-  AssignActionModal,
-  type AssignActionModalProps,
-} from './src/components/modals/assign_action_modal';
+export { BaseActionModal } from './src/components/modals/base_action_modal';
+export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
+export {
+  InvestigationActionModals,
+  type InvestigationActionModalsProps,
+} from './src/components/modals/investigation_action_modals';
 export {
   ApprovalModal,
   type ApprovalModalProps,
 } from './src/components/modals/approval_modal/approval_modal';
+export {
+  ApprovalContent,
+  type ApprovalContentProps,
+  type ApprovalAction,
+  type AlwaysAllowOption,
+} from './src/components/modals/approval_modal/approval_content';
 export { type BlastRadiusItemProps } from './src/components/modals/approval_modal/blast_radius_item';
-export { BlastRadiusSection } from './src/components/modals/approval_modal/blast_radius_section';
+export {
+  BlastRadiusSection,
+  type BlastRadiusContent,
+  type BlastRadiusSectionProps,
+} from './src/components/modals/approval_modal/blast_radius_section';
