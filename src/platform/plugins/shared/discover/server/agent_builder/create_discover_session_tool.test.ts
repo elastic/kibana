@@ -165,6 +165,17 @@ describe('createDiscoverSessionTool schema', () => {
     }
   });
 
+  it.each([
+    { esql: 'FROM logs-* | STATS count = COUNT(*)' },
+    { attachment_id: 'att-session', esql: 'PROMQL index=metrics (avg(cpu_usage))' },
+  ])('rejects aggregating esql: $esql', (input) => {
+    const parsed = schema.safeParse(input);
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues[0].message).toContain('Aggregating ES|QL');
+    }
+  });
+
   it('rejects esql that does not parse after sanitizing', () => {
     const parsed = schema.safeParse({
       esql: 'FROM logs-*\n| WHERE @timestamp \u0000= ?_tstart AND @timestamp \u0000< ?_tend AND log.level == "error"',

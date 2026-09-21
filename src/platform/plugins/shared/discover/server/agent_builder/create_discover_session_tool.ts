@@ -20,6 +20,7 @@ import {
   type DiscoverSessionData as DiscoverSessionApiData,
 } from '@kbn/as-code-discover-schema';
 import { MAX_SESSION_TITLE_LENGTH, MAX_TAB_LABEL_LENGTH } from '@kbn/discover-session-constants';
+import { hasAggregatingCommand } from '@kbn/esql-utils';
 import { getDateRange } from '@kbn/timerange';
 import {
   DISCOVER_SESSION_ATTACHMENT_TYPE,
@@ -174,6 +175,11 @@ const createDiscoverSessionSchema = z
       if (errors.length > 0) {
         issue(`${errors[0].message} ES|QL comparisons use ==, >=, <=, <, and >.`);
         return;
+      }
+      if (hasAggregatingCommand(esql)) {
+        issue(
+          `Aggregating ES|QL belongs in ${platformCoreTools.createVisualization}, not a Discover session.`
+        );
       }
     }
 

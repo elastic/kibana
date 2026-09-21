@@ -116,11 +116,13 @@ const SearchBar = (props: {
 const inlineProps = ({
   registerActionButtons,
   canWriteDashboards = true,
+  canOpenInDiscover = true,
   data = sessionData,
   version,
 }: {
   registerActionButtons?: jest.Mock;
   canWriteDashboards?: boolean;
+  canOpenInDiscover?: boolean;
   data?: DiscoverSessionApiData;
   version?: number;
 } = {}) => {
@@ -141,7 +143,10 @@ const inlineProps = ({
           }
           application={
             {
-              capabilities: { dashboard_v2: { showWriteControls: canWriteDashboards } },
+              capabilities: {
+                dashboard_v2: { showWriteControls: canWriteDashboards },
+                discover_v2: { show: canOpenInDiscover },
+              },
             } as unknown as ApplicationStart
           }
           registerActionButtons={registerActionButtons}
@@ -256,6 +261,14 @@ describe('DiscoverSessionInline', () => {
         timeRange: { from: 'now-15m', to: 'now' },
       })
     );
+  });
+
+  it('hides Open in Discover when the user cannot open Discover', () => {
+    const registerActionButtons = jest.fn();
+    renderInline({ registerActionButtons, canOpenInDiscover: false });
+
+    const actionButtons = registerActionButtons.mock.calls.at(-1)?.[0] as ActionButton[];
+    expect(actionButtons.find((button) => button.icon === 'discoverApp')).toBeUndefined();
   });
 
   it('reloads the embeddable when a follow-up changes the query', async () => {

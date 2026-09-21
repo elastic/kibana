@@ -231,7 +231,11 @@ export const DiscoverSessionInline = ({
 
     const buttons: ActionButton[] = [];
 
-    if (locator) {
+    const canOpenInDiscover =
+      Boolean(application?.capabilities.discover_v2?.show) ||
+      Boolean(application?.capabilities.discover_v2?.save);
+
+    if (locator && canOpenInDiscover) {
       buttons.push({
         type: ActionButtonType.SECONDARY,
         icon: 'discoverApp',
@@ -248,7 +252,7 @@ export const DiscoverSessionInline = ({
 
     registerActionButtons(buttons);
     return () => registerActionButtons([]);
-  }, [data, effectiveTimeRange, locator, registerActionButtons]);
+  }, [application, data, effectiveTimeRange, locator, registerActionButtons]);
 
   return (
     <SearchEmbeddableToolbarProvider value={toolbarSlot}>
