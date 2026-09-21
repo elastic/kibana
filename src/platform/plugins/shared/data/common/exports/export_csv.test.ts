@@ -23,6 +23,10 @@ function getDefaultOptions() {
   };
 }
 
+function getTableModeOptions() {
+  return { ...getDefaultOptions(), missingValueDisplay: 'table' as const };
+}
+
 function getDataTable({ multipleColumns }: { multipleColumns?: boolean } = {}): Datatable {
   const layer1: Datatable = {
     type: 'datatable',
@@ -91,12 +95,31 @@ describe('CSV exporter', () => {
     ['null', null],
     ['undefined', undefined],
     ['a missing bucket', MISSING_TOKEN],
-  ])('should export %s as the dash the table renders', (_name, value) => {
+  ])('should export %s as the dash the table renders in table mode', (_name, value) => {
     const datatable = getDataTable();
     datatable.rows[0].col1 = value;
 
-    expect(datatableToCSV(datatable, getDefaultOptions())).toMatch('columnOne\r\n"-"\r\n');
+    expect(datatableToCSV(datatable, getTableModeOptions())).toMatch('columnOne\r\n"-"\r\n');
   });
+
+  test.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['a missing bucket', MISSING_TOKEN],
+  ])(
+    'should export %s through the formatter by default (charts keep the label)',
+    (_name, value) => {
+      const datatable = getDataTable();
+      datatable.rows[0].col1 = value;
+
+      expect(datatableToCSV(datatable, getDefaultOptions())).toMatch(
+        `columnOne\r\n"Formatted_${value}"\r\n`
+      );
+      expect(
+        datatableToCSV(datatable, { ...getDefaultOptions(), missingValueDisplay: 'text' })
+      ).toMatch(`columnOne\r\n"Formatted_${value}"\r\n`);
+    }
+  );
 
   test('should not let the formula guard turn the dash into an escaped value', () => {
     const datatable = getDataTable();
@@ -104,7 +127,7 @@ describe('CSV exporter', () => {
 
     // "-" starts a formula, but the dash is our own constant rather than document content.
     expect(
-      datatableToCSV(datatable, { ...getDefaultOptions(), escapeFormulaValues: true })
+      datatableToCSV(datatable, { ...getTableModeOptions(), escapeFormulaValues: true })
     ).toMatch('columnOne\r\n"-"\r\n');
   });
 
@@ -112,7 +135,7 @@ describe('CSV exporter', () => {
     const datatable = getDataTable();
     datatable.rows[0].col1 = null;
 
-    expect(datatableToCSV(datatable, { ...getDefaultOptions(), quoteValues: false })).toMatch(
+    expect(datatableToCSV(datatable, { ...getTableModeOptions(), quoteValues: false })).toMatch(
       'columnOne\r\n-\r\n'
     );
   });
@@ -121,7 +144,7 @@ describe('CSV exporter', () => {
     const datatable = getDataTable();
     datatable.rows[0].col1 = null;
 
-    expect(datatableToCSV(datatable, { ...getDefaultOptions(), raw: true })).toMatch(
+    expect(datatableToCSV(datatable, { ...getTableModeOptions(), raw: true })).toMatch(
       'columnOne\r\n\r\n'
     );
   });
@@ -142,7 +165,7 @@ describe('CSV exporter', () => {
     const datatable = getDataTable({ multipleColumns: true });
     datatable.rows[0].col1 = null;
 
-    expect(datatableToCSV(datatable, { ...getDefaultOptions(), csvSeparator: '-' })).toBe(
+    expect(datatableToCSV(datatable, { ...getTableModeOptions(), csvSeparator: '-' })).toBe(
       'columnOne-columnTwo\r\n"-"-"Formatted_5"\r\n'
     );
   });

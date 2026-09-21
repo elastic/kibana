@@ -15,32 +15,35 @@ describe('Export CSV action', () => {
   let action: ExportCSVAction;
   let context: { embeddable: ExportCsvActionApi };
 
-  beforeEach(async () => {
-    action = new ExportCSVAction();
-    context = {
-      embeddable: {
-        getInspectorAdapters: () => ({
+  const createContext = (missingValueDisplay: 'text' | 'table' = 'text') => ({
+    embeddable: {
+      getInspectorAdapters: () => ({
+        tables: {
+          allowCsvExport: true,
+          missingValueDisplay,
           tables: {
-            allowCsvExport: true,
-            tables: {
-              layer1: {
-                type: 'datatable',
-                columns: [
-                  { id: 'firstName', name: 'First Name' },
-                  { id: 'originalLastName', name: 'Last Name' },
-                ],
-                rows: [
-                  {
-                    firstName: 'Kibanana',
-                    orignialLastName: 'Kiwi',
-                  },
-                ],
-              },
+            layer1: {
+              type: 'datatable',
+              columns: [
+                { id: 'firstName', name: 'First Name' },
+                { id: 'originalLastName', name: 'Last Name' },
+              ],
+              rows: [
+                {
+                  firstName: 'Kibanana',
+                  orignialLastName: 'Kiwi',
+                },
+              ],
             },
           },
-        }),
-      },
-    };
+        },
+      }),
+    },
+  });
+
+  beforeEach(async () => {
+    action = new ExportCSVAction();
+    context = createContext();
   });
 
   it('is compatible when api meets all conditions', async () => {
@@ -59,8 +62,21 @@ describe('Export CSV action', () => {
       embeddable: context.embeddable,
       asString: true,
     })) as unknown as undefined | Record<string, { content: string; type: string }>;
-    // The row has no value under the "originalLastName" column id, so that cell exports as the
-    // same dash the table renders for a missing value.
+    // The row has no value under the "originalLastName" column id; charts export it through the
+    // formatter rather than as a dash.
+    expect(result).toEqual({
+      'untitled.csv': {
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibanana,${LINE_FEED_CHARACTER}`,
+        type: 'text/plain;charset=utf-8',
+      },
+    });
+  });
+
+  it('Should export missing values as a dash when the visualization uses table presentation', async () => {
+    const result = (await action.execute({
+      embeddable: createContext('table').embeddable,
+      asString: true,
+    })) as unknown as undefined | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
       'untitled.csv': {
         content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibanana,-${LINE_FEED_CHARACTER}`,

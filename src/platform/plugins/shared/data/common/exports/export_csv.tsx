@@ -21,11 +21,23 @@ interface CSVOptions {
   escapeFormulaValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
+  /**
+   * Mirrors `TablesAdapter.missingValueDisplay`: only `'table'` exports missing values as the
+   * dash the table renders; otherwise they go through the formatter and keep the `(null)` label.
+   */
+  missingValueDisplay?: 'text' | 'table';
 }
 
 export function datatableToCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions
+  {
+    csvSeparator,
+    quoteValues,
+    formatFactory,
+    raw,
+    escapeFormulaValues,
+    missingValueDisplay,
+  }: CSVOptions
 ) {
   const escapeValues = createEscapeValue({
     separator: csvSeparator,
@@ -61,8 +73,8 @@ export function datatableToCSV(
       const value = row[id];
 
       // Export what the table shows: missing values as a dash, quoted like any other
-      // non-alphanumeric cell but never formula-escaped.
-      if (!raw && isMissingValue(value)) {
+      // non-alphanumeric cell but never formula-escaped. Charts keep the `(null)` label.
+      if (!raw && missingValueDisplay === 'table' && isMissingValue(value)) {
         return escapePlaceholder(NULL_PLACEHOLDER);
       }
 
