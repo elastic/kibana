@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
   isJobStatusWithResults,
@@ -28,7 +27,7 @@ import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogsAppHeader, logsAnomaliesPageTitle } from '../header';
-import { LogsPageTemplate } from '../shared/page_template';
+import { LogsPageTemplate, type LogsPageTemplateProps } from '../shared/page_template';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
@@ -138,10 +137,7 @@ export const LogEntryRatePageContent = memo(() => {
   }
 });
 
-export const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
-  children,
-  ...rest
-}) => {
+export const AnomaliesPageTemplate: React.FC<LogsPageTemplateProps> = ({ children, ...rest }) => {
   const { logViewStatus } = useLogViewContext();
   return (
     <LogsPageTemplate
