@@ -56,10 +56,6 @@ apiTest.describe(
         !systemIndicesEsClient.isAvailable,
         'system_indices_superuser does not exist on Cloud serverless (MKI)'
       );
-      // skip() in beforeAll only skips the tests, not the hook body, so return as well.
-      if (!systemIndicesEsClient.isAvailable) {
-        return;
-      }
 
       sysEsClient = await systemIndicesEsClient.getClient();
       await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {

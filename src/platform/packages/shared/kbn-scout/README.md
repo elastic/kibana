@@ -158,11 +158,8 @@ on local targets, or branch on `isAvailable` and skip:
 
 ```ts
 apiTest.beforeAll(async ({ systemIndicesEsClient }) => {
+  // skip() throws, so the rest of the hook is skipped along with every test in the suite.
   apiTest.skip(!systemIndicesEsClient.isAvailable, 'needs system_indices_superuser');
-  // skip() in beforeAll only skips the tests, not the hook body, so return as well.
-  if (!systemIndicesEsClient.isAvailable) {
-    return;
-  }
   // ...
 });
 ```

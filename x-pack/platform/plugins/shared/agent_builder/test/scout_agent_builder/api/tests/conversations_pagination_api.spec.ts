@@ -48,10 +48,6 @@ apiTest.describe(
         !systemIndicesEsClient.isAvailable,
         'system_indices_superuser does not exist on Cloud serverless (MKI)'
       );
-      // skip() in beforeAll only skips the tests, not the hook body, so return as well.
-      if (!systemIndicesEsClient.isAvailable) {
-        return;
-      }
 
       // Independent setup, parallelized to stay well under the default beforeAll timeout —
       // sequential round trips here can add up to tens of seconds against a slow ES/Kibana.
