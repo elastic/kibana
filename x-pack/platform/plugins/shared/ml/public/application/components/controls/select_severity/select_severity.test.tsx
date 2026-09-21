@@ -228,7 +228,7 @@ describe('SelectSeverityUI', () => {
     expect(getByRole('option', { name: '75-100' })).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('preserves a custom floor when deselecting a higher overlapping band', async () => {
+  it('drops the partial first band when deselecting a higher overlapping band', async () => {
     const onChange = jest.fn();
     const { getByTestId, getByRole } = render(
       <SelectSeverityUI severity={[{ min: 30 }]} onChange={onChange} />
@@ -251,10 +251,7 @@ describe('SelectSeverityUI', () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(
       onChange.mock.calls[0][0].map((option: { threshold: unknown }) => option.threshold)
-    ).toEqual([
-      { min: 30, max: 50 },
-      { min: 50, max: 75 },
-    ]);
+    ).toEqual([{ min: 50, max: 75 }]);
   });
 
   it('displays the canonical critical band as 75-100', () => {

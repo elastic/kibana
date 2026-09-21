@@ -118,7 +118,20 @@ describe('applyCustomOpenEndedFloorToSelection', () => {
     { min: ML_ANOMALY_THRESHOLD.CRITICAL },
   ];
 
-  it('keeps a custom floor on the partial first band when higher bands are toggled off', () => {
+  it('keeps the custom open-ended floor when the remaining selection still covers floor-to-100', () => {
+    expect(
+      applyCustomOpenEndedFloorToSelection(
+        [
+          { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
+          { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+          { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+        ],
+        [{ min: 30 }]
+      )
+    ).toEqual([{ min: 30 }]);
+  });
+
+  it('drops the partial first band when higher bands are toggled off', () => {
     expect(
       applyCustomOpenEndedFloorToSelection(
         [
@@ -127,10 +140,7 @@ describe('applyCustomOpenEndedFloorToSelection', () => {
         ],
         [{ min: 30 }]
       )
-    ).toEqual([
-      { min: 30, max: ML_ANOMALY_THRESHOLD.MAJOR },
-      { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
-    ]);
+    ).toEqual([{ min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL }]);
   });
 
   it('uses canonical bands when the user expands below the original floor', () => {
