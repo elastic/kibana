@@ -7,25 +7,41 @@
 
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { CasesPermissions } from '../../../../common';
+import type { ActionLicense } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
+import * as listI18n from '../translations';
 
 interface GetListMenuArgs {
   permissions: CasesPermissions;
   isTemplatesEnabled: boolean;
+  actionLicense: ActionLicense | null;
   navigateToCreateCase: () => void;
   navigateToConfigureCases: () => void;
   navigateToCasesTemplates: () => void;
   getCasesTemplatesUrl: () => string;
 }
 
+const getActionLicenseTooltip = (actionLicense: ActionLicense | null): string | undefined => {
+  if (actionLicense != null && !actionLicense.enabledInLicense) {
+    return listI18n.ACTION_LICENSE_REQUIRED;
+  }
+  if (actionLicense != null && !actionLicense.enabledInConfig) {
+    return listI18n.ACTION_LICENSE_DISABLED_BY_CONFIG;
+  }
+  return undefined;
+};
+
 export const getListMenu = ({
   permissions,
   isTemplatesEnabled,
+  actionLicense,
   navigateToCreateCase,
   navigateToConfigureCases,
   navigateToCasesTemplates,
   getCasesTemplatesUrl,
 }: GetListMenuArgs): AppHeaderMenu => {
+  const licenseTooltip = getActionLicenseTooltip(actionLicense);
+
   const items = [
     ...(isTemplatesEnabled && permissions.manageTemplates
       ? [
@@ -49,6 +65,7 @@ export const getListMenu = ({
             run: () => navigateToConfigureCases(),
             testId: 'configure-case-button',
             order: 100,
+            ...(licenseTooltip ? { tooltipContent: licenseTooltip } : {}),
           },
         ]
       : []),

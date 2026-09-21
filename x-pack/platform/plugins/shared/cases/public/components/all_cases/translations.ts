@@ -491,3 +491,19 @@ export const SEARCH_HIDDEN_FIELDS_INFO_TEXT = i18n.translate(
       'Results can match values from template and custom fields that are not shown as columns.',
   }
 );
+
+export const ACTION_LICENSE_REQUIRED = i18n.translate(
+  'xpack.cases.allCasesView.actionLicenseRequired',
+  {
+    defaultMessage:
+      'Opening cases in external systems requires a Platinum license or higher, a cloud deployment, or a free trial.',
+  }
+);
+
+export const ACTION_LICENSE_DISABLED_BY_CONFIG = i18n.translate(
+  'xpack.cases.allCasesView.actionLicenseDisabledByConfig',
+  {
+    defaultMessage:
+      'External connectors are disabled in the Kibana configuration. Update xpack.actions.enabledActionTypes to enable them.',
+  }
+);
