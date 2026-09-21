@@ -11,8 +11,8 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   warningLabel: i18n.translate('xpack.alertzero.approvalModal.warningLabel', {
     defaultMessage: 'APPROVAL REQUIRED',
   }),
-  blastRadiusTitle: i18n.translate('xpack.alertzero.approvalModal.blastRadiusTitle', {
-    defaultMessage: 'Blast radius',
+  actionImpactTitle: i18n.translate('xpack.alertzero.approvalModal.actionImpactTitle', {
+    defaultMessage: 'Impact',
   }),
   cancel: i18n.translate('xpack.alertzero.approvalModal.cancel', {
     defaultMessage: 'Cancel',
