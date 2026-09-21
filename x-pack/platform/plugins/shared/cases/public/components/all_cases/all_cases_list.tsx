@@ -195,12 +195,21 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       (mode: ViewToggleId) => {
         setViewMode(mode);
         trackViewModeChanged(mode);
-        if (mode === VIEW_TOGGLE_LIST_ID) {
-          deselectCases();
-          setQueryParams({ sortField: SortFieldCase.createdAt, sortOrder: queryParams.sortOrder });
+        // List view only supports createdAt; clear selection only when normalizing sort.
+        if (mode !== VIEW_TOGGLE_LIST_ID || queryParams.sortField === SortFieldCase.createdAt) {
+          return;
         }
+        deselectCases();
+        setQueryParams({ sortField: SortFieldCase.createdAt, sortOrder: queryParams.sortOrder });
       },
-      [setViewMode, trackViewModeChanged, deselectCases, setQueryParams, queryParams.sortOrder]
+      [
+        setViewMode,
+        trackViewModeChanged,
+        deselectCases,
+        setQueryParams,
+        queryParams.sortField,
+        queryParams.sortOrder,
+      ]
     );
 
     const selectedColumnFields = useMemo(

@@ -1164,7 +1164,7 @@ describe('AllCasesListGeneric', () => {
       expect(await screen.findByTestId('all-cases-clear-selection-link')).toBeInTheDocument();
     });
 
-    it('should not clear selection when switching view mode', async () => {
+    it('should not clear selection when switching from list to table view', async () => {
       let currentViewMode: ViewToggleId = VIEW_TOGGLE_LIST_ID;
       const setViewMode = jest.fn((mode: ViewToggleId) => {
         currentViewMode = mode;
@@ -1195,6 +1195,79 @@ describe('AllCasesListGeneric', () => {
       expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
       expect(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`)).toBeChecked();
       expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+    });
+
+    it('should not clear selection when switching from table to list while sorted by createdAt', async () => {
+      let currentViewMode: ViewToggleId = VIEW_TOGGLE_TABLE_ID;
+      const setViewMode = jest.fn((mode: ViewToggleId) => {
+        currentViewMode = mode;
+      });
+      useViewModeMock.mockImplementation(() => ({
+        viewMode: currentViewMode,
+        setViewMode,
+      }));
+
+      const { rerender } = renderWithTestingProviders(<AllCasesList />);
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: /list view/i }));
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
+      expect(currentViewMode).toBe(VIEW_TOGGLE_LIST_ID);
+
+      rerender(<AllCasesList />);
+      await waitForComponentToUpdate();
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`cases-list-item-checkbox-${caseToSelect.id}`)
+      ).toBeChecked();
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+    });
+
+    it('should clear selection when switching from table to list while sorted by a non-createdAt field', async () => {
+      let currentViewMode: ViewToggleId = VIEW_TOGGLE_TABLE_ID;
+      const setViewMode = jest.fn((mode: ViewToggleId) => {
+        currentViewMode = mode;
+      });
+      useViewModeMock.mockImplementation(() => ({
+        viewMode: currentViewMode,
+        setViewMode,
+      }));
+
+      const { rerender } = renderWithTestingProviders(<AllCasesList />);
+
+      // Sort by title so list-mode entry must normalize to createdAt
+      await userEvent.click(await screen.findByTitle('Name'));
+      await waitFor(() => {
+        expect(useGetCasesMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            queryParams: {
+              ...DEFAULT_QUERY_PARAMS,
+              sortField: SortFieldCase.title,
+              sortOrder: 'asc',
+            },
+          })
+        );
+      });
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: /list view/i }));
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
+      expect(currentViewMode).toBe(VIEW_TOGGLE_LIST_ID);
+
+      rerender(<AllCasesList />);
+      await waitForComponentToUpdate();
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+      expect(screen.queryByText('Selected 1 case')).not.toBeInTheDocument();
     });
 
     it('should not render list checkboxes or bulk actions for read-only users', async () => {
