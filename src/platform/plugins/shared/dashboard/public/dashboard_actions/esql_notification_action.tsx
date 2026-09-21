@@ -30,6 +30,11 @@ export type EsqlNotificationActionApi = PublishesEsql & HasUniqueId & Partial<Ca
 const isApiCompatible = (api: unknown | null): api is EsqlNotificationActionApi =>
   Boolean(apiPublishesEsql(api) && apiHasUniqueId(api));
 
+/**
+ * Renders a panel hover action that displays the ES|QL statements currently
+ * executed by an embeddable that implements PublishesEsql. Visible only when
+ * the embeddable has at least one active ES|QL query.
+ */
 export const esqlNotificationAction: ActionDefinition<EmbeddableApiContext> = {
   id: ACTION_ESQL_NOTIFICATION,
   type: ACTION_ESQL_NOTIFICATION,
