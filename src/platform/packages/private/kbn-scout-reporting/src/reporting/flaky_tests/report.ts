@@ -23,7 +23,6 @@ import {
   fileStatsKey,
   type BranchCountsRow,
   type FlakyTestQueryScope,
-  type TestFailureSamples,
   type TestMetadataRow,
   type TestStatsRow,
 } from './queries';
@@ -39,6 +38,7 @@ import {
   type FlakyTestLatestRun,
   type FlakyTestPipelineStats,
   type FlakyTestReport,
+  type FlakyTestSampleFailure,
   type FlakyTestReportOptions,
   type FlakyTestReportThresholds,
   type TestFramework,
@@ -134,6 +134,7 @@ const toEntry = (
   testId: stats.testId,
   framework: stats.framework,
   title: metadata?.title ?? '(unknown)',
+  suiteTitle: metadata?.suiteTitle,
   filePath: metadata?.filePath ?? '(unknown)',
   configPath: metadata?.configPath,
   owners: metadata?.owners ?? [],
@@ -304,7 +305,7 @@ const buildReport = async (
   };
 
   let branchStats = new Map<string, FlakyTestBranchStats[]>();
-  let samples = new Map<string, TestFailureSamples>();
+  let samples = new Map<string, FlakyTestSampleFailure[]>();
   let pipelineStats = new Map<string, FlakyTestPipelineStats[]>();
   if (admitted.length > 0) {
     [branchStats, samples, pipelineStats] = await Promise.all([
@@ -324,10 +325,9 @@ const buildReport = async (
 
   const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
     ...entry,
-    suiteTitle: samples.get(entry.testId)?.suiteTitle,
     latestRun: latestRunAcrossBranches(branchStats.get(entry.testId)),
     byBranch: branchStats.get(entry.testId) ?? [],
-    sampleFailures: samples.get(entry.testId)?.failures ?? [],
+    sampleFailures: samples.get(entry.testId) ?? [],
   });
 
   // One file entry per (path, framework) over the tests of both lists, in ranking order

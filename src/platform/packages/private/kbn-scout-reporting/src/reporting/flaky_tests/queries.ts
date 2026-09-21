@@ -47,11 +47,16 @@ export interface TestStatsRow {
 export interface TestMetadataRow {
   testId: string;
   title?: string;
+  /** Title of the enclosing describe blocks; absent when the framework reports none. */
+  suiteTitle?: string;
   filePath?: string;
   configPath?: string;
   owners: string[];
   areas: string[];
 }
+
+/** What the Jest reporter writes as the suite title of a test outside any describe block. */
+const UNKNOWN_SUITE_TITLE = 'unknown';
 
 const asArray = (value: string | string[] | null | undefined): string[] => {
   if (value === null || value === undefined) return [];
@@ -219,6 +224,7 @@ export const buildTestMetadataQuery = (
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
     'STATS title = MAX(test.title.keyword),' +
+      ' suite_title = MAX(suite.title.keyword),' +
       ' file_path = MAX(test.file.path),' +
       ' config_path = MAX(test_run.config.file.path),' +
       ' owners = VALUES(test.file.owner),' +
@@ -293,6 +299,7 @@ export const fetchTestMetadata = async (
   const records = await runEsql<{
     test_id: string;
     title: string | null;
+    suite_title: string | null;
     file_path: string | null;
     config_path: string | null;
     owners: string | string[] | null;
@@ -305,6 +312,10 @@ export const fetchTestMetadata = async (
       {
         testId: record.test_id,
         title: record.title ?? undefined,
+        suiteTitle:
+          record.suite_title && record.suite_title !== UNKNOWN_SUITE_TITLE
+            ? record.suite_title
+            : undefined,
         filePath: record.file_path ?? undefined,
         configPath: record.config_path ?? undefined,
         owners: asArray(record.owners),
@@ -614,35 +625,22 @@ interface SampleFailureSource {
   '@timestamp': string;
   event?: { error?: { message?: string } };
   buildkite?: { build?: { url?: string } };
-  suite?: { title?: string };
 }
-
-/** Recent failures of one test, plus the suite title read off the same documents. */
-export interface TestFailureSamples {
-  failures: FlakyTestSampleFailure[];
-  /** Title of the enclosing describe blocks; the Jest reporter writes `unknown` when there are none. */
-  suiteTitle?: string;
-}
-
-const UNKNOWN_SUITE_TITLE = 'unknown';
 
 /**
- * Most recent failure messages per test. Error messages, like suite titles, are mapped as `text`
- * and cannot be aggregated in ES|QL, so this uses a `terms` + `top_hits` search over attempt-level
- * `test-end` failures instead (attempt failures carry the error for every framework, including
- * Playwright) and reads both off the same documents. One document is fetched even when no
- * failure messages are wanted, so the suite title does not depend on `samplesPerTest`.
+ * Most recent failure messages per test. Error messages are mapped as `text` and cannot be
+ * aggregated in ES|QL, so this uses a `terms` + `top_hits` search over attempt-level `test-end`
+ * failures instead (attempt failures carry the error for every framework, including Playwright).
  */
 export const fetchSampleFailures = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
   testIds: readonly string[],
   samplesPerTest: number
-): Promise<Map<string, TestFailureSamples>> => {
-  if (testIds.length === 0) {
+): Promise<Map<string, FlakyTestSampleFailure[]>> => {
+  if (testIds.length === 0 || samplesPerTest <= 0) {
     return new Map();
   }
-  const failuresPerTest = Math.max(samplesPerTest, 0);
 
   const hits = await searchLatestPerTest<SampleFailureSource>(
     es,
@@ -653,18 +651,15 @@ export const fetchSampleFailures = async (
       { terms: { 'test.id': testIds } },
     ],
     testIds,
-    Math.max(failuresPerTest, 1),
-    ['@timestamp', 'event.error.message', 'buildkite.build.url', 'suite.title']
+    samplesPerTest,
+    ['@timestamp', 'event.error.message', 'buildkite.build.url']
   );
 
-  const samples = new Map<string, TestFailureSamples>();
+  const samples = new Map<string, FlakyTestSampleFailure[]>();
   for (const [testId, sources] of hits) {
-    const suiteTitle = sources
-      .map((source) => source.suite?.title?.trim())
-      .find((title) => title && title !== UNKNOWN_SUITE_TITLE);
-    samples.set(testId, {
-      suiteTitle: suiteTitle || undefined,
-      failures: sources.slice(0, failuresPerTest).flatMap((source) => {
+    samples.set(
+      testId,
+      sources.flatMap((source) => {
         const message = source.event?.error?.message?.trim();
         if (!message) return [];
         return [
@@ -674,8 +669,8 @@ export const fetchSampleFailures = async (
             timestamp: new Date(source['@timestamp']),
           },
         ];
-      }),
-    });
+      })
+    );
   }
 
   return samples;

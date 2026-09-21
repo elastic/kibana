@@ -347,6 +347,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
           {
             testId: 'jest-flaky-high',
             title: 'flakes a lot',
+            suiteTitle: 'flaky suite',
             filePath: 'a.test.ts',
             configPath: 'jest.config.js',
             owners: ['elastic/team'],
@@ -355,19 +356,16 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         ],
       ])
     );
-    const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures').mockResolvedValue(
-      new Map([
-        [
-          'jest-flaky-high',
-          {
-            suiteTitle: 'flaky suite',
-            failures: [
-              { message: 'boom', buildUrl: 'https://b/1', timestamp: new Date('2026-09-06') },
-            ],
-          },
-        ],
-      ])
-    );
+    const fetchSampleFailures = jest
+      .spyOn(queries, 'fetchSampleFailures')
+      .mockResolvedValue(
+        new Map([
+          [
+            'jest-flaky-high',
+            [{ message: 'boom', buildUrl: 'https://b/1', timestamp: new Date('2026-09-06') }],
+          ],
+        ])
+      );
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
       new Map([
         [

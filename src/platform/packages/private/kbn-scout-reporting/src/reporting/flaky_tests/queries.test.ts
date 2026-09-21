@@ -427,6 +427,7 @@ describe('buildTestMetadataQuery', () => {
 
     expect(query).toContain('test.status IN ("failed", "timedOut")');
     expect(query).toContain('title = MAX(test.title.keyword)');
+    expect(query).toContain('suite_title = MAX(suite.title.keyword)');
     expect(query).toContain('owners = VALUES(test.file.owner)');
     expect(query).toContain('BY test.id');
   });
@@ -492,12 +493,21 @@ describe('fetchTestMetadata', () => {
       {
         test_id: 't1',
         title: 'does a thing',
+        suite_title: 'my suite',
         file_path: 'a.ts',
         config_path: 'a.config.ts',
         owners: 'elastic/team-a',
         areas: ['platform', 'security'],
       },
-      { test_id: 't2', title: null, file_path: null, config_path: null, owners: null, areas: null },
+      {
+        test_id: 't2',
+        title: null,
+        suite_title: null,
+        file_path: null,
+        config_path: null,
+        owners: null,
+        areas: null,
+      },
     ]);
 
     const metadata = await fetchTestMetadata(client, scope, ['jest']);
@@ -505,6 +515,7 @@ describe('fetchTestMetadata', () => {
     expect(metadata.get('t1')).toEqual({
       testId: 't1',
       title: 'does a thing',
+      suiteTitle: 'my suite',
       filePath: 'a.ts',
       configPath: 'a.config.ts',
       owners: ['elastic/team-a'],
@@ -513,57 +524,43 @@ describe('fetchTestMetadata', () => {
     expect(metadata.get('t2')).toEqual({
       testId: 't2',
       title: undefined,
+      suiteTitle: undefined,
       filePath: undefined,
       configPath: undefined,
       owners: [],
       areas: [],
     });
   });
+
+  it('treats the suite title the Jest reporter writes for tests outside any describe block as absent', async () => {
+    const { client } = mockEs([
+      {
+        test_id: 't1',
+        title: 'top-level test',
+        suite_title: 'unknown',
+        file_path: 'a.test.ts',
+        config_path: null,
+        owners: null,
+        areas: null,
+      },
+    ]);
+
+    const metadata = await fetchTestMetadata(client, scope, ['jest']);
+
+    expect(metadata.get('t1')?.suiteTitle).toBeUndefined();
+  });
 });
 
 describe('fetchSampleFailures', () => {
-  it('returns an empty map without a search when there are no tests', async () => {
+  it('returns an empty map without a search when there is nothing to sample', async () => {
     const { client, search } = mockEs([]);
 
     await expect(fetchSampleFailures(client, scope, [], 3)).resolves.toEqual(new Map());
+    await expect(fetchSampleFailures(client, scope, ['t1'], 0)).resolves.toEqual(new Map());
     expect(search).not.toHaveBeenCalled();
   });
 
-  it('still reads the suite title off one document when no failure samples are wanted', async () => {
-    const { client, search } = mockEs([]);
-    search.mockResolvedValue({
-      aggregations: {
-        by_test: {
-          buckets: [
-            {
-              key: 't1',
-              latest: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        '@timestamp': '2026-09-02T00:00:00.000Z',
-                        event: { error: { message: 'boom' } },
-                        suite: { title: 'my suite' },
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    const samples = await fetchSampleFailures(client, scope, ['t1'], 0);
-
-    expect(samples.get('t1')).toEqual({ suiteTitle: 'my suite', failures: [] });
-    const [request] = search.mock.calls[0];
-    expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(1);
-  });
-
-  it('groups the latest attempt failures per test, reads the suite title and skips hits without a message', async () => {
+  it('groups the latest attempt failures per test and skips hits without a message', async () => {
     const { client, search } = mockEs([]);
     search.mockResolvedValue({
       aggregations: {
@@ -579,25 +576,11 @@ describe('fetchSampleFailures', () => {
                         '@timestamp': '2026-09-02T00:00:00.000Z',
                         event: { error: { message: '  boom  ' } },
                         buildkite: { build: { url: 'https://buildkite.com/b/1' } },
-                        // the Jest reporter writes `unknown` for tests outside any describe block
-                        suite: { title: 'unknown' },
                       },
                     },
-                    {
-                      _source: {
-                        '@timestamp': '2026-09-01T00:00:00.000Z',
-                        event: { error: {} },
-                        suite: { title: ' my suite ' },
-                      },
-                    },
+                    { _source: { '@timestamp': '2026-09-01T00:00:00.000Z', event: { error: {} } } },
                   ],
                 },
-              },
-            },
-            {
-              key: 't3',
-              latest: {
-                hits: { hits: [{ _source: { '@timestamp': '2026-09-01T00:00:00.000Z' } }] },
               },
             },
           ],
@@ -605,33 +588,28 @@ describe('fetchSampleFailures', () => {
       },
     });
 
-    const samples = await fetchSampleFailures(client, scope, ['t1', 't2', 't3'], 3);
+    const samples = await fetchSampleFailures(client, scope, ['t1', 't2'], 3);
 
-    expect(samples.get('t1')).toEqual({
-      suiteTitle: 'my suite',
-      failures: [
-        {
-          message: 'boom',
-          buildUrl: 'https://buildkite.com/b/1',
-          timestamp: new Date('2026-09-02T00:00:00.000Z'),
-        },
-      ],
-    });
+    expect(samples.get('t1')).toEqual([
+      {
+        message: 'boom',
+        buildUrl: 'https://buildkite.com/b/1',
+        timestamp: new Date('2026-09-02T00:00:00.000Z'),
+      },
+    ]);
     expect(samples.has('t2')).toBe(false);
-    expect(samples.get('t3')).toEqual({ suiteTitle: undefined, failures: [] });
 
     const [request] = search.mock.calls[0];
     expect(request.query.bool.filter).toEqual(
       expect.arrayContaining([
         { term: { 'event.action': 'test-end' } },
         { terms: { 'test.status': ['failed', 'timedOut'] } },
-        { terms: { 'test.id': ['t1', 't2', 't3'] } },
+        { terms: { 'test.id': ['t1', 't2'] } },
         { terms: { 'buildkite.pipeline.slug': ['kibana-on-merge'] } },
       ])
     );
-    expect(request.aggs.by_test.terms.size).toBe(3);
+    expect(request.aggs.by_test.terms.size).toBe(2);
     expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(3);
-    expect(request.aggs.by_test.aggs.latest.top_hits._source).toContain('suite.title');
   });
 });
 
