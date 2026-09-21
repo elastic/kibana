@@ -81736,7 +81736,7 @@ paths:
                       attributes:
                         additionalProperties: true
                         description: |
-                          Partial monitor attributes. Same fields as `PUT /api/synthetics/monitors/{id}`. Only specified fields are updated. An empty object is rejected.
+                          Attributes to update for the monitor. You can specify the same fields as in `PUT /api/synthetics/monitors/{id}`. An empty object is rejected.
                         minProperties: 1
                         type: object
                       id:
@@ -81814,6 +81814,7 @@ paths:
       summary: Bulk update monitors
       tags:
         - synthetics
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name

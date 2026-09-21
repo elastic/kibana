@@ -650,6 +650,7 @@ paths:
         This is a versioned public API (`elastic-api-version: 2023-10-31`).
       tags:
         - synthetics
+      x-state: added in 9.5.0
       requestBody:
         required: true
         content:
@@ -683,9 +684,9 @@ paths:
                         minProperties: 1
                         additionalProperties: true
                         description: >
-                          Partial monitor attributes. Same fields as
-                          `PUT /api/synthetics/monitors/{id}`. Only specified
-                          fields are updated. An empty object is rejected.
+                          Attributes to update for the monitor. You can specify
+                          the same fields as in `PUT /api/synthetics/monitors/{id}`.
+                          An empty object is rejected.
             examples:
               bulkUpdateRequestExample1:
                 summary: Mixed patches
