@@ -91,7 +91,7 @@ export class AlertZeroPublicPlugin
     return {};
   }
 
-  public start(_core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
+  public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
       return {};
     }
