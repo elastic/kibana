@@ -58,6 +58,8 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
 const CUSTOM_CONTENT_ESQL_INSTRUCTIONS =
   'The query results feed an HTML template that can only loop over the returned rows — it cannot aggregate, group, or sort them. Any grouping or aggregation the content needs must happen in the query itself (STATS ... BY ...), and rows should come back already sorted and limited to what the panel will display.';
 
+const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
 const getExistingTemplate = (data: VisualizationAttachmentData | undefined): string | undefined => {
   if (!data || !isCustomContentVisualization(data)) {
     return undefined;
@@ -190,8 +192,8 @@ const createVisualizationSchema = z.object({
         }
         // Models often dump one empty endpoint. Fill the missing side rather than fail.
         return {
-          from: fromBlank ? 'now-24h' : from,
-          to: toBlank ? 'now' : to,
+          from: fromBlank ? DEFAULT_TIME_RANGE.from : from,
+          to: toBlank ? DEFAULT_TIME_RANGE.to : to,
         };
       },
       z
