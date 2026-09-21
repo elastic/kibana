@@ -1078,4 +1078,53 @@ describe('checkUploadPackageAssetPrivileges', () => {
       })
     );
   });
+
+  it('requires ml:canCreateJob when incoming archive rule ID collides with an untracked ML rule in an additional destination Space (primary-Space upgrade)', async () => {
+    // Regression: primary-Space upgrade fans out to space-a. The archive contains a non-ML rule
+    // with id 'colliding-id'. In space-a there is an existing ML rule with the same id, but it has
+    // no tracked ref in additional_spaces_installed_kibana['space-a'] (untracked — e.g. installed
+    // outside Fleet). The old guard `space === spaceId` skipped incomingRuleIds for space-a, so
+    // the ML collision went undetected and ml:canCreateJob was not required.
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const internalClientForSpaceA = makeSavedObjectsClient([
+      { id: 'colliding-id', attributes: { type: 'machine_learning' } },
+    ]);
+    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+      internalClientForSpaceA
+    );
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'colliding-id', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'space-a': [], // no tracked ref for 'colliding-id' in space-a
+        },
+      },
+    } as any;
+
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveSignals: {
+        gatedTypesFound: new Set([KibanaAssetType.securityRule]),
+        hasMlSecurityRules: false,
+        incomingRuleIds: ['colliding-id'],
+      },
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('space-a');
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      expect.arrayContaining(['space-a']),
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
+  });
 });

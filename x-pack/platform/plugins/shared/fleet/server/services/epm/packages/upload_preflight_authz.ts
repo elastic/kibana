@@ -232,7 +232,7 @@ export async function checkUploadPackageAssetPrivileges({
       const refRuleIds = (refs ?? [])
         .filter((ref) => ref.type === KibanaSavedObjectType.securityRule)
         .map((ref) => ref.id);
-      const archiveRuleIds = space === spaceId ? (signals.incomingRuleIds ?? []) : [];
+      const archiveRuleIds = signals.incomingRuleIds ?? [];
       const ruleIds = [...new Set([...refRuleIds, ...archiveRuleIds])];
       if (ruleIds.length > 0) {
         const clientForSpace = usePrimaryRefs
