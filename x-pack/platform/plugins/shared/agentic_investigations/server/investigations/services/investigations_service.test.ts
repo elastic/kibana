@@ -132,4 +132,23 @@ describe('InvestigationsService.updateAssignees', () => {
     expect(error).toBeInstanceOf(UnknownAssigneesError);
     expect(error.message).toContain('"uid-missing"');
   });
+
+  it('returns a one-element array when ES collapses the stored value to a bare string', async () => {
+    // Elasticsearch's `flattened` field type collapses a single-element array to a bare
+    // string on round-trip. patchMetadata returns the stored document, so after writing
+    // ["uid-1"] we may read back "uid-1" (not ["uid-1"]). readAssignees must handle this.
+    const conversation = makeConversation({ metadata: { status: 'open', assignees: [] } });
+    const client: ConversationPublicClient = {
+      get: jest.fn().mockResolvedValue(conversation),
+      patchMetadata: jest.fn().mockResolvedValue({
+        conversation: { ...conversation, metadata: { status: 'open', assignees: 'uid-1' } },
+        changedFields: ['assignees'],
+      }),
+    } as unknown as ConversationPublicClient;
+    const service = makeService(client, ['uid-1']);
+
+    const result = await service.updateAssignees(request, 'inv-1', { assignees: ['uid-1'] });
+
+    expect(result).toEqual({ assignees: ['uid-1'] });
+  });
 });

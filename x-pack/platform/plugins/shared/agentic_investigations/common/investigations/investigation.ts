@@ -10,6 +10,7 @@ import {
   CONVERSATION_ID_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
+import { MAX_INVESTIGATION_ASSIGNEES } from './constants';
 
 /**
  * A single assignee is a user profile uid, bounded to the length the
@@ -24,15 +25,15 @@ export const investigationIdParamsSchema = z.object({
 export type InvestigationIdParams = z.infer<typeof investigationIdParamsSchema>;
 
 /**
- * Body for PATCH /internal/investigations/investigations/{id}/assignees.
+ * Body for PATCH /internal/investigations/{id}/assignees.
  *
  * Overwrite semantics: the supplied list replaces whatever is stored. An empty
- * array removes all assignees. Bounded at 100 to match the escalation collaborator
- * limit so a private escalation linked to an investigation can mirror its assignees
- * one-for-one without hitting a separate ceiling.
+ * array removes all assignees. Bounded at MAX_INVESTIGATION_ASSIGNEES to match
+ * the escalation collaborator limit so an investigation and its escalation can
+ * mirror assignees one-for-one without hitting a separate ceiling.
  */
 export const updateAssigneesRequestSchema = z.object({
-  assignees: z.array(assigneeSchema).max(100),
+  assignees: z.array(assigneeSchema).max(MAX_INVESTIGATION_ASSIGNEES),
 });
 export type UpdateAssigneesRequest = z.infer<typeof updateAssigneesRequestSchema>;
 

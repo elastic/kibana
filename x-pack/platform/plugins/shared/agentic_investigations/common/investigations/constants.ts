@@ -7,9 +7,7 @@
 
 import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
 
-/** Base segment; individual resource URLs are nested under this. */
-export const INVESTIGATIONS_INTERNAL_URL = AGENTIC_INVESTIGATIONS_INTERNAL_URL as const;
-export const INVESTIGATION_BY_ID_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}` as const;
+export const INVESTIGATION_BY_ID_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/{id}` as const;
 export const INVESTIGATION_ASSIGNEES_URL = `${INVESTIGATION_BY_ID_URL}/assignees` as const;
 
 /**
@@ -19,12 +17,13 @@ export const INVESTIGATION_ASSIGNEES_URL = `${INVESTIGATION_BY_ID_URL}/assignees
  */
 export const INVESTIGATION_TEMPLATE_ID = 'investigation' as const;
 
-/** Pagination bounds for investigation list queries (future use). */
-export const MAX_INVESTIGATIONS_PAGE_SIZE = 50;
-
 /**
- * UI capabilities. Scoped to the investigations sub-feature so they cannot
- * be confused with proposal or escalation capabilities.
+ * Maximum number of assignees per investigation. Matches the escalation
+ * collaborator ceiling so an investigation and its escalation can mirror
+ * assignees one-for-one without hitting a separate limit.
  */
+export const MAX_INVESTIGATION_ASSIGNEES = 100;
+
+/** UI capabilities. */
 export const INVESTIGATIONS_UI_CAPABILITY_SHOW = 'showInvestigations' as const;
 export const INVESTIGATIONS_UI_CAPABILITY_MANAGE = 'manageInvestigations' as const;

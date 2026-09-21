@@ -6,7 +6,6 @@
  */
 
 import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
-export { INVESTIGATION_TEMPLATE_ID } from '../investigations/constants';
 
 export const ESCALATIONS_INTERNAL_URL =
   `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/escalations` as const;

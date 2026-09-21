@@ -24,14 +24,17 @@ const readString = (value: MetadataFieldValue | undefined): string | undefined =
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
 /**
- * `assignees` is a `TEXT_ARRAY`, but `Investigation.assignee` is singular because the header
- * renders one avatar. The first entry is the one shown until the type carries the whole list.
+ * Reads the stored assignees from conversation metadata, handling the ES `flattened`
+ * field behaviour where a single-element array collapses to a bare string on round-trip.
  */
-const readFirstAssignee = (value: MetadataFieldValue | undefined): string | null => {
+const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
   if (Array.isArray(value)) {
-    return readString(value[0]) ?? null;
+    return value.flatMap((v) => (typeof v === 'string' && v.length > 0 ? [v] : []));
   }
-  return readString(value) ?? null;
+  if (typeof value === 'string' && value.length > 0) {
+    return [value];
+  }
+  return [];
 };
 
 /**
@@ -125,7 +128,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     watch_execution_id: readString(metadata.workflow_execution_id) ?? '',
     status: readString(metadata.status),
     severity: readString(metadata.severity),
-    assignee: readFirstAssignee(metadata.assignees),
+    assignees: readAssignees(metadata.assignees),
     // `summary` is the long form; `description` is the single-line one. Prefer the richer field and
     // fall back, because a template only requires `status`.
     summary: readString(metadata.summary) ?? readString(metadata.description),

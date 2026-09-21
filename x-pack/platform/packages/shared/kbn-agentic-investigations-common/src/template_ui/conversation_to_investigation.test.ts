@@ -85,18 +85,26 @@ describe('conversationToInvestigation', () => {
     expect(result.summary).toBe('The long form.');
   });
 
-  it('takes the first assignee, because the header renders a single avatar', () => {
+  it('maps assignees from conversation metadata to the assignees list', () => {
     const result = conversationToInvestigation(
       conversation({ metadata: { assignees: ['first.analyst', 'second.analyst'] } })
     );
 
-    expect(result.assignee).toBe('first.analyst');
+    expect(result.assignees).toEqual(['first.analyst', 'second.analyst']);
   });
 
-  it('reports no assignee for an empty assignees list', () => {
+  it('returns an empty assignees list for an empty metadata assignees array', () => {
     const result = conversationToInvestigation(conversation({ metadata: { assignees: [] } }));
 
-    expect(result.assignee).toBeNull();
+    expect(result.assignees).toEqual([]);
+  });
+
+  it('handles ES flattened-field bare-string read-back as a one-element list', () => {
+    const result = conversationToInvestigation(
+      conversation({ metadata: { assignees: 'bare.analyst' as unknown as string[] } })
+    );
+
+    expect(result.assignees).toEqual(['bare.analyst']);
   });
 
   it('leaves optional fields undefined rather than inventing them', () => {
@@ -105,7 +113,7 @@ describe('conversationToInvestigation', () => {
     expect(result.status).toBeUndefined();
     expect(result.severity).toBeUndefined();
     expect(result.summary).toBeUndefined();
-    expect(result.assignee).toBeNull();
+    expect(result.assignees).toEqual([]);
     // No metadata field declares a watch, so this stays empty rather than guessing one.
     expect(result.watch_id).toBe('');
     expect(result.watch_execution_id).toBe('');

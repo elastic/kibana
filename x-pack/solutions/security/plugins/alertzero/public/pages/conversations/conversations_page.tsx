@@ -33,10 +33,11 @@ import { AlertZeroPageSection } from '../../components/layout/alertzero_page_sec
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useProposalsList } from '../../hooks/use_proposals_api';
+import { useUpdateAssignees } from '../../hooks/use_investigations_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
-import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
+import { QUEUE_PAGE_INFO, DECISION_ERRORS, ASSIGN_ERROR_MESSAGE } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
@@ -59,6 +60,7 @@ export const ConversationsPage: React.FC = () => {
   const { data, isLoading, error } = useProposalsList();
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
+  const updateAssignees = useUpdateAssignees();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
@@ -159,6 +161,32 @@ export const ConversationsPage: React.FC = () => {
       );
     },
     [approve, closeApproval, onDecisionError, proposalsById]
+  );
+
+  // The assign modal calls onAssign(assignee, rationale). We write the assignees list via
+  // the investigations API, close on success, and surface any error as a danger toast while
+  // keeping the modal open so the user can retry.
+  // `modalState.recordId` carries the proposal id; the conversation id lives on the raw proposal.
+  const onAssignSubmit = useCallback(
+    (assignee: string) => {
+      const conversationId = modalState.recordId
+        ? proposalsById.get(modalState.recordId)?.conversationId
+        : undefined;
+
+      if (!conversationId) {
+        notifications?.toasts.addDanger(ASSIGN_ERROR_MESSAGE);
+        return;
+      }
+
+      updateAssignees.mutate(
+        { id: conversationId, assignees: assignee ? [assignee] : [] },
+        {
+          onSuccess: closeModal,
+          onError: () => notifications?.toasts.addDanger(ASSIGN_ERROR_MESSAGE),
+        }
+      );
+    },
+    [modalState.recordId, proposalsById, updateAssignees, closeModal, notifications]
   );
 
   const renderDismissModal = useCallback(
@@ -277,6 +305,7 @@ export const ConversationsPage: React.FC = () => {
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
+        onAssignSubmit={onAssignSubmit}
         renderDismissModal={renderDismissModal}
       />
 

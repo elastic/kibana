@@ -22,6 +22,11 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   }),
 });
 
+/** Shown as a danger toast when the assignee update API call fails. */
+export const ASSIGN_ERROR_MESSAGE = i18n.translate('xpack.alertzero.queue.assignFailed', {
+  defaultMessage: 'Unable to update the assignee. Try again.',
+});
+
 /** Keyed by the HTTP status the proposals route returns for a refused decision. */
 export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Object.freeze({
   400: i18n.translate('xpack.alertzero.queue.decisionInvalidInput', {

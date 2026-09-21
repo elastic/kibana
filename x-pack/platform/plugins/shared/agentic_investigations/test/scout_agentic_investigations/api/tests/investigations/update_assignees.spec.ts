@@ -21,10 +21,12 @@ apiTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
+    let editorCookieHeader: Record<string, string>;
     let investigationId: string;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser('editor'));
 
       // Create the investigation through the Agent Builder public API so the index
       // is managed by Kibana (direct ES writes are rejected on restricted indices).
@@ -94,5 +96,22 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toContain('"uid-does-not-exist-abc123"');
     });
+
+    apiTest(
+      'returns 404 for a non-owner — current limitation: only owner can mutate (tracked in follow-up)',
+      async ({ apiClient }) => {
+        // The agent_builder conversation client enforces owner-only access for patchMetadata,
+        // so a user who holds manage_investigations but did not create the conversation gets
+        // 404 (not 403) on PATCH. This test documents the current behaviour; a follow-up issue
+        // will address it once agent_builder exposes a non-owner write access mode.
+        const response = await apiClient.patch(INVESTIGATION_ASSIGNEES_PATH(investigationId), {
+          headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
+          body: { assignees: [] },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(404);
+      }
+    );
   }
 );

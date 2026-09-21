@@ -14,10 +14,10 @@ import {
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import {
-  ESCALATION_TEMPLATE_ID,
-  INVESTIGATION_TEMPLATE_ID,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_TEMPLATE_ID,
 } from '../../../common/escalations/constants';
+import { INVESTIGATION_TEMPLATE_ID } from '../../../common/investigations/constants';
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();

@@ -14,6 +14,18 @@ import type {
 } from '../../../common/investigations/investigation';
 import { NotAnInvestigationError, UnknownAssigneesError } from './errors';
 
+/**
+ * Reads the stored assignees from conversation metadata, handling the ES `flattened`
+ * field behaviour where a single-element array is collapsed to a bare string on
+ * round-trip. Returns the list as-is when it is already an array, wraps a bare string
+ * in a one-element array, and returns an empty array for any other value.
+ */
+const readAssignees = (stored: unknown): string[] => {
+  if (Array.isArray(stored)) return stored as string[];
+  if (typeof stored === 'string') return [stored];
+  return [];
+};
+
 export interface InvestigationsServiceDeps {
   logger: Logger;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
@@ -21,6 +33,16 @@ export interface InvestigationsServiceDeps {
   userProfile: CoreStart['userProfile'];
 }
 
+/**
+ * Server-side service for investigation operations.
+ *
+ * **Owner-only constraint**: `ConversationPublicClient.patchMetadata` delegates to an
+ * owner-only write path; non-owners receive a 404 (masked as not-found) rather than a
+ * 403. A caller holding `manage_investigations` who did not create the conversation will
+ * therefore see a 404 from `updateAssignees`. This is a known limitation of the
+ * underlying agent_builder conversation ACL — see the follow-up issue linked in the
+ * Scout spec for `update_assignees`.
+ */
 export class InvestigationsService {
   private readonly logger: Logger;
   private readonly getConversationClient: (
@@ -68,8 +90,7 @@ export class InvestigationsService {
       assignees: body.assignees,
     });
 
-    const stored = conversation.metadata?.assignees;
-    return { assignees: Array.isArray(stored) ? (stored as string[]) : [] };
+    return { assignees: readAssignees(conversation.metadata?.assignees) };
   }
 
   /**
