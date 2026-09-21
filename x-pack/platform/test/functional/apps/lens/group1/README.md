@@ -15,23 +15,17 @@ This directory contains a set of Lens Functional Test Runner (FTR) suites that r
 
 ## Where To Add Tests
 
-Use the file that matches the main behavior under test:
+Do not add new tests here. Stateful coverage lives in Scout
+(`x-pack/platform/plugins/shared/lens/test/scout/smokescreen`).
 
-- `chart_creation.ts`: create, save, reopen, change data view, or edit saved visualization metadata.
-- `layers.ts`: create, duplicate, remove, switch, or validate Lens layers and layer-specific behavior (CCS-only; prefer Scout smokescreen for new coverage).
-- `dimension_editor.ts`: edit dimensions, operations, labels, formats, references, percentile values, or incomplete dimension state (CCS-only; prefer Scout smokescreen for new coverage).
-- `chart_style_settings.ts`: change chart appearance or chart interactions, such as axes, value labels, point visibility, visual options, or legend filtering (CCS-only; prefer Scout smokescreen for new coverage).
-- `ad_hoc_data_view.ts`: flows specific to ad hoc data views.
-- `multiple_data_views.ts`: flows involving more than one data view.
-- `inspector.ts`: Lens inspector requests and adapter behavior.
+The files left in this directory run only for CCS (`config.ccs.ts`):
 
-If a test touches several areas, place it where the assertion would be most useful to someone debugging a failure. For example, a test that switches chart types only to reach a style setting belongs in `chart_style_settings.ts`.
+- `chart_switching.ts`
+- `layers.ts`
+- `dimension_editor.ts`
+- `chart_style_settings.ts`
 
-Chart-switching, layers, dimension-editor and chart-style-settings coverage now live in Scout, under
-`x-pack/platform/plugins/shared/lens/test/scout/smokescreen`. `chart_switching.ts`, `layers.ts`,
-`dimension_editor.ts` and `chart_style_settings.ts` remain here but `index.ts` loads them only for
-the cross-cluster-search run (`config.ccs.ts`), which Scout cannot reproduce yet — do not add new
-tests to them.
+They remain here because Scout cannot reproduce the cross-cluster-search run yet.
 
 ## Running Locally
 
