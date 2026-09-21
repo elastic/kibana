@@ -77,6 +77,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => 
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions'),
   useFetchGroupActions: jest.fn(),
 }));
 
@@ -235,7 +236,7 @@ beforeEach(() => {
   mockUseFetchGroupActions.mockReturnValue({
     data: new Map([
       [
-        'group-1',
+        'rule-1:group-1',
         {
           groupHash: 'group-1',
           ruleId: 'rule-1',
@@ -308,6 +309,32 @@ describe('EpisodeDetailsPage', () => {
     // this just proves the header is wired up to badges at all.
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
       'Active'
+    );
+  });
+
+  it('uses the rule and group hash to render group-derived header state', () => {
+    mockUseFetchGroupActions.mockReturnValue({
+      data: new Map([
+        [
+          'rule-1:group-1',
+          {
+            groupHash: 'group-1',
+            ruleId: 'rule-1',
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            lastSnoozeAction: null,
+            snoozeExpiry: null,
+            tags: [],
+            lastSnoozeActor: null,
+            lastDeactivateActor: null,
+          },
+        ],
+      ]),
+    } as unknown as ReturnType<typeof useFetchGroupActions>);
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
+      'Inactive'
     );
   });
 

@@ -31,7 +31,10 @@ import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
+import {
+  getGroupActionKey,
+  useFetchGroupActions,
+} from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
@@ -125,7 +128,9 @@ export function EpisodeDetailsPage() {
   });
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
-  const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
+  const groupAction = groupHash
+    ? groupActionsMap?.get(getGroupActionKey(ruleId, groupHash))
+    : undefined;
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
