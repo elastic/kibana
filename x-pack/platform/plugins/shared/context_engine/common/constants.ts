@@ -10,6 +10,9 @@ export const internalApiPath = '/internal/context_engine';
 
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
+/** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
+export const aiIndexQueryPath = `${aiIndexPath}/_query`;
+export const aiIndexDescribePath = `${aiIndexByIdPath}/_describe`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
 export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
 export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
@@ -29,6 +32,18 @@ export const signalsPath = `${internalApiPath}/signals`;
 
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
+
+/** Read-only internal route for searching data streams, backing the AI index trace picker. */
+export const dataStreamsSearchPath = `${internalApiPath}/data_streams`;
+
+/** Version of the internal data streams search API, shared between route registration and the browser client. */
+export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
+
+/** Cap on the number of data streams returned by the search API (applied after filtering hidden/managed streams out). */
+export const MAX_DATA_STREAM_SEARCH_RESULTS = 50;
+
+/** Bound on the free-text `search` query param, to prevent unbounded-input DoS. */
+export const MAX_DATA_STREAM_SEARCH_LENGTH = 256;
 
 /** Max number of tag groups returned by the grouped Signals list. */
 export const MAX_SIGNAL_GROUPS = 100;
@@ -79,6 +94,24 @@ export const MAX_AI_INDEX_TRACES = 100;
 export const MAX_AI_INDEX_TRACE_VALUE_LENGTH = 10240;
 /** Cap on comma-separated index/data-stream/alias expressions inside a single 'index' trace value. */
 export const MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS = 50;
+
+/** AI-index ES|QL query API bounds. */
+export const MAX_AI_INDEX_QUERY_LENGTH = 10000;
+export const MAX_AI_INDEX_QUERY_PARAMS = 100;
+export const MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH = 256;
+export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
+
+/** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
+export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;
+export const MAX_AI_INDEX_QUERY_LIMIT = 1000;
+export const MAX_AI_INDEX_QUERY_RESPONSE_BYTES = 20 * 1024 * 1024;
+
+/** AI-index describe API bounds. */
+export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
+/** Byte cap per `_mapping` / `_field_caps` response; field cap applies after download. */
+export const MAX_AI_INDEX_DESCRIBE_METADATA_BYTES = 20 * 1024 * 1024;
+export const MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS = 20;
+export const MAX_AI_INDEX_DESCRIBE_TAG_COUNTS = 20;
 
 export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
