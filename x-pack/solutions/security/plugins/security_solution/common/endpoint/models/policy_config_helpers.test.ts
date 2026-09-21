@@ -31,6 +31,19 @@ describe('Policy Config helpers', () => {
       expect(disableProtections(policyFactory())).toEqual<PolicyConfig>(eventsOnlyPolicy());
     });
 
+    it('leaves an absent custom_yara_signatures absent', () => {
+      const policy = policyFactory();
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        delete policy[os].memory_protection.custom_yara_signatures;
+      }
+
+      const result = disableProtections(policy);
+
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(result[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+      }
+    });
+
     it('does not enable supported fields', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 

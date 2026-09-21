@@ -160,6 +160,11 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   }, policy);
 };
 
+/**
+ * `custom_yara_signatures` is left absent when it was never configured: this helper backs both
+ * `disableProtections` and `ensureOnlyEventCollectionIsAllowed`, and forcing an explicit `false`
+ * here would opt a policy out of the future `??=` backfill for a feature it never had.
+ */
 const getDisabledCommonProtectionsForOS = (
   policy: PolicyConfig,
   os: PolicyOperatingSystem
@@ -171,7 +176,9 @@ const getDisabledCommonProtectionsForOS = (
   memory_protection: {
     ...policy[os].memory_protection,
     mode: ProtectionModes.off,
-    custom_yara_signatures: false,
+    ...(policy[os].memory_protection.custom_yara_signatures === undefined
+      ? {}
+      : { custom_yara_signatures: false }),
   },
   malware: {
     ...policy[os].malware,
