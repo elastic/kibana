@@ -55,6 +55,7 @@ export const caseConfigurationResponseMock: Configuration = {
   customFields: customFieldsConfigurationMock,
   templates: templatesConfigurationMock,
   observableTypes: observableTypesMock,
+  extractObservables: true,
 };
 
 export const caseConfigurationRequest: ConfigurationRequest = {
