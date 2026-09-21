@@ -17,6 +17,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -69,6 +70,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    extractObservables,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -84,6 +86,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onAddNewConnector,
     onChangeConnector,
     onChangeClosureType,
+    onChangeExtractObservables,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -173,6 +176,28 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                 {hasMinimumLicensePermissions && showObservableTypesSection && (
                   <EuiHorizontalRule margin="l" />
                 )}
+
+                {showObservableTypesSection && (
+                  <SettingsSection
+                    data-test-subj="cases-redesign-extract-observables-section"
+                    title={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_TITLE}
+                    description={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_DESC}
+                  >
+                    <EuiSwitch
+                      label={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_LABEL}
+                      checked={extractObservables}
+                      onChange={(e) => onChangeExtractObservables(e.target.checked)}
+                      disabled={
+                        isPersistingConfiguration ||
+                        isLoadingCaseConfiguration ||
+                        !permissions.settings
+                      }
+                      data-test-subj="extract-observables-default-switch"
+                    />
+                  </SettingsSection>
+                )}
+
+                {showObservableTypesSection && <EuiHorizontalRule margin="l" />}
 
                 {showObservableTypesSection && (
                   <SettingsSection

@@ -292,6 +292,28 @@ export const DEPRECATED_BADGE = i18n.translate('xpack.cases.configureCases.depre
   defaultMessage: 'Deprecated',
 });
 
+export const EXTRACT_OBSERVABLES_DEFAULT_TITLE = i18n.translate(
+  'xpack.cases.configureCases.extractObservablesDefaultTitle',
+  {
+    defaultMessage: 'Auto-extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_DEFAULT_DESC = i18n.translate(
+  'xpack.cases.configureCases.extractObservablesDefaultDesc',
+  {
+    defaultMessage:
+      'Automatically extract observables from alerts when they are added to new cases. Individual cases can override this setting.',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_DEFAULT_LABEL = i18n.translate(
+  'xpack.cases.configureCases.extractObservablesDefaultLabel',
+  {
+    defaultMessage: 'Auto-extract observables by default',
+  }
+);
+
 export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
   defaultMessage: 'Cases settings',
 });
