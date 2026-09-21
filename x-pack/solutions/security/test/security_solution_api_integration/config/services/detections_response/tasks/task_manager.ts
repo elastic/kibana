@@ -8,6 +8,7 @@
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { waitFor } from '../wait_for';
 
 export const taskHasRun = async (taskId: string, kbn: KbnClient, after: Date): Promise<boolean> => {
   const task = await kbn.savedObjects.get({
@@ -28,10 +29,24 @@ export const launchTask = async (
 ): Promise<Date> => {
   logger.info(`Launching task ${taskId}`);
 
-  await kbn.request({
-    method: 'POST',
-    path: `/internal/ftr/task_manager/${taskId}/run_soon`,
-  });
+  await waitFor(
+    async () => {
+      const { data } = await kbn.request<{ error?: string; conflict?: boolean }>({
+        method: 'POST',
+        path: `/internal/ftr/task_manager/${taskId}/run_soon`,
+      });
+
+      if (data.conflict || data.error?.includes('currently running')) {
+        return false;
+      }
+      if (data.error) {
+        throw new Error(`Failed to launch task ${taskId}: ${data.error}`);
+      }
+      return true;
+    },
+    'launchTask',
+    logger
+  );
 
   // runSoon sets runAt to now, so capture the threshold after it returns: taskHasRun then stays false until the post-run reschedule.
   const after = new Date();

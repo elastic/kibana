@@ -280,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
       const opts = {
         eventTypes: params.eventTypes,
         withTimeoutMs: 1000,
-        fromTimestamp: new Date().toISOString(),
+        fromTimestamp: runAt.toISOString(),
       };
 
       // .ds-<ds-name>-YYYY.MM.DD-NNNNNN

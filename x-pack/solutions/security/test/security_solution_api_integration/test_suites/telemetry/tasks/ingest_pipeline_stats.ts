@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
         const opts = {
           eventTypes: [INGEST_PIPELINES_STATS_EBT],
           withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
+          fromTimestamp: runAt.toISOString(),
         };
 
         await waitFor(
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
         const opts = {
           eventTypes: [INGEST_PIPELINES_STATS_EBT],
           withTimeoutMs: 1000,
-          fromTimestamp: new Date().toISOString(),
+          fromTimestamp: runAt.toISOString(),
         };
 
         await waitFor(
