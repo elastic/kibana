@@ -1,5 +1,5 @@
 {
-  "sha1": "c7022f20e4b80b0975f11764adc2decc4943387d",
+  "sha1": "e99f07b20e8e15bdd679180e446e2e6ecf85a386",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -109,19 +109,6 @@
       }
     },
     {
-      "id": "f85d28e0ed04b82-fdd3ee6f17f77d8",
-      "title": "Flyout System - push padding scenarios two system push sessions, Back from the newest, ends with no padding",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 167,
-        "column": 15
-      }
-    },
-    {
       "id": "f85d28e0ed04b82-135df77982b40a3",
       "title": "Flyout System - push padding scenarios two system push sessions, close oldest first, keeps the newest open",
       "expectedStatus": "skipped",
@@ -130,8 +117,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/push_padding_scenarios.spec.ts",
-        "line": 190,
-        "column": 19
+        "line": 169,
+        "column": 21
       }
     }
   ]
