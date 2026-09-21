@@ -127891,10 +127891,11 @@ components:
               properties:
                 placement:
                   default: before
-                  description: Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.
+                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.'
                   enum:
                     - before
                     - after
+                    - tooltip
                   type: string
                 visible:
                   default: false
