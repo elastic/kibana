@@ -81675,6 +81675,151 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/synthetics/monitors/_bulk_update:
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/_bulk_update</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Partially update multiple monitors in a single request.
+        Each `updates` entry has its own `id` and `attributes` patch, so one request can apply a different change per monitor. Unspecified fields are left unchanged. Patches use the same merge, validate, and encrypt path as `PUT /api/synthetics/monitors/{id}`.
+        For private-location monitors, Fleet is synced once for the batch instead of once per monitor.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      operationId: put-synthetic-monitors-bulk-update
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkUpdateRequestExample1:
+                description: |
+                  Run `PUT /api/synthetics/monitors/_bulk_update` to apply a different partial update to each monitor.
+                summary: Mixed patches
+                value: |-
+                  {
+                    "updates": [
+                      {
+                        "id": "monitor1-id",
+                        "attributes": {
+                          "enabled": false
+                        }
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "attributes": {
+                          "tags": ["bulk-patched"]
+                        }
+                      },
+                      {
+                        "id": "monitor3-id",
+                        "attributes": {
+                          "schedule": {
+                            "number": "15",
+                            "unit": "m"
+                          }
+                        }
+                      }
+                    ]
+                  }
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                updates:
+                  description: |
+                    Monitors to update. Minimum 1 entry, maximum 1000. Each `id` may appear at most once. `attributes` must contain at least one field.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: true
+                        description: |
+                          Attributes to update for the monitor. You can specify the same fields as in `PUT /api/synthetics/monitors/{id}`. An empty object is rejected.
+                        minProperties: 1
+                        type: object
+                      id:
+                        description: The monitor config ID to update.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - id
+                      - attributes
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - updates
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkUpdateResponseExample1:
+                  description: A response from a bulk update with one failure.
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "updated": true
+                        },
+                        {
+                          "id": "missing-id",
+                          "updated": false,
+                          "error": "Monitor id missing-id not found!"
+                        },
+                        {
+                          "id": "monitor3-id",
+                          "updated": true
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+                    type: array
+                  result:
+                    items:
+                      type: object
+                      properties:
+                        error:
+                          description: Present when `updated` is `false`.
+                          type: string
+                        id:
+                          description: The monitor config ID from the request.
+                          type: string
+                        updated:
+                          description: |
+                            If `true`, the monitor was updated. If `false`, see `error`.
+                          type: boolean
+                      required:
+                        - id
+                        - updated
+                    type: array
+                required:
+                  - result
+          description: |
+            A successful response. The `result` array is in request order. Per-id failures (not found, validation, Fleet sync) set `updated: false` and `error` without failing the whole batch. `errors` is present only when there are service-level sync errors.
+        '400':
+          description: |
+            Bad request. Returned when `updates` is missing or empty, an `attributes` object is empty, or the same `id` appears more than once.
+      summary: Bulk update monitors
+      tags:
+        - synthetics
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/synthetics/monitors/{id}:
     delete:
       description: |
