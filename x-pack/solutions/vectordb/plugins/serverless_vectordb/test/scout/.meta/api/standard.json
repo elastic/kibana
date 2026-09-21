@@ -1,9 +1,65 @@
 {
-  "sha1": "f6c436bc2b89a4b8fd499932c4bda4a2220908e2",
+  "sha1": "2f1c3b95517970c4378a32fa349ee81fd5120995",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "5e57e2357f851e8-876f2123a7bdd9c",
+      "title": "Vector DB onboarding API key API issues an onboarding key when the caller has none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/api_key.spec.ts",
+        "line": 27,
+        "column": 11
+      }
+    },
+    {
+      "id": "5e57e2357f851e8-83dce555e295a61",
+      "title": "Vector DB onboarding API key API does not issue a second key while one is active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/api_key.spec.ts",
+        "line": 44,
+        "column": 13
+      }
+    },
+    {
+      "id": "5e57e2357f851e8-35b0ba00a0a4ba8",
+      "title": "Vector DB onboarding API key API names the key as requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/api_key.spec.ts",
+        "line": 58,
+        "column": 21
+      }
+    },
+    {
+      "id": "5e57e2357f851e8-19db395a51fcc1e",
+      "title": "Vector DB onboarding API key API rejects an unauthenticated request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/api_key.spec.ts",
+        "line": 77,
+        "column": 71
+      }
+    },
     {
       "id": "f501f95e1e7f128-298eb9245c64f5f",
       "title": "Vector DB deployment stats API privileges reports only the indices and documents the caller can read",
@@ -30,6 +86,104 @@
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats_privileges.spec.ts",
         "line": 102,
         "column": 15
+      }
+    },
+    {
+      "id": "18a5e382a53dd93-f2da57cb6d1029e",
+      "title": "Vector DB deployment stats API returns a value for every home page stat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats.spec.ts",
+        "line": 32,
+        "column": 11
+      }
+    },
+    {
+      "id": "18a5e382a53dd93-0e299ec82e1efbc",
+      "title": "Vector DB deployment stats API rejects an unauthenticated request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats.spec.ts",
+        "line": 57,
+        "column": 21
+      }
+    },
+    {
+      "id": "1c417c8c40171bc-e9a1bcba74c7a28",
+      "title": "Vector DB starred dashboards count API counts only the starred dashboards that still exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
+        "line": 32,
+        "column": 47
+      }
+    },
+    {
+      "id": "1c417c8c40171bc-bd4641be4962f36",
+      "title": "Vector DB starred dashboards count API counts nothing when no dashboards are starred",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
+        "line": 43,
+        "column": 80
+      }
+    },
+    {
+      "id": "1c417c8c40171bc-959aa225535aeab",
+      "title": "Vector DB starred dashboards count API resolves dashboards a viewer can read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
+        "line": 56,
+        "column": 23
+      }
+    },
+    {
+      "id": "1c417c8c40171bc-3d924643cd06f21",
+      "title": "Vector DB starred dashboards count API refuses more dashboard IDs than a user can favorite",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
+        "line": 66,
+        "column": 47
+      }
+    },
+    {
+      "id": "1c417c8c40171bc-e107e757d6a1c01",
+      "title": "Vector DB starred dashboards count API rejects an unauthenticated request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
+        "line": 79,
+        "column": 7
       }
     }
   ]
