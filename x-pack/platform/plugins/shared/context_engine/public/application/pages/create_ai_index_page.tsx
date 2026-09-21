@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
+import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
@@ -87,6 +88,7 @@ export const CreateAiIndexPage = () => {
   const { createAiIndex, isCreating } = useCreateAiIndex();
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
+  const [trace, setTrace] = useState<EditableAiIndexTrace | undefined>();
   const [storageType, setStorageType] = useState<AiIndexType>('index');
   const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
@@ -100,6 +102,7 @@ export const CreateAiIndexPage = () => {
       description,
       storageType,
       sources: [],
+      trace,
     });
     if (created) {
       navigateToContextEngine(getAiIndexDetailPath(created.id));
@@ -201,6 +204,30 @@ export const CreateAiIndexPage = () => {
               )}
             />
           </EuiFormRow>
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel hasBorder paddingSize="l" data-test-subj="contextCreateAiIndexTracesPanel">
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.contextEngine.createAiIndex.traces.title"
+                defaultMessage="Agent traces"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.contextEngine.createAiIndex.traces.description"
+                defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <TraceSelector value={trace} onChange={setTrace} />
         </EuiPanel>
 
         <EuiSpacer size="l" />
