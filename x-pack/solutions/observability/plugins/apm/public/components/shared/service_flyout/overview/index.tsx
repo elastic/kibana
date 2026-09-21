@@ -39,7 +39,7 @@ interface AppliedTransactionFilters {
   rangeFrom: string;
   rangeTo: string;
   start: string;
-  end: string
+  end: string;
   transactionType: string;
 }
 
