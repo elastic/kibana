@@ -11,7 +11,7 @@ import { createSignificantSecurityEventAttachmentType } from './significant_secu
 import { createHuntCorrelationAttachmentType } from './hunt_correlation';
 
 /**
- * Registers the three Hunt Watch attachment types (see project-alertzero #206) on the
+ * Registers the three Hunt Watch attachment types on the
  * Agent Builder attachment registry. Must be called from `setup()`, inside the plugin's
  * existing `config.enabled` guard — the corresponding allow-list entries live in
  * `AGENT_BUILDER_BUILTIN_ATTACHMENTS` and registering an id absent from that allow-list

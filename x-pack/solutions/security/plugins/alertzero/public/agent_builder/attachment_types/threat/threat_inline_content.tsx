@@ -49,6 +49,16 @@ export const THREAT_EXTERNAL_REF_LINK_TEST_ID = 'alertzeroThreatExternalRefLink'
 
 const IOC_VISIBLE_LIMIT = 8;
 
+/** Only render http(s) external references; threat-report URLs are untrusted feed content. */
+const isHttpExternalUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const cellStyles = css`
   overflow-wrap: anywhere;
 `;
@@ -195,7 +205,9 @@ const renderEnrichedSections = ({
 
   const sections: React.ReactNode[] = [];
 
-  const externalRefsWithUrl = liveData.externalReferences?.filter((ref) => Boolean(ref.url));
+  const externalRefsWithUrl = liveData.externalReferences?.filter(
+    (ref) => typeof ref.url === 'string' && isHttpExternalUrl(ref.url)
+  );
   if (externalRefsWithUrl?.length) {
     sections.push(
       <div key="external-refs">

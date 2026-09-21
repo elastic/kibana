@@ -109,6 +109,31 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('rejects maps_to_proposal.actionInput when serialized size exceeds 32KB', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        maps_to_proposal: {
+          actionInput: { blob: 'x'.repeat(40_000) },
+        },
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects empty event_id or source_index on events', async () => {
+      const emptyEventId = await attachmentType.validate({
+        ...validPayload,
+        events: [{ event_id: '', source_index: 'logs-*' }],
+      });
+      const emptySourceIndex = await attachmentType.validate({
+        ...validPayload,
+        events: [{ event_id: 'evt-1', source_index: '' }],
+      });
+
+      expect(emptyEventId.valid).toBe(false);
+      expect(emptySourceIndex.valid).toBe(false);
+    });
+
     it('rejects a non-integer truncated_original_count', async () => {
       const result = await attachmentType.validate({
         ...validPayload,

@@ -18,12 +18,12 @@ export const HUNT_CORRELATION_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.huntCor
 
 const anchorSchema = z.object({
   kind: z.enum(['hash', 'ioc_set_hash', 'actor']),
-  value: z.string().max(2048),
+  value: z.string().min(1).max(2048),
 });
 
 const diamondScoreSchema = z.object({
   vertex: z.enum(['adversary', 'capability', 'infrastructure', 'victim']),
-  related_report_id: z.string().max(512),
+  related_report_id: z.string().min(1).max(512),
   score: z.number().min(0).max(1),
 });
 

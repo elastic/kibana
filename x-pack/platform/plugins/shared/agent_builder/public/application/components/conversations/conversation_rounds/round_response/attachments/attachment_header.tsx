@@ -130,8 +130,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const hasActionButtons = actionButtons && actionButtons.length > 0;
   const showPreviewClose = previewBadgeState === 'previewing' && Boolean(onClosePreview);
   // Always render the title/icon header, even when there are no trailing actions.
-  // Attachments like Significant Security Event are content-only (no Discover exit) but
-  // still need the chrome title from getLabel.
+  // Content-only attachments still need the chrome title from getLabel.
   const hasTrailingActions = hasActionButtons || showPreviewClose || hasCloseButton;
 
   return (

@@ -19,7 +19,7 @@ export const THREAT_ATTACHMENT_ID = ALERTZERO_ATTACHMENT_TYPES.threat;
 /**
  * By-reference trigger carrier: the payload names a threat report by id, plus captured
  * display fallbacks. The live document itself is resolved client-side, space-projected,
- * by the `security.threat` renderer (see #206) — the server only validates and formats the
+ * by the `security.threat` renderer — the server only validates and formats the
  * reference and its fallback fields.
  */
 export const threatAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({

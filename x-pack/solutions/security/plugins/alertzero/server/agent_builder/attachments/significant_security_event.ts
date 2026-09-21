@@ -18,8 +18,8 @@ export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
   ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent;
 
 const securityKnowledgeIndicatorSchema = z.object({
-  type: z.string().max(64),
-  value: z.string().max(2048),
+  type: z.string().min(1).max(64),
+  value: z.string().min(1).max(2048),
   confidence: z.number().min(0).max(1).optional(),
 });
 
@@ -28,12 +28,18 @@ const timelineEntrySchema = z.object({
   what: z.string().min(1).max(2000),
 });
 
-const evidenceItemSchema = z.string().max(2000);
+const evidenceItemSchema = z.string().min(1).max(2000);
 
 const significantSecurityEventRefSchema = z.object({
-  event_id: z.string().max(512),
-  source_index: z.string().max(256),
+  event_id: z.string().min(1).max(512),
+  source_index: z.string().min(1).max(256),
 });
+
+/** Cap serialized actionInput so arbitrary JSON values cannot grow without limit. */
+const ACTION_INPUT_MAX_SERIALIZED_BYTES = 32_768;
+
+const serializedActionInputByteLength = (input: Record<string, unknown>): number =>
+  new TextEncoder().encode(JSON.stringify(input)).byteLength;
 
 const mapsToProposalSchema = z
   .object({
@@ -41,13 +47,25 @@ const mapsToProposalSchema = z
     impact: z.string().max(2000).optional(),
     confidence: z.number().min(0).max(1).optional(),
     actionWorkflowId: z.string().max(512).optional(),
-    // Workflow input values are arbitrary JSON, so value size can't be bounded by
-    // schema; bound the keyspace instead so a hostile payload can't grow without limit.
+    // Workflow input values are arbitrary JSON. Bound both key count and serialized
+    // size so a hostile payload cannot grow without limit.
     actionInput: z
       .record(z.string().max(256), z.unknown())
       .refine((input) => Object.keys(input).length <= 50, {
         message: 'actionInput accepts at most 50 keys',
       })
+      .refine(
+        (input) => {
+          try {
+            return serializedActionInputByteLength(input) <= ACTION_INPUT_MAX_SERIALIZED_BYTES;
+          } catch {
+            return false;
+          }
+        },
+        {
+          message: `actionInput serialized size must be at most ${ACTION_INPUT_MAX_SERIALIZED_BYTES} bytes`,
+        }
+      )
       .optional(),
     manual_remediation: z.array(z.string().max(2000)).max(50).optional(),
   })
@@ -66,8 +84,8 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   capability: z.string().max(256),
   run_id: z.string().max(256),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
-  entities: z.array(z.string().max(2048)).max(50),
-  alerts: z.array(z.string().max(2048)).max(50).optional(),
+  entities: z.array(z.string().min(1).max(2048)).max(50),
+  alerts: z.array(z.string().min(1).max(2048)).max(50).optional(),
   events: z.array(significantSecurityEventRefSchema).max(50).optional(),
   timeline: z.array(timelineEntrySchema).max(50),
   hypothesis_tested: z.string().max(4000),

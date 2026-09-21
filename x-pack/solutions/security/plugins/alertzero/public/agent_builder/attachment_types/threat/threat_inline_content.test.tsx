@@ -279,6 +279,43 @@ describe('ThreatAttachmentInlineContent', () => {
     expect(link).toHaveTextContent('MITRE ATT&CK');
   });
 
+  it('omits non-http(s) external reference URLs', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-ext-bad',
+        content: {
+          title: 'Unsafe External Title',
+          external_references: [
+            {
+              source_name: 'Evil',
+              url: 'javascript:alert(1)',
+              external_id: 'evil',
+            },
+            {
+              source_name: 'Safe',
+              url: 'https://example.com/report',
+              external_id: 'safe',
+            },
+          ],
+        },
+        severity: { level: 'high' },
+        source: { name: 'Source' },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-ext-bad' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Unsafe External Title')).toBeInTheDocument();
+    });
+
+    const links = screen.getAllByTestId(THREAT_EXTERNAL_REF_LINK_TEST_ID);
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute('href', 'https://example.com/report');
+    expect(links[0]).toHaveTextContent('Safe');
+  });
+
   it('shows Alert hits label rather than alert_hits_total= for evidence', async () => {
     const http = {
       fetch: jest.fn().mockResolvedValue({

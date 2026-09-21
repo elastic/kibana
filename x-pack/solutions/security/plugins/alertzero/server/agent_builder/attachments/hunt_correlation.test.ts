@@ -65,6 +65,20 @@ describe('createHuntCorrelationAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('rejects empty anchor values and related_report_id', async () => {
+      const emptyAnchor = await attachmentType.validate({
+        ...validPayload,
+        anchors: [{ kind: 'hash', value: '' }],
+      });
+      const emptyReportId = await attachmentType.validate({
+        ...validPayload,
+        diamond_scores: [{ vertex: 'victim', related_report_id: '', score: 0.5 }],
+      });
+
+      expect(emptyAnchor.valid).toBe(false);
+      expect(emptyReportId.valid).toBe(false);
+    });
+
     it('returns invalid when a diamond score is out of [0, 1] range', async () => {
       const result = await attachmentType.validate({
         ...validPayload,

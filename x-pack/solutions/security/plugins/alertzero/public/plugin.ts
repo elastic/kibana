@@ -13,6 +13,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import {
   ALERTZERO_APP_ID,
@@ -53,9 +54,11 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private readonly logger: Logger;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
+    this.logger = context.logger.get();
   }
 
   public setup(
@@ -111,9 +114,10 @@ export class AlertZeroPublicPlugin
     });
 
     const registerAttachments = async () => {
-      const spaceId =
-        (await startDeps.spaces?.getActiveSpace().then((space) => space.id).catch(() => undefined)) ??
-        'default';
+      // Fall back to 'default' only when the spaces plugin is absent. If spaces is
+      // present but getActiveSpace fails, let the error propagate so we do not
+      // register alert-index links scoped to the wrong space.
+      const spaceId = startDeps.spaces ? (await startDeps.spaces.getActiveSpace()).id : 'default';
 
       await registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
         http: core.http,
@@ -126,8 +130,7 @@ export class AlertZeroPublicPlugin
     };
 
     registerAttachments().catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to register AlertZero attachment UI definitions', error);
+      this.logger.error('Failed to register AlertZero attachment UI definitions', error);
     });
 
     return {};
