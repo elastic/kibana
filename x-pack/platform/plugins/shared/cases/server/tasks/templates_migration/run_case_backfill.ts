@@ -188,6 +188,10 @@ const backfillCasesForSpace = async (
 
   while (true) {
     if (shouldPause()) {
+      if (hadFailures) {
+        await safeClosePit(repo, cursor.pitId, log);
+        return { outcome: 'failed', scanned, backfilled, cursor: undefined };
+      }
       return { outcome: 'paused', scanned, backfilled, cursor: makeCursor() };
     }
 
