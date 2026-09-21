@@ -62,6 +62,15 @@ export const createDefaultPolicy = (
       ? getCloudPolicyConfig(factoryPolicy)
       : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
+  // Strip custom YARA signatures before the license-tier clamp below runs, so a below-Enterprise
+  // license never sees a field it can't configure and materializes an explicit `false` for it.
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+    !experimentalFeatures.customYaraSignaturesEnabled
+  ) {
+    defaultPolicyPerType = removeCustomYaraSignatures(defaultPolicyPerType);
+  }
+
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
   } else if (!licenseService.isEnterprise()) {
@@ -78,13 +87,6 @@ export const createDefaultPolicy = (
     !experimentalFeatures.trustedDevices
   ) {
     defaultPolicyPerType = removeDeviceControl(defaultPolicyPerType);
-  }
-
-  if (
-    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
-    !experimentalFeatures.customYaraSignaturesEnabled
-  ) {
-    defaultPolicyPerType = removeCustomYaraSignatures(defaultPolicyPerType);
   }
 
   if (!experimentalFeatures.linuxDnsEvents) {

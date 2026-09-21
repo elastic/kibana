@@ -599,6 +599,34 @@ describe('Create Default Policy tests ', () => {
       expectCustomYaraSignaturesAbsent(policy);
     });
 
+    it('should omit custom YARA signatures on Platinum license when the experimental flag is off', async () => {
+      const experimentalFeaturesWithCysDisabled = {
+        trustedDevices: true,
+        linuxDnsEvents: true,
+        customYaraSignaturesEnabled: false,
+      } as ExperimentalFeatures;
+
+      const esClientInfo = await elasticsearchServiceMock
+        .createClusterClient()
+        .asInternalUser.info();
+      esClientInfo.cluster_name = '';
+      esClientInfo.cluster_uuid = '';
+      const policy = createDefaultPolicy(
+        licenseService,
+        edrCompleteConfig,
+        cloud,
+        esClientInfo,
+        productFeaturesService,
+        telemetryConfigProviderMock,
+        experimentalFeaturesWithCysDisabled
+      );
+
+      // Memory protection itself stays on for Platinum; only the CYS-specific field must be
+      // omitted, rather than materialized as an explicit `false` while the flag is off.
+      expectCustomYaraSignaturesAbsent(policy);
+      expect(policy.windows.memory_protection.mode).not.toBe(ProtectionModes.off);
+    });
+
     it('should omit custom YARA signatures when the endpointCustomYaraSignatures product feature is off', async () => {
       licenseEmitter.next(Enterprise);
       productFeaturesService = createProductFeaturesServiceMock(
