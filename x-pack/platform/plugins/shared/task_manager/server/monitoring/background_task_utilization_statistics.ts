@@ -27,8 +27,6 @@ import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from '../config';
 
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
-  // 1 while Task Manager is throttling because Elasticsearch is unhealthy, else 0.
-  // Numeric (not boolean) so the autoscaler can read it as a metric.
   es_backpressure_active: number;
 }
 
