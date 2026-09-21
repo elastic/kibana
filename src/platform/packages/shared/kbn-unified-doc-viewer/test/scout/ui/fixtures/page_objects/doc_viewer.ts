@@ -202,10 +202,13 @@ export class DocViewer {
     return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
   }
 
+  /** JSON editor rendered by the source tab. Use it to gate on that tab being rendered. */
+  getJsonCodeEditor(): Locator {
+    return this.page.getByLabel('Read only JSON view of an elasticsearch document');
+  }
+
   async getJsonCodeEditorValue(): Promise<string> {
-    await this.page
-      .getByLabel('Read only JSON view of an elasticsearch document')
-      .waitFor({ state: 'visible' });
+    await this.getJsonCodeEditor().waitFor({ state: 'visible' });
 
     const raw = await this.page.evaluate(() => {
       const monacoEnv = (window as unknown as MonacoJsonEnvironment).MonacoEnvironment;

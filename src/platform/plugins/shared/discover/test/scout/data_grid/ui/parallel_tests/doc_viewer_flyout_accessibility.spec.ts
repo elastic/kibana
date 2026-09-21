@@ -217,6 +217,10 @@ spaceTest.describe(
 
         await spaceTest.step('source tab', async () => {
           await docViewer.openTab('doc_view_source');
+          // The flyout is the scan root in both tabs, so without this gate the
+          // scan could still be looking at the fields table.
+          await expect(docViewer.getJsonCodeEditor()).toBeVisible();
+
           // No grid exclusion needed: the JSON editor replaces the fields table.
           const { violations } = await page.checkA11y({ include: [FLYOUT_TEST_SUBJ] });
           expect(violations).toStrictEqual([]);

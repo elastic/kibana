@@ -57,7 +57,9 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
       for (const column of SIDEBAR_COLUMNS) {
         await unifiedFieldList.clickFieldListItemAdd(column);
       }
-      await expect(dataGrid.getColumnHeader(SIDEBAR_COLUMNS[1])).toBeVisible();
+      for (const column of SIDEBAR_COLUMNS) {
+        await expect(dataGrid.getColumnHeader(column)).toBeVisible();
+      }
 
       const { violations } = await page.checkA11y({ include: [GRID_TEST_SUBJ] });
       expect(violations).toStrictEqual([]);
@@ -76,7 +78,12 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
       await docViewer.close();
       // Adding columns raises toasts that overlay the grid.
       await toasts.dismissAll();
-      await expect(dataGrid.getColumnHeader(FLYOUT_COLUMNS[1])).toBeVisible();
+
+      // Assert every column, not just the last: the toggle is idempotent per
+      // click, so a column dropped along the way would otherwise go unnoticed.
+      for (const column of FLYOUT_COLUMNS) {
+        await expect(dataGrid.getColumnHeader(column)).toBeVisible();
+      }
 
       const { violations } = await page.checkA11y({ include: [GRID_TEST_SUBJ] });
       expect(violations).toStrictEqual([]);
@@ -116,6 +123,8 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
         // Close the sort popover so its trigger is not left expanded.
         await page.keyboard.press('Escape');
         await dataGrid.openGridDisplaySettings();
+        // The helper gates on the trigger's `aria-expanded`, not on the panel.
+        await expect(page.locator(DISPLAY_POPOVER_TEST_SUBJ)).toBeVisible();
 
         const { violations } = await page.checkA11y({ include: [DISPLAY_POPOVER_TEST_SUBJ] });
         expect(violations).toStrictEqual([]);

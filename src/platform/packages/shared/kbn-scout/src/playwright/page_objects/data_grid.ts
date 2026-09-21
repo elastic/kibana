@@ -543,13 +543,15 @@ export class DataGrid {
   }
 
   async openColumnMenuByField(field: string) {
-    await expect(async () => {
-      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
-      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-        state: 'visible',
-      });
-    }).toPass();
+    const actionButton = this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`);
+
+    await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
+    await actionButton.waitFor({ state: 'visible' });
+    await actionButton.click();
+
+    await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+      state: 'visible',
+    });
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {

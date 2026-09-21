@@ -85,7 +85,7 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
   spaceTest(
     'has no automated a11y violations in the save flow',
     async ({ page, pageObjects }, testInfo) => {
-      const { discover } = pageObjects;
+      const { discover, toasts } = pageObjects;
       // Per-attempt title: cleanup only runs after retries, and the save modal
       // disables its confirm button on a duplicate.
       const savedSearchTitle = `a11ySearch-${testInfo.retry}`;
@@ -99,6 +99,7 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
 
       await spaceTest.step('title entered', async () => {
         await discover.saveModal.fillTitle(savedSearchTitle);
+        await expect(page.testSubj.locator('savedObjectTitle')).toHaveValue(savedSearchTitle);
 
         const { violations } = await page.checkA11y({ include: [SAVE_MODAL_TEST_SUBJ] });
         expect(violations).toStrictEqual([]);
@@ -106,6 +107,10 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
 
       await spaceTest.step('save confirmed', async () => {
         await discover.saveModal.confirm();
+        // The modal closes before the save request resolves; the toast is the
+        // first signal that it did.
+        await toasts.waitForToastWithText(`Discover session '${savedSearchTitle}' was saved`);
+        await toasts.dismissAll();
         await discover.waitUntilTabIsLoaded();
 
         const { violations } = await page.checkA11y({
@@ -125,9 +130,11 @@ spaceTest.describe('Discover app - accessibility', { tag: '@local-stateful-class
       await spaceTest.step('open-search flyout', async () => {
         const loadSearchForm = page.testSubj.locator('loadSearchForm');
 
-        // Populated by the standard Discover archive, which ships saved searches.
         await discover.clickAppMenuItem('discoverOpenButton');
         await loadSearchForm.waitFor({ state: 'visible' });
+        // Scan a populated list, not the empty state: this entry comes from the
+        // standard Discover archive loaded in `beforeAll`.
+        await expect(page.testSubj.locator('savedObjectTitleA-Saved-Search')).toBeVisible();
 
         const { violations } = await page.checkA11y({
           include: ['[data-test-subj="loadSearchForm"]'],
