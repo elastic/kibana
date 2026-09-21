@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { test, testData } from '../../fixtures';
 
 test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
@@ -22,7 +23,7 @@ test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
     await expect(
       profilingStorageExplorerPage.page
-        .getByTestId('profilingPageTemplate')
+        .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
         .getByText('Storage explorer')
     ).toBeVisible();
   });
@@ -55,7 +56,7 @@ test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo, 'host.id : "1234"');
     await expect(
       profilingStorageExplorerPage.page
-        .getByTestId('profilingPageTemplate')
+        .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
         .getByText('Storage explorer')
     ).toBeVisible();
   });
