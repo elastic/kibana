@@ -32,6 +32,7 @@ const aiIndex = (sources: AiIndexSource[]): AiIndexHttpItem => ({
   dest: { type: 'index', value: 'ai-index-support' },
   automations: [{ type: 'workflow', value: 'wf-1' }],
   sources,
+  traces: [],
   date_created: '2026-08-01T00:00:00.000Z',
   date_modified: '2026-08-01T00:00:00.000Z',
 });
