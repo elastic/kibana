@@ -280,6 +280,24 @@ export class UnifiedFieldList {
     await this.getAvailableField(field).click();
   }
 
+  /** Opens a field's details and navigates to Lens through its Visualize action. */
+  async clickFieldListItemVisualize(field: string): Promise<void> {
+    await this.waitUntilSidebarHasLoaded();
+    await this.clickFieldListItem(field);
+    await this.waitUntilFieldPopoverIsLoaded();
+    await this.page.testSubj.locator(`fieldVisualize-${field}`).click();
+  }
+
+  /**
+   * Opens the field popover and applies that field as the histogram breakdown.
+   */
+  async clickFieldListAddBreakdownField(field: string): Promise<void> {
+    await this.searchField(field);
+    await this.clickFieldListItem(field);
+    await this.waitUntilFieldPopoverIsLoaded();
+    await this.page.testSubj.click(`fieldPopoverHeader_addBreakdownField-${field}`);
+  }
+
   getFieldDescription(field: string) {
     return this.page.testSubj.locator(`fieldDescription-${field}`);
   }

@@ -38,7 +38,7 @@ const numericFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'numericFormat',
+    id: 'visNumericFormat',
     title: 'Numeric Format',
     description:
       'Number or percentage format with optional decimal places, suffix, and compact notation.',
@@ -64,7 +64,7 @@ const byteFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'byteFormat',
+    id: 'visByteFormat',
     title: 'Byte Format',
     description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
   });
@@ -81,7 +81,7 @@ const customFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'customFormat',
+    id: 'visCustomFormat',
     title: 'Custom Format',
     description: 'Custom format using a Kibana field format pattern string.',
   });
@@ -92,7 +92,7 @@ const customFormatSchema = z
 export const formatTypeSchema = z
   .union([numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema])
   .meta({
-    id: 'formatType',
+    id: 'visFormatType',
     title: 'Format Type',
     description: 'Number display format for the dimension value.',
   });

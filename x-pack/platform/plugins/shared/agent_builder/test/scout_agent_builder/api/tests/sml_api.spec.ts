@@ -15,7 +15,8 @@ import type {
   SmlAutocompleteHttpResponse,
   SmlSearchHttpResponse,
 } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
-import { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
+import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
@@ -32,6 +33,34 @@ import {
 } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
+const SML_FIXTURE_NOW = '2024-06-01T12:00:00.000Z';
+
+/** An SML document as written to the index: bookkeeping lives under the flattened `attributes`. */
+const SML_CRAWLER = { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' as const } };
+
+// Ids are `${type}:${originId}` so search can rebuild the origin uri.
+const indexedDocument = ({
+  type,
+  originId,
+  title,
+  content,
+}: {
+  type: string;
+  originId: string;
+  title: string;
+  content: string;
+}): SmlDocument => ({
+  '@timestamp': SML_FIXTURE_NOW,
+  id: `${type}:${originId}`,
+  type,
+  title,
+  content,
+  updated_at: SML_FIXTURE_NOW,
+  references: [{ uri: `${type}://${originId}`, relation: 'derived_from' }],
+  governance: { provenance: { created_by: SML_CRAWLER, updated_by: SML_CRAWLER } },
+  permissions: { kibana: { privileges: [] } },
+});
+
 apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
   let adminInteractiveCookieHeader: Record<string, string>;
   let sysEsClient: Client;
@@ -39,102 +68,86 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   // Shared search-test entry: indexed once and reused by hit, wildcard,
   // and compact-shape assertions so the index is never empty
   const searchRunId = randomUUID();
-  const searchEntryId = `sml-autocomplete-${searchRunId}`;
   const searchOriginId = `sml-origin-${searchRunId}`;
+  const searchEntryId = `visualization:${searchOriginId}`;
   const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
-  const longTitleEntryId = `sml-multitoken-long-${searchRunId}`;
-  const shortTitleEntryId = `sml-multitoken-short-${searchRunId}`;
+  const longTitleOriginId = `sml-multitoken-long-${searchRunId}`;
+  const longTitleEntryId = `visualization:${longTitleOriginId}`;
+  const shortTitleOriginId = `sml-multitoken-short-${searchRunId}`;
+  const shortTitleEntryId = `visualization:${shortTitleOriginId}`;
 
   // "sales" is not a registered SML type, so the slash here is part of the title.
-  const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
+  const slashTitleOriginId = `sml-slash-title-${searchRunId}`;
+  const slashTitleEntryId = `dashboard:${slashTitleOriginId}`;
   const slashTitle = `sales/marketing overview ${searchRunId}`;
 
-  const capitalizedTypeEntryId = `sml-capitalized-type-${searchRunId}`;
+  const capitalizedTypeOriginId = `sml-capitalized-type-${searchRunId}`;
+  const capitalizedTypeEntryId = `Workflow:${capitalizedTypeOriginId}`;
 
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
     sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    // Created bare — the Elasticsearch-managed `ai-index-idx-managed` template owns the mappings.
     const exists = await sysEsClient.indices.exists({ index: smlIndexName });
     if (!exists) {
-      await sysEsClient.indices.create({
-        index: smlIndexName,
-        mappings: smlElasticsearchIndexMappings,
-      });
+      await sysEsClient.indices.create({ index: smlIndexName });
     }
-
-    const now = '2024-06-01T12:00:00.000Z';
-    const baseDocument = {
-      created_at: now,
-      updated_at: now,
-      permissions: { kibana: { privileges: [] } },
-      ingestion_method: 'crawled',
-    };
 
     await sysEsClient.index({
       index: smlIndexName,
       id: searchEntryId,
-      document: {
-        ...baseDocument,
-        id: searchEntryId,
+      document: indexedDocument({
         type: 'visualization',
+        originId: searchOriginId,
         title: searchIndexedTitle,
-        origin: { uri: `visualization://${searchOriginId}` },
         content: 'pacific bluefin tuna content for sml scout',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: slashTitleEntryId,
-      document: {
-        ...baseDocument,
-        id: slashTitleEntryId,
+      document: indexedDocument({
         type: 'dashboard',
+        originId: slashTitleOriginId,
         title: slashTitle,
-        origin: { uri: `dashboard://${slashTitleEntryId}` },
         content: 'sales and marketing overview for sml scout',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: longTitleEntryId,
-      document: {
-        ...baseDocument,
-        id: longTitleEntryId,
+      document: indexedDocument({
         type: 'visualization',
+        originId: longTitleOriginId,
         title: `yellowfin tuna migration patterns across the pacific ${searchRunId}`,
-        origin: { uri: `visualization://${longTitleEntryId}` },
         content: 'yellowfin long title for sml scout ranking',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: shortTitleEntryId,
-      document: {
-        ...baseDocument,
-        id: shortTitleEntryId,
+      document: indexedDocument({
         type: 'visualization',
+        originId: shortTitleOriginId,
         title: `yellowfin ${searchRunId}`,
-        origin: { uri: `visualization://${shortTitleEntryId}` },
         content: 'yellowfin short title for sml scout ranking',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: capitalizedTypeEntryId,
-      document: {
-        ...baseDocument,
-        id: capitalizedTypeEntryId,
+      document: indexedDocument({
         type: 'Workflow',
+        originId: capitalizedTypeOriginId,
         title: `capitalized type entry ${searchRunId}`,
-        origin: { uri: `workflow://${capitalizedTypeEntryId}` },
         content: 'capitalized type for sml scout',
-      },
+      }),
     });
 
     await sysEsClient.indices.refresh({ index: smlIndexName });
@@ -307,30 +320,24 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   );
 
   apiTest(
-    'POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs',
+    'POST /internal/agent_builder/sml/_attach attaches entry and emits attachment_added',
     async ({ apiClient, asAdmin, log, kbnClient }) => {
       const runId = randomUUID();
-      const entryId = `sml-scout-attach-${runId}`;
       const indexedTitle = `sml scout attach ${runId}`;
       const llmProxy = await createLlmProxy(log);
       const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
+      const entryId = `connector:${connectorId}`;
 
-      const now = '2024-06-01T12:00:00.000Z';
       await sysEsClient.index({
         index: smlIndexName,
         id: entryId,
         refresh: 'wait_for',
-        document: {
-          id: entryId,
+        document: indexedDocument({
           type: 'connector',
+          originId: connectorId,
           title: indexedTitle,
-          origin: { uri: `connector://${connectorId}` },
           content: `attach content for ${runId}`,
-          created_at: now,
-          updated_at: now,
-          permissions: { kibana: { privileges: [] } },
-          ingestion_method: 'crawled',
-        },
+        }),
       });
 
       await setupAgentDirectAnswer({
@@ -369,14 +376,23 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       expect(conversation).toHaveStatusCode(200);
       const conv = conversation.body as {
         attachments?: Array<{ type: string; id: string }>;
-        rounds: Array<{ input: { attachment_refs?: Array<{ attachment_id: string }> } }>;
+        events?: Array<{
+          type: string;
+          actor?: { type: string };
+          data?: { attachment_id?: string; source?: string };
+        }>;
       };
       const attachments = conv.attachments ?? [];
       expect(attachments[0].type).toBe('text');
       expect(attachments[1].type).toBe('connector');
-      const lastRound = conv.rounds[conv.rounds.length - 1];
-      expect(lastRound.input.attachment_refs?.[0].attachment_id).toBe(attachments[0].id);
-      expect(lastRound.input.attachment_refs?.[1].attachment_id).toBe(attachments[1].id);
+      // The SML item goes through the attachment client, so it emits `attachment_added`
+      // attributed to the calling user with the HTTP source, like any HTTP-created attachment.
+      const addedEvent = (conv.events ?? []).find(
+        (e) => e.type === 'attachment_added' && e.data?.attachment_id === attachments[1].id
+      );
+      expect(addedEvent).toBeDefined();
+      expect(addedEvent?.data?.source).toBe('http_api');
+      expect(addedEvent?.actor?.type).toBe('user');
 
       await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`

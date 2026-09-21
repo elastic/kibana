@@ -59,6 +59,7 @@ import {
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentTabRuntimeState,
+  type ExpandedDocCascadePath,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -118,7 +119,7 @@ function DiscoverDocumentsComponent({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, discoverFeatureFlags } = services;
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -154,6 +155,15 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isWarningCalloutDismissed = useCurrentTabSelector(
+    (state) => state.isWarningCalloutDismissed
+  );
+  const setIsWarningCalloutDismissed = useCurrentTabAction(
+    internalStateActions.setIsWarningCalloutDismissed
+  );
+  const dismissWarningCallout = useCallback(() => {
+    dispatch(setIsWarningCalloutDismissed({ isWarningCalloutDismissed: true }));
+  }, [dispatch, setIsWarningCalloutDismissed]);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -194,7 +204,10 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
-    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+    (
+        owner: string,
+        expandedDocCascadePath?: ExpandedDocCascadePath
+      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -206,6 +219,7 @@ function DiscoverDocumentsComponent({
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? owner : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
             initialDocViewerTabId: options?.initialTabId,
             initialDocViewerTabState: options?.initialTabState,
           })
@@ -375,8 +389,14 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
-    [documentState.interceptedWarnings]
+    () => (
+      <SearchResponseWarningsCallout
+        warnings={documentState.interceptedWarnings ?? []}
+        isDismissed={isWarningCalloutDismissed}
+        onDismiss={dismissWarningCallout}
+      />
+    ),
+    [dismissWarningCallout, documentState.interceptedWarnings, isWarningCalloutDismissed]
   );
 
   const loadingIndicator = useMemo(
@@ -503,11 +523,6 @@ function DiscoverDocumentsComponent({
     renderViewModeToggle,
   ]);
 
-  const isDataTableJsonViewEnabled = useMemo(
-    () => discoverFeatureFlags.getDataTableJsonViewEnabled(),
-    [discoverFeatureFlags]
-  );
-
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -592,16 +607,10 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            documentsDisplayModeState={
-              isDataTableJsonViewEnabled ? documentsDisplayMode : undefined
-            }
-            onUpdateDocumentsDisplayMode={
-              isDataTableJsonViewEnabled ? onUpdateDocumentsDisplayMode : undefined
-            }
-            jsonModeSettingsState={isDataTableJsonViewEnabled ? jsonModeSettings : undefined}
-            onUpdateJsonModeSettings={
-              isDataTableJsonViewEnabled ? onUpdateJsonModeSettings : undefined
-            }
+            documentsDisplayModeState={documentsDisplayMode}
+            onUpdateDocumentsDisplayMode={onUpdateDocumentsDisplayMode}
+            jsonModeSettingsState={jsonModeSettings}
+            onUpdateJsonModeSettings={onUpdateJsonModeSettings}
           />
         </CellActionsProvider>
       </div>

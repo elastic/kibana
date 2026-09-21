@@ -47,6 +47,13 @@ export const ENTITY_ANALYTICS = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_SETTINGS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalyticsSettings',
+  {
+    defaultMessage: 'Entity analytics settings',
+  }
+);
+
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   'xpack.securitySolution.navigation.privilegedUserMonitoring',
   {

@@ -55,7 +55,7 @@ type CheckedFields = Pick<
 interface CorpusRow {
   /** What the user types into the input. */
   input: string;
-  /** Options passed to the parser (presets, delimiter, roundRelativeTime, dateFormat). */
+  /** Options passed to the parser (presets, delimiter, roundRelativeTime, inputDateFormats). */
   options?: TimeRangeTransformOptions;
   /** Why this row exists / what behaviour it documents. */
   note: string;
@@ -1330,6 +1330,182 @@ describe('parser corpus: textToTimeRange (fr-FR)', () => {
         input: 'next 3 days',
         options: { locale },
         note: 'English duration phrase recognized while French is the active locale',
+        expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+});
+
+describe('parser corpus: textToTimeRange (pt-BR)', () => {
+  const locale = 'pt-BR';
+
+  runCorpus([
+    {
+      input: 'hoje',
+      options: { locale },
+      note: 'Portuguese named range "today"',
+      expected: {
+        start: 'now/d',
+        end: 'now/d',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'esta semana até agora',
+      options: { locale },
+      note: 'Portuguese week-to-date named range — contains the delimiter word "até"',
+      expected: {
+        start: 'now/w',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'últimos 15 minutos',
+      options: { locale },
+      note: 'masculine plural agreement — "minuto" is masculine',
+      expected: {
+        start: 'now-15m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'últimas 24 horas',
+      options: { locale },
+      note: 'feminine plural agreement — "hora" is feminine',
+      expected: { start: 'now-24h', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'última 1 semana',
+      options: { locale },
+      note: 'feminine singular agreement',
+      expected: { start: 'now-1w', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'últimos 24 horas',
+      options: { locale },
+      note:
+        'the masculine-plural form parses even against a feminine unit ' +
+        '(generation prefers the agreeing "últimas")',
+      expected: { start: 'now-24h', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'último 1 mês',
+      options: { locale },
+      note: 'masculine singular agreement',
+      expected: { start: 'now-1M', end: 'now', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'próximas 24 horas',
+      options: { locale },
+      note: 'feminine plural agreement (future)',
+      expected: {
+        start: 'now',
+        end: 'now+24h',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: true,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'próxima semana',
+      options: { locale },
+      note: 'future named range — "next week"',
+      expected: { start: 'now+1w/w', end: 'now+1w/w', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'mês passado',
+      options: { locale },
+      note: 'past named range — "last month"',
+      expected: { start: 'now-1M/M', end: 'now-1M/M', isNaturalLanguage: true, isInvalid: false },
+    },
+    {
+      input: 'há 7 minutos',
+      options: { locale },
+      note: 'Portuguese instant (past) — moment pt-br\'s own "há %s"',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: '7 minutos atrás',
+      options: { locale },
+      note: 'the common spoken past-instant variant',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'em 7 minutos',
+      options: { locale },
+      note: 'Portuguese instant (future) — "in 7 minutes"',
+      expected: {
+        start: 'now',
+        end: 'now+7m',
+        type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'now-7m até now',
+      options: { locale },
+      note: 'Portuguese delimiter "até" splits a range explicitly',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'now-7m a now',
+      options: { locale },
+      note: 'the bare preposition "a" is also accepted as a delimiter',
+      expected: {
+        start: 'now-7m',
+        end: 'now',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+        isInvalid: false,
+      },
+    },
+    {
+      input: 'há 3 dias a há 2 dias',
+      options: { locale },
+      note:
+        'bare "a" between two phrases that each contain an "a"-adjacent word — only the ' +
+        'candidate split whose sides both parse wins',
+      expected: {
+        start: 'now-3d',
+        end: 'now-2d',
+        type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+        isNaturalLanguage: false,
+        isInvalid: false,
+      },
+    },
+  ]);
+
+  describe('merge requirement: English still parses with pt-BR active', () => {
+    runCorpus([
+      {
+        input: 'next 3 days',
+        options: { locale },
+        note: 'English duration phrase recognized while Portuguese is the active locale',
         expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
       },
     ]);

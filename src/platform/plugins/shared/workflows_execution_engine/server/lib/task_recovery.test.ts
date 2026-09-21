@@ -11,7 +11,12 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+} from './execution_identity';
+import {
   buildTaskAttemptsExhaustedMessage,
+  failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
@@ -707,6 +712,106 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining(
         'Failed to mark scheduled workflow execution sched-1 as FAILED after task error'
+      )
+    );
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('update rejected'));
+  });
+});
+
+describe('failExecutionMissingIdentity', () => {
+  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let repository: WorkflowExecutionRepository;
+  let stepExecutionRepository: StepExecutionRepository;
+  const logger = loggingSystemMock.create().get();
+
+  beforeEach(() => {
+    workflowExecutionsDataClient = createMockWorkflowDataClient();
+    const stepExecutionsDataClient = createMockStepDataClient();
+    repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
+    stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataClient);
+    jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+    jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
+    workflowExecutionsDataClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [{ id: 'mock-id', index: '.mock' }],
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('marks a pending execution FAILED with the missing-identity message', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'exec-1',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.PENDING,
+    } as EsWorkflowExecution);
+
+    await failExecutionMissingIdentity({
+      workflowExecutionRepository: repository,
+      stepExecutionRepository,
+      workflowRunId: 'exec-1',
+      spaceId: 'default',
+      logger,
+    });
+
+    expectFailedWorkflowUpdate(workflowExecutionsDataClient, 'exec-1', {
+      type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+      message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+    });
+    expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Marked workflow execution exec-1 FAILED: ${MISSING_EXECUTION_IDENTITY_MESSAGE}`
+      )
+    );
+  });
+
+  it('leaves already-terminal executions untouched', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'exec-1',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.COMPLETED,
+    } as EsWorkflowExecution);
+
+    await failExecutionMissingIdentity({
+      workflowExecutionRepository: repository,
+      stepExecutionRepository,
+      workflowRunId: 'exec-1',
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+    expect(stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
+  });
+
+  it('swallows mark-failed errors and logs without throwing', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'exec-1',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.PENDING,
+    } as EsWorkflowExecution);
+    workflowExecutionsDataClient.bulk.mockRejectedValueOnce(new Error('update rejected'));
+
+    await expect(
+      failExecutionMissingIdentity({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'exec-1',
+        spaceId: 'default',
+        logger,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Failed to mark workflow execution exec-1 as FAILED (missing identity)'
       )
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('update rejected'));

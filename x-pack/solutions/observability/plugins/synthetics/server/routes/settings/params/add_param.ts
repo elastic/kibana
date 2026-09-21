@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SyntheticsParamRequest,
@@ -20,16 +25,12 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-const ParamsObjectSchema = schema.object({
-  key: schema.string({
-    minLength: 1,
-  }),
-  value: schema.string({
-    minLength: 1,
-  }),
-  description: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  share_across_spaces: schema.maybe(schema.boolean()),
+export const ParamsObjectSchema = z.strictObject({
+  key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+  value: z.string().min(1).max(MAX_PARAM_VALUE_LENGTH),
+  description: z.string().max(4096).optional(),
+  tags: z.array(z.string().max(256)).max(100).optional(),
+  share_across_spaces: z.boolean().optional(),
 });
 
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
@@ -40,7 +41,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
+      body: z.union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)]),
     },
   },
   handler: async ({ request, response, server, savedObjectsClient }) => {
@@ -53,6 +54,15 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         spaceId,
         request.body as SyntheticsParamRequest[] | SyntheticsParamRequest
       );
+
+      const conflictingKey = await findConflictingParamKey(savedObjectsClient, savedObjectsData);
+      if (conflictingKey) {
+        return response.conflict({
+          body: {
+            message: `A synthetics global parameter with the key "${conflictingKey}" already exists.`,
+          },
+        });
+      }
 
       const result = await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
         savedObjectsData
@@ -103,6 +113,73 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     }
   },
 });
+
+// `synthetics-param` mappings are `dynamic: false`, so `key` cannot be queried
+// server-side; fetch the params visible in the target namespaces and compare in memory.
+// Keys are checked per namespace scope so a mixed bulk request (shared + space-local)
+// does not widen the search for space-local keys to all spaces via `*`.
+// Best effort only: params use generated ids and `key` is not indexed, so nothing enforces
+// uniqueness on write and concurrent creates of the same key can still both succeed.
+const findConflictingParamKey = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsData: Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>>
+): Promise<string | undefined> => {
+  const requestedKeys = savedObjectsData.map((obj) => obj.attributes.key);
+
+  const seenKeys = new Set<string>();
+  for (const key of requestedKeys) {
+    if (seenKeys.has(key)) {
+      return key;
+    }
+    seenKeys.add(key);
+  }
+
+  const keysByNamespaceScope = new Map<string, { namespaces: string[]; keys: string[] }>();
+  for (const obj of savedObjectsData) {
+    const namespaces = obj.initialNamespaces ?? [];
+    const scopeKey = JSON.stringify(namespaces);
+    const group = keysByNamespaceScope.get(scopeKey) ?? { namespaces, keys: [] };
+    group.keys.push(obj.attributes.key);
+    keysByNamespaceScope.set(scopeKey, group);
+  }
+
+  for (const { namespaces, keys } of keysByNamespaceScope.values()) {
+    const conflictingKey = await findConflictingKeyInNamespaces(
+      savedObjectsClient,
+      keys,
+      namespaces
+    );
+    if (conflictingKey) {
+      return conflictingKey;
+    }
+  }
+
+  return undefined;
+};
+
+const findConflictingKeyInNamespaces = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  requestedKeys: string[],
+  namespaces: string[]
+): Promise<string | undefined> => {
+  const finder = savedObjectsClient.createPointInTimeFinder<
+    Omit<SyntheticsParamSOAttributes, 'id'>
+  >({
+    type: syntheticsParamType,
+    perPage: 1000,
+    ...(namespaces.length ? { namespaces } : {}),
+  });
+
+  const existingKeys = new Set<string>();
+  for await (const { saved_objects: savedObjects } of finder.find()) {
+    for (const { attributes } of savedObjects) {
+      existingKeys.add(attributes.key);
+    }
+  }
+  await finder.close();
+
+  return requestedKeys.find((key) => existingKeys.has(key));
+};
 
 const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>>) => {
   const { id, attributes: data, namespaces } = savedObject;

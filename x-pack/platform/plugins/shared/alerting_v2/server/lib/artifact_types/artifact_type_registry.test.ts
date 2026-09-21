@@ -45,6 +45,42 @@ describe('ArtifactTypeRegistry', () => {
     ).toThrow(/non-empty type/);
   });
 
+  it('rejects a reference field that contains a colon', () => {
+    expect(() =>
+      registry.register({
+        type: 'custom.type',
+        dataSchema: z.object({ dashboard_id: z.string().max(64) }).strict(),
+        references: [{ field: 'dash:board', savedObjectType: 'dashboard' }],
+      })
+    ).toThrow(/must be snake_case/);
+  });
+
+  it('rejects a reference field that is not snake_case', () => {
+    expect(() =>
+      registry.register({
+        type: 'custom.type',
+        dataSchema: z.object({ dashboardId: z.string().max(64) }).strict(),
+        references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
+      })
+    ).toThrow(/must be snake_case/);
+  });
+
+  it('is immune to the caller mutating its descriptors after registration', () => {
+    const references = [{ field: 'dashboard_id', savedObjectType: 'dashboard' }];
+    registry.register({
+      type: 'custom.type',
+      dataSchema: z.object({ dashboard_id: z.string().max(64) }).strict(),
+      references,
+    });
+
+    references[0].savedObjectType = 'index-pattern';
+    references.length = 0;
+
+    expect(registry.get('custom.type')?.references).toEqual([
+      { field: 'dashboard_id', savedObjectType: 'dashboard' },
+    ]);
+  });
+
   it('rejects unbounded string schemas', () => {
     expect(() =>
       registry.register({
@@ -75,7 +111,10 @@ describe('ArtifactTypeRegistry', () => {
   it('registers built-in runbook and dashboard types', () => {
     registerBuiltinArtifactTypes(registry);
     expect(registry.get('runbook')).toBeDefined();
-    expect(registry.get('dashboard')).toBeDefined();
+    expect(registry.get('dashboard')?.references?.[0]).toEqual({
+      field: 'dashboard_id',
+      savedObjectType: 'dashboard',
+    });
   });
 
   describe('validate', () => {

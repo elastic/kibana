@@ -562,6 +562,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
+  const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
     return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
@@ -783,7 +784,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const children = (
     <>
-      {packageInfo?.readme && (
+      {enableIntegrationTileClickToAdd && packageInfo?.readme && (
         <>
           <EuiPanel hasBorder paddingSize="m" data-test-subj="packageDocumentationCallout">
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -919,7 +920,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   return !addIntegrationFlyoutProps ? (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="createPackagePolicy"
+    >
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>

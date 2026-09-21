@@ -12,11 +12,11 @@
  * provisions `xpack.cloud.managed_otlp.url` and the managed-bulk infrastructure, and its
  * comment anticipated this addition. Enabling `managedOtlpOutput` only in this config keeps
  * the flag scoped to where it is meaningful.
- *
  */
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { cleanFleetIndices } from '../space_awareness/helpers';
@@ -33,15 +33,48 @@ export default function (providerContext: FtrProviderContext) {
 
     skipIfNoDockerRegistry(providerContext);
 
+    const getSecretById = (id: string) =>
+      es.get({
+        index: '.fleet-secrets',
+        id,
+      });
+
+    const deleteAllSecrets = async () => {
+      try {
+        await es.deleteByQuery({
+          index: '.fleet-secrets',
+          query: { match_all: {} },
+        });
+      } catch (_err) {
+        // index doesn't exist yet — safe to ignore
+      }
+    };
+
+    const seedFleetServerRequirements = async () => {
+      await kibanaServer.savedObjects.create({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {
+          output_secret_storage_requirements_met: true,
+          otlp_output_requirements_met: true,
+          use_space_awareness_migration_status: 'success',
+        },
+        overwrite: true,
+      });
+    };
+
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').send({}).expect(200);
+      await seedFleetServerRequirements();
+      await deleteAllSecrets();
     });
 
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
+      await deleteAllSecrets();
     });
 
     describe('POST /api/fleet/outputs', () => {
@@ -188,6 +221,54 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.message).to.contain('[request body.otlp_exporter.tls.1.key_pem]');
       });
+
+      it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-secrets-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4317',
+              protocol: 'grpc',
+            },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'test-tls-key-pem-value',
+                  tpm: {
+                    owner_auth: 'test-tpm-owner-auth-value',
+                    auth: 'test-tpm-auth-value',
+                  },
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const { item } = body;
+        const tlsKeyPemSecretId: string = item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        const ownerAuthSecretId: string = item.secrets?.otlp_exporter?.tls?.tpm?.owner_auth?.id;
+        const authSecretId: string = item.secrets?.otlp_exporter?.tls?.tpm?.auth?.id;
+
+        expect(tlsKeyPemSecretId).to.be.a('string');
+        expect(ownerAuthSecretId).to.be.a('string');
+        expect(authSecretId).to.be.a('string');
+
+        const tlsKeyPemSecret = await getSecretById(tlsKeyPemSecretId);
+        expect((tlsKeyPemSecret._source as Record<string, string>).value).to.be(
+          'test-tls-key-pem-value'
+        );
+
+        const ownerAuthSecret = await getSecretById(ownerAuthSecretId);
+        expect((ownerAuthSecret._source as Record<string, string>).value).to.be(
+          'test-tpm-owner-auth-value'
+        );
+
+        const authSecret = await getSecretById(authSecretId);
+        expect((authSecret._source as Record<string, string>).value).to.be('test-tpm-auth-value');
+      });
     });
 
     describe('PUT /api/fleet/outputs/{id}', () => {
@@ -259,6 +340,106 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body.message).to.contain('non-OTel inputs');
+      });
+
+      it('converts an ES output to OTLP and clears beats-specific fields', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `es-to-otlp-${uuidv4()}`,
+            type: 'elasticsearch',
+            hosts: ['https://es.example.com:9200'],
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        expect(updateBody.item.type).to.be('otlp');
+        expect(updateBody.item.otlp_exporter).to.eql({
+          endpoint: 'https://otlp.example.com:4317',
+          protocol: 'grpc',
+        });
+        expect(updateBody.item.hosts).to.be(null);
+      });
+
+      it('converts an OTLP output to ES and clears otlp_exporter', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-to-es-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'elasticsearch',
+            hosts: ['https://es.example.com:9200'],
+          })
+          .expect(200);
+
+        expect(updateBody.item.type).to.be('elasticsearch');
+        expect(updateBody.item.otlp_exporter).to.be(null);
+        expect(updateBody.item.hosts).to.eql(['https://es.example.com:9200']);
+      });
+    });
+
+    describe('DELETE /api/fleet/outputs/{id}', () => {
+      it('removes all associated ESO secrets when an OTLP output is deleted', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-delete-secrets-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'to-be-deleted-key',
+                  tpm: { owner_auth: 'to-be-deleted-owner-auth', auth: 'to-be-deleted-auth' },
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+        const keyPemSecretId: string = createBody.item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        const ownerAuthSecretId: string =
+          createBody.item.secrets?.otlp_exporter?.tls?.tpm?.owner_auth?.id;
+        const authSecretId: string = createBody.item.secrets?.otlp_exporter?.tls?.tpm?.auth?.id;
+        expect(keyPemSecretId).to.be.a('string');
+        expect(ownerAuthSecretId).to.be.a('string');
+        expect(authSecretId).to.be.a('string');
+
+        await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx').expect(200);
+
+        // All secrets must be cleaned up
+        for (const secretId of [keyPemSecretId, ownerAuthSecretId, authSecretId]) {
+          try {
+            await getSecretById(secretId);
+            throw new Error(`Expected ESO secret ${secretId} to be deleted alongside the output`);
+          } catch (err) {
+            expect(err.meta?.statusCode).to.be(404);
+          }
+        }
       });
     });
 
