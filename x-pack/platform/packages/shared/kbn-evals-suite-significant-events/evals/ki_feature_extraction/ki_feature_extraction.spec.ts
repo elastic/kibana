@@ -14,22 +14,22 @@ import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
-import {
-  SIGEVENTS_SNAPSHOT_RUN,
-  cleanSignificantEventsDataStreams,
-  replaySignificantEventsSnapshot,
-} from '../../src/data_generators/replay';
+import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
-  snapshotCatalogKey,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
-import { buildAvailableSnapshotsBySource } from '../shared';
+import {
+  buildAvailableSnapshotsBySource,
+  hasAvailableSnapshot,
+  replayDatasetSnapshot,
+} from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
 import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
@@ -42,6 +42,7 @@ interface CollectedExample {
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
+  const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
@@ -93,19 +94,20 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             snapshotSource: scenario.snapshot_source,
           });
 
-          const availableSnapshots =
-            availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-          if (!availableSnapshots.has(source.snapshotName)) {
-            log.info(
-              `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
-            );
+          if (
+            !hasAvailableSnapshot({
+              availableSnapshotsBySource,
+              source,
+              datasetId: dataset.id,
+              failOnMissingSnapshot,
+              log,
+            })
+          ) {
             continue;
           }
 
           await cleanSignificantEventsDataStreams(esClient, log);
-          await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+          await replayDatasetSnapshot({ esClient, log, dataset, source });
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
           const sampledHits = await collectSampleDocuments({

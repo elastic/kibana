@@ -14,3 +14,5 @@ export const BANK_OF_ANTHOS_NAMESPACE = 'bank-of-anthos';
 export const BANK_OF_ANTHOS_GCS_BASE_PATH_PREFIX = BANK_OF_ANTHOS_NAMESPACE;
 export const QUARKUS_SUPER_HEROES_NAMESPACE = 'quarkus-super-heroes';
 export const QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX = QUARKUS_SUPER_HEROES_NAMESPACE;
+export const INCIDENTS_NAMESPACE = 'incidents';
+export const INCIDENTS_GCS_BASE_PATH_PREFIX = 'customer0-incidents';

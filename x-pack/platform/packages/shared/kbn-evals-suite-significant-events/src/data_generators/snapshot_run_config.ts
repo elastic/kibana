@@ -8,6 +8,13 @@
 export interface GcsConfig {
   bucket: string;
   basePathPrefix: string;
+  /**
+   * When `false`, `basePathPrefix` is used as the full GCS base path without the
+   * {@link SIGEVENTS_SNAPSHOT_RUN} prefix. Incident snapshots are captured once per
+   * incident (not per run), so they live at a run-independent path such as
+   * `customer0-incidents/incident-3048`. Defaults to `true` (run-scoped).
+   */
+  runScoped?: boolean;
 }
 
 /**
@@ -20,4 +27,4 @@ export interface GcsConfig {
 export const SIGEVENTS_SNAPSHOT_RUN = process.env.SIGEVENTS_SNAPSHOT_RUN || '2026-03-27';
 
 export const resolveBasePath = (gcs: GcsConfig) =>
-  `${SIGEVENTS_SNAPSHOT_RUN}/${gcs.basePathPrefix}`;
+  gcs.runScoped === false ? gcs.basePathPrefix : `${SIGEVENTS_SNAPSHOT_RUN}/${gcs.basePathPrefix}`;

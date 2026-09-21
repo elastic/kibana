@@ -13,8 +13,9 @@ import {
   listAvailableSnapshots,
 } from '../../src/data_generators/replay';
 import type { GcsConfig } from '../../src/data_generators/replay';
-import { getDatasetById, getAllDatasetIds } from '../../src/datasets';
+import { getAllDatasetIds, resolveRequestedDatasets } from '../../src/datasets';
 import { readKibanaConfig } from '../lib/kibana';
+import { planProbeDatasets } from './dataset_selection';
 
 const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
 
@@ -50,32 +51,26 @@ const flattenKeys = (doc: Record<string, unknown>, prefix = ''): string[] => {
 run(
   async ({ log, flags }) => {
     const datasetIds = getAllDatasetIds();
-    const datasetId = String(flags.dataset || 'all');
+    const selectedDatasetIds = flags.dataset == null ? undefined : String(flags.dataset);
 
-    if (datasetId === 'list') {
+    if (selectedDatasetIds?.trim() === 'list') {
       log.info(`Registered datasets: ${datasetIds.join(', ')}`);
       return;
     }
 
-    const datasetsToProbe =
-      datasetId === 'all'
-        ? datasetIds
-        : datasetId
-            .split(',')
-            .map((id) => id.trim())
-            .filter(Boolean);
+    const selectedDatasets = resolveRequestedDatasets(selectedDatasetIds);
 
-    const unknownIds = datasetsToProbe.filter((id) => !datasetIds.includes(id));
-    if (unknownIds.length > 0) {
-      throw new Error(
-        `Unknown dataset id(s): ${unknownIds.join(', ')}\nRegistered datasets: ${datasetIds.join(
-          ', '
-        )}`
-      );
+    if (selectedDatasets.length === 0) {
+      throw new Error(`No dataset selected. Pass --dataset <id[,id]>, "all", or "list".`);
     }
 
-    if (datasetsToProbe.length === 0) {
-      throw new Error(`No dataset selected. Pass --dataset <id[,id]>, "all", or "list".`);
+    const { datasetsToProbe, unsupportedDatasetsMessage } = planProbeDatasets(selectedDatasets);
+
+    if (unsupportedDatasetsMessage) {
+      if (datasetsToProbe.length === 0) {
+        throw new Error(unsupportedDatasetsMessage);
+      }
+      log.warning(unsupportedDatasetsMessage);
     }
 
     const scenario = String(flags.scenario || '');
@@ -109,15 +104,11 @@ run(
     );
 
     log.info(`Run: ${SIGEVENTS_SNAPSHOT_RUN} | ES: ${esUrl}`);
-    log.info(`Datasets: ${datasetsToProbe.join(', ')} | Scenario: ${scenario}`);
+    log.info(`Datasets: ${datasetsToProbe.map(({ id }) => id).join(', ')} | Scenario: ${scenario}`);
     log.info(`ES|QL probes: ${esqlProbes.length} | Modes: ${modes.join(', ') || '(none)'}`);
 
-    for (const id of datasetsToProbe) {
-      const datasetConfig = getDatasetById(id);
-      if (!datasetConfig) {
-        throw new Error(`Dataset "${id}" is registered but has no config`);
-      }
-
+    for (const datasetConfig of datasetsToProbe) {
+      const { id } = datasetConfig;
       const gcs: GcsConfig = datasetConfig.gcs;
       const available = await listAvailableSnapshots(esClient, log, gcs);
       if (!available.includes(scenario)) {
@@ -246,7 +237,7 @@ run(
       array: ['esql', 'mode'],
       help: `
         --dataset         Dataset id to probe, comma-separated list, "all", or "list"
-                          to print the registered ids (default: all)
+                          to print the registered ids (default: default datasets)
         --scenario        (required) Scenario snapshot to replay for each dataset
         --mode            Inspection mode, repeatable: fields (sample-doc leaf keys),
                           mapping (duration-family mapping fields), patterns (top body.text)

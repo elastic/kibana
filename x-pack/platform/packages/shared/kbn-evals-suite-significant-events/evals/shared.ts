@@ -7,10 +7,20 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { GcsConfig } from '../src/data_generators/replay';
-import { listAvailableSnapshots } from '../src/data_generators/replay';
+import type { GcsConfig, ReplayStats } from '../src/data_generators/replay';
+import {
+  listAvailableSnapshots,
+  replayIntoManagedStream,
+  replaySignificantEventsSnapshot,
+  resolveBasePath,
+} from '../src/data_generators/replay';
 import type { DatasetConfig, SnapshotSourceOverride } from '../src/datasets';
 import { resolveScenarioSnapshotSource, snapshotCatalogKey } from '../src/datasets';
+
+interface ResolvedSnapshotSource {
+  snapshotName: string;
+  gcs: GcsConfig;
+}
 
 /**
  * For each dataset, resolves the GCS snapshot source for every scenario
@@ -43,4 +53,74 @@ export async function buildAvailableSnapshotsBySource(
     availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
   }
   return availableSnapshotsBySource;
+}
+
+export function hasAvailableSnapshot({
+  availableSnapshotsBySource,
+  source,
+  datasetId,
+  failOnMissingSnapshot,
+  log,
+}: {
+  availableSnapshotsBySource: Map<string, Set<string>>;
+  source: ResolvedSnapshotSource;
+  datasetId: string;
+  failOnMissingSnapshot: boolean;
+  log: ToolingLog;
+}): boolean {
+  const availableSnapshots = availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs));
+  if (availableSnapshots?.has(source.snapshotName)) {
+    return true;
+  }
+
+  const missingSnapshot =
+    `Snapshot "${source.snapshotName}" for dataset "${datasetId}" was not found at ` +
+    `"${source.gcs.bucket}/${resolveBasePath(source.gcs)}".`;
+
+  if (failOnMissingSnapshot) {
+    throw new Error(missingSnapshot);
+  }
+
+  log.info(`${missingSnapshot} Skipping.`);
+  return false;
+}
+
+interface DatasetReplayArgs {
+  esClient: Client;
+  log: ToolingLog;
+  dataset: DatasetConfig;
+  source: ResolvedSnapshotSource;
+}
+
+export async function replayDatasetIntoManagedStream({
+  esClient,
+  log,
+  dataset,
+  source,
+}: DatasetReplayArgs): Promise<ReplayStats> {
+  return replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs, {
+    includeOriginalNameIndices: dataset.replayMode === 'managed-stream',
+  });
+}
+
+export async function replayDatasetSnapshot({
+  esClient,
+  log,
+  dataset,
+  source,
+}: DatasetReplayArgs): Promise<void> {
+  const { replayMode } = dataset;
+
+  switch (replayMode) {
+    case 'managed-stream':
+      await replayDatasetIntoManagedStream({ esClient, log, dataset, source });
+      return;
+    case undefined:
+      await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+      return;
+    default: {
+      const unhandledReplayMode: never = replayMode;
+      throw new Error(`Unhandled replayMode "${unhandledReplayMode}"`);
+    }
+  }
 }
