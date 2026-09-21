@@ -1643,6 +1643,7 @@ packages:
   - 'x-pack/solutions/security/packages/kbn-securitysolution-list-hooks'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-list-utils'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-lists-common'
+  - 'x-pack/solutions/security/packages/kbn-securitysolution-mitre-catalog'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-t-grid'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-utils'
   - 'x-pack/solutions/security/packages/navigation'

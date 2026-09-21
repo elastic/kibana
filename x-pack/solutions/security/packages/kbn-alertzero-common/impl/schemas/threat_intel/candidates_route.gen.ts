@@ -16,6 +16,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CandidateSkipReason = lazySchema(() =>
+  z.enum(['open_proposal', 'already_hunted', 'not_found', 'other_space'])
+);
+export type CandidateSkipReason = z.infer<typeof CandidateSkipReason>;
+export type CandidateSkipReasonEnum = typeof CandidateSkipReason.enum;
+export const CandidateSkipReasonEnum = CandidateSkipReason.enum;
+
 export const CandidatesRequestBody = lazySchema(() =>
   z
     .object({
@@ -27,20 +34,22 @@ export const CandidatesRequestBody = lazySchema(() =>
 export type CandidatesRequestBody = z.infer<typeof CandidatesRequestBody>;
 export type CandidatesRequestBodyInput = z.input<typeof CandidatesRequestBody>;
 
-export const CandidateSkipReason = lazySchema(() =>
-  z.enum(['open_proposal', 'already_hunted', 'not_found', 'other_space'])
-);
-export type CandidateSkipReason = z.infer<typeof CandidateSkipReason>;
-
 export const CandidatesResponse = lazySchema(() =>
   z.object({
     ids: z.array(z.string()),
-    skipped: z.array(
-      z.object({
-        id: z.string(),
-        reason: CandidateSkipReason,
-      })
-    ),
+    /**
+     * Reports that matched the request but are not being hunted, each with why. A report carrying an open Hunt Proposal is skipped on the scheduled and the manual-named path alike.
+     */
+    skipped: z
+      .array(
+        z.object({
+          id: z.string(),
+          reason: CandidateSkipReason,
+        })
+      )
+      .describe(
+        'Reports that matched the request but are not being hunted, each with why. A report carrying an open Hunt Proposal is skipped on the scheduled and the manual-named path alike.'
+      ),
     total: z.number().int(),
     truncated: z.boolean(),
   })

@@ -14,7 +14,10 @@ import type {
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
@@ -49,6 +52,12 @@ export interface AlertZeroStartDependencies {
   proposals: ProposalsPluginStart;
   contextEngine: ContextEnginePluginStart;
   inference: InferenceServerStart;
+  /**
+   * Optional, matching the plugin manifest. Setup registers the AlertZero model
+   * tiers through it; start needs it again so hunt routes can resolve the
+   * connector an operator picked for a tier.
+   */
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export type AlertZeroRouter = IRouter;
