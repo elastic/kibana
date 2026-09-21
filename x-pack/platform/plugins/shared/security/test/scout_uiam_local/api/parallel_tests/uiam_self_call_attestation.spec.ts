@@ -80,15 +80,19 @@ apiTest.describe(
             expect.objectContaining({ username: internalUiamApiKey.id })
           );
         } finally {
-          await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
-            headers: { ...COMMON_UNSAFE_HEADERS },
-            responseType: 'json',
-            body: {
-              id: internalUiamApiKey.id,
-              authcScheme: 'ApiKey',
-              credential: internalUiamApiKey.key,
-            },
-          });
+          const invalidateResponse = await apiClient.post(
+            'test_endpoints/uiam/api_keys/_invalidate',
+            {
+              headers: { ...COMMON_UNSAFE_HEADERS },
+              responseType: 'json',
+              body: {
+                id: internalUiamApiKey.id,
+                authcScheme: 'ApiKey',
+                credential: internalUiamApiKey.key,
+              },
+            }
+          );
+          expect(invalidateResponse).toHaveStatusCode(200);
         }
       }
     );
