@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import { internalTools, isAttachmentTool } from '@kbn/agent-builder-common/tools';
-import { RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID } from '../constants';
+import { RULE_CREATION_SKILL_ID, RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { extractConversationId, toolSpanJoinClauses, LLM_ISSUED_TOOL_SPAN } from './tool_routing';
 
@@ -25,8 +25,13 @@ export interface TrajectoryFetchOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
+interface ToolCall {
+  name: string;
+  skill?: string;
+}
+
 interface ToolCalls {
-  toolNames: string[];
+  calls: ToolCall[];
   /** The agent's own trace; the workflow's trace id points at the eval client. */
   agentTraceId: string | undefined;
 }
@@ -35,28 +40,39 @@ type Trajectory =
   | ({ available: true; joinedOn: string; settled: boolean } & ToolCalls)
   | { available: false; explanation: string };
 
+const skillArgument = (toolArguments: string | null): string | undefined => {
+  try {
+    const { skill } = JSON.parse(toolArguments ?? '') as { skill?: unknown };
+    return typeof skill === 'string' ? skill : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const fetchToolCalls = async (
   traceEsClient: EsClient,
   where: string
 ): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
-    query: `FROM traces-*\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
+    query: `FROM traces-*\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments`,
   })) as unknown as EsqlResponse;
 
   const seen = new Set<string>();
-  const toolNames: string[] = [];
+  const calls: ToolCall[] = [];
   let agentTraceId: string | undefined;
   // Rows arrive in KEEP order. Spans are indexed into two data streams, so dedupe by span_id.
-  for (const [spanId, traceId, toolName] of response.values) {
+  for (const [spanId, traceId, name, toolArguments] of response.values) {
     const isNewSpan = spanId != null && !seen.has(spanId);
-    if (isNewSpan && toolName) {
+    if (isNewSpan && name) {
       seen.add(spanId);
-      toolNames.push(toolName);
+      calls.push(
+        name === internalTools.loadSkill ? { name, skill: skillArgument(toolArguments) } : { name }
+      );
       agentTraceId ??= traceId ?? undefined;
     }
   }
   // No rows means this join key reached no spans: unmeasured, not an empty trajectory.
-  return toolNames.length > 0 ? { toolNames, agentTraceId } : undefined;
+  return calls.length > 0 ? { calls, agentTraceId } : undefined;
 };
 
 /**
@@ -86,8 +102,8 @@ export const createTrajectoryFetcher = ({
     type Read = ToolCalls & { joinedOn: string };
     const sameRead = (a: Read, b: Read) =>
       a.joinedOn === b.joinedOn &&
-      a.toolNames.length === b.toolNames.length &&
-      a.toolNames.every((name, i) => name === b.toolNames[i]);
+      a.calls.length === b.calls.length &&
+      a.calls.every((call, i) => call.name === b.calls[i].name);
     let last: Read | undefined;
     for (let poll = 1; poll <= maxPolls; poll++) {
       let current: Read | undefined;
@@ -115,7 +131,7 @@ export const createTrajectoryFetcher = ({
 
     if (last) {
       log.warning(
-        `Trajectory span set never settled after ${maxPolls} polls (${last.toolNames.length} calls) — scoring potentially incomplete`
+        `Trajectory span set never settled after ${maxPolls} polls (${last.calls.length} calls) — scoring potentially incomplete`
       );
       return { available: true, ...last, settled: false };
     }
@@ -161,16 +177,13 @@ const trajectoryEvaluator = (
         metadata: undefined,
       };
     }
+    const toolNames = trajectory.calls.map((call) => call.name);
     if (!trajectory.settled) {
       return {
         score: null,
         label: 'potentially_incomplete',
         explanation: `Span set never settled (joined on ${trajectory.joinedOn})`,
-        metadata: {
-          incomplete: true,
-          toolNames: trajectory.toolNames,
-          agentTraceId: trajectory.agentTraceId,
-        },
+        metadata: { incomplete: true, toolNames, agentTraceId: trajectory.agentTraceId },
       };
     }
     const { score, explanation, metadata } = scoreFn(trajectory);
@@ -178,17 +191,13 @@ const trajectoryEvaluator = (
       score,
       label: undefined,
       explanation: `${explanation} (joined on ${trajectory.joinedOn})`,
-      metadata: {
-        ...metadata,
-        toolNames: trajectory.toolNames,
-        agentTraceId: trajectory.agentTraceId,
-      },
+      metadata: { ...metadata, toolNames, agentTraceId: trajectory.agentTraceId },
     };
   },
 });
 
-export const scoreCallCount: ScoreFn = ({ toolNames }) => {
-  const total = toolNames.length;
+export const scoreCallCount: ScoreFn = ({ calls }) => {
+  const total = calls.length;
   return {
     score: total <= MAX_TOOL_CALLS ? 1 : 0,
     explanation: `${total} tool call(s), bound ${MAX_TOOL_CALLS}`,
@@ -200,23 +209,41 @@ export const scoreCallCount: ScoreFn = ({ toolNames }) => {
  * The detection-rule-edit skill prescribes: load the skill → research → draft the rule once →
  * preview / render the attachment. Checks the run against that shape.
  */
-export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
-  const firstDraft = toolNames.indexOf(RULE_CREATION_TOOL_ID);
-  const skillLoaded = toolNames.indexOf(internalTools.loadSkill);
-  const drafts = toolNames.filter((name) => name === RULE_CREATION_TOOL_ID).length;
-  const expectedAfterDraft = (name: string) =>
-    name === RULE_CREATION_TOOL_ID || name === RULE_PREVIEW_TOOL_ID || isAttachmentTool(name);
+export const scoreCallOrder: ScoreFn = ({ calls }) => {
+  const names = calls.map((call) => call.name);
+  const [first] = calls;
+  const firstDraft = names.indexOf(RULE_CREATION_TOOL_ID);
+  const drafts = names.filter((name) => name === RULE_CREATION_TOOL_ID).length;
+  const finishingTool = (name: string) => name === RULE_PREVIEW_TOOL_ID || isAttachmentTool(name);
+  const beforeDraft = names.slice(1, firstDraft === -1 ? undefined : firstDraft);
+  const finishedBeforeDrafting = beforeDraft.filter(finishingTool);
   const exploredAfterDraft =
-    firstDraft === -1 ? [] : toolNames.slice(firstDraft + 1).filter((n) => !expectedAfterDraft(n));
+    firstDraft === -1
+      ? []
+      : names
+          .slice(firstDraft + 1)
+          .filter((name) => name !== RULE_CREATION_TOOL_ID && !finishingTool(name));
+  const unique = (list: string[]) => [...new Set(list)].join(', ');
 
   const violations: string[] = [];
+  if (first?.name !== internalTools.loadSkill) {
+    violations.push('did not load a skill before anything else');
+  } else if (first.skill === undefined) {
+    violations.push(
+      'loaded skill is not recorded on the span (agentBuilder:tracing:includeToolDetails is off)'
+    );
+  } else if (!first.skill.includes(RULE_CREATION_SKILL_ID)) {
+    violations.push(`loaded skill "${first.skill}" instead of ${RULE_CREATION_SKILL_ID}`);
+  }
   if (firstDraft === -1) violations.push('never drafted a rule');
-  else if (skillLoaded === -1 || skillLoaded > firstDraft) {
-    violations.push('drafted without loading the skill first');
+  if (finishedBeforeDrafting.length > 0) {
+    violations.push(
+      `previewed or edited attachments before drafting: ${unique(finishedBeforeDrafting)}`
+    );
   }
   if (drafts > 1) violations.push(`drafted ${drafts} times`);
   if (exploredAfterDraft.length > 0) {
-    violations.push(`explored after drafting: ${[...new Set(exploredAfterDraft)].join(', ')}`);
+    violations.push(`explored after drafting: ${unique(exploredAfterDraft)}`);
   }
 
   return {
@@ -225,7 +252,13 @@ export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
       violations.length === 0
         ? 'skill → research → one draft → preview/attachments'
         : violations.join('; '),
-    metadata: { drafts, exploredAfterDraft, violations },
+    metadata: {
+      loadedSkill: first?.skill,
+      drafts,
+      finishedBeforeDrafting,
+      exploredAfterDraft,
+      violations,
+    },
   };
 };
 

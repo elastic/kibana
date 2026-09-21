@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationResult } from '../rule_creation_client';
-import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
+import { DRAFT_STEP_ID, RULE_CREATION_SKILL_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import {
   createTrajectoryEvaluators,
   createTrajectoryFetcher,
@@ -35,11 +35,18 @@ const COLS = [
   { name: 'span_id', type: 'keyword' },
   { name: 'trace_id', type: 'keyword' },
   { name: 'attributes.gen_ai.tool.name', type: 'keyword' },
+  { name: 'attributes.gen_ai.tool.call.arguments', type: 'keyword' },
 ];
+const skillArgs = (skill: string) => JSON.stringify({ skill });
 /** One row per name, each its own span; `spanIds` overrides to simulate re-indexed copies. */
-const rows = (names: Array<string | null>, spanIds?: string[]) => ({
+const rows = (names: Array<string | null>, spanIds?: string[], skill = RULE_CREATION_SKILL_ID) => ({
   columns: COLS,
-  values: names.map((n, i) => [spanIds?.[i] ?? `span-${i}`, AGENT_TRACE, n]),
+  values: names.map((n, i) => [
+    spanIds?.[i] ?? `span-${i}`,
+    AGENT_TRACE,
+    n,
+    n === SKILL ? skillArgs(skill) : null,
+  ]),
 });
 
 const esWith = (handler: (query: string, call: number) => unknown) => {
@@ -75,36 +82,59 @@ const evaluateAll = async (client: EsClient, output: RuleCreationResult, maxPoll
     )
   );
 
-const settled = (toolNames: string[]) => ({
+/** Builds a settled trajectory; `load_skill` loads RULE_CREATION_SKILL_ID unless told otherwise, `null` = unrecorded. */
+const settled = (names: string[], skill: string | null = RULE_CREATION_SKILL_ID) => ({
   available: true as const,
-  toolNames,
+  calls: names.map((name) => (name === SKILL ? { name, skill: skill ?? undefined } : { name })),
   agentTraceId: AGENT_TRACE,
   joinedOn: 'workflow trace id',
   settled: true,
 });
 
 describe('createTrajectoryFetcher', () => {
-  it('asks for TOOL spans ordered by time and keeps only the tool name', async () => {
+  it('asks for TOOL spans ordered by time and keeps only the tool name and arguments', async () => {
     const { client, query } = esReturning([CREATE]);
     await fetcher(client)(result());
     const q = query.mock.calls[0][0].query as string;
     expect(q).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(q).toContain('attributes.gen_ai.tool.call.id IS NOT NULL');
     expect(q).toContain('SORT @timestamp ASC');
-    expect(q).toContain('KEEP span_id, trace_id, attributes.gen_ai.tool.name');
+    expect(q).toContain(
+      'KEEP span_id, trace_id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments'
+    );
   });
 
   it('drops rows with no tool name', async () => {
     const { client } = esReturning([null, CREATE, null]);
     const t = await fetcher(client)(result());
-    expect(t).toMatchObject({ available: true, toolNames: [CREATE] });
+    expect(t).toMatchObject({ available: true, calls: [{ name: CREATE }] });
+  });
+
+  it('reads the loaded skill off load_skill arguments and nothing else', async () => {
+    const { client } = esReturning([SKILL, CREATE]);
+    const t = await fetcher(client)(result());
+    expect(t).toMatchObject({
+      calls: [{ name: SKILL, skill: RULE_CREATION_SKILL_ID }, { name: CREATE }],
+    });
+  });
+
+  it('leaves the skill undefined when arguments are absent or malformed', async () => {
+    const { client } = esWith(() => ({
+      columns: COLS,
+      values: [
+        ['a', AGENT_TRACE, SKILL, null],
+        ['b', AGENT_TRACE, SKILL, 'not json'],
+      ],
+    }));
+    const t = await fetcher(client)(result());
+    expect(t).toMatchObject({ calls: [{ name: SKILL }, { name: SKILL }] });
   });
 
   it('counts a span once even when it is indexed into two data streams', async () => {
     const twice = [CREATE, CREATE, PREVIEW, PREVIEW];
     const { client } = esWith(() => rows(twice, ['a', 'a', 'b', 'b']));
     const t = await fetcher(client)(result());
-    expect(t).toMatchObject({ available: true, toolNames: [CREATE, PREVIEW] });
+    expect(t).toMatchObject({ calls: [{ name: CREATE }, { name: PREVIEW }] });
   });
 
   it("reports the agent's own trace id, which is not the workflow's", async () => {
@@ -136,25 +166,30 @@ describe('createTrajectoryFetcher', () => {
     const byPoll: Record<number, string[]> = { 1: [SKILL], 2: [SKILL, LABS, CREATE] };
     const { client, query } = esWith((_q, call) => rows(byPoll[call] ?? [SKILL, LABS, CREATE]));
     const t = await fetcher(client)(result());
-    expect(t).toMatchObject({ available: true, settled: true, toolNames: [SKILL, LABS, CREATE] });
+    expect(t).toMatchObject({ available: true, settled: true });
+    expect((t as { calls: Array<{ name: string }> }).calls.map((c) => c.name)).toEqual([
+      SKILL,
+      LABS,
+      CREATE,
+    ]);
     expect(query).toHaveBeenCalledTimes(3);
   });
 
   it('does not treat two same-sized reads with different sequences as settled', async () => {
     const byPoll: Record<number, string[]> = { 1: [SKILL, LABS], 2: [SKILL, CREATE] };
-    const { client } = esWith((_q, call) => rows(byPoll[call] ?? [SKILL, CREATE]));
+    const { client, query } = esWith((_q, call) => rows(byPoll[call] ?? [SKILL, CREATE]));
     const t = await fetcher(client)(result());
-    expect(t).toMatchObject({ available: true, settled: true, toolNames: [SKILL, CREATE] });
-    expect((client.esql.query as jest.Mock).mock.calls.length).toBe(3);
+    expect(t).toMatchObject({ available: true, settled: true });
+    expect(query).toHaveBeenCalledTimes(3);
   });
 
   it('does not treat reads from different join keys as settled', async () => {
-    const { client } = esWith((q, call) =>
+    const { client, query } = esWith((q, call) =>
       call === 1 && q.includes('trace.id') ? rows([]) : rows([SKILL, CREATE])
     );
     const t = await fetcher(client)(result());
     expect(t).toMatchObject({ available: true, settled: true, joinedOn: 'workflow trace id' });
-    expect((client.esql.query as jest.Mock).mock.calls.length).toBe(4);
+    expect(query).toHaveBeenCalledTimes(4);
   });
 
   it('reports an unsettled trajectory when the span count keeps growing', async () => {
@@ -181,7 +216,10 @@ describe('createTrajectoryEvaluators', () => {
     const results = await evaluateAll(client, result());
     expect(results.map((r) => r.score)).toEqual([1, 1]);
     for (const r of results) {
-      expect((r.metadata as Record<string, unknown>).agentTraceId).toBe(AGENT_TRACE);
+      expect(r.metadata).toMatchObject({
+        agentTraceId: AGENT_TRACE,
+        toolNames: [SKILL, LABS, CREATE, PREVIEW, ATTACH_READ],
+      });
     }
   });
 
@@ -215,18 +253,55 @@ describe('scoreCallOrder', () => {
   it('accepts skill → research → one draft → preview/attachments', () => {
     const r = scoreCallOrder(settled([SKILL, LABS, CREATE, PREVIEW, ATTACH_READ]));
     expect(r.score).toBe(1);
-    expect(r.metadata).toMatchObject({ drafts: 1, violations: [] });
+    expect(r.metadata).toMatchObject({
+      loadedSkill: RULE_CREATION_SKILL_ID,
+      drafts: 1,
+      violations: [],
+    });
   });
 
   it('accepts the minimal path: skill then draft', () => {
     expect(scoreCallOrder(settled([SKILL, CREATE])).score).toBe(1);
   });
 
-  it('fails a draft made without loading the skill first', () => {
+  it('accepts the skill given as a path, as long as it is the right skill', () => {
+    expect(
+      scoreCallOrder(settled([SKILL, CREATE], `skill://${RULE_CREATION_SKILL_ID}`)).score
+    ).toBe(1);
+  });
+
+  it('fails when the wrong skill was loaded', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE], 'threat-hunting'));
+    expect(r.score).toBe(0);
+    expect(r.metadata.violations).toEqual([
+      `loaded skill "threat-hunting" instead of ${RULE_CREATION_SKILL_ID}`,
+    ]);
+  });
+
+  it('fails, and says why, when the loaded skill is not recorded on the span', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE], null));
+    expect(r.score).toBe(0);
+    expect(r.metadata.violations).toEqual([expect.stringContaining('includeToolDetails')]);
+  });
+
+  it('fails a draft made without loading a skill first', () => {
     expect(scoreCallOrder(settled([CREATE])).metadata.violations).toEqual([
-      'drafted without loading the skill first',
+      'did not load a skill before anything else',
     ]);
     expect(scoreCallOrder(settled([CREATE, SKILL])).score).toBe(0);
+  });
+
+  it('fails research done before the skill was loaded', () => {
+    const r = scoreCallOrder(settled([LABS, SKILL, CREATE]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.violations).toEqual(['did not load a skill before anything else']);
+  });
+
+  it('fails a preview or attachment edit before the draft exists', () => {
+    const r = scoreCallOrder(settled([SKILL, PREVIEW, CREATE]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.finishedBeforeDrafting).toEqual([PREVIEW]);
+    expect(r.explanation).toContain('before drafting');
   });
 
   it('fails a run that drafted more than once', () => {
@@ -236,7 +311,6 @@ describe('scoreCallOrder', () => {
   });
 
   it('fails research after the draft, and names what was explored', () => {
-    // Draft, go look at indices, draft again.
     const r = scoreCallOrder(
       settled([SKILL, CREATE, LIST_INDICES, LIST_INDICES, CREATE, ATTACH_READ])
     );
