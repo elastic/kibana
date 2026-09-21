@@ -2989,7 +2989,7 @@ describe('ActionPolicyClient', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch-all');
-      expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
+      expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
       expect(result.evaluated_count).toBe(1);
       expect(result.is_truncated).toBe(true);
@@ -3042,7 +3042,7 @@ describe('ActionPolicyClient', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch-all');
-      expect(result.items[0].actionPolicy.id).toBe('ap-empty-matcher');
+      expect(result.items[0].action_policy.id).toBe('ap-empty-matcher');
     });
 
     it('returns catch-all APs even when the rule has no tags', async () => {
@@ -3070,7 +3070,7 @@ describe('ActionPolicyClient', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
-      expect(result.items[0].actionPolicy.id).toBe('ap-matcher');
+      expect(result.items[0].action_policy.id).toBe('ap-matcher');
     });
 
     it('skips APs whose tag clause does not intersect the rule tags', async () => {
@@ -3117,7 +3117,7 @@ describe('ActionPolicyClient', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
-      expect(result.items[0].actionPolicy.id).toBe('ap-combined');
+      expect(result.items[0].action_policy.id).toBe('ap-combined');
     });
   });
 });

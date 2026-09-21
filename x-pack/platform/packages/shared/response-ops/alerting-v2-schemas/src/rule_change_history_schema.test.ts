@@ -47,10 +47,10 @@ describe('listRuleChangeHistoryRequestSchema', () => {
 });
 
 describe('getRuleChangeHistoryEventParamsSchema', () => {
-  it('requires both id and eventId', () => {
+  it('requires both id and event_id', () => {
     expect(
-      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', eventId: 'event-1' })
-    ).toEqual({ id: 'rule-1', eventId: 'event-1' });
+      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', event_id: 'event-1' })
+    ).toEqual({ id: 'rule-1', event_id: 'event-1' });
     expect(getRuleChangeHistoryEventParamsSchema.safeParse({ id: 'rule-1' }).success).toBe(false);
   });
 
@@ -75,7 +75,7 @@ describe('listRuleChangeHistoryResponseSchema', () => {
             timestamp: '2026-01-15T12:00:00.000Z',
             actor: { name: 'elastic' },
             action: 'rule_create',
-            isCurrent: true,
+            is_current: true,
             metadata: { version: 1 },
           },
         ],
@@ -91,7 +91,7 @@ describe('ruleChangeHistoryDetailSchema', () => {
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
         timestamp: '2026-01-15T12:00:00.000Z',
-        actor: { name: 'elastic', profileId: 'u_1' },
+        actor: { name: 'elastic', profile_id: 'u_1' },
         action: 'rule_update',
         changes: { count: 1, summary: { metadata: { name: 'old' } } },
         snapshot: { id: 'rule-1', unexpected_legacy_field: true },
