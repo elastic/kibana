@@ -1207,7 +1207,10 @@ describe('AllCasesListGeneric', () => {
         setViewMode,
       }));
 
-      const { rerender } = renderWithTestingProviders(<AllCasesList />);
+      // hiddenStatuses must change on rerender so React.memo re-renders and picks up the new viewMode
+      const { rerender } = renderWithTestingProviders(
+        <AllCasesList hiddenStatuses={[CaseStatuses.closed]} />
+      );
 
       const caseToSelect = useGetCasesMockState.data.cases[0];
       await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
@@ -1218,7 +1221,7 @@ describe('AllCasesListGeneric', () => {
       expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
       expect(currentViewMode).toBe(VIEW_TOGGLE_LIST_ID);
 
-      rerender(<AllCasesList />);
+      rerender(<AllCasesList hiddenStatuses={[]} />);
       await waitForComponentToUpdate();
 
       expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
@@ -1238,7 +1241,9 @@ describe('AllCasesListGeneric', () => {
         setViewMode,
       }));
 
-      const { rerender } = renderWithTestingProviders(<AllCasesList />);
+      const { rerender } = renderWithTestingProviders(
+        <AllCasesList hiddenStatuses={[CaseStatuses.closed]} />
+      );
 
       // Sort by title so list-mode entry must normalize to createdAt
       await userEvent.click(await screen.findByTitle('Name'));
@@ -1263,7 +1268,7 @@ describe('AllCasesListGeneric', () => {
       expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
       expect(currentViewMode).toBe(VIEW_TOGGLE_LIST_ID);
 
-      rerender(<AllCasesList />);
+      rerender(<AllCasesList hiddenStatuses={[]} />);
       await waitForComponentToUpdate();
 
       expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
