@@ -1382,7 +1382,6 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test agent policy with cloud connectors enabled',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
-            supports_agentless: true,
             agentless: {
               cloud_connectors: {
                 enabled: true,
@@ -1400,7 +1399,6 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test agent policy without cloud connectors',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
-            supports_agentless: true,
             agentless: {
               cloud_connectors: {
                 enabled: false,
@@ -1428,7 +1426,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should create package policy with cloud connector when conditions are met', async () => {
-        const { body: packagePolicy } = await supertest
+        const {
+          body: { item: packagePolicy },
+        } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -1490,7 +1490,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should not create cloud connector when agent policy has cloud connectors disabled', async () => {
-        const { body: packagePolicy } = await supertest
+        const {
+          body: { item: packagePolicy },
+        } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
