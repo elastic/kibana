@@ -1915,7 +1915,7 @@ paths:
                         type: string
                         x-state: Technical Preview
                       name:
-                        description: Deprecated. Case-sensitive Kibana username of the user to grant access to. Use `id` instead; `name` is only kept so existing entries can be sent back unchanged.
+                        description: Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.
                         maxLength: 1024
                         minLength: 1
                         type: string
