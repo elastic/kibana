@@ -20418,6 +20418,11 @@ paths:
                       example: null
                       nullable: true
                       type: string
+                    extractObservables:
+                      description: |
+                        Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                      example: true
+                      type: boolean
                     id:
                       example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                       type: string
@@ -20613,6 +20618,11 @@ paths:
                     example: null
                     nullable: true
                     type: string
+                  extractObservables:
+                    description: |
+                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                    example: true
+                    type: boolean
                   id:
                     example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                     type: string
@@ -20809,6 +20819,11 @@ paths:
                     example: null
                     nullable: true
                     type: string
+                  extractObservables:
+                    description: |
+                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                    example: true
+                    type: boolean
                   id:
                     example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                     type: string
@@ -133224,6 +133239,7 @@ components:
               type: text
               required: false
           error: null
+          extractObservables: true
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -133604,6 +133620,7 @@ components:
             type: text
             required: false
         error: null
+        extractObservables: true
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -133711,6 +133728,7 @@ components:
             type: toggle
             required: false
         error: null
+        extractObservables: true
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -139296,6 +139314,10 @@ components:
           maxItems: 10
           minItems: 0
           type: array
+        extractObservables:
+          description: |
+            Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.
+          type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
         templates:
@@ -139679,6 +139701,10 @@ components:
               - required
               - type
           type: array
+        extractObservables:
+          description: |
+            Indicates whether observables are automatically extracted from alerts when they are added to new cases.
+          type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'
         version:
