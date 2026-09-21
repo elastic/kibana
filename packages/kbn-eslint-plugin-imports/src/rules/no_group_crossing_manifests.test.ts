@@ -178,7 +178,6 @@ jest.mock('@kbn/repo-packages', () => {
           id: `@kbn/${id}-plugin`,
           group,
           visibility: path.includes('platform/shared') ? 'shared' : 'private',
-          isDevOnly: () => false,
           manifest: {
             plugin: {
               id,
