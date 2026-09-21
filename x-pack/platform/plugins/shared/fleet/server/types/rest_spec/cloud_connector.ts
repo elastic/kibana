@@ -75,7 +75,7 @@ const IacRequestFieldsSchema = {
           : 'must be a CloudFormation stack ARN (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>)',
       meta: {
         description:
-          'ARN of the last CloudFormation stack deployed for this connector (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>).',
+          'ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).',
         availability: IAC_FIELD_AVAILABILITY,
       },
     })
