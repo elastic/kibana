@@ -47,7 +47,7 @@ The suite also requires `NIGHTSHIFT_PLAN_EXTRACTION_SPLIT` from private runtime 
 keep its value out of public commands, logs, and PR evidence.
 Limit the generated OpenRouter payload to the selected model(s) and judge using the existing
 `generate_openrouter_connectors.js --models <model-ids>` command, capturing its base64 stdout
-directly into `KIBANA_TESTING_AI_CONNECTORS`. It reads credentials from the loaded environment
+directly into `KIBANA_TESTING_INFERENCE_ENDPOINTS`. It reads credentials from the loaded environment
 and automatically includes an OpenRouter judge from `EVAL_CONNECTOR_ID`. The full catalog
 can exceed Java's environment-string size limit. For an EIS judge, include its definition
 from the standard `node scripts/evals init` discovery/cache as well; an OpenRouter-only

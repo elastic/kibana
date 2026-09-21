@@ -28,11 +28,31 @@ it('reads EIS model metadata when the REST list exposes only the underlying endp
   };
   await expect(
     getJudgeModel(client, {
+      type: 'stack_connector',
       id: 'eis-google-gemini-3-1-pro',
       name: 'EIS Gemini',
       actionTypeId: '.inference',
       config: { inferenceId: endpointId },
       secrets: {},
+    })
+  ).resolves.toBe('google-gemini-3.1-pro');
+});
+
+it('reads model metadata through an inference endpoint definition', async () => {
+  const client = {
+    getConnectorById: async (id: string) => {
+      if (id !== endpointId) throw new Error('Connector not found');
+      return endpoint;
+    },
+  };
+  await expect(
+    getJudgeModel(client, {
+      type: 'inference_endpoint',
+      id: 'eis-google-gemini-3-1-pro',
+      name: 'EIS Gemini',
+      inferenceId: endpointId,
+      provider: 'elastic',
+      taskType: 'chat_completion',
     })
   ).resolves.toBe('google-gemini-3.1-pro');
 });
@@ -52,6 +72,7 @@ it('keeps ordinary connector IDs and reports the configured model', async () => 
   };
   await expect(
     getJudgeModel(client, {
+      type: 'stack_connector',
       id: 'openrouter-judge',
       name: 'OpenRouter Gemini',
       actionTypeId: '.gen-ai',

@@ -24,9 +24,9 @@ In a Bash session using the pinned Node version, load the existing profile/conne
 ```bash
 source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh \
   x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.golden.json
-KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_openrouter_connectors.js \
+KIBANA_TESTING_INFERENCE_ENDPOINTS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_openrouter_connectors.js \
   --models openrouter-anthropic-claude-sonnet-4-6)"
-export KIBANA_TESTING_AI_CONNECTORS
+export KIBANA_TESTING_INFERENCE_ENDPOINTS
 micro_eval_log="$(mktemp)"
 node scripts/evals start --suite nightshift-micro-evals --profile golden \
   --model openrouter-anthropic-claude-sonnet-4-6 >"$micro_eval_log" 2>&1
