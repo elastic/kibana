@@ -92,7 +92,20 @@ const groupFilterClause = ({
     filter.push({ wildcard: { _index: `${remoteName}:*` } });
   }
   filter.push(...getHeartbeatLocationFilter({ field: 'observer.name', value: locationId }));
-  return filter.length === 1 ? filter[0] : { bool: { filter } };
+
+  if (remoteName) {
+    return filter.length === 1 ? filter[0] : { bool: { filter } };
+  }
+
+  // Local/Heartbeat ids are not unique across linked clusters. The overview
+  // chart searches `synthetics-*,*:synthetics-*`, so a bare `monitor.id` terms
+  // query would also match a remote copy of the same id.
+  return {
+    bool: {
+      filter,
+      must_not: [{ wildcard: { _index: '*:*' } }],
+    },
+  };
 };
 
 const monitorIdQuery = (ids: OverviewStatusFilterId[]): estypes.QueryDslQueryContainer => {

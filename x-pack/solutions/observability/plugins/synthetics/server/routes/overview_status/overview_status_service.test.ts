@@ -2622,6 +2622,55 @@ describe('current status route', () => {
           expect(result.pendingConfigs.id2.locations[0].status).toBe('pending');
         });
 
+        it('classifies pending-before-window as stale before statusFilter pagination', async () => {
+          const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+          const priorTs = moment().subtract(3, 'hours').toISOString();
+          // In-window: neither monitor ran → both pending. Prior-window: id1
+          // stopped reporting, so a `statusFilter=stale` page must include it
+          // rather than paging only the (empty) in-window stale bucket.
+          esClient.search.mockResponseOnce(getEsResponse({ buckets: [] })).mockResponseOnce(
+            getEsResponse({
+              buckets: [
+                {
+                  key: { monitorId: 'id1', locationId: japanLoc.id },
+                  status: {
+                    key: japanLoc.id,
+                    top: [{ metrics: { 'monitor.status': 'up' }, sort: [priorTs] }],
+                  },
+                },
+              ],
+            })
+          );
+
+          const overviewStatusService = new OverviewStatusService(
+            buildRouteContext(
+              {
+                dateRangeStart: 'now-24h',
+                dateRangeEnd: 'now',
+                page: 1,
+                perPage: 20,
+                statusFilter: 'stale',
+              },
+              syntheticsEsClient
+            )
+          );
+          overviewStatusService.getMonitorConfigs = jest
+            .fn()
+            .mockResolvedValue(testMonitors as any);
+
+          const result = await overviewStatusService.getOverviewStatus();
+
+          expect(result.configs.map((config: { configId: string }) => config.configId)).toEqual([
+            'id1',
+          ]);
+          expect(result.staleConfigs.id1?.overallStatus).toBe('stale');
+          expect(result.pendingConfigs.id1).toBeUndefined();
+          expect(result.staleIds).toEqual([{ monitorQueryId: 'id1' }]);
+          expect(
+            result.pendingIds.map((id: { monitorQueryId: string }) => id.monitorQueryId)
+          ).toEqual(expect.arrayContaining(['id2']));
+        });
+
         it("keeps a stale run's last-known status when inspecting a historical window", async () => {
           const { esClient, syntheticsEsClient } = getUptimeESMockClient();
           // Same old data, but the window ends in the past — the user explicitly

@@ -16,6 +16,16 @@ import {
 } from './use_monitor_filters';
 import { WrappedHelper } from '../../../utils/testing';
 
+const localMonitorIdQuery = (
+  queryIds: string[],
+  extraFilter: Array<Record<string, unknown>> = []
+) => ({
+  bool: {
+    filter: [{ terms: { 'monitor.id': queryIds } }, ...extraFilter],
+    must_not: [{ wildcard: { _index: '*:*' } }],
+  },
+});
+
 describe('useMonitorFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -207,7 +217,7 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({ terms: { 'monitor.id': ['id1', 'id2'] } });
+    expect(result.current).toEqual(localMonitorIdQuery(['id1', 'id2']));
   });
 
   it('returns a terms query scoped to a status filter', () => {
@@ -221,7 +231,7 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({ terms: { 'monitor.id': ['id2'] } });
+    expect(result.current).toEqual(localMonitorIdQuery(['id2']));
   });
 
   it('intersects the status filter with the allIds-based schedules filter', () => {
@@ -237,7 +247,7 @@ describe('useMonitorIdFilter', () => {
 
     // id4 is up but not in allIds (e.g. excluded by a schedule filter); id1 is
     // in allIds but not up — only the intersection should come through.
-    expect(result.current).toEqual({ terms: { 'monitor.id': ['id2', 'id3'] } });
+    expect(result.current).toEqual(localMonitorIdQuery(['id2', 'id3']));
   });
 
   it('returns a terms query of allIds when a free-text search is active', () => {
@@ -251,7 +261,7 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({ terms: { 'monitor.id': ['id1', 'id3'] } });
+    expect(result.current).toEqual(localMonitorIdQuery(['id1', 'id3']));
   });
 
   it('intersects a free-text search with a status filter', () => {
@@ -265,7 +275,7 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({ terms: { 'monitor.id': ['id2'] } });
+    expect(result.current).toEqual(localMonitorIdQuery(['id2']));
   });
 
   it('scopes to disabledMonitorQueryIds for the disabled status filter', () => {
@@ -279,7 +289,7 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({ terms: { 'monitor.id': ['id2'] } });
+    expect(result.current).toEqual(localMonitorIdQuery(['id2']));
   });
 
   it('falls back to a non-matching id when the status filter matches nothing', () => {
@@ -356,6 +366,55 @@ describe('useMonitorIdFilter', () => {
     });
   });
 
+  it('keeps a local same-ID clause off remote CCS indices', () => {
+    paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
+    selSPy.mockReturnValue({
+      status: {
+        allIds: [
+          { monitorQueryId: 'shared-id' },
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+        downIds: [
+          { monitorQueryId: 'shared-id' },
+          {
+            monitorQueryId: 'shared-id',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+
+    expect(result.current).toEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              filter: [{ terms: { 'monitor.id': ['shared-id'] } }],
+              must_not: [{ wildcard: { _index: '*:*' } }],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { terms: { 'monitor.id': ['shared-id'] } },
+                { wildcard: { _index: 'cluster-east:*' } },
+                { term: { 'observer.name': 'us-east-1' } },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
   it('scopes a Heartbeat Down status filter by location, not a shared monitor.id', () => {
     paramSpy.mockReturnValue({ statusFilter: 'down' } as any);
     selSPy.mockReturnValue({
@@ -371,14 +430,9 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({
-      bool: {
-        filter: [
-          { terms: { 'monitor.id': ['hb-1'] } },
-          { term: { 'observer.name': 'asia_japan' } },
-        ],
-      },
-    });
+    expect(result.current).toEqual(
+      localMonitorIdQuery(['hb-1'], [{ term: { 'observer.name': 'asia_japan' } }])
+    );
   });
 
   it('matches location-less Heartbeat pings via a missing observer.name, not the placeholder id', () => {
@@ -392,14 +446,12 @@ describe('useMonitorIdFilter', () => {
 
     const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
 
-    expect(result.current).toEqual({
-      bool: {
-        filter: [
-          { terms: { 'monitor.id': ['hb-1'] } },
-          { bool: { must_not: { exists: { field: 'observer.name' } } } },
-        ],
-      },
-    });
+    expect(result.current).toEqual(
+      localMonitorIdQuery(
+        ['hb-1'],
+        [{ bool: { must_not: { exists: { field: 'observer.name' } } } }]
+      )
+    );
   });
 
   it('scopes a search-filtered allIds by cluster and location, not a shared monitor.id', () => {

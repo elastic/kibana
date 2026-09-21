@@ -180,7 +180,7 @@ export class OverviewStatusService {
     // overview never silently hides one. Monitors with no run in the queried
     // window surface as `pending`; in a live window, monitors whose latest run
     // went stale surface as `stale` (see `processOverviewStatus`).
-    return this.buildOverviewStatusResult(rawConfigs, statusResult);
+    return await this.buildOverviewStatusResult(rawConfigs, statusResult);
   }
 
   /**
@@ -194,10 +194,10 @@ export class OverviewStatusService {
   ) {
     this.filterData = await getMonitorFilters(this.routeContext);
     const statusResult = await this.getQueryResult();
-    return this.buildOverviewStatusResult(allConfigs, statusResult);
+    return await this.buildOverviewStatusResult(allConfigs, statusResult);
   }
 
-  private buildOverviewStatusResult(
+  private async buildOverviewStatusResult(
     allConfigs: Array<
       SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
     >,
@@ -207,17 +207,24 @@ export class OverviewStatusService {
     const { page, perPage } = params;
     const isPaginated = page != null && perPage != null;
 
-    const {
-      up,
-      down,
-      pending,
-      stale,
-      upConfigs,
-      downConfigs,
-      pendingConfigs,
-      staleConfigs,
-      disabledConfigs,
-    } = this.processOverviewStatus(allConfigs, statusResult);
+    const processed = this.processOverviewStatus(allConfigs, statusResult);
+    let pending = processed.pending;
+    let stale = processed.stale;
+    const { up, down, upConfigs, downConfigs, pendingConfigs, staleConfigs, disabledConfigs } =
+      processed;
+
+    // `statusFilter=stale|pending` paginates from these buckets *before* the
+    // client can promote pending-before-window monitors. Run that promotion
+    // here so a Stale click does not page an empty in-window stale set.
+    const statusFilter = params.statusFilter;
+    if (
+      this.shouldApplyFreshnessGuard() &&
+      (statusFilter === MONITOR_STATUS_ENUM.STALE || statusFilter === MONITOR_STATUS_ENUM.PENDING)
+    ) {
+      await this.promotePendingFromPriorWindow(pendingConfigs, staleConfigs);
+      pending = Object.values(pendingConfigs).length;
+      stale = Object.values(staleConfigs).length;
+    }
 
     const {
       enabledMonitorQueryIds,
@@ -348,8 +355,13 @@ export class OverviewStatusService {
     const monitorIds = (
       Array.isArray(monitorQueryIds) ? monitorQueryIds : monitorQueryIds ? [monitorQueryIds] : []
     ).filter(Boolean);
+
+    return { priorRuns: await this.getPriorRunsBeforeWindow(monitorIds) };
+  }
+
+  private async getPriorRunsBeforeWindow(monitorIds: string[]): Promise<OverviewStalePriorRun[]> {
     if (monitorIds.length === 0) {
-      return { priorRuns: [] };
+      return [];
     }
 
     const { from } = this.getStatusQueryRange();
@@ -383,7 +395,76 @@ export class OverviewStatusService {
       });
     });
 
-    return { priorRuns };
+    return priorRuns;
+  }
+
+  private async promotePendingFromPriorWindow(
+    pendingConfigs: Record<string, OverviewStatusMetaData>,
+    staleConfigs: Record<string, OverviewStatusMetaData>
+  ) {
+    const monitorQueryIds = [
+      ...new Set(
+        Object.values(pendingConfigs)
+          .map((config) => config.monitorQueryId)
+          .filter(Boolean)
+      ),
+    ];
+    const priorRuns = await this.getPriorRunsBeforeWindow(monitorQueryIds);
+    if (priorRuns.length === 0) {
+      return;
+    }
+
+    const runsByMonitor = new Map<string, Map<string, OverviewStalePriorRun>>();
+    for (const run of priorRuns) {
+      let byLocation = runsByMonitor.get(run.monitorQueryId);
+      if (!byLocation) {
+        byLocation = new Map();
+        runsByMonitor.set(run.monitorQueryId, byLocation);
+      }
+      byLocation.set(run.locationId, run);
+    }
+
+    for (const [configId, meta] of Object.entries(pendingConfigs)) {
+      const byLocation = runsByMonitor.get(meta.monitorQueryId);
+      if (!byLocation) {
+        continue;
+      }
+
+      const scheduleMinutes = Number(meta.schedule) || 0;
+      let hasStale = false;
+      let latestTimestamp: string | undefined;
+
+      const locations = meta.locations.map((location) => {
+        const run = byLocation.get(location.id);
+        if (run && isRunStale(run.timestamp, scheduleMinutes)) {
+          hasStale = true;
+          if (!latestTimestamp || Date.parse(run.timestamp) > Date.parse(latestTimestamp)) {
+            latestTimestamp = run.timestamp;
+          }
+          return { ...location, status: MONITOR_STATUS_ENUM.STALE, lastStatus: run.status };
+        }
+        return { ...location, status: MONITOR_STATUS_ENUM.PENDING };
+      });
+
+      if (!hasStale) {
+        continue;
+      }
+
+      locations.sort((a, b) => {
+        if (a.status === b.status) {
+          return 0;
+        }
+        return a.status === MONITOR_STATUS_ENUM.PENDING ? 1 : -1;
+      });
+
+      staleConfigs[configId] = {
+        ...meta,
+        overallStatus: MONITOR_STATUS_ENUM.STALE,
+        timestamp: latestTimestamp,
+        locations,
+      };
+      delete pendingConfigs[configId];
+    }
   }
 
   paginateConfigs({
