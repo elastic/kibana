@@ -13,11 +13,8 @@ import {
   isWorkflowAbortedError,
   isWorkflowExecutionError,
 } from '@kbn/agent-builder-common';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EuiFlexGroup } from '@elastic/eui';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
 import { RequestAbortedRoundError } from './request_aborted_round_error';
 import { WorkflowError } from './workflow_error';
@@ -76,21 +73,9 @@ const renderErrorContent = (error: unknown): React.ReactNode => {
 
 interface RoundErrorProps {
   error: unknown;
-  onRetry?: () => void;
 }
 
-const labels = {
-  retryAriaLabel: i18n.translate('xpack.agentBuilder.round.error.retryLabel', {
-    defaultMessage: 'Retry',
-  }),
-  tryAgain: i18n.translate('xpack.agentBuilder.round.error.tryAgain', {
-    defaultMessage: 'Try again?',
-  }),
-};
-
-export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
-  const { euiTheme } = useEuiTheme();
-
+export const RoundError: React.FC<RoundErrorProps> = ({ error }) => {
   const errorContent = renderErrorContent(error);
 
   return (
@@ -104,29 +89,6 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
         <ReasoningErrorPanel>{errorContent}</ReasoningErrorPanel>
       ) : (
         errorContent
-      )}
-
-      {onRetry && (
-        <EuiFlexGroup direction="row" justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              css={css`
-                color: ${euiTheme.colors.textPrimary};
-              `}
-              data-test-subj="agentBuilderRoundErrorRetryButton"
-              iconType="refresh"
-              onClick={onRetry}
-              aria-label={labels.retryAriaLabel}
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                action: AGENT_BUILDER_UI_EBT.action.conversation.RETRY,
-                detail: 'conversation',
-              })}
-            >
-              {labels.tryAgain}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       )}
     </EuiFlexGroup>
   );

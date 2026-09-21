@@ -15,14 +15,13 @@ import { RoundError } from '../../conversation_rounds/round_error/round_error';
 
 interface ExecutionFailedEventProps {
   event: ExecutionFailedEventData;
-  onRetry?: () => void;
 }
 
 const label = i18n.translate('xpack.agentBuilder.conversation.timeline.executionFailed.label', {
   defaultMessage: 'An error occurred',
 });
 
-export const ExecutionFailedEvent: React.FC<ExecutionFailedEventProps> = ({ event, onRetry }) => {
+export const ExecutionFailedEvent: React.FC<ExecutionFailedEventProps> = ({ event }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const error = useMemo(() => deserializeExecutionError(event.data.error), [event.data.error]);
 
@@ -36,7 +35,7 @@ export const ExecutionFailedEvent: React.FC<ExecutionFailedEventProps> = ({ even
         }
         onClick={() => setIsExpanded((expanded) => !expanded)}
         isExpanded={isExpanded}
-        expansion={<RoundError error={error} onRetry={onRetry} />}
+        expansion={<RoundError error={error} />}
         ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_EXECUTION_ERROR}
       />
     </div>
