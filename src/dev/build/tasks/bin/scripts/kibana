@@ -35,8 +35,13 @@ if ! "$NODE" --version >/dev/null 2>&1; then
 fi
 {{/linux}}
 {{#serverless}}
+# Default: official Node 24.19.0. PC is compile-time, so this only selects a tree.
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
+fi
+# Custom Node 26.8.1 pointer-compression. Last matching env wins if both are set.
+if [ "$KBN_USE_NODE_26" = 'true' ]; then
+  NODE="${DIR}/node/node-26-pointer-compression/bin/node"
 fi
 if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
   export LD_PRELOAD='/usr/lib/libjemalloc.so.2'
