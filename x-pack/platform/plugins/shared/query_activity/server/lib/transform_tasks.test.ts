@@ -164,6 +164,8 @@ describe('isQueryTaskCandidate', () => {
     const actions = [
       'indices:data/read/esql[a]',
       'indices:data/read/eql[a]',
+      'indices:data/read/eql/search',
+      'indices:data/read/eql/search[a]',
       'indices:data/read/sql[a]',
       'indices:data/read/async_search/submit',
     ];
@@ -314,7 +316,7 @@ describe('transformTasks', () => {
   it('uses raw description for EQL tasks', () => {
     const task: TasksTaskInfo = {
       ...baseTask,
-      action: 'indices:data/read/eql',
+      action: 'indices:data/read/eql/search',
       description: 'process where true',
       headers: {
         'X-Opaque-Id': 'req4;kibana:application:discover:new',

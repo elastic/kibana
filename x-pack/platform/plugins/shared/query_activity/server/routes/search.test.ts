@@ -75,6 +75,8 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
         'indices:data/read/esql[a]',
         'indices:data/read/eql',
         'indices:data/read/eql[a]',
+        'indices:data/read/eql/search',
+        'indices:data/read/eql/search[a]',
         'indices:data/read/sql',
         'indices:data/read/sql[a]',
         'indices:data/read/msearch',
