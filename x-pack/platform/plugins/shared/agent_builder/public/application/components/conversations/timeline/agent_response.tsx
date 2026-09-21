@@ -64,7 +64,6 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
           response={response}
           steps={steps}
           isLoading={isLoading}
-          hasError={false}
           executionTerminatedEvent={executionTerminatedEvent}
           conversationAttachments={conversationAttachments}
           attachmentRefs={attachmentRefs}

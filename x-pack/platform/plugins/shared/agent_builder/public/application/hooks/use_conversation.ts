@@ -6,7 +6,6 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useMemo } from 'react';
 import { isSharedConversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
@@ -138,15 +137,10 @@ export const useConversationReadOnly = () => {
   };
 };
 
-export const useConversationRounds = () => {
-  const { conversation } = useConversation();
-  return useMemo(() => conversation?.rounds ?? [], [conversation?.rounds]);
-};
-
 export const useHasActiveConversation = () => {
   const hasPersistedConversation = useHasPersistedConversation();
-  const conversationRounds = useConversationRounds();
-  return hasPersistedConversation || conversationRounds.length > 0;
+  const { conversation } = useConversation();
+  return hasPersistedConversation || (conversation?.events?.length ?? 0) > 0;
 };
 
 export const useHasPersistedConversation = () => {
