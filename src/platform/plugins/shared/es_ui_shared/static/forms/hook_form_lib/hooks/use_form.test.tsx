@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { getRandomString } from '../shared_imports';
+import { getRandomString } from '@kbn/test-jest-helpers';
 import { emptyField } from '../../helpers/field_validators';
 import { ComboBoxField } from '../../components';
 import { Form, UseField, UseArray } from '../components';

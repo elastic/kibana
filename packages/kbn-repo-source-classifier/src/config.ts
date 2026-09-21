@@ -60,5 +60,6 @@ export const TEST_DIR = new Set([
   'storybook',
   '.storybook',
   'integration_tests',
+  'data_loaders',
   ...RANDOM_TEST_FILE_NAMES,
 ]);

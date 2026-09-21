@@ -6,5 +6,6 @@
     "@elastic/obs-signals-logs-team"
   ],
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "shared",
+  "devOnly": true
 }

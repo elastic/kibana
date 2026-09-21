@@ -24,7 +24,7 @@ dependsOn:
 tags:
   - shared-common
   - package
-  - prod
+  - dev
   - group-platform
   - shared
   - jest-unit-tests

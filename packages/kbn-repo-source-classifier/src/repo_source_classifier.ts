@@ -53,6 +53,11 @@ export class RepoSourceClassifier {
       return true;
     }
 
+    // FTR/script helper that value-imports KbnClient; not app runtime
+    if (name === 'kibana_status' && path.getSegs().includes('endpoint')) {
+      return true;
+    }
+
     if (name.startsWith('_')) {
       for (const tag of TEST_TAG) {
         if (name.includes(tag)) {
@@ -88,6 +93,10 @@ export class RepoSourceClassifier {
     }
 
     if (path.getFilename() === 'webpack.config' && path.getPkgInfo()?.pkgId !== '@kbn/optimizer') {
+      return true;
+    }
+
+    if (path.getPkgInfo()?.pkgId === '@kbn/setup-node-env') {
       return true;
     }
 
