@@ -94,15 +94,6 @@ export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
-/* Trigger badge                                                              */
-/* -------------------------------------------------------------------------- */
-
-export const MANUAL_RUN_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.manualRunLabel',
-  { defaultMessage: 'Manual run' }
-);
-
-/* -------------------------------------------------------------------------- */
 /* Worker settings layout (autonomy cards, trigger row)                       */
 /* -------------------------------------------------------------------------- */
 

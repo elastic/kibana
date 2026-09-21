@@ -79,10 +79,10 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
   const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
-  const triggerLabel =
+  const scheduleBadge =
     settings.scheduleInterval != null
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
-      : settingsI18n.MANUAL_RUN_LABEL;
+      : undefined;
   const controlsDisabled = settingsLocked || isSaving;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
   const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
@@ -178,9 +178,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">{autonomyLabel}</EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{triggerLabel}</EuiBadge>
-          </EuiFlexItem>
+          {scheduleBadge ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{scheduleBadge}</EuiBadge>
+            </EuiFlexItem>
+          ) : null}
           {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}
           {error ? (
             <EuiFlexItem grow={false}>
