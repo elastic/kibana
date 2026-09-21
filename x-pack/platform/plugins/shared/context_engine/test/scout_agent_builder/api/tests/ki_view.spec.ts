@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-const COLLECTION = 'api/context_engine/ai_index';
+const { AI_INDEX_COLLECTION_PATH, API_HEADERS } = testData;
 // Unique per run so stale resources from an interrupted run cannot leak into the assertions.
 const RUN_ID = randomUUID().slice(0, 8);
 const AI_INDEX_ID = `scout_view_ai_index_${RUN_ID}`;
@@ -20,11 +20,6 @@ const DEST = `ai-index-idx-scout-view-${RUN_ID}`;
 const DS_AI_INDEX_ID = `scout_view_ai_index_ds_${RUN_ID}`;
 const DS_VIEW_NAME = `v-ai-index-${DS_AI_INDEX_ID}`;
 const DS_DEST = `ai-index-ds-scout-view-${RUN_ID}`;
-
-const API_HEADERS = {
-  ...testData.COMMON_HEADERS,
-  'elastic-api-version': '2023-10-31',
-};
 
 // The `ai-index@mappings` fields the view filters on.
 const MAPPINGS = {
@@ -63,7 +58,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
     for (const id of [AI_INDEX_ID, DS_AI_INDEX_ID]) {
-      await apiClient.delete(`${COLLECTION}/${id}`, {
+      await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
       });
@@ -78,7 +73,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
     'exposes only current, active, unexpired KIs through the view',
     async ({ apiClient, esClient }) => {
       await apiTest.step('creates the AI index and its view', async () => {
-        const response = await apiClient.post(COLLECTION, {
+        const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
           headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
           responseType: 'json',
           body: {
@@ -137,7 +132,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
       });
 
       await apiTest.step('deleting the AI index removes the view', async () => {
-        const response = await apiClient.delete(`${COLLECTION}/${AI_INDEX_ID}`, {
+        const response = await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`, {
           headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
           responseType: 'json',
         });
@@ -153,7 +148,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
     'exposes only the latest revision of each KI through a data stream view',
     async ({ apiClient, esClient }) => {
       await apiTest.step('creates the AI index and its view', async () => {
-        const response = await apiClient.post(COLLECTION, {
+        const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
           headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
           responseType: 'json',
           body: {
