@@ -46,7 +46,6 @@ describe('TraceSelector', () => {
     });
     mockUseSearchDataStreams.mockReturnValue({
       dataStreams: ['logs-genai-default'],
-      hasMore: false,
       isLoading: false,
       isError: false,
     });

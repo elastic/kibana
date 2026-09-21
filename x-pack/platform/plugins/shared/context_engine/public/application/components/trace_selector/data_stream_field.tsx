@@ -28,7 +28,7 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const [hasFocused, setHasFocused] = useState(false);
 
-  const { dataStreams, hasMore, isLoading, isError } = useSearchDataStreams({
+  const { dataStreams, isLoading, isError } = useSearchDataStreams({
     search: debouncedSearch.trim(),
     enabled: hasFocused,
   });

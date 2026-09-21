@@ -52,7 +52,6 @@ export const registerDataStreamsRoutes = ({ router }: { router: IRouter }): void
         const visible = dataStreams.filter((ds) => !ds.hidden);
         const body: SearchDataStreamsResponse = {
           dataStreams: visible.map((ds) => ds.name).slice(0, MAX_DATA_STREAM_SEARCH_RESULTS),
-          hasMore: visible.length > MAX_DATA_STREAM_SEARCH_RESULTS,
         };
         return response.ok({ body });
       })

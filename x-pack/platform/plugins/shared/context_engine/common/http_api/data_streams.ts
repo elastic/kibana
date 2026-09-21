@@ -8,6 +8,4 @@
 /** Response of the data streams search API. */
 export interface SearchDataStreamsResponse {
   dataStreams: string[];
-  /** True when more matches exist beyond the returned, capped list. */
-  hasMore: boolean;
 }

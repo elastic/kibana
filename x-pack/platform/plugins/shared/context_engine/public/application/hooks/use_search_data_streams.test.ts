@@ -74,7 +74,6 @@ describe('useSearchDataStreams', () => {
     const core = coreMock.createStart();
     mockedSearchDataStreams.mockResolvedValue({
       dataStreams: ['logs-genai-default'],
-      hasMore: true,
     });
 
     const { result } = renderSearchDataStreams(core, { search: 'lo', enabled: true });
@@ -87,7 +86,6 @@ describe('useSearchDataStreams', () => {
       search: 'lo',
       signal: expect.any(AbortSignal),
     });
-    expect(result.current.hasMore).toBe(true);
     expect(result.current.isError).toBe(false);
     expect(result.current.isLoading).toBe(false);
   });
@@ -114,7 +112,7 @@ describe('useSearchDataStreams', () => {
     await waitFor(() => expect(mockedSearchDataStreams).toHaveBeenCalledTimes(2));
     expect(firstSignal?.aborted).toBe(true);
 
-    second.resolve({ dataStreams: ['logs-newer'], hasMore: false });
+    second.resolve({ dataStreams: ['logs-newer'] });
     first.reject(new Error('aborted'));
   });
 
@@ -133,7 +131,6 @@ describe('useSearchDataStreams', () => {
     const second = createDeferred<SearchDataStreamsResponse>();
     mockedSearchDataStreams.mockResolvedValueOnce({
       dataStreams: ['logs-first'],
-      hasMore: false,
     });
     mockedSearchDataStreams.mockReturnValueOnce(second.promise);
 
@@ -152,11 +149,10 @@ describe('useSearchDataStreams', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(true));
     expect(result.current.dataStreams).toEqual(['logs-first']);
 
-    second.resolve({ dataStreams: ['logs-second'], hasMore: true });
+    second.resolve({ dataStreams: ['logs-second'] });
 
     await waitFor(() => {
       expect(result.current.dataStreams).toEqual(['logs-second']);
-      expect(result.current.hasMore).toBe(true);
       expect(result.current.isLoading).toBe(false);
     });
   });

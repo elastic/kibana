@@ -16,7 +16,6 @@ interface UseSearchDataStreamsArgs {
 
 interface UseSearchDataStreamsResult {
   dataStreams: string[];
-  hasMore: boolean;
   isLoading: boolean;
   isError: boolean;
 }
@@ -39,7 +38,6 @@ export const useSearchDataStreams = ({
 
   return {
     dataStreams: data?.dataStreams ?? [],
-    hasMore: data?.hasMore ?? false,
     isLoading: isFetching,
     isError,
   };

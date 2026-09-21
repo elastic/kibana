@@ -26,7 +26,6 @@ jest.mock('../../hooks/use_search_data_streams', () => ({
 
 const defaultHookResult = {
   dataStreams: ['logs-genai-default'],
-  hasMore: false,
   isLoading: false,
   isError: false,
 };
@@ -118,18 +117,6 @@ describe('DataStreamField', () => {
 
     expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
     expect(screen.getByText('logs-other')).toBeInTheDocument();
-  });
-
-  it('swaps help text when the hook reports hasMore', () => {
-    mockUseSearchDataStreams.mockReturnValue({
-      ...defaultHookResult,
-      hasMore: true,
-    });
-    renderField({ value: undefined, onChange: jest.fn() });
-
-    expect(
-      screen.getByText('Showing the first 50 matches. Refine your search to narrow the results.')
-    ).toBeInTheDocument();
   });
 
   it('shows a toast warning on load error instead of rendering the raw error message', () => {

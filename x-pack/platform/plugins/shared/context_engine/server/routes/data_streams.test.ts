@@ -92,7 +92,7 @@ describe('data streams routes', () => {
 
     expect(getDataStream).toHaveBeenCalledWith({ name: '*', expand_wildcards: 'all' });
     expect(response.ok).toHaveBeenCalledWith({
-      body: { dataStreams: ['logs-genai-default'], hasMore: false },
+      body: { dataStreams: ['logs-genai-default'] },
     });
   });
 
@@ -117,11 +117,11 @@ describe('data streams routes', () => {
     await callRoute(dataStreamsSearchPath, { query: {} });
 
     expect(response.ok).toHaveBeenCalledWith({
-      body: { dataStreams: ['zeta-stream', 'managed-stream', 'alpha-stream'], hasMore: false },
+      body: { dataStreams: ['zeta-stream', 'managed-stream', 'alpha-stream'] },
     });
   });
 
-  it('caps results and sets hasMore when more matches survive filtering', async () => {
+  it('caps results when more matches survive filtering', async () => {
     const extra = 3;
     const dataStreams = Array.from({ length: MAX_DATA_STREAM_SEARCH_RESULTS + extra }, (_, i) => ({
       name: `ds-${String(i).padStart(3, '0')}`,
@@ -133,20 +133,7 @@ describe('data streams routes', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: {
         dataStreams: dataStreams.slice(0, MAX_DATA_STREAM_SEARCH_RESULTS).map((ds) => ds.name),
-        hasMore: true,
       },
-    });
-  });
-
-  it('sets hasMore to false when the filtered list fits the cap', async () => {
-    getDataStream.mockResolvedValue({
-      data_streams: [{ name: 'a-stream' }, { name: 'b-stream' }],
-    });
-
-    await callRoute(dataStreamsSearchPath, { query: {} });
-
-    expect(response.ok).toHaveBeenCalledWith({
-      body: { dataStreams: ['a-stream', 'b-stream'], hasMore: false },
     });
   });
 });
