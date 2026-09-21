@@ -17,7 +17,10 @@ import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plu
 import type { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
+import {
+  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
+  SERVICE_ACCOUNT_MAX_ROLES,
+} from '../../common/service_accounts';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -216,6 +219,22 @@ describe('EsServiceAccounts', () => {
       await serviceAccounts.create(request, createParams);
 
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // Elasticsearch caps no role count of its own, so a creator can hold more roles than Kibana
+    // is willing to read back. Copying them would create an account `readAccount` then refuses.
+    it('rejects a creator whose roles fall outside what an explicit `roles` may hold', async () => {
+      getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          roles: new Array(SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer'),
+        })
+      );
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Specify `roles` explicitly'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('accepts an API-key caller that names the roles explicitly', async () => {

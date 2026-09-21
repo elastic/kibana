@@ -22,6 +22,12 @@ import {
 const LOCAL_ONLY = ['@local-stateful-classic'];
 
 const CREATE_ENDPOINT = 'internal/security/service_account';
+/**
+ * The endpoint is `access: 'internal'`, and Scout's `apiClient` adds no headers of its own. The
+ * origin header is what a real internal caller sends, and what keeps the suite passing should the
+ * server config ever stop disabling `server.restrictInternalApis`.
+ */
+const REQUEST_HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
 const NAMESPACE = 'kibana';
 /** The single token Kibana mints per account, named in `ES_SERVICE_ACCOUNT_TOKEN_NAME`. */
 const TOKEN_NAME = 'kibana-managed';
@@ -137,7 +143,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       created.push(name);
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
-        headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
         responseType: 'json',
         body: { name },
       });
@@ -169,7 +175,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     created.push(name);
 
     const response = await apiClient.post(CREATE_ENDPOINT, {
-      headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+      headers: { ...cookieHeader, ...REQUEST_HEADERS },
       responseType: 'json',
       body: { name, roles: ['viewer'] },
     });
@@ -188,7 +194,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const name = uniqueName('duplicate');
     created.push(name);
-    const headers = { ...cookieHeader, 'kbn-xsrf': 'true' };
+    const headers = { ...cookieHeader, ...REQUEST_HEADERS };
 
     const first = await apiClient.post(CREATE_ENDPOINT, {
       headers,
@@ -215,7 +221,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       // bare separator and a name pointing at another namespace are refused alongside traversal.
       for (const name of ['../_cluster/settings', 'elastic/', '/']) {
         const response = await apiClient.post(CREATE_ENDPOINT, {
-          headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+          headers: { ...cookieHeader, ...REQUEST_HEADERS },
           responseType: 'json',
           body: { name },
         });
@@ -247,7 +253,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       created.push(name);
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
-        headers: { ...apiKeyHeader, 'kbn-xsrf': 'true' },
+        headers: { ...apiKeyHeader, ...REQUEST_HEADERS },
         responseType: 'json',
         body: { name },
       });
@@ -273,7 +279,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       created.push(name);
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
-        headers: { ...apiKeyHeader, 'kbn-xsrf': 'true' },
+        headers: { ...apiKeyHeader, ...REQUEST_HEADERS },
         responseType: 'json',
         body: { name, roles: ['viewer'] },
       });
@@ -307,7 +313,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       created.push(name);
 
       const response = await apiClient.post(CREATE_ENDPOINT, {
-        headers: { ...apiKeyHeader, 'kbn-xsrf': 'true' },
+        headers: { ...apiKeyHeader, ...REQUEST_HEADERS },
         responseType: 'json',
         body: { name, roles: ['viewer'] },
       });
@@ -322,7 +328,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     created.push(name);
 
     const response = await apiClient.post(CREATE_ENDPOINT, {
-      headers: { ...cookieHeader, 'kbn-xsrf': 'true' },
+      headers: { ...cookieHeader, ...REQUEST_HEADERS },
       responseType: 'json',
       body: { name },
     });

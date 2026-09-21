@@ -29,9 +29,12 @@ export const SYSTEM_INDICES_HEADERS = { 'x-elastic-product-origin': 'kibana' };
  * that can write restricted indices such as `.kibana`. Scout's own `esClient` authenticates as
  * `elastic`, whose `superuser` role stops short of them.
  *
- * `@kbn/es` bind-mounts the account into locally-managed serverless clusters, but a stateful
- * cluster gets the role definition and no account, so both are created here. Both calls are
- * idempotent, and neither works on Cloud, which is one more reason this suite is local-only.
+ * `@kbn/es` provisions the role and the account on every cluster it starts: bind-mounted into a
+ * serverless one, written through the native realm on a stateful one. The writes below are the
+ * same role and account again, a no-op on those clusters and what makes the client work against a
+ * stateful cluster that came from anywhere else. Nothing is removed afterwards: the account is
+ * `@kbn/es`'s, and `@kbn/test-es-server` authenticates as it by default. Neither write works on
+ * Cloud, which is one more reason this suite is local-only.
  */
 export const createSystemIndicesEsClient = async (
   esClient: Client,

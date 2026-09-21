@@ -22,4 +22,5 @@ export {
   serviceAccountIdSchema,
   serviceAccountNameSchema,
   serviceAccountRoleNameSchema,
+  serviceAccountRolesSchema,
 } from './schemas';

@@ -35,6 +35,15 @@ export const serviceAccountRoleNameSchema = z
   .max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
 
 /**
+ * The role list an account is created with, whether the caller named it or Kibana derived it. One
+ * schema for both, so that nothing Kibana writes falls outside what it is willing to read back.
+ */
+export const serviceAccountRolesSchema = z
+  .array(serviceAccountRoleNameSchema)
+  .min(1)
+  .max(SERVICE_ACCOUNT_MAX_ROLES);
+
+/**
  * Parameters for creating a service account. Validated in two places: the route body, and again
  * inside each backend, since callers of the server contract never pass through the route.
  *
@@ -43,5 +52,5 @@ export const serviceAccountRoleNameSchema = z
  */
 export const createServiceAccountParamsSchema = z.object({
   name: serviceAccountNameSchema,
-  roles: z.array(serviceAccountRoleNameSchema).min(1).max(SERVICE_ACCOUNT_MAX_ROLES).optional(),
+  roles: serviceAccountRolesSchema.optional(),
 });
