@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -95,15 +96,25 @@ export function buildRequiredActions(
   return [...privilegeNames].map((name) => security.authz.actions.api.get(name));
 }
 
-export async function checkUploadPackageAssetPrivileges(
-  request: KibanaRequest,
-  archiveBuffer: Buffer,
-  contentType: string,
-  spaceId: string,
-  pkgName: string | undefined,
-  installation: SavedObject<Installation> | undefined,
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<string[]> {
+export interface CheckUploadPackageAssetPrivilegesOptions {
+  request: KibanaRequest;
+  archiveBuffer: Buffer;
+  contentType: string;
+  spaceId: string;
+  pkgName: string | undefined;
+  installation: SavedObject<Installation> | undefined;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+export async function checkUploadPackageAssetPrivileges({
+  request,
+  archiveBuffer,
+  contentType,
+  spaceId,
+  pkgName,
+  installation,
+  savedObjectsClient,
+}: CheckUploadPackageAssetPrivilegesOptions): Promise<string[]> {
   const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
   // Compute destination spaces first — needed for both the existing-asset scan
@@ -140,8 +151,9 @@ export async function checkUploadPackageAssetPrivileges(
   // Build per-Space data: gated asset types (archive types union existing ref types) and whether
   // any existing security rule in this Space is ML type (requires ml:canCreateJob).
   // Keeping these per-Space avoids requiring privileges for a type in a Space that never had it.
-  // For the primary/streaming Space, read SO attributes to detect ML subtype — stored refs only
-  // carry the SO type, not the rule subtype. Fail closed if the read fails.
+  // Stored refs carry only the SO type, not the rule subtype, so we read SO attributes to detect
+  // ML rules. Primary/streaming spaces use the user-scoped client; additional spaces use an
+  // internal client scoped to that namespace. Fail closed: any read error means assume ML present.
   const spaceData = new Map<string, { types: Set<KibanaAssetType>; hasMlRules: boolean }>();
   for (const space of destinationSpaces) {
     const types = new Set(signals.gatedTypesFound);
@@ -157,18 +169,20 @@ export async function checkUploadPackageAssetPrivileges(
     }
 
     let hasMlRules = signals.hasMlSecurityRules;
-    if (installation && usePrimaryRefs) {
-      const primaryRefs = installation.attributes.installed_kibana ?? [];
-      const ruleIds = primaryRefs
+    if (installation) {
+      const ruleIds = (refs ?? [])
         .filter((ref) => ref.type === KibanaSavedObjectType.securityRule)
         .map((ref) => ref.id);
       if (ruleIds.length > 0) {
+        const clientForSpace = usePrimaryRefs
+          ? savedObjectsClient
+          : appContextService.getInternalUserSOClientForSpaceId(space);
         try {
-          const bulkResult = await savedObjectsClient.bulkGet<{ type?: string }>(
+          const bulkResult = await clientForSpace.bulkGet<{ type?: string }>(
             ruleIds.map((id) => ({ type: KibanaSavedObjectType.securityRule, id }))
           );
           for (const so of bulkResult.saved_objects) {
-            if (!so.error && so.attributes?.type === 'machine_learning') {
+            if (isSavedObjectErrorResult(so) || so.attributes?.type === 'machine_learning') {
               hasMlRules = true;
               break;
             }
@@ -229,7 +243,5 @@ export async function checkUploadPackageAssetPrivileges(
     }
   }
 
-  // Return the exact set of Spaces that were authorised so callers can use it to cap
-  // multispace propagation to the same snapshot (preventing TOCTOU bypass).
   return destinationSpaces;
 }

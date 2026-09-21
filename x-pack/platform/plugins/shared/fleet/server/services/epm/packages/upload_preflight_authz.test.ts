@@ -22,6 +22,7 @@ jest.mock('../../app_context', () => ({
   appContextService: {
     getSecurity: jest.fn(),
     getConfig: jest.fn(),
+    getInternalUserSOClientForSpaceId: jest.fn(),
   },
 }));
 
@@ -264,15 +265,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        'mypackage',
-        undefined,
-        mockSavedObjectsClient
-      )
+      checkUploadPackageAssetPrivileges({
+        request: mockRequest,
+        archiveBuffer: mockArchiveBuffer,
+        contentType: mockContentType,
+        spaceId: mockSpaceId,
+        pkgName: 'mypackage',
+        installation: undefined,
+        savedObjectsClient: mockSavedObjectsClient,
+      })
     ).resolves.toEqual([]);
 
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -289,15 +290,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      undefined,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -324,15 +325,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      undefined,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -355,15 +356,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        'mypackage',
-        undefined,
-        mockSavedObjectsClient
-      )
+      checkUploadPackageAssetPrivileges({
+        request: mockRequest,
+        archiveBuffer: mockArchiveBuffer,
+        contentType: mockContentType,
+        spaceId: mockSpaceId,
+        pkgName: 'mypackage',
+        installation: undefined,
+        savedObjectsClient: mockSavedObjectsClient,
+      })
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -376,15 +377,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        'mypackage',
-        undefined,
-        mockSavedObjectsClient
-      )
+      checkUploadPackageAssetPrivileges({
+        request: mockRequest,
+        archiveBuffer: mockArchiveBuffer,
+        contentType: mockContentType,
+        spaceId: mockSpaceId,
+        pkgName: 'mypackage',
+        installation: undefined,
+        savedObjectsClient: mockSavedObjectsClient,
+      })
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -396,15 +397,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      undefined,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -426,15 +427,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      undefined,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: undefined,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -456,15 +457,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     (appContextService.getSecurity as jest.Mock).mockReturnValue(null);
 
     await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        'mypackage',
-        undefined,
-        mockSavedObjectsClient
-      )
+      checkUploadPackageAssetPrivileges({
+        request: mockRequest,
+        archiveBuffer: mockArchiveBuffer,
+        contentType: mockContentType,
+        spaceId: mockSpaceId,
+        pkgName: 'mypackage',
+        installation: undefined,
+        savedObjectsClient: mockSavedObjectsClient,
+      })
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -483,15 +484,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(
@@ -515,15 +516,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      'space-x',
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: 'space-x',
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     expect(atSpaces).toHaveBeenCalledWith(['space-x'], expect.anything());
@@ -548,15 +549,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a', 'space-b']));
     expect(result).toHaveLength(3);
@@ -577,15 +578,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      'space-x',
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: 'space-x',
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(result).toEqual(['space-x']);
   });
@@ -606,15 +607,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -642,15 +643,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
     } as any;
 
     await expect(
-      checkUploadPackageAssetPrivileges(
-        mockRequest,
-        mockArchiveBuffer,
-        mockContentType,
-        mockSpaceId,
-        'mypackage',
-        installation,
-        mockSavedObjectsClient
-      )
+      checkUploadPackageAssetPrivileges({
+        request: mockRequest,
+        archiveBuffer: mockArchiveBuffer,
+        contentType: mockContentType,
+        spaceId: mockSpaceId,
+        pkgName: 'mypackage',
+        installation: installation,
+        savedObjectsClient: mockSavedObjectsClient,
+      })
     ).rejects.toThrow(FleetUnauthorizedError);
   });
 
@@ -670,15 +671,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(result).toEqual([]);
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -708,15 +709,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      'request-space',
-      'security_detection_engine',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: 'request-space',
+      pkgName: 'security_detection_engine',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     // Must detect the security-rule in installed_kibana and require rules-all.
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
@@ -745,15 +746,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'security_detection_engine',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'security_detection_engine',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(result).toEqual([mockSpaceId]);
 
@@ -776,6 +777,9 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+      makeSavedObjectsClient([{ id: 'old-rule', attributes: { type: 'query' } }])
+    );
 
     const installation = {
       attributes: {
@@ -787,15 +791,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -822,6 +826,9 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+      makeSavedObjectsClient([{ id: 'old-rule', attributes: { type: 'query' } }])
+    );
 
     const installation = {
       attributes: {
@@ -834,15 +841,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
     // Two separate atSpaces calls — one per unique action set.
@@ -875,15 +882,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       },
     } as any;
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(result).toEqual([]);
     expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -920,15 +927,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
       ],
     });
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -959,15 +966,15 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     mockSavedObjectsClient.bulkGet.mockRejectedValue(new Error('SO read failed'));
 
-    const result = await checkUploadPackageAssetPrivileges(
-      mockRequest,
-      mockArchiveBuffer,
-      mockContentType,
-      mockSpaceId,
-      'mypackage',
-      installation,
-      mockSavedObjectsClient
-    );
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
 
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
     const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
@@ -978,5 +985,140 @@ describe('checkUploadPackageAssetPrivileges', () => {
       })
     );
     expect(result).toEqual([mockSpaceId]);
+  });
+
+  it('checks rules-all + ml:canCreateJob when an additional Space has an existing ML rule but archive is benign', async () => {
+    // Regression: additional_spaces_installed_kibana['space-a'] has a security-rule SO whose
+    // attributes.type === 'machine_learning'. The archive is benign (no security rules).
+    // Without per-space SO reads, the ML subtype is not detected and ml:canCreateJob is omitted.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+      makeSavedObjectsClient([{ id: 'ml-rule-in-space-a', attributes: { type: 'machine_learning' } }])
+    );
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'my-dashboard', type: 'dashboard', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'ml-rule-in-space-a', type: 'security-rule', version: 1 }],
+        },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('space-a');
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      ['space-a'],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
+    expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a']));
+  });
+
+  it('fails closed (requires ml:canCreateJob) when internal client bulkGet throws for an additional Space ML check', async () => {
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue({
+      bulkGet: jest.fn().mockRejectedValue(new Error('internal client read failed')),
+    });
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'my-dashboard', type: 'dashboard', version: 1 }],
+        additional_spaces_installed_kibana: {
+          'space-a': [{ id: 'some-rule', type: 'security-rule', version: 1 }],
+        },
+      },
+    } as any;
+
+    const result = await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      ['space-a'],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
+    expect(result).toEqual(expect.arrayContaining([mockSpaceId, 'space-a']));
+  });
+
+  it('fails closed (requires ml:canCreateJob) when bulkGet returns a per-object error for an existing security rule', async () => {
+    // isSavedObjectErrorResult(so) === true when bulkGet resolves but the individual SO has an
+    // error (e.g. not found, unauthorized). Treat as ML rule present — fail closed.
+    (createArchiveIterator as jest.Mock).mockReturnValue(
+      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
+    );
+
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    const installation = {
+      attributes: {
+        installed_kibana_space_id: mockSpaceId,
+        installed_kibana: [{ id: 'existing-rule', type: 'security-rule', version: 1 }],
+        additional_spaces_installed_kibana: {},
+      },
+    } as any;
+
+    mockSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'existing-rule',
+          type: 'security-rule',
+          error: { statusCode: 403, error: 'Forbidden', message: 'Unauthorized' },
+        },
+      ],
+    });
+
+    await checkUploadPackageAssetPrivileges({
+      request: mockRequest,
+      archiveBuffer: mockArchiveBuffer,
+      contentType: mockContentType,
+      spaceId: mockSpaceId,
+      pkgName: 'mypackage',
+      installation: installation,
+      savedObjectsClient: mockSavedObjectsClient,
+    });
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(
+      [mockSpaceId],
+      expect.objectContaining({
+        kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
+      })
+    );
   });
 });
