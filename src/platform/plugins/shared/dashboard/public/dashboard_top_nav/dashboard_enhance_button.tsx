@@ -29,9 +29,6 @@ export const DashboardEnhanceButton = ({
   const breakpoint = applicationBreakpoint ?? viewportBreakpoint;
   const iconOnly = breakpoint !== 'm' && breakpoint !== 'l' && breakpoint !== 'xl';
 
-  const tooltipContent = action.tooltip?.content;
-  const hasCustomTooltip = !!tooltipContent;
-
   const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     const triggerElement = event.currentTarget;
     action.onClick({
@@ -64,16 +61,5 @@ export const DashboardEnhanceButton = ({
     </AiButton>
   );
 
-  if (!iconOnly && !hasCustomTooltip) {
-    return button;
-  }
-
-  return (
-    <EuiToolTip
-      content={tooltipContent ?? ENHANCE_LABEL}
-      {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
-    >
-      {button}
-    </EuiToolTip>
-  );
+  return <EuiToolTip content={action.tooltip}>{button}</EuiToolTip>;
 };

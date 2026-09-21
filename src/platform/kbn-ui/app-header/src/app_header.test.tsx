@@ -23,6 +23,8 @@ jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
 }));
 
+const ENHANCE_TOOLTIP = 'Improve the content and style of your dashboard using AI';
+
 describe('AppHeaderView', () => {
   beforeEach(() => {
     mockApplicationBreakpoint = undefined;
@@ -179,7 +181,7 @@ describe('AppHeaderView', () => {
 
   it('renders when the only content is an experimental dashboard AI action', () => {
     const onClick = jest.fn();
-    render(<AppHeaderView experimentalDashboardAiAction={{ onClick }} />);
+    render(<AppHeaderView experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.enhance)).toBeInTheDocument();
@@ -195,7 +197,7 @@ describe('AppHeaderView', () => {
         title="Dashboard"
         share={{ onClick: jest.fn() }}
         favorite={{ status: 'unfavorited', onToggle }}
-        experimentalDashboardAiAction={{ onClick }}
+        experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
@@ -216,7 +218,11 @@ describe('AppHeaderView', () => {
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{ onClick: jest.fn(), isDisabled: true }}
+        experimentalDashboardAiAction={{
+          onClick: jest.fn(),
+          isDisabled: true,
+          tooltip: ENHANCE_TOOLTIP,
+        }}
       />
     );
 
@@ -227,7 +233,10 @@ describe('AppHeaderView', () => {
     mockApplicationBreakpoint = 's';
 
     render(
-      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+      />
     );
 
     const button = screen.getByRole('button', { name: 'Enhance' });
@@ -239,65 +248,43 @@ describe('AppHeaderView', () => {
     mockApplicationBreakpoint = 'm';
 
     render(
-      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+      />
     );
 
     expect(screen.getByRole('button', { name: 'Enhance' })).toHaveTextContent('Enhance');
   });
 
-  it('shows the enhance tooltip on the labeled button when provided', async () => {
+  it('shows the enhance tooltip on the labeled button', async () => {
     mockApplicationBreakpoint = 'm';
 
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{
-          onClick: jest.fn(),
-          tooltip: { content: 'Improve the content and style of your dashboard using AI' },
-        }}
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
-    const button = screen.getByRole('button', { name: 'Enhance' });
-    fireEvent.mouseOver(button);
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
 
-    expect(
-      await screen.findByText('Improve the content and style of your dashboard using AI')
-    ).toBeInTheDocument();
+    expect(await screen.findByText(ENHANCE_TOOLTIP)).toBeInTheDocument();
   });
 
-  it('shows the enhance tooltip on the icon-only button when provided', async () => {
+  it('shows the enhance tooltip on the icon-only button', async () => {
     mockApplicationBreakpoint = 's';
 
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{
-          onClick: jest.fn(),
-          tooltip: { content: 'Improve the content and style of your dashboard using AI' },
-        }}
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
-    const button = screen.getByRole('button', { name: 'Enhance' });
-    fireEvent.mouseOver(button);
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
 
-    expect(
-      await screen.findByText('Improve the content and style of your dashboard using AI')
-    ).toBeInTheDocument();
-  });
-
-  it('falls back to the Enhance label as the icon-only tooltip when none is provided', async () => {
-    mockApplicationBreakpoint = 's';
-
-    render(
-      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
-    );
-
-    const button = screen.getByRole('button', { name: 'Enhance' });
-    fireEvent.mouseOver(button);
-
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Enhance');
+    expect(await screen.findByText(ENHANCE_TOOLTIP)).toBeInTheDocument();
   });
 
   it('renders a description with a Learn more link', () => {
