@@ -376,6 +376,10 @@ export const nextSeverityThreshold = (
   const lowerBound = Math.max(conditionExtremeness, ...lessSevere);
   if (moreSevere.length > 0) {
     const upperBound = Math.min(...moreSevere);
+    // No room between the floor (condition threshold / less-severe band) and the next
+    // more-severe band: any midpoint would duplicate an existing threshold. Leave it empty
+    // (NaN) so the user picks a value, instead of seeding a guaranteed duplicate.
+    if (lowerBound >= upperBound) return NaN;
     return dir * ((lowerBound + upperBound) / 2);
   }
   const nextExtremeness = lessSevere.length > 0 ? lowerBound + 1 : conditionExtremeness;

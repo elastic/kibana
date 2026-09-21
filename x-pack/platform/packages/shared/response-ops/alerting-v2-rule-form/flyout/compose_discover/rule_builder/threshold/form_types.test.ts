@@ -275,6 +275,30 @@ describe('severity helpers', () => {
       );
       expect(value).toBe(90);
     });
+
+    it('returns NaN instead of a colliding value when there is no room below a more-severe band', () => {
+      // `high` sits on the condition threshold (100), leaving no room for a less-severe `info`
+      // band: it would need to be >= 100 (condition) and < 100 (below `high`) at once.
+      const ascending = nextSeverityThreshold(
+        [
+          { id: 'a', severity: 'high', threshold: 100 },
+          { id: 'b', severity: 'critical', threshold: 200 },
+        ],
+        'info',
+        cond(Comparator.GT, [100])
+      );
+      expect(ascending).toBeNaN();
+
+      const descending = nextSeverityThreshold(
+        [
+          { id: 'a', severity: 'high', threshold: 100 },
+          { id: 'b', severity: 'critical', threshold: 50 },
+        ],
+        'info',
+        cond(Comparator.LT, [100])
+      );
+      expect(descending).toBeNaN();
+    });
   });
 
   describe('getSeverityValidationError', () => {
