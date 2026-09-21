@@ -32,12 +32,7 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type {
-  FormValues,
-  RecoveryStrategy,
-  RuleNotificationsValue,
-  RuleQuery,
-} from '../../form/types';
+import type { FormValues, RecoveryStrategy, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
@@ -84,7 +79,6 @@ import {
 import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';
-import { buildRuleNotificationTag } from '../../actions_form/helpers/rule_scoped_action_policies';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -227,24 +221,13 @@ export interface ComposeDiscoverFlyoutProps {
   onClose: () => void;
   services: RuleFormServices;
   /**
-   * Called with the create payload when the user submits in create mode. When the user
-   * enables the notifications step, `notifications` carries the captured action draft list;
-   * otherwise it is `undefined`.
+   * Called with the create payload when the user submits in create mode.
    */
-  onCreateRule: (
-    payload: ReturnType<typeof composeFormToCreateRequest>,
-    notifications?: RuleNotificationsValue
-  ) => void;
+  onCreateRule: (payload: ReturnType<typeof composeFormToCreateRequest>) => void;
   /**
-   * Called with id + update payload when the user submits in edit mode. When the user
-   * configures simple actions, `notifications` carries the captured action draft list so
-   * the caller can create linked action policies; otherwise it is `undefined`.
+   * Called with id + update payload when the user submits in edit mode.
    */
-  onUpdateRule?: (
-    id: string,
-    payload: ReturnType<typeof composeFormToUpdateRequest>,
-    notifications?: RuleNotificationsValue
-  ) => void;
+  onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
@@ -634,10 +617,7 @@ export function ComposeDiscoverFlyout({
 
   const applyYamlValuesToFormAndSandbox = useCallback(
     (parsed: FormValues): FormValues => {
-      const composed = {
-        ...mapYamlFormValuesToComposeFormValues(parsed),
-        notifications: methods.getValues('notifications'),
-      };
+      const composed = mapYamlFormValuesToComposeFormValues(parsed);
       methods.reset(composed);
       setSandboxQuery(composed.query);
       setSandboxTimeField(composed.timeField);
@@ -973,21 +953,10 @@ export function ComposeDiscoverFlyout({
       }
     }
 
-    let submitted = values;
-    if (values.notifications?.workflows?.length && !values.metadata.tags?.length) {
-      const tags = [buildRuleNotificationTag(values.metadata.name)];
-      methods.setValue('metadata.tags', tags, { shouldDirty: true });
-      submitted = { ...values, metadata: { ...values.metadata, tags } };
-    }
-
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(submitted, builderType), submitted.notifications);
+      onCreateRule(composeFormToCreateRequest(values, builderType));
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(
-        ruleId,
-        composeFormToUpdateRequest(submitted, builderType),
-        submitted.notifications
-      );
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }
   });
 
