@@ -23,6 +23,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import * as i18n from './translations';
@@ -294,40 +295,7 @@ export const WatchDetailPage: React.FC = () => {
             subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
             data-test-subj="alertZeroWatchWorkersSection"
           >
-            {workersError ? (
-              <EuiEmptyPrompt
-                iconType="error"
-                title={<h2>{i18n.WORKERS_LOAD_ERROR_TITLE}</h2>}
-                body={<p>{i18n.WORKERS_LOAD_ERROR_BODY}</p>}
-                actions={
-                  <EuiButtonEmpty onClick={() => refetchWorkers()}>{i18n.RETRY}</EuiButtonEmpty>
-                }
-                data-test-subj="alertZeroWatchWorkersLoadError"
-              />
-            ) : workersLoading && members.length === 0 ? (
-              <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />
-            ) : (
-              <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-                {members.map((worker) => {
-                  const draft = resolve(worker);
-                  return (
-                    <EuiFlexItem key={worker.id} grow={false}>
-                      <WorkerSettingsPanel
-                        worker={worker}
-                        enabled={draft.enabled}
-                        settings={draft.settings}
-                        error={draft.error}
-                        errorLink={draft.errorLink}
-                        settingsLocked={worker.state === 'unavailable'}
-                        isSaving={isSaving}
-                        onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
-                        onSettingsChange={(patch) => updateSettings(worker, patch)}
-                      />
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGroup>
-            )}
+            {renderWorkers()}
           </SettingsSection>
         </EuiFlexItem>
       </EuiFlexGroup>
