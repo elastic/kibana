@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
+import { filter, finalize, from, merge, ReplaySubject, shareReplay, tap } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
@@ -43,6 +43,8 @@ import {
   getPendingRound,
   evictInternalEvents,
   estimatePerRoundTokens,
+  estimateFailedEntryTokens,
+  survivingFailedEntryTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import {
@@ -57,7 +59,9 @@ import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
-import { convertGraphEvents } from './convert_graph_events';
+import { convertGraphEvents, type ConvertedEvents } from './convert_graph_events';
+import { buildRoundInterruptedEvent } from './utils/build_round_interrupted_event';
+import { emitRoundInterruptedOnError } from './utils/emit_round_interrupted_on_error';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
@@ -244,6 +248,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skills,
     toolProvider,
     agentConfiguration,
+    aiIndicesEnabled: experimentalFeatures.aiIndices,
     attachmentsService: attachments,
     request,
     spaceId: context.spaceId,
@@ -308,7 +313,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager,
     toolRegistry,
   });
-  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
+  const failedEntryTokenCounts = estimateFailedEntryTokens(processedConversation.timeline);
+  const conversationTokenEstimate =
+    perRoundTokenCounts.reduce((sum, count) => sum + count, 0) +
+    survivingFailedEntryTokens(processedConversation.timeline, 0, failedEntryTokenCounts);
 
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
@@ -329,6 +337,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     contextBudget,
     perRoundTokenCounts,
+    failedEntryTokenCounts,
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
@@ -457,8 +466,38 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+  const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
+
+  // Every event of the run, collected for the interruption path. `addRoundCompleteEvent` keeps its
+  // own `toArray()` as the completion signal for `round_complete`; this holds the same references.
+  const collectedEvents: ConvertedEvents[] = [];
+
+  const toRoundInterrupted = () =>
+    buildRoundInterruptedEvent({
+      events: collectedEvents,
+      roundId,
+      pendingRound,
+      startTime,
+      processedInput,
+      author,
+      origin,
+      agentId: agentIdForEvents,
+      conversation,
+      modelProvider,
+      mainConnectorId: model.connector.connectorId,
+      configurationOverrides: effectiveOverrides,
+      compactionResult,
+      relevantSkillsSelection,
+      initialTodos,
+      attachmentStateManager: context.attachmentStateManager,
+      chatInputChanges,
+      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+    });
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
+    tap((event) => {
+      collectedEvents.push(event);
+    }),
     addRoundCompleteEvent({
       userInput: processedInput,
       origin,
@@ -485,10 +524,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
       chatInputChanges,
-      agentId: agentId ?? conversation?.agent_id ?? 'unknown',
+      agentId: agentIdForEvents,
       conversation,
     }),
     evictInternalEvents(),
+    // Placed after eviction so `round_interrupted` reaches the runner like any other chat event.
+    emitRoundInterruptedOnError({ buildEvent: toRoundInterrupted, logger }),
     shareReplay()
   );
 
