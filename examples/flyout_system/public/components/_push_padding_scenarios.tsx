@@ -122,6 +122,7 @@ const StandalonePushSlot: React.FC<SlotProps> = ({ label, onOpenChange }) => {
           minWidth={FLYOUT_MIN_WIDTH}
           onClose={toggle}
           aria-labelledby={`pushPaddingFlyout-${label}`}
+          data-test-subj={`pushPaddingFlyout-${label}`}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
