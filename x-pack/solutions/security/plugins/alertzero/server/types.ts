@@ -54,3 +54,6 @@ export interface AlertZeroStartDependencies {
 
 export type AlertZeroRouter = IRouter;
 export type AlertZeroSpaceIdResolver = (request: KibanaRequest) => string;
+
+export type { CandidateQueryParams, CandidateQueryResult } from './services/watches/hunt/common/build_candidate_query';
+export type { HuntCoordinatorParams, HuntCoordinatorResult } from './services/watches/hunt/hunt_coordinator';

@@ -6,3 +6,26 @@
  */
 
 export type { HuntServices } from './types';
+export type {
+  HuntCoordinatorParams,
+  HuntCoordinatorResult,
+  HuntCoordinatorStatus,
+  HuntCoordinatorTier2SkipReason,
+} from './hunt_coordinator';
+export type {
+  CandidateQueryParams,
+  CandidateQueryResult,
+} from './common/build_candidate_query';
+export type {
+  HuntBehaviorParams,
+  HuntBehaviorResult,
+  HuntBehaviorStatus,
+  ValidatedBehavior,
+  IndexedBehavior,
+} from './tier2/types';
+export type {
+  CorrelationEngineResult,
+  AnchorSet,
+  AnchorHit,
+  SearchByAnchorsResult,
+} from './correlation/types';
