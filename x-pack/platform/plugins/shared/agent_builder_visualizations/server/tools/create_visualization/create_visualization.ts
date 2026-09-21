@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
+  DEFAULT_TIME_RANGE,
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
@@ -57,8 +58,6 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
 
 const CUSTOM_CONTENT_ESQL_INSTRUCTIONS =
   'The query results feed an HTML template that can only loop over the returned rows — it cannot aggregate, group, or sort them. Any grouping or aggregation the content needs must happen in the query itself (STATS ... BY ...), and rows should come back already sorted and limited to what the panel will display.';
-
-const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 const getExistingTemplate = (data: VisualizationAttachmentData | undefined): string | undefined => {
   if (!data || !isCustomContentVisualization(data)) {

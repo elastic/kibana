@@ -7,7 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
+import {
+  DEFAULT_TIME_RANGE,
+  VISUALIZATION_ATTACHMENT_TYPE,
+} from '@kbn/agent-builder-visualizations-common';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -217,7 +220,7 @@ describe('createVisualizationTool schema', () => {
     const missingTo = schema.safeParse({ ...base, time_range: { from: 'now-7d' } });
     expect(missingTo.success).toBe(true);
     if (missingTo.success) {
-      expect(missingTo.data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+      expect(missingTo.data.time_range).toEqual({ from: 'now-7d', to: DEFAULT_TIME_RANGE.to });
     }
 
     const to = new Date().toISOString();
@@ -227,13 +230,13 @@ describe('createVisualizationTool schema', () => {
     });
     expect(blankFrom.success).toBe(true);
     if (blankFrom.success) {
-      expect(blankFrom.data.time_range).toEqual({ from: 'now-24h', to });
+      expect(blankFrom.data.time_range).toEqual({ from: DEFAULT_TIME_RANGE.from, to });
     }
 
     const blankTo = schema.safeParse({ ...base, time_range: { from: 'now-7d', to: '' } });
     expect(blankTo.success).toBe(true);
     if (blankTo.success) {
-      expect(blankTo.data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+      expect(blankTo.data.time_range).toEqual({ from: 'now-7d', to: DEFAULT_TIME_RANGE.to });
     }
   });
 
@@ -547,10 +550,10 @@ describe('createVisualizationTool handler', () => {
     const { result, attachments } = await runHandler(parsed);
 
     expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
-    expect(result.results[0].data.time_range).toEqual({ from: 'now-24h', to });
+    expect(result.results[0].data.time_range).toEqual({ from: DEFAULT_TIME_RANGE.from, to });
     expect(attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ time_range: { from: 'now-24h', to } }),
+        data: expect.objectContaining({ time_range: { from: DEFAULT_TIME_RANGE.from, to } }),
       })
     );
   });
