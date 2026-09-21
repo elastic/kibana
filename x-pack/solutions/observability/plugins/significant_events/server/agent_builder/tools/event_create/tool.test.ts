@@ -46,6 +46,7 @@ describe('event_create tool', () => {
 
     const getScopedClients = jest.fn().mockResolvedValue({
       getEventClient: jest.fn().mockReturnValue({}),
+      getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
     });

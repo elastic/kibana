@@ -38,6 +38,7 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+    getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
   });
   return createEventsWriteTool({
@@ -313,19 +314,21 @@ describe('events_write tool', () => {
       includeExcluded: true,
       includeExpired: true,
     });
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      source: 'discovery',
-      inputs: [
-        expect.objectContaining({
-          causal_features: [
-            expect.objectContaining({ type: 'entity', subtype: 'service' }),
-            expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
-          ],
-          blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
-        }),
-      ],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        source: 'discovery',
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ type: 'entity', subtype: 'service' }),
+              expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+            ],
+            blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
+          }),
+        ],
+      })
+    );
   });
 
   it('disambiguates stream-less causal features using the event streams', async () => {

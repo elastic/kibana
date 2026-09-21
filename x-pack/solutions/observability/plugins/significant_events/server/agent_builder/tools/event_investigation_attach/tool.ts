@@ -106,7 +106,9 @@ export const createEventInvestigationAttachTool = ({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await attachEventInvestigationToolHandler({
@@ -115,6 +117,7 @@ export const createEventInvestigationAttachTool = ({
           workflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
+          alertEventsClient: await getAlertEventsClient(),
         });
 
         telemetry.trackAgentToolEventInvestigationAttach({

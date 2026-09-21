@@ -311,9 +311,10 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
-          request,
-        });
+        const { getEventClient, getKnowledgeIndicatorClient, getAlertEventsClient, licensing } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
         const items = await enrichCausalFeatures(
           toolParams.items,
@@ -325,6 +326,8 @@ export function createEventsWriteTool({
           eventClient: await getEventClient(),
           inputs: items,
           source: toolParams.source,
+          alertEventsClient: await getAlertEventsClient(),
+          logger,
         });
 
         data.forEach((result) => {
