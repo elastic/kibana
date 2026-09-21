@@ -54,7 +54,7 @@ responses:
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
   403:
-    description: 'Forbidden — the archive contains a gated asset type and the caller lacks the required Kibana API privilege. No assets are written.'
+    description: 'Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive. No assets are written.'
     content:
       application/json:
         examples:
