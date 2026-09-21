@@ -157,7 +157,9 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   describe('lookback window', () => {
-    it('declares disableLookbackWindow on every config (entity-index source)', () => {
+    it('declares disableLookbackWindow on every config', () => {
+      // IDP configs gate on entity.lifecycle.last_seen; Workday gates on event.ingested.
+      // Neither wants the engine's @timestamp window.
       for (const config of SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS) {
         expect(config.disableLookbackWindow).toBe(true);
       }
