@@ -327,6 +327,27 @@ describe('awaitTraceReady', () => {
     expect(extractEvidenceMock).toHaveBeenCalledTimes(3);
   });
 
+  it('returns the latest evidence when transient errors exhaust the remaining budget', async () => {
+    const searchFailure = buildResponseError(503);
+    extractEvidenceMock
+      .mockResolvedValueOnce(buildExtraction(READY_ROUND))
+      .mockRejectedValue(searchFailure);
+
+    await expect(run()).resolves.toEqual(
+      expect.objectContaining({ round: READY_ROUND, readiness: 'best_effort' })
+    );
+    expect(extractEvidenceMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
+  });
+
+  it('throws an exhausted transient error when no evidence was reconstructed', async () => {
+    const searchFailure = buildResponseError(503);
+    extractEvidenceMock.mockRejectedValue(searchFailure);
+
+    await expect(run()).rejects.toBe(searchFailure);
+    expect(extractEvidenceMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+  });
+
   it('returns best-effort after a late baseline reset', async () => {
     const changedRound: EvidenceRound = {
       ...READY_ROUND,

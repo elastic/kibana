@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EvaluationIndices, LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from './constants';
+import {
+  EVALS_EVIDENCE_LOG_EVENT_NAMES,
+  EvaluationIndices,
+  LOGS_INDEX_PATTERN,
+  TRACES_INDEX_PATTERN,
+} from './constants';
 
 /**
  * Shared privilege descriptors for the golden cluster API key.
@@ -43,6 +48,11 @@ export const goldenClusterPrivileges = {
           {
             names: [LOGS_INDEX_PATTERN],
             privileges: ['read', 'view_index_metadata'],
+            query: {
+              terms: {
+                event_name: Object.values(EVALS_EVIDENCE_LOG_EVENT_NAMES),
+              },
+            },
           },
           {
             names: [

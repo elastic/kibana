@@ -192,7 +192,8 @@ export const awaitTraceReady = async (
       },
     });
   } catch (error) {
-    if (!(error instanceof TraceReadinessError)) {
+    const exhaustedRetryableSearch = isRetryableSearchError(error);
+    if (!(error instanceof TraceReadinessError) && !exhaustedRetryableSearch) {
       throw error;
     }
 
@@ -201,6 +202,10 @@ export const awaitTraceReady = async (
         `Trace ${traceAccessor.traceId} did not reach ${request.mode} readiness within the budget; returning best-effort evidence for profile "${lastEvidence.profile}"`
       );
       return lastEvidence;
+    }
+
+    if (exhaustedRetryableSearch) {
+      throw error;
     }
 
     if (sawDocuments) {

@@ -116,12 +116,15 @@ describe('createTraceAccessor', () => {
       });
     });
 
-    it('returns _source documents from hits only', async () => {
+    it('returns hit metadata with _source documents', async () => {
       const { esClient, searchMock } = createEsClient();
       searchMock.mockResolvedValueOnce({
         hits: {
           hits: [
             {
+              _id: 'doc-1',
+              _index: 'logs-evals-default',
+              sort: [1782468000000],
               _source: { '@timestamp': '2026-06-26T10:00:00.000Z', 'attributes.content': 'hello' },
             },
             { _source: undefined },
@@ -131,7 +134,17 @@ describe('createTraceAccessor', () => {
       const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
 
       await expect(accessor.runSearch('logs', { size: 2 })).resolves.toEqual({
-        documents: [{ '@timestamp': '2026-06-26T10:00:00.000Z', 'attributes.content': 'hello' }],
+        documents: [
+          {
+            id: 'doc-1',
+            index: 'logs-evals-default',
+            sort: [1782468000000],
+            source: {
+              '@timestamp': '2026-06-26T10:00:00.000Z',
+              'attributes.content': 'hello',
+            },
+          },
+        ],
         aggregations: undefined,
       });
     });

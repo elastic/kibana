@@ -87,6 +87,97 @@ describe('normalizeEvidence', () => {
     );
   });
 
+  it('uses hit identity to order equal-timestamp documents without span IDs', async () => {
+    const mapping = getInstrumentationProfile('otel-genai-events');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+    const timestamp = '2026-07-14T09:24:14.340Z';
+    const sort = [1784021054340, null];
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'message-b',
+              _index: 'logs-generic.otel-default',
+              sort,
+              _source: { '@timestamp': timestamp, body: { structured: { content: 'second' } } },
+            },
+            {
+              _id: 'message-a',
+              _index: 'logs-generic.otel-default',
+              sort,
+              _source: { '@timestamp': timestamp, body: { structured: { content: 'first' } } },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'response-a',
+              _index: 'logs-generic.otel-default',
+              sort,
+              _source: {
+                '@timestamp': timestamp,
+                body: { structured: { message: { content: 'earlier identity' } } },
+              },
+            },
+            {
+              _id: 'response-b',
+              _index: 'logs-generic.otel-default',
+              sort,
+              _source: {
+                '@timestamp': timestamp,
+                body: { structured: { message: { content: 'later identity' } } },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'tool-b',
+              _index: 'traces-generic.otel-default',
+              sort,
+              _source: {
+                '@timestamp': timestamp,
+                attributes: {
+                  'gen_ai.tool.call.id': 'call-b',
+                  'gen_ai.tool.name': 'tool-b',
+                },
+              },
+            },
+            {
+              _id: 'tool-a',
+              _index: 'traces-generic.otel-default',
+              sort,
+              _source: {
+                '@timestamp': timestamp,
+                attributes: {
+                  'gen_ai.tool.call.id': 'call-a',
+                  'gen_ai.tool.name': 'tool-a',
+                },
+              },
+            },
+          ],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: 'first' },
+      response: { message: 'later identity' },
+      steps: [
+        { tool_call_id: 'call-a', tool_id: 'tool-a' },
+        { tool_call_id: 'call-b', tool_id: 'tool-b' },
+      ],
+    });
+  });
+
   it('uses the shared evidence gate and profile recommendation rules', () => {
     expect(hasResolvedEvidence({ ...EMPTY_ROUND, input: { message: 'hello' } })).toBe(true);
     expect(hasResolvedEvidence({ ...EMPTY_ROUND, response: { message: 'world' } })).toBe(true);

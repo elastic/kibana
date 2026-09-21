@@ -8,6 +8,7 @@
 import {
   type TraceAccessorWithSearch,
   type TraceFilter,
+  type TraceSearchDocument,
   type TraceSearchParams,
   type TraceSearchResult,
   type TraceSource,
@@ -142,6 +143,57 @@ const resolveFieldValue = (value: unknown, segments: string[]): unknown => {
 
 const getFieldValue = (document: Record<string, unknown>, fieldPath: string): unknown =>
   resolveFieldValue(document, fieldPath.split('.'));
+
+const compareSortValues = (left: unknown, right: unknown): number => {
+  if (left === right) {
+    return 0;
+  }
+  if (typeof left === 'number' && typeof right === 'number') {
+    return left - right;
+  }
+  const leftString = String(left);
+  const rightString = String(right);
+  if (leftString === rightString) {
+    return 0;
+  }
+  return leftString < rightString ? -1 : 1;
+};
+
+const getDocumentIdentity = ({ id, index, source }: TraceSearchDocument): string =>
+  `${index}\u0000${id || JSON.stringify(source)}`;
+
+const sortEvidenceDocuments = (
+  documents: TraceSearchDocument[],
+  order: 'asc' | 'desc'
+): TraceSearchDocument[] => {
+  const direction = order === 'asc' ? 1 : -1;
+  return [...documents].sort((left, right) => {
+    const leftSort = left.sort ?? [getFieldValue(left.source, '@timestamp')];
+    const rightSort = right.sort ?? [getFieldValue(right.source, '@timestamp')];
+    const sortLength = Math.max(leftSort.length, rightSort.length);
+    for (let index = 0; index < sortLength; index++) {
+      const leftMissing = leftSort[index] === undefined || leftSort[index] === null;
+      const rightMissing = rightSort[index] === undefined || rightSort[index] === null;
+      if (leftMissing || rightMissing) {
+        if (leftMissing !== rightMissing) {
+          return leftMissing ? 1 : -1;
+        }
+        continue;
+      }
+      const comparison = compareSortValues(leftSort[index], rightSort[index]);
+      if (comparison !== 0) {
+        return comparison * direction;
+      }
+    }
+
+    const leftIdentity = getDocumentIdentity(left);
+    const rightIdentity = getDocumentIdentity(right);
+    if (leftIdentity === rightIdentity) {
+      return 0;
+    }
+    return (leftIdentity < rightIdentity ? -1 : 1) * direction;
+  });
+};
 
 const toTraceFilters = (spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec): TraceFilter[] =>
   spec.filter.map(({ field, value }) => ({
@@ -290,10 +342,10 @@ const parseMessageFromDocument = (
 const parseMessageValue = (
   itemKey: typeof EVIDENCE_ITEM_KEYS.userQuery | typeof EVIDENCE_ITEM_KEYS.agentResponse,
   itemSpec: EvidenceMessageItemSpec,
-  documents: Array<Record<string, unknown>>
+  documents: TraceSearchDocument[]
 ): string | undefined => {
-  for (const document of documents) {
-    const value = parseMessageFromDocument(itemKey, itemSpec, document);
+  for (const { source } of documents) {
+    const value = parseMessageFromDocument(itemKey, itemSpec, source);
     if (typeof value === 'string' && value.trim()) {
       return value;
     }
@@ -304,15 +356,15 @@ const parseMessageValue = (
 
 const parseToolCallsValue = (
   itemSpec: EvidenceToolCallsItemSpec,
-  documents: Array<Record<string, unknown>>
+  documents: TraceSearchDocument[]
 ): ToolCallEvidence[] | undefined => {
   const entries = documents
-    .map((document) => {
+    .map(({ source }) => {
       const evidence: ToolCallEvidence = {};
-      const toolCallId = getFieldValue(document, itemSpec.fields.tool_call_id);
-      const toolId = getFieldValue(document, itemSpec.fields.tool_id);
-      const toolArguments = getFieldValue(document, itemSpec.fields.arguments);
-      const toolResult = getFieldValue(document, itemSpec.fields.result);
+      const toolCallId = getFieldValue(source, itemSpec.fields.tool_call_id);
+      const toolId = getFieldValue(source, itemSpec.fields.tool_id);
+      const toolArguments = getFieldValue(source, itemSpec.fields.arguments);
+      const toolResult = getFieldValue(source, itemSpec.fields.result);
 
       if (typeof toolCallId === 'string' && toolCallId) {
         evidence.tool_call_id = toolCallId;
@@ -379,7 +431,7 @@ const stringifySample = (value: unknown): string | undefined => {
 const getItemProbe = (
   itemKey: EvidenceItemKey,
   itemSpec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec,
-  documents: Array<Record<string, unknown>>,
+  documents: TraceSearchDocument[],
   parsedValue: unknown
 ): EvidenceItemProbeResult => {
   const isToolCallsItem = itemKey === EVIDENCE_ITEM_KEYS.toolCalls;
@@ -422,20 +474,27 @@ const extractEvidenceWithSearch = async (
     ),
   ]);
 
+  const userDocuments = sortEvidenceDocuments(
+    userSearch.documents,
+    mapping[EVIDENCE_ITEM_KEYS.userQuery].select === 'last' ? 'desc' : 'asc'
+  );
+  const agentDocuments = sortEvidenceDocuments(
+    agentSearch.documents,
+    mapping[EVIDENCE_ITEM_KEYS.agentResponse].select === 'last' ? 'desc' : 'asc'
+  );
+  const toolDocuments = sortEvidenceDocuments(toolSearch.documents, 'asc');
+
   const userMessage = parseMessageValue(
     EVIDENCE_ITEM_KEYS.userQuery,
     mapping[EVIDENCE_ITEM_KEYS.userQuery],
-    userSearch.documents
+    userDocuments
   );
   const agentMessage = parseMessageValue(
     EVIDENCE_ITEM_KEYS.agentResponse,
     mapping[EVIDENCE_ITEM_KEYS.agentResponse],
-    agentSearch.documents
+    agentDocuments
   );
-  const toolCalls = parseToolCallsValue(
-    mapping[EVIDENCE_ITEM_KEYS.toolCalls],
-    toolSearch.documents
-  );
+  const toolCalls = parseToolCallsValue(mapping[EVIDENCE_ITEM_KEYS.toolCalls], toolDocuments);
 
   const round: EvidenceRound = {
     input: { message: typeof userMessage === 'string' ? userMessage : '' },
@@ -449,19 +508,19 @@ const extractEvidenceWithSearch = async (
       [EVIDENCE_ITEM_KEYS.userQuery]: getItemProbe(
         EVIDENCE_ITEM_KEYS.userQuery,
         mapping[EVIDENCE_ITEM_KEYS.userQuery],
-        userSearch.documents,
+        userDocuments,
         userMessage
       ),
       [EVIDENCE_ITEM_KEYS.agentResponse]: getItemProbe(
         EVIDENCE_ITEM_KEYS.agentResponse,
         mapping[EVIDENCE_ITEM_KEYS.agentResponse],
-        agentSearch.documents,
+        agentDocuments,
         agentMessage
       ),
       [EVIDENCE_ITEM_KEYS.toolCalls]: getItemProbe(
         EVIDENCE_ITEM_KEYS.toolCalls,
         mapping[EVIDENCE_ITEM_KEYS.toolCalls],
-        toolSearch.documents,
+        toolDocuments,
         toolCalls
       ),
     },

@@ -9,6 +9,7 @@ import type {
   AggregationsAggregate,
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isValidTraceId } from '@opentelemetry/api';
 import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
@@ -48,8 +49,15 @@ export interface TraceSearchParams {
   aggs?: Record<string, AggregationsAggregationContainer>;
 }
 
+export interface TraceSearchDocument {
+  id: string;
+  index: string;
+  sort?: SortResults;
+  source: Record<string, unknown>;
+}
+
 export interface TraceSearchResult<TAggregations = Record<string, AggregationsAggregate>> {
-  documents: Array<Record<string, unknown>>;
+  documents: TraceSearchDocument[];
   aggregations?: TAggregations;
 }
 
@@ -107,7 +115,18 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
     });
 
     return {
-      documents: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
+      documents: response.hits.hits.flatMap((hit) =>
+        hit._source
+          ? [
+              {
+                id: hit._id ?? '',
+                index: hit._index,
+                sort: hit.sort,
+                source: hit._source,
+              },
+            ]
+          : []
+      ),
       aggregations: response.aggregations as TAggregations | undefined,
     };
   },
