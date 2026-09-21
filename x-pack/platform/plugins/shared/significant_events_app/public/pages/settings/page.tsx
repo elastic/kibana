@@ -65,7 +65,11 @@ export function SettingsPage() {
   }
 
   if (isAvailabilityLoading) {
-    return <EuiLoadingElastic size="xxl" />;
+    return (
+      <SignificantEventsAppPageTemplate.Body grow alignment="center">
+        <EuiLoadingElastic size="xxl" />
+      </SignificantEventsAppPageTemplate.Body>
+    );
   }
 
   if (!availability || !availability.available) {
