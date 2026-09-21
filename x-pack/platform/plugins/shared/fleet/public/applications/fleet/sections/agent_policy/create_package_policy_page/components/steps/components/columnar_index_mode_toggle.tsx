@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   getRegistryDataStreamAssetBaseName,
   isColumnarEligible,
+  isColumnarIndexMode,
 } from '../../../../../../../../../common/services';
 import type {
   ExperimentalDataStreamFeature,
@@ -60,6 +61,14 @@ const NOT_SUPPORTED_TOOLTIP = i18n.translate(
   }
 );
 
+const NO_LONGER_SUPPORTED_TOOLTIP = i18n.translate(
+  'xpack.fleet.packagePolicy.experimentalFeatures.columnarNoLongerSupportedTooltip',
+  {
+    defaultMessage:
+      'This integration no longer declares columnar support for this data stream; you can turn it off.',
+  }
+);
+
 /**
  * Tech preview opt-in for the columnar index mode (`logsdb_columnar` for logs data streams,
  * `columnar` otherwise). The opt-in is stored per data stream in
@@ -81,17 +90,27 @@ export const ColumnarIndexModeToggle: React.FunctionComponent<Props> = ({
 
   const manifestIndexMode = registryDataStream.elasticsearch?.index_mode;
   const isTsdbDeclaredByPackage = manifestIndexMode === 'time_series';
-  const isColumnarDeclaredByPackage =
-    manifestIndexMode === 'logsdb_columnar' || manifestIndexMode === 'columnar';
+  const isColumnarDeclaredByPackage = isColumnarIndexMode(manifestIndexMode);
   const isTsdbOptedIn = currentFeatures?.tsdb === true;
 
   // The package must declare readiness (`elasticsearch.columnar.supported: true`) before the
   // opt-in is offered; declaring a columnar index_mode outright also counts as ready.
   const isEligible = isColumnarEligible(registryDataStream);
 
+  // Stale opt-in: the policy still has columnar on but the package no longer declares support
+  // for it (e.g. after an upgrade). The switch must stay on *and* interactive so the user can
+  // turn it off — the server only rejects turning columnar on, never off.
+  const isStaleOptIn = !isEligible && currentFeatures?.columnar === true;
+
   const isTsdbEnabled = isTsdbDeclaredByPackage || isTsdbOptedIn;
-  const isDisabled = isTsdbEnabled || isColumnarDeclaredByPackage || !isEligible;
-  const isChecked = !isEligible ? false : currentFeatures?.columnar ?? isColumnarDeclaredByPackage;
+  const isDisabled = isStaleOptIn
+    ? false
+    : isTsdbEnabled || isColumnarDeclaredByPackage || !isEligible;
+  const isChecked = isStaleOptIn
+    ? true
+    : isEligible
+    ? currentFeatures?.columnar ?? isColumnarDeclaredByPackage
+    : false;
 
   const handleChange = useCallback(
     (checked: boolean) => {
@@ -110,7 +129,9 @@ export const ColumnarIndexModeToggle: React.FunctionComponent<Props> = ({
     [experimentalDataStreamFeatures, dataStreamName, onChange]
   );
 
-  const disabledTooltip = isTsdbEnabled
+  const tooltip = isStaleOptIn
+    ? NO_LONGER_SUPPORTED_TOOLTIP
+    : isTsdbEnabled
     ? DISABLED_TSDB_TOOLTIP
     : isColumnarDeclaredByPackage
     ? DISABLED_BY_INTEGRATION_TOOLTIP
@@ -142,9 +163,11 @@ export const ColumnarIndexModeToggle: React.FunctionComponent<Props> = ({
       }
       helpText={DESCRIPTION}
     >
-      {disabledTooltip ? (
+      {tooltip ? (
+        // Historically only rendered for the disabled states, hence the test subject name; it is
+        // also used to explain the still-interactive stale opt-in.
         <span data-test-subj="packagePolicyEditor.columnarIndexMode.disabledTooltip">
-          <EuiToolTip content={disabledTooltip} position="right" display="inlineBlock">
+          <EuiToolTip content={tooltip} position="right" display="inlineBlock">
             {switchElement}
           </EuiToolTip>
         </span>

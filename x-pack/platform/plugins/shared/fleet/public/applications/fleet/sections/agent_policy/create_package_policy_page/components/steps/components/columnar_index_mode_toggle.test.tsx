@@ -150,9 +150,32 @@ describe('ColumnarIndexModeToggle', () => {
       expect(result.getByTestId(SWITCH_TEST_SUBJ)).toBeDisabled();
     });
 
-    it('stays unchecked when not supported even if an opt-in is already stored', () => {
+    it('stays checked and interactive for a stale opt-in so it can be turned off', async () => {
       const result = render({ ...mockRegistryDataStream, elasticsearch: {} }, [
         { data_stream: 'logs-nginx.access', features: { columnar: true } },
+      ]);
+      const toggle = result.getByTestId(SWITCH_TEST_SUBJ);
+      expect(toggle).not.toBeDisabled();
+      expect(toggle).toHaveAttribute('aria-checked', 'true');
+      await expectTooltip(
+        result,
+        'This integration no longer declares columnar support for this data stream; you can turn it off.'
+      );
+    });
+
+    it('lets the user turn off a stale opt-in', () => {
+      const result = render({ ...mockRegistryDataStream, elasticsearch: {} }, [
+        { data_stream: 'logs-nginx.access', features: { columnar: true } },
+      ]);
+      fireEvent.click(result.getByTestId(SWITCH_TEST_SUBJ));
+      expect(onChange).toHaveBeenCalledWith([
+        { data_stream: 'logs-nginx.access', features: { columnar: false } },
+      ]);
+    });
+
+    it('stays unchecked and disabled when not supported and the opt-in is stored as false', () => {
+      const result = render({ ...mockRegistryDataStream, elasticsearch: {} }, [
+        { data_stream: 'logs-nginx.access', features: { columnar: false } },
       ]);
       const toggle = result.getByTestId(SWITCH_TEST_SUBJ);
       expect(toggle).toBeDisabled();

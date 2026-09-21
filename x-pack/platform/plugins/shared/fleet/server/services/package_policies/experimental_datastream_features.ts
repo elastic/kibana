@@ -116,18 +116,6 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       );
     }
 
-    // Turning columnar ON requires the package to have declared the data stream columnar-ready.
-    // Turning it OFF is always allowed, so that an opt-in made before the package dropped the
-    // declaration can still be undone.
-    if (
-      featureMapEntry.features.columnar &&
-      !columnarEligibleDataStreams.has(featureMapEntry.data_stream)
-    ) {
-      throw new Error(
-        `data stream ${featureMapEntry.data_stream} is not columnar-ready: the package does not declare elasticsearch.columnar.supported`
-      );
-    }
-
     const existingOptIn = installation?.experimental_data_stream_features?.find(
       (optIn) => optIn.data_stream === featureMapEntry.data_stream
     );
@@ -143,6 +131,21 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     const isDocValueOnlyNumericChanged = hasFeatureChanged('doc_value_only_numeric');
     const isDocValueOnlyOtherChanged = hasFeatureChanged('doc_value_only_other');
+
+    // Turning columnar ON requires the package to have declared the data stream columnar-ready.
+    // Only the ON transition is gated: the stored feature map is re-submitted on every policy
+    // save, so checking the state instead of the transition would make every subsequent edit of
+    // a policy fail once the package stops declaring support. Turning columnar off (or leaving
+    // an existing opt-in untouched) is always allowed. This runs before any ES write.
+    if (
+      featureMapEntry.features.columnar &&
+      isColumnarOptInChanged &&
+      !columnarEligibleDataStreams.has(featureMapEntry.data_stream)
+    ) {
+      throw new Error(
+        `data stream ${featureMapEntry.data_stream} is not columnar-ready: the package does not declare elasticsearch.columnar.supported`
+      );
+    }
 
     if (
       [
@@ -164,9 +167,13 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     const mappings = componentTemplate.template.mappings;
     const componentTemplateChanged =
-      isDocValueOnlyNumericChanged || isDocValueOnlyOtherChanged || isSyntheticSourceOptInChanged;
+      isDocValueOnlyNumericChanged ||
+      isDocValueOnlyOtherChanged ||
+      isSyntheticSourceOptInChanged ||
+      isColumnarOptInChanged;
 
     let mappingsProperties = componentTemplate.template.mappings?.properties;
+    let mappingsDynamicTemplates = componentTemplate.template.mappings?.dynamic_templates;
     if (isDocValueOnlyNumericChanged || isDocValueOnlyOtherChanged) {
       forEachMappings(mappings?.properties ?? {}, (mappingProp, name) =>
         applyDocOnlyValueToMapping(
@@ -181,6 +188,23 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       const templateProperties = (templateMappings[componentTemplateName] ?? {}).properties ?? {};
       // merge package spec mappings with generated mappings, so that index:false from package spec is not overwritten
       mappingsProperties = merge(templateProperties, mappings?.properties ?? {});
+    }
+
+    // The per-field `columnar` overrides (`columnar.doc_values` / `columnar.index`) are only
+    // applied by the mapping generator when the resolved index mode is columnar, so the @package
+    // component template installed with the package still carries the non-columnar values. Take
+    // the freshly prepared mappings verbatim in both directions: they were generated above with
+    // the *new* feature set, so turning columnar on applies the overrides and turning it off
+    // drops them again. Merging the mappings read back from ES on top would reinstate the stale
+    // `doc_values: false`, which makes Elasticsearch reject the columnar index template.
+    if (isColumnarOptInChanged) {
+      const preparedMappings = templateMappings[componentTemplateName];
+      if (preparedMappings?.properties) {
+        mappingsProperties = preparedMappings.properties;
+      }
+      if (preparedMappings?.dynamic_templates) {
+        mappingsDynamicTemplates = preparedMappings.dynamic_templates;
+      }
     }
 
     let sourceModeSettings = {};
@@ -216,14 +240,17 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           mappings: {
             ...mappings,
             properties: mappingsProperties ?? {},
+            ...(mappingsDynamicTemplates ? { dynamic_templates: mappingsDynamicTemplates } : {}),
           },
         },
       };
 
-      const hasExperimentalDataStreamIndexingFeatures =
+      const hasExperimentalDataStreamIndexingFeatures = Boolean(
         featureMapEntry.features.synthetic_source ||
-        featureMapEntry.features.doc_value_only_numeric ||
-        featureMapEntry.features.doc_value_only_other;
+          featureMapEntry.features.doc_value_only_numeric ||
+          featureMapEntry.features.doc_value_only_other ||
+          featureMapEntry.features.columnar
+      );
 
       await esClient.cluster.putComponentTemplate({
         name: componentTemplateName,
@@ -285,18 +312,22 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       updatedIndexTemplate = indexTemplateBody as IndexTemplate;
 
-      await esClient.indices.putIndexTemplate({
-        name: featureMapEntry.data_stream,
-        ...indexTemplateBody,
-        _meta: {
-          has_experimental_data_stream_indexing_features:
-            featureMapEntry.features.tsdb || featureMapEntry.features.columnar,
-        },
-        // GET brings string | string[] | undefined but this PUT expects string[]
-        ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
-          ? [indexTemplateBody.ignore_missing_component_templates].flat()
-          : undefined,
-      });
+      try {
+        await esClient.indices.putIndexTemplate({
+          name: featureMapEntry.data_stream,
+          ...indexTemplateBody,
+          _meta: {
+            has_experimental_data_stream_indexing_features:
+              featureMapEntry.features.tsdb || featureMapEntry.features.columnar,
+          },
+          // GET brings string | string[] | undefined but this PUT expects string[]
+          ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
+            ? [indexTemplateBody.ignore_missing_component_templates].flat()
+            : undefined,
+        });
+      } catch (err) {
+        throw enrichColumnarIndexTemplateError(err, featureMapEntry.data_stream);
+      }
     }
 
     updatedIndexTemplates.push({
@@ -336,4 +367,25 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
   // Delete the experimental features map from the package policy so it doesn't get persisted
   delete packagePolicy.package.experimental_data_stream_features;
+}
+
+/**
+ * Columnar (doc-values-only) storage cannot reconstruct `_source` for a field declared with
+ * `doc_values: false`, so Elasticsearch rejects the index template PUT with a 400. The raw ES
+ * error is hard to act on, so point at the package-level fix (`columnar.doc_values: true`).
+ */
+function enrichColumnarIndexTemplateError(err: any, dataStream: string) {
+  const reason: string = err?.body?.error?.reason ?? err?.meta?.body?.error?.reason ?? '';
+  const statusCode = err?.statusCode ?? err?.meta?.statusCode;
+  const isColumnarMappingRejection =
+    statusCode === 400 && /doc_values|synthetic source|not reconstructable/i.test(reason);
+
+  if (!isColumnarMappingRejection) {
+    return err;
+  }
+
+  return new Error(
+    `Elasticsearch rejected the columnar index template for ${dataStream}: ${reason}. ` +
+      `Fields with doc_values: false need a columnar.doc_values: true override in the package.`
+  );
 }

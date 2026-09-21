@@ -231,6 +231,38 @@ describe('parseDataStreamElasticsearchEntry', () => {
       dynamic_namespace: true,
     });
   });
+  it('Should preserve the columnar readiness flag', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        columnar: { supported: true },
+      })
+    ).toEqual({
+      columnar: { supported: true },
+    });
+  });
+  it('Should preserve a dotted columnar readiness flag', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'columnar.supported': true,
+      })
+    ).toEqual({
+      columnar: { supported: true },
+    });
+  });
+  it('Should preserve the columnar readiness flag alongside other fields', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        index_mode: 'logsdb_columnar',
+        columnar: { supported: true },
+        source_mode: 'synthetic',
+        unknown_field: 'should be dropped',
+      })
+    ).toEqual({
+      index_mode: 'logsdb_columnar',
+      columnar: { supported: true },
+      source_mode: 'synthetic',
+    });
+  });
 });
 
 describe('parseTopLevelElasticsearchEntry', () => {
@@ -355,9 +387,10 @@ describe('parseTopLevelElasticsearchEntry', () => {
   it('should handle the same documented fields as parseDataStreamElasticsearchEntry', () => {
     // This test guards against adding a new field to parseDataStreamElasticsearchEntry
     // and forgetting to add it to parseTopLevelElasticsearchEntry.
-    // ingest_pipeline.name and index_template.data_stream are intentionally data-stream-only
-    // and must remain in the exclusion list below.
+    // ingest_pipeline.name, index_template.data_stream and columnar are intentionally
+    // data-stream-only and must remain in the exclusion list below.
     const allDocumentedFields = {
+      columnar: { supported: true },
       index_mode: 'time_series',
       source_mode: 'synthetic',
       dynamic_dataset: true,
@@ -375,6 +408,7 @@ describe('parseTopLevelElasticsearchEntry', () => {
     const {
       'ingest_pipeline.name': _ingestPipeline,
       'index_template.data_stream': _dataStream,
+      columnar: _columnar,
       ...dataStreamComparable
     } = fromDataStream;
 
@@ -682,6 +716,39 @@ describe('parseAndVerifyDataStreams', () => {
         dataset: 'ds',
         elasticsearch: {},
         package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+      },
+    ]);
+  });
+
+  it('should preserve elasticsearch.columnar.supported from the data stream manifest', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['columnar-pkg-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'columnar-pkg',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'columnar-pkg-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0
+          elasticsearch:
+            columnar:
+              supported: true`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        elasticsearch: { columnar: { supported: true } },
+        package: 'columnar-pkg',
         path: 'stream1',
         release: 'ga',
         title: 'Custom Logs',

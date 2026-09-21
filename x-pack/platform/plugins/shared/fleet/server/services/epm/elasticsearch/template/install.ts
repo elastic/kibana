@@ -16,6 +16,7 @@ import { ElasticsearchAssetType } from '../../../../types';
 import {
   getPipelineNameForDatastream,
   getRegistryDataStreamAssetBaseName,
+  isColumnarIndexMode,
 } from '../../../../../common/services';
 import type {
   RegistryDataStream,
@@ -668,19 +669,19 @@ export function prepareTemplate({
   // any other type the logs profile defaults (host.name sort, logs pipeline) are inappropriate,
   // so the base columnar mode is used. This must stay in sync with the toggle handler in
   // package_policies/experimental_datastream_features.ts.
-  const manifestColumnarMode =
-    dataStream.elasticsearch?.index_mode === 'logsdb_columnar' ||
-    dataStream.elasticsearch?.index_mode === 'columnar'
-      ? dataStream.elasticsearch.index_mode
-      : undefined;
+  const manifestColumnarMode = isColumnarIndexMode(dataStream.elasticsearch?.index_mode)
+    ? dataStream.elasticsearch?.index_mode
+    : undefined;
   const optInColumnarMode = dataStream.type === 'logs' ? 'logsdb_columnar' : 'columnar';
   const resolvedIndexMode =
     manifestColumnarMode ??
     (experimentalDataStreamFeature?.features.columnar ? optInColumnarMode : undefined);
 
   // Per-field `columnar` overrides only apply when the data stream actually ends up in the
-  // columnar family, which is exactly when `resolvedIndexMode` is set.
-  const isColumnarMode = resolvedIndexMode !== undefined;
+  // columnar family, which is exactly when `resolvedIndexMode` is set. `getTemplate` gives
+  // time_series precedence over the columnar mode, so a data stream that is both must not get
+  // the columnar overrides applied to its mappings.
+  const isColumnarMode = resolvedIndexMode !== undefined && !isIndexModeTimeSeries;
 
   const validFields = processFields(fields);
 

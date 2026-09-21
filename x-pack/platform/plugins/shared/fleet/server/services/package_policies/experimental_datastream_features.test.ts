@@ -949,6 +949,49 @@ describe('experimental_datastream_features', () => {
       expect(putIndexSettings()).toEqual({});
     });
 
+    it('does not throw when a stale columnar opt-in is re-submitted unchanged', async () => {
+      // The stored feature map is re-attached to the package policy on every save, so a
+      // package that drops its readiness declaration must not make every later edit fail.
+      mockInstalledFeatures('metrics-test.test', { columnar: true }, [
+        { dataset: 'test.test', type: 'metrics' },
+      ]);
+      mockIndexTemplate('metrics-test.test', { mode: 'columnar' });
+
+      await expect(
+        handleExperimentalDatastreamFeatureOptIn({
+          soClient,
+          esClient,
+          packagePolicy: getPolicy('metrics-test.test', { columnar: true }),
+        })
+      ).resolves.not.toThrow();
+
+      // Nothing changed, so nothing is written.
+      expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when another feature changes while a stale columnar opt-in is kept', async () => {
+      mockInstalledFeatures('metrics-test.test', { columnar: true }, [
+        { dataset: 'test.test', type: 'metrics' },
+      ]);
+      mockIndexTemplate('metrics-test.test', { mode: 'columnar' });
+
+      await expect(
+        handleExperimentalDatastreamFeatureOptIn({
+          soClient,
+          esClient,
+          packagePolicy: getPolicy('metrics-test.test', {
+            columnar: true,
+            synthetic_source: true,
+          }),
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      // columnar itself did not change, so the index mode is left alone.
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+
     it('removes the index mode when opting out of columnar on a package without a declared mode', async () => {
       mockInstalledFeatures('metrics-test.test', { columnar: true });
       mockIndexTemplate('metrics-test.test', { mode: 'columnar', codec: 'best_compression' });

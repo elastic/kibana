@@ -368,6 +368,21 @@ describe('EPM index template install', () => {
           index: false,
         });
       });
+
+      it('ignores the overrides when time_series wins over the columnar opt-in', () => {
+        // getTemplate gives time_series precedence over the columnar mode, so the mappings must
+        // not be generated as if the index were columnar.
+        expect(
+          getProperties(columnarDataStream({ index_mode: 'time_series' }), {
+            data_stream: 'logs-package.dataset',
+            features: { columnar: true },
+          })
+        ).toEqual({
+          type: 'keyword',
+          doc_values: false,
+          index: false,
+        });
+      });
     });
 
     it('should default OTel metrics data streams to time_series index mode', () => {
