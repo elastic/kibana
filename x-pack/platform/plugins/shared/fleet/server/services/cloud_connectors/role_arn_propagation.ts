@@ -96,10 +96,14 @@ export const propagateRoleArnToPackagePolicies = async ({
   const soFor = (policy: (typeof policies)[number]) =>
     appContextService.getInternalUserSOClientForSpaceId(getSpaceForPackagePolicy(policy));
 
+  // `packagePolicyService.update` merges the payload into the existing saved object, so only the
+  // fields we intend to touch need to be present — except `package`, which it requires to resolve
+  // the package info it validates and compiles the inputs against.
   const buildUpdatePayload = (policy: NewPackagePolicy, inputs: NewPackagePolicy['inputs']) => ({
     name: policy.name,
     enabled: policy.enabled,
     policy_ids: policy.policy_ids,
+    package: policy.package,
     inputs,
   });
 

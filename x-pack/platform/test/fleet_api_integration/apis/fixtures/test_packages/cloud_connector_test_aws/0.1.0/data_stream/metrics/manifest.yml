@@ -1,0 +1,14 @@
+title: Test AWS metrics stream
+type: metrics
+streams:
+  - input: aws/metrics
+    title: Collect test AWS metrics
+    description: Test stream carrying a role_arn variable
+    vars:
+      - name: role_arn
+        type: text
+        title: Role ARN
+        multi: false
+        required: true
+        show_user: true
+        description: The AWS IAM role ARN assumed by this stream

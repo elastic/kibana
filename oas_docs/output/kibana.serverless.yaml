@@ -42504,8 +42504,10 @@ paths:
                             nullable: true
                           type: object
                         verification_failed_at:
+                          nullable: true
                           type: string
                         verification_started_at:
+                          nullable: true
                           type: string
                         verification_status:
                           type: string
@@ -42768,8 +42770,10 @@ paths:
                           nullable: true
                         type: object
                       verification_failed_at:
+                        nullable: true
                         type: string
                       verification_started_at:
+                        nullable: true
                         type: string
                       verification_status:
                         type: string
@@ -43012,8 +43016,10 @@ paths:
                           nullable: true
                         type: object
                       verification_failed_at:
+                        nullable: true
                         type: string
                       verification_started_at:
+                        nullable: true
                         type: string
                       verification_status:
                         type: string
@@ -43267,8 +43273,10 @@ paths:
                           nullable: true
                         type: object
                       verification_failed_at:
+                        nullable: true
                         type: string
                       verification_started_at:
+                        nullable: true
                         type: string
                       verification_status:
                         type: string

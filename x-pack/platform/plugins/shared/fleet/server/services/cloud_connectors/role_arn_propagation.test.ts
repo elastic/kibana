@@ -33,6 +33,11 @@ jest.mock('../spaces/helpers', () => ({
 const OLD_ARN = 'arn:aws:iam::123456789012:role/Old';
 const NEW_ARN = 'arn:aws:iam::123456789012:role/New';
 const CONNECTOR_ID = 'connector-1';
+const PACKAGE = {
+  name: 'cloud_security_posture',
+  title: 'Security Posture Management',
+  version: '1.9.0',
+};
 
 const makePolicy = (id: string, roleArn = OLD_ARN) => ({
   id,
@@ -40,6 +45,7 @@ const makePolicy = (id: string, roleArn = OLD_ARN) => ({
   policy_ids: [`agent-${id}`],
   namespace: 'default',
   enabled: true,
+  package: PACKAGE,
   cloud_connector_id: CONNECTOR_ID,
   inputs: [
     {
@@ -80,6 +86,8 @@ describe('propagateRoleArnToPackagePolicies', () => {
     for (const call of (packagePolicyService.update as jest.Mock).mock.calls) {
       const [, , , update] = call;
       expect(update.inputs[0].vars.role_arn.value).toBe(NEW_ARN);
+      // `packagePolicyService.update` rejects payloads without a package.
+      expect(update.package).toEqual(PACKAGE);
     }
   });
 
@@ -221,5 +229,6 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(revertCall?.[3].inputs[0].vars.role_arn.value).toBe(
       'arn:aws:iam::123456789012:role/Drifted'
     );
+    expect(revertCall?.[3].package).toEqual(PACKAGE);
   });
 });
