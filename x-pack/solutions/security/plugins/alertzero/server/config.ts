@@ -15,7 +15,7 @@ export const configSchema = schema.object({
    * feature privileges. Turning it off and restarting is what triggers orphan cleanup. The
    * user-facing per-space gate is the `securitySolution:enableAlertZero` advanced setting.
    */
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
   ui: schema.object({
     useMockData: schema.boolean({ defaultValue: false }),
   }),
