@@ -28,6 +28,12 @@ describe('createActionPolicyDataSchema', () => {
       expect(result.throttle).toBeUndefined();
     });
 
+    it('trims surrounding whitespace from name', () => {
+      const result = createActionPolicyDataSchema.parse({ ...base, name: '  Test  ' });
+
+      expect(result.name).toBe('Test');
+    });
+
     it('accepts per_episode + on_status_change', () => {
       const result = createActionPolicyDataSchema.parse({
         ...base,
@@ -123,6 +129,10 @@ describe('createActionPolicyDataSchema', () => {
   });
 
   describe('invalid payloads', () => {
+    it('rejects whitespace-only name', () => {
+      expect(() => createActionPolicyDataSchema.parse({ ...base, name: '   ' })).toThrow();
+    });
+
     it('rejects per_episode + time_interval', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
