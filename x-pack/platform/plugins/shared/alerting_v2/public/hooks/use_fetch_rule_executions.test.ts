@@ -110,7 +110,7 @@ describe('toListRuleExecutionsRequest', () => {
         outcome: ['failure'],
         startTime: '2026-01-01T00:00:00.000Z',
         endTime: '2026-01-02T00:00:00.000Z',
-        sort: 'startedAt',
+        sortField: 'startedAt',
         sortOrder: 'asc',
       })
     ).toEqual({
@@ -120,7 +120,7 @@ describe('toListRuleExecutionsRequest', () => {
       outcome: ['failure'],
       start_time: '2026-01-01T00:00:00.000Z',
       end_time: '2026-01-02T00:00:00.000Z',
-      sort: 'started_at',
+      sort_field: 'started_at',
       sort_order: 'asc',
     });
   });

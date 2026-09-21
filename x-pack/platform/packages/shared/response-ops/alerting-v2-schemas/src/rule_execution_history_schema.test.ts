@@ -60,7 +60,7 @@ describe('rule_execution_history_schema', () => {
       it('fills in defaults when no fields are provided', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).toEqual({
-          sort: 'started_at',
+          sort_field: 'started_at',
           sort_order: 'desc',
           page: 1,
           per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
@@ -203,18 +203,20 @@ describe('rule_execution_history_schema', () => {
       });
     });
 
-    describe('sort / sort_order', () => {
+    describe('sort_field / sort_order', () => {
       it('accepts the supported sort fields', () => {
-        expect(listRuleExecutionsRequestSchema.parse({ sort: 'started_at' }).sort).toBe(
+        expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'started_at' }).sort_field).toBe(
           'started_at'
         );
-        expect(listRuleExecutionsRequestSchema.parse({ sort: 'duration' }).sort).toBe('duration');
+        expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'duration' }).sort_field).toBe(
+          'duration'
+        );
       });
 
       it('rejects unknown sort fields', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ sort: 'created_at' }).success).toBe(
-          false
-        );
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ sort_field: 'created_at' }).success
+        ).toBe(false);
       });
 
       it('accepts asc and desc as sort order', () => {
@@ -314,7 +316,7 @@ describe('rule_execution_history_schema', () => {
         outcome: ['success', 'failure'] as const,
         start_time: '2026-06-01T00:00:00Z',
         end_time: '2026-06-02T00:00:00Z',
-        sort: 'duration' as const,
+        sort_field: 'duration' as const,
         sort_order: 'asc' as const,
         page: 2,
         per_page: 25,

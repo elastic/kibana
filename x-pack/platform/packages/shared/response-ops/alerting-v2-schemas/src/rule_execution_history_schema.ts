@@ -61,7 +61,7 @@ export const listRuleExecutionsRequestSchema = z
       .datetime()
       .optional()
       .describe('Inclusive ISO datetime upper bound on event.start.'),
-    sort: z
+    sort_field: z
       .enum(['started_at', 'duration'])
       .default('started_at')
       .describe('Sort field. Defaults to started_at.'),

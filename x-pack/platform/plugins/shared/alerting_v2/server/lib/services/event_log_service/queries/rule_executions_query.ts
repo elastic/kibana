@@ -85,7 +85,7 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
     outcomes,
     startTime,
     endTime,
-    sort = 'startedAt',
+    sortField = 'startedAt',
     sortOrder = 'desc',
     page,
     perPage,
@@ -127,7 +127,7 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
 
   return {
     query: { bool: { filter: filters } },
-    sort: [{ [SORT_FIELD_TO_ES[sort]]: { order: sortOrder } }],
+    sort: [{ [SORT_FIELD_TO_ES[sortField]]: { order: sortOrder } }],
     from: (page - 1) * perPage,
     size: perPage,
   };

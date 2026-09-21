@@ -23,7 +23,7 @@ export interface ListRuleExecutionsUiParams {
   outcome?: RuleExecutionOutcome[];
   startTime?: string;
   endTime?: string;
-  sort?: 'startedAt' | 'duration';
+  sortField?: 'startedAt' | 'duration';
   sortOrder?: 'asc' | 'desc';
   enabled?: boolean;
 }
@@ -35,7 +35,7 @@ export const toListRuleExecutionsRequest = ({
   outcome,
   startTime,
   endTime,
-  sort,
+  sortField,
   sortOrder,
   ...rest
 }: Omit<ListRuleExecutionsUiParams, 'enabled'>): Complete<Partial<ListRuleExecutionsRequest>> => {
@@ -47,7 +47,7 @@ export const toListRuleExecutionsRequest = ({
     outcome,
     start_time: startTime,
     end_time: endTime,
-    sort: sort === 'startedAt' ? 'started_at' : sort,
+    sort_field: sortField === 'startedAt' ? 'started_at' : sortField,
     sort_order: sortOrder,
   };
 };

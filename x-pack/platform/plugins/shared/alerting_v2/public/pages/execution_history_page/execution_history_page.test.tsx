@@ -318,7 +318,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 10,
         outcome: undefined,
-        sort: 'startedAt',
+        sortField: 'startedAt',
         sortOrder: 'desc',
       });
     });

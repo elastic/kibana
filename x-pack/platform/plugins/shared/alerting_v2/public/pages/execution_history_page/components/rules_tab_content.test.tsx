@@ -167,7 +167,7 @@ describe('RulesTabContent', () => {
       page: 1,
       perPage: 10,
       outcome: undefined,
-      sort: 'startedAt',
+      sortField: 'startedAt',
       sortOrder: 'desc',
     });
   });
@@ -267,7 +267,7 @@ describe('RulesTabContent', () => {
         page: 1,
         perPage: 10,
         outcome: ['failure'],
-        sort: 'startedAt',
+        sortField: 'startedAt',
         sortOrder: 'desc',
       });
     });
@@ -303,7 +303,7 @@ describe('RulesTabContent', () => {
 
       await waitFor(() => {
         expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
-          expect.objectContaining({ page: 1, sort: 'duration', sortOrder: 'asc' })
+          expect.objectContaining({ page: 1, sortField: 'duration', sortOrder: 'asc' })
         );
       });
     });
@@ -321,7 +321,7 @@ describe('RulesTabContent', () => {
 
       await waitFor(() => {
         expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
-          expect.objectContaining({ sort: 'startedAt', sortOrder: 'desc' })
+          expect.objectContaining({ sortField: 'startedAt', sortOrder: 'desc' })
         );
       });
     });

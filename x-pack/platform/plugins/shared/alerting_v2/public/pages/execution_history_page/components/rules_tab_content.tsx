@@ -212,7 +212,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     page: page + 1,
     perPage,
     outcome: toOutcomeParam(outcomeFilter),
-    sort: sortField === RULE_EXECUTION_FIELDS.startedAt ? 'startedAt' : 'duration',
+    sortField: sortField === RULE_EXECUTION_FIELDS.startedAt ? 'startedAt' : 'duration',
     sortOrder: sortDirection,
   });
 

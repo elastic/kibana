@@ -11,7 +11,7 @@ import { ExecutionHistoryClient } from './execution_history_client';
 import type { ListRuleExecutionsArgs } from './types';
 
 const baseArgs = (overrides: Partial<ListRuleExecutionsArgs> = {}): ListRuleExecutionsArgs => ({
-  sort: 'startedAt',
+  sortField: 'startedAt',
   sortOrder: 'desc',
   page: 1,
   perPage: 20,
@@ -75,11 +75,11 @@ describe('ExecutionHistoryClient', () => {
       );
     });
 
-    it('passes through sort, sortOrder, startTime, endTime, paging unchanged', async () => {
+    it('passes through sortField, sortOrder, startTime, endTime, paging unchanged', async () => {
       const { client, findRuleExecutions } = createMocks();
       await client.listRuleExecutions(
         baseArgs({
-          sort: 'duration',
+          sortField: 'duration',
           sortOrder: 'asc',
           startTime: '2026-06-01T00:00:00Z',
           endTime: '2026-06-02T00:00:00Z',
@@ -89,7 +89,7 @@ describe('ExecutionHistoryClient', () => {
       );
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          sort: 'duration',
+          sortField: 'duration',
           sortOrder: 'asc',
           startTime: '2026-06-01T00:00:00Z',
           endTime: '2026-06-02T00:00:00Z',
