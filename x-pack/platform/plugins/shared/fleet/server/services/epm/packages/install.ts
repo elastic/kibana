@@ -73,7 +73,6 @@ import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_insta
 import * as Registry from '../registry';
 import {
   setPackageInfo,
-  generatePackageInfoFromArchiveBuffer,
   deleteVerificationResult,
   unpackBufferToAssetsMap,
 } from '../archive';
@@ -107,7 +106,12 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
-import { checkUploadPackageAssetPrivileges } from './upload_preflight_authz';
+import {
+  checkUploadPackageAssetPrivileges,
+  parsePackageAndCollectSignals,
+} from './upload_preflight_authz';
+export { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
+import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
 
@@ -116,11 +120,6 @@ const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 const MAX_INSTALL_RETRIES = 5;
 const BASE_RETRY_DELAY_MS = 1000; // 1s
 
-export const PACKAGES_TO_INSTALL_WITH_STREAMING = [
-  // The security_detection_engine package contains a large number of assets and
-  // is not suitable for regular installation as it might cause OOM errors.
-  'security_detection_engine',
-];
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -938,7 +937,10 @@ async function installPackageByUpload({
       }
     }
 
-    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
+    const { packageInfo, archiveSignals } = await parsePackageAndCollectSignals(
+      archiveBuffer,
+      contentType
+    );
     pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
@@ -962,8 +964,7 @@ async function installPackageByUpload({
     ) {
       await checkUploadPackageAssetPrivileges({
         request,
-        archiveBuffer,
-        contentType,
+        archiveSignals,
         spaceId,
         pkgName,
         installation: installedPkg,

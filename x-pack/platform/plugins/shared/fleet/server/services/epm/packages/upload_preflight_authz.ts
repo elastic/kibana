@@ -11,12 +11,16 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
+import type { ArchivePackage } from '../../../types';
 import { KibanaAssetType, KibanaSavedObjectType, type Installation } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
-import { getPathParts } from '../archive';
-import { createArchiveIterator } from '../archive/archive_iterator';
-import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './install';
+import { getPathParts, traverseArchiveEntries } from '../archive';
+import {
+  filterAssetPathForParseAndVerifyArchive,
+  parseAndVerifyArchive,
+} from '../archive/parse';
+import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 
 // Single source of truth: asset type → required Kibana API privileges.
 // GATED_ASSET_TYPES is derived from the keys so the two stay in sync structurally.
@@ -42,11 +46,12 @@ export async function collectArchiveSignals(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveSignals> {
-  const iterator = createArchiveIterator(archiveBuffer, contentType);
   const gatedTypesFound = new Set<KibanaAssetType>();
   let hasMlSecurityRules = false;
 
-  await iterator.traverseEntries(
+  await traverseArchiveEntries(
+    archiveBuffer,
+    contentType,
     async (entry) => {
       const parts = getPathParts(entry.path);
 
@@ -76,6 +81,55 @@ export async function collectArchiveSignals(
   return { gatedTypesFound, hasMlSecurityRules };
 }
 
+export async function parsePackageAndCollectSignals(
+  archiveBuffer: Buffer,
+  contentType: string
+): Promise<{ packageInfo: ArchivePackage; archiveSignals: ArchiveSignals }> {
+  const assetsMap: Record<string, Buffer> = {};
+  const paths: string[] = [];
+  const gatedTypesFound = new Set<KibanaAssetType>();
+  let hasMlSecurityRules = false;
+
+  await traverseArchiveEntries(
+    archiveBuffer,
+    contentType,
+    async (entry) => {
+      paths.push(entry.path);
+      if (entry.buffer) assetsMap[entry.path] = entry.buffer;
+
+      const parts = getPathParts(entry.path);
+      if (parts.service === 'kibana') {
+        const assetType = parts.type as KibanaAssetType;
+        if (GATED_ASSET_TYPES.has(assetType)) {
+          gatedTypesFound.add(assetType);
+          if (assetType === KibanaAssetType.securityRule && entry.buffer) {
+            try {
+              const asset = JSON.parse(entry.buffer.toString('utf8'));
+              if (asset?.attributes?.type === 'machine_learning') {
+                hasMlSecurityRules = true;
+              }
+            } catch {
+              // Malformed JSON; install will fail later with a better error.
+            }
+          }
+        }
+      }
+    },
+    (path) => {
+      // Buffer manifest/lifecycle/tags for parseAndVerifyArchive, and
+      // security_rule JSONs for ML-subtype detection.
+      if (filterAssetPathForParseAndVerifyArchive(path)) return true;
+      const parts = getPathParts(path);
+      return parts.service === 'kibana' && parts.type === KibanaAssetType.securityRule;
+    }
+  );
+
+  return {
+    packageInfo: parseAndVerifyArchive(paths, assetsMap),
+    archiveSignals: { gatedTypesFound, hasMlSecurityRules },
+  };
+}
+
 export function buildRequiredActions(
   signals: ArchiveSignals,
   security: SecurityPluginStart
@@ -98,8 +152,7 @@ export function buildRequiredActions(
 
 export interface CheckUploadPackageAssetPrivilegesOptions {
   request: KibanaRequest;
-  archiveBuffer: Buffer;
-  contentType: string;
+  archiveSignals: ArchiveSignals;
   spaceId: string;
   pkgName: string | undefined;
   installation: SavedObject<Installation> | undefined;
@@ -108,14 +161,12 @@ export interface CheckUploadPackageAssetPrivilegesOptions {
 
 export async function checkUploadPackageAssetPrivileges({
   request,
-  archiveBuffer,
-  contentType,
+  archiveSignals: signals,
   spaceId,
   pkgName,
   installation,
   savedObjectsClient,
 }: CheckUploadPackageAssetPrivilegesOptions): Promise<string[]> {
-  const signals = await collectArchiveSignals(archiveBuffer, contentType);
 
   // Compute destination spaces first — needed for both the existing-asset scan
   // and the privilege check, so the two are always consistent.

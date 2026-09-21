@@ -10,8 +10,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { KibanaAssetType } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
-import { createArchiveIterator } from '../archive/archive_iterator';
+import { traverseArchiveEntries } from '../archive';
 
+import type { ArchiveSignals } from './upload_preflight_authz';
 import {
   checkUploadPackageAssetPrivileges,
   collectArchiveSignals,
@@ -26,11 +27,12 @@ jest.mock('../../app_context', () => ({
   },
 }));
 
-jest.mock('../archive/archive_iterator', () => ({
-  createArchiveIterator: jest.fn(),
+jest.mock('../archive', () => ({
+  getPathParts: jest.requireActual('../archive').getPathParts,
+  traverseArchiveEntries: jest.fn(),
 }));
 
-jest.mock('./install', () => ({
+jest.mock('./streaming_packages', () => ({
   PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
 }));
 
@@ -53,6 +55,17 @@ function makeIterator(entries: Array<{ path: string; buffer?: Buffer }>) {
     }),
     getPaths: jest.fn().mockResolvedValue(entries.map((e) => e.path)),
   };
+}
+
+function mockTraverseEntries(entries: Array<{ path: string; buffer?: Buffer }>) {
+  (traverseArchiveEntries as jest.Mock).mockImplementation(
+    async (_buf: Buffer, _type: string, onEntry: any, readBuffer?: (path: string) => boolean) => {
+      for (const entry of entries) {
+        const shouldRead = readBuffer ? readBuffer(entry.path) : false;
+        await onEntry({ path: entry.path, buffer: shouldRead ? entry.buffer : undefined });
+      }
+    }
+  );
 }
 
 function makeSecurity(hasAllRequested: boolean, missingPrivileges: string[] = []) {
@@ -98,13 +111,11 @@ describe('collectArchiveSignals', () => {
   });
 
   it('returns empty signals for archives with no gated asset types', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' },
-        { path: 'mypackage-1.0.0/kibana/visualization/my-viz.json' },
-        { path: 'mypackage-1.0.0/elasticsearch/index_template/my-template.json' },
-      ])
-    );
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' },
+      { path: 'mypackage-1.0.0/kibana/visualization/my-viz.json' },
+      { path: 'mypackage-1.0.0/elasticsearch/index_template/my-template.json' },
+    ]);
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
@@ -113,9 +124,7 @@ describe('collectArchiveSignals', () => {
   });
 
   it('detects security_rule as gated type', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
+    mockTraverseEntries([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }]);
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
@@ -128,11 +137,9 @@ describe('collectArchiveSignals', () => {
       type: 'machine_learning',
       machine_learning_job_id: 'my-job',
     });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
-      ])
-    );
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
+    ]);
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
@@ -141,11 +148,9 @@ describe('collectArchiveSignals', () => {
 
   it('does not set hasMlSecurityRules for non-ML security_rule', async () => {
     const queryRuleBuffer = makeAssetBuffer({ type: 'query', query: 'event.action: *' });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer },
-      ])
-    );
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer },
+    ]);
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
@@ -154,33 +159,30 @@ describe('collectArchiveSignals', () => {
   });
 
   it('does not read buffers for non-security_rule kibana assets', async () => {
-    const iterator = makeIterator([
+    mockTraverseEntries([
       {
         path: 'mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json',
         buffer: Buffer.from('{}'),
       },
     ]);
-    (createArchiveIterator as jest.Mock).mockReturnValue(iterator);
 
     await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
-    const traverseCall = iterator.traverseEntries.mock.calls[0];
-    const readBufferFn = traverseCall[1]!;
+    // 4th argument to traverseArchiveEntries is the readBuffer predicate
+    const readBufferFn = (traverseArchiveEntries as jest.Mock).mock.calls[0][3]!;
     expect(readBufferFn('mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json')).toBe(false);
     expect(readBufferFn('mypackage-1.0.0/kibana/security_rule/my-rule.json')).toBe(true);
   });
 
   it('does not gate other kibana asset types (osquery, ml_module, csp, slo, alerting)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/osquery_saved_query/my-query.json' },
-        { path: 'mypackage-1.0.0/kibana/osquery_pack_asset/my-pack.json' },
-        { path: 'mypackage-1.0.0/kibana/ml_module/my-module.json' },
-        { path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' },
-        { path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' },
-        { path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' },
-      ])
-    );
+    mockTraverseEntries([
+      { path: 'mypackage-1.0.0/kibana/osquery_saved_query/my-query.json' },
+      { path: 'mypackage-1.0.0/kibana/osquery_pack_asset/my-pack.json' },
+      { path: 'mypackage-1.0.0/kibana/ml_module/my-module.json' },
+      { path: 'mypackage-1.0.0/kibana/csp_rule_template/my-rule.json' },
+      { path: 'mypackage-1.0.0/kibana/slo_template/my-slo.json' },
+      { path: 'mypackage-1.0.0/kibana/alerting_rule_template/my-alert.json' },
+    ]);
 
     const signals = await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
@@ -254,21 +256,13 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('allows upload when archive contains no gated asset types', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' },
-        { path: 'mypackage-1.0.0/kibana/visualization/my-viz.json' },
-      ])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveBuffer: mockArchiveBuffer,
-        contentType: mockContentType,
+        archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -280,20 +274,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks rules-all for non-ML security_rule package', async () => {
-    const queryRuleBuffer = makeAssetBuffer({ type: 'query' });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: queryRuleBuffer },
-      ])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -312,23 +298,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks rules-all + ml:canCreateJob for ML security_rule package', async () => {
-    const mlRuleBuffer = makeAssetBuffer({
-      type: 'machine_learning',
-      machine_learning_job_id: 'my-job',
-    });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
-      ])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: true },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -345,21 +320,13 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('throws FleetUnauthorizedError when caller lacks ml:canCreateJob for ML rule package', async () => {
-    const mlRuleBuffer = makeAssetBuffer({ type: 'machine_learning' });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
-      ])
-    );
-
     const security = makeSecurity(false, ['api:ml:canCreateJob']);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveBuffer: mockArchiveBuffer,
-        contentType: mockContentType,
+        archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: true },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -369,18 +336,13 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('throws FleetUnauthorizedError when caller lacks rules-all for security_rule package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
     const security = makeSecurity(false, ['api:rules-all']);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveBuffer: mockArchiveBuffer,
-        contentType: mockContentType,
+        archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -390,17 +352,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks elasticAssistant for security_ai_prompt package', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityAIPrompt]), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -415,22 +372,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('accumulates union of required actions for mixed gated types', async () => {
-    const mlRuleBuffer = makeAssetBuffer({ type: 'machine_learning' });
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([
-        { path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json', buffer: mlRuleBuffer },
-        { path: 'mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json' },
-        { path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' },
-      ])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule, KibanaAssetType.securityAIPrompt]), hasMlSecurityRules: true },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation: undefined,
@@ -451,16 +398,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('throws FleetUnauthorizedError when security plugin is unavailable (fail closed)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
     (appContextService.getSecurity as jest.Mock).mockReturnValue(null);
 
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveBuffer: mockArchiveBuffer,
-        contentType: mockContentType,
+        archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation: undefined,
@@ -470,10 +413,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('fans out to all additional spaces when upgrading from primary space', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -486,8 +425,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -502,10 +440,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks only the request space when uploading from an additional (non-primary) space', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -518,8 +452,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
       spaceId: 'space-x',
       pkgName: 'mypackage',
       installation,
@@ -535,10 +468,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('returns all destination spaces for a primary-space upgrade (used to cap propagation)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -551,8 +480,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -564,10 +492,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('returns only the request space for an additional-space install (no fan-out)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -580,8 +504,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
       spaceId: 'space-x',
       pkgName: 'mypackage',
       installation,
@@ -592,10 +515,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('checks privileges when archive has no gated types but existing install has security_rule refs (gated-to-benign removal)', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -609,8 +528,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -627,10 +545,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('throws FleetUnauthorizedError when caller lacks privileges to remove gated types', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(false, ['api:rules-all']);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -645,8 +559,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     await expect(
       checkUploadPackageAssetPrivileges({
         request: mockRequest,
-        archiveBuffer: mockArchiveBuffer,
-        contentType: mockContentType,
+        archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
         spaceId: mockSpaceId,
         pkgName: 'mypackage',
         installation,
@@ -656,10 +569,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('skips privilege check when archive and existing install both have no gated types', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -673,8 +582,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -691,10 +599,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // cleanUpUnusedKibanaAssetsStep reads installed_kibana unconditionally.
     // Preflight must read the same source — otherwise additional_spaces_installed_kibana[spaceId]
     // is empty, the check is skipped, and cleanup removes the security rule via internal client.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'security_detection_engine-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -711,8 +615,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: 'request-space',
       pkgName: 'security_detection_engine',
       installation,
@@ -732,10 +635,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   it('checks only the request space for a streaming package even when installed in additional spaces', async () => {
     // security_detection_engine uses streaming install, which writes only to the request Space.
     // Preflight must mirror that — do not require privileges in the other Spaces.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'security_detection_engine-1.0.0/kibana/security_rule/my-rule.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -748,8 +647,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set([KibanaAssetType.securityRule]), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'security_detection_engine',
       installation,
@@ -771,10 +669,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // additional_spaces_installed_kibana['space-a'] does. A primary-space benign
     // upload fans out to space-a and cleanUpUnusedKibanaAssetsStep would delete
     // the security-rule SO there. Preflight must detect this and require rules-all.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
@@ -793,8 +687,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -820,10 +713,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // Archive is benign. The global-union approach would require rules-all + elasticAssistant
     // in both spaces, rejecting a caller who has each privilege in only its own Space.
     // Per-space: space-a needs only rules-all, space-b needs only elasticAssistant.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
@@ -843,8 +732,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -865,10 +753,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('skips privilege check when benign archive and additional Space refs are all non-gated', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -884,8 +768,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -901,10 +784,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // currently installed security-rule SO has attributes.type === 'machine_learning'.
     // cleanUpUnusedKibanaAssetsStep will delete the ML rule via the internal client.
     // Preflight must detect the ML subtype from the SO and require ml:canCreateJob.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -929,8 +808,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -949,10 +827,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('fails closed (requires ml:canCreateJob) when savedObjectsClient.bulkGet throws during ML subtype detection', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -968,8 +842,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -991,10 +864,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // Regression: additional_spaces_installed_kibana['space-a'] has a security-rule SO whose
     // attributes.type === 'machine_learning'. The archive is benign (no security rules).
     // Without per-space SO reads, the ML subtype is not detected and ml:canCreateJob is omitted.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
@@ -1015,8 +884,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -1036,10 +904,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('fails closed (requires ml:canCreateJob) when internal client bulkGet throws for an additional Space ML check', async () => {
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
     (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue({
@@ -1058,8 +922,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     const result = await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
@@ -1080,10 +943,6 @@ describe('checkUploadPackageAssetPrivileges', () => {
   it('fails closed (requires ml:canCreateJob) when bulkGet returns a per-object error for an existing security rule', async () => {
     // isSavedObjectErrorResult(so) === true when bulkGet resolves but the individual SO has an
     // error (e.g. not found, unauthorized). Treat as ML rule present — fail closed.
-    (createArchiveIterator as jest.Mock).mockReturnValue(
-      makeIterator([{ path: 'mypackage-1.0.0/kibana/dashboard/my-dashboard.json' }])
-    );
-
     const security = makeSecurity(true);
     (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
 
@@ -1107,8 +966,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
-      archiveBuffer: mockArchiveBuffer,
-      contentType: mockContentType,
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
       spaceId: mockSpaceId,
       pkgName: 'mypackage',
       installation,
