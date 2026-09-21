@@ -162,6 +162,8 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
       await page.testSubj.click('lnsMetric_secondaryNameVisibility_tooltip');
       await lens.waitForVisualization('mtrVis');
       await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toBeUndefined();
+      await lens.metric.hoverSecondaryMetric();
+      await expect(lens.metric.secondaryMetricNameTooltip).toHaveText('Average of bytes');
 
       await page.testSubj.click('lnsMetric_secondaryNameVisibility_hidden');
       await lens.waitForVisualization('mtrVis');

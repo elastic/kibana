@@ -67,7 +67,7 @@ const SecondaryMetricLabelTooltip: NonNullable<SecondaryMetricProps['labelToolti
   label,
   placement,
 }) => (
-  <EuiToolTip content={label} position={placement}>
+  <EuiToolTip content={label} position={placement} data-test-subj="mtrVisSecondaryNameTooltip">
     {children}
   </EuiToolTip>
 );
