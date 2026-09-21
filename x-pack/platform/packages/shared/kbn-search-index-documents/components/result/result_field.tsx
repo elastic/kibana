@@ -142,7 +142,8 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         className="resultFieldRowCell"
         valign="top"
         truncateText={!isExpanded}
-        width="20%"
+        setScopeRow
+        width={euiTheme.base * 10}
       >
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
