@@ -25,8 +25,7 @@ export const selectComboBoxOption = async (comboBoxTestId: string, label: string
   await act(async () => {
     fireEvent.click(
       within(optionsList).getByRole('option', {
-        name: (accessibleName) =>
-          accessibleName === label || accessibleName.endsWith(` ${label}`),
+        name: (accessibleName) => accessibleName === label || accessibleName.endsWith(` ${label}`),
       })
     );
   });
