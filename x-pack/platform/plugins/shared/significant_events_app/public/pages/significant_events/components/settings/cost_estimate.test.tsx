@@ -129,11 +129,10 @@ const period = (label: PeriodCost['label'], overrides: Partial<PeriodCost> = {})
     group('discovery', { estimatedCost: 1.2, totalTokens: 12 }),
     group('investigation', { estimatedCost: 2.3, totalTokens: 23 }),
     group('ki_extraction', { estimatedCost: 3.4, totalTokens: 34 }),
-    group('memory', { estimatedCost: 4.5, totalTokens: 45 }),
   ],
-  totalEstimatedCost: 11.4,
+  totalEstimatedCost: 6.9,
   totalStatus: 'complete',
-  totalTokens: 114,
+  totalTokens: 69,
   unknownFeatureTokens: 0,
   unknownFeatureDocCount: 0,
   ...overrides,
@@ -490,24 +489,22 @@ describe('CostEstimate', () => {
   it('renders the headline, both group columns, fixed order, and numeric formatting', () => {
     renderExpandedCost();
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent(
-      '~$11.40 today · ~$20.50 this month (recorded calls)'
+      '~$6.90 today · ~$20.50 this month (recorded calls)'
     );
     const groups = screen.getAllByTestId(/^significantEventsCostGroup-/);
     expect(groups.map((node) => node.getAttribute('data-test-subj'))).toEqual([
       'significantEventsCostGroup-discovery',
       'significantEventsCostGroup-investigation',
       'significantEventsCostGroup-ki_extraction',
-      'significantEventsCostGroup-memory',
     ]);
     expect(screen.getByText('Discovery')).toBeInTheDocument();
     expect(screen.getByText('Investigation')).toBeInTheDocument();
     expect(screen.getByText('KI extraction')).toBeInTheDocument();
-    expect(screen.getByText('Memory')).toBeInTheDocument();
     expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
       '~$1.20'
     );
-    expect(screen.getByTestId('significantEventsCostGroupMonth-memory')).toHaveTextContent(
-      '~$4.50'
+    expect(screen.getByTestId('significantEventsCostGroupMonth-ki_extraction')).toHaveTextContent(
+      '~$3.40'
     );
   });
 
@@ -527,11 +524,6 @@ describe('CostEstimate', () => {
               priceableTokens: 0,
             }),
             group('ki_extraction', {
-              estimatedCost: 0,
-              totalTokens: 0,
-              priceableTokens: 0,
-            }),
-            group('memory', {
               estimatedCost: 0,
               totalTokens: 0,
               priceableTokens: 0,
@@ -562,7 +554,6 @@ describe('CostEstimate', () => {
             }),
             group('investigation', { estimatedCost: 0, totalTokens: 0 }),
             group('ki_extraction', { estimatedCost: 0, totalTokens: 0 }),
-            group('memory', { estimatedCost: 0, totalTokens: 0 }),
           ],
           totalEstimatedCost: 1.2,
           totalStatus: 'partial',
@@ -608,7 +599,6 @@ describe('CostEstimate', () => {
             group('discovery', { estimatedCost: null, totalTokens: 5, priceableTokens: 0 }),
             group('investigation', { estimatedCost: 0, totalTokens: 0 }),
             group('ki_extraction', { estimatedCost: 0, totalTokens: 0 }),
-            group('memory', { estimatedCost: 0, totalTokens: 0 }),
           ],
         }),
         month: period('this_month', {
@@ -618,7 +608,6 @@ describe('CostEstimate', () => {
             group('discovery', { estimatedCost: 0, totalTokens: 0 }),
             group('investigation', { estimatedCost: 0, totalTokens: 0 }),
             group('ki_extraction', { estimatedCost: 0, totalTokens: 0 }),
-            group('memory', { estimatedCost: 0, totalTokens: 0 }),
           ],
         }),
       }),
@@ -701,7 +690,6 @@ describe('CostEstimate', () => {
             group('discovery', { tierCrossingCount: 1 }),
             group('investigation', { tierCrossingCount: 0 }),
             group('ki_extraction', { tierCrossingCount: 0 }),
-            group('memory', { tierCrossingCount: 0 }),
           ],
         }),
       }),
@@ -743,7 +731,6 @@ describe('CostEstimate', () => {
             group('discovery', { tierCrossingCount: 2 }),
             group('investigation', { tierCrossingCount: 3 }),
             group('ki_extraction', { tierCrossingCount: 0 }),
-            group('memory', { tierCrossingCount: 0 }),
           ],
         }),
       }),
