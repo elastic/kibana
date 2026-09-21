@@ -347,7 +347,7 @@ steps:
   # ---------------------------------------------------------------------------
   # 7. Autonomy gate — create a proposal to close FP alerts if any qualify.
   #
-  #    Autonomy mapping:
+  #    Autonomy mapping (two levels — `assisted` from WATCH_AUTONOMY_LEVELS is not offered):
   #      manual     → autoApprove: false  (human gate, 72 h queue row)
   #      supervised → autoApprove: true   (auto-closes; analyst notified and can undo)
   #

@@ -3,7 +3,7 @@ name: Close alerts as false positive
 description: >
   AlertZero action: closes a set of security alerts as false positives.
   Executed by the investigation proposal gate once an analyst approves (or
-  auto-approved by the Alert Triage Worker at Assisted autonomy), so the
+  auto-approved by the Alert Triage Worker at Supervised autonomy), so the
   close is attributed to the approving principal.
 enabled: true
 tags:
