@@ -246,7 +246,13 @@ describe('ConversationProposalsService', () => {
     });
 
     it('enriches proposals with conversation titles', async () => {
-      const proposals = [makeProposal({ status: 'dismissed', decidedAt: '2026-09-01T00:00:00Z' })];
+      const proposals = [
+        makeProposal({
+          status: 'no_action',
+          decision: 'dismissed',
+          decidedAt: '2026-09-01T00:00:00Z',
+        }),
+      ];
 
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
@@ -260,7 +266,7 @@ describe('ConversationProposalsService', () => {
     });
 
     it('returns unenriched proposals when bulkGet throws', async () => {
-      const proposals = [makeProposal({ status: 'dismissed' })];
+      const proposals = [makeProposal({ status: 'no_action', decision: 'dismissed' })];
       const agentBuilder = {
         conversations: {
           getScopedClient: jest.fn().mockResolvedValue({

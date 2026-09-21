@@ -12,9 +12,9 @@ import {
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   ALERTZERO_PROPOSALS_CLOSED_URL,
 } from '@kbn/alertzero-common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import type { ProposalsPageResponse } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
 
 /** Pending proposals for a single action category, newest first. */
 export const useProposalsByCategory = (

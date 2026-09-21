@@ -34,12 +34,6 @@ export const buildWorkerUrl = (workerId: string) =>
 export const buildSkillUrl = (skillId: string) =>
   `${ALERTZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
 
-export const ALERTZERO_INVESTIGATIONS_URL = `${ALERTZERO_INTERNAL_URL}/investigations` as const;
-export const ALERTZERO_INVESTIGATION_URL_TEMPLATE = `${ALERTZERO_INVESTIGATIONS_URL}/{id}` as const;
-
-export const buildInvestigationUrl = (id: string) =>
-  `${ALERTZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
-
 /** Pending proposals for a single action category. */
 export const ALERTZERO_PROPOSALS_CATEGORY_URL =
   `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
