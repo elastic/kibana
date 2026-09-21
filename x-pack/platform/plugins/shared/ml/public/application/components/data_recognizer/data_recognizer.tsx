@@ -16,6 +16,7 @@ import { RecognizedResult } from './recognized_result';
 
 export interface DataRecognizerResults {
   count: number;
+  settled: boolean;
   onChange?: () => void;
 }
 
@@ -52,12 +53,19 @@ export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, results }
         ));
 
         results.count = elements.length;
+        results.settled = true;
         results.onChange?.();
 
         setRecognizedResults(elements);
       })
       .catch(() => {
-        // Recognition failed; leave results empty.
+        if (cancelled) {
+          return;
+        }
+
+        // Recognition failed; report as settled with no results.
+        results.settled = true;
+        results.onChange?.();
       });
 
     return () => {

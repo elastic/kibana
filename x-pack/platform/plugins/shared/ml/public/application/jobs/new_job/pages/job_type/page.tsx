@@ -47,6 +47,7 @@ export const Page: FC = () => {
   });
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const [recognizerSettled, setRecognizerSettled] = useState(false);
 
   const { selectedDataView, selectedSavedSearch, projectRouting } = useDataSource();
 
@@ -117,8 +118,10 @@ export const Page: FC = () => {
 
   const recognizerResults = {
     count: 0,
+    settled: false,
     onChange() {
       setRecognizerResultsCount(recognizerResults.count);
+      setRecognizerSettled(recognizerResults.settled);
     },
   };
 
@@ -359,7 +362,11 @@ export const Page: FC = () => {
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <EuiFlexGrid gutterSize="l" columns={4}>
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={4}
+        data-test-subj={`mlJobTypeSelectionWizardCards ${recognizerSettled ? 'loaded' : 'loading'}`}
+      >
         {jobTypes.map(({ onClick, icon, title, description, id }) => (
           <EuiFlexItem key={id}>
             <LinkCard
