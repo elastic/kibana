@@ -70,6 +70,13 @@ function FactParts({ parts }: { parts: LevelCardFactPart[] }) {
   );
 }
 
+/**
+ * Fact-row label column. Narrower than `SettingRow`'s 200px: these rows sit inside a card that is
+ * itself in the control column, so they align to each other rather than to the page-level rows.
+ */
+const FACT_LABEL_COL_PX = 100;
+const FACT_LABEL_GAP_PX = 12;
+
 function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
   const { euiTheme } = useEuiTheme();
   return (
@@ -84,11 +91,17 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
           {card.who}
         </p>
       </EuiText>
+      {/*
+        Label-left / value-right, on the same `SettingRow` grid the rest of the Worker's settings
+        use, so a card's facts line up with the rows above and below it instead of stacking.
+      */}
       <dl
         css={css`
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          display: grid;
+          grid-template-columns: ${FACT_LABEL_COL_PX}px minmax(0, 1fr);
+          column-gap: ${FACT_LABEL_GAP_PX}px;
+          row-gap: 2px;
+          align-items: baseline;
           margin: 0;
         `}
       >
@@ -97,9 +110,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
             key={fact.label}
             data-test-subj="alertZeroAutonomyCardFact"
             css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 2px;
+              display: contents;
             `}
           >
             <dt
@@ -114,6 +125,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
             <dd
               css={css`
                 margin: 0;
+                min-width: 0;
                 color: ${euiTheme.colors.textSubdued};
               `}
             >

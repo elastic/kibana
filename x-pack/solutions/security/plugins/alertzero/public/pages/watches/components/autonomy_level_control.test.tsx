@@ -40,6 +40,20 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
     expect(within(group).getAllByText('You').length).toBeGreaterThan(0);
   });
 
+  it('lays each fact out as a label/value row on one grid, not label above value', () => {
+    render(<AutonomyLevelControl workerId={AD_WORKER_ID} current="manual" onChange={onChange} />);
+    const [fact] = screen.getAllByTestId('alertZeroAutonomyCardFact');
+
+    // `display: contents` drops the per-fact wrapper from layout so its `dt`/`dd` become columns of
+    // the shared grid — that is what keeps every value on the same left edge across rows.
+    expect(fact).toHaveStyleRule('display', 'contents');
+    expect(fact.parentElement).toHaveStyleRule('display', 'grid');
+    expect(fact.parentElement).toHaveStyleRule(
+      'grid-template-columns',
+      expect.stringMatching(/^\d+px minmax\(0, ?1fr\)$/) as unknown as string
+    );
+  });
+
   it('shows the supervised warning callout at the highest level', () => {
     render(
       <AutonomyLevelControl workerId={TRIAGE_WORKER_ID} current="supervised" onChange={onChange} />
