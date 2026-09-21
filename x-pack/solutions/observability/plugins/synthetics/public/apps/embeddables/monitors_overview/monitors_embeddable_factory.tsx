@@ -16,6 +16,7 @@ import type {
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+  CanCancelRequests,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -26,12 +27,14 @@ import {
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
 import type { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 import type { OverviewView } from '../../synthetics/state';
 import type { MonitorFilters } from '../../../../common/types';
+import { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
@@ -57,7 +60,8 @@ export type OverviewMonitorsEmbeddableState = SerializedTitles &
 export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
-  HasEditCapabilities;
+  HasEditCapabilities &
+  CanCancelRequests;
 
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -71,6 +75,7 @@ export const getMonitorsEmbeddableFactory = (
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
+      const requestCancellationManager = new RequestCancellationManager();
       // Ensure filters have all required properties with defaults
       const filters$ = new BehaviorSubject({
         ...DEFAULT_FILTERS,
@@ -116,6 +121,7 @@ export const getMonitorsEmbeddableFactory = (
         ...titleManager.api,
         ...stateApi,
         defaultTitle$,
+        cancelRequests: (reason?: AbortReason) => requestCancellationManager.cancel(reason),
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
             defaultMessage: 'filters',
@@ -149,6 +155,7 @@ export const getMonitorsEmbeddableFactory = (
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
+          requestCancellationManager.startLoad();
           reload$.next(next.isReload);
         });
 
@@ -174,6 +181,7 @@ export const getMonitorsEmbeddableFactory = (
                 reload$={reload$}
                 filters={filters || DEFAULT_FILTERS}
                 view={view}
+                requestCancellationManager={requestCancellationManager}
               />
             </div>
           );

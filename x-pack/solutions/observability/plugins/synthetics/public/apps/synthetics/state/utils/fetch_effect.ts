@@ -50,6 +50,7 @@ export const sendErrorToast = (payload: ToastParams<ErrorToastOptions>, error: E
  * @param fail creates a failure action
  * @param onSuccess
  * @param onFailure
+ * @param shouldIgnoreError
  * @template T the action type expected by the fetch action
  * @template R the type that the API request should return on success
  * @template S the type of the success action
@@ -60,7 +61,8 @@ export function fetchEffectFactory<T, R, S, F>(
   success: (response: R) => PayloadAction<S>,
   fail: (error: IHttpSerializedFetchError<T>) => PayloadAction<F>,
   onSuccess?: ((response: R) => void) | string,
-  onFailure?: ((error: Error) => void) | string
+  onFailure?: ((error: Error) => void) | string,
+  shouldIgnoreError?: (error: unknown) => boolean
 ) {
   const showErrorToast = (error: Error, action: PayloadAction<T>) => {
     const serializedError = serializeHttpFetchError(error as IHttpFetchError, action.payload);
@@ -82,6 +84,9 @@ export function fetchEffectFactory<T, R, S, F>(
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {
         const error = response as Error;
+        if (shouldIgnoreError?.(error)) {
+          return;
+        }
         // eslint-disable-next-line no-console
         console.error(error);
 
@@ -109,6 +114,9 @@ export function fetchEffectFactory<T, R, S, F>(
         }
       }
     } catch (error) {
+      if (shouldIgnoreError?.(error)) {
+        return;
+      }
       // eslint-disable-next-line no-console
       console.error(error);
       const errorMessage = (action.payload as unknown as ActionMessages)?.error;
