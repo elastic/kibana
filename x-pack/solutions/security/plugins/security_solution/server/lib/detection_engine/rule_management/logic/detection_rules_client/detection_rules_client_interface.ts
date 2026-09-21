@@ -11,7 +11,6 @@ import type { SecurityRuleChangeTracking } from '../../../../../../common/detect
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-  RulePatchProps,
   RuleObjectId,
   RuleResponse,
   RuleToImport,
@@ -19,6 +18,7 @@ import type {
 import type {
   RuleChangesHistoryResponse,
   RestoreRuleFromHistoryResponse,
+  UnresolvedRulePatchProps,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
@@ -67,7 +67,11 @@ export interface UpdateRuleArgs {
 }
 
 export interface PatchRuleArgs {
-  rulePatch: RulePatchProps;
+  /**
+   * Type-specific fields of the patch are validated against the existing rule's type in
+   * `patchTypeSpecificParams`, so only the type-independent props are typed here.
+   */
+  rulePatch: UnresolvedRulePatchProps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
