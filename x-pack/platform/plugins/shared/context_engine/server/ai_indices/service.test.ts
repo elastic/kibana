@@ -422,6 +422,13 @@ describe('AiIndexService', () => {
           dest: { type: 'data_stream', value: 'ai-index-ds-loser' },
         })
       ).rejects.toBeInstanceOf(AiIndexConflictError);
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({
+        index: '.contextengine-ai-indices',
+        ignore_unavailable: true,
+      });
+      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+        storageClient.search.mock.invocationCallOrder[1]
+      );
       expect(esClient.esql.putView).toHaveBeenLastCalledWith({
         name: 'v-ai-index-customer_support',
         query: expect.stringContaining('FROM ai-index-ds-winner METADATA'),

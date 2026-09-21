@@ -32,7 +32,11 @@ import {
   AiIndexAlreadyExistsError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
-import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import {
+  aiIndicesIndexName,
+  buildManagedAiIndexDocId,
+  createAiIndexStorageClient,
+} from './storage';
 import { deleteKiView, putKiView } from './ki_view';
 import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
@@ -216,6 +220,8 @@ export class AiIndexService {
   /** Best-effort: repoints the view at the stored dest, or removes it when nothing is stored. */
   private async restoreView(aiIndexId: string, spaceId: string): Promise<void> {
     try {
+      // The winning write is on the shard but may not be searchable yet.
+      await this.esClient.indices.refresh({ index: aiIndicesIndexName, ignore_unavailable: true });
       const current = await this.findDocument(aiIndexId, spaceId);
       if (current) {
         await this.putView(aiIndexId, current.document.dest);
