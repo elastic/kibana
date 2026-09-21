@@ -89,6 +89,7 @@ const aiIndexDocument: AiIndexDocument = {
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-customer_support | LIMIT 10' }],
+  traces: [],
   date_created: '2026-07-08T12:10:30.000Z',
   date_modified: '2026-07-08T12:10:30.000Z',
 };
@@ -162,6 +163,7 @@ describe('AiIndexService', () => {
     dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
     automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
     sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
+    traces: [],
   };
 
   describe('create', () => {
@@ -640,6 +642,7 @@ describe('AiIndexService', () => {
       dest: { type: 'index' as const, value: 'ai-index-idx-sml-data' },
       automations: [],
       sources: [],
+      traces: [],
     };
 
     const mockValidIndexDest = () =>
@@ -941,6 +944,33 @@ describe('AiIndexService', () => {
       await expect(service.get('customer_support', DEFAULT_SPACE)).rejects.toThrow('boom');
     });
 
+    it('attaches derived queries to stored traces', async () => {
+      const documentWithTraces: AiIndexDocument = {
+        ...aiIndexDocument,
+        space: 'marketing',
+        traces: [
+          { type: 'index', value: 'logs-*' },
+          { type: 'esql', value: 'FROM foo | LIMIT 1' },
+          { type: 'elastic_agent', value: 'my-agent' },
+        ],
+      };
+      mockSearchHits(storedHit(documentWithTraces));
+
+      await expect(service.get('customer_support', 'marketing')).resolves.toEqual(
+        expect.objectContaining({
+          traces: [
+            { type: 'index', value: 'logs-*', query: 'FROM logs-*' },
+            { type: 'esql', value: 'FROM foo | LIMIT 1', query: 'FROM foo | LIMIT 1' },
+            expect.objectContaining({
+              type: 'elastic_agent',
+              value: 'my-agent',
+              query: expect.stringContaining('FROM traces-agent_builder.otel-marketing'),
+            }),
+          ],
+        })
+      );
+    });
+
     it('ensures a missing managed AI index and returns it', async () => {
       const managedDocument: AiIndexDocument = {
         ...aiIndexDocument,
@@ -1032,6 +1062,23 @@ describe('AiIndexService', () => {
       });
     });
 
+    it("derives elastic_agent trace queries from the document's own stored space", async () => {
+      const otherSpaceDocument: AiIndexDocument = {
+        ...aiIndexDocument,
+        space: 'other',
+        traces: [{ type: 'elastic_agent', value: 'my-agent' }],
+      };
+      mockSearchHits(storedHit(otherSpaceDocument));
+
+      const [item] = await service.list('marketing');
+
+      expect(item.traces[0]).toEqual(
+        expect.objectContaining({
+          query: expect.stringContaining('FROM traces-agent_builder.otel-other'),
+        })
+      );
+    });
+
     it('ensures missing managed AI indices and re-lists', async () => {
       const managedDocument: AiIndexDocument = {
         ...aiIndexDocument,
@@ -1081,6 +1128,45 @@ describe('AiIndexService', () => {
       expect(ensure).toHaveBeenCalledWith('ok', DEFAULT_SPACE);
       expect(ensure).toHaveBeenCalledWith('broken', DEFAULT_SPACE);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('broken'));
+    });
+
+    it('treats a missing traces field as an empty list', async () => {
+      const { traces: _traces, ...documentWithoutTraces } = aiIndexDocument;
+      mockSearchHits(storedHit(documentWithoutTraces));
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([
+        toHttpItem({ ...documentWithoutTraces, traces: [] }),
+      ]);
+    });
+  });
+
+  describe('traces persistence', () => {
+    it('stores the traces sent on create', async () => {
+      const traces = [{ type: 'index' as const, value: 'logs-*' }];
+      await service.create('customer_support', DEFAULT_SPACE, { ...properties, traces });
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ traces }),
+        })
+      );
+    });
+
+    it('replaces stored traces on put', async () => {
+      mockSearchHits(
+        storedHit({ ...aiIndexDocument, traces: [{ type: 'index' as const, value: 'old-*' }] })
+      );
+
+      const traces = [{ type: 'elastic_agent' as const, value: 'my-agent' }];
+      await expect(
+        service.put('customer_support', DEFAULT_SPACE, { ...properties, traces })
+      ).resolves.toBe('updated');
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ traces }),
+        })
+      );
     });
   });
 

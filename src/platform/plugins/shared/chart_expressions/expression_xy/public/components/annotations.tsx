@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { Fragment } from 'react';
-import { snakeCase } from 'lodash';
+import { omit, snakeCase } from 'lodash';
 import type { CustomAnnotationTooltip } from '@elastic/charts';
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import moment from 'moment';
@@ -37,6 +37,8 @@ import { css } from '@emotion/react';
 import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
+import { getLineAnnotationChartId } from '../helpers/annotation_click';
+import { getExtraFields } from '../helpers/get_extra_fields';
 
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
@@ -73,23 +75,6 @@ const TooltipAnnotationDetails = ({
       ))}
     </div>
   ) : null;
-};
-
-const getExtraFields = (
-  row: PointEventAnnotationRow,
-  formatFactory: FormatFactory,
-  columns: DatatableColumn[] | undefined
-) => {
-  return Object.keys(row)
-    .filter((key) => key.startsWith('field:'))
-    .map((key) => {
-      const columnFormatter = columns?.find((c) => c.id === key)?.meta?.params;
-      return {
-        key,
-        name: key.replace('field:', ''),
-        formatter: columnFormatter && formatFactory(columnFormatter),
-      };
-    });
 };
 
 const DISPLAYED_COUNT_OF_ROWS = 5;
@@ -266,6 +251,7 @@ export const getAnnotationsGroupedByInterval = (
         isDarkMode
       ),
       isGrouped: false,
+      rows: rowsPerBucket,
     };
     if (rowsPerBucket.length > 1) {
       const commonStyles = getCommonStyles(rowsPerBucket, isDarkMode);
@@ -309,7 +295,7 @@ export const Annotations = ({
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
         const { timebucket, time, isGrouped, id: configId } = annotation;
         const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
-        const id = snakeCase(`${configId}-${time}`);
+        const id = getLineAnnotationChartId(configId, time);
         const markerBodyLabel =
           !simpleView && !isGrouped && annotation.textVisibility && !hasReducedPadding
             ? annotation.label
@@ -323,7 +309,7 @@ export const Annotations = ({
               !simpleView ? (
                 <Marker
                   {...{
-                    config: annotation,
+                    config: omit(annotation, 'rows'),
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
                     label: !isGrouped ? annotation.label : undefined,

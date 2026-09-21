@@ -34,6 +34,7 @@ import {
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 import { deleteKiView, putKiView } from './ki_view';
+import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { AI_INDEX_DEST_VALUE_PATTERN } from '../../common/validation';
 
@@ -54,6 +55,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
+  traces: buildTraceQueries(document.traces ?? [], document.space),
   date_created: document.date_created,
   date_modified: document.date_modified,
 });

@@ -67,7 +67,6 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       matcher,
       group_by: groupBy,
       throttle,
-      tags,
       grouping_mode: groupingMode,
     } = source;
     const data: CreateActionPolicyData = {
@@ -75,7 +74,6 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       description,
       destinations,
       grouping_mode: groupingMode ?? 'per_episode',
-      ...(tags != null && { tags }),
       ...(matcher != null && { matcher }),
       ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
@@ -130,7 +128,6 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
           isSnoozeLoading={isSnoozing || isUnsnoozing}
           session={'start'}
           ownFocus={false}
-          hasAnimation={false}
         />
       )}
       {policyToDelete && (
