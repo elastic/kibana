@@ -10,6 +10,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { GetProposalsListResponse } from '../../../common/proposals/list';
 import type { ConversationProposalsService } from '../../services/conversation_proposals/conversation_proposals_service';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerGetProposalsRoute } from './get_proposals';
 
 const makeListResult = (
@@ -64,7 +65,7 @@ describe('registerGetProposalsRoute', () => {
     const request = httpServerMock.createKibanaRequest({ query: { windowHours: 48 } });
     const response = httpServerMock.createResponseFactory();
 
-    await handler({}, request, response);
+    await handler(createRouteContextMock(), request, response);
 
     expect(service.list).toHaveBeenCalledWith({ windowHours: 48 }, request, 'default');
     expect(response.ok).toHaveBeenCalled();
@@ -75,7 +76,11 @@ describe('registerGetProposalsRoute', () => {
     const { handler } = setup(makeConversationProposalsService(listResult));
     const response = httpServerMock.createResponseFactory();
 
-    await handler({}, httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }), response);
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }),
+      response
+    );
 
     const [call] = (response.ok as jest.Mock).mock.calls;
     const body = call[0].body as GetProposalsListResponse;
@@ -91,7 +96,11 @@ describe('registerGetProposalsRoute', () => {
     const { handler } = setup(service);
     const response = httpServerMock.createResponseFactory();
 
-    await handler({}, httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }), response);
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }),
+      response
+    );
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
   });
@@ -103,7 +112,7 @@ describe('registerGetProposalsRoute', () => {
       const response = httpServerMock.createResponseFactory();
 
       await handler(
-        {},
+        createRouteContextMock(),
         httpServerMock.createKibanaRequest({ query: { windowHours: 24 } }),
         response
       );

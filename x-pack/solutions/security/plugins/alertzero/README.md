@@ -1,21 +1,45 @@
 # AlertZero plugin (`@kbn/alertzero-plugin`)
 
-Security Watch investigation queue and catalog behind `xpack.alertzero.enabled`.
+Security Watch investigation queue and catalog behind the `securitySolution:enableAlertZero` advanced setting.
 
 ## Enablement
 
-Add to `kibana.yml` (or `config/kibana.dev.yml` for local dev):
+Two independent gates, with different scopes and different jobs.
+
+### `securitySolution:enableAlertZero` — the user-facing, per-space gate
+
+A namespace-scoped Kibana advanced setting (default `false`), registered by this plugin in `server/ui_settings.ts`. Turn it on in **Stack Management → Advanced Settings** for the space you want AlertZero in, or pin it for a whole deployment:
 
 ```yaml
-xpack.alertzero.enabled: true
+uiSettings.overrides:
+  securitySolution:enableAlertZero: true
 ```
 
-- **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
-- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
+It controls three things, and takes effect live — no page reload:
 
-Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
+| Surface | When off |
+|---------|----------|
+| Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
+| Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
+| HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
 
-Restart Kibana after changing config, then open `/app/alertzero` (or use the Security left rail).
+### `xpack.alertzero.enabled` — the deployment kill switch
+
+A plugin config flag, now defaulting to `true`. It is *not* the user-facing toggle; it exists to stop AlertZero's startup side effects on a deployment, and turning it off requires a restart:
+
+```yaml
+xpack.alertzero.enabled: false
+```
+
+Everything in the table below is skipped when it is off — including registration of the advanced setting itself, which is why `withAlertZeroEnabled` can never read an unregistered key.
+
+### `xpack.alertzero.ui.useMockData`
+
+Optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
+
+### Worker lifecycle
+
+Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space. Turning the *advanced setting* off does **not** trigger cleanup; it only hides the surfaces.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -26,16 +50,19 @@ uiSettings.overrides:
 
 This is optional. AlertZero's own Watch pages work without it; it only affects what the Workflows UI lists (default `false`).
 
-### When disabled (`xpack.alertzero.enabled: false`) — no production pollution
+### When the kill switch is off (`xpack.alertzero.enabled: false`) — no production pollution
 
 | Surface | Behavior |
 |---------|----------|
+| `securitySolution:enableAlertZero` | Not registered (absent from Advanced Settings) |
 | HTTP `/internal/alertzero/*` | Not registered |
 | Kibana feature / privileges | Not registered |
 | Browser app `/app/alertzero` | Not registered (nav links to `alertzero` / `alertzero:*` are removed by chrome) |
 | Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
 | Managed workflow initialization | Not called |
 | Leftover installed Worker documents | Global Workflows orphan cleanup removes docs whose owner is unregistered |
+
+With the kill switch on but the advanced setting off, the Kibana feature privileges *are* registered — `features.registerKibanaFeature` cannot be scoped per space — so the `alertzero` read/write privileges appear in the Roles and Spaces pickers regardless of the per-space toggle.
 
 Definitions still exist in `@kbn/workflows/managed` (code registry only). Worker definitions are **not** installed into `.workflows-*` until a user enables that Worker or saves settings on it. AlertZero startup installs only the three global rule workflows before `ready()` reconciles already-installed dynamic documents.
 
@@ -93,7 +120,7 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 | `/app/alertzero/investigations/:id/proposals/:proposalId` | Proposal detail shell |
 | `/app/alertzero/settings` | Settings stub (no dedicated nav item) |
 
-### Security left-rail order (when AlertZero enabled)
+### Security left-rail order (when `securitySolution:enableAlertZero` is on)
 
 **AlertZero → Chats → Discover → Dashboards → Alerts → Attacks → Records → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 

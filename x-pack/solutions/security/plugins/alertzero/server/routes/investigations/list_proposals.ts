@@ -16,6 +16,7 @@ import { getMockProposalsByConversationId } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 const ListProposalsRequestParams = z.object({
   id: z.string().min(1).max(256),
@@ -46,7 +47,7 @@ export const registerListInvestigationProposalsRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const { id } = request.params;
 
@@ -65,6 +66,6 @@ export const registerListInvestigationProposalsRoute = ({
             body: { message: 'Failed to list investigation proposals' },
           });
         }
-      }
+      })
     );
 };

@@ -14,6 +14,7 @@ import type { ListInvestigationsResponse } from '@kbn/alertzero-common';
 import { MOCK_INVESTIGATIONS } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 export const registerListInvestigationsRoute = ({ router, logger, config }: RouteDependencies) => {
   router.versioned
@@ -32,7 +33,7 @@ export const registerListInvestigationsRoute = ({ router, logger, config }: Rout
           request: {},
         },
       },
-      async (_context, _request, response) => {
+      withAlertZeroEnabled(async (_context, _request, response) => {
         try {
           if (config.ui.useMockData) {
             const body: ListInvestigationsResponse = {
@@ -51,6 +52,6 @@ export const registerListInvestigationsRoute = ({ router, logger, config }: Rout
             body: { message: 'Failed to list investigations' },
           });
         }
-      }
+      })
     );
 };

@@ -13,7 +13,10 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
  * managed rule-creation workflow the alertzero plugin installs at start, so alertzero must be
- * enabled; the workflow's ai.agent step additionally requires the Workflows UI and
+ * enabled. `xpack.alertzero.enabled` now defaults to `true` and is kept below only to pin the
+ * kill switch explicitly; the suite touches no `/internal/alertzero/*` route, so the per-space
+ * `securitySolution:enableAlertZero` setting does not need an override. The workflow's ai.agent
+ * step additionally requires the Workflows UI and
  * agent settings, and the approval-gate tests respond to the review step through the
  * inbox plugin's respond route, which is also disabled by default.
  *

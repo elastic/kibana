@@ -18,6 +18,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import { CLOSED_GROUP_KEY, type ProposalGroups } from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 // PROPOSALS_API_PRIVILEGE_READ cannot be imported from agentic_investigations/server (cross-plugin
 // server import is forbidden), so we derive the identical value here. It is load-bearing: the
@@ -67,7 +68,7 @@ export const registerGetProposalsRoute = ({
           request: { query: buildRouteValidationWithZod(GetProposalsRequestQuery) },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           if (config.ui.useMockData) {
             const groups = groupMockProposals();
@@ -90,6 +91,6 @@ export const registerGetProposalsRoute = ({
             body: { message: 'Failed to get proposals' },
           });
         }
-      }
+      })
     );
 };

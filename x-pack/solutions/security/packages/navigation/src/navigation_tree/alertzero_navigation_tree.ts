@@ -13,8 +13,9 @@ import { alertZeroLink } from '../links';
 /**
  * Solution navigation for the AlertZero app, shared by ESS and serverless so the two cannot drift.
  *
- * Nodes are omitted from the rendered tree when `xpack.alertzero.enabled` is false, because the deep links
- * they reference are only registered by the AlertZero plugin when it is enabled.
+ * Nodes are omitted from the rendered tree when the `securitySolution:enableAlertZero` advanced setting is
+ * off (or the `xpack.alertzero.enabled` deployment kill switch is off): the AlertZero app is then either
+ * unregistered or `AppStatus.inaccessible`, and core drops the deep links these nodes reference.
  */
 
 /**

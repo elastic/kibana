@@ -8,15 +8,18 @@
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { filter, from, map, switchMap, take, type Subscription } from 'rxjs';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
+  ALERTZERO_ENABLED_SETTING_ID,
   API_VERSIONS,
   TEMPLATE_ID_INVESTIGATION,
   buildInvestigationUrl,
@@ -52,6 +55,7 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private templateRegistration?: Subscription;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -71,10 +75,25 @@ export class AlertZeroPublicPlugin
       appRoute: ALERTZERO_APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       euiIconType: 'securitySignalDetected',
-      status: AppStatus.accessible,
+      // Inaccessible until the per-space setting is on. Core then empties `visibleIn` and
+      // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
+      // navigation tree — those trees hold no check of their own.
+      status: AppStatus.inaccessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 101,
       deepLinks: getAlertZeroDeepLinks(),
+      updater$: from(coreSetup.getStartServices()).pipe(
+        switchMap(([coreStart]) =>
+          coreStart.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false).pipe(
+            map(
+              (settingEnabled): AppUpdater =>
+                () => ({
+                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+                })
+            )
+          )
+        )
+      ),
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const { renderApp } = await import('./application');
@@ -95,22 +114,31 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
-    registerAgenticInvestigationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_INVESTIGATION,
-      name: INVESTIGATION_TEMPLATE_NAME,
-      icon: 'securitySignalDetected',
-      loadInvestigation: async (conversationId) => {
-        const { investigation } = await core.http.get<GetInvestigationResponse>(
-          buildInvestigationUrl(conversationId),
-          { version: API_VERSIONS.internal.v1 }
-        );
-        return investigation;
-      },
-    });
+    // Registration is one-shot, so wait for the first `true` rather than re-registering on every
+    // emission; this keeps the Agent Builder template in step with the toggle without a reload.
+    this.templateRegistration = core.uiSettings
+      .get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => {
+        registerAgenticInvestigationTemplateUI({
+          conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+          templateId: TEMPLATE_ID_INVESTIGATION,
+          name: INVESTIGATION_TEMPLATE_NAME,
+          icon: 'securitySignalDetected',
+          loadInvestigation: async (conversationId) => {
+            const { investigation } = await core.http.get<GetInvestigationResponse>(
+              buildInvestigationUrl(conversationId),
+              { version: API_VERSIONS.internal.v1 }
+            );
+            return investigation;
+          },
+        });
+      });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.templateRegistration?.unsubscribe();
+  }
 }

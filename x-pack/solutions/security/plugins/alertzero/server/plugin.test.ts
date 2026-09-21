@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertZeroConfig } from './config';
 import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
@@ -40,7 +41,7 @@ jest.mock('./routes/register_routes', () => ({
 }));
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
-  enabled: false,
+  enabled: true,
   ui: { useMockData: true },
   ...overrides,
 });
@@ -83,6 +84,24 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
       expect(registerAgentType).not.toHaveBeenCalled();
       expect(registerAlertZeroInferenceFeatures).not.toHaveBeenCalled();
+      expect(coreSetup.uiSettings.register).not.toHaveBeenCalled();
+    });
+
+    // Serverless allowlists `securitySolution:enableAlertZero` off this contract; a wrong answer
+    // here fails Kibana startup in dev with "in the allowlist but is not registered".
+    it('reports isEnabled false so consumers do not allowlist an unregistered setting', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+
+      const contract = plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: undefined,
+        } as never
+      );
+
+      expect(contract).toEqual({ isEnabled: false });
     });
 
     it('does not install managed worker workflows on start', () => {
@@ -133,6 +152,43 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
       expect(registerRoutes).toHaveBeenCalled();
       expect(registerAgentType).toHaveBeenCalled();
+    });
+
+    it('registers the per-space enablement advanced setting', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: { management: {} },
+          agentBuilder: { tools: { register: jest.fn() } },
+        } as never
+      );
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [ALERTZERO_ENABLED_SETTING_ID]: expect.objectContaining({ value: false }),
+        })
+      );
+    });
+
+    it('reports isEnabled true so consumers can allowlist the setting', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+
+      const contract = plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: { management: {} },
+          agentBuilder: { tools: { register: jest.fn() } },
+        } as never
+      );
+
+      expect(contract).toEqual({ isEnabled: true });
     });
 
     it('registers the AlertZero thin agent type when Agent Builder is available at setup', () => {

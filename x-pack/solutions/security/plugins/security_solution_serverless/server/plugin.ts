@@ -29,6 +29,7 @@ import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
 } from '@kbn/security-solution-navigation';
+import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
@@ -124,6 +125,14 @@ export class SecuritySolutionServerlessPlugin
     // individual settings based on feature flags. The FF is only ever `false` when an
     // administrator disables it globally; in that case the toggle is a harmless noop.
     projectSettings.push(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
+
+    // AlertZero registers `securitySolution:enableAlertZero` only when its `xpack.alertzero.enabled`
+    // kill switch is on, and the plugin is additionally cascade-disabled while its required
+    // `agenticInvestigations` dependency is off. Allowlisting a key that was never registered fails
+    // startup in dev, so follow the contract the plugin reports rather than assuming it ran.
+    if (pluginsSetup.alertzero?.isEnabled) {
+      projectSettings.push(ALERTZERO_ENABLED_SETTING_ID);
+    }
 
     // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
     if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
