@@ -21,8 +21,6 @@ import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
-// Temporary: remove once dataset filtering is enabled by default in ES
-const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
 // ANTLR ALL(*) adaptive-prediction cost grows super-linearly with parenthesis nesting depth.
 // Reject deep queries before touching the parser to prevent event-loop stalls (DoS via a single
@@ -98,7 +96,6 @@ const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
   logger: Logger,
-  datasetFilteringEnabled: boolean,
   projectRouting: string | undefined
 ): Promise<{ timeField: string | undefined }> => {
   const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
@@ -135,24 +132,21 @@ const resolveTimeField = async (
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // Temporary: remove once dataset filtering is enabled by default in ES
-  if (datasetFilteringEnabled) {
-    const { datasets } = await service.getDatasets().catch(() => ({ datasets: [] }));
-    const datasetNames = new Set(datasets.map(({ name }) => name));
-    const datasetSources = splitSources.filter((name) => datasetNames.has(name));
-    if (datasetSources.length > 0) {
-      const datasetChecks = await Promise.all(
-        datasetSources.map((sourceName) =>
-          checkViewLikeSourceForTimestamp({
-            client,
-            sourceName,
-            projectRouting: effectiveProjectRouting,
-          })
-        )
-      );
-      if (datasetChecks.every(Boolean)) {
-        return { timeField: ES_TIMESTAMP_FIELD_NAME };
-      }
+  const { datasets } = await service.getDatasets().catch(() => ({ datasets: [] }));
+  const datasetNames = new Set(datasets.map(({ name }) => name));
+  const datasetSources = splitSources.filter((name) => datasetNames.has(name));
+  if (datasetSources.length > 0) {
+    const datasetChecks = await Promise.all(
+      datasetSources.map((sourceName) =>
+        checkViewLikeSourceForTimestamp({
+          client,
+          sourceName,
+          projectRouting: effectiveProjectRouting,
+        })
+      )
+    );
+    if (datasetChecks.every(Boolean)) {
+      return { timeField: ES_TIMESTAMP_FIELD_NAME };
     }
   }
 
@@ -259,20 +253,9 @@ export const registerGetTimeFieldRoute = (
 
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
-      // Temporary: remove once dataset filtering is enabled by default in ES
-      const datasetFilteringEnabled = await core.featureFlags.getBooleanValue(
-        DATASET_FILTERING_FEATURE_FLAG_KEY,
-        false
-      );
 
       try {
-        const body = await resolveTimeField(
-          client,
-          query,
-          logger.get(),
-          datasetFilteringEnabled,
-          projectRouting
-        );
+        const body = await resolveTimeField(client, query, logger.get(), projectRouting);
         esqlRouteRequestCounter.add(1, {
           route: 'timefield',
           outcome: 'success',
