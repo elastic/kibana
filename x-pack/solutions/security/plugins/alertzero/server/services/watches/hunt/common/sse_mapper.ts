@@ -158,12 +158,14 @@ export interface SseMapperOptions {
  */
 const buildSecurityKnowledgeIndicators = (
   result: HuntCoordinatorResult,
-  reportId: string,
   onlyTechniqueId?: string
 ): SseSecurityKnowledgeIndicator[] => {
   const { tier1, tier2 } = result;
+  // No `{ type: 'threat', value: reportId }` entry here: `report_id` is
+  // already its own top-level field on the payload, and the inline content
+  // renders it as a linked "Source report" line, so duplicating it into the
+  // indicator list was redundant and unlinked.
   const indicators: SseSecurityKnowledgeIndicator[] = [
-    { type: 'threat', value: reportId },
     ...tier1.resolvedIocs.map(
       (ioc): SseSecurityKnowledgeIndicator => ({
         type: 'ioc',
@@ -297,7 +299,7 @@ export const buildSseData = (
           capability: CAPABILITY_ID,
           run_id: result.runId,
           report_id: reportId,
-          security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, reportId),
+          security_knowledge_indicators: buildSecurityKnowledgeIndicators(result),
           entities,
           events,
           hunt_result: buildHuntResult(result),
@@ -313,11 +315,7 @@ export const buildSseData = (
       capability: CAPABILITY_ID,
       run_id: result.runId,
       report_id: reportId,
-      security_knowledge_indicators: buildSecurityKnowledgeIndicators(
-        result,
-        reportId,
-        techniqueId
-      ),
+      security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
       entities,
       events,
       hunt_result: buildHuntResult(result, techniqueId),
