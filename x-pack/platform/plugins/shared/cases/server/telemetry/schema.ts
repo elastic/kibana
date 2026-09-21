@@ -418,6 +418,20 @@ export const casesSchema: CasesTelemetrySchema = {
         manually: long,
         automatic: long,
       },
+      extractObservablesDefaultOn: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of configuration saved objects with the extractObservables default enabled',
+        },
+      },
+      extractObservablesDefaultOff: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of configuration saved objects with the extractObservables default disabled',
+        },
+      },
       ...customFieldsSolutionTelemetrySchema,
     },
     sec: customFieldsSolutionTelemetrySchema,
