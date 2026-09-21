@@ -582,13 +582,15 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`exclude selections`);
     await this.optionsListPopoverAssertOpen();
 
-    const buttonGroup = await this.testSubjects.find('optionsList__includeExcludeButtonGroup');
-    await (
-      await this.find.descendantDisplayedByCssSelector(
+    await this.retry.try(async () => {
+      const buttonGroup = await this.testSubjects.find('optionsList__includeExcludeButtonGroup');
+      const button = await this.find.descendantDisplayedByCssSelector(
         include ? '[data-text="Include"]' : '[data-text="Exclude"]',
         buttonGroup
-      )
-    ).click();
+      );
+      await button.click();
+      expect(await button.getAttribute('aria-pressed')).to.be('true');
+    });
   }
 
   public async optionsListWaitForLoading(controlId: string) {
