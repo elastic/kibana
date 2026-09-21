@@ -28,13 +28,18 @@ const PUSH_VIEWPORT = { width: 1600, height: 1200 };
 const OVERLAY_VIEWPORT = { width: 800, height: 1200 };
 
 /**
- * Excluded from the a11y scan below. The fields table renders an `EuiDataGrid`
- * whose virtualized body scrolls without being keyboard focusable, which axe
- * reports as `scrollable-region-focusable` (serious). The violation is
- * pre-existing and lives in EUI's grid rather than in the flyout, so it is
- * scoped out to keep the rest of the flyout covered.
+ * Excluded from the scans below: the fields table's virtualized body scrolls
+ * without being keyboard focusable, which axe reports as
+ * `scrollable-region-focusable` (serious). The violation is pre-existing and
+ * lives in EUI's grid rather than in the flyout.
+ *
+ * Scoped to the scroll container rather than the whole grid, so the field rows
+ * and their actions stay covered. That container has no test subject or role,
+ * so its EUI class is the only handle — if the class is ever renamed the scan
+ * fails loudly on the violation rather than silently losing coverage.
  */
-const FIELDS_GRID_TEST_SUBJ = '[data-test-subj="UnifiedDocViewerTableGrid"]';
+const FIELDS_GRID_SCROLL_CONTAINER =
+  '[data-test-subj="UnifiedDocViewerTableGrid"] .euiDataGrid__virtualized';
 
 const FLYOUT_TEST_SUBJ = '[data-test-subj="docViewerFlyout"]';
 
@@ -192,7 +197,7 @@ spaceTest.describe(
       await spaceTest.step('push flyout', async () => {
         const { violations } = await page.checkA11y({
           include: [FLYOUT_TEST_SUBJ],
-          exclude: [FIELDS_GRID_TEST_SUBJ],
+          exclude: [FIELDS_GRID_SCROLL_CONTAINER],
         });
         expect(violations).toStrictEqual([]);
       });
@@ -202,7 +207,7 @@ spaceTest.describe(
 
         const { violations } = await page.checkA11y({
           include: [FLYOUT_TEST_SUBJ],
-          exclude: [FIELDS_GRID_TEST_SUBJ],
+          exclude: [FIELDS_GRID_SCROLL_CONTAINER],
         });
         expect(violations).toStrictEqual([]);
       });
@@ -231,7 +236,7 @@ spaceTest.describe(
 
           const { violations } = await page.checkA11y({
             include: [FLYOUT_TEST_SUBJ, EXPANSION_POPOVER_TEST_SUBJ],
-            exclude: [FIELDS_GRID_TEST_SUBJ],
+            exclude: [FIELDS_GRID_SCROLL_CONTAINER],
           });
           expect(violations).toStrictEqual([]);
         });
