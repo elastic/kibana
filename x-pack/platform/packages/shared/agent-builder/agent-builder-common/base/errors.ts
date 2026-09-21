@@ -9,6 +9,7 @@ import { ServerSentEventError } from '@kbn/sse-utils';
 import { AgentExecutionErrorCode } from '../agents/execution_errors';
 import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
+import type { SerializedExecutionError } from '../agents/execution_status';
 
 /**
  * Code to identify agentBuilder errors
@@ -62,6 +63,35 @@ export const createAgentBuilderError = (
   meta?: Record<string, any>
 ): AgentBuilderError<AgentBuilderErrorCode> => {
   return new AgentBuilderError(errorCode, message, meta ?? {});
+};
+
+/**
+ * Rebuilds an `AgentBuilderError` from its serialized form, including the `cause` chain, so that
+ * re-serializing it loses nothing and the error type guards keep working.
+ */
+export const deserializeExecutionError = (
+  serialized: SerializedExecutionError
+): AgentBuilderError<AgentBuilderErrorCode> => {
+  const error = createAgentBuilderError(serialized.code, serialized.message, serialized.meta);
+  const causes = serialized.causes ?? [];
+  let cause: (Error & { code?: string }) | undefined;
+  for (const link of [...causes].reverse()) {
+    const next: Error & { code?: string; cause?: unknown } = new Error(link.message);
+    if (link.name) {
+      next.name = link.name;
+    }
+    if (link.code) {
+      next.code = link.code;
+    }
+    if (cause) {
+      next.cause = cause;
+    }
+    cause = next;
+  }
+  if (cause) {
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
 };
 
 /**

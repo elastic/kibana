@@ -26,16 +26,19 @@ import type {
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
   DeleteWorkflowsApi,
+  GetAiIndexDataReadServiceParams,
 } from './types';
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { registerDataStreamsRoutes } from './routes/data_streams';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
+import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
@@ -47,6 +50,7 @@ import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
+import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
@@ -67,6 +71,9 @@ export class ContextEnginePlugin
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsService;
+  private createAiIndexDataReadService?: (
+    params: GetAiIndexDataReadServiceParams
+  ) => AiIndexDataReadService;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
@@ -189,6 +196,12 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       getScheduleService,
+      getAiIndexDataReadService: (params) => {
+        if (!this.createAiIndexDataReadService) {
+          throw new Error('AI index read service not available — plugin has not started');
+        }
+        return this.createAiIndexDataReadService(params);
+      },
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
@@ -263,6 +276,9 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    // Read-only internal API backing the AI index trace picker's data stream search.
+    registerDataStreamsRoutes({ router });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -321,6 +337,7 @@ export class ContextEnginePlugin
         ensure: ensureAiIndex,
       },
     });
+    const aiIndexService = this.aiIndexService;
 
     this.signalsService = new SignalsService({
       esClient: this.esClient,
@@ -332,6 +349,16 @@ export class ContextEnginePlugin
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
     const createImprovementsService = this.createImprovementsService;
+
+    this.createAiIndexDataReadService = ({ esClient, request }) =>
+      new AiIndexDataReadService({
+        esClient,
+        spaceId: resolveSpaceId(startDeps.spaces, request),
+        auditLogger: coreStart.security.audit.asScoped(request),
+        aiIndexService,
+        logger: this.logger,
+      });
+    const createAiIndexDataReadService = this.createAiIndexDataReadService;
 
     // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
     // first user write to create from it, so the store needs no grant on the internal user.
@@ -373,6 +400,7 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
+      getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
     };

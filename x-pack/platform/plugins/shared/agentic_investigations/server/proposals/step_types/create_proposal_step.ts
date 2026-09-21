@@ -79,6 +79,7 @@ export const getCreateProposalStepDefinition = ({
         return {
           output: {
             proposalId: proposal.id,
+            rootProposalId: proposal.rootProposalId ?? proposal.id,
             status: proposal.status,
             category: proposal.category,
             requiresDecision: proposal.decision == null,
