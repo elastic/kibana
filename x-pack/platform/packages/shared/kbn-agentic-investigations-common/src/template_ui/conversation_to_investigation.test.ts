@@ -264,6 +264,26 @@ describe('conversationToInvestigation', () => {
       expect(result.events[0].actor).toBe('m.rodriguez');
     });
 
+    it('drops an event type registered by another solution', () => {
+      const result = conversationToInvestigation(
+        conversation({
+          events: [
+            {
+              id: 'custom',
+              created_at: '2024-01-01T01:00:00Z',
+              actor,
+              type: 'text_note',
+              data: {},
+            },
+            event({ id: 'builtin', type: TimelineEventType.userMessage, data: { message: 'hi' } }),
+          ],
+        })
+      );
+
+      // `events` is an open envelope, so only the built-in types have a payload this can read.
+      expect(result.events.map(({ id }) => id)).toEqual(['builtin']);
+    });
+
     it('drops an event whose payload yields nothing worth a line of text', () => {
       const result = conversationToInvestigation(
         conversation({

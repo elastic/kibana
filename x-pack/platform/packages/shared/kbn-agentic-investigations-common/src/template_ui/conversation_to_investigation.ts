@@ -8,9 +8,9 @@
 import type {
   Conversation,
   MetadataFieldValue,
-  TimelineEvent as ConversationEvent,
+  TimelineEvent as AgentBuilderTimelineEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import { isTimelineEvent, TimelineEventType, TimelineTriggerType } from '@kbn/agent-builder-common';
 import type { Investigation, TimelineEvent } from '../types';
 import { TIMELINE_EVENT_LABELS } from './translations';
 
@@ -49,7 +49,7 @@ const TRIGGER_LABELS: Record<string, string> = {
 };
 
 /** Falls back to `undefined` for an event whose payload carries nothing worth a line of text. */
-const summarize = (event: ConversationEvent): string | undefined => {
+const summarize = (event: AgentBuilderTimelineEvent): string | undefined => {
   switch (event.type) {
     case TimelineEventType.userMessage:
       return readString(event.data.message);
@@ -81,7 +81,9 @@ const summarize = (event: ConversationEvent): string | undefined => {
 
 const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
   (events ?? []).flatMap((event) => {
-    if (OMITTED_EVENT_TYPES.has(event.type)) {
+    // `events` is the open envelope, so it can also carry event types registered by other
+    // solutions. Only the built-in ones have a payload this knows how to summarize.
+    if (!isTimelineEvent(event) || OMITTED_EVENT_TYPES.has(event.type)) {
       return [];
     }
     const summary = summarize(event);

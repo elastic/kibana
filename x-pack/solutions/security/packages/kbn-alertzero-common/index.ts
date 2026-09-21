@@ -19,8 +19,12 @@ export {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
   ALERTZERO_FEATURE_ID,
+  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_INTERNAL_URL,
   ALERTZERO_PLUGIN_NAME,
+  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_URL,
@@ -49,6 +53,7 @@ export {
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
+  WATCH_AUTONOMY_REVIEW_GATED,
   WORKER_SCHEDULE_UNITS,
   WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
@@ -67,6 +72,7 @@ export type {
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
 
@@ -145,6 +151,7 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
