@@ -3,7 +3,7 @@
 - **ID**: `js/kibana/unsafe-dynamic-http-path`
 - **Kind**: `path-problem` (data-flow)
 - **Severity**: Error (security-severity 7.5)
-- **Description**: Detects a dynamically-built string (template literal, `+` concatenation, `+=` accumulation or `[...].join(sep)`) that flows into the path of a browser `http.*` request without `buildPath()` (`@kbn/core-http-browser`) or `encodeURIComponent()`. Unencoded path parameters allow path traversal / IDOR.
+- **Description**: Detects a dynamically-built string (template literal, `+` concatenation, `+=` accumulation or `join(sep)` over an array) that flows into the path of a browser `http.*` request without `buildPath()` (`@kbn/core-http-browser`) or `encodeURIComponent()`. Unencoded path parameters allow path traversal / IDOR.
 
 This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path` ESLint rule. The ESLint rule only checks the inline path expression at the call site; this query follows the value across variables, helper-function returns, and files.
 
@@ -29,5 +29,9 @@ This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path`
 
 - Kibana's CodeQL analysis runs with `CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES`, so the `http` receiver and path argument are matched syntactically (identifier `http`, or any property access ending in `.http`), mirroring the ESLint rule.
 - `buildPath()` and `encodeURIComponent()` results break the flow and are not reported, whether called inline or assigned to a variable first. Non-`http` receivers (e.g. `client.delete(...)`) are not matched.
+- A helper that wraps the encoder (`const encodeURIComponentIfNotEmpty = (val) => encodeURIComponent(val || '')`) is also treated as safe, including when it is imported from another file. Every return of the helper must be an encoder result and the helper must not be able to fall through, so a helper that encodes on only one branch still reports. A call whose callee cannot be resolved is deliberately *not* assumed safe.
+- A variable is safe only if **every** value that can reach it is encoded, so `if (c) { p = encodeURIComponent(id); } else { p = id; }` still reports.
+- Array spreads are enumerated, and are safe only when the spread operand is itself safe: `[BASE, ...parts].join('/')` is reported, `[...CONSTANT_SEGMENTS].join('/')` is not.
+- A joined array is tracked past its literal: elements added with `push`/`unshift`/`splice`, and `concat`/`filter`/`slice`/`flat`/`reverse`/`sort` chains, are all followed. `map()` preserves the elements unless its callback is an encoder, so `[BASE, id].map(encodeURIComponent).join('/')` is not reported.
 - Literal segments are safe, so `` `/api/x/${1}` `` is not reported, matching the ESLint rule's handling of literals.
-- Known gaps: an array assembled through `push`/`filter` before `join`, and a path whose only dynamic part is a bare variable that was never constructed (`http.get(props.href)`), are not reported.
+- Known gap: a path whose only dynamic part is a bare variable that was never constructed (`http.get(props.href)`) is not reported.

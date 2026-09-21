@@ -15,3 +15,7 @@ export const makeUnsafeDeletePath = (id: string): string => `/api/things/${id}`;
 
 // Safe: encodes the segment before returning.
 export const makeSafeDeletePath = (id: string): string => `/api/things/${encodeURIComponent(id)}`;
+
+// Safe: a helper whose only job is to wrap encodeURIComponent (mirrors Kibana's
+// `encodeURIComponentIfNotEmpty` in execution_context_container.ts).
+export const encodeSeg = (val?: string): string => encodeURIComponent(val || '');

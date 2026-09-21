@@ -19,7 +19,7 @@
 // - `// $ Alert` marks the sink line (the http call) that SHOULD be reported.
 // - Lines without `// $ Alert` should NOT be reported.
 
-import { makeUnsafeDeletePath, makeSafeDeletePath } from './__fixtures__/paths';
+import { makeUnsafeDeletePath, makeSafeDeletePath, encodeSeg } from './__fixtures__/paths';
 
 // =============================================================================
 // BAD: inline dynamic path at the call site (also caught by the ESLint rule)
@@ -124,3 +124,141 @@ http.get([INTERNAL_ROUTES.BASE, encodeURIComponent(id)].join('/'));
 
 // GOOD: join over constant-only segments
 http.get([INTERNAL_ROUTES.BASE, 'status'].join('/'));
+
+// =============================================================================
+// Encoding wrappers: helpers whose every return value is an encoder result
+// =============================================================================
+
+// GOOD: the real Kibana pattern - a helper that just wraps encodeURIComponent
+const encodeURIComponentIfNotEmpty = (val) => encodeURIComponent(val || '');
+http.get(`/api/dashboards/${encodeURIComponentIfNotEmpty(id)}`);
+http.delete('/api/dashboards/' + encodeURIComponentIfNotEmpty(id));
+
+// GOOD: wrapper result hoisted into a variable first (exercises isEncodedValue)
+const wrappedId = encodeURIComponentIfNotEmpty(id);
+http.get(`/api/dashboards/${wrappedId}`);
+
+// GOOD: block-bodied wrapper with a single return
+function encodeSegment(val) {
+  return encodeURIComponent(val);
+}
+http.get(`/api/dashboards/${encodeSegment(id)}`);
+
+// GOOD: wrapper that assigns to a local before returning (exercises getALocalSource)
+function encodeSegmentViaVar(val) {
+  const encoded = encodeURIComponent(val);
+  return encoded;
+}
+http.get(`/api/dashboards/${encodeSegmentViaVar(id)}`);
+
+// GOOD: wrapper around buildPath()
+const buildDashPath = (x) => buildPath('/api/dashboards/{id}', { id: x });
+http.get(`${INTERNAL_ROUTES.BASE}${buildDashPath(id)}`);
+
+// GOOD: cross-file encoding wrapper (proves getACallee() resolves through the import)
+http.get(`/api/things/${encodeSeg(id)}`);
+
+// BAD: a wrapper that only encodes on one branch is NOT a wrapper
+function maybeEncode(val, shouldEncode) {
+  if (shouldEncode) {
+    return encodeURIComponent(val);
+  }
+  return val;
+}
+http.get(`/api/dashboards/${maybeEncode(id, true)}`); // $ Alert
+
+// BAD: partially-encoding wrapper result hoisted into a variable
+const maybeEncodedId = maybeEncode(id, true);
+http.get(`/api/dashboards/${maybeEncodedId}`); // $ Alert
+
+// BAD: an encode-sounding name is not enough - the return value must be an encoder result
+const encodeNothing = (val) => `${val}`;
+http.get(`/api/dashboards/${encodeNothing(id)}`); // $ Alert
+
+// BAD: a wrapper that encodes and then appends raw input
+const encodeThenAppend = (val) => encodeURIComponent(val) + suffix;
+http.get(`/api/dashboards/${encodeThenAppend(id)}`); // $ Alert
+
+// BAD: an unresolvable callee must not be assumed safe (forex, not forall)
+http.get(`/api/dashboards/${unknownGlobalEncoder(id)}`); // $ Alert
+
+// BAD: a wrapper that can fall through returns undefined, which is not encoded
+function encodeIfTruthy(val) {
+  if (val) {
+    return encodeURIComponent(val);
+  }
+}
+http.get(`/api/dashboards/${encodeIfTruthy(id)}`); // $ Alert
+
+// BAD: a bare `return;` is not an encoded value either
+function encodeOrNothing(val) {
+  if (!val) {
+    return;
+  }
+  return encodeURIComponent(val);
+}
+http.get(`/api/dashboards/${encodeOrNothing(id)}`); // $ Alert
+
+// =============================================================================
+// A value that is only sometimes encoded is not safe
+// =============================================================================
+
+// BAD: one local source is encoded, the other is not
+let mixed;
+if (cond) {
+  mixed = encodeURIComponent(id);
+} else {
+  mixed = id;
+}
+http.get(`/api/dashboards/${mixed}`); // $ Alert
+
+// =============================================================================
+// Array spread in join()
+// =============================================================================
+
+// BAD: spreading an array that holds unencoded input
+const unsafeParts = [id, 'children'];
+http.get([INTERNAL_ROUTES.BASE, ...unsafeParts].join('/')); // $ Alert
+
+// BAD: spread of an unsafe variable as the only element
+http.get([...unsafeParts].join('/')); // $ Alert
+
+// BAD: spread of a plain (non-constant) identifier
+http.get([INTERNAL_ROUTES.BASE, ...segments].join('/')); // $ Alert
+
+// GOOD: spread of a constant array
+http.get([...CONSTANT_SEGMENTS].join('/'));
+
+// GOOD: spread of a constant property chain
+http.get([INTERNAL_ROUTES.BASE, ...INTERNAL_ROUTES.SUFFIXES].join('/'));
+
+// =============================================================================
+// Arrays mutated or transformed after creation, then joined
+// =============================================================================
+
+// BAD: the unsafe segment is pushed in after the literal was created
+const mutParts = [INTERNAL_ROUTES.BASE];
+mutParts.push(id);
+http.get(mutParts.join('/')); // $ Alert
+
+// GOOD: only encoded segments are pushed in
+const safeMutParts = [INTERNAL_ROUTES.BASE];
+safeMutParts.push(encodeURIComponent(id));
+http.get(safeMutParts.join('/'));
+
+// BAD: concat introduces the unsafe segment
+http.get([INTERNAL_ROUTES.BASE].concat(unsafeParts).join('/')); // $ Alert
+
+// BAD: filter preserves whatever was already unsafe
+http.get([INTERNAL_ROUTES.BASE, id].filter(Boolean).join('/')); // $ Alert
+
+// BAD: map with a non-encoding callback preserves the unsafe elements
+http.get([INTERNAL_ROUTES.BASE, id].map(String).join('/')); // $ Alert
+
+// GOOD: map with encodeURIComponent encodes every element
+http.get([INTERNAL_ROUTES.BASE, id].map(encodeURIComponent).join('/'));
+
+// GOOD: splice used to remove an element does not introduce a segment
+const splicedParts = [INTERNAL_ROUTES.BASE, 'status'];
+splicedParts.splice(idx, 1);
+http.get(splicedParts.join('/'));
