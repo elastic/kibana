@@ -50,19 +50,19 @@ export const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promi
 };
 
 /**
- * Unsets the space-scoped classic-table toggle on every Kibana space.
- * Sequential spaceTest workers write this on `test-space-N`; a later config
- * reuses those spaces on a shared Scout server.
+ * Unsets the space-scoped classic-table toggle on spaces this Scout config
+ * owns: `default` and `test-space-N`. Does not touch other named spaces on a
+ * shared or Cloud server.
  */
 export const unsetAlertingV2ShowClassicAlertsTableSetting = async (
   kbnClient: KbnClient
 ): Promise<void> => {
-  const spaceIds = await listSpaceIds(kbnClient);
+  const spaceIds = await listOwnedSpaceIds(kbnClient);
 
   await Promise.all(
     spaceIds.map((spaceId) =>
       kbnClient.uiSettings.unset(ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID, {
-        space: spaceId === 'default' ? undefined : spaceId,
+        space: spaceId === DEFAULT_SPACE_ID ? undefined : spaceId,
       })
     )
   );
@@ -78,13 +78,22 @@ export const resetAlertingV2NavSettings = async (kbnClient: KbnClient): Promise<
   await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
-const listSpaceIds = async (kbnClient: KbnClient): Promise<string[]> => {
+const DEFAULT_SPACE_ID = 'default';
+const SCOUT_TEST_SPACE_ID = /^test-space-\d+$/;
+
+const isSuiteOwnedSpace = (spaceId: string): boolean =>
+  spaceId === DEFAULT_SPACE_ID || SCOUT_TEST_SPACE_ID.test(spaceId);
+
+const listOwnedSpaceIds = async (kbnClient: KbnClient): Promise<string[]> => {
   try {
     const spaces = (await kbnClient.spaces.list()) as Array<{ id?: string }> | undefined;
-    const ids = (spaces ?? []).map((space) => space.id).filter((id): id is string => Boolean(id));
-    return ids.length > 0 ? ids : ['default'];
+    const ids = (spaces ?? [])
+      .map((space) => space.id)
+      .filter((id): id is string => typeof id === 'string')
+      .filter(isSuiteOwnedSpace);
+    return ids.length > 0 ? ids : [DEFAULT_SPACE_ID];
   } catch {
-    return ['default'];
+    return [DEFAULT_SPACE_ID];
   }
 };
 

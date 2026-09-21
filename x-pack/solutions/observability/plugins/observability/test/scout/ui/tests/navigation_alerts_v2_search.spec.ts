@@ -95,24 +95,15 @@ test.describe(
       );
 
       await chrome.openSearch();
-      await chrome.search(ACTION_POLICIES_TITLE);
-      await expect
-        .poll(
-          async () =>
-            (await chrome.searchNoResults.isVisible()) || (await chrome.searchOptions.count()) > 0,
-          { timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS }
-        )
-        .toBeTruthy();
-      await expect(
-        chrome.getSearchOptionByUrl(spaceAppUrl(scoutSpace.id, ACTION_POLICIES_PATH))
-      ).toHaveCount(0);
-
-      await chrome.search('episodes');
+      await chrome.search('alerting');
       await expect(
         chrome.getSearchOptionByUrl(spaceAppUrl(scoutSpace.id, ALERTS_PATH))
       ).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
+      await expect(
+        chrome.getSearchOptionByUrl(spaceAppUrl(scoutSpace.id, ACTION_POLICIES_PATH))
+      ).toHaveCount(0);
     });
   }
 );
