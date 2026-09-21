@@ -108,6 +108,38 @@ describe('CommentsLayer', () => {
     expect(within(current).getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
   });
 
+  it('scrolls to a page whose header is stuck at the bottom of the list when it is clicked, rather than closing it', async () => {
+    const elsewhere = createComment('far', {
+      route: { pageKey: '/app/two', path: '/app/two' },
+      anchor: anchorById('missing'),
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere, seeded]) });
+    act(() => controller.setActive(true));
+    const [, other] = await screen.findAllByTestId('devCommentsPanelPage');
+    const list = screen.getByTestId('devCommentsPanel').lastElementChild as HTMLElement;
+    const header = other.firstElementChild as HTMLElement;
+    const content = other.lastElementChild as HTMLElement;
+    const trigger = within(other).getByText('/app/two').closest('button') as HTMLButtonElement;
+    list.setAttribute('data-rect', '0,100,400,400');
+
+    // Stuck at the bottom, the header is above its content, which is further down the list.
+    header.setAttribute('data-rect', '0,468,400,32');
+    content.setAttribute('data-rect', '0,740,400,100');
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    // The content comes right under the two headers stuck at the top: 740 - 100 - 2 * 32.
+    expect(list.scrollTop).toBe(576);
+
+    // In place, the content right under it, the header closes and opens the page.
+    header.setAttribute('data-rect', '0,200,400,32');
+    content.setAttribute('data-rect', '0,232,400,100');
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(list.scrollTop).toBe(576);
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('shows when a comment was written the way the host does, or as the local time without it', async () => {
     const fallback = await renderLayer();
     act(() => fallback.setActive(true));
@@ -292,6 +324,26 @@ describe('CommentsLayer', () => {
     escape();
     expect(controller.store.getState().pending).toBeNull();
     expect(controller.store.getState().active).toBe(true);
+  });
+
+  it('does not send the focus back to the element a moved draft left, only to the one it ended on', async () => {
+    renderPage(`<button id="target">Target</button><button id="other">Other</button>`);
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    act(() => controller.pick(target(), { x: 20, y: 20 }));
+    await screen.findByTestId('devCommentsComposerInput');
+    act(() => editorText('devCommentsComposerInput').focus());
+
+    // Another click moves the draft while the composer stays open.
+    act(() => controller.pick(query('#other'), { x: 40, y: 40 }));
+    expect(document.activeElement).not.toBe(target());
+    await act(flush);
+    expect(document.activeElement).not.toBe(target());
+    expect(screen.getByTestId('devCommentsComposerInput')).toBeInTheDocument();
+
+    escape();
+    expect(controller.store.getState().pending).toBeNull();
+    expect(document.activeElement).toBe(query('#other'));
   });
 
   it('keeps the comment being written, text included, when the page changes under a save that then fails', async () => {

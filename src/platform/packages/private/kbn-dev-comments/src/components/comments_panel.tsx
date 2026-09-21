@@ -35,6 +35,7 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
   useGeneratedHtmlId,
   useEuiTheme,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -142,31 +143,83 @@ const ThreadSizeBadge = ({ comment }: { comment: Comment }) => {
   );
 };
 
+/** The height of a page header, in px; the stacks of them at the ends of the list are this many times their number. */
+const headerHeight = (euiTheme: EuiThemeComputed) => parseFloat(euiTheme.size.xl);
+
+/**
+ * The comments of a page under its header. The headers are all in view at all
+ * times, as in a list of contacts: each sticks at the top once the list has
+ * scrolled past it, under those of the pages before it, and at the bottom while
+ * its page is further down, above those of the pages after it. They can do so
+ * because the section has no box of its own, leaving the headers to stick within
+ * the list. A header stuck at the bottom is the way to its page: a click scrolls
+ * there; elsewhere, a click closes or opens the page.
+ */
 const PageGroup = ({
   pageKey,
   count,
+  index,
+  total,
+  list,
   children,
-}: PropsWithChildren<{ pageKey: string; count: number }>) => {
+}: PropsWithChildren<{
+  pageKey: string;
+  count: number;
+  /** The page's place among the `total` pages listed. */
+  index: number;
+  total: number;
+  /** The scrolling list the page is in. */
+  list: RefObject<HTMLDivElement>;
+}>) => {
   const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(true);
   const contentId = useGeneratedHtmlId({ prefix: 'devCommentsPanelPage' });
+  const headerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const height = headerHeight(euiTheme);
+
+  const onClick = () => {
+    const header = headerRef.current;
+    const content = contentRef.current;
+    const scroller = list.current;
+    // Stuck at the bottom, the header sits above its content rather than right on top of it.
+    if (
+      header &&
+      content &&
+      scroller &&
+      content.getBoundingClientRect().top > header.getBoundingClientRect().bottom + 1
+    ) {
+      const contentTop =
+        content.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top +
+        scroller.scrollTop;
+      // The header takes its place in the stack at the top, its content right under it.
+      scroller.scrollTop = contentTop - (index + 1) * height;
+      return;
+    }
+    setOpen((value) => !value);
+  };
 
   return (
     <section
       css={css`
-        padding-top: ${euiTheme.size.s};
+        display: contents;
       `}
       data-test-subj="devCommentsPanelPage"
     >
       <EuiFlexGroup
+        ref={headerRef}
         gutterSize="s"
         alignItems="center"
         responsive={false}
         css={css`
           position: sticky;
-          top: 0;
+          top: ${index * height}px;
+          bottom: ${(total - 1 - index) * height}px;
           z-index: ${euiTheme.levels.header};
-          padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          height: ${height}px;
+          margin-top: ${euiTheme.size.s};
+          padding: 0 ${euiTheme.size.s};
           border-radius: ${euiTheme.border.radius.medium};
           background: ${euiTheme.colors.backgroundBasePrimary};
           &:hover {
@@ -185,7 +238,7 @@ const PageGroup = ({
             color="text"
             flush="left"
             iconType={open ? 'chevronSingleDown' : 'chevronSingleRight'}
-            onClick={() => setOpen((value) => !value)}
+            onClick={onClick}
             aria-expanded={open}
             aria-controls={contentId}
             title={pageKey}
@@ -214,7 +267,9 @@ const PageGroup = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div id={contentId}>{open && children}</div>
+      <div id={contentId} ref={contentRef}>
+        {open && children}
+      </div>
     </section>
   );
 };
@@ -225,6 +280,7 @@ const PanelRow = ({
   expanded,
   active,
   list,
+  inset,
   onSelect,
   onToggle,
   onGuide,
@@ -238,6 +294,8 @@ const PanelRow = ({
   active: boolean;
   /** The scrolling list the row is in. */
   list: RefObject<HTMLDivElement>;
+  /** How much of the list, at its top and at its bottom, the stacks of page headers take up while the row is in view, in px. */
+  inset: { top: number; bottom: number };
   /** The comment was picked: its thread opens at its pin when the element is visible, in the row otherwise. */
   onSelect: () => void;
   /** Shows the thread in the row, or hides it. */
@@ -250,8 +308,8 @@ const PanelRow = ({
 
   // Brings the row into view by scrolling the list, and only the list: `scrollIntoView`
   // would also scroll the page under the panel when the list cannot scroll far enough.
-  // Expanded, the row goes to the top (below the page's sticky header), once its thread
-  // has laid out; the row of the thread open from a pin only comes into view.
+  // Expanded, the row goes to the top (below the page headers stuck there), once its
+  // thread has laid out; the row of the thread open from a pin only comes into view.
   useEffect(() => {
     if (!expanded && !active) {
       return;
@@ -262,18 +320,17 @@ const PanelRow = ({
       if (!row || !scroller) {
         return;
       }
-      const headerHeight = parseFloat(euiTheme.size.xl);
       const top =
         row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
       const bottom = top + row.offsetHeight;
-      if (expanded || top - headerHeight < scroller.scrollTop) {
-        scroller.scrollTop = top - headerHeight;
-      } else if (bottom > scroller.scrollTop + scroller.clientHeight) {
-        scroller.scrollTop = bottom - scroller.clientHeight;
+      if (expanded || top - inset.top < scroller.scrollTop) {
+        scroller.scrollTop = top - inset.top;
+      } else if (bottom > scroller.scrollTop + scroller.clientHeight - inset.bottom) {
+        scroller.scrollTop = bottom - scroller.clientHeight + inset.bottom;
       }
     });
     return () => cancelAnimationFrame(frame);
-  }, [expanded, active, list, euiTheme.size.xl]);
+  }, [expanded, active, list, inset.top, inset.bottom]);
 
   // Opened from the preview, which the text then replaces, focus moves on to the toggle that closes the thread.
   useEffect(() => {
@@ -587,8 +644,15 @@ export const CommentsPanel = () => {
                 })}
               </EuiText>
             )}
-            {groups.map((group) => (
-              <PageGroup key={group.pageKey} pageKey={group.pageKey} count={group.comments.length}>
+            {groups.map((group, index) => (
+              <PageGroup
+                key={group.pageKey}
+                pageKey={group.pageKey}
+                count={group.comments.length}
+                index={index}
+                total={groups.length}
+                list={listRef}
+              >
                 {group.comments.map((comment) => {
                   const placed = resolvedAnchors.get(comment.id);
                   const element = placed?.exposed ? placed.element : null;
@@ -600,6 +664,10 @@ export const CommentsPanel = () => {
                       expanded={expandedId === comment.id}
                       active={activeThreadId === comment.id}
                       list={listRef}
+                      inset={{
+                        top: (index + 1) * headerHeight(euiTheme),
+                        bottom: (groups.length - 1 - index) * headerHeight(euiTheme),
+                      }}
                       onSelect={() => select(comment, element)}
                       onToggle={() => toggle(comment)}
                       onGuide={() => void controller.guideTo(comment)}

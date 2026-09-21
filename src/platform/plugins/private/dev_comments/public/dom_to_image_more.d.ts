@@ -24,6 +24,8 @@ declare module 'dom-to-image-more' {
        * (`after`), before its computed styles are copied onto it. Inline styles set here win.
        */
       adjustClonedNode?: (original: Node, clone: Node, after: boolean) => void;
+      /** Called with the finished clone, styles copied and field values put in, before it is drawn. */
+      onclone?: (clone: Element) => void | Promise<void>;
     }
 
     function toCanvas(node: Node, options?: Options): Promise<HTMLCanvasElement>;

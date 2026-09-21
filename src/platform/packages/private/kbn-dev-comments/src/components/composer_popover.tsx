@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, type KeyboardEvent } from 'react';
+import React, { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import {
@@ -49,14 +49,18 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
 
   // The popover took the focus; when the comment is discarded or saved it goes
   // back to the commented element (a saved comment's pin then takes it over).
-  const { element } = pending;
+  // That is the element the comment ended on: a click that moves the draft
+  // changes it while the popover stays, and its editor keeps the focus.
+  const elementRef = useRef(pending.element);
+  elementRef.current = pending.element;
   useEffect(
     () => () => {
+      const element = elementRef.current;
       if (element instanceof HTMLElement && element.isConnected) {
         element.focus({ preventScroll: true });
       }
     },
-    [element]
+    []
   );
 
   const canSave = !saving && text.trim().length > 0 && displayName.trim().length > 0;

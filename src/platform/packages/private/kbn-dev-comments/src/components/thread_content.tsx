@@ -420,6 +420,11 @@ export const ThreadContent = ({
             ${euiScrollBarStyles(euiThemeContext)}
             /* Room for focus rings and the scrollbar. */
             padding: ${euiTheme.size.xs} ${euiTheme.size.xs} 0 0;
+            /* Under the popover's drop-shadow filter, Chrome hit-tests what is scrolled out of view
+               as if it were not clipped: a comment's copy button under the header takes the clicks
+               meant for the resolve button, and cards take those on the page above the popover.
+               A clip of the box itself is honored. */
+            clip-path: inset(0);
           `}
         >
           {timeline}
