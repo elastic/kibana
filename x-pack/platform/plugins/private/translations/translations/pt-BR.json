@@ -18661,7 +18661,6 @@
     "xpack.dataFederation.createFlyout.authentication.anonymous": "Anônimo",
     "xpack.dataFederation.createFlyout.authentication.azure.credentials": "Credenciais",
     "xpack.dataFederation.createFlyout.authentication.federatedIdentity": "Identidade Federada",
-    "xpack.dataFederation.createFlyout.authentication.helpAriaLabel": "Abrir documentação de segurança na nuvem",
     "xpack.dataFederation.createFlyout.authentication.label": "Método preferido",
     "xpack.dataFederation.createFlyout.authentication.title": "Autenticação",
     "xpack.dataFederation.createFlyout.azure.federated.optional.hide": "Ocultar configurações opcionais de autenticação",
