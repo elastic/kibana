@@ -127,7 +127,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleAfterXOccurenceInput').fill('5');
 
     await page.testSubj.click(SUBMIT_BUTTON);
-    // Custom recurring schedules trigger a confirm modal before save.
+    // No scope is selected, so the "save without scope" confirmation modal appears.
     await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
@@ -144,10 +144,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
     await page.testSubj.locator(NAME_INPUT).fill(name);
 
-    // The "Filter alerts" switch is rendered as an EuiSwitch nested inside
-    // a panel that carries the data-test-subj. The clickable element is the
-    // inner button.
-    await page.testSubj.locator('maintenanceWindowScopedQuerySwitch').locator('button').click();
+    await page.testSubj.click('maintenanceWindowScopedQuerySwitch');
     await expect(page.testSubj.locator('maintenanceWindowScopeQuery')).toBeVisible();
 
     // Without a scope query, the multi-solution warning callout is not shown.
