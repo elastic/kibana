@@ -67,8 +67,12 @@ export interface ListEntitiesParams {
   filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   size?: number;
   source?: string[] | undefined;
+  /** Set to true to send `_source: false`. Pair with `docValueFields` to read from doc values. */
+  disableSource?: boolean;
   searchAfter?: Array<string | number>;
   fields?: (QueryDslFieldAndFormat | string)[];
+  /** Read field values directly from doc values, bypassing _source decompression. Use with disableSource: true. */
+  docValueFields?: string[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
   filterQuery?: string;
@@ -672,7 +676,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields } = p;
+    const { filter, size, searchAfter, source, disableSource, fields, docValueFields } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -692,15 +696,19 @@ export class CRUDClient {
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
+      ...(docValueFields && docValueFields.length > 0 ? { docvalue_fields: docValueFields } : {}),
       ...buildEntityListSourceFilter({
         sourceIncludes: source,
+        disableSource,
       }),
     });
 
     const hits = resp.hits.hits;
     const entities = hits.map((hit) => hit._source as Entity);
     const lastHit = hits[hits.length - 1];
-    const entityFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
+    const hasFieldsRequest =
+      (fields && fields.length > 0) || (docValueFields && docValueFields.length > 0);
+    const entityFields = hasFieldsRequest ? hits.map((hit) => hit.fields) : undefined;
 
     return {
       entities,
