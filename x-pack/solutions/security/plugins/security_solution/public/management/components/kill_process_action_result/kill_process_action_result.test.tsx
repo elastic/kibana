@@ -222,7 +222,7 @@ describe('KillSuspendProcessActionResult', () => {
     expect(output).toContain('PID 1234');
     expect(output).toContain('Entity ID entity-a');
     expect(output).toContain(
-      'Failed to kill process provide, but some descendant processes were killed'
+      'Failed to kill the provided process, but some descendant processes were killed'
     );
     // The generic action failure message should NOT be rendered when output content is available
     expect(

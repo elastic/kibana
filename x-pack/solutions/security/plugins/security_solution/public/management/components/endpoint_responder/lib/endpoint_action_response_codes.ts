@@ -190,7 +190,10 @@ const CODES = Object.freeze({
 
   'ra_kill-process_error_partial-descendants': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.failurePartialDescendants',
-    { defaultMessage: 'Failed to kill process provide, but some descendant processes were killed' }
+    {
+      defaultMessage:
+        'Failed to kill the provided process, but some descendant processes were killed',
+    }
   ),
 
   // ---------------[ Codes for kill-process descendant processes ]------------ \\

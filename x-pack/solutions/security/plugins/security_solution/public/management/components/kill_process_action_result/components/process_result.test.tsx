@@ -178,7 +178,7 @@ describe('ProcessResult', () => {
       const { getByTestId } = render();
 
       expect(getByTestId(testPrefix).textContent).toContain(
-        'Failed to kill process provide, but some descendant processes were killed'
+        'Failed to kill the provided process, but some descendant processes were killed'
       );
       // Should not fall back to the default success or failure messages
       expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
