@@ -29,6 +29,7 @@ export const registerUiSettings = (uiSettings: UiSettingsServiceSetup): void => 
       }),
       type: 'boolean',
       value: false,
+      scope: 'namespace',
       category: [SECURITY_SOLUTION_CATEGORY],
       solutionViews: ['classic', 'security'],
       experimental: true,

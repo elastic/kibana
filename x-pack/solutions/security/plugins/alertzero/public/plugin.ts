@@ -114,8 +114,10 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
-    // Registration is one-shot, so wait for the first `true` rather than re-registering on every
-    // emission; this keeps the Agent Builder template in step with the toggle without a reload.
+    // The template registration API has no deregistration counterpart, so this is one-shot:
+    // we register on the first `true` and cannot remove the entry if the setting is later
+    // disabled. `loadInvestigation` re-checks the live setting so that slots opened while
+    // AlertZero is disabled surface an error instead of issuing a 404.
     this.templateRegistration = core.uiSettings
       .get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)
       .pipe(filter(Boolean), take(1))
@@ -126,6 +128,9 @@ export class AlertZeroPublicPlugin
           name: INVESTIGATION_TEMPLATE_NAME,
           icon: 'securitySignalDetected',
           loadInvestigation: async (conversationId) => {
+            if (!core.uiSettings.get<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)) {
+              throw new Error('AlertZero is disabled for this space');
+            }
             const { investigation } = await core.http.get<GetInvestigationResponse>(
               buildInvestigationUrl(conversationId),
               { version: API_VERSIONS.internal.v1 }
