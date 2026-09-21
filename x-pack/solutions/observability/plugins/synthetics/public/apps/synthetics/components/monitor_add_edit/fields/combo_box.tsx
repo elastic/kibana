@@ -22,6 +22,8 @@ export interface FormattedComboBoxProps {
   // Opt-in copy button; the combo box steals focus on click, so pills can't be
   // drag-selected/copied. Only meaningful for tag-like fields.
   enableCopy?: boolean;
+  options?: Array<EuiComboBoxOptionOption<string>>;
+  isLoading?: boolean;
 }
 
 export const FormattedComboBox = ({
@@ -29,6 +31,7 @@ export const FormattedComboBox = ({
   onBlur,
   selectedOptions,
   enableCopy = false,
+  options,
   ...props
 }: FormattedComboBoxProps) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
@@ -80,7 +83,8 @@ export const FormattedComboBox = ({
   const comboBox = (
     <EuiComboBox<string>
       data-test-subj="syntheticsFleetComboBox"
-      noSuggestions
+      noSuggestions={!options?.length}
+      options={options}
       selectedOptions={formattedSelectedOptions}
       onCreateOption={onCreateOption}
       onChange={onOptionsChange}
